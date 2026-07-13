@@ -2,6 +2,69 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — M2 changes committed
+
+### Completed
+
+- Committed the completed M2 implementation, fixtures, tests, and documentation on `develop`.
+- Used repository identity `Rabassoft <ricard@rabassoft.com>`.
+- Kept the commit local; no push was performed.
+
+### Verification
+
+- Confirmed the complete M2 acceptance suite passed before committing.
+- Checked the staged diff and commit attribution.
+
+### Pending
+
+- Review the committed M2 diff.
+- Prepare PLAN-003 without implementing M3.
+
+## 2026-07-13 — M2 root immutable operations completed
+
+### Completed
+
+- Promoted PLAN-002's runtime diagnostic contract to SPEC-001 v0.1.6.
+- Added and exported operation, expectation, metadata, and result contracts.
+- Implemented pure root-only `applyOperation()` and `applyFormOperation()` utilities.
+- Added strict shape, path, form membership, type compatibility, expectation, accessor-safety, and immutable cloning behavior.
+- Added 27 operation conformance fixtures, focused unit tests, and built-package smoke coverage.
+- Completed PLAN-002 and milestone M2 without introducing runtime state or deferred capabilities.
+
+### Verification
+
+- `CI=true pnpm install --frozen-lockfile` passed.
+- `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
+- `pnpm test` passed with 82 tests in 4 files.
+- `pnpm build` and `pnpm test:package` passed.
+- `git diff --check` and local Markdown-link validation passed.
+
+### Pending
+
+- Review and commit the completed M2 diff only when explicitly requested.
+- Propose and approve PLAN-003 before implementing the controlled runtime.
+
+## 2026-07-13 — PLAN-002 formally reviewed and approved
+
+### Completed
+
+- Reviewed PLAN-002 against SPEC-001 v0.1.5, ADR-005, ADR-006, the deferred-decisions register, and the implemented M1 contracts.
+- Defined safe handling for target accessors and required-member accessors without invoking caller code.
+- Closed malformed-path validation, minimum FormDefinition shape, reason values, and diagnostic cutoff/order behavior.
+- Added the missing accessor diagnostic and test coverage requirement.
+- Marked PLAN-002 Approved without implementing M2 production code.
+
+### Verification
+
+- Checked public contracts, root-only scope, structural sharing, diagnostic safety, fixture coverage, and acceptance commands.
+- Confirmed nested objects, arrays, runtime state, business validation, and other deferred capabilities remain excluded.
+- Ran formatting, diff, and local Markdown-link validation for the review changes.
+
+### Pending
+
+- Promote PLAN-002's approved diagnostic contract to SPEC-001.
+- Implement and verify the approved M2 increment.
+
 ## 2026-07-13 — M1 and PLAN-002 changes committed
 
 ### Completed

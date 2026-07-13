@@ -3,7 +3,7 @@ import type { DataPath, Diagnostic, DocumentPath } from '../contracts.js';
 export interface DiagnosticInput {
   readonly code: string;
   readonly severity: 'warning' | 'error';
-  readonly source: 'schema' | 'ui-schema';
+  readonly source: 'schema' | 'ui-schema' | 'runtime';
   readonly dataPath?: DataPath;
   readonly documentPath?: DocumentPath;
   readonly parameters?: Readonly<Record<string, unknown>>;

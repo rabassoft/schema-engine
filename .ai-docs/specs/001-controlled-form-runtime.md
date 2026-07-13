@@ -1,11 +1,12 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Draft
-- **Versión:** 0.1.5
+- **Versión:** 0.1.6
 - **Fecha:** 13 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
 - **Plan de implementación aprobado:** [`PLAN-001`](../plans/001-compiler-only-implementation.md)
+- **Plan de operaciones aprobado:** [`PLAN-002`](../plans/002-root-immutable-operations.md)
 
 ## 1. Propósito
 
@@ -882,6 +883,23 @@ Los parámetros y `documentPath` exactos quedan definidos en PLAN-001. Los
 diagnósticos sobre campos incluirán `dataPath: [fieldName]`; los diagnósticos de
 raíz no incluirán `dataPath`.
 
+El incremento M2 utilizará estos códigos normativos, todos con severidad
+`error`, fuente `runtime` y sin `documentPath`:
+
+| Código                           | Propósito                                          |
+| -------------------------------- | -------------------------------------------------- |
+| `INVALID_OPERATION_TARGET`       | El valor raíz no es un objeto de datos admitido    |
+| `INVALID_OPERATION`              | Un miembro de la operación es inválido             |
+| `INVALID_OPERATION_PATH`         | El path no pertenece al alcance raíz de M2         |
+| `INVALID_FORM_DEFINITION`        | La definición no permite resolver paths y tipos    |
+| `FORM_PATH_NOT_MANAGED`          | El path no pertenece al formulario                 |
+| `INCOMPATIBLE_OPERATION_VALUE`   | El valor no coincide con el tipo básico del campo  |
+| `UNSUPPORTED_OPERATION_PROPERTY` | La propiedad objetivo es un accessor no soportado  |
+| `STALE_OPERATION`                | La expectativa no coincide con el valor confirmado |
+
+PLAN-002 define sus parámetros, razones cerradas, orden, mensajes fallback,
+inmutabilidad y reglas de seguridad exactos.
+
 ## 25. Ciclo de vida
 
 El runtime expondrá:
@@ -970,6 +988,7 @@ Estas preguntas no invalidan las decisiones de comportamiento descritas en esta 
 
 | Versión | Fecha      | Cambio                                                                                                            |
 | ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| 0.1.6   | 13-07-2026 | Se incorpora el contrato diagnóstico aprobado de PLAN-002.                                                        |
 | 0.1.5   | 13-07-2026 | Se limita M2 a propiedades raíz y se define `ApplyOperationResult`.                                               |
 | 0.1.4   | 13-07-2026 | Se incorpora el contrato diagnóstico normativo y la referencia al PLAN-001 aprobado.                              |
 | 0.1.3   | 13-07-2026 | Se define la entrada de `compileFormDefinition()` y se aclaran los miembros obligatorios y opcionales de la raíz. |

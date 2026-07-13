@@ -1,0 +1,20 @@
+{
+  "mode": "form",
+  "definition": {
+    "fields": null
+  },
+  "currentValue": {},
+  "operation": {
+    "type": "set-value",
+    "metadata": {
+      "id": 1,
+      "formId": "form"
+    },
+    "path": ["name"],
+    "expected": {
+      "kind": "missing"
+    },
+    "value": "Ada",
+    "source": "user"
+  }
+}

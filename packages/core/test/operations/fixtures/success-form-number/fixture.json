@@ -1,0 +1,39 @@
+{
+  "mode": "form",
+  "definition": {
+    "fields": [
+      {
+        "path": ["name"],
+        "kind": "string"
+      },
+      {
+        "path": ["amount"],
+        "kind": "number",
+        "numericType": "number"
+      },
+      {
+        "path": ["count"],
+        "kind": "number",
+        "numericType": "integer"
+      },
+      {
+        "path": ["active"],
+        "kind": "boolean"
+      }
+    ]
+  },
+  "currentValue": {},
+  "operation": {
+    "type": "set-value",
+    "metadata": {
+      "id": 1,
+      "formId": "form"
+    },
+    "path": ["amount"],
+    "expected": {
+      "kind": "missing"
+    },
+    "value": 1.5,
+    "source": "user"
+  }
+}

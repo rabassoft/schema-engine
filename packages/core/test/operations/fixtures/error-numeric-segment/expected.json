@@ -1,0 +1,20 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION_PATH",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "reason": "non-string-segment",
+        "pathLength": 1,
+        "segmentIndex": 0,
+        "actualType": "number",
+        "actualValue": 0
+      },
+      "fallbackMessage": "Operation path is outside the supported root-property scope."
+    }
+  ]
+}

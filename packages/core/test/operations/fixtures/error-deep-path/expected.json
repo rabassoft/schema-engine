@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION_PATH",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "reason": "deep-path-not-supported",
+        "pathLength": 2
+      },
+      "fallbackMessage": "Operation path is outside the supported root-property scope."
+    }
+  ]
+}

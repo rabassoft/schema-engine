@@ -1,0 +1,33 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "member": "metadata.id",
+        "expected": "integer >= 1",
+        "reason": "invalid-value",
+        "actualType": "number",
+        "actualValue": 0
+      },
+      "fallbackMessage": "Operation member \"metadata.id\" is invalid."
+    },
+    {
+      "code": "INVALID_OPERATION",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "member": "metadata.formId",
+        "expected": "non-empty string",
+        "reason": "invalid-value",
+        "actualType": "string",
+        "actualValue": ""
+      },
+      "fallbackMessage": "Operation member \"metadata.formId\" is invalid."
+    }
+  ]
+}

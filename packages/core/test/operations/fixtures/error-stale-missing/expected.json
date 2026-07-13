@@ -1,0 +1,22 @@
+{
+  "success": false,
+  "value": {
+    "name": "Ada"
+  },
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "STALE_OPERATION",
+      "severity": "error",
+      "source": "runtime",
+      "dataPath": ["name"],
+      "parameters": {
+        "expectedKind": "missing",
+        "actualKind": "value",
+        "actualType": "string",
+        "actualValue": "Ada"
+      },
+      "fallbackMessage": "Operation expectation does not match current data."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_OPERATION_VALUE",
+      "severity": "error",
+      "source": "runtime",
+      "dataPath": ["name"],
+      "parameters": {
+        "field": "name",
+        "fieldType": "string",
+        "actualType": "number",
+        "actualValue": 1
+      },
+      "fallbackMessage": "Operation value is incompatible with field \"name\"."
+    }
+  ]
+}

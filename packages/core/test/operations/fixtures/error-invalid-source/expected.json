@@ -1,0 +1,20 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "member": "source",
+        "expected": "user",
+        "reason": "invalid-value",
+        "actualType": "string",
+        "actualValue": "system"
+      },
+      "fallbackMessage": "Operation member \"source\" is invalid."
+    }
+  ]
+}

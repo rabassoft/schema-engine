@@ -1,0 +1,20 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "member": "type",
+        "expected": "set-value or remove-value",
+        "reason": "invalid-value",
+        "actualType": "string",
+        "actualValue": "bad"
+      },
+      "fallbackMessage": "Operation member \"type\" is invalid."
+    }
+  ]
+}

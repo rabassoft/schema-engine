@@ -90,3 +90,45 @@ export interface CompileFormDefinitionInput {
   readonly schema: unknown;
   readonly uiSchema?: unknown;
 }
+
+export type OperationExpectation =
+  | { readonly kind: 'missing' }
+  | { readonly kind: 'value'; readonly value: unknown };
+
+export interface FormOperationMetadata {
+  readonly id: number;
+  readonly formId: string;
+}
+
+export interface SetValueOperation {
+  readonly type: 'set-value';
+  readonly metadata: FormOperationMetadata;
+  readonly path: DataPath;
+  readonly expected: OperationExpectation;
+  readonly value: unknown;
+  readonly source: 'user';
+}
+
+export interface RemoveValueOperation {
+  readonly type: 'remove-value';
+  readonly metadata: FormOperationMetadata;
+  readonly path: DataPath;
+  readonly expected: { readonly kind: 'value'; readonly value: unknown };
+  readonly source: 'user';
+}
+
+export type FormOperation = SetValueOperation | RemoveValueOperation;
+
+export type ApplyOperationResult<TData extends object> =
+  | {
+      readonly success: true;
+      readonly value: Readonly<TData>;
+      readonly changed: boolean;
+      readonly diagnostics: readonly [];
+    }
+  | {
+      readonly success: false;
+      readonly value: Readonly<TData>;
+      readonly changed: false;
+      readonly diagnostics: readonly Diagnostic[];
+    };

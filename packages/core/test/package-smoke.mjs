@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
-import { compileFormDefinition } from '@rabassoft/schema-engine';
+import {
+  applyFormOperation,
+  applyOperation,
+  compileFormDefinition,
+} from '@rabassoft/schema-engine';
 
 assert.equal(typeof compileFormDefinition, 'function');
+assert.equal(typeof applyOperation, 'function');
+assert.equal(typeof applyFormOperation, 'function');
 
 const result = compileFormDefinition({
   schema: {

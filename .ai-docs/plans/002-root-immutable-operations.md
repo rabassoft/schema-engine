@@ -1,7 +1,9 @@
 # PLAN-002: Root-level immutable operations
 
-- **Status:** Proposed
+- **Status:** Completed
 - **Date:** 2026-07-13
+- **Approval date:** 2026-07-13
+- **Completion date:** 2026-07-13
 - **Requires:** [`SPEC-001` v0.1.5](../specs/001-controlled-form-runtime.md), [completed PLAN-001](./001-compiler-only-implementation.md)
 - **Milestone:** M2 — Immutable operations
 
@@ -87,10 +89,14 @@ inputs and return diagnostics for expected misuse rather than throwing.
 - Both functions accept exactly one path segment and that segment must be a
   string. Empty property names are valid through `['']`.
 - Reject `[]`, numeric segments, and paths with more than one segment.
-- `applyOperation()` may target any own root property.
+- `applyOperation()` may target any root property name; an inherited property is
+  considered missing and a matching set may create the own property.
 - `applyFormOperation()` additionally requires an exact canonical path match in
   `FormDefinition`; it never resolves a field by `key` or `name` alone.
 - Inherited properties are treated as missing. Presence uses `Object.hasOwn()`.
+- An existing target must be an own data property. Accessor targets are rejected
+  without invoking their getter or setter; unaffected accessor descriptors are
+  preserved without invocation.
 - Root replacement, intermediate containers, nested paths, and array indices
   remain deferred.
 
@@ -115,14 +121,35 @@ Stop a dependent branch after its first structural error, but collect other
 independent operation-member diagnostics in member order:
 `type`, `metadata`, `source`, `path`, `expected`, `value`.
 
+Target and operation-shape validation are independent. If either fails, return
+the target diagnostic first, followed by operation diagnostics in the order
+above; do not validate a form definition, expectation, or effect. A non-object
+operation produces only its top-level `INVALID_OPERATION` diagnostic. An
+invalid discriminant skips the type-dependent remove expectation rule and set
+value validation.
+
 ### 4.1 Operation shape
 
 - Operation must be a non-null, non-array object.
+- Every required operation, metadata, and expectation member must be an own
+  data property. Missing members and accessor members are malformed; validation
+  never invokes caller-provided getters or setters.
 - `type` must be `set-value` or `remove-value`.
 - `metadata` must be an object with integer `id >= 1` and a non-empty string
   `formId`.
 - `source` must equal `user`.
 - Extra operation or metadata properties are ignored.
+- Nested member order is `metadata.id`, `metadata.formId`, then
+  `expected.kind`, `expected.value`. `INVALID_OPERATION.expected` uses these
+  stable descriptions: `non-null object`, `set-value or remove-value`,
+  `metadata object`, `integer >= 1`, `non-empty string`, `user`, `array`,
+  `expectation object`, `missing or value`, `own data property`, and
+  `defined own data property`, as applicable to the reported member.
+- A non-array `path` produces `INVALID_OPERATION` for member `path`. For an
+  array path, validate length before its segment: `[]` is
+  `root-not-supported`, length greater than one is `deep-path-not-supported`,
+  and a missing, accessor, or non-string sole segment is
+  `non-string-segment`. Never invoke a path-segment accessor.
 - `expected` must be an object with `kind: 'missing'` or `kind: 'value'`.
   `kind: 'value'` requires an own `value` member; its value may be any value,
   including `undefined`, because matching uses identity/value semantics.
@@ -146,6 +173,8 @@ independent operation-member diagnostics in member order:
   successful no-op with the original root reference.
 - `remove-value` deletes a present root property after a matching expectation.
   Removing a missing property is stale.
+- An existing accessor target produces `UNSUPPORTED_OPERATION_PROPERTY`, the
+  original root reference, and `changed: false` before expectation matching.
 - Removing a required form field is allowed; requiredness remains a validation
   concern.
 
@@ -154,6 +183,23 @@ independent operation-member diagnostics in member order:
 - `FormDefinition.fields` must be an array of supported field definitions with
   unique one-string-segment paths. A malformed definition produces
   `INVALID_FORM_DEFINITION`; the utility does not repair it.
+- The exact minimum validated shape is:
+  - `definition` is a non-null, non-array object with an own data-property
+    `fields` containing an array;
+  - every array index is an own data property containing a non-null, non-array
+    object with own data-properties `path` and `kind`;
+  - `path` is exactly one string segment and is unique in the array;
+  - `kind` is `string`, `number`, or `boolean`;
+  - a `number` field has an own data-property `numericType` equal to `number`
+    or `integer`.
+- Other field members are not read or revalidated because they are not needed
+  for path membership or basic type compatibility. Required members are read
+  through property descriptors, so malformed definitions cannot execute
+  accessors.
+- Inspect fields in array order, emit at most one structural diagnostic per
+  field branch, and continue with independent entries. Any form-definition
+  diagnostic prevents membership, compatibility, expectation, and effect
+  checks.
 - `set-value` compatibility:
   - string field: JavaScript string;
   - number field with `numericType: 'number'`: finite number;
@@ -187,19 +233,42 @@ All M2 diagnostics use `severity: 'error'`, `source: 'runtime'`, no
 `documentPath`, and a frozen parameters object. Include `dataPath` only after a
 valid one-string-segment operation path has been established.
 
-| Code                           | Required parameters                                                     | Meaning                                                  |
-| ------------------------------ | ----------------------------------------------------------------------- | -------------------------------------------------------- |
-| `INVALID_OPERATION_TARGET`     | `actualType`                                                            | Current root is not an accepted object                   |
-| `INVALID_OPERATION`            | `member`, `expected`, `actualType`, optional `actualValue`              | Operation member is malformed                            |
-| `INVALID_OPERATION_PATH`       | `reason`, `pathLength`, optional `segmentIndex`, optional `actualType`  | Path is empty, deep, or non-string                       |
-| `INVALID_FORM_DEFINITION`      | `reason`                                                                | FormDefinition cannot safely resolve managed paths/types |
-| `FORM_PATH_NOT_MANAGED`        | `path`                                                                  | Valid root path is absent from FormDefinition            |
-| `INCOMPATIBLE_OPERATION_VALUE` | `field`, `fieldType`, `actualType`, optional `actualValue`              | Set value fails basic type compatibility                 |
-| `STALE_OPERATION`              | `expectedKind`, `actualKind`, optional safe expected/actual descriptors | Presence or `Object.is` expectation failed               |
+| Code                             | Required parameters                                                                 | Meaning                                                  |
+| -------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `INVALID_OPERATION_TARGET`       | `actualType`                                                                        | Current root is not an accepted object                   |
+| `INVALID_OPERATION`              | `member`, `expected`, `reason`, optional `actualType`, optional `actualValue`       | Operation member is malformed                            |
+| `INVALID_OPERATION_PATH`         | `reason`, `pathLength`, optional `segmentIndex`, optional `actualType`              | Path is empty, deep, or non-string                       |
+| `INVALID_FORM_DEFINITION`        | `reason`, optional `fieldIndex`, optional `path`                                    | FormDefinition cannot safely resolve managed paths/types |
+| `FORM_PATH_NOT_MANAGED`          | `path`                                                                              | Valid root path is absent from FormDefinition            |
+| `INCOMPATIBLE_OPERATION_VALUE`   | `field`, `fieldType`, `actualType`, optional `actualValue`                          | Set value fails basic type compatibility                 |
+| `UNSUPPORTED_OPERATION_PROPERTY` | `property`, `reason`                                                                | Existing target is not a supported data property         |
+| `STALE_OPERATION`                | `expectedKind`, `actualKind`, conditional expected/actual type and value parameters | Presence or `Object.is` expectation failed               |
 
 `reason` values for `INVALID_OPERATION_PATH` are exactly `root-not-supported`,
 `deep-path-not-supported`, and `non-string-segment`. Diagnostic values follow
 PLAN-001's scalar-or-type-descriptor policy and never retain caller objects.
+
+`INVALID_OPERATION.reason` is exactly `missing-member`, `accessor-member`, or
+`invalid-value`. `actualType` is omitted for missing and accessor members, so
+diagnostics never need to evaluate an accessor.
+
+`reason` values for `INVALID_FORM_DEFINITION` are exactly
+`definition-not-object`, `fields-not-array`, `field-not-object`,
+`invalid-field-path`, `unsupported-field-kind`, `invalid-numeric-type`, and
+`duplicate-field-path`. Field-related definition diagnostics additionally
+include `fieldIndex`; `duplicate-field-path` also includes a copied `path`.
+`UNSUPPORTED_OPERATION_PROPERTY.reason` is exactly `accessor-property`.
+
+For `STALE_OPERATION`, `expectedKind` and `actualKind` are `missing` or `value`.
+Each side whose kind is `value` includes `expectedType`/`actualType` and includes
+`expectedValue`/`actualValue` only for `null`, strings, booleans, and finite
+numbers. Other values are represented only by their type and are never retained.
+For `INCOMPATIBLE_OPERATION_VALUE`, `fieldType` is exactly `string`, `number`,
+`integer`, or `boolean`.
+
+All M2 diagnostics include a stable English `fallbackMessage`. Diagnostic
+builders copy every path or descriptor they expose and never retain caller
+containers.
 
 No warning or diagnostic is emitted for a successful no-op.
 
@@ -227,7 +296,7 @@ Required structural fixtures:
 - Errors: invalid target, invalid operation type, invalid metadata, invalid
   source, invalid expectation, missing set value, undefined set value (unit-only),
   empty path, deep path, numeric segment, stale missing expectation, stale value
-  expectation, and remove missing.
+  expectation, remove missing, and accessor target (unit-only).
 
 Required form-aware fixtures:
 
@@ -249,6 +318,7 @@ Focused unit tests additionally cover:
 - Result/diagnostic freezing without freezing input or output values.
 - Input operation/definition objects remain unmodified.
 - Deterministic diagnostic order for multiple malformed members.
+- Required-member accessors are rejected without getter/setter invocation.
 - M1 compiler fixtures and outputs remain unchanged.
 
 ## 9. Implementation sequence and acceptance
@@ -291,3 +361,4 @@ documentation and implementation disagree.
   reference.
 - Valid no-ops succeed with `changed: false` and no diagnostics.
 - Nested operations and arrays remain deferred.
+- Caller-provided accessors are never invoked during validation or application.

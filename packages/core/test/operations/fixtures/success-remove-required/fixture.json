@@ -1,0 +1,41 @@
+{
+  "mode": "form",
+  "definition": {
+    "fields": [
+      {
+        "path": ["name"],
+        "kind": "string"
+      },
+      {
+        "path": ["amount"],
+        "kind": "number",
+        "numericType": "number"
+      },
+      {
+        "path": ["count"],
+        "kind": "number",
+        "numericType": "integer"
+      },
+      {
+        "path": ["active"],
+        "kind": "boolean"
+      }
+    ]
+  },
+  "currentValue": {
+    "name": "Ada"
+  },
+  "operation": {
+    "type": "remove-value",
+    "metadata": {
+      "id": 1,
+      "formId": "form"
+    },
+    "path": ["name"],
+    "expected": {
+      "kind": "value",
+      "value": "Ada"
+    },
+    "source": "user"
+  }
+}

@@ -6,15 +6,15 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: `develop` contains the committed M1 implementation and PLAN-002 documentation, two commits ahead of `origin/develop`; GitHub default branch is `main`
+- Repository revision: `develop` contains the committed M2 implementation and documentation, one commit ahead of `origin/develop`; GitHub default branch is `main`
 
 ## Current phase
 
-M1 completed; architecture validation before M2.
+M1 and M2 completed; architecture validation before M3.
 
 ## Current objective
 
-Review and approve PLAN-002 for the M2 root-level immutable-operations increment.
+Review the completed M2 increment and prepare a decision-complete M3 controlled-runtime plan.
 
 ## Latest completed work
 
@@ -22,21 +22,32 @@ Review and approve PLAN-002 for the M2 root-level immutable-operations increment
 - Implemented immutable compiler contracts and `compileFormDefinition()` for the approved JSON Schema and UI Schema subset.
 - Added 30 conformance fixtures and 10 focused unit tests; all 40 tests pass.
 - Completed PLAN-001 and marked M1 complete in the roadmap.
-- Updated SPEC-001 to Draft v0.1.5 with the normative M1 diagnostic contract and
-  the clarified root-only M2 operation/result boundaries.
+- Updated SPEC-001 through Draft v0.1.6 with the normative M1 and M2 diagnostic
+  contracts and clarified root-only operation/result boundaries.
 - Drafted a decision-complete PLAN-002 for `applyOperation()` and
   `applyFormOperation()`, including contracts, diagnostics, fixtures, and
   acceptance criteria.
 - Committed the completed M1 increment and proposed PLAN-002 documentation on
   `develop` as `Rabassoft <ricard@rabassoft.com>`.
+- Formally reviewed and approved PLAN-002 after closing accessor-property,
+  malformed-path, minimum FormDefinition shape, and diagnostic-order behavior.
+- Implemented and exported root-level `applyOperation()` and
+  `applyFormOperation()` with immutable results and deterministic runtime
+  diagnostics.
+- Added 27 operation conformance fixtures and focused tests; all 82 repository
+  tests pass.
+- Completed PLAN-002 and milestone M2.
+- Committed the completed M2 increment on `develop` as
+  `Rabassoft <ricard@rabassoft.com>`.
 
 ## In progress
 
-No implementation task is active. PLAN-002 is Proposed and awaiting review.
+No implementation task is active. PLAN-002 and M2 are complete.
 
 ## Next action
 
-Review PLAN-002 and explicitly approve it before implementing M2.
+Review the completed M2 diff, then propose and approve PLAN-003 before
+implementing the controlled runtime.
 
 ## Blockers
 
@@ -44,20 +55,25 @@ None.
 
 ## Open questions
 
-- None within PLAN-002; its implementation and fixture boundaries are specified.
+- None within completed PLAN-002.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
 
 ## Verification status
 
 - `CI=true pnpm install --frozen-lockfile` passed with the pinned lockfile.
 - `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
-- `pnpm test` passed: 2 test files and 40 tests, including all 30 conformance fixtures.
+- `pnpm test` passed: 4 test files and 82 tests, including all compiler and
+  operation conformance fixtures.
 - `pnpm build` and `pnpm test:package` passed.
 - Built package exports verified with zero runtime dependencies.
 - `git diff --check` and local Markdown link validation passed.
-- PLAN-002 was checked against SPEC-001 v0.1.5 and the deferred-decisions
-  register; no M2 production code was added.
-- Current checkout is `develop`; the completed changes are committed locally and not pushed.
+- PLAN-002 was checked against SPEC-001 and the deferred-decisions register.
+- The formal review checked PLAN-002 against the implemented M1 contracts and
+  closed all identified decision ambiguities before approval.
+- SPEC-001 v0.1.6 includes the M2 diagnostic contract.
+- `pnpm test` passes with 4 test files and 82 tests, including 27 operation
+  fixtures and all 30 compiler fixtures.
+- Current checkout is `develop`; M2 is committed locally and not pushed.
 
 ## Relevant documents
 
@@ -70,3 +86,4 @@ None.
 - `.ai-docs/adrs/000-index.md`
 - `packages/core/src/index.ts`
 - `packages/core/test/conformance/fixtures/`
+- `packages/core/test/operations/fixtures/`

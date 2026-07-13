@@ -1,0 +1,20 @@
+{
+  "mode": "structural",
+  "currentValue": {
+    "name": "Ada"
+  },
+  "operation": {
+    "type": "set-value",
+    "metadata": {
+      "id": 1,
+      "formId": "form"
+    },
+    "path": ["name"],
+    "expected": {
+      "kind": "value",
+      "value": "Ada"
+    },
+    "value": "Grace",
+    "source": "user"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "FORM_PATH_NOT_MANAGED",
+      "severity": "error",
+      "source": "runtime",
+      "dataPath": ["other"],
+      "parameters": {
+        "path": ["other"]
+      },
+      "fallbackMessage": "Operation path is not managed by the form."
+    }
+  ]
+}

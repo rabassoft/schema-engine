@@ -1,0 +1,17 @@
+{
+  "mode": "structural",
+  "currentValue": {},
+  "operation": {
+    "type": "set-value",
+    "metadata": {
+      "id": 0,
+      "formId": ""
+    },
+    "path": ["name"],
+    "expected": {
+      "kind": "missing"
+    },
+    "value": "Ada",
+    "source": "user"
+  }
+}

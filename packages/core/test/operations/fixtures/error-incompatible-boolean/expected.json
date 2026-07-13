@@ -1,0 +1,20 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_OPERATION_VALUE",
+      "severity": "error",
+      "source": "runtime",
+      "dataPath": ["active"],
+      "parameters": {
+        "field": "active",
+        "fieldType": "boolean",
+        "actualType": "string",
+        "actualValue": "true"
+      },
+      "fallbackMessage": "Operation value is incompatible with field \"active\"."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "member": "expected",
+        "expected": "expectation object",
+        "reason": "invalid-value",
+        "actualType": "null",
+        "actualValue": null
+      },
+      "fallbackMessage": "Operation member \"expected\" is invalid."
+    }
+  ]
+}

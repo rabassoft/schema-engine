@@ -1,0 +1,18 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "member": "value",
+        "expected": "defined own data property",
+        "reason": "missing-member"
+      },
+      "fallbackMessage": "Operation member \"value\" is invalid."
+    }
+  ]
+}

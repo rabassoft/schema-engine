@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "value": {},
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_FORM_DEFINITION",
+      "severity": "error",
+      "source": "runtime",
+      "dataPath": ["name"],
+      "parameters": {
+        "reason": "fields-not-array"
+      },
+      "fallbackMessage": "Form definition is invalid for operation application."
+    }
+  ]
+}

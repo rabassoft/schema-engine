@@ -1,0 +1,16 @@
+{
+  "success": false,
+  "value": [],
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_OPERATION_TARGET",
+      "severity": "error",
+      "source": "runtime",
+      "parameters": {
+        "actualType": "array"
+      },
+      "fallbackMessage": "Operation target must be an ordinary object."
+    }
+  ]
+}
