@@ -6,6 +6,32 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — Post-M6 state and proposed roadmap clarified
+
+### Completed
+
+- Synchronized STATUS with pushed revision `180fe87`, where `develop` and
+  `origin/develop` now coincide, without changing executable code.
+- Replaced the obsolete M1-only root README description with the implemented
+  M1-M6 core, Angular 22, native renderer, package, and deferred boundaries.
+- Corrected the present-tense SPEC-001 lifecycle narrative to record M6 as
+  completed while preserving Draft v0.1.13 and its historical version entry.
+- Added a proposed G0/M7-M12 dependency order to ROADMAP and cross-referenced it
+  from the deferred register without approving, activating, or promoting any
+  future item.
+
+### Verification
+
+- Formatting, local Markdown links, stale M6/M1/checkpoint references, and
+  `git diff --check` pass for the documentation-only checkpoint.
+- The prior M6 code verification remains unchanged: 175 tests, builds, package
+  smoke, declaration inspection, and architectural boundary checks passed.
+
+### Pending
+
+- Review and explicitly approve whether G0 formal prototype closure becomes the
+  next active effort; the roadmap proposal alone authorizes no implementation.
+
 ## 2026-07-14 — M6 closure committed
 
 ### Completed

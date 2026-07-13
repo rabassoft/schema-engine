@@ -1,5 +1,14 @@
 # Architecture Documentation
 
+## Project state
+
+- [Current status](./project/STATUS.md) — canonical present-tense checkpoint.
+- [Roadmap](./project/ROADMAP.md) — completed milestones and proposed future
+  sequence.
+- [Stable handoff](../HANDOFF.md) — context-recovery procedure, never current
+  status.
+- [Work log](./project/WORKLOG.md) — append-only history; read selectively.
+
 ## Specifications
 
 - [SPEC-001: Controlled Form Runtime](./specs/001-controlled-form-runtime.md)
@@ -10,6 +19,7 @@
 
 ## Roadmap and deferred decisions
 
+- [Milestones and proposed sequence](./project/ROADMAP.md)
 - [Deferred decisions](./roadmap/deferred-decisions.md)
 
 ## Implementation plans
@@ -20,5 +30,9 @@
 - [PLAN-004: Angular controlled-form adapter](./plans/004-angular-adapter.md) — Completed
 - [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
+
+M1-M6 are completed. The post-M6 sequence is a proposal rather than an approved
+delivery commitment, and no deferred decision becomes active merely by
+appearing in it.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

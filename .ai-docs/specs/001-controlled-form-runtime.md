@@ -1339,15 +1339,17 @@ textos mediante un `TextResolver` neutral y mantiene `@angular/forms/signals`
 limitado a la capa Angular. No se incorporan Signal Forms validation schemas,
 Reactive Forms, Template-driven Forms, compat, submit ni persistencia.
 
-ADR-011 y PLAN-006 revisión 1 están aceptados para el siguiente incremento.
-Esta versión de SPEC incorpora sus contratos normativos de `enum` string,
+ADR-011 y PLAN-006 revisión 1 fueron aceptados e implementados mediante M6.
+Esta versión de SPEC contiene sus contratos normativos de `enum` string,
 choices, labels resolubles, validación estructural de definiciones manuales y
-renderer select nativo. M6 implementará esos contratos de forma incremental sin
-modificar el alcance completado de M1-M5.
+renderer select nativo. PLAN-006 quedó completado el 14 de julio de 2026 sin
+modificar el alcance completado de M1-M5 ni activar capacidades adicionales.
 
-M6 seguirá la secuencia exacta de PLAN-006, empezando por los contratos
-neutrales y sus exports. D-010, el bridge de validación de D-024, D-036, D-037 y
-las demás decisiones aplazadas conservan su estado.
+M1-M6 implementan el walking skeleton descrito por esta SPEC. La especificación
+permanece Draft v0.1.13 hasta superar una revisión formal de aceptación; la
+finalización de M6 no la acepta ni promociona automáticamente APIs públicas a
+Stable. D-010, el bridge de validación de D-024, D-036, D-037 y las demás
+decisiones aplazadas conservan su estado.
 
 ## 30. Historial
 

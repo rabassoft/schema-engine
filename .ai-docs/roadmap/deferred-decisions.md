@@ -357,6 +357,11 @@ Las entradas más cercanas a convertirse en ADR son:
 1. **D-010 — Acción explícita para limpiar un campo.**
 2. **D-005 — Objetos anidados.**
 
+El orden de trabajo post-M6 propuesto se describe en
+[`ROADMAP.md`](../project/ROADMAP.md). Esa secuencia no cambia el estado de
+ninguna entrada: D-010 y D-005 continúan como Candidate y todas las demás
+conservan el estado registrado aquí hasta una promoción y aprobación explícitas.
+
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                          |
