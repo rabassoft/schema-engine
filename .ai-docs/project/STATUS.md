@@ -6,7 +6,9 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: current `develop` HEAD contains revised proposed ADR-009 and its reviewed Angular public-surface correction, one commit ahead of `origin/develop`; GitHub default branch is `main`
+- Repository revision: current `develop` HEAD contains revised proposed ADR-009,
+  its reviewed Angular public-surface correction, and the final review record;
+  two commits ahead of `origin/develop`; GitHub default branch is `main`
 
 ## Current phase
 
@@ -14,7 +16,7 @@ M1 through M5 completed; no implementation task active.
 
 ## Current objective
 
-Perform the final formal review of revised proposed ADR-009 before acceptance.
+Obtain an explicit acceptance decision for revised proposed ADR-009.
 
 ## Latest completed work
 
@@ -129,6 +131,9 @@ Perform the final formal review of revised proposed ADR-009 before acceptance.
   assertion that prevents accidental re-export.
 - Committed ADR-009 revision 1 and its reviewed public-surface correction on
   `develop` with repository identity `Rabassoft <ricard@rabassoft.com>`.
+- Completed the final formal review of ADR-009's seven acceptance areas with no
+  remaining findings; kept ADR-009 Proposed and D-029 Candidate pending an
+  explicit acceptance decision.
 
 ## In progress
 
@@ -136,8 +141,9 @@ None. No implementation task is active.
 
 ## Next action
 
-Review the revised seven acceptance areas and either accept ADR-009 and promote
-D-029 or report any remaining concern.
+Explicitly accept ADR-009 and promote D-029, or request a further revision. Do
+not implement publication, SemVer enforcement, or additional API changes as
+part of that decision.
 
 ## Blockers
 
@@ -149,8 +155,8 @@ None. There is no implementation blocker or documentation conflict.
 - The Angular `ValidatorFn` bridge portion of D-024 remains deferred and outside
   completed M5.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
-- ADR-009 remains Proposed; its revised seven acceptance areas require final
-  explicit review.
+- ADR-009 remains Proposed and D-029 remains Candidate; the only open decision
+  in this increment is whether to accept the reviewed policy.
 
 ## Verification status
 
@@ -185,6 +191,12 @@ None. There is no implementation blocker or documentation conflict.
   `pnpm test`, and `pnpm test:package`; all 140 tests remain passing.
 - Package smoke coverage confirms `SCHEMA_RENDERER_REGISTRATIONS` is absent from
   the Angular root entry point while internal resolver tests remain passing.
+- The final formal review passed all seven acceptance areas: entry-point
+  boundary, complete inventory, Angular extension surface, unsupported imports,
+  orthogonal policy axes, D-028 separation, and acceptance scope.
+- The reviewed source entry points and generated declarations agree, ADR-009
+  remains Proposed, and D-029 remains Candidate; no documentation conflict was
+  found.
 
 ## Relevant documents
 

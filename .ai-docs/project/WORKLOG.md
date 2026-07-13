@@ -2,6 +2,32 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — ADR-009 final formal review completed
+
+### Completed
+
+- Reviewed ADR-009 revision 1 against all seven acceptance areas: package
+  entry-point boundary, API inventory, Angular extension surface, unsupported
+  imports, orthogonal policy axes, D-028 separation, and acceptance scope.
+- Found no remaining issue after the revision 1 corrections.
+- Kept ADR-009 Proposed and D-029 Candidate pending the user's explicit
+  acceptance decision.
+
+### Verification
+
+- Confirmed that the committed source entry points and built declarations agree
+  and that `SCHEMA_RENDERER_REGISTRATIONS` is absent from the public Angular
+  entry point.
+- Confirmed that ADR-009, the ADR index, and the deferred-decisions register
+  retain consistent Proposed/Candidate states.
+- Relied on the immediately preceding full verification: formatting, linting,
+  type checking, all 140 tests, and both package smoke tests passed.
+
+### Pending
+
+- Explicitly accept ADR-009 and promote D-029, or request another revision. No
+  push was performed.
+
 ## 2026-07-13 — ADR-009 revision 1 committed
 
 ### Completed

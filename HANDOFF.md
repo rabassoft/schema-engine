@@ -6,8 +6,9 @@
 
 ## 1. Current objective
 
-No implementation task is active. Perform the final formal review of revised
-proposed ADR-009 before accepting its public API and stability policy.
+No implementation task is active. The final formal review of revised proposed
+ADR-009 passed all seven acceptance areas. Obtain an explicit decision to accept
+the public API and stability policy or revise it again.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -181,10 +182,12 @@ and lifecycle as separate axes. The reviewed correction removes the raw
 `provideSchemaRenderer`, `AngularRendererResolver`, and renderer contracts as
 public extension APIs. D-028 still owns SemVer, package coordination, Angular
 compatibility, and the exact deprecation window. Acceptance does not authorize
-publication or additional code changes.
+publication or additional code changes. The final formal review found no
+remaining issue; ADR-009 remains Proposed and D-029 remains Candidate until an
+explicit acceptance decision is recorded.
 
 ## 12. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-008, revised proposed ADR-009, completed PLAN-001 through PLAN-005, the deferred-decisions register, and the ADR index. Perform the final review of ADR-009's seven acceptance areas; do not accept it without explicit approval.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-008, revised proposed ADR-009, completed PLAN-001 through PLAN-005, the deferred-decisions register, and the ADR index. Record an explicit decision to accept ADR-009 and promote D-029, or request a further revision; do not implement publication or additional API changes.
