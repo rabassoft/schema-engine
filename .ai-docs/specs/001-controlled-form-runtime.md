@@ -1,7 +1,7 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Draft
-- **Versión:** 0.1.8
+- **Versión:** 0.1.9
 - **Fecha:** 13 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
@@ -9,6 +9,7 @@
 - **Plan de operaciones aprobado:** [`PLAN-002`](../plans/002-root-immutable-operations.md)
 - **Plan de runtime aprobado:** [`PLAN-003`](../plans/003-controlled-runtime.md)
 - **Resolución de renderers:** [`ADR-007`](../adrs/007-resolucion-renderers-testers.md)
+- **Instanciación Angular:** [`ADR-008`](../adrs/008-instanciacion-renderers-angular.md)
 
 ## 1. Propósito
 
@@ -131,6 +132,8 @@ El adaptador Angular será responsable de:
 - Exponer operaciones mediante outputs o callbacks idiomáticos.
 - Resolver renderers mediante registrations y testers puntuados sobre
   `FieldDefinition`, conforme a ADR-007.
+- Instanciar cada renderer inline mediante `ViewContainerRef.createComponent()`
+  y bindings de creación, conforme a ADR-008.
 - Crear y destruir el runtime con el ciclo de vida del componente.
 - Generar identificadores DOM a partir de `formId` y la clave lógica del campo.
 
@@ -986,14 +989,15 @@ Las decisiones que inicialmente bloqueaban la implementación están cerradas:
 3. Resolución de renderers: ADR-007.
 4. Aislamiento y reporte de listeners: PLAN-003.
 
-Antes de M4 debe resolverse D-027, la estrategia concreta de instanciación
-dinámica en Angular. Las demás decisiones aplazadas conservan su estado en el
-registro correspondiente.
+D-027 queda resuelta por ADR-008. No permanece ninguna decisión arquitectónica
+inmediata que bloquee la preparación de PLAN-004. Las demás decisiones
+aplazadas conservan su estado en el registro correspondiente.
 
 ## 30. Historial
 
 | Versión | Fecha      | Cambio                                                                                                            |
 | ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| 0.1.9   | 13-07-2026 | Se incorpora ADR-008 y se cierra la instanciación inline de renderers Angular.                                    |
 | 0.1.8   | 13-07-2026 | Se incorpora ADR-007 y se cierra la estrategia neutral de resolución de renderers.                                |
 | 0.1.7   | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-003 y el schema fuente en las opciones del runtime.                     |
 | 0.1.6   | 13-07-2026 | Se incorpora el contrato diagnóstico aprobado de PLAN-002.                                                        |

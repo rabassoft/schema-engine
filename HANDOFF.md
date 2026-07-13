@@ -1,12 +1,12 @@
 # Schema Engine — Codex Handoff
 
 - **Handoff date:** 13 July 2026
-- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.8`, status `Draft`
+- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.9`, status `Draft`
 - **Implementation status:** M1 compiler, M2 root immutable operations, and M3 controlled runtime completed in `packages/core`; framework adapters and renderers are not implemented.
 
 ## 1. Current objective
 
-Resolve Angular renderer instantiation D-027 and prepare the M4 adapter plan.
+Prepare and formally review PLAN-004 for the Angular adapter.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -55,6 +55,11 @@ Do not rewrite these ADRs as part of an unrelated task. Surface conflicts explic
 ADR-004 has now been superseded by accepted ADR-007. Renderer selection uses
 deterministic scored testers over normalized `FieldDefinition` in the adapter;
 the core owns no component registry.
+
+Accepted ADR-008 resolves D-027: inline renderers are created with
+`ViewContainerRef.createComponent()`, an explicit `EnvironmentInjector`, and
+creation-time input/output bindings. Standalone `createComponent()` remains for
+out-of-tree UI and is outside M4.
 
 ## 5. Accepted architecture increment
 
@@ -144,4 +149,4 @@ while keeping M3 framework-neutral and application-controlled.
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.8, accepted ADR-005, ADR-006, and ADR-007, completed PLAN-001, PLAN-002, and PLAN-003, the deferred-decisions register, and the ADR index. Review the completed M3 correction and verification evidence. Do not implement M4. Resolve D-027 for Angular renderer instantiation, then propose a decision-complete PLAN-004 for the Angular adapter.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.9, accepted ADR-005 through ADR-008, completed PLAN-001 through PLAN-003, the deferred-decisions register, and the ADR index. Do not implement M4. Propose a decision-complete PLAN-004 for the Angular adapter, including package boundary, Signals projection, providers, renderer registration/resolution, ViewContainerRef bindings, lifecycle, diagnostics, fixtures, and verification.

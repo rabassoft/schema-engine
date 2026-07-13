@@ -26,8 +26,9 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
+8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
 
 ## 4. ADRs específicos de Angular
 
 1. [Angular ADR 001: Proveedores Funcionales y Registro Reactivo Zoneless](./angular/001-angular-proveedores-funcionales-signals.md) — **Requiere revisión**; contiene afirmaciones pre-SPEC sobre Signals, RxJS, Zone.js y zoneless.
-2. `Angular ADR 002: Instanciación mediante ViewContainerRef` — **Placeholder vacío**; no registra una decisión aceptada.
+2. `Angular ADR 002: Instanciación mediante ViewContainerRef` — **Placeholder histórico vacío**; sustituido por ADR-008.

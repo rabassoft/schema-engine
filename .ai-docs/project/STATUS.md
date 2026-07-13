@@ -6,7 +6,7 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: `develop` contains committed reviewed M3 and ADR-007 documentation, three commits ahead of `origin/develop`; GitHub default branch is `main`
+- Repository revision: `develop` contains committed reviewed M3 and ADR-008 documentation, four commits ahead of `origin/develop`; GitHub default branch is `main`
 
 ## Current phase
 
@@ -14,7 +14,7 @@ M1, M2, and M3 completed; architecture validation before M4.
 
 ## Current objective
 
-Resolve Angular renderer instantiation D-027 and prepare PLAN-004 for M4.
+Prepare and formally review PLAN-004 for the M4 Angular adapter.
 
 ## Latest completed work
 
@@ -56,15 +56,18 @@ Resolve Angular renderer instantiation D-027 and prepare PLAN-004 for M4.
   owned by framework adapters.
 - Committed reviewed M3 and the D-023/ADR-007 resolution on `develop` as
   `Rabassoft <ricard@rabassoft.com>`.
+- Accepted ADR-008 and promoted D-027 with inline
+  `ViewContainerRef.createComponent()` plus creation-time bindings.
+- Committed the D-027/ADR-008 resolution on `develop` as
+  `Rabassoft <ricard@rabassoft.com>`.
 
 ## In progress
 
-No implementation task is active. M3 review and D-023 resolution are complete.
+No implementation task is active. D-027 is resolved and M4 planning is ready.
 
 ## Next action
 
-Resolve D-027 for Angular dynamic instantiation, then draft and approve PLAN-004
-before implementing the Angular adapter.
+Draft and formally approve PLAN-004 before implementing the Angular adapter.
 
 ## Blockers
 
@@ -72,7 +75,7 @@ None.
 
 ## Open questions
 
-- Angular dynamic instantiation remains open as D-027.
+- None blocking PLAN-004; D-024 details belong in the adapter plan.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
 
 ## Verification status
@@ -97,6 +100,9 @@ None.
   tests.
 - ADR-007 was checked against SPEC-001, ADR-003/004, D-016, D-023, D-024,
   D-026, and D-027.
+- ADR-008 was checked against current official Angular documentation for
+  `ViewContainerRef.createComponent`, `NgComponentOutlet`, standalone
+  `createComponent`, and creation-time bindings.
 - Current checkout is `develop`; M3 and ADR-007 are committed locally and not pushed.
 
 ## Relevant documents
@@ -105,6 +111,7 @@ None.
 - `.ai-docs/adrs/005-politica-dialecto-json-schema.md`
 - `.ai-docs/adrs/006-limite-paquete-inicial.md`
 - `.ai-docs/adrs/007-resolucion-renderers-testers.md`
+- `.ai-docs/adrs/008-instanciacion-renderers-angular.md`
 - `.ai-docs/plans/001-compiler-only-implementation.md`
 - `.ai-docs/plans/002-root-immutable-operations.md`
 - `.ai-docs/roadmap/deferred-decisions.md`

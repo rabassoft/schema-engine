@@ -2,6 +2,42 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — ADR-008 committed
+
+### Completed
+
+- Committed ADR-008, D-027 promotion, SPEC-001 v0.1.9, and persistent-state updates on `develop`.
+- Used repository identity `Rabassoft <ricard@rabassoft.com>`.
+- Kept the commit local; no push was performed.
+
+### Verification
+
+- Formatting, diff, and local Markdown-link validation passed before commit.
+
+### Pending
+
+- Prepare and formally review PLAN-004 before implementing M4.
+
+## 2026-07-13 — Reviewed M3 committed and D-027 resolved
+
+### Completed
+
+- Committed reviewed M3, its accessor-safety correction, and ADR-007 as `805308d`.
+- Reviewed current official Angular APIs for dynamic inline components.
+- Accepted ADR-008 selecting `ViewContainerRef.createComponent()` with creation-time input/output bindings and an explicit `EnvironmentInjector`.
+- Promoted D-027 without implementing Angular or renderers.
+- Updated SPEC-001 to Draft v0.1.9 and cleared the immediate architectural prerequisites for PLAN-004.
+
+### Verification
+
+- Confirmed the M3 commit attribution is `Rabassoft <ricard@rabassoft.com>`.
+- Checked ADR-008 against ADR-007, Angular's programmatic rendering guide, and the current Angular API references.
+- Formatting, diff, and local Markdown-link validation passed.
+
+### Pending
+
+- Draft and formally approve PLAN-004 before implementing M4.
+
 ## 2026-07-13 — Reviewed M3 and ADR-007 committed
 
 ### Completed

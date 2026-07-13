@@ -226,10 +226,13 @@ Cada decisión debe registrar:
 
 ## D-027: Estrategia de instanciación dinámica en Angular
 
-- **Estado:** Research
+- **Estado:** Promoted
 - **Opciones:** `ViewContainerRef`, `NgComponentOutlet`, bindings programáticos u otra estrategia.
 - **Motivo:** Debe decidirse después del contrato renderer-runtime, no antes.
 - **Retomar cuando:** El ADR de resolución de renderers esté aprobado.
+- **Resolución:** [`ADR-008`](../adrs/008-instanciacion-renderers-angular.md)
+  acepta `ViewContainerRef.createComponent()` con bindings de creación para los
+  renderers inline.
 
 ## D-028: Versionado de paquetes y compatibilidad con frameworks
 
@@ -292,7 +295,7 @@ Cada decisión debe registrar:
 
 Las entradas más cercanas a convertirse en ADR son:
 
-1. **D-027 — Instanciación dinámica en Angular.**
+1. **D-024 — Custom renderers y bridges Angular.**
 2. **D-028 — Versionado de paquetes.**
 3. **D-029 — API pública.**
 
