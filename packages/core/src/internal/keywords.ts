@@ -93,6 +93,7 @@ export const STRING_FIELD_KEYWORDS = new Set([
   'minLength',
   'maxLength',
   'pattern',
+  'enum',
 ]);
 
 export const NUMBER_FIELD_KEYWORDS = new Set([

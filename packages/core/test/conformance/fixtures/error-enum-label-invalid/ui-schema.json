@@ -1,0 +1,11 @@
+{
+  "fields": {
+    "status": {
+      "enumLabels": {
+        "draft": "   ",
+        "published": 42,
+        "unknown": ""
+      }
+    }
+  }
+}

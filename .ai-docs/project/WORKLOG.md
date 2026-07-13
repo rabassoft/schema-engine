@@ -6,6 +6,47 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-13 — M6 PLAN-006 step 2 completed
+
+### Completed
+
+- Added `enum` to the supported direct string-field keyword set while retaining
+  root `enum`/`const` as unsupported, `format` as ignored, and non-string enums
+  as incompatible.
+- Added internal `absent`, `valid`, and `schema-blocked` enum states so malformed
+  schema branches retain their errors without producing derived UI cascades.
+- Implemented descriptor-safe enum inspection for outer values and every array
+  index, collecting sparse, accessor, non-string, and repeated-value errors in
+  deterministic index order without executing getters.
+- Implemented descriptor-safe `enumLabels` parsing, exact compatibility and
+  unknown-label diagnostics, and suppression below invalid/missing schema
+  candidates.
+- Constructed ordered immutable choices with opaque custom labels, exact domain
+  strings, and visible JSON-literal fallbacks for blank values.
+- Added all 13 PLAN-006 compiler conformance fixtures plus focused tests for
+  exact comparison, multiple duplicates, sparse/accessor values, ignored
+  branches, input preservation, deep immutability, and deterministic behavior.
+- Replaced the historical unsupported-`enum` fixture with `const`, which remains
+  unsupported after the accepted enum subset was implemented.
+
+### Verification
+
+- Frozen installation, workspace formatting, linting, type checking, builds,
+  and package smoke passed without a dependency or lockfile change.
+- The full suite passed: 11 files and 159 tests, comprising 123 core and 36
+  Angular tests.
+- All 43 compiler fixtures passed, including the 13 new enum fixtures.
+- Core contains no Angular, RxJS, DOM, or browser import and still has zero
+  runtime dependencies; Angular Forms imports remain Signal Forms-only.
+- Searches confirmed that operations, runtime, and Angular do not enforce enum
+  membership or inspect choices in step 2.
+- All 31 Markdown links resolve and `git diff --check` passes.
+
+### Pending
+
+- Implement PLAN-006 step 3: validate manually supplied choices at runtime
+  creation and prove the existing operation boundary does not inspect them.
+
 ## 2026-07-13 — Persistent context workflow compacted
 
 ### Completed

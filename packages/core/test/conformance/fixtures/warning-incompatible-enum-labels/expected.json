@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "status",
+        "name": "status",
+        "path": ["status"],
+        "required": false,
+        "label": "status",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_UI_OPTION",
+      "severity": "warning",
+      "source": "ui-schema",
+      "dataPath": ["status"],
+      "documentPath": ["fields", "status", "enumLabels"],
+      "parameters": {
+        "field": "status",
+        "fieldType": "string",
+        "option": "enumLabels",
+        "reason": "missing-compatible-enum"
+      },
+      "fallbackMessage": "UI option \"enumLabels\" requires a compatible string enum on field \"status\"."
+    }
+  ]
+}

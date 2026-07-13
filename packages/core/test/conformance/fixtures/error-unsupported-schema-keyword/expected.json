@@ -6,11 +6,11 @@
       "severity": "error",
       "source": "schema",
       "dataPath": ["status"],
-      "documentPath": ["properties", "status", "enum"],
+      "documentPath": ["properties", "status", "const"],
       "parameters": {
-        "keyword": "enum"
+        "keyword": "const"
       },
-      "fallbackMessage": "Schema keyword \"enum\" is not supported."
+      "fallbackMessage": "Schema keyword \"const\" is not supported."
     }
   ]
 }

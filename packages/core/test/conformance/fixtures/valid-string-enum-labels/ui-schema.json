@@ -1,0 +1,15 @@
+{
+  "fields": {
+    "status": {
+      "enumLabels": {
+        "draft": "status.draft",
+        "published": "status.published"
+      }
+    },
+    "priority": {
+      "enumLabels": {
+        "high": "priority.high"
+      }
+    }
+  }
+}

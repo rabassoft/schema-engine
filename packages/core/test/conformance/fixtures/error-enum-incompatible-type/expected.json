@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_SCHEMA_KEYWORD",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["priority"],
+      "documentPath": ["properties", "priority", "enum"],
+      "parameters": {
+        "keyword": "enum",
+        "fieldType": "number"
+      },
+      "fallbackMessage": "Schema keyword \"enum\" is incompatible with field type \"number\"."
+    }
+  ]
+}

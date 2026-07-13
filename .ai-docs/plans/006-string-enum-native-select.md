@@ -912,10 +912,20 @@ publish packages, promote any API to Stable, or start M6.
 
 - **Date:** 2026-07-13
 - **Milestone:** M6 active.
-- **Completed:** Step 1 neutral contracts, root export, and focused
-  public-contract tests.
-- **Next:** Step 2 compiler classification, descriptor-safe enum/UI parsing,
-  immutable choices, fixtures, and cascade-suppression tests.
+- **Initial checkpoint:** Step 1 neutral contracts, root export, and focused
+  public-contract tests completed.
 
 No deferred capability, compiler behavior, runtime validation, Angular code,
 package version, publication setting, or API stability state changed in step 1.
+
+## 23. Compiler implementation checkpoint
+
+- **Date:** 2026-07-13
+- **Completed:** Step 2 enum keyword classification, descriptor-safe enum/UI
+  parsing, immutable choices, compiler fixtures, and cascade-suppression tests.
+- **Boundary:** Runtime creation, operation behavior, text projection, and
+  Angular remain unchanged at this checkpoint.
+
+The implementation preserves root `enum` and `const` as unsupported, `format`
+as an ignored annotation, non-string enums as incompatible, and every deferred
+capability as inactive.

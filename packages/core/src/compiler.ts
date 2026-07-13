@@ -46,6 +46,11 @@ interface NumberConstraints {
   readonly multipleOf?: number;
 }
 
+type StringEnumState =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'valid'; readonly values: readonly string[] }
+  | { readonly kind: 'schema-blocked' };
+
 interface FieldCandidate {
   readonly name: string;
   readonly type: FieldType;
@@ -54,6 +59,7 @@ interface FieldCandidate {
   readonly schemaDescription?: string;
   readonly stringConstraints: StringConstraints;
   readonly numberConstraints: NumberConstraints;
+  readonly stringEnum: StringEnumState;
 }
 
 interface ParsedFieldUi {
@@ -64,6 +70,7 @@ interface ParsedFieldUi {
   readonly placeholder?: string;
   readonly decimalPlaces?: number;
   readonly showTrailingZeros?: boolean;
+  readonly enumLabels?: ReadonlyMap<string, string>;
 }
 
 interface ParsedUiSchema {
@@ -85,6 +92,7 @@ const UI_FIELD_KEYS = new Set([
   'hint',
   'tooltip',
   'placeholder',
+  'enumLabels',
   'options',
 ]);
 const UI_TEXT_KEYS = new Set([
@@ -119,7 +127,7 @@ export function compileFormDefinition(
   const rawUiSchema = rawInput.uiSchema;
   let candidates: FieldCandidate[] = [];
   let propertyNames: readonly string[] | undefined;
-  let fieldTypes: ReadonlyMap<string, FieldType> | undefined;
+  let candidatesByName: ReadonlyMap<string, FieldCandidate> | undefined;
 
   if (!isRecord(rawSchema)) {
     diagnostics.push(
@@ -141,8 +149,8 @@ export function compileFormDefinition(
         root.requiredNames,
         diagnostics,
       );
-      fieldTypes = new Map(
-        candidates.map(({ name, type }) => [name, type] as const),
+      candidatesByName = new Map(
+        candidates.map((candidate) => [candidate.name, candidate] as const),
       );
 
       for (const entry of root.requiredEntries) {
@@ -166,7 +174,7 @@ export function compileFormDefinition(
   const parsedUi = inspectUiSchema(
     rawUiSchema,
     propertyNames,
-    fieldTypes,
+    candidatesByName,
     diagnostics,
   );
 
@@ -531,10 +539,10 @@ function inspectValidField(
     maximum?: number;
     multipleOf?: number;
   } = {};
+  let stringEnum: StringEnumState = { kind: 'absent' };
   const supportedKeywords = fieldKeywords(type);
 
   for (const keyword of Object.keys(field)) {
-    const value = field[keyword];
     const documentPath = ['properties', name, keyword] as const;
 
     if (!supportedKeywords.has(keyword)) {
@@ -550,6 +558,9 @@ function inspectValidField(
           ),
         );
       } else if (COMPILER_SUPPORTED_KEYWORDS.has(keyword)) {
+        if (keyword === 'enum') {
+          stringEnum = { kind: 'schema-blocked' };
+        }
         diagnostics.push(
           diagnostic({
             code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
@@ -586,6 +597,13 @@ function inspectValidField(
       }
       continue;
     }
+
+    if (keyword === 'enum') {
+      stringEnum = inspectStringEnum(name, field, diagnostics);
+      continue;
+    }
+
+    const value = field[keyword];
 
     if (keyword === 'title' || keyword === 'description') {
       if (typeof value !== 'string') {
@@ -666,7 +684,104 @@ function inspectValidField(
     ...(schemaDescription === undefined ? {} : { schemaDescription }),
     stringConstraints,
     numberConstraints,
+    stringEnum,
   };
+}
+
+function inspectStringEnum(
+  name: string,
+  field: Record<string, unknown>,
+  diagnostics: Diagnostic[],
+): StringEnumState {
+  const documentPath = ['properties', name, 'enum'] as const;
+  const descriptor = Object.getOwnPropertyDescriptor(field, 'enum');
+
+  if (descriptor === undefined || !('value' in descriptor)) {
+    diagnostics.push(
+      invalidSchemaKeywordDescriptor(
+        'enum',
+        'array of unique strings',
+        documentPath,
+        [name],
+        descriptor === undefined ? 'missing' : 'accessor',
+      ),
+    );
+    return { kind: 'schema-blocked' };
+  }
+
+  const value: unknown = descriptor.value;
+  if (!Array.isArray(value)) {
+    diagnostics.push(
+      invalidSchemaKeywordValue(
+        'enum',
+        value,
+        'array of unique strings',
+        documentPath,
+        [name],
+      ),
+    );
+    return { kind: 'schema-blocked' };
+  }
+
+  if (value.length === 0) {
+    diagnostics.push(
+      invalidSchemaKeywordValue(
+        'enum',
+        value,
+        'non-empty array of unique strings',
+        documentPath,
+        [name],
+      ),
+    );
+    return { kind: 'schema-blocked' };
+  }
+
+  const values: string[] = [];
+  const seen = new Set<string>();
+  let blocked = false;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const entryPath = [...documentPath, index] as const;
+    const entryDescriptor = Object.getOwnPropertyDescriptor(value, index);
+
+    if (entryDescriptor === undefined || !('value' in entryDescriptor)) {
+      diagnostics.push(
+        invalidSchemaKeywordDescriptor(
+          'enum',
+          'string',
+          entryPath,
+          [name],
+          entryDescriptor === undefined ? 'missing' : 'accessor',
+        ),
+      );
+      blocked = true;
+      continue;
+    }
+
+    const entry: unknown = entryDescriptor.value;
+    if (typeof entry !== 'string') {
+      diagnostics.push(
+        invalidSchemaKeywordValue('enum', entry, 'string', entryPath, [name]),
+      );
+      blocked = true;
+      continue;
+    }
+
+    if (seen.has(entry)) {
+      diagnostics.push(
+        invalidSchemaKeywordValue('enum', entry, 'unique string', entryPath, [
+          name,
+        ]),
+      );
+      blocked = true;
+      continue;
+    }
+
+    seen.add(entry);
+    values.push(entry);
+  }
+
+  return blocked ? { kind: 'schema-blocked' } : { kind: 'valid', values };
 }
 
 function fieldKeywords(type: FieldType): ReadonlySet<string> {
@@ -691,7 +806,7 @@ function isUnicodePattern(value: string): boolean {
 function inspectUiSchema(
   rawUiSchema: unknown,
   propertyNames: readonly string[] | undefined,
-  fieldTypes: ReadonlyMap<string, FieldType> | undefined,
+  candidatesByName: ReadonlyMap<string, FieldCandidate> | undefined,
   diagnostics: Diagnostic[],
 ): ParsedUiSchema {
   const order: string[] = [];
@@ -729,7 +844,7 @@ function inspectUiSchema(
       inspectUiFields(
         rawUiSchema.fields,
         knownFields,
-        fieldTypes,
+        candidatesByName,
         fields,
         diagnostics,
       );
@@ -804,7 +919,7 @@ function inspectUiOrder(
 function inspectUiFields(
   value: unknown,
   knownFields: ReadonlySet<string> | undefined,
-  fieldTypes: ReadonlyMap<string, FieldType> | undefined,
+  candidatesByName: ReadonlyMap<string, FieldCandidate> | undefined,
   fields: Map<string, ParsedFieldUi>,
   diagnostics: Diagnostic[],
 ): void {
@@ -840,10 +955,10 @@ function inspectUiFields(
     const parsed = inspectFieldUi(
       name,
       rawFieldUi,
-      fieldTypes?.get(name),
+      candidatesByName?.get(name),
       diagnostics,
     );
-    if (knownFields?.has(name) && fieldTypes?.has(name)) {
+    if (knownFields?.has(name) && candidatesByName?.has(name)) {
       fields.set(name, parsed);
     }
   }
@@ -852,7 +967,7 @@ function inspectUiFields(
 function inspectFieldUi(
   name: string,
   value: Record<string, unknown>,
-  fieldType: FieldType | undefined,
+  candidate: FieldCandidate | undefined,
   diagnostics: Diagnostic[],
 ): ParsedFieldUi {
   const parsed: {
@@ -863,16 +978,24 @@ function inspectFieldUi(
     placeholder?: string;
     decimalPlaces?: number;
     showTrailingZeros?: boolean;
+    enumLabels?: ReadonlyMap<string, string>;
   } = {};
 
   for (const key of Object.keys(value)) {
-    const rawValue = value[key];
     const documentPath = ['fields', name, key] as const;
 
     if (!UI_FIELD_KEYS.has(key)) {
       diagnostics.push(unknownUiKey(key, documentPath, [name]));
       continue;
     }
+
+    if (key === 'enumLabels') {
+      inspectEnumLabels(name, value, candidate, parsed, diagnostics);
+      continue;
+    }
+
+    const rawValue = value[key];
+    const fieldType = candidate?.type;
 
     if (UI_TEXT_KEYS.has(key)) {
       if (typeof rawValue !== 'string') {
@@ -904,6 +1027,113 @@ function inspectFieldUi(
   }
 
   return parsed;
+}
+
+function inspectEnumLabels(
+  name: string,
+  fieldUi: Record<string, unknown>,
+  candidate: FieldCandidate | undefined,
+  parsed: { enumLabels?: ReadonlyMap<string, string> },
+  diagnostics: Diagnostic[],
+): void {
+  const documentPath = ['fields', name, 'enumLabels'] as const;
+  const descriptor = Object.getOwnPropertyDescriptor(fieldUi, 'enumLabels');
+
+  if (descriptor === undefined || !('value' in descriptor)) {
+    diagnostics.push(
+      invalidUiDescriptor(
+        'enumLabels',
+        'object',
+        documentPath,
+        [name],
+        descriptor === undefined ? 'missing' : 'accessor',
+      ),
+    );
+    return;
+  }
+
+  const value: unknown = descriptor.value;
+  if (!isRecord(value)) {
+    diagnostics.push(
+      invalidUiValue('enumLabels', value, 'object', documentPath, [name]),
+    );
+    return;
+  }
+
+  if (
+    candidate === undefined ||
+    candidate.stringEnum.kind === 'schema-blocked'
+  ) {
+    return;
+  }
+
+  if (candidate.stringEnum.kind === 'absent') {
+    diagnostics.push(
+      diagnostic({
+        code: 'INCOMPATIBLE_UI_OPTION',
+        severity: 'warning',
+        source: 'ui-schema',
+        dataPath: [name],
+        documentPath,
+        parameters: {
+          field: name,
+          fieldType: candidate.type,
+          option: 'enumLabels',
+          reason: 'missing-compatible-enum',
+        },
+        fallbackMessage: `UI option "enumLabels" requires a compatible string enum on field "${name}".`,
+      }),
+    );
+    return;
+  }
+
+  const enumValues = new Set(candidate.stringEnum.values);
+  const labels = new Map<string, string>();
+
+  for (const labelKey of Object.keys(value)) {
+    const labelPath = [...documentPath, labelKey] as const;
+    const labelDescriptor = Object.getOwnPropertyDescriptor(value, labelKey);
+
+    if (labelDescriptor === undefined || !('value' in labelDescriptor)) {
+      diagnostics.push(
+        invalidUiDescriptor(
+          labelKey,
+          'non-blank string',
+          labelPath,
+          [name],
+          labelDescriptor === undefined ? 'missing' : 'accessor',
+        ),
+      );
+      continue;
+    }
+
+    const label: unknown = labelDescriptor.value;
+    if (typeof label !== 'string' || label.trim().length === 0) {
+      diagnostics.push(
+        invalidUiValue(labelKey, label, 'non-blank string', labelPath, [name]),
+      );
+      continue;
+    }
+
+    if (!enumValues.has(labelKey)) {
+      diagnostics.push(
+        diagnostic({
+          code: 'UNKNOWN_ENUM_LABEL',
+          severity: 'warning',
+          source: 'ui-schema',
+          dataPath: [name],
+          documentPath: labelPath,
+          parameters: { field: name, value: labelKey },
+          fallbackMessage: `UI enum label references unknown value "${labelKey}".`,
+        }),
+      );
+      continue;
+    }
+
+    labels.set(labelKey, label);
+  }
+
+  parsed.enumLabels = labels;
 }
 
 function inspectUiOptions(
@@ -1030,6 +1260,16 @@ function buildFieldDefinition(
       ...base,
       kind: 'string',
       constraints: { ...candidate.stringConstraints },
+      ...(candidate.stringEnum.kind === 'valid'
+        ? {
+            choices: candidate.stringEnum.values.map((value) => ({
+              value,
+              label:
+                ui?.enumLabels?.get(value) ??
+                (value.trim().length > 0 ? value : JSON.stringify(value)),
+            })),
+          }
+        : {}),
     };
     return definition;
   }
@@ -1100,6 +1340,24 @@ function invalidSchemaKeywordValue(
   });
 }
 
+function invalidSchemaKeywordDescriptor(
+  keyword: string,
+  expected: string,
+  documentPath: readonly (string | number)[],
+  dataPath: readonly (string | number)[],
+  actualDescriptorType: 'missing' | 'accessor',
+): Diagnostic {
+  return diagnostic({
+    code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+    severity: 'error',
+    source: 'schema',
+    dataPath,
+    documentPath,
+    parameters: { keyword, expected, actualType: actualDescriptorType },
+    fallbackMessage: `Schema keyword "${keyword}" has an invalid value.`,
+  });
+}
+
 function unknownUiKey(
   key: string,
   documentPath: readonly (string | number)[],
@@ -1130,6 +1388,24 @@ function invalidUiValue(
     ...(dataPath === undefined ? {} : { dataPath }),
     documentPath,
     parameters: { key, expected, ...describeActualValue(value) },
+    fallbackMessage: `UI Schema key "${key}" has an invalid value.`,
+  });
+}
+
+function invalidUiDescriptor(
+  key: string,
+  expected: string,
+  documentPath: readonly (string | number)[],
+  dataPath: readonly (string | number)[],
+  actualDescriptorType: 'missing' | 'accessor',
+): Diagnostic {
+  return diagnostic({
+    code: 'INVALID_UI_SCHEMA_VALUE',
+    severity: 'error',
+    source: 'ui-schema',
+    dataPath,
+    documentPath,
+    parameters: { key, expected, actualType: actualDescriptorType },
     fallbackMessage: `UI Schema key "${key}" has an invalid value.`,
   });
 }

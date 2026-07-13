@@ -1,0 +1,33 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["status"],
+      "documentPath": ["properties", "status", "enum", 2],
+      "parameters": {
+        "keyword": "enum",
+        "expected": "unique string",
+        "actualType": "string",
+        "actualValue": "draft"
+      },
+      "fallbackMessage": "Schema keyword \"enum\" has an invalid value."
+    },
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["status"],
+      "documentPath": ["properties", "status", "enum", 3],
+      "parameters": {
+        "keyword": "enum",
+        "expected": "unique string",
+        "actualType": "string",
+        "actualValue": "draft"
+      },
+      "fallbackMessage": "Schema keyword \"enum\" has an invalid value."
+    }
+  ]
+}

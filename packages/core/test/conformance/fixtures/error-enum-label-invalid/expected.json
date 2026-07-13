@@ -1,0 +1,47 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_UI_SCHEMA_VALUE",
+      "severity": "error",
+      "source": "ui-schema",
+      "dataPath": ["status"],
+      "documentPath": ["fields", "status", "enumLabels", "draft"],
+      "parameters": {
+        "key": "draft",
+        "expected": "non-blank string",
+        "actualType": "string",
+        "actualValue": "   "
+      },
+      "fallbackMessage": "UI Schema key \"draft\" has an invalid value."
+    },
+    {
+      "code": "INVALID_UI_SCHEMA_VALUE",
+      "severity": "error",
+      "source": "ui-schema",
+      "dataPath": ["status"],
+      "documentPath": ["fields", "status", "enumLabels", "published"],
+      "parameters": {
+        "key": "published",
+        "expected": "non-blank string",
+        "actualType": "number",
+        "actualValue": 42
+      },
+      "fallbackMessage": "UI Schema key \"published\" has an invalid value."
+    },
+    {
+      "code": "INVALID_UI_SCHEMA_VALUE",
+      "severity": "error",
+      "source": "ui-schema",
+      "dataPath": ["status"],
+      "documentPath": ["fields", "status", "enumLabels", "unknown"],
+      "parameters": {
+        "key": "unknown",
+        "expected": "non-blank string",
+        "actualType": "string",
+        "actualValue": ""
+      },
+      "fallbackMessage": "UI Schema key \"unknown\" has an invalid value."
+    }
+  ]
+}

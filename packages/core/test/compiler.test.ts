@@ -138,6 +138,234 @@ describe('compileFormDefinition', () => {
     expect(Object.isFrozen(result.definition.fields[0]?.path)).toBe(true);
   });
 
+  it('normalizes exact string enums into deeply frozen ordered choices', () => {
+    const enumValues = ['', ' Draft ', 'draft'];
+    const enumLabels = { draft: 'status.draft' };
+    const input = {
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { status: { type: 'string', enum: enumValues } },
+      },
+      uiSchema: { fields: { status: { enumLabels } } },
+    };
+
+    const result = compileFormDefinition(input);
+
+    expect(result).toMatchObject({
+      success: true,
+      definition: {
+        fields: [
+          {
+            choices: [
+              { value: '', label: '""' },
+              { value: ' Draft ', label: ' Draft ' },
+              { value: 'draft', label: 'status.draft' },
+            ],
+          },
+        ],
+      },
+    });
+    expect(enumValues).toEqual(['', ' Draft ', 'draft']);
+    expect(enumLabels).toEqual({ draft: 'status.draft' });
+    expect(Object.isFrozen(enumValues)).toBe(false);
+    expect(Object.isFrozen(enumLabels)).toBe(false);
+    if (!result.success) return;
+    const field = result.definition.fields[0];
+    expect(field?.kind).toBe('string');
+    if (field?.kind !== 'string' || field.choices === undefined) return;
+    expect(Object.isFrozen(field.choices)).toBe(true);
+    expect(field.choices.every(Object.isFrozen)).toBe(true);
+  });
+
+  it('inspects enum arrays through descriptors without executing accessors', () => {
+    let getterCalls = 0;
+    const accessorField = Object.defineProperty({ type: 'string' }, 'enum', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return ['unsafe'];
+      },
+    });
+    const sparseEnum: unknown[] = ['first'];
+    sparseEnum[2] = 'first';
+    sparseEnum[3] = 'first';
+    Object.defineProperty(sparseEnum, 1, {
+      enumerable: true,
+      configurable: true,
+      get() {
+        getterCalls += 1;
+        return 'unsafe';
+      },
+    });
+    sparseEnum.length = 5;
+
+    const accessorResult = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { status: accessorField },
+      },
+    });
+    const entryResult = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { status: { type: 'string', enum: sparseEnum } },
+      },
+    });
+
+    expect(getterCalls).toBe(0);
+    expect(accessorResult.diagnostics).toMatchObject([
+      {
+        code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+        documentPath: ['properties', 'status', 'enum'],
+        parameters: {
+          expected: 'array of unique strings',
+          actualType: 'accessor',
+        },
+      },
+    ]);
+    expect(entryResult.diagnostics).toMatchObject([
+      {
+        documentPath: ['properties', 'status', 'enum', 1],
+        parameters: { expected: 'string', actualType: 'accessor' },
+      },
+      {
+        documentPath: ['properties', 'status', 'enum', 2],
+        parameters: { expected: 'unique string', actualValue: 'first' },
+      },
+      {
+        documentPath: ['properties', 'status', 'enum', 3],
+        parameters: { expected: 'unique string', actualValue: 'first' },
+      },
+      {
+        documentPath: ['properties', 'status', 'enum', 4],
+        parameters: { expected: 'string', actualType: 'missing' },
+      },
+    ]);
+  });
+
+  it('suppresses derived enumLabels diagnostics below blocked schema branches', () => {
+    let getterCalls = 0;
+    const ignoredLabels = Object.defineProperty({}, 'unsafe', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return 'Unsafe';
+      },
+    });
+
+    const blocked = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { status: { type: 'string', enum: [] } },
+      },
+      uiSchema: { fields: { status: { enumLabels: ignoredLabels } } },
+    });
+    const missingType = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { status: {} },
+      },
+      uiSchema: { fields: { status: { enumLabels: ignoredLabels } } },
+    });
+
+    expect(getterCalls).toBe(0);
+    expect(blocked.diagnostics.map(({ code }) => code)).toEqual([
+      'INVALID_SCHEMA_KEYWORD_VALUE',
+    ]);
+    expect(missingType.diagnostics.map(({ code }) => code)).toEqual([
+      'MISSING_FIELD_TYPE',
+    ]);
+  });
+
+  it('keeps root enum unsupported and field-type incompatibility descriptor-safe', () => {
+    let getterCalls = 0;
+    const numberField = Object.defineProperty({ type: 'number' }, 'enum', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return [1, 2];
+      },
+    });
+
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        enum: ['root'],
+        properties: { amount: numberField },
+      },
+    });
+
+    expect(getterCalls).toBe(0);
+    expect(result.diagnostics).toMatchObject([
+      {
+        code: 'UNSUPPORTED_SCHEMA_KEYWORD',
+        documentPath: ['enum'],
+      },
+      {
+        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+        documentPath: ['properties', 'amount', 'enum'],
+        parameters: { keyword: 'enum', fieldType: 'number' },
+      },
+    ]);
+  });
+
+  it('reports enumLabels accessors without executing them', () => {
+    let getterCalls = 0;
+    const outerAccessor = Object.defineProperty({}, 'enumLabels', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return {};
+      },
+    });
+    const memberAccessor = Object.defineProperty({}, 'draft', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return 'Draft';
+      },
+    });
+    const schema = {
+      $schema: dialect,
+      type: 'object',
+      properties: { status: { type: 'string', enum: ['draft'] } },
+    };
+
+    const outerResult = compileFormDefinition({
+      schema,
+      uiSchema: { fields: { status: outerAccessor } },
+    });
+    const memberResult = compileFormDefinition({
+      schema,
+      uiSchema: { fields: { status: { enumLabels: memberAccessor } } },
+    });
+
+    expect(getterCalls).toBe(0);
+    expect(outerResult.diagnostics).toMatchObject([
+      {
+        code: 'INVALID_UI_SCHEMA_VALUE',
+        documentPath: ['fields', 'status', 'enumLabels'],
+        parameters: { actualType: 'accessor', expected: 'object' },
+      },
+    ]);
+    expect(memberResult.diagnostics).toMatchObject([
+      {
+        code: 'INVALID_UI_SCHEMA_VALUE',
+        documentPath: ['fields', 'status', 'enumLabels', 'draft'],
+        parameters: {
+          actualType: 'accessor',
+          expected: 'non-blank string',
+        },
+      },
+    ]);
+  });
+
   it('does not traverse values of unknown keywords', () => {
     const opaque = Object.defineProperty({}, 'hidden', {
       enumerable: true,

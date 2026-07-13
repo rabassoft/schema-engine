@@ -1,0 +1,40 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "status",
+        "name": "status",
+        "path": ["status"],
+        "required": false,
+        "label": "status",
+        "kind": "string",
+        "constraints": {},
+        "choices": [
+          {
+            "value": "draft",
+            "label": "status.draft"
+          },
+          {
+            "value": "published",
+            "label": "published"
+          }
+        ]
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "UNKNOWN_ENUM_LABEL",
+      "severity": "warning",
+      "source": "ui-schema",
+      "dataPath": ["status"],
+      "documentPath": ["fields", "status", "enumLabels", "archived"],
+      "parameters": {
+        "field": "status",
+        "value": "archived"
+      },
+      "fallbackMessage": "UI enum label references unknown value \"archived\"."
+    }
+  ]
+}

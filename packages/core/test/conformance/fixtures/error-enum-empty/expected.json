@@ -1,0 +1,18 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["status"],
+      "documentPath": ["properties", "status", "enum"],
+      "parameters": {
+        "keyword": "enum",
+        "expected": "non-empty array of unique strings",
+        "actualType": "array"
+      },
+      "fallbackMessage": "Schema keyword \"enum\" has an invalid value."
+    }
+  ]
+}

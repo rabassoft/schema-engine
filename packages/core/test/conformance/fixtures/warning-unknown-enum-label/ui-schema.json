@@ -1,0 +1,10 @@
+{
+  "fields": {
+    "status": {
+      "enumLabels": {
+        "archived": "status.archived",
+        "draft": "status.draft"
+      }
+    }
+  }
+}

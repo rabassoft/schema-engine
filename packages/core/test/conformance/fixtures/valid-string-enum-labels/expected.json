@@ -1,0 +1,46 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "status",
+        "name": "status",
+        "path": ["status"],
+        "required": false,
+        "label": "status",
+        "kind": "string",
+        "constraints": {},
+        "choices": [
+          {
+            "value": "draft",
+            "label": "status.draft"
+          },
+          {
+            "value": "published",
+            "label": "status.published"
+          }
+        ]
+      },
+      {
+        "key": "priority",
+        "name": "priority",
+        "path": ["priority"],
+        "required": false,
+        "label": "priority",
+        "kind": "string",
+        "constraints": {},
+        "choices": [
+          {
+            "value": "low",
+            "label": "low"
+          },
+          {
+            "value": "high",
+            "label": "priority.high"
+          }
+        ]
+      }
+    ]
+  },
+  "diagnostics": []
+}

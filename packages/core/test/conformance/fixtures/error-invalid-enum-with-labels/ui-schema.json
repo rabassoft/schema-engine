@@ -1,0 +1,9 @@
+{
+  "fields": {
+    "status": {
+      "enumLabels": {
+        "unknown": "Unknown"
+      }
+    }
+  }
+}
