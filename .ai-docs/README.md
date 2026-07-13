@@ -31,8 +31,8 @@
 - [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
 
-M1-M6 are completed. The post-M6 sequence is a proposal rather than an approved
-delivery commitment, and no deferred decision becomes active merely by
-appearing in it.
+M1-M6 are completed. G0 formal prototype closure is the active review-only gate;
+M7-M12 remain a proposal rather than an approved delivery commitment. No
+deferred decision becomes active merely by appearing in the roadmap.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

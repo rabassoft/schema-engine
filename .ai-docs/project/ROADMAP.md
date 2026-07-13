@@ -22,13 +22,13 @@
   - Enum string y `enumLabels` normalizados, choices y textos resolubles,
     validación estructural segura y select Angular controlado según ADR-011.
 
-## Secuencia post-M6 propuesta
-
-> Esta secuencia es una propuesta de planificación, no un compromiso de entrega
-> aprobado. Ningún elemento está activo y ninguna decisión diferida se promueve
-> hasta revisar y aprobar explícitamente su ADR, SPEC y/o plan de implementación.
+## Gate de revisión activo
 
 ### G0 — Cierre formal del prototipo
+
+- **Estado:** Approved y activo desde el 14 de julio de 2026.
+- **Frontera:** revisión y evidencia sobre el comportamiento ya implementado;
+  no autoriza cambios funcionales, promoción de APIs ni capacidades diferidas.
 
 - Relacionar todos los criterios de aceptación de SPEC-001 con evidencia
   ejecutable.
@@ -37,6 +37,16 @@
   revisión.
 - Mantener todas las APIs públicas como Experimental salvo que una ADR separada
   las promueva.
+
+G0 solo podrá cerrarse y marcar SPEC-001 como Accepted si toda la evidencia
+pasa. Cualquier hallazgo mantendrá la SPEC en Draft y se trasladará a trabajo
+separado antes de repetir la revisión.
+
+## Secuencia post-G0 propuesta
+
+> M7-M12 continúan como propuesta de planificación, no como compromiso de
+> entrega aprobado. Ninguna decisión diferida se promueve hasta revisar y
+> aprobar explícitamente su ADR, SPEC y/o plan de implementación.
 
 ### M7 — Limpieza explícita de campos
 

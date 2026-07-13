@@ -6,6 +6,29 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — G0 formal prototype closure approved
+
+### Decision
+
+- Ricard explicitly approved G0 as the active post-M6 review gate.
+- G0 is limited to acceptance evidence for the already implemented SPEC-001
+  boundary: the 22-criterion matrix, a minimal Angular consumer, full
+  verification, and an end-to-end specification review.
+- Acceptance is fail-closed: any finding keeps SPEC-001 Draft and becomes
+  separate work before the review can be repeated.
+- The approval does not change behavior, promote public APIs to Stable, prepare
+  publication, activate M7-M12, or promote a deferred decision.
+
+### Verification
+
+- Formatting, all local Markdown links, state consistency, and
+  `git diff --check` pass for the approval checkpoint.
+
+### Pending
+
+- Prepare the G0 evidence matrix mapping all 22 SPEC-001 acceptance criteria to
+  existing evidence or an explicit gap.
+
 ## 2026-07-14 — Post-M6 state and proposed roadmap clarified
 
 ### Completed

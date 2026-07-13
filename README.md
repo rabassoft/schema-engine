@@ -11,10 +11,10 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository contains the completed M1-M6 controlled-form prototype. No
-post-M6 milestone is active; the proposed sequence is recorded in the
-[roadmap](./.ai-docs/project/ROADMAP.md) and requires separate approval before
-implementation.
+The repository contains the completed M1-M6 controlled-form prototype. G0, its
+formal acceptance review, is the only active post-M6 gate. No implementation
+milestone is active; the proposed M7-M12 sequence is recorded in the
+[roadmap](./.ai-docs/project/ROADMAP.md) and requires separate approval.
 
 ## Current implementation
 
