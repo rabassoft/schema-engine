@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import '@angular/compiler';
 import { Injector, createEnvironmentInjector } from '@angular/core';
+import * as angularApi from '@rabassoft/schema-engine-angular';
 import {
   AngularRendererResolver,
   SchemaBooleanRendererComponent,
@@ -24,6 +25,7 @@ assert.equal(typeof provideSchemaTextResolver, 'function');
 assert.equal(typeof SchemaStringRendererComponent, 'function');
 assert.equal(typeof SchemaNumberRendererComponent, 'function');
 assert.equal(typeof SchemaBooleanRendererComponent, 'function');
+assert.equal('SCHEMA_RENDERER_REGISTRATIONS' in angularApi, false);
 
 const injector = createEnvironmentInjector(
   [provideSchemaEngineAngular()],

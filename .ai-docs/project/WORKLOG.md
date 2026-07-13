@@ -2,6 +2,61 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — ADR-009 revision 1 committed
+
+### Completed
+
+- Committed revised proposed ADR-009 and the reviewed Angular public-surface correction on `develop` using `Rabassoft <ricard@rabassoft.com>`.
+- Kept ADR-009 Proposed and D-029 Candidate pending the requested final formal review.
+
+### Verification
+
+- Confirmed the complete intended diff, repository identity, branch, formatting, linting, type checking, all 140 tests, package smoke tests, documentation links, and diff integrity before commit.
+- The commit leaves `develop` one commit ahead of `origin/develop`; no push was performed.
+
+### Pending
+
+- Perform the final formal review of ADR-009's seven acceptance areas without accepting it automatically.
+
+## 2026-07-13 — ADR-009 formal-review corrections implemented
+
+### Completed
+
+- Reviewed all seven ADR-009 acceptance areas and found three required corrections before acceptance.
+- Separated Public/Internal visibility, Experimental/Stable stability, and Active/Deprecated lifecycle; a deprecated Stable API now retains Stable guarantees until removal.
+- Made stability promotion explicitly manual and independent of package version, `private`, or publication state.
+- Removed `SCHEMA_RENDERER_REGISTRATIONS` from the Angular root entry point while preserving the token for internal provider and resolver implementation.
+- Added package smoke coverage preventing accidental public re-export of the raw token.
+- Kept ADR-009 Proposed and D-029 Candidate pending one final explicit acceptance review.
+
+### Verification
+
+- `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm test:package` passed.
+- All 140 tests pass: 104 core and 36 Angular; package smoke coverage confirms the intended root surface.
+
+### Pending
+
+- Perform the final review of revised ADR-009 and either accept it and promote D-029 or report a remaining concern.
+
+## 2026-07-13 — ADR-009 public API policy proposed
+
+### Completed
+
+- Confirmed that the reviewed M5 commit on `develop` is synchronized with `origin/develop`.
+- Audited the root export maps and indexes of `@rabassoft/schema-engine` and `@rabassoft/schema-engine-angular`.
+- Drafted proposed ADR-009 to make package entry points the only supported import boundary and classify all current root exports as Experimental.
+- Defined public, deprecated, and internal boundaries; change governance; deprecation ordering; consumer-facing enforcement; exclusions; and formal acceptance criteria.
+- Kept D-029 Candidate until explicit acceptance and preserved D-028 as the owner of SemVer, package coordination, Angular compatibility, and the exact deprecation window.
+
+### Verification
+
+- Checked the proposal against SPEC-001, ADR-002, ADR-006, the current package manifests and indexes, and D-028/D-029.
+- Formatting, diff validation, and local Markdown-link validation passed.
+
+### Pending
+
+- Formally review ADR-009's seven acceptance areas before accepting it or changing public contracts.
+
 ## 2026-07-13 — M5 diff reviewed and committed
 
 ### Completed

@@ -6,7 +6,7 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: current `develop` HEAD contains the completed and reviewed M5 increment, six commits ahead of `origin/develop`; GitHub default branch is `main`
+- Repository revision: current `develop` HEAD contains revised proposed ADR-009 and its reviewed Angular public-surface correction, one commit ahead of `origin/develop`; GitHub default branch is `main`
 
 ## Current phase
 
@@ -14,7 +14,7 @@ M1 through M5 completed; no implementation task active.
 
 ## Current objective
 
-No active implementation objective. M5 is reviewed, committed, and complete.
+Perform the final formal review of revised proposed ADR-009 before acceptance.
 
 ## Latest completed work
 
@@ -106,15 +106,38 @@ No active implementation objective. M5 is reviewed, committed, and complete.
   correction without increasing the public scope.
 - Committed the reviewed M5 increment on `develop` with repository identity
   `Rabassoft <ricard@rabassoft.com>`.
+- Confirmed that the user pushed M5 and that `develop` is synchronized with
+  `origin/develop`.
+- Audited both package export maps and root indexes, including consumer,
+  extension, native-renderer, text, and internal-only Angular surfaces.
+- Drafted proposed ADR-009 with explicit entry-point boundaries, an initial API
+  inventory, Experimental/Stable/Deprecated/Internal states, change and
+  deprecation rules, enforcement, exclusions, and acceptance criteria.
+- Kept D-029 Candidate pending review and left D-028 responsible for SemVer,
+  package coordination, Angular compatibility, and the exact deprecation
+  window.
+- Formally reviewed ADR-009 and identified three corrections: orthogonal
+  visibility/stability/lifecycle, explicitly manual stability promotion, and an
+  internal raw Angular renderer-registration token.
+- Revised ADR-009 with Public/Internal visibility, Experimental/Stable
+  stability, and Active/Deprecated lifecycle axes; Stable guarantees now survive
+  deprecation.
+- Clarified that version, `private`, and publication state never promote an API
+  automatically.
+- Removed `SCHEMA_RENDERER_REGISTRATIONS` from the Angular root entry point,
+  retained it as an internal implementation token, and added a package smoke
+  assertion that prevents accidental re-export.
+- Committed ADR-009 revision 1 and its reviewed public-surface correction on
+  `develop` with repository identity `Rabassoft <ricard@rabassoft.com>`.
 
 ## In progress
 
-None.
+None. No implementation task is active.
 
 ## Next action
 
-Select and formally scope the next increment. Push `develop` only when
-explicitly requested.
+Review the revised seven acceptance areas and either accept ADR-009 and promote
+D-029 or report any remaining concern.
 
 ## Blockers
 
@@ -126,6 +149,8 @@ None. There is no implementation blocker or documentation conflict.
 - The Angular `ValidatorFn` bridge portion of D-024 remains deferred and outside
   completed M5.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
+- ADR-009 remains Proposed; its revised seven acceptance areas require final
+  explicit review.
 
 ## Verification status
 
@@ -141,8 +166,9 @@ None. There is no implementation blocker or documentation conflict.
 - `git diff --check` passed; local Markdown links were validated.
 - The core package remains free of Angular and runtime dependencies; only
   framework-neutral text contracts entered core for M5.
-- Current checkout is `develop`; the reviewed M5 increment is committed in the
-  current HEAD, and no push was performed in this task.
+- Current checkout is `develop`; ADR-009 revision 1 and the reviewed Angular
+  public-surface correction are committed in the current HEAD, and no push was
+  performed in this task.
 - Completed PLAN-005 was checked against SPEC-001, ADR-007/008, completed
   PLAN-004, current M4 contracts, and D-008/D-010/D-024/D-025/D-028/D-029/D-030.
 - The Signal Forms re-review used current official Angular 22 overview, custom
@@ -151,6 +177,14 @@ None. There is no implementation blocker or documentation conflict.
 - Native adapter imports are limited to `@angular/forms/signals`; no Reactive
   Forms, Template-driven Forms, compatibility layer, Zone.js coupling, browser
   global, component library, or deferred capability entered M5.
+- `develop` was confirmed synchronized with `origin/develop` before drafting
+  ADR-009.
+- Proposed ADR-009 was checked against SPEC-001, ADR-002, ADR-006, both package
+  export maps and indexes, and D-028/D-029.
+- Review corrections passed `pnpm format`, `pnpm lint`, `pnpm typecheck`,
+  `pnpm test`, and `pnpm test:package`; all 140 tests remain passing.
+- Package smoke coverage confirms `SCHEMA_RENDERER_REGISTRATIONS` is absent from
+  the Angular root entry point while internal resolver tests remain passing.
 
 ## Relevant documents
 
@@ -159,6 +193,7 @@ None. There is no implementation blocker or documentation conflict.
 - `.ai-docs/adrs/006-limite-paquete-inicial.md`
 - `.ai-docs/adrs/007-resolucion-renderers-testers.md`
 - `.ai-docs/adrs/008-instanciacion-renderers-angular.md`
+- `.ai-docs/adrs/009-politica-api-publica-estabilidad.md`
 - `.ai-docs/plans/001-compiler-only-implementation.md`
 - `.ai-docs/plans/002-root-immutable-operations.md`
 - `.ai-docs/plans/003-controlled-runtime.md`

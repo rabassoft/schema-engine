@@ -248,6 +248,7 @@ Cada decisión debe registrar:
 - **Pregunta:** ¿Qué paquetes, tipos y funciones serán públicos y cuáles internos?
 - **Motivo:** Debe definirse antes de la primera publicación, pero después del walking skeleton.
 - **Documento esperado:** ADR de public API y política de deprecación.
+- **Propuesta en revisión:** [`ADR-009`](../adrs/009-politica-api-publica-estabilidad.md)
 
 ## D-030: Localización avanzada
 
@@ -301,7 +302,8 @@ Las entradas más cercanas a convertirse en ADR son:
 
 ## 5. Historial
 
-| Fecha      | Cambio                                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------------------------ |
-| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes. |
-| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                              |
+| Fecha      | Cambio                                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 13-07-2026 | Se propone ADR-009 para delimitar la API pública y su política de estabilidad; D-029 permanece Candidate hasta su aceptación. |
+| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes.            |
+| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                                         |

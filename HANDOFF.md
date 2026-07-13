@@ -6,8 +6,8 @@
 
 ## 1. Current objective
 
-No implementation task is active. Select and formally scope the next increment;
-push `develop` only after explicit authorization.
+No implementation task is active. Perform the final formal review of revised
+proposed ADR-009 before accepting its public API and stability policy.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -170,8 +170,21 @@ Signal Form as the business source of truth and confines it to a private
 renderer-local buffer reconciled from core snapshots. Its contracts are promoted
 to SPEC-001 v0.1.11. The final suite passes 140 tests: 104 core and 36 Angular.
 
-## 11. Recommended next Codex prompt
+## 11. Proposed public API decision
+
+[`ADR-009: Public API boundary and stability policy`](.ai-docs/adrs/009-politica-api-publica-estabilidad.md)
+is Proposed. It treats only explicit package export-map entry points as public,
+classifies every intended root export as Public, Experimental, and Active,
+excludes deep imports and internal helpers, and treats visibility, stability,
+and lifecycle as separate axes. The reviewed correction removes the raw
+`SCHEMA_RENDERER_REGISTRATIONS` token from the root entry point while retaining
+`provideSchemaRenderer`, `AngularRendererResolver`, and renderer contracts as
+public extension APIs. D-028 still owns SemVer, package coordination, Angular
+compatibility, and the exact deprecation window. Acceptance does not authorize
+publication or additional code changes.
+
+## 12. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-008, completed PLAN-001 through PLAN-005, the deferred-decisions register, and the ADR index. Select and formally scope the next implementation increment; do not push or implement it without explicit approval.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-008, revised proposed ADR-009, completed PLAN-001 through PLAN-005, the deferred-decisions register, and the ADR index. Perform the final review of ADR-009's seven acceptance areas; do not accept it without explicit approval.

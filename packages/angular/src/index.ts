@@ -1,6 +1,5 @@
 export {
   AngularRendererResolver,
-  SCHEMA_RENDERER_REGISTRATIONS,
   provideSchemaEngineAngular,
   provideSchemaRenderer,
 } from './renderer.js';

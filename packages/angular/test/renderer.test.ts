@@ -9,12 +9,12 @@ import {
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   AngularRendererResolver,
-  SCHEMA_RENDERER_REGISTRATIONS,
   provideSchemaEngineAngular,
   type AngularFieldRenderer,
   type AngularFieldTextSnapshot,
   type AngularRendererRegistration,
 } from '../src/index.js';
+import { SCHEMA_RENDERER_REGISTRATIONS } from '../src/renderer.js';
 
 @Component({ selector: 'test-renderer', standalone: true, template: '' })
 class TestRenderer implements AngularFieldRenderer {
