@@ -97,9 +97,9 @@ Cada decisión debe registrar:
   de presentación posterior sobre una definición normalizada.
 - **Decisión:** ADR-011 acepta `enum` solo para campos string, choices
   normalizados, labels desde UI Schema y un select Angular nativo. PLAN-006
-  revisión 1 está aprobado y sus contratos están promovidos a SPEC-001 Draft
-  v0.1.13. M6 está activo y su paso 1 de contratos neutrales está completado;
-  la compilación de enum comienza en el paso 2.
+  revisión 1 fue aprobado y sus contratos fueron promovidos a SPEC-001 Draft
+  v0.1.13. PLAN-006 y M6 quedaron completados el 14 de julio de 2026 sin
+  activar `const`, `format`, otros tipos de enum ni controles alternativos.
 - **Revisión formal:** Las tres correcciones sobre contexto de textos,
   validación segura de choices manuales y labels accesibles no blank fueron
   incorporadas en ADR-011 revision 1. La repetición de las ocho áreas pasó sin
@@ -361,6 +361,7 @@ Las entradas más cercanas a convertirse en ADR son:
 
 | Fecha      | Cambio                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | PLAN-006 y M6 se completan con enum string normalizado y select Angular controlado, manteniendo las exclusiones diferidas.      |
 | 13-07-2026 | M6 comienza y completa el paso 1 de contratos neutrales de PLAN-006 sin activar otra decisión aplazada.                         |
 | 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                            |
 | 13-07-2026 | Se acepta ADR-011, D-008 se promueve y `const`/`format` se separan como D-036 y D-037 sin activar su implementación.            |

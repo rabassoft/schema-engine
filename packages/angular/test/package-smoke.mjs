@@ -8,6 +8,7 @@ import {
   SchemaFieldOutletDirective,
   SchemaFormDirective,
   SchemaNumberRendererComponent,
+  SchemaStringEnumRendererComponent,
   SchemaStringRendererComponent,
   provideSchemaEngineAngular,
   provideSchemaEngineAngularNative,
@@ -23,9 +24,13 @@ assert.equal(typeof provideSchemaRenderer, 'function');
 assert.equal(typeof provideSchemaEngineAngularNative, 'function');
 assert.equal(typeof provideSchemaTextResolver, 'function');
 assert.equal(typeof SchemaStringRendererComponent, 'function');
+assert.equal(typeof SchemaStringEnumRendererComponent, 'function');
 assert.equal(typeof SchemaNumberRendererComponent, 'function');
 assert.equal(typeof SchemaBooleanRendererComponent, 'function');
 assert.equal('SCHEMA_RENDERER_REGISTRATIONS' in angularApi, false);
+assert.equal('nativeRegistrations' in angularApi, false);
+assert.equal('sentinelToken' in angularApi, false);
+assert.equal('choiceToken' in angularApi, false);
 
 const injector = createEnvironmentInjector(
   [provideSchemaEngineAngular()],

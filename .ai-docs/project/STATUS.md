@@ -5,21 +5,21 @@
 
 ## Checkpoint
 
-- **Updated:** 2026-07-13 by Ricard / Codex
+- **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `17561d2` (`develop` is eight commits ahead of
-  `origin/develop`; no push has been performed by Codex)
+- **Committed revision:** current `HEAD`, PLAN-006/M6 completion (`develop` is
+  ten commits ahead of `origin/develop`; no push has been performed by Codex)
 - **Specification:** SPEC-001 Draft v0.1.13
-- **Plan:** PLAN-006 revision 1, Approved
-- **Phase:** M1–M5 completed; M6 active
-- **Working tree:** PLAN-006 steps 4 and 5 are implemented and verified but
-  uncommitted
+- **Plan:** PLAN-006 revision 1, Completed
+- **Phase:** M1–M6 completed; no active milestone
+- **Working tree:** clean after the reviewed and verified PLAN-006/M6 completion
+  commit
 
 ## Current objective
 
-Deliver M6 under approved PLAN-006: normalize supported string enums and expose
-them through a controlled native Angular select without promoting any deferred
-capability.
+No active implementation objective. M6 is complete; preserve the controlled
+prototype boundary while the next milestone or deferred decision is selected
+and approved separately.
 
 ## In progress
 
@@ -27,36 +27,33 @@ None.
 
 ## Latest completed work
 
-- Committed PLAN-006 step 3 as `17561d2` with repository identity
-  `Rabassoft <ricard@rabassoft.com>`; no push was performed.
-- Completed step 4 choice text contracts and projection with exact contexts,
-  diagnostics, identity, locale, descriptor-safety, and immutability coverage.
-- Added Public Experimental `SchemaStringEnumRendererComponent` with the fixed
-  selector and existing Angular root entry point.
-- Implemented a private Signal Forms token buffer: missing/out-of-enum uses the
-  disabled empty sentinel and every choice, including domain `""`, uses its
-  positional token without optimistic state.
-- Registered `native-string-enum` at rank 20 and priority 0 using an own-data
-  descriptor tester; ordinary strings retain the rank-10 fallback.
-- Added focused rank, descriptor-safety, sentinel, token, empty-domain-value,
-  and controlled-reconciliation tests; the workspace now passes 172 tests.
+- Completed step 6 resolver, controlled integration, accessibility,
+  standard/zoneless, lifecycle, malformed-token, and package-surface coverage.
+- Fixed initial zoneless selection by reconciling the private Signal Forms token
+  in a post-render write phase after dynamic options exist.
+- Completed PLAN-006 and M6 end to end: normalized choices, safe runtime
+  boundary, localized texts, ranked native select, and controlled behavior.
+- Passed final acceptance with frozen installation, 175 tests, builds, package
+  smoke, declaration inspection, architectural boundaries, links, and diff
+  integrity.
+- Re-reviewed the complete final step-6 and lifecycle diff without finding a
+  correctness, scope, test, public-surface, or documentation issue.
+- Committed the final PLAN-006/M6 checkpoint as
+  `feat(angular): complete string enum support` with the Rabassoft identity; no
+  push was performed.
 
 ## Exact next action
 
-Implement PLAN-006 step 6 only: add integration, accessibility, resolver,
-controlled-state, zoneless, and package-surface tests for the native string-enum
-renderer.
-
-Before implementation, review the current uncommitted step-4 and step-5 diff
-and PLAN-006 sections 2, 9, 10, 11, 12, 13.4, 13.5, 14, 15, and 16.
+Select and approve the next milestone separately. Do not start D-010 or another
+deferred capability without explicit promotion and approval.
 
 ## Blockers and conflicts
 
 - No implementation blocker.
 - No active documentation conflict.
-- PLAN-006 revision 1 and SPEC-001 Draft v0.1.13 authorize step 6.
-- Step 3 is committed in `17561d2`; the verified step-4 and step-5 diff remains
-  uncommitted and there is no active implementation task.
+- PLAN-006 revision 1 and M6 are completed; SPEC-001 remains Draft v0.1.13.
+- The final step-6 and lifecycle closure is committed in the current `HEAD`;
+  the working tree is clean.
 
 ## Open questions outside the active scope
 
@@ -69,8 +66,9 @@ and PLAN-006 sections 2, 9, 10, 11, 12, 13.4, 13.5, 14, 15, and 16.
 
 ## Latest verification
 
+- `CI=true pnpm install --frozen-lockfile` passed with the lockfile unchanged.
 - `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
-- `pnpm test` passed: 13 files and 172 tests (129 core, 43 Angular).
+- `pnpm test` passed: 13 files and 175 tests (129 core, 46 Angular).
 - `pnpm build` and `pnpm test:package` passed for both packages.
 - No dependency, lockfile, package version, or publication setting changed.
 - Core still has zero runtime dependencies and no Angular, RxJS, DOM, or browser
@@ -83,7 +81,7 @@ and PLAN-006 sections 2, 9, 10, 11, 12, 13.4, 13.5, 14, 15, and 16.
 ## Task document map
 
 - Normative behavior: `.ai-docs/specs/001-controlled-form-runtime.md`
-- Active delivery contract: `.ai-docs/plans/006-string-enum-native-select.md`
+- Completed delivery contract: `.ai-docs/plans/006-string-enum-native-select.md`
 - Active architectural decision: `.ai-docs/adrs/011-enum-string-normalizado-select-nativo.md`
 - Supporting ADR status and links: `.ai-docs/adrs/000-index.md`
 - Deferred boundaries: `.ai-docs/roadmap/deferred-decisions.md`

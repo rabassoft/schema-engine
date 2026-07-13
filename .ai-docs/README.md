@@ -19,6 +19,6 @@
 - [PLAN-003: Controlled form runtime](./plans/003-controlled-runtime.md) — Completed
 - [PLAN-004: Angular controlled-form adapter](./plans/004-angular-adapter.md) — Completed
 - [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
-- [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Approved revision 1; contracts promoted to SPEC-001 Draft v0.1.13
+- [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

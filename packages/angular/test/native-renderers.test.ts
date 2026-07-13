@@ -19,6 +19,7 @@ import {
   SchemaFieldOutletDirective,
   SchemaFormDirective,
   SchemaNumberRendererComponent,
+  SchemaStringEnumRendererComponent,
   SchemaStringRendererComponent,
   provideSchemaEngineAngular,
   provideSchemaEngineAngularNative,
@@ -34,8 +35,9 @@ const compiled = compileFormDefinition({
       name: { type: 'string' },
       amount: { type: 'number' },
       active: { type: 'boolean' },
+      status: { type: 'string', enum: ['', ' ', 'draft', 'published'] },
     },
-    required: ['name'],
+    required: ['name', 'status'],
   },
   uiSchema: {
     fields: {
@@ -47,10 +49,22 @@ const compiled = compileFormDefinition({
         placeholder: 'name.placeholder',
       },
       amount: { options: { decimalPlaces: 2, showTrailingZeros: true } },
+      status: {
+        label: 'status.label',
+        description: 'status.description',
+        hint: 'status.hint',
+        tooltip: 'status.tooltip',
+        placeholder: 'status.placeholder',
+        enumLabels: {
+          '': 'status.empty',
+          ' ': 'status.space',
+          draft: 'status.draft',
+        },
+      },
     },
   },
 });
-if (!compiled.success || compiled.definition.fields.length !== 3)
+if (!compiled.success || compiled.definition.fields.length !== 4)
   throw new Error('native fixture compilation failed');
 const definition = compiled.definition;
 const fields = definition.fields;
@@ -111,6 +125,13 @@ describe('native Signal Forms renderers', () => {
       success: true,
       registration: { renderer: SchemaBooleanRendererComponent },
     });
+    expect(resolver.resolve(fields[3]!)).toMatchObject({
+      success: true,
+      registration: {
+        id: 'native-string-enum',
+        renderer: SchemaStringEnumRendererComponent,
+      },
+    });
   });
 
   it('allows explicit custom registrations to override native renderers', () => {
@@ -130,6 +151,234 @@ describe('native Signal Forms renderers', () => {
       success: true,
       registration: { id: 'custom-string' },
     });
+    expect(
+      TestBed.inject(AngularRendererResolver).resolve(fields[3]!),
+    ).toMatchObject({
+      success: true,
+      registration: { id: 'native-string-enum' },
+    });
+  });
+
+  it('applies rank and priority override rules at the enum rank', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaEngineAngularNative({
+          id: 'equal-enum',
+          renderer: SchemaBooleanRendererComponent,
+          tester: (field) => (field === fields[3] ? 20 : null),
+          priority: 0,
+        }),
+      ],
+    });
+    expect(
+      TestBed.inject(AngularRendererResolver).resolve(fields[3]!),
+    ).toMatchObject({
+      success: true,
+      registration: { id: 'native-string-enum' },
+    });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaEngineAngularNative({
+          id: 'priority-enum',
+          renderer: SchemaBooleanRendererComponent,
+          tester: (field) => (field === fields[3] ? 20 : null),
+          priority: 1,
+        }),
+      ],
+    });
+    expect(
+      TestBed.inject(AngularRendererResolver).resolve(fields[3]!),
+    ).toMatchObject({
+      success: true,
+      registration: { id: 'priority-enum' },
+    });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaEngineAngularNative({
+          id: 'higher-enum',
+          renderer: SchemaBooleanRendererComponent,
+          tester: (field) => (field === fields[3] ? 21 : null),
+          priority: -1,
+        }),
+      ],
+    });
+    expect(
+      TestBed.inject(AngularRendererResolver).resolve(fields[3]!),
+    ).toMatchObject({
+      success: true,
+      registration: { id: 'higher-enum' },
+    });
+  });
+
+  it('keeps enum selection controlled and accessible through the outlet', () => {
+    const validator: SchemaValidator = {
+      validate: () => ({
+        valid: false,
+        issues: [
+          {
+            code: 'required',
+            path: ['status'],
+            parameters: {},
+            fallbackMessage: 'status.required',
+          },
+        ],
+      }),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaTextResolver({
+          resolve: (text, context) => `${context.locale}:${text}`,
+        }),
+        provideSchemaEngineAngularNative(),
+      ],
+    });
+    const fixture = TestBed.createComponent(NativeHost);
+    fixture.componentInstance.field.set(fields[3]!);
+    fixture.componentInstance.config.set(
+      createConfig({ validator, validationVisibility: 'all', locale: 'en' }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+    const select = root.querySelector('select') as HTMLSelectElement;
+    const label = root.querySelector('label') as HTMLLabelElement;
+    const summary = root.querySelector('summary') as HTMLElement;
+
+    expect(fixture.componentInstance.operations).toEqual([]);
+    expect(select.id).toBe('se-native%20form-status');
+    expect(label.htmlFor).toBe(select.id);
+    expect(select.value).toBe('');
+    expect(select.options[0]?.disabled).toBe(true);
+    expect(select.options[0]?.textContent?.trim()).toBe(
+      'en:status.placeholder',
+    );
+    expect(Array.from(select.options, ({ value }) => value)).toEqual([
+      '',
+      'choice:0',
+      'choice:1',
+      'choice:2',
+      'choice:3',
+    ]);
+    expect(
+      Array.from(select.options, ({ textContent }) => textContent?.trim()),
+    ).toEqual([
+      'en:status.placeholder',
+      'en:status.empty',
+      'en:status.space',
+      'en:status.draft',
+      'en:published',
+    ]);
+    expect(select.getAttribute('aria-required')).toBe('true');
+    expect(select.getAttribute('aria-invalid')).toBe('true');
+    expect(select.getAttribute('aria-describedby')).toBe(
+      'se-native%20form-status-description se-native%20form-status-hint se-native%20form-status-errors',
+    );
+    expect(summary.getAttribute('aria-label')).toBe('en:status.tooltip');
+    expect(root.textContent).toContain('en:status.description');
+    expect(root.textContent).toContain('en:status.hint');
+    expect(root.querySelector('[aria-live="polite"]')?.textContent).toContain(
+      'en:status.required',
+    );
+
+    select.dispatchEvent(new Event('focus', { bubbles: true }));
+    expect(fixture.componentInstance.form?.snapshot()?.fields[3]?.focused).toBe(
+      true,
+    );
+
+    select.value = 'choice:1';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(fixture.componentInstance.operations).toMatchObject([
+      { type: 'set-value', value: ' ' },
+    ]);
+    expect(fixture.componentInstance.form?.snapshot()?.value).toEqual({
+      name: 'Ada',
+      amount: 1234.5,
+    });
+
+    select.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(select.value).toBe('');
+    expect(fixture.componentInstance.operations).toHaveLength(1);
+    expect(fixture.componentInstance.form?.snapshot()?.fields[3]).toMatchObject(
+      { focused: false, touched: true },
+    );
+
+    select.value = 'choice:3';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'set-value',
+      value: 'published',
+    });
+    expect(fixture.componentInstance.operations).toHaveLength(2);
+
+    fixture.componentInstance.config.set(
+      createConfig({
+        validator,
+        validationVisibility: 'all',
+        value: { name: 'Ada', amount: 1234.5, status: 'published' },
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(select.value).toBe('choice:3');
+    expect(fixture.componentInstance.operations).toHaveLength(2);
+
+    fixture.componentInstance.config.set(
+      createConfig({
+        validator,
+        validationVisibility: 'all',
+        locale: 'ca',
+        value: { name: 'Ada', amount: 1234.5, status: 'legacy' },
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(select.value).toBe('');
+    expect(select.options[0]?.textContent?.trim()).toBe(
+      'ca:status.placeholder',
+    );
+    expect(select.options[1]?.textContent?.trim()).toBe('ca:status.empty');
+    expect(fixture.componentInstance.operations).toHaveLength(2);
+
+    const operationCount = fixture.componentInstance.operations.length;
+    expect(select.isConnected).toBe(true);
+    fixture.destroy();
+    expect(select.isConnected).toBe(false);
+    select.value = 'choice:3';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(fixture.componentInstance.operations).toHaveLength(operationCount);
+  });
+
+  it('runs the enum outlet under explicit zoneless change detection', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideSchemaEngineAngularNative(),
+      ],
+    });
+    const fixture = TestBed.createComponent(NativeHost);
+    fixture.componentInstance.field.set(fields[3]!);
+    fixture.componentInstance.config.set(
+      createConfig({
+        value: { name: 'Ada', amount: 1234.5, status: 'draft' },
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+    const select = root.querySelector('select') as HTMLSelectElement;
+    expect(select.value).toBe('choice:2');
+
+    select.value = 'choice:3';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(fixture.componentInstance.operations).toMatchObject([
+      { type: 'set-value', value: 'published' },
+    ]);
   });
 
   it('uses LOCALE_ID, resolves text, and keeps string edits controlled', () => {

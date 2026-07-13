@@ -6,6 +6,145 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — M6 closure committed
+
+### Completed
+
+- Committed the reviewed PLAN-006 step-6 implementation, zoneless post-render
+  correction, full integration/package coverage, and M6 lifecycle closure as
+  `feat(angular): complete string enum support`.
+- Used repository identity `Rabassoft <ricard@rabassoft.com>` and performed no
+  push.
+- Synchronized the compact project checkpoint within the same final commit so
+  the repository closes M6 with a clean working tree and no active task.
+
+### Verification
+
+- The committed scope is the previously accepted 10-file diff and retains the
+  completed frozen-install, formatting, linting, type-checking, 175-test,
+  build, package-smoke, declaration, boundary, link, and diff verification.
+
+### Pending
+
+- Select and approve the next milestone separately; no deferred capability is
+  active.
+
+## 2026-07-14 — Final M6 diff review passed
+
+### Completed
+
+- Re-reviewed the complete uncommitted PLAN-006 step-6 implementation,
+  post-render correction, integration coverage, package smoke changes, and M6
+  lifecycle documentation.
+- Confirmed that the Angular change affects only controlled presentation-token
+  reconciliation after dynamic options render and does not alter core state,
+  validation, operations, or deferred scope.
+- Found no correctness, accessibility, lifecycle, public-surface, test,
+  documentation, or diff-integrity issue requiring correction.
+
+### Verification
+
+- The preceding final acceptance remains current: frozen installation,
+  formatting, linting, type checking, 175 tests, builds, package smoke,
+  declaration and boundary inspection, 31 Markdown links, and diff checks all
+  passed.
+- `git diff --check` passes after the review checkpoint update.
+
+### Pending
+
+- Commit the reviewed step-6 and M6 closure diff only when explicitly
+  requested; select the next milestone separately.
+
+## 2026-07-14 — PLAN-006 and M6 completed
+
+### Completed
+
+- Executed PLAN-006 step 7 final acceptance after reading the complete approved
+  plan and reviewing the uncommitted step-6 correction and coverage diff.
+- Confirmed the complete M6 pipeline from direct string `enum` and optional
+  `enumLabels` through immutable choices, runtime structural validation,
+  resolved choice texts, ranked renderer selection, and the controlled native
+  select.
+- Inspected generated core and Angular declarations: the expected neutral
+  contracts and `SchemaStringEnumRendererComponent` are exported from existing
+  roots, while registration and token helpers remain internal.
+- Repeated all eight acceptance areas and found no remaining scope, contract,
+  diagnostic, structural-safety, control, accessibility, Angular, package, or
+  delivery finding.
+- Marked PLAN-006 and ROADMAP milestone M6 completed and synchronized the
+  promoted D-008 entry without changing SPEC-001 Draft v0.1.13 or ADR-011.
+
+### Verification
+
+- `CI=true pnpm install --frozen-lockfile` passed with all 198 packages reused
+  and no lockfile change.
+- Workspace formatting, linting, type checking, builds, and package smoke
+  passed.
+- The full suite passed: 13 files and 175 tests, comprising 129 core and 46
+  Angular tests.
+- Core declarations expose `StringChoiceDefinition`, `choices`, `enumLabels`,
+  and exclusive choice text contexts; Angular declarations expose frozen choice
+  labels and the fixed `schema-string-enum-renderer` component metadata.
+- Core retains zero runtime dependencies and no framework, RxJS, DOM, or browser
+  import; Angular Forms imports remain limited to `@angular/forms/signals`.
+- No raw schema reaches a renderer or tester, no enum-membership business
+  validation entered operations/runtime actions/Signal Forms/select, and all
+  deferred exclusions remain inactive.
+- No dependency, lockfile, version, peer range, entry point, export map,
+  publication setting, or generated-output tracking changed.
+- All 31 Markdown links resolve and `git diff --check` passes.
+
+### Pending
+
+- Review and commit the verified step-6 and M6 closure diff when explicitly
+  requested; select the next milestone separately.
+
+## 2026-07-13 — M6 PLAN-006 step 6 completed
+
+### Completed
+
+- Added resolver coverage for ordinary and enum strings plus consumer
+  overrides at rank 10, equal rank 20 with registration order, rank 20 with
+  positive priority, and rank 21.
+- Exercised the select through `SchemaFormDirective`, the field outlet,
+  `AngularRendererResolver`, and Angular component creation rather than direct
+  construction.
+- Covered missing, external out-of-enum, empty, whitespace, first/later choice,
+  rejection, external confirmation, locale, focus, blur, issues, and controlled
+  no-optimistic-mutation behavior.
+- Verified the disabled placeholder sentinel, labels, description, hint,
+  tooltip, deterministic IDs, `aria-describedby`, `aria-invalid`,
+  `aria-required`, issue live region, and `focusBoundControl()` delegation.
+- Verified standard and explicit zoneless TestBed configurations, malformed and
+  out-of-range token isolation, component/view destruction, and listener
+  cleanup.
+- Extended package smoke to require the Public Experimental component export
+  while keeping registration and token helpers absent from the package root.
+- Corrected initial zoneless selection by moving controlled token reset to an
+  Angular post-render write phase, after the dynamic options are present.
+
+### Verification
+
+- Workspace formatting, linting, type checking, builds, and package smoke
+  passed.
+- The full suite passed: 13 files and 175 tests, comprising 129 core and 46
+  Angular tests.
+- Generated declarations expose the component with selector
+  `schema-string-enum-renderer` and do not expose registration or token helpers
+  from the Angular root.
+- Core remains framework-neutral with zero runtime dependencies; Angular Forms
+  imports remain limited to Signal Forms.
+- Initial render, reconciliation, rejection, locale, blur, out-of-enum data,
+  malformed tokens, and destruction emit no unintended operation.
+- No dependency, lockfile, version, peer range, publication setting, raw schema
+  renderer input, business validation, or deferred capability changed.
+- All 31 Markdown links resolve and `git diff --check` passes.
+
+### Pending
+
+- Execute PLAN-006 step 7 final acceptance, declaration review, and M6
+  lifecycle closure.
+
 ## 2026-07-13 — M6 PLAN-006 step 5 completed
 
 ### Completed

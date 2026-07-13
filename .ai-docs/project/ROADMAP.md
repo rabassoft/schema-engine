@@ -15,7 +15,7 @@
 - [x] M5 — Renderer HTML
   - Completado el 13 de julio de 2026.
   - Renderers nativos accesibles, Signal Forms locales, textos reemplazables y edición numérica localizada y controlada.
-- [ ] M6 — Enum de strings y select nativo
-  - PLAN-006 revisión 1 aprobado y contratos promovidos a SPEC-001 Draft v0.1.13.
-  - Activo: paso 1 completado; contratos neutrales, exports y tests focalizados incorporados.
-  - Choices normalizados, labels resolubles y renderer select controlado según ADR-011.
+- [x] M6 — Enum de strings y select nativo
+  - Completado el 14 de julio de 2026 bajo PLAN-006 revisión 1.
+  - Enum string y `enumLabels` normalizados, choices y textos resolubles,
+    validación estructural segura y select Angular controlado según ADR-011.

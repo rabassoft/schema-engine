@@ -1,8 +1,9 @@
 # PLAN-006: String enum normalization and native select
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-13
 - **Approval date:** 2026-07-13
+- **Completion date:** 2026-07-14
 - **Review revision:** 1
 - **Review state:** Corrections applied; repeated formal review passed; explicitly approved
 - **Requires:** [`SPEC-001` v0.1.13](../specs/001-controlled-form-runtime.md),
@@ -970,3 +971,46 @@ The renderer uses only normalized own choices and resolved text snapshots. Its
 private Signal Forms leaf carries an empty missing/out-of-enum sentinel or a
 positional choice token; no render, reconciliation, or external value mutates
 application state or emits an operation.
+
+## 27. Integration and package-surface checkpoint
+
+- **Date:** 2026-07-13
+- **Completed:** Step 6 resolver overrides, controlled integration,
+  accessibility, standard/zoneless, lifecycle, malformed-token, and public
+  package-surface coverage.
+- **Boundary:** Step 7 final verification, declaration review, documentation,
+  and M6 lifecycle closure remains pending.
+
+The expanded tests exposed and fixed an initial zoneless ordering defect: the
+controlled token now resets during an Angular post-render write phase, after
+dynamic options exist. This preserves the same private buffer and emits no
+intent during initial render or reconciliation.
+
+## 28. Completion and final acceptance
+
+- **Date:** 2026-07-14
+- **Result:** Completed; all seven implementation steps and every acceptance
+  condition passed.
+- **Milestone:** M6 completed.
+
+Final acceptance confirmed:
+
+1. Only direct string enums and `enumLabels` entered the supported subset;
+   every explicit exclusion remains inactive.
+2. Neutral choices, text extensions, and the Angular component are Public +
+   Experimental + Active through the existing root entry points only.
+3. Schema, UI, runtime, and choice-text diagnostics retain their exact paths,
+   parameters, cascade suppression, order, fallback, and immutability.
+4. Compiler, runtime, projector, tester, and renderer reads are descriptor-safe;
+   operations retain their minimum boundary and execute no choices accessor.
+5. The external validator and consuming application remain authoritative for
+   validation and controlled value confirmation, including missing and
+   out-of-enum data.
+6. Choice labels remain ordered and non-blank, and the positional token protocol
+   distinguishes the empty domain string from the disabled sentinel.
+7. Rank-20 specialization, rank-10 fallback, consumer overrides, standard and
+   zoneless rendering, accessibility, lifecycle, and package exports pass.
+8. Frozen installation, formatting, linting, type checking, 175 tests, builds,
+   package smoke, declaration inspection, boundary searches, links, and diff
+   integrity pass without dependency, version, publication, or deferred-scope
+   changes.

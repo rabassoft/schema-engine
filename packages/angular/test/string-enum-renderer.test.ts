@@ -110,10 +110,23 @@ describe('native string enum renderer step 5', () => {
       'choice:0',
       'choice:1',
     ]);
+    fixture.componentInstance.focus();
+    expect(document.activeElement).toBe(select);
 
     select.value = 'choice:0';
     select.dispatchEvent(new Event('change', { bubbles: true }));
     expect(emitted).toEqual(['']);
+
+    const invalidOption = document.createElement('option');
+    select.add(invalidOption);
+    invalidOption.value = 'choice:99';
+    select.value = invalidOption.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    invalidOption.value = 'choice:01';
+    select.value = invalidOption.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(emitted).toEqual(['']);
+    invalidOption.remove();
 
     fixture.componentRef.setInput(
       'snapshot',

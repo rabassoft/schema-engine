@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  afterRenderEffect,
   computed,
-  effect,
   input,
   output,
   signal,
@@ -105,7 +105,9 @@ export class SchemaStringEnumRendererComponent implements AngularFieldRenderer {
   });
 
   constructor() {
-    effect(() => this.controlField().reset(this.confirmedToken()));
+    afterRenderEffect({
+      write: () => this.controlField().reset(this.confirmedToken()),
+    });
   }
 
   protected onChange(event: Event): void {
