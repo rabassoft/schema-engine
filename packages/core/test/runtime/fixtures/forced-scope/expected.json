@@ -1,0 +1,195 @@
+{
+  "success": true,
+  "initialSnapshot": {
+    "value": {},
+    "locale": "en",
+    "valid": false,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": false,
+        "issues": [
+          {
+            "code": "required",
+            "path": ["name"],
+            "parameters": {}
+          }
+        ],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  },
+  "actions": [
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": true,
+          "operationEmitted": false
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {},
+        "locale": "en",
+        "valid": false,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": false,
+            "issues": [
+              {
+                "code": "required",
+                "path": ["name"],
+                "parameters": {}
+              }
+            ],
+            "showIssues": true
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    },
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": true,
+          "operationEmitted": false
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {},
+        "locale": "en",
+        "valid": false,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": false,
+            "issues": [
+              {
+                "code": "required",
+                "path": ["name"],
+                "parameters": {}
+              }
+            ],
+            "showIssues": false
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    }
+  ],
+  "operations": [],
+  "snapshotEmissions": 2,
+  "finalSnapshot": {
+    "value": {},
+    "locale": "en",
+    "valid": false,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": false,
+        "issues": [
+          {
+            "code": "required",
+            "path": ["name"],
+            "parameters": {}
+          }
+        ],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  }
+}

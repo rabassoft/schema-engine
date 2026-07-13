@@ -6,15 +6,15 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: `develop` contains committed M2 and proposed PLAN-003 documentation, two commits ahead of `origin/develop`; GitHub default branch is `main`
+- Repository revision: `develop` contains committed reviewed M3 and ADR-007 documentation, three commits ahead of `origin/develop`; GitHub default branch is `main`
 
 ## Current phase
 
-M1 and M2 completed; architecture validation before M3.
+M1, M2, and M3 completed; architecture validation before M4.
 
 ## Current objective
 
-Review and approve PLAN-003 for the M3 controlled-runtime increment.
+Resolve Angular renderer instantiation D-027 and prepare PLAN-004 for M4.
 
 ## Latest completed work
 
@@ -44,16 +44,27 @@ Review and approve PLAN-003 for the M3 controlled-runtime increment.
   subscriptions, interaction, scopes, and disposal.
 - Committed the proposed PLAN-003 documentation on `develop` as
   `Rabassoft <ricard@rabassoft.com>`.
+- Implemented and exported the controlled runtime with synchronous validation,
+  immutable snapshots, controlled updates, operation emission, interaction,
+  scopes, subscriptions, listener isolation, and disposal.
+- Added 10 runtime conformance fixtures and focused tests; all 103 repository
+  tests pass.
+- Completed PLAN-003 and milestone M3.
+- Reviewed the complete M3 diff and fixed accessor execution across validator
+  results, definitions, paths, scopes, and diagnostic parameter copying.
+- Accepted ADR-007 and promoted D-023 with deterministic scored renderer testers
+  owned by framework adapters.
+- Committed reviewed M3 and the D-023/ADR-007 resolution on `develop` as
+  `Rabassoft <ricard@rabassoft.com>`.
 
 ## In progress
 
-No implementation task is active. PLAN-003 is Proposed and awaiting formal
-review.
+No implementation task is active. M3 review and D-023 resolution are complete.
 
 ## Next action
 
-Formally review PLAN-003 and resolve its public option/result/diagnostic changes
-before approval. Do not implement M3 before approval.
+Resolve D-027 for Angular dynamic instantiation, then draft and approve PLAN-004
+before implementing the Angular adapter.
 
 ## Blockers
 
@@ -61,8 +72,7 @@ None.
 
 ## Open questions
 
-- PLAN-003 promotes source-schema ownership and listener-exception reporting;
-  their exact public contracts require formal review.
+- Angular dynamic instantiation remains open as D-027.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
 
 ## Verification status
@@ -80,13 +90,21 @@ None.
 - SPEC-001 v0.1.6 includes the M2 diagnostic contract.
 - `pnpm test` passes with 4 test files and 82 tests, including 27 operation
   fixtures and all 30 compiler fixtures.
-- Current checkout is `develop`; M2 is committed locally and not pushed.
+- SPEC-001 v0.1.7 includes the approved M3 option contract.
+- `pnpm test` passes with 6 test files and 103 tests, including 10 runtime
+  fixtures.
+- M3 accessor-safety regression coverage passes; the suite now contains 104
+  tests.
+- ADR-007 was checked against SPEC-001, ADR-003/004, D-016, D-023, D-024,
+  D-026, and D-027.
+- Current checkout is `develop`; M3 and ADR-007 are committed locally and not pushed.
 
 ## Relevant documents
 
 - `.ai-docs/specs/001-controlled-form-runtime.md`
 - `.ai-docs/adrs/005-politica-dialecto-json-schema.md`
 - `.ai-docs/adrs/006-limite-paquete-inicial.md`
+- `.ai-docs/adrs/007-resolucion-renderers-testers.md`
 - `.ai-docs/plans/001-compiler-only-implementation.md`
 - `.ai-docs/plans/002-root-immutable-operations.md`
 - `.ai-docs/roadmap/deferred-decisions.md`

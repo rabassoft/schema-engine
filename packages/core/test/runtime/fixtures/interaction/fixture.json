@@ -1,0 +1,18 @@
+{
+  "value": {
+    "name": "Ada"
+  },
+  "baselineValue": {
+    "name": "Ada"
+  },
+  "actions": [
+    {
+      "type": "focus",
+      "path": ["name"]
+    },
+    {
+      "type": "blur",
+      "path": ["name"]
+    }
+  ]
+}

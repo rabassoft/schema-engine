@@ -1,0 +1,13 @@
+{
+  "value": {},
+  "baselineValue": {},
+  "actions": [
+    {
+      "type": "dispose"
+    },
+    {
+      "type": "focus",
+      "path": ["name"]
+    }
+  ]
+}

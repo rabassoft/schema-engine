@@ -6,6 +6,8 @@
 - [x] M2 — Operaciones inmutables
   - Completado el 13 de julio de 2026.
   - Operaciones raíz puras, diagnósticos runtime, 27 fixtures y 82 tests totales.
-- [ ] M3 — Runtime controlado
+- [x] M3 — Runtime controlado
+  - Completado el 13 de julio de 2026.
+  - Estado controlado, validación, snapshots, interacción, scopes, listeners y disposal.
 - [ ] M4 — Adaptador Angular
 - [ ] M5 — Renderer HTML

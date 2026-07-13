@@ -1,0 +1,181 @@
+{
+  "success": true,
+  "initialSnapshot": {
+    "value": {},
+    "locale": "en",
+    "valid": true,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  },
+  "actions": [
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": false,
+          "operationEmitted": false
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {},
+        "locale": "en",
+        "valid": true,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    },
+    {
+      "result": {
+        "success": false,
+        "effects": {
+          "snapshotChanged": false,
+          "operationEmitted": false
+        },
+        "diagnostics": [
+          {
+            "code": "RUNTIME_DISPOSED",
+            "severity": "error",
+            "source": "runtime",
+            "parameters": {
+              "action": "focus"
+            },
+            "fallbackMessage": "Runtime is disposed."
+          }
+        ]
+      },
+      "snapshot": {
+        "value": {},
+        "locale": "en",
+        "valid": true,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    }
+  ],
+  "operations": [],
+  "snapshotEmissions": 0,
+  "finalSnapshot": {
+    "value": {},
+    "locale": "en",
+    "valid": true,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  }
+}

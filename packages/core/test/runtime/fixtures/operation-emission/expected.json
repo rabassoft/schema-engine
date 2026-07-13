@@ -1,0 +1,211 @@
+{
+  "success": true,
+  "initialSnapshot": {
+    "value": {
+      "name": "Ada"
+    },
+    "locale": "en",
+    "valid": true,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "value",
+          "value": "Ada"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  },
+  "actions": [
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": false,
+          "operationEmitted": true
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {
+          "name": "Ada"
+        },
+        "locale": "en",
+        "valid": true,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "value",
+              "value": "Ada"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    },
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": false,
+          "operationEmitted": true
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {
+          "name": "Ada"
+        },
+        "locale": "en",
+        "valid": true,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "value",
+              "value": "Ada"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    }
+  ],
+  "operations": [
+    {
+      "type": "set-value",
+      "metadata": {
+        "id": 1,
+        "formId": "fixture"
+      },
+      "path": ["name"],
+      "expected": {
+        "kind": "value",
+        "value": "Ada"
+      },
+      "value": "Grace",
+      "source": "user"
+    },
+    {
+      "type": "remove-value",
+      "metadata": {
+        "id": 2,
+        "formId": "fixture"
+      },
+      "path": ["name"],
+      "expected": {
+        "kind": "value",
+        "value": "Ada"
+      },
+      "source": "user"
+    }
+  ],
+  "snapshotEmissions": 0,
+  "finalSnapshot": {
+    "value": {
+      "name": "Ada"
+    },
+    "locale": "en",
+    "valid": true,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "value",
+          "value": "Ada"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  }
+}

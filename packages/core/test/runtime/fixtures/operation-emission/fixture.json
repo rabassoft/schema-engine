@@ -1,0 +1,19 @@
+{
+  "value": {
+    "name": "Ada"
+  },
+  "baselineValue": {
+    "name": "Ada"
+  },
+  "actions": [
+    {
+      "type": "set",
+      "path": ["name"],
+      "value": "Grace"
+    },
+    {
+      "type": "remove",
+      "path": ["name"]
+    }
+  ]
+}

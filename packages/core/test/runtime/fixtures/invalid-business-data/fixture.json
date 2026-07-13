@@ -1,0 +1,8 @@
+{
+  "value": {},
+  "baselineValue": {
+    "name": "Ada"
+  },
+  "validatorMode": "required-name",
+  "actions": []
+}

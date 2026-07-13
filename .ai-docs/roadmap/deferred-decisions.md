@@ -193,12 +193,15 @@ Cada decisión debe registrar:
 
 ## D-023: Estrategia avanzada de resolución de renderers
 
-- **Estado:** Candidate
+- **Estado:** Promoted
 - **Pregunta:** ¿Cómo elegir el mejor renderer compatible?
 - **Dirección propuesta:** Testers/resolvers con puntuación, prioridad y capacidades, no un diccionario simple `type -> component`.
 - **Motivo:** El walking skeleton puede comenzar con pocos tipos, pero la extensibilidad exige una decisión temprana.
 - **Retomar cuando:** Antes de implementar el adaptador Angular HTML.
 - **Documento esperado:** ADR de renderer resolution.
+- **Resolución:** [`ADR-007`](../adrs/007-resolucion-renderers-testers.md) acepta
+  testers puntuados, priority y desempate determinista en el adaptador, sin un
+  registry de componentes en el core.
 
 ## D-024: Renderers personalizados y bridges de validación del framework
 
@@ -289,10 +292,9 @@ Cada decisión debe registrar:
 
 Las entradas más cercanas a convertirse en ADR son:
 
-1. **D-023 — Resolución de renderers.**
+1. **D-027 — Instanciación dinámica en Angular.**
 2. **D-028 — Versionado de paquetes.**
 3. **D-029 — API pública.**
-4. Forma definitiva del puerto de validación.
 
 ## 5. Historial
 

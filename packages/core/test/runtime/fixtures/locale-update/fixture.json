@@ -1,0 +1,12 @@
+{
+  "value": {},
+  "baselineValue": {},
+  "actions": [
+    {
+      "type": "update",
+      "update": {
+        "locale": "ca"
+      }
+    }
+  ]
+}

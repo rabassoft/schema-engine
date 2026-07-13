@@ -1,0 +1,18 @@
+{
+  "value": {
+    "name": "Ada"
+  },
+  "baselineValue": {
+    "name": "Ada"
+  },
+  "actions": [
+    {
+      "type": "update",
+      "update": {
+        "value": {
+          "name": "Grace"
+        }
+      }
+    }
+  ]
+}

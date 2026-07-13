@@ -132,3 +132,116 @@ export type ApplyOperationResult<TData extends object> =
       readonly changed: false;
       readonly diagnostics: readonly Diagnostic[];
     };
+
+export interface ValidationIssue {
+  readonly code: string;
+  readonly path: DataPath;
+  readonly keyword?: string;
+  readonly parameters: Readonly<Record<string, unknown>>;
+  readonly fallbackMessage?: string;
+}
+export interface ValidationResult {
+  readonly valid: boolean;
+  readonly issues: readonly ValidationIssue[];
+}
+export interface SchemaValidator {
+  validate(schema: unknown, value: unknown): ValidationResult;
+}
+export type ValidationVisibility = 'touched' | 'all';
+export interface ControlledExternalState<TData extends object> {
+  readonly value: Readonly<TData>;
+  readonly baselineValue: Readonly<TData>;
+  readonly locale: string;
+}
+export interface ControlledFormRuntimeOptions<
+  TData extends object,
+> extends ControlledExternalState<TData> {
+  readonly formId: string;
+  readonly definition: FormDefinition;
+  readonly schema: unknown;
+  readonly validator: SchemaValidator;
+  readonly validationVisibility?: ValidationVisibility;
+}
+export interface ExternalStateUpdate<TData extends object> {
+  readonly value?: Readonly<TData>;
+  readonly baselineValue?: Readonly<TData>;
+  readonly locale?: string;
+}
+export interface RuntimeActionResult {
+  readonly success: boolean;
+  readonly effects: {
+    readonly snapshotChanged: boolean;
+    readonly operationEmitted: boolean;
+  };
+  readonly diagnostics: readonly Diagnostic[];
+}
+export interface FieldRuntimeSnapshot {
+  readonly key: string;
+  readonly path: DataPath;
+  readonly presence:
+    | { readonly kind: 'missing' }
+    | { readonly kind: 'value'; readonly value: unknown };
+  readonly dirty: boolean;
+  readonly touched: boolean;
+  readonly focused: boolean;
+  readonly valid: boolean;
+  readonly issues: readonly ValidationIssue[];
+  readonly showIssues: boolean;
+}
+export interface FormRuntimeSnapshot<TData extends object> {
+  readonly value: Readonly<TData>;
+  readonly locale: string;
+  readonly valid: boolean;
+  readonly dirty: boolean;
+  readonly validationVisibility: ValidationVisibility;
+  readonly fields: readonly FieldRuntimeSnapshot[];
+  readonly globalIssues: readonly ValidationIssue[];
+}
+export interface FormScope {
+  readonly id: string;
+  readonly paths: readonly DataPath[];
+  readonly includeGlobalIssues?: boolean;
+}
+export interface ValidationSnapshot {
+  readonly valid: boolean;
+  readonly issues: readonly ValidationIssue[];
+  readonly diagnostics: readonly Diagnostic[];
+}
+export type SnapshotListener<TData extends object> = (
+  snapshot: FormRuntimeSnapshot<TData>,
+) => void;
+export type OperationListener = (operation: FormOperation) => void;
+export type Unsubscribe = () => void;
+export type SubscribeResult =
+  | {
+      readonly success: true;
+      readonly unsubscribe: Unsubscribe;
+      readonly diagnostics: readonly [];
+    }
+  | { readonly success: false; readonly diagnostics: readonly Diagnostic[] };
+export interface FormRuntime<TData extends object> {
+  getSnapshot(): FormRuntimeSnapshot<TData>;
+  getFieldSnapshot(path: DataPath): FieldRuntimeSnapshot | undefined;
+  subscribe(listener: SnapshotListener<TData>): SubscribeResult;
+  subscribeOperations(listener: OperationListener): SubscribeResult;
+  updateExternalState(update: ExternalStateUpdate<TData>): RuntimeActionResult;
+  requestSetValue(path: DataPath, value: unknown): RuntimeActionResult;
+  requestRemoveValue(path: DataPath): RuntimeActionResult;
+  focus(path: DataPath): RuntimeActionResult;
+  blur(path: DataPath): RuntimeActionResult;
+  resetTouched(scope?: FormScope): RuntimeActionResult;
+  setValidationVisibility(
+    visibility: ValidationVisibility,
+  ): RuntimeActionResult;
+  getValidationSnapshot(scope?: FormScope): ValidationSnapshot;
+  showValidationErrors(scope: FormScope): RuntimeActionResult;
+  hideValidationErrors(scopeId: string): RuntimeActionResult;
+  dispose(): RuntimeActionResult;
+}
+export type CreateControlledFormRuntimeResult<TData extends object> =
+  | {
+      readonly success: true;
+      readonly runtime: FormRuntime<TData>;
+      readonly diagnostics: readonly Diagnostic[];
+    }
+  | { readonly success: false; readonly diagnostics: readonly Diagnostic[] };

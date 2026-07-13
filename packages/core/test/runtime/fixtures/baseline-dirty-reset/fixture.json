@@ -1,0 +1,16 @@
+{
+  "value": {
+    "name": "Ada"
+  },
+  "baselineValue": {},
+  "actions": [
+    {
+      "type": "update",
+      "update": {
+        "baselineValue": {
+          "name": "Ada"
+        }
+      }
+    }
+  ]
+}

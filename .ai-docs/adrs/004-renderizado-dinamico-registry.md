@@ -1,5 +1,8 @@
 # ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)
 
+> **Estado:** Superseded por [`ADR-007`](./007-resolucion-renderers-testers.md).
+> Se conserva sin reescribir como contexto histórico pre-SPEC.
+
 **1. Título:** Adopción conceptual del Patrón Registry para la resolución dinámica de interfaces.
 **2. Fecha:** 12 de Julio de 2026.
 **3. Contexto:** El motor debe interpretar el JSON Schema y los metadatos visuales (UI Schema) para determinar en tiempo de ejecución qué tipo de control de interfaz se debe mostrar. Al ser un núcleo agnóstico (Capa 0), el motor desconoce cómo se renderizan los componentes en los frameworks destino, pero debe proporcionar una vía para que estos sepan qué componente instanciar.

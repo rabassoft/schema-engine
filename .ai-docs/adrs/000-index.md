@@ -22,9 +22,10 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 1. [ADR 001: Desacoplamiento del framework reactivo (Core en Vanilla TS)](./001-agnosticismo-framework-core.md) — Pre-SPEC; dirección alineada, estado formal pendiente de normalización; el nombre provisional del paquete queda sustituido por ADR-006.
 2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Requiere revisión**; relacionado con D-028.
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
-4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Requiere revisión**; relacionado con D-023.
+4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
 5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
+7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 
 ## 4. ADRs específicos de Angular
 

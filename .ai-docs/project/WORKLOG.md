@@ -2,6 +2,85 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — Reviewed M3 and ADR-007 committed
+
+### Completed
+
+- Committed the reviewed M3 implementation, accessor-safety correction, fixtures, tests, SPEC updates, and ADR-007 resolution on `develop`.
+- Used repository identity `Rabassoft <ricard@rabassoft.com>`.
+- Kept the commit local; no push was performed.
+
+### Verification
+
+- Confirmed the complete 104-test acceptance suite passed before commit.
+- Checked staged diff integrity and commit attribution.
+
+### Pending
+
+- Resolve D-027 through a dedicated architectural decision.
+- Prepare PLAN-004 only after Angular instantiation is closed.
+
+## 2026-07-13 — M3 reviewed and D-023 resolved
+
+### Completed
+
+- Reviewed the full uncommitted M3 diff against PLAN-003 and SPEC-001.
+- Fixed a runtime robustness defect that could execute accessors in validator results, definitions, paths, scopes, or diagnostic parameters.
+- Added regression coverage proving malformed accessor-shaped contracts return diagnostics without invoking getters.
+- Accepted ADR-007 for deterministic scored renderer testers owned by framework adapters.
+- Marked ADR-004 superseded and promoted D-023 without implementing renderers or Angular.
+- Updated SPEC-001 to Draft v0.1.8 and reconciled its immediate-decision register.
+
+### Verification
+
+- Formatting, lint, type checking, tests, build, package smoke, diff, and local Markdown links passed.
+- Confirmed renderer selection consumes normalized `FieldDefinition` and adds no framework dependency to the core.
+
+### Pending
+
+- Resolve D-027 for Angular dynamic renderer instantiation.
+- Prepare and approve PLAN-004 before implementing M4.
+
+## 2026-07-13 — M3 controlled runtime completed
+
+### Completed
+
+- Implemented discriminated controlled-runtime creation with source-schema validation access.
+- Added immutable snapshots, dirty derivation, synchronous normalized validation, atomic external updates, and structural sharing.
+- Added non-optimistic operation requests with sequential IDs and separate synchronous subscriptions.
+- Added focus, blur, touched, validation visibility, scopes, listener isolation, idempotent unsubscribe, and disposal.
+- Added 10 runtime conformance fixtures, focused unit tests, and package smoke coverage.
+- Completed PLAN-003 and milestone M3 without adding Angular, renderers, persistence, async validation, or deferred capabilities.
+
+### Verification
+
+- `CI=true pnpm install --frozen-lockfile` passed.
+- `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
+- `pnpm test` passed with 103 tests in 6 files.
+- `pnpm build` and `pnpm test:package` passed.
+- `git diff --check` and local Markdown-link validation passed.
+
+### Pending
+
+- Review and commit the completed M3 diff only when explicitly requested.
+- Resolve D-023 and prepare the M4 Angular adapter plan before implementation.
+
+## 2026-07-13 — PLAN-003 reviewed and approved
+
+### Completed
+
+- Formally reviewed PLAN-003 and closed exact diagnostic parameters, reasons, ordering, and fallback-message policy.
+- Approved source-schema access, discriminated creation/subscription results, and listener-exception isolation.
+- Promoted the approved runtime option contract to SPEC-001 v0.1.7.
+
+### Verification
+
+- Checked the plan against SPEC-001, completed M1/M2 contracts, ADR-005/006, and deferred scope.
+
+### Pending
+
+- Implement and verify M3 without expanding into Angular, renderers, async validation, or optimistic state.
+
 ## 2026-07-13 — Proposed PLAN-003 committed
 
 ### Completed

@@ -1,0 +1,125 @@
+{
+  "success": true,
+  "initialSnapshot": {
+    "value": {},
+    "locale": "en",
+    "valid": true,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  },
+  "actions": [
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": true,
+          "operationEmitted": false
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {},
+        "locale": "ca",
+        "valid": true,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    }
+  ],
+  "operations": [],
+  "snapshotEmissions": 1,
+  "finalSnapshot": {
+    "value": {},
+    "locale": "ca",
+    "valid": true,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  }
+}

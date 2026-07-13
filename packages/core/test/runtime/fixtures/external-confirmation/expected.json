@@ -1,0 +1,134 @@
+{
+  "success": true,
+  "initialSnapshot": {
+    "value": {
+      "name": "Ada"
+    },
+    "locale": "en",
+    "valid": true,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "value",
+          "value": "Ada"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  },
+  "actions": [
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": true,
+          "operationEmitted": false
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {
+          "name": "Grace"
+        },
+        "locale": "en",
+        "valid": true,
+        "dirty": true,
+        "validationVisibility": "touched",
+        "fields": [
+          {
+            "key": "name",
+            "path": ["name"],
+            "presence": {
+              "kind": "value",
+              "value": "Grace"
+            },
+            "dirty": true,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          },
+          {
+            "key": "age",
+            "path": ["age"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    }
+  ],
+  "operations": [],
+  "snapshotEmissions": 1,
+  "finalSnapshot": {
+    "value": {
+      "name": "Grace"
+    },
+    "locale": "en",
+    "valid": true,
+    "dirty": true,
+    "validationVisibility": "touched",
+    "fields": [
+      {
+        "key": "name",
+        "path": ["name"],
+        "presence": {
+          "kind": "value",
+          "value": "Grace"
+        },
+        "dirty": true,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "key": "age",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  }
+}

@@ -1,7 +1,9 @@
 # PLAN-003: Controlled form runtime
 
-- **Status:** Proposed
+- **Status:** Completed
 - **Date:** 2026-07-13
+- **Approval date:** 2026-07-13
+- **Completion date:** 2026-07-13
 - **Requires:** [`SPEC-001` v0.1.6](../specs/001-controlled-form-runtime.md), [completed PLAN-001](./001-compiler-only-implementation.md), [completed PLAN-002](./002-root-immutable-operations.md)
 - **Milestone:** M3 — Controlled runtime
 
@@ -281,21 +283,28 @@ primitive identity.
 All runtime diagnostics follow existing immutability and safe-value rules.
 PLAN-003 adds:
 
-- `INVALID_RUNTIME_OPTIONS`
-- `INVALID_EXTERNAL_STATE_UPDATE`
-- `INVALID_VALIDATOR_RESULT`
-- `VALIDATOR_EXCEPTION`
-- `UNKNOWN_RUNTIME_PATH`
-- `UNKNOWN_SCOPE_PATH`
-- `UNKNOWN_VALIDATION_ISSUE_PATH`
-- `INVALID_SCOPE`
-- `INVALID_VALIDATION_VISIBILITY`
-- `INVALID_LISTENER`
-- `LISTENER_EXCEPTION` (warning)
-- `RUNTIME_DISPOSED`
+| Code                            | Severity | Required parameters                                             |
+| ------------------------------- | -------- | --------------------------------------------------------------- |
+| `INVALID_RUNTIME_OPTIONS`       | error    | `member`, `expected`, `reason`, optional safe actual descriptor |
+| `INVALID_EXTERNAL_STATE_UPDATE` | error    | `member`, `expected`, `reason`, optional safe actual descriptor |
+| `INVALID_VALIDATOR_RESULT`      | error    | `reason`, optional `issueIndex`                                 |
+| `VALIDATOR_EXCEPTION`           | error    | `phase` (`creation` or `update`)                                |
+| `UNKNOWN_RUNTIME_PATH`          | error    | copied `path`                                                   |
+| `UNKNOWN_SCOPE_PATH`            | warning  | `scopeId`, copied `path`                                        |
+| `UNKNOWN_VALIDATION_ISSUE_PATH` | warning  | `issueIndex`, copied `path`                                     |
+| `INVALID_SCOPE`                 | error    | `member`, `expected`, `reason`                                  |
+| `INVALID_VALIDATION_VISIBILITY` | error    | safe actual descriptor                                          |
+| `INVALID_LISTENER`              | error    | `channel`, safe actual descriptor                               |
+| `LISTENER_EXCEPTION`            | warning  | `channel`, `listenerIndex`                                      |
+| `RUNTIME_DISPOSED`              | error    | `action`                                                        |
 
-The formal review must fix exact parameters, reason values, fallback messages,
-and diagnostic ordering before approval, following PLAN-001/002 conventions.
+Member reasons are exactly `missing-member`, `accessor-member`, and
+`invalid-value`. Validator-result reasons are exactly `result-not-object`,
+`invalid-valid`, `issues-not-array`, `issue-not-object`, `invalid-code`,
+`invalid-path`, `invalid-keyword`, `invalid-parameters`, and
+`invalid-fallback-message`. Diagnostics are ordered by validation phase, field
+or issue index, then listener subscription order. All include stable English
+fallback messages and never retain exceptions or caller containers.
 
 ## 12. Tests and fixtures
 

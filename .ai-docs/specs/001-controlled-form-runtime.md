@@ -1,12 +1,14 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Draft
-- **Versión:** 0.1.6
+- **Versión:** 0.1.8
 - **Fecha:** 13 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
 - **Plan de implementación aprobado:** [`PLAN-001`](../plans/001-compiler-only-implementation.md)
 - **Plan de operaciones aprobado:** [`PLAN-002`](../plans/002-root-immutable-operations.md)
+- **Plan de runtime aprobado:** [`PLAN-003`](../plans/003-controlled-runtime.md)
+- **Resolución de renderers:** [`ADR-007`](../adrs/007-resolucion-renderers-testers.md)
 
 ## 1. Propósito
 
@@ -127,6 +129,8 @@ El adaptador Angular será responsable de:
 - Obtener por defecto `LOCALE_ID`.
 - Proyectar snapshots a Signals.
 - Exponer operaciones mediante outputs o callbacks idiomáticos.
+- Resolver renderers mediante registrations y testers puntuados sobre
+  `FieldDefinition`, conforme a ADR-007.
 - Crear y destruir el runtime con el ciclo de vida del componente.
 - Generar identificadores DOM a partir de `formId` y la clave lógica del campo.
 
@@ -723,11 +727,11 @@ La implementación por defecto devolverá el texto sin modificar. Cambiar el loc
 export interface ControlledFormRuntimeOptions<TData extends object> {
   readonly formId: string;
   readonly definition: FormDefinition;
+  readonly schema: unknown;
   readonly value: Readonly<TData>;
   readonly baselineValue: Readonly<TData>;
   readonly locale: string;
   readonly validator: SchemaValidator;
-  readonly textResolver: TextResolver;
   readonly validationVisibility?: ValidationVisibility;
 }
 ```
@@ -973,21 +977,25 @@ La implementación mínima se considerará válida cuando demuestre:
 - Actualiza parcialmente el baseline.
 - Los campos de otros pasos conservan su dirty.
 
-## 29. Decisiones abiertas inmediatas
+## 29. Estado de decisiones inmediatas
 
-Antes de implementar deberán resolverse, como mínimo:
+Las decisiones que inicialmente bloqueaban la implementación están cerradas:
 
-1. Forma definitiva del puerto `SchemaValidator` y su acceso al esquema fuente.
-2. Estructura de paquetes y nombres públicos iniciales.
-3. Estrategia de resolución de renderers para el walking skeleton.
-4. Política de aislamiento y reporte de excepciones lanzadas por listeners.
+1. Puerto `SchemaValidator` y schema fuente: PLAN-003.
+2. Paquete y nombre público inicial: ADR-006.
+3. Resolución de renderers: ADR-007.
+4. Aislamiento y reporte de listeners: PLAN-003.
 
-Estas preguntas no invalidan las decisiones de comportamiento descritas en esta SPEC.
+Antes de M4 debe resolverse D-027, la estrategia concreta de instanciación
+dinámica en Angular. Las demás decisiones aplazadas conservan su estado en el
+registro correspondiente.
 
 ## 30. Historial
 
 | Versión | Fecha      | Cambio                                                                                                            |
 | ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| 0.1.8   | 13-07-2026 | Se incorpora ADR-007 y se cierra la estrategia neutral de resolución de renderers.                                |
+| 0.1.7   | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-003 y el schema fuente en las opciones del runtime.                     |
 | 0.1.6   | 13-07-2026 | Se incorpora el contrato diagnóstico aprobado de PLAN-002.                                                        |
 | 0.1.5   | 13-07-2026 | Se limita M2 a propiedades raíz y se define `ApplyOperationResult`.                                               |
 | 0.1.4   | 13-07-2026 | Se incorpora el contrato diagnóstico normativo y la referencia al PLAN-001 aprobado.                              |

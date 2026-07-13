@@ -1,0 +1,18 @@
+{
+  "value": {},
+  "baselineValue": {},
+  "validatorMode": "required-name",
+  "actions": [
+    {
+      "type": "show",
+      "scope": {
+        "id": "step",
+        "paths": [["name"]]
+      }
+    },
+    {
+      "type": "hide",
+      "scopeId": "step"
+    }
+  ]
+}

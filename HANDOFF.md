@@ -1,12 +1,12 @@
 # Schema Engine — Codex Handoff
 
 - **Handoff date:** 13 July 2026
-- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.6`, status `Draft`
-- **Implementation status:** M1 compiler and M2 root immutable operations completed in `packages/core`; runtime, validators, adapters, and renderers are not implemented.
+- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.8`, status `Draft`
+- **Implementation status:** M1 compiler, M2 root immutable operations, and M3 controlled runtime completed in `packages/core`; framework adapters and renderers are not implemented.
 
 ## 1. Current objective
 
-Review and approve proposed PLAN-003 for the M3 controlled runtime.
+Resolve Angular renderer instantiation D-027 and prepare the M4 adapter plan.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -47,11 +47,14 @@ The following pre-SPEC ADRs are pending review and must not be treated as
 authoritative where they conflict with `SPEC-001`:
 
 - Global ADR-002: versioning aligned directly with Angular major versions.
-- Global ADR-004: a renderer registry based on a simple static dictionary.
 - Angular ADR-001: statements coupling Signals, RxJS, Zone.js, and zoneless behavior.
 - Angular ADR-002: an empty `ViewContainerRef` placeholder that records no accepted decision.
 
 Do not rewrite these ADRs as part of an unrelated task. Surface conflicts explicitly and handle them through a dedicated review.
+
+ADR-004 has now been superseded by accepted ADR-007. Renderer selection uses
+deterministic scored testers over normalized `FieldDefinition` in the adapter;
+the core owns no component registry.
 
 ## 5. Accepted architecture increment
 
@@ -130,15 +133,15 @@ malformed-path, form-definition-shape, and diagnostic-order behavior. M2
 production code is exported from `@rabassoft/schema-engine` with 27 operation
 fixtures and focused unit coverage.
 
-## 8. Proposed controlled-runtime plan
+## 8. Completed controlled-runtime plan
 
 [`PLAN-003: Controlled form runtime`](.ai-docs/plans/003-controlled-runtime.md)
-is Proposed and awaiting formal review. It closes the source-schema access and
-listener-isolation directions while keeping M3 framework-neutral and
-application-controlled.
+was formally reviewed, approved, implemented, and completed. It closes source-schema access,
+creation/subscription results, diagnostic parameters, and listener isolation
+while keeping M3 framework-neutral and application-controlled.
 
 ## 9. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.6, accepted ADR-005 and ADR-006, completed PLAN-001 and PLAN-002, proposed PLAN-003, the deferred-decisions register, and the ADR index. Formally review PLAN-003 for decision completeness, especially validator source-schema access, creation/subscription result contracts, listener exceptions, validation normalization, scopes, structural sharing, diagnostics, and fixtures. Do not implement M3 during the review.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.8, accepted ADR-005, ADR-006, and ADR-007, completed PLAN-001, PLAN-002, and PLAN-003, the deferred-decisions register, and the ADR index. Review the completed M3 correction and verification evidence. Do not implement M4. Resolve D-027 for Angular renderer instantiation, then propose a decision-complete PLAN-004 for the Angular adapter.
