@@ -91,6 +91,23 @@ Cada decisión debe registrar:
 - **Pregunta:** ¿Cómo deducir selectores, radios, fechas, emails y renderers especializados?
 - **Motivo:** Depende del sistema definitivo de resolución de renderers.
 - **Retomar cuando:** El registry/tester básico esté implementado.
+- **Revisión de frontera:** La revisión del 13 de julio de 2026 confirma que
+  esta entrada agrupa tres responsabilidades distintas. `enum` y `const` son
+  assertions sobre los datos; `format` es una annotation por defecto en Draft
+  2020-12; y la elección entre selector, radios u otro renderer es una política
+  de presentación posterior sobre una definición normalizada.
+- **Dirección de trabajo aprobada:** Elaborar primero una decisión acotada de
+  `enum`; mantener `const` y `format` aplazados hasta que tengan casos de uso y
+  contratos propios. Esta aprobación solo autoriza preparar la ADR y no cambia
+  SPEC-001, ADR-005 ni la implementación.
+- **Propuesta activa:** [`ADR-011`](../adrs/011-enum-string-normalizado-select-nativo.md)
+  plantea `enum` solo para campos string, choices normalizados, labels desde UI
+  Schema y un select Angular nativo. D-008 permanece Candidate hasta la
+  aceptación explícita de la ADR.
+- **Revisión formal:** Las tres correcciones sobre contexto de textos,
+  validación segura de choices manuales y labels accesibles no blank fueron
+  incorporadas en ADR-011 revision 1. La repetición de las ocho áreas pasó sin
+  hallazgos; la propuesta sigue pendiente de aceptación explícita.
 
 ## D-009: Null y campos triestado
 

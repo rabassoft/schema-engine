@@ -18,7 +18,8 @@ M1 through M5 completed; no implementation task active.
 
 ## Current objective
 
-Prepare the next product decision after completing the D-024 boundary review.
+Decide whether to accept or revise ADR-011 revision 1 after its repeated formal
+review passed all eight acceptance areas.
 
 ## Latest completed work
 
@@ -167,21 +168,51 @@ Prepare the next product decision after completing the D-024 boundary review.
 - Committed the reviewed ADR-009/010 acceptance records, ADR-002 supersession,
   D-028/D-029 promotions, and D-024 boundary review on `develop` with repository
   identity `Rabassoft <ricard@rabassoft.com>`.
+- Reviewed D-008 against Draft 2020-12, SPEC-001, ADR-005/007/009, and the
+  implemented compiler and renderer contracts.
+- Separated `enum` and `const` data assertions from default-annotation
+  `format`, and separated all three from the adapter-owned choice of visual
+  renderer.
+- Proposed promoting only a narrowly scoped `enum` increment; no deferred
+  capability, public contract, or implementation was changed.
+- Received explicit approval to separate D-008 and drafted proposed ADR-011 for
+  string-only enum choices, UI Schema labels, text projection, validation
+  ownership, and a higher-ranked native Angular select renderer.
+- Kept `const`, `format`, non-string enums, radios, clearing to missing, SPEC-001,
+  and all implementation unchanged pending formal review and acceptance.
+- Formally reviewed ADR-011's eight acceptance areas and confirmed the overall
+  string-enum, external-validation, controlled-state, renderer-rank, public-API,
+  and exclusion direction.
+- Identified three corrections required before acceptance: structurally
+  exclusive choice/issue text contexts, safe ownership for malformed manual
+  `choices`, and non-empty accessible labels including the empty-string value.
+- Kept ADR-011 Proposed and D-008 Candidate; no SPEC, accepted ADR, package, or
+  implementation contract changed.
+- Applied all three ADR-011 review corrections: mutually exclusive text
+  contexts, descriptor-safe compiler/runtime choice validation without changing
+  PLAN-002, and non-blank accessible choice-label fallbacks.
+- Repeated all eight acceptance checks with no remaining findings; retained
+  ADR-011 Proposed revision 1 and D-008 Candidate pending an explicit decision.
 
 ## In progress
 
-None. No implementation task is active.
+- None. No implementation task is active.
 
 ## Next action
 
-Review D-008 (`enum`, `const`, and `format`) as the smallest next product
-candidate now that renderer resolution is implemented. Separate data semantics,
-compiler contracts, validation ownership, and renderer selection before
-drafting an ADR or implementation plan.
+Explicitly accept or revise ADR-011 revision 1. Acceptance may partially revise
+ADR-005's enum classification, promote the enum portion of D-008, and authorize
+a SPEC/implementation plan, but must not itself implement the increment.
 
 ## Blockers
 
-None. There is no implementation blocker or remaining documentation conflict.
+No implementation blocker. Promoting `format` as validation or normalized
+renderer metadata would conflict with accepted ADR-005, which currently treats
+it as an ignored annotation with `IGNORED_SCHEMA_KEYWORD`; that policy must not
+change without an explicit ADR revision. SPEC-001 also explicitly excludes all
+three keywords until a promotion is approved. Proposed ADR-011 intentionally
+does not override either document before acceptance. No unresolved review
+finding or implementation blocker remains.
 
 ## Open questions
 
@@ -192,6 +223,11 @@ None. There is no implementation blocker or remaining documentation conflict.
 - The D-024 Angular validation bridge remains deferred until a concrete consumer
   defines root-versus-field scope, control context, and normalization of codes,
   parameters, and paths. Custom renderer registration is no longer open.
+- None within ADR-011 revision 1 after the repeated formal review.
+- Whether `const` should eventually mean fixed display, readonly presentation,
+  hidden data, or no renderer at all.
+- Whether any supported `format` should remain presentation-only or opt into
+  assertion semantics through an explicit validator policy.
 
 ## Verification status
 
@@ -263,6 +299,35 @@ None. There is no implementation blocker or remaining documentation conflict.
   `ValidatorFn`, and the stable Signal Forms `Validator` contract.
 - D-024 and the next-candidate list consistently record the bridge as Deferred
   and D-008 as the next decision; no public contract or implementation changed.
+- D-008 was checked against the Draft 2020-12 validation vocabularies, SPEC-001,
+  ADR-005/007/009, compiler keyword classification and `FieldDefinition`, the
+  unsupported-`enum` fixture, and native renderer testers.
+- The review confirmed that `enum` and `const` remain blocking unsupported
+  keywords, `format` remains an ignored annotation warning, and no raw schema
+  reaches renderers.
+- No code test was required for this documentation-only review; formatting,
+  local-link validation, and diff integrity were rerun.
+- Proposed ADR-011 was checked against Draft 2020-12, SPEC-001, ADR-005/007/009,
+  current public contracts, compiler diagnostics, text projection, renderer
+  ranks, controlled-state rules, and D-010.
+- The ADR index and D-008 register consistently retain Proposed/Candidate
+  states; SPEC-001, ADR-005, packages, and implementation remain unchanged.
+- The formal review covered all eight ADR-011 acceptance areas and found three
+  correctable contract gaps; no contradiction was found in validation
+  ownership, controlled state, renderer resolution, API classification, or
+  deferred exclusions.
+- Official Angular 22 Signal Forms documentation confirms native select support
+  while keeping the approved private leaf-buffer boundary; this does not change
+  the three review findings.
+- ADR-011 revision 1 preserves `choice`/`issue` exclusivity, assigns manual
+  choice validation to runtime creation, leaves PLAN-002 operations unchanged,
+  and guarantees non-blank source/resolved choice labels.
+- The repeated review passed all eight areas: scope, normalization,
+  diagnostics, external validation, controlled state, texts/accessibility,
+  renderer/API boundaries, and exclusions.
+- ADR-011, the ADR index, D-008, STATUS, WORKLOG, and HANDOFF consistently retain
+  Proposed/Candidate states pending explicit acceptance; SPEC-001, ADR-005,
+  packages, and implementation remain unchanged.
 
 ## Relevant documents
 
@@ -273,6 +338,7 @@ None. There is no implementation blocker or remaining documentation conflict.
 - `.ai-docs/adrs/008-instanciacion-renderers-angular.md`
 - `.ai-docs/adrs/009-politica-api-publica-estabilidad.md`
 - `.ai-docs/adrs/010-versionado-semver-compatibilidad.md`
+- `.ai-docs/adrs/011-enum-string-normalizado-select-nativo.md`
 - `.ai-docs/plans/001-compiler-only-implementation.md`
 - `.ai-docs/plans/002-root-immutable-operations.md`
 - `.ai-docs/plans/003-controlled-runtime.md`

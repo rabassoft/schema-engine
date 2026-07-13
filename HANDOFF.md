@@ -8,8 +8,12 @@
 
 No implementation task is active. ADR-010 revision 1 is accepted, pre-SPEC
 ADR-002 is Superseded, and D-028 is Promoted. D-024's custom-renderer concern is
-resolved while its Angular validation bridge remains Deferred. Review D-008 as
-the smallest next product decision.
+resolved while its Angular validation bridge remains Deferred. D-008 has been
+reviewed and split. Proposed ADR-011 now defines the minimal string-enum
+increment while keeping `const` and `format` deferred. Its three formal-review
+corrections are applied and the repeated eight-area review passed. The next
+action is an explicit acceptance or revision decision; no implementation task
+is active.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -213,8 +217,34 @@ field context, and neither directly produces the normalized whole-model issues
 required by core `SchemaValidator`. Revisit only with a concrete consumer that
 defines root-versus-field scope and canonical error/path mapping.
 
-## 14. Recommended next Codex prompt
+## 14. Reviewed D-008 boundary and proposed enum decision
+
+D-008 currently groups three different concerns. Draft 2020-12 defines `enum`
+and `const` as assertions over instance values, while the standard dialect uses
+`format` as an annotation by default. Renderer selection is a separate adapter
+policy applied only after the compiler has produced normalized metadata.
+
+The approved split produced
+[`ADR-011: String enum normalization and native select renderer`](.ai-docs/adrs/011-enum-string-normalizado-select-nativo.md),
+currently Proposed. It limits the first increment to unique non-empty string
+enums, normalizes immutable choices, obtains optional labels from UI Schema,
+extends text resolution for choices, preserves external validation ownership,
+and specializes the Angular native renderer through ADR-007 ranks.
+
+`const` remains deferred until fixed-value presentation has a concrete use
+case. `format` remains deferred and ignored with a warning under ADR-005;
+promoting it requires explicitly revising that accepted policy. Non-string
+enums, radios and clearing back to missing also remain outside ADR-011.
+
+No implementation task is active. D-008 remains Candidate and ADR-011 remains
+Proposed revision 1. Its formal review corrections now preserve exclusive
+choice/issue text contexts, safely validate compiled and manually supplied
+choices without broadening PLAN-002, and guarantee non-blank accessible labels
+including the empty-string value. The repeated eight-area review passed without
+remaining findings.
+
+## 15. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-010, completed PLAN-001 through PLAN-005, D-008 in the deferred-decisions register, and the ADR index. Review D-008 as the smallest next product candidate; separate `enum`, `const`, and `format` data semantics, compiler contracts, validation ownership, and renderer selection before drafting an ADR or implementation plan.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-010, proposed ADR-011 revision 1 and its repeated formal review, completed PLAN-001 through PLAN-005, D-008/D-010 in the deferred-decisions register, and the ADR index. Decide whether to accept or revise ADR-011. If accepted, synchronize ADR-005, D-008, STATUS, WORKLOG, HANDOFF, and SPEC planning state without implementing the enum increment.

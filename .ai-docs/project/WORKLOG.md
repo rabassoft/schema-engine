@@ -2,6 +2,125 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — ADR-011 review corrections completed
+
+### Completed
+
+- Preserved mutually exclusive `choice` and `issue` branches in the proposed
+  `TextResolutionContext` contract.
+- Assigned descriptor-safe validation of compiled enums and manually supplied
+  choices to compiler/runtime creation while explicitly preserving PLAN-002's
+  minimum `applyFormOperation()` checks.
+- Required non-blank choice labels, defined a visible two-quote fallback for the
+  empty-string value plus JSON-literal fallbacks for other blank values, and
+  isolated blank resolver results with diagnostics and a safe source fallback.
+- Repeated all eight ADR-011 acceptance checks with no remaining findings.
+- Kept ADR-011 Proposed revision 1 and D-008 Candidate; SPEC-001, ADR-005,
+  packages, and implementation remain unchanged.
+
+### Verification
+
+- Rechecked the corrected contracts against current compiler/runtime descriptor
+  handling, PLAN-002/003, text diagnostics, renderer ranks, package entry
+  points, Draft 2020-12, HTML select behavior, and Angular 22 Signal Forms.
+- Confirmed consistent Proposed/Candidate state across ADR-011, the ADR index,
+  D-008, STATUS, WORKLOG, and HANDOFF.
+- Ran formatting, Markdown-link validation, and `git diff --check`; no code test
+  was required for the documentation-only correction.
+
+### Pending
+
+- Explicitly accept or revise ADR-011 revision 1. Acceptance may update
+  ADR-005, D-008, and SPEC planning state but must not implement the increment.
+
+## 2026-07-13 — ADR-011 formal review completed with corrections
+
+### Completed
+
+- Reviewed all eight ADR-011 acceptance areas against Draft 2020-12,
+  SPEC-001, ADR-005/007/009, current compiler/runtime/operation contracts,
+  Angular text projection, native renderer resolution, Signal Forms select
+  support, and D-010.
+- Confirmed string-only scope, external validation ownership, controlled-state
+  behavior, deterministic renderer specialization, public API classification,
+  and deferred exclusions.
+- Identified three corrections required before acceptance: preserve mutually
+  exclusive text-context members, validate malformed manually supplied choices
+  at an explicit safe boundary, and guarantee non-empty accessible option
+  labels including the empty-string domain value.
+- Kept ADR-011 Proposed and D-008 Candidate; SPEC-001, ADR-005 and all code
+  remain unchanged.
+
+### Verification
+
+- Rechecked native `<select>` support against current official Angular 22
+  Signal Forms documentation and enum/format semantics against official JSON
+  Schema Draft 2020-12 sources.
+- Inspected current public type exports, runtime and operation definition-shape
+  validation, text diagnostics, renderer ranks, and package entry points.
+- Ran formatting, Markdown-link validation, and `git diff --check`; no code test
+  was required for the documentation-only review.
+
+### Pending
+
+- Apply the three ADR-011 corrections and repeat all eight acceptance checks
+  before considering acceptance, D-008 promotion, or SPEC changes.
+
+## 2026-07-13 — ADR-011 string-enum decision proposed
+
+### Completed
+
+- Recorded explicit approval to split D-008 and drafted ADR-011 as Proposed.
+- Limited the proposed first increment to non-empty unique string enums with
+  immutable normalized choices and optional UI Schema labels.
+- Defined choice text resolution, external validation ownership, controlled
+  missing and invalid-value behavior, deterministic renderer ranks, internal
+  DOM tokens, and the public native select component boundary.
+- Kept `const`, `format`, non-string enums, radios, clearing to missing,
+  SPEC-001, ADR-005, packages, and implementation unchanged.
+- Added ADR-011 to the global index and linked the active proposal from D-008
+  while retaining Proposed/Candidate states.
+
+### Verification
+
+- Checked the proposal against Draft 2020-12, SPEC-001, ADR-005/007/009,
+  compiler keyword and diagnostic behavior, public field/text contracts,
+  Angular text projection and native renderer ranks, and D-010.
+- Ran formatting, Markdown-link validation, and `git diff --check`; no code test
+  was required for the documentation-only proposal.
+
+### Pending
+
+- Formally review ADR-011's eight acceptance areas before deciding whether to
+  accept it, partially revise ADR-005, promote D-008, or change SPEC-001.
+
+## 2026-07-13 — D-008 architectural boundary reviewed
+
+### Completed
+
+- Reviewed `enum`, `const`, and `format` against JSON Schema Draft 2020-12,
+  SPEC-001, ADR-005/007/009, and the implemented compiler-to-renderer boundary.
+- Confirmed that `enum` and `const` are data assertions, `format` is an
+  annotation by default, and visual renderer selection is an adapter concern
+  over normalized `FieldDefinition`.
+- Proposed promoting only a minimal `enum` increment while retaining `const`
+  and `format` as deferred work pending separate use cases and contracts.
+- Recorded the accepted ADR-005 conflict that prevents treating `format` as
+  validation or normalized renderer metadata without an explicit revision.
+
+### Verification
+
+- Inspected compiler keyword classification, normalized field contracts, the
+  unsupported-`enum` conformance fixture, and native renderer testers.
+- Confirmed that the review changed documentation only and activated no
+  deferred capability or public contract.
+- Ran formatting, Markdown-link validation, and `git diff --check`.
+
+### Pending
+
+- Approve or revise the D-008 split. If approved, draft ADR-011 for the minimal
+  `enum` contract before changing SPEC-001 or implementation.
+
 ## 2026-07-13 — API and versioning decisions committed
 
 ### Completed

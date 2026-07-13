@@ -29,6 +29,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
 9. [ADR 009: Límite de API pública y política de estabilidad](./009-politica-api-publica-estabilidad.md) — **Accepted.**
 10. [ADR 010: Versionado independiente, SemVer Stable y compatibilidad explícita](./010-versionado-semver-compatibilidad.md) — **Accepted.**
+11. [ADR 011: Enum de strings normalizado y renderer select nativo](./011-enum-string-normalizado-select-nativo.md) — **Proposed revision 1; las tres correcciones fueron aplicadas y la revisión repetida pasó sin hallazgos; D-008 permanece Candidate.**
 
 ## 4. ADRs específicos de Angular
 
