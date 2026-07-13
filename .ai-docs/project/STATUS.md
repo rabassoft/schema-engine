@@ -6,7 +6,7 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: initial baseline committed on `main`; local `develop` created from that baseline; private `origin` configured at `rabassoft/schema-engine`; branches not pushed yet
+- Repository revision: remote branch strategy established at `a324d83`; `develop` contains a local persistent-state update not yet pushed; GitHub default branch is `main`
 
 ## Current phase
 
@@ -18,6 +18,9 @@ Review and approve PLAN-001 for the minimal compiler-only implementation.
 
 ## Latest completed work
 
+- Recorded the completed Git/GitHub setup in the persistent project state on `develop`.
+- Pushed `main`, configured its upstream, and made it GitHub's default stable/deployment branch.
+- Verified `develop` was pushed to GitHub at `a324d83` and is tracking `origin/develop`.
 - Corrected the repository-local Git identity and initial commit attribution to `Rabassoft <ricard@rabassoft.com>`.
 - Created the initial repository baseline on `main` and local integration branch `develop`.
 - Documented `main` as stable/deployment-ready and `develop` as the development integration branch.
@@ -40,9 +43,7 @@ No implementation task is currently active. PLAN-001 is proposed and awaiting re
 
 ## Next action
 
-Review PLAN-001 for compatibility, decision completeness, diagnostic coverage,
-fixtures, and scope; then decide whether to approve it. Do not implement the
-compiler before approval.
+Review and approve PLAN-001; do not implement the compiler before plan approval.
 
 ## Blockers
 
@@ -55,14 +56,13 @@ None.
 
 ## Verification status
 
+- Remote branch strategy verified: `main` and `develop` exist at `a324d83`, track their matching upstreams, and GitHub defaults to `main`.
+- Current checkout is `develop`; its persistent-state commit is not yet pushed.
 - Initial commit author and committer verified as `Rabassoft <ricard@rabassoft.com>`.
 - Initial snapshot reviewed for ignored files and common credential patterns before commit.
-- Local `main` and `develop` point to the same initial baseline; checkout is on `develop`; no branch has been pushed yet.
 - GitHub authentication verified as `rabassoft`; `origin` points to the private `rabassoft/schema-engine` repository.
-- Confirmed the remote repository is empty because no commit or push has been performed.
 - `.gitignore` patterns verified; `.DS_Store`, dependencies, generated output, caches, local environment files, logs, and IDE-local metadata are ignored.
 - Confirmed `.env.example`, `pnpm-lock.yaml`, and conformance fixtures remain trackable.
-- Git work tree verified on branch `main`; all trackable project files remain untracked and no commit was created.
 - Documentation conflicts normalized and reviewed manually.
 - ADR-005 formally reviewed and accepted after resolving its validator-boundary and keyword-classification ambiguities.
 - ADR-006 accepted for `packages/core` and `@rabassoft/schema-engine`.

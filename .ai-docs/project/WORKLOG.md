@@ -2,6 +2,65 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — Repository setup state recorded
+
+### Completed
+
+- Recorded Git initialization, ignore policy, GitHub connection, commit attribution, and remote branch setup in persistent project state.
+- Created a documentation-only commit on `develop`.
+- Did not push the new documentation commit.
+
+### Verification
+
+- Confirmed only `STATUS.md` and `WORKLOG.md` changed after the initial baseline.
+- Confirmed the documentation diff passes `git diff --check`.
+- Confirmed `develop` is ahead of `origin/develop` after the commit.
+
+### Pending
+
+- Review and approve PLAN-001 before compiler implementation.
+- Push the documentation commit only when explicitly requested.
+
+## 2026-07-13 — Remote branch strategy completed
+
+### Completed
+
+- Pushed local `main` to `origin/main` at `a324d83`.
+- Configured local `main` to track `origin/main`.
+- Set `main` as the GitHub default stable/deployment branch.
+- Kept `develop` as the checked-out integration branch tracking `origin/develop`.
+
+### Verification
+
+- Confirmed remote `main` and `develop` both point to `a324d83`.
+- Confirmed both local branches track their matching upstreams.
+- Confirmed GitHub reports `main` as the default branch.
+
+### Pending
+
+- Commit the persistent-state updates currently on `develop`.
+- Review and approve PLAN-001 before compiler implementation.
+
+## 2026-07-13 — Remote push state verified
+
+### Completed
+
+- Verified `origin/develop` exists at `a324d83` and local `develop` tracks it.
+- Verified local `main` also points to `a324d83`.
+- Identified that `origin/main` has not been pushed.
+- Identified that GitHub selected `develop` as the default branch.
+
+### Verification
+
+- Compared local refs with `git ls-remote`.
+- Queried the GitHub repository default branch.
+
+### Pending
+
+- Push `main` and change the GitHub default branch to `main` to match the documented workflow.
+- Commit the persistent-state update after the remote branch setup is complete.
+- Review and approve PLAN-001 before compiler implementation.
+
 ## 2026-07-13 — Initial commit attribution corrected
 
 ### Completed
