@@ -1,0 +1,41 @@
+import { describe, expect, expectTypeOf, it } from 'vitest';
+import type {
+  FieldUiSchema,
+  StringChoiceDefinition,
+  StringFieldDefinition,
+} from '../src/index.js';
+
+describe('public string choice contracts', () => {
+  it('exports immutable choice, string-field, and UI metadata shapes', () => {
+    const choice = {
+      value: 'draft',
+      label: 'status.draft',
+    } satisfies StringChoiceDefinition;
+    const field = {
+      key: 'status',
+      name: 'status',
+      path: ['status'],
+      required: true,
+      label: 'Status',
+      kind: 'string',
+      constraints: {},
+      choices: [choice],
+    } satisfies StringFieldDefinition;
+    const ui = {
+      enumLabels: { draft: 'status.draft' },
+    } satisfies FieldUiSchema;
+
+    expect(field.choices).toEqual([choice]);
+    expect(ui.enumLabels).toEqual({ draft: 'status.draft' });
+    expectTypeOf<StringChoiceDefinition>().toEqualTypeOf<{
+      readonly value: string;
+      readonly label: string;
+    }>();
+    expectTypeOf<StringFieldDefinition['choices']>().toEqualTypeOf<
+      readonly StringChoiceDefinition[] | undefined
+    >();
+    expectTypeOf<FieldUiSchema['enumLabels']>().toEqualTypeOf<
+      Readonly<Record<string, string>> | undefined
+    >();
+  });
+});

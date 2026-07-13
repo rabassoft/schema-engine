@@ -2,6 +2,76 @@
 
 This document is append-only. New entries must be added at the top.
 
+Read only the newest entry by default. Search older entries by date, milestone,
+plan, ADR, or deferred-decision identifier when historical evidence is needed;
+the full file is not part of routine task startup.
+
+## 2026-07-13 — Persistent context workflow compacted
+
+### Completed
+
+- Reduced `STATUS.md` to a compact canonical checkpoint containing only the
+  current phase, objective, active task, latest outcomes, exact next action,
+  blockers, open questions, verification, and task-document map.
+- Replaced the historical state duplication in `HANDOFF.md` with a stable
+  context-recovery procedure suitable for a fresh Codex task.
+- Updated `AGENTS.md` to load the compact status completely and select only the
+  task-relevant SPEC, ADR, plan, deferred-decision, and worklog sections.
+- Preserved every existing append-only worklog entry and documented targeted
+  latest-entry and historical-search reads.
+- Kept the current M6 state, SPEC-001 Draft v0.1.13, approved PLAN-006 revision
+  1, deferred boundaries, and uncommitted step-1 implementation unchanged.
+- Left `ROADMAP.md`, SPECs, ADRs, plan contracts, production code, and package
+  configuration unchanged by this documentation-memory repair.
+
+### Verification
+
+- Repository formatting passed.
+- Every local link in all 31 Markdown files resolved.
+- Searches confirmed that current objective, in-progress state, latest work,
+  exact next action, and blockers are owned only by `STATUS.md`.
+- `STATUS.md`, `HANDOFF.md`, and `AGENTS.md` now total about 1,700 words, down
+  from about 5,600, while the complete append-only history remains available.
+- `git diff --check` passed.
+
+### Pending
+
+- Implement PLAN-006 step 2 exactly as recorded in `STATUS.md`.
+
+## 2026-07-13 — M6 PLAN-006 step 1 completed
+
+### Completed
+
+- Marked M6 active under approved PLAN-006 revision 1.
+- Added public experimental `StringChoiceDefinition` with readonly `value` and
+  `label` members.
+- Extended `StringFieldDefinition` with optional readonly `choices` and
+  `FieldUiSchema` with optional readonly `enumLabels`.
+- Re-exported `StringChoiceDefinition` from the existing core root entry point
+  without adding an entry point, export-map change, dependency, or Stable API.
+- Added a focused contract test that imports all three extended contracts from
+  the public core index and fixes their readonly TypeScript shapes.
+
+### Verification
+
+- Workspace formatting, lint, typecheck, and builds passed, including Angular
+  partial compilation.
+- The full suite passed: 11 files and 141 tests, comprising 105 core and 36
+  Angular tests.
+- Package smoke passed for both public root entry points.
+- Generated declarations expose `StringChoiceDefinition`, `choices`, and
+  `enumLabels` from the expected public modules.
+- All 31 local Markdown files resolve their local links and `git diff --check`
+  passes.
+- No compiler parsing, runtime validation, Angular code, or deferred capability
+  entered step 1.
+
+### Pending
+
+- Implement PLAN-006 step 2: enum keyword classification, descriptor-safe enum
+  and `enumLabels` parsing, immutable choice construction, conformance fixtures,
+  and cascade-suppression tests.
+
 ## 2026-07-13 — PLAN-006 revision 1 approved
 
 ### Completed

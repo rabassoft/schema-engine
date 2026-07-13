@@ -2,115 +2,102 @@
 
 ## Project purpose
 
-Schema Engine is a framework-agnostic ecosystem for generating metadata-driven user interfaces.
+Schema Engine is a framework-agnostic ecosystem for metadata-driven user
+interfaces. Its first increment is a controlled dynamic-form runtime based on
+JSON Schema and UI Schema. Angular is the first reference adapter, but it must
+not own the domain model, validation, operations, or runtime behavior.
 
-The first product increment is a controlled dynamic-form runtime based on JSON Schema and UI Schema. Angular is the first reference adapter, but Angular must not own the domain model, validation model, operations, or runtime behavior.
+## Context-loading workflow
 
-## Sources of truth
+Repository documentation is persistent project memory; chat history is not a
+source of truth. At the start of every task:
 
-Before proposing or implementing architectural changes, read these files in order:
+1. Read `.ai-docs/project/STATUS.md` completely.
+2. Read `HANDOFF.md` when orienting in a fresh task or when recovery rules are
+   needed; it contains stable guidance, never current status.
+3. Inspect `git status --short --branch` and the scoped working-tree diff.
+4. Read the task-relevant SPEC sections and any sections explicitly named by
+   `STATUS.md`. Read the full SPEC before changing architecture or public
+   contracts.
+5. Use `.ai-docs/adrs/000-index.md` to select and read only applicable ADRs.
+6. Search `.ai-docs/roadmap/deferred-decisions.md` for capabilities or decision
+   identifiers touched by the task.
+7. Read the active plan sections named by `STATUS.md`. Read the entire plan
+   before approving it, changing its contract, or declaring it complete.
 
-1. `HANDOFF.md`
-2. `.ai-docs/specs/001-controlled-form-runtime.md`
-3. `.ai-docs/roadmap/deferred-decisions.md`
-4. `.ai-docs/adrs/000-index.md` and the relevant ADRs
+Do not read the whole append-only `WORKLOG.md` by default. Read its newest entry
+when more detail about the current dirty checkpoint is needed; search historical
+entries by identifier, milestone, or date when investigating the past.
 
-`SPEC-001` is the current primary source of truth. Existing ADRs predate it and must be treated as subject to review when they conflict with the specification.
+`STATUS.md` is the canonical current state. SPEC-001 is the primary behavioral
+source of truth. Pre-SPEC ADRs are subject to review when they conflict with it.
+When authoritative documents conflict, stop and report the conflict rather than
+silently choosing one.
 
 ## Architectural constraints
 
-- Keep the core independent from Angular, React, Vue, Svelte, RxJS, the DOM, and browser globals.
-- Treat the application as the only source of truth for `value` and `baselineValue`.
-- Use incremental, strict form operations instead of mutating application state.
-- Expose framework-neutral immutable snapshots and subscriptions from the runtime.
-- Keep validation implementations replaceable and normalize their results to core contracts.
-- Do not make renderers interpret raw JSON Schema; they consume normalized definitions.
-- Keep persistence, submit flows, HTTP calls, and saving states outside the runtime.
-- Do not implement items listed in `deferred-decisions.md` unless the task explicitly promotes one of them through a SPEC, ADR, or approved implementation plan.
-- Do not silently change public contracts or confirmed architectural decisions.
+- Keep core independent from Angular, React, Vue, Svelte, RxJS, the DOM, and
+  browser globals.
+- Treat the application as the only source of truth for `value` and
+  `baselineValue`.
+- Use incremental strict operations; expose immutable framework-neutral
+  snapshots and subscriptions.
+- Keep validation replaceable and normalize external results to core contracts.
+- Renderers consume normalized definitions, never raw JSON Schema.
+- Keep persistence, submit flows, HTTP calls, and saving states outside runtime.
+- Do not implement a deferred item unless the task explicitly promotes it
+  through a SPEC, ADR, or approved plan.
+- Do not silently change public contracts or accepted decisions.
 
-## Working process
+## Current prototype boundary
 
-For significant architectural or implementation work:
+Only root object schemas; primitive `string`, `number`, `integer`, and `boolean`
+fields; the SPEC-001 JSON/UI Schema subset; synchronous external validation;
+controlled state; and Angular native HTML controls are in scope.
 
-1. Read the relevant specification and ADRs.
-2. Identify contradictions, assumptions, and unresolved decisions.
-3. Propose the smallest useful implementation or documentation increment.
-4. Wait for approval when the task changes architecture or public contracts.
-5. Implement only the approved scope.
-6. Add unit tests and conformance fixtures.
-7. Run formatting, linting, type checking, and tests when those tools exist.
-8. Report any conflict between code and documentation.
-9. Update the relevant SPEC, ADR, or deferred-decision entry when a decision changes status.
+Do not add nested objects, arrays, composition, async validation, optimistic
+state, advanced layouts, visual builders, plugins, undo/redo, or commercial
+features to the initial increment.
 
-## Current scope restrictions
+## Delivery workflow
 
-The initial prototype supports only:
+Before substantial changes:
 
-- Root object schemas.
-- Primitive fields: `string`, `number`, `integer`, and `boolean`.
-- The explicit JSON Schema and UI Schema subset defined in `SPEC-001`.
-- Synchronous validation through an external adapter.
-- Controlled state ownership.
-- Angular with native HTML controls as the first reference adapter.
+1. confirm consistency with the relevant SPEC, accepted ADRs, approved plan,
+   and deferred boundaries;
+2. identify the smallest deliverable;
+3. update only the `In progress` section of `STATUS.md`;
+4. obtain approval before changing architecture or public contracts.
 
-Do not add nested objects, arrays, schema composition, async validation, optimistic state, advanced layouts, visual builders, plugins, undo/redo, or commercial features in the initial increment.
+During implementation, preserve unrelated dirty changes, implement only the
+approved scope, add unit tests and conformance fixtures, and report any
+code/documentation conflict.
 
-## Documentation language
+At task completion:
 
-Keep code, public API names, diagnostics, and technical identifiers in English. Existing architecture documentation may remain in Spanish unless a task explicitly requests translation.
+1. run applicable formatting, linting, type checks, tests, builds, package
+   checks, link checks, and diff checks;
+2. compact `STATUS.md` to the present state only: checkpoint, current objective,
+   no active task, latest 3–5 completed outcomes, exact next action, blockers,
+   open questions, latest verification, and a task-document map;
+3. prepend one dated entry to `WORKLOG.md` without rewriting old entries;
+4. update `ROADMAP.md` only when a milestone changes;
+5. update a SPEC, ADR, plan, or deferred entry only when behavior or decision
+   state changes;
+6. do not mark work complete when verification fails;
+7. do not commit or push unless explicitly requested.
 
-## Persistent project state
+## Document responsibilities
 
-The repository documentation is the persistent project memory.
+- `STATUS.md`: present, kept compact.
+- `WORKLOG.md`: append-only past; targeted reads only.
+- `ROADMAP.md`: planned milestones.
+- SPECs: required behavior.
+- ADRs: architectural decisions.
+- Plans: approved delivery contract and checks.
+- `deferred-decisions.md`: intentionally postponed work.
+- `HANDOFF.md`: stable context-recovery procedure.
 
-Before starting any task, read:
-
-1. `.ai-docs/project/STATUS.md`
-2. The specification relevant to the task
-3. The applicable ADRs
-4. `.ai-docs/roadmap/deferred-decisions.md`
-
-`.ai-docs/project/STATUS.md` is the canonical source of truth for the
-current project state. Do not infer the current state solely from chat
-history or previous agent messages.
-
-## Task lifecycle
-
-At the beginning of a task:
-
-1. Confirm that the requested work is consistent with the current SPECs
-   and ADRs.
-2. Identify the smallest deliverable that satisfies the request.
-3. Update the `In progress` section of `.ai-docs/project/STATUS.md` before
-   making substantial changes.
-4. Do not activate anything listed in `deferred-decisions.md` without
-   explicit approval.
-
-At the end of every task:
-
-1. Run the applicable tests, linting and type checks.
-2. Update `.ai-docs/project/STATUS.md` with:
-   - latest completed work;
-   - current state;
-   - exact next action;
-   - blockers and open questions;
-   - verification performed.
-3. Add a dated entry at the top of `.ai-docs/project/WORKLOG.md`.
-4. Update `.ai-docs/project/ROADMAP.md` only when a milestone changes.
-5. Update a SPEC or ADR when implementation reveals a conflict.
-6. Do not mark work as complete when verification fails.
-7. Do not commit or push unless explicitly requested.
-
-## Documentation consistency
-
-- Do not duplicate the same status in several documents.
-- `STATUS.md` describes the present.
-- `WORKLOG.md` records the past.
-- `ROADMAP.md` describes planned milestones.
-- SPECs define required behavior.
-- ADRs explain architectural decisions.
-- `deferred-decisions.md` records intentionally postponed decisions.
-
-When two documents conflict, stop and report the conflict rather than
-silently choosing one.
+Keep code, public APIs, diagnostics, and technical identifiers in English.
+Existing architecture documentation may remain in Spanish unless translation is
+explicitly requested.

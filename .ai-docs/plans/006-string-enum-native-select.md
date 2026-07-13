@@ -901,9 +901,21 @@ v0.1.13, activate M6, or authorize implementation.
 - **Result:** Approved, revision 1.
 - **Specification:** Exact normative contracts promoted to SPEC-001 Draft
   v0.1.13.
-- **Milestone:** M6 remains planned and inactive until implementation actually
-  begins.
+- **Milestone at approval:** M6 remained planned and inactive until
+  implementation actually began.
 
 The explicit approval authorizes implementation within this plan's reviewed
 scope. It does not itself modify production code, activate deferred decisions,
 publish packages, promote any API to Stable, or start M6.
+
+## 22. Implementation start
+
+- **Date:** 2026-07-13
+- **Milestone:** M6 active.
+- **Completed:** Step 1 neutral contracts, root export, and focused
+  public-contract tests.
+- **Next:** Step 2 compiler classification, descriptor-safe enum/UI parsing,
+  immutable choices, fixtures, and cascade-suppression tests.
+
+No deferred capability, compiler behavior, runtime validation, Angular code,
+package version, publication setting, or API stability state changed in step 1.

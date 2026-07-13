@@ -17,5 +17,5 @@
   - Renderers nativos accesibles, Signal Forms locales, textos reemplazables y edición numérica localizada y controlada.
 - [ ] M6 — Enum de strings y select nativo
   - PLAN-006 revisión 1 aprobado y contratos promovidos a SPEC-001 Draft v0.1.13.
-  - Milestone planificado pero todavía inactivo; comenzará con una tarea de implementación explícita.
+  - Activo: paso 1 completado; contratos neutrales, exports y tests focalizados incorporados.
   - Choices normalizados, labels resolubles y renderer select controlado según ADR-011.

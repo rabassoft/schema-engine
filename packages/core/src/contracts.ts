@@ -13,6 +13,7 @@ export interface FieldUiSchema {
   readonly hint?: string;
   readonly tooltip?: string;
   readonly placeholder?: string;
+  readonly enumLabels?: Readonly<Record<string, string>>;
   readonly options?: {
     readonly decimalPlaces?: number;
     readonly showTrailingZeros?: boolean;
@@ -35,6 +36,11 @@ export interface BaseFieldDefinition {
   readonly placeholder?: string;
 }
 
+export interface StringChoiceDefinition {
+  readonly value: string;
+  readonly label: string;
+}
+
 export interface StringFieldDefinition extends BaseFieldDefinition {
   readonly kind: 'string';
   readonly constraints: {
@@ -42,6 +48,7 @@ export interface StringFieldDefinition extends BaseFieldDefinition {
     readonly maxLength?: number;
     readonly pattern?: string;
   };
+  readonly choices?: readonly StringChoiceDefinition[];
 }
 
 export interface NumberFieldDefinition extends BaseFieldDefinition {

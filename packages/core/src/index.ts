@@ -31,6 +31,7 @@ export type {
   SchemaValidator,
   SetValueOperation,
   SnapshotListener,
+  StringChoiceDefinition,
   StringFieldDefinition,
   SubscribeResult,
   TextResolutionContext,

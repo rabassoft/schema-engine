@@ -57,9 +57,8 @@ Las decisiones aplazadas se registran en [`deferred-decisions.md`](../roadmap/de
 
 ADR-011 y PLAN-006 incorporan al contrato del siguiente incremento un
 subconjunto de `enum` exclusivo de campos string, con choices normalizados y un
-renderer select nativo. Este contrato todavía no forma parte de la
-implementación completada M1-M5; M6 permanece inactivo hasta que comience una
-tarea de implementación. `const`, `format`, enums no string y las demás
+renderer select nativo. Este contrato amplía la implementación completada
+M1-M5 mediante el milestone M6. `const`, `format`, enums no string y las demás
 exclusiones de ADR-011 permanecen fuera de alcance.
 
 ## 4. Terminología
@@ -1343,14 +1342,12 @@ Reactive Forms, Template-driven Forms, compat, submit ni persistencia.
 ADR-011 y PLAN-006 revisión 1 están aceptados para el siguiente incremento.
 Esta versión de SPEC incorpora sus contratos normativos de `enum` string,
 choices, labels resolubles, validación estructural de definiciones manuales y
-renderer select nativo. M6 continúa planificado pero inactivo: aprobar el plan y
-promover el contrato no modifica por sí solo la implementación completada en
-M1-M5.
+renderer select nativo. M6 implementará esos contratos de forma incremental sin
+modificar el alcance completado de M1-M5.
 
-El inicio de M6 deberá activar el milestone y seguir la secuencia exacta de
-PLAN-006, empezando por los contratos neutrales y sus exports. D-010, el bridge
-de validación de D-024, D-036, D-037 y las demás decisiones aplazadas conservan
-su estado.
+M6 seguirá la secuencia exacta de PLAN-006, empezando por los contratos
+neutrales y sus exports. D-010, el bridge de validación de D-024, D-036, D-037 y
+las demás decisiones aplazadas conservan su estado.
 
 ## 30. Historial
 

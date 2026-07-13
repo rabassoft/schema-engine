@@ -98,7 +98,8 @@ Cada decisión debe registrar:
 - **Decisión:** ADR-011 acepta `enum` solo para campos string, choices
   normalizados, labels desde UI Schema y un select Angular nativo. PLAN-006
   revisión 1 está aprobado y sus contratos están promovidos a SPEC-001 Draft
-  v0.1.13; M6 todavía no ha comenzado.
+  v0.1.13. M6 está activo y su paso 1 de contratos neutrales está completado;
+  la compilación de enum comienza en el paso 2.
 - **Revisión formal:** Las tres correcciones sobre contexto de textos,
   validación segura de choices manuales y labels accesibles no blank fueron
   incorporadas en ADR-011 revision 1. La repetición de las ocho áreas pasó sin
@@ -360,6 +361,7 @@ Las entradas más cercanas a convertirse en ADR son:
 
 | Fecha      | Cambio                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 13-07-2026 | M6 comienza y completa el paso 1 de contratos neutrales de PLAN-006 sin activar otra decisión aplazada.                         |
 | 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                            |
 | 13-07-2026 | Se acepta ADR-011, D-008 se promueve y `const`/`format` se separan como D-036 y D-037 sin activar su implementación.            |
 | 13-07-2026 | D-024 registra custom renderers como resueltos por ADR-007/009 y aplaza el bridge Angular hasta existir un consumidor concreto. |
