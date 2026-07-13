@@ -1,0 +1,8 @@
+{
+  "fields": {
+    "amount": {
+      "placeholder": "0.00",
+      "options": { "decimalPlaces": 2, "showTrailingZeros": true }
+    }
+  }
+}

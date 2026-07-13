@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "name",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "UNKNOWN_UI_ORDER_FIELD",
+      "severity": "warning",
+      "source": "ui-schema",
+      "dataPath": ["missing"],
+      "documentPath": ["order", 0],
+      "parameters": {
+        "field": "missing",
+        "index": 0
+      },
+      "fallbackMessage": "UI order references unknown field \"missing\"."
+    }
+  ]
+}

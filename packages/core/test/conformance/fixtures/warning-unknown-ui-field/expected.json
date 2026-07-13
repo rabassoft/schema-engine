@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "name",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "UNKNOWN_UI_FIELD",
+      "severity": "warning",
+      "source": "ui-schema",
+      "dataPath": ["missing"],
+      "documentPath": ["fields", "missing"],
+      "parameters": {
+        "field": "missing"
+      },
+      "fallbackMessage": "UI Schema references unknown field \"missing\"."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "name",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_UI_OPTION",
+      "severity": "warning",
+      "source": "ui-schema",
+      "dataPath": ["name"],
+      "documentPath": ["fields", "name", "options", "decimalPlaces"],
+      "parameters": {
+        "field": "name",
+        "fieldType": "string",
+        "option": "decimalPlaces"
+      },
+      "fallbackMessage": "UI option \"decimalPlaces\" is incompatible with field \"name\"."
+    }
+  ]
+}

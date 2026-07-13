@@ -1,0 +1,14 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "ROOT_SCHEMA_MUST_BE_OBJECT",
+      "severity": "error",
+      "source": "schema",
+      "parameters": {
+        "actualType": "array"
+      },
+      "fallbackMessage": "The root schema must be an object."
+    }
+  ]
+}

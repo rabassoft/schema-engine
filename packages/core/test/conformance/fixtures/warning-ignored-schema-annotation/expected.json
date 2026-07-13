@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "definition": {
+    "fields": []
+  },
+  "diagnostics": [
+    {
+      "code": "IGNORED_SCHEMA_KEYWORD",
+      "severity": "warning",
+      "source": "schema",
+      "documentPath": ["$comment"],
+      "parameters": {
+        "keyword": "$comment"
+      },
+      "fallbackMessage": "Known annotation \"$comment\" is ignored by the compiler."
+    }
+  ]
+}

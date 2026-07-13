@@ -1,8 +1,10 @@
 # PLAN-001: Minimal compiler-only implementation
 
-- **Status:** Proposed
+- **Status:** Completed
+- **Approval date:** 2026-07-13
+- **Completion date:** 2026-07-13
 - **Date:** 2026-07-13
-- **Requires:** [`SPEC-001` v0.1.3](../specs/001-controlled-form-runtime.md), [accepted ADR-005](../adrs/005-politica-dialecto-json-schema.md), [accepted ADR-006](../adrs/006-limite-paquete-inicial.md)
+- **Requires:** [`SPEC-001` v0.1.4](../specs/001-controlled-form-runtime.md), [accepted ADR-005](../adrs/005-politica-dialecto-json-schema.md), [accepted ADR-006](../adrs/006-limite-paquete-inicial.md)
 - **Milestone:** M1 — Minimal compiler
 
 ## 1. Goal and completion boundary
@@ -16,7 +18,8 @@ all unit and conformance tests pass, and the documentation records the verified
 behavior. It does not include the controlled runtime, operations, validation
 adapters, Angular, renderers, persistence, or deferred capabilities.
 
-Implementation must not begin until this plan is approved.
+This plan was approved on 2026-07-13 and authorizes the compiler-only
+implementation described here.
 
 ## 2. Workspace and package
 
@@ -30,8 +33,9 @@ Implementation must not begin until this plan is approved.
 - Mark the package as side-effect free and expose only the root entry point.
 - Keep all implementation free of framework packages, RxJS, DOM types, browser
   globals, filesystem access, environment checks, and network access.
-- Root scripts must provide `format:check`, `lint`, `typecheck`, `test`, and
-  `build`. No publishing or CI workflow is part of this increment.
+- Root scripts must provide `format:check`, `lint`, `typecheck`, `test`,
+  `test:package`, and `build`. No publishing or CI workflow is part of this
+  increment.
 
 ADR-006 supersedes the old pre-SPEC package name
 `@rabassoft/schema-engine-core` with `@rabassoft/schema-engine`; the
@@ -150,7 +154,9 @@ values as opaque and never traverse them looking for schemas.
   known field is retained. Later occurrences produce
   `DUPLICATE_UI_ORDER_FIELD` and are ignored. Unknown names produce
   `UNKNOWN_UI_ORDER_FIELD` and are ignored. Fields not retained from `order`
-  are appended in schema property order.
+  are appended in schema property order. Duplicate detection applies only to
+  known fields; every occurrence of an unknown name produces only
+  `UNKNOWN_UI_ORDER_FIELD`.
 - `fields`, when present, must be an object record. Entries for names absent
   from schema `properties` produce `UNKNOWN_UI_FIELD` and are ignored without
   traversing their metadata.
@@ -169,6 +175,9 @@ values as opaque and never traverse them looking for schemas.
   `UNKNOWN_UI_SCHEMA_KEY` and are ignored.
 - Numeric options are retained only for number/integer fields. Each option on a
   non-numeric field produces `INCOMPATIBLE_UI_OPTION` and is omitted.
+- If a field schema branch is invalid and therefore has no reliable field type,
+  validate the shape of its UI metadata but skip placeholder/option
+  compatibility diagnostics to avoid cascades.
 - UI Schema never changes field type, constraints, requiredness, or data paths.
 
 ## 5. Diagnostic contract
@@ -192,44 +201,49 @@ Document paths use these exact forms:
 
 ADR-005 supplies these fixed codes and severities:
 
-| Code | Severity |
-|---|---|
-| `MISSING_SCHEMA_DIALECT` | warning |
-| `INVALID_SCHEMA_DIALECT` | error |
-| `UNSUPPORTED_SCHEMA_DIALECT` | error |
-| `UNSUPPORTED_SCHEMA_KEYWORD` | error |
-| `IGNORED_SCHEMA_KEYWORD` | warning |
-| `UNKNOWN_SCHEMA_KEYWORD` | warning |
+| Code                         | Severity |
+| ---------------------------- | -------- |
+| `MISSING_SCHEMA_DIALECT`     | warning  |
+| `INVALID_SCHEMA_DIALECT`     | error    |
+| `UNSUPPORTED_SCHEMA_DIALECT` | error    |
+| `UNSUPPORTED_SCHEMA_KEYWORD` | error    |
+| `IGNORED_SCHEMA_KEYWORD`     | warning  |
+| `UNKNOWN_SCHEMA_KEYWORD`     | warning  |
 
 The compiler increment adds:
 
-| Code | Severity | Required parameters |
-|---|---|---|
-| `INVALID_COMPILER_INPUT` | error | `actualType` |
-| `ROOT_SCHEMA_MUST_BE_OBJECT` | error | `actualType` |
-| `ROOT_TYPE_MUST_BE_OBJECT` | error | `actualValue` |
-| `MISSING_SCHEMA_PROPERTIES` | error | none |
-| `INVALID_SCHEMA_PROPERTIES` | error | `actualType` |
-| `INVALID_FIELD_SCHEMA` | error | `field`, `actualType` |
-| `MISSING_FIELD_TYPE` | error | `field` |
-| `UNSUPPORTED_FIELD_TYPE` | error | `field`, `actualValue` |
-| `INVALID_SCHEMA_KEYWORD_VALUE` | error | `keyword`, `expected`, `actualValue` |
-| `INCOMPATIBLE_SCHEMA_KEYWORD` | error | `keyword`, `fieldType` |
-| `UNMANAGED_REQUIRED_PROPERTY` | warning | `field` |
-| `INVALID_UI_SCHEMA` | error | `actualType` |
-| `UNKNOWN_UI_SCHEMA_KEY` | warning | `key` |
-| `INVALID_UI_SCHEMA_VALUE` | error | `key`, `expected`, `actualValue` |
-| `DUPLICATE_UI_ORDER_FIELD` | warning | `field`, `firstIndex`, `duplicateIndex` |
-| `UNKNOWN_UI_ORDER_FIELD` | warning | `field`, `index` |
-| `UNKNOWN_UI_FIELD` | warning | `field` |
-| `INCOMPATIBLE_PLACEHOLDER` | warning | `field`, `fieldType` |
-| `INCOMPATIBLE_UI_OPTION` | warning | `field`, `fieldType`, `option` |
+| Code                           | Severity | Required parameters                     |
+| ------------------------------ | -------- | --------------------------------------- |
+| `INVALID_COMPILER_INPUT`       | error    | `actualType`                            |
+| `ROOT_SCHEMA_MUST_BE_OBJECT`   | error    | `actualType`                            |
+| `ROOT_TYPE_MUST_BE_OBJECT`     | error    | `actualType`                            |
+| `MISSING_SCHEMA_PROPERTIES`    | error    | none                                    |
+| `INVALID_SCHEMA_PROPERTIES`    | error    | `actualType`                            |
+| `INVALID_FIELD_SCHEMA`         | error    | `field`, `actualType`                   |
+| `MISSING_FIELD_TYPE`           | error    | `field`                                 |
+| `UNSUPPORTED_FIELD_TYPE`       | error    | `field`, `actualType`                   |
+| `INVALID_SCHEMA_KEYWORD_VALUE` | error    | `keyword`, `expected`, `actualType`     |
+| `INCOMPATIBLE_SCHEMA_KEYWORD`  | error    | `keyword`, `fieldType`                  |
+| `UNMANAGED_REQUIRED_PROPERTY`  | warning  | `field`                                 |
+| `INVALID_UI_SCHEMA`            | error    | `actualType`                            |
+| `UNKNOWN_UI_SCHEMA_KEY`        | warning  | `key`                                   |
+| `INVALID_UI_SCHEMA_VALUE`      | error    | `key`, `expected`, `actualType`         |
+| `DUPLICATE_UI_ORDER_FIELD`     | warning  | `field`, `firstIndex`, `duplicateIndex` |
+| `UNKNOWN_UI_ORDER_FIELD`       | warning  | `field`, `index`                        |
+| `UNKNOWN_UI_FIELD`             | warning  | `field`                                 |
+| `INCOMPATIBLE_PLACEHOLDER`     | warning  | `field`, `fieldType`                    |
+| `INCOMPATIBLE_UI_OPTION`       | warning  | `field`, `fieldType`, `option`          |
 
 `actualType` uses the closed values `null`, `array`, `object`, `string`,
 `number`, `boolean`, `undefined`, `bigint`, `symbol`, or `function`.
-`actualValue` is included only when it is JSON-safe; otherwise it is replaced
-by `actualType`. All diagnostics include a frozen parameters object, even when
-empty.
+Diagnostics about invalid values additionally include optional `actualValue`
+only for `null`, strings, finite numbers, and booleans. Arrays, objects,
+non-finite numbers, `undefined`, bigint, symbols, and functions are represented
+only by `actualType`, preventing input objects from leaking into diagnostics.
+For `INVALID_SCHEMA_DIALECT`, `declaredDialect` is the scalar value when it is
+safe under the same rule; otherwise it is a newly created frozen
+`{ type: actualType }` descriptor. All diagnostics include a frozen parameters
+object, even when empty.
 
 ## 6. Implementation structure
 
@@ -261,19 +275,22 @@ Required fixtures:
   `valid-numeric-options`, `valid-empty-form`.
 - Warnings: `warning-missing-dialect`, `warning-unknown-schema-keyword`,
   `warning-ignored-schema-annotation`, `warning-unknown-order-field`,
-  `warning-duplicate-order-field`, `warning-unknown-ui-field`,
+  `warning-duplicate-order-field`, `warning-unknown-ui-key`,
+  `warning-unknown-ui-field`,
   `warning-unmanaged-required-property`, `warning-incompatible-placeholder`,
   `warning-incompatible-ui-option`.
 - Errors: `error-invalid-dialect`, `error-unsupported-dialect`,
   `error-root-not-object`, `error-root-type`, `error-missing-properties`,
   `error-field-schema`, `error-field-missing-type`, `error-unsupported-type`,
   `error-unsupported-schema-keyword`, `error-incompatible-schema-keyword`,
-  `error-invalid-constraint`, `error-invalid-ui-schema`.
+  `error-invalid-required`, `error-invalid-constraint`, `error-invalid-pattern`,
+  `error-invalid-ui-schema`, `error-invalid-ui-value`.
 
 Focused unit tests must additionally cover:
 
 - Text precedence, including explicit empty strings.
 - String, number, integer, and boolean normalization.
+- Supported `default` metadata is accepted without entering `FormDefinition`.
 - Constraint and numeric-option boundary values.
 - Stable field and diagnostic ordering.
 - Multiple independent errors with no partial definition.
@@ -301,7 +318,7 @@ Focused unit tests must additionally cover:
 9. Resolve any implementation/documentation conflict before completion; update
    SPEC/ADR only through explicit review.
 10. Update `STATUS.md`, prepend `WORKLOG.md`, and mark M1 complete in
-   `ROADMAP.md` only after every verification succeeds.
+    `ROADMAP.md` only after every verification succeeds.
 
 Acceptance commands must all succeed from a clean checkout using the pinned
 toolchain:

@@ -1,0 +1,19 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["name"],
+      "documentPath": ["properties", "name", "minLength"],
+      "parameters": {
+        "keyword": "minLength",
+        "expected": "non-negative integer",
+        "actualType": "number",
+        "actualValue": -1
+      },
+      "fallbackMessage": "Schema keyword \"minLength\" has an invalid value."
+    }
+  ]
+}

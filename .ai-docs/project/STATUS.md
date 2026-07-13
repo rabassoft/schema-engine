@@ -6,44 +6,37 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: remote branch strategy established at `a324d83`; `develop` contains a local persistent-state update not yet pushed; GitHub default branch is `main`
+- Repository revision: `develop` contains the committed M1 implementation and PLAN-002 documentation, two commits ahead of `origin/develop`; GitHub default branch is `main`
 
 ## Current phase
 
-Architecture validation before implementation.
+M1 completed; architecture validation before M2.
 
 ## Current objective
 
-Review and approve PLAN-001 for the minimal compiler-only implementation.
+Review and approve PLAN-002 for the M2 root-level immutable-operations increment.
 
 ## Latest completed work
 
-- Recorded the completed Git/GitHub setup in the persistent project state on `develop`.
-- Pushed `main`, configured its upstream, and made it GitHub's default stable/deployment branch.
-- Verified `develop` was pushed to GitHub at `a324d83` and is tracking `origin/develop`.
-- Corrected the repository-local Git identity and initial commit attribution to `Rabassoft <ricard@rabassoft.com>`.
-- Created the initial repository baseline on `main` and local integration branch `develop`.
-- Documented `main` as stable/deployment-ready and `develop` as the development integration branch.
-- Created the private GitHub repository `rabassoft/schema-engine` and configured it as `origin`.
-- Added and verified the initial `.gitignore` for macOS and the planned Node/TypeScript toolchain.
-- Initialized the local Git repository with `main` as the initial branch.
-- Drafted decision-complete PLAN-001 for `compileFormDefinition()`.
-- Accepted ADR-006 for the initial package boundary and public name.
-- Updated SPEC-001 to Draft v0.1.3 with the approved compiler input and root optionality.
-- Formally reviewed and accepted ADR-005.
-- Updated SPEC-001 to Draft v0.1.2 and closed the initial dialect decision.
-- Normalized documentation conflicts and reserved ADR-005 for the JSON Schema dialect policy.
-- Added `hint`, `tooltip`, and `placeholder` to the UI contract.
-- Created the deferred-decisions register.
-- Prepared the Codex repository handoff.
+- Implemented the pnpm workspace and framework-neutral `@rabassoft/schema-engine` package with zero runtime dependencies.
+- Implemented immutable compiler contracts and `compileFormDefinition()` for the approved JSON Schema and UI Schema subset.
+- Added 30 conformance fixtures and 10 focused unit tests; all 40 tests pass.
+- Completed PLAN-001 and marked M1 complete in the roadmap.
+- Updated SPEC-001 to Draft v0.1.5 with the normative M1 diagnostic contract and
+  the clarified root-only M2 operation/result boundaries.
+- Drafted a decision-complete PLAN-002 for `applyOperation()` and
+  `applyFormOperation()`, including contracts, diagnostics, fixtures, and
+  acceptance criteria.
+- Committed the completed M1 increment and proposed PLAN-002 documentation on
+  `develop` as `Rabassoft <ricard@rabassoft.com>`.
 
 ## In progress
 
-No implementation task is currently active. PLAN-001 is proposed and awaiting review.
+No implementation task is active. PLAN-002 is Proposed and awaiting review.
 
 ## Next action
 
-Review and approve PLAN-001; do not implement the compiler before plan approval.
+Review PLAN-002 and explicitly approve it before implementing M2.
 
 ## Blockers
 
@@ -51,27 +44,20 @@ None.
 
 ## Open questions
 
-- None within PLAN-001; its package, API, behavior, diagnostics, fixtures, and verification are specified.
-- Other pre-runtime decisions remain listed in section 29 of SPEC-001 and are outside this compiler-only increment.
+- None within PLAN-002; its implementation and fixture boundaries are specified.
+- Other pre-runtime decisions remain listed in section 29 of SPEC-001.
 
 ## Verification status
 
-- Remote branch strategy verified: `main` and `develop` exist at `a324d83`, track their matching upstreams, and GitHub defaults to `main`.
-- Current checkout is `develop`; its persistent-state commit is not yet pushed.
-- Initial commit author and committer verified as `Rabassoft <ricard@rabassoft.com>`.
-- Initial snapshot reviewed for ignored files and common credential patterns before commit.
-- GitHub authentication verified as `rabassoft`; `origin` points to the private `rabassoft/schema-engine` repository.
-- `.gitignore` patterns verified; `.DS_Store`, dependencies, generated output, caches, local environment files, logs, and IDE-local metadata are ignored.
-- Confirmed `.env.example`, `pnpm-lock.yaml`, and conformance fixtures remain trackable.
-- Documentation conflicts normalized and reviewed manually.
-- ADR-005 formally reviewed and accepted after resolving its validator-boundary and keyword-classification ambiguities.
-- ADR-006 accepted for `packages/core` and `@rabassoft/schema-engine`.
-- PLAN-001 checked against SPEC-001, ADR-005, ADR-006, and the deferred register.
-- SPEC-001 updated to Draft v0.1.3 and checked against accepted ADR-005 and ADR-006.
-- SPEC-001 status and version checked across the specification, index, handoff, and project status.
-- Active ADR references and documentation paths checked.
-- No production code exists yet.
-- No test suite exists yet.
+- `CI=true pnpm install --frozen-lockfile` passed with the pinned lockfile.
+- `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
+- `pnpm test` passed: 2 test files and 40 tests, including all 30 conformance fixtures.
+- `pnpm build` and `pnpm test:package` passed.
+- Built package exports verified with zero runtime dependencies.
+- `git diff --check` and local Markdown link validation passed.
+- PLAN-002 was checked against SPEC-001 v0.1.5 and the deferred-decisions
+  register; no M2 production code was added.
+- Current checkout is `develop`; the completed changes are committed locally and not pushed.
 
 ## Relevant documents
 
@@ -79,5 +65,8 @@ None.
 - `.ai-docs/adrs/005-politica-dialecto-json-schema.md`
 - `.ai-docs/adrs/006-limite-paquete-inicial.md`
 - `.ai-docs/plans/001-compiler-only-implementation.md`
+- `.ai-docs/plans/002-root-immutable-operations.md`
 - `.ai-docs/roadmap/deferred-decisions.md`
 - `.ai-docs/adrs/000-index.md`
+- `packages/core/src/index.ts`
+- `packages/core/test/conformance/fixtures/`

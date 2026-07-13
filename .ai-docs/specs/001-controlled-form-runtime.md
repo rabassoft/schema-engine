@@ -1,10 +1,11 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Draft
-- **Versión:** 0.1.3
+- **Versión:** 0.1.5
 - **Fecha:** 13 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
+- **Plan de implementación aprobado:** [`PLAN-001`](../plans/001-compiler-only-implementation.md)
 
 ## 1. Propósito
 
@@ -264,9 +265,7 @@ export interface BaseFieldDefinition {
 }
 
 export type FieldDefinition =
-  | StringFieldDefinition
-  | NumberFieldDefinition
-  | BooleanFieldDefinition;
+  StringFieldDefinition | NumberFieldDefinition | BooleanFieldDefinition;
 
 export interface StringFieldDefinition extends BaseFieldDefinition {
   readonly kind: 'string';
@@ -338,6 +337,12 @@ export type CompileFormResult =
 ```
 
 Los errores normales de configuración no lanzarán excepciones.
+
+PLAN-001 define el pipeline determinista, la validación estructural, la
+normalización de UI Schema, la inmutabilidad observable, los parámetros de
+diagnóstico y los fixtures obligatorios para el primer incremento del
+compilador. Cualquier error produce `success: false` sin definición parcial;
+un resultado con solo warnings puede incluir una definición válida.
 
 ## 9. Modelo controlado
 
@@ -443,9 +448,13 @@ export type FormOperation = SetValueOperation | RemoveValueOperation;
 ### 11.5 Reglas estrictas
 
 - Las rutas se representarán mediante arrays de segmentos.
-- La ruta vacía `[]` identifica la raíz, pero no puede eliminarse.
-- `set-value` podrá crear únicamente la propiedad final cuando su contenedor exista.
-- No se crearán contenedores intermedios.
+- `DataPath` puede representar la raíz mediante `[]`, pero las utilidades de M2
+  aceptarán únicamente propiedades raíz mediante un path `[fieldName]` con un
+  solo segmento string.
+- M2 rechazará `[]`, segmentos numéricos y paths con más de un segmento.
+- `set-value` podrá crear únicamente una propiedad raíz.
+- Los paths profundos, contenedores intermedios, objetos anidados y arrays
+  permanecen aplazados.
 - `remove-value` exige que la propiedad final exista.
 - La expectativa se comprobará mediante `Object.is`.
 - Una discrepancia producirá `STALE_OPERATION`.
@@ -465,6 +474,28 @@ applyFormOperation(definition, currentValue, operation);
 - `applyFormOperation` verificará que la ruta pertenece al formulario y que el valor es compatible con el tipo básico.
 - Las restricciones de negocio como `minimum` o `pattern` serán responsabilidad del validador.
 - Ambas utilidades serán puras e inmutables y conservarán las ramas no afectadas.
+
+El resultado de ambas utilidades será:
+
+```ts
+export type ApplyOperationResult<TData extends object> =
+  | {
+      readonly success: true;
+      readonly value: Readonly<TData>;
+      readonly changed: boolean;
+      readonly diagnostics: readonly [];
+    }
+  | {
+      readonly success: false;
+      readonly value: Readonly<TData>;
+      readonly changed: false;
+      readonly diagnostics: readonly Diagnostic[];
+    };
+```
+
+En caso de error, `value` conservará exactamente la referencia de entrada. Una
+operación válida sin efecto devolverá `success: true`, `changed: false`, la
+misma referencia y ningún diagnóstico.
 
 ## 12. Intenciones del renderer
 
@@ -505,10 +536,7 @@ El core no implementará su propio validador JSON Schema.
 
 ```ts
 export interface SchemaValidator {
-  validate(
-    schema: unknown,
-    value: unknown,
-  ): ValidationResult;
+  validate(schema: unknown, value: unknown): ValidationResult;
 }
 ```
 
@@ -589,11 +617,7 @@ Reglas:
 El core ofrecerá una utilidad pura:
 
 ```ts
-commitScopeToBaseline(
-  baselineValue,
-  currentValue,
-  scope,
-);
+commitScopeToBaseline(baselineValue, currentValue, scope);
 ```
 
 Esta utilidad copiará al baseline únicamente las rutas válidas del scope. Guardar un scope no afectará al estado dirty del resto del formulario.
@@ -655,10 +679,7 @@ Los campos sin foco se reformatearán inmediatamente. El campo numérico activo 
 
 ```ts
 export interface TextResolver {
-  resolve(
-    text: string,
-    context: TextResolutionContext,
-  ): string;
+  resolve(text: string, context: TextResolutionContext): string;
 }
 ```
 
@@ -827,6 +848,40 @@ Política:
 - El core no escribirá directamente en consola.
 - Las excepciones se reservarán para fallos internos inesperados.
 
+El primer incremento del compilador utilizará estos códigos normativos:
+
+| Código                         | Severidad | Fuente      |
+| ------------------------------ | --------- | ----------- |
+| `MISSING_SCHEMA_DIALECT`       | `warning` | `schema`    |
+| `INVALID_SCHEMA_DIALECT`       | `error`   | `schema`    |
+| `UNSUPPORTED_SCHEMA_DIALECT`   | `error`   | `schema`    |
+| `UNSUPPORTED_SCHEMA_KEYWORD`   | `error`   | `schema`    |
+| `IGNORED_SCHEMA_KEYWORD`       | `warning` | `schema`    |
+| `UNKNOWN_SCHEMA_KEYWORD`       | `warning` | `schema`    |
+| `INVALID_COMPILER_INPUT`       | `error`   | `schema`    |
+| `ROOT_SCHEMA_MUST_BE_OBJECT`   | `error`   | `schema`    |
+| `ROOT_TYPE_MUST_BE_OBJECT`     | `error`   | `schema`    |
+| `MISSING_SCHEMA_PROPERTIES`    | `error`   | `schema`    |
+| `INVALID_SCHEMA_PROPERTIES`    | `error`   | `schema`    |
+| `INVALID_FIELD_SCHEMA`         | `error`   | `schema`    |
+| `MISSING_FIELD_TYPE`           | `error`   | `schema`    |
+| `UNSUPPORTED_FIELD_TYPE`       | `error`   | `schema`    |
+| `INVALID_SCHEMA_KEYWORD_VALUE` | `error`   | `schema`    |
+| `INCOMPATIBLE_SCHEMA_KEYWORD`  | `error`   | `schema`    |
+| `UNMANAGED_REQUIRED_PROPERTY`  | `warning` | `schema`    |
+| `INVALID_UI_SCHEMA`            | `error`   | `ui-schema` |
+| `UNKNOWN_UI_SCHEMA_KEY`        | `warning` | `ui-schema` |
+| `INVALID_UI_SCHEMA_VALUE`      | `error`   | `ui-schema` |
+| `DUPLICATE_UI_ORDER_FIELD`     | `warning` | `ui-schema` |
+| `UNKNOWN_UI_ORDER_FIELD`       | `warning` | `ui-schema` |
+| `UNKNOWN_UI_FIELD`             | `warning` | `ui-schema` |
+| `INCOMPATIBLE_PLACEHOLDER`     | `warning` | `ui-schema` |
+| `INCOMPATIBLE_UI_OPTION`       | `warning` | `ui-schema` |
+
+Los parámetros y `documentPath` exactos quedan definidos en PLAN-001. Los
+diagnósticos sobre campos incluirán `dataPath: [fieldName]`; los diagnósticos de
+raíz no incluirán `dataPath`.
+
 ## 25. Ciclo de vida
 
 El runtime expondrá:
@@ -913,9 +968,11 @@ Estas preguntas no invalidan las decisiones de comportamiento descritas en esta 
 
 ## 30. Historial
 
-| Versión | Fecha | Cambio |
-|---|---|---|
-| 0.1.3 | 13-07-2026 | Se define la entrada de `compileFormDefinition()` y se aclaran los miembros obligatorios y opcionales de la raíz. |
-| 0.1.2 | 13-07-2026 | Se referencia ADR-005 y se cierra la selección del dialecto inicial de JSON Schema. |
-| 0.1.1 | 13-07-2026 | Se añaden `hint`, `tooltip` y `placeholder` al contrato de UI y a la definición normalizada. |
-| 0.1.0 | 13-07-2026 | Primera consolidación de las decisiones del runtime controlado. |
+| Versión | Fecha      | Cambio                                                                                                            |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| 0.1.5   | 13-07-2026 | Se limita M2 a propiedades raíz y se define `ApplyOperationResult`.                                               |
+| 0.1.4   | 13-07-2026 | Se incorpora el contrato diagnóstico normativo y la referencia al PLAN-001 aprobado.                              |
+| 0.1.3   | 13-07-2026 | Se define la entrada de `compileFormDefinition()` y se aclaran los miembros obligatorios y opcionales de la raíz. |
+| 0.1.2   | 13-07-2026 | Se referencia ADR-005 y se cierra la selección del dialecto inicial de JSON Schema.                               |
+| 0.1.1   | 13-07-2026 | Se añaden `hint`, `tooltip` y `placeholder` al contrato de UI y a la definición normalizada.                      |
+| 0.1.0   | 13-07-2026 | Primera consolidación de las decisiones del runtime controlado.                                                   |

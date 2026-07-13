@@ -101,14 +101,14 @@ siendo una decisión separada y no queda definida por este ADR.
 
 ## 3. Diagnósticos
 
-| Código | Severidad | Comportamiento | `documentPath` |
-|---|---|---|---|
-| `MISSING_SCHEMA_DIALECT` | `warning` | Asume Draft 2020-12 y continúa | `['$schema']` |
-| `INVALID_SCHEMA_DIALECT` | `error` | Bloquea la compilación | `['$schema']` |
-| `UNSUPPORTED_SCHEMA_DIALECT` | `error` | Bloquea la compilación | `['$schema']` |
-| `UNSUPPORTED_SCHEMA_KEYWORD` | `error` | Bloquea la compilación | Ruta de la keyword |
-| `IGNORED_SCHEMA_KEYWORD` | `warning` | Ignora la anotación conocida | Ruta de la keyword |
-| `UNKNOWN_SCHEMA_KEYWORD` | `warning` | Ignora la keyword desconocida | Ruta de la keyword |
+| Código                       | Severidad | Comportamiento                 | `documentPath`     |
+| ---------------------------- | --------- | ------------------------------ | ------------------ |
+| `MISSING_SCHEMA_DIALECT`     | `warning` | Asume Draft 2020-12 y continúa | `['$schema']`      |
+| `INVALID_SCHEMA_DIALECT`     | `error`   | Bloquea la compilación         | `['$schema']`      |
+| `UNSUPPORTED_SCHEMA_DIALECT` | `error`   | Bloquea la compilación         | `['$schema']`      |
+| `UNSUPPORTED_SCHEMA_KEYWORD` | `error`   | Bloquea la compilación         | Ruta de la keyword |
+| `IGNORED_SCHEMA_KEYWORD`     | `warning` | Ignora la anotación conocida   | Ruta de la keyword |
+| `UNKNOWN_SCHEMA_KEYWORD`     | `warning` | Ignora la keyword desconocida  | Ruta de la keyword |
 
 Todos estos diagnósticos tendrán `source: 'schema'`. Sus parámetros incluirán:
 

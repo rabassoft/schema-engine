@@ -1,0 +1,16 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "UNSUPPORTED_SCHEMA_KEYWORD",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["status"],
+      "documentPath": ["properties", "status", "enum"],
+      "parameters": {
+        "keyword": "enum"
+      },
+      "fallbackMessage": "Schema keyword \"enum\" is not supported."
+    }
+  ]
+}

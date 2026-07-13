@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "active",
+        "name": "active",
+        "path": ["active"],
+        "required": false,
+        "label": "active",
+        "kind": "boolean"
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_PLACEHOLDER",
+      "severity": "warning",
+      "source": "ui-schema",
+      "dataPath": ["active"],
+      "documentPath": ["fields", "active", "placeholder"],
+      "parameters": {
+        "field": "active",
+        "fieldType": "boolean"
+      },
+      "fallbackMessage": "Placeholder is incompatible with boolean field \"active\"."
+    }
+  ]
+}

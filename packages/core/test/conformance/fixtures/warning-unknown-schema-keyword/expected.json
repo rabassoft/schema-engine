@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "definition": {
+    "fields": []
+  },
+  "diagnostics": [
+    {
+      "code": "UNKNOWN_SCHEMA_KEYWORD",
+      "severity": "warning",
+      "source": "schema",
+      "documentPath": ["x-custom"],
+      "parameters": {
+        "keyword": "x-custom"
+      },
+      "fallbackMessage": "Unknown schema keyword \"x-custom\" is treated as an annotation."
+    }
+  ]
+}

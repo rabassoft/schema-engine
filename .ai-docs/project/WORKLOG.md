@@ -2,6 +2,114 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — M1 and PLAN-002 changes committed
+
+### Completed
+
+- Committed the completed M1 compiler increment, architecture documentation updates, and proposed PLAN-002 on `develop`.
+- Used repository identity `Rabassoft <ricard@rabassoft.com>`.
+- Kept the commit local; no push was performed.
+
+### Verification
+
+- Re-ran the frozen install, formatting, linting, type checking, tests, build, and built-package smoke test before committing.
+- Checked the final diff, local Markdown links, and common credential patterns.
+
+### Pending
+
+- Review and explicitly approve PLAN-002 before implementing M2.
+- Push the local `develop` commits only when explicitly requested.
+
+## 2026-07-13 — PLAN-002 proposed
+
+### Completed
+
+- Confirmed that both M2 operation utilities are limited to one string root-property path segment.
+- Defined the operation result contract, including exact input-reference preservation on failures and successful no-ops.
+- Updated SPEC-001 to Draft v0.1.5 to make those M2 boundaries normative.
+- Drafted decision-complete PLAN-002 with contracts, validation order, immutable behavior, diagnostics, fixtures, and acceptance criteria.
+- Kept nested objects, arrays, runtime state, validation, adapters, and other deferred capabilities out of scope.
+
+### Verification
+
+- Checked PLAN-002 against SPEC-001 v0.1.5, completed PLAN-001, and the deferred-decisions register.
+- Confirmed that no M2 production code was added.
+- Ran formatting, diff, and local Markdown-link checks for the documentation changes.
+
+### Pending
+
+- Review and explicitly approve PLAN-002.
+- Do not implement M2 before that approval.
+
+## 2026-07-13 — M1 minimal compiler completed
+
+### Completed
+
+- Promoted PLAN-001's diagnostic contract to SPEC-001 v0.1.4.
+- Created the native pnpm workspace and `packages/core` package named `@rabassoft/schema-engine`.
+- Added TypeScript, ESLint, Prettier, Vitest, ESM build output, declarations, and package smoke testing.
+- Implemented `compileFormDefinition()` with deterministic diagnostics, immutable outputs, strict root/field parsing, UI text precedence, ordering, and numeric visual options.
+- Added 30 complete conformance fixtures and 10 focused unit tests.
+- Completed PLAN-001 and milestone M1.
+
+### Verification
+
+- `CI=true pnpm install --frozen-lockfile` passed.
+- `pnpm format:check` passed.
+- `pnpm lint` passed.
+- `pnpm typecheck` passed.
+- `pnpm test` passed with 40 tests in 2 files.
+- `pnpm build` passed.
+- `pnpm test:package` passed.
+- Verified 30 expected conformance results and zero runtime dependencies.
+- `git diff --check` and local Markdown link validation passed.
+
+### Pending
+
+- Review and commit the completed M1 diff only when explicitly requested.
+- Propose and approve PLAN-002 before implementing immutable operations.
+
+## 2026-07-13 — PLAN-001 approved
+
+### Completed
+
+- Approved PLAN-001 after its formal review.
+- Authorized the compiler-only M1 implementation.
+- Kept runtime, validators, Angular, renderers, persistence, and deferred capabilities out of scope.
+
+### Verification
+
+- Confirmed PLAN-001 has no remaining implementation decisions.
+- Confirmed accepted ADR-005 and ADR-006 are its normative prerequisites.
+
+### Pending
+
+- Promote the approved diagnostic contract to SPEC-001.
+- Implement and verify the compiler-only increment.
+
+## 2026-07-13 — PLAN-001 formal review completed
+
+### Completed
+
+- Reviewed PLAN-001 against SPEC-001, ADR-005, ADR-006, and the first-prototype restrictions.
+- Added the missing `test:package` root-script requirement.
+- Made duplicate/unknown UI order behavior deterministic.
+- Prevented compatibility diagnostics below invalid field-schema branches.
+- Replaced unsafe diagnostic value capture with scalar-or-type descriptors.
+- Expanded conformance fixtures for UI keys, required, patterns, and invalid UI values.
+- Kept PLAN-001 in Proposed status pending explicit approval.
+
+### Verification
+
+- Checked diagnostic codes, severities, parameter shapes, and document paths.
+- Checked fixture coverage against the compiler pipeline and accepted ADR policies.
+- Confirmed no workspace or compiler code was created.
+
+### Pending
+
+- Review and explicitly approve PLAN-001.
+- Commit and push the review documentation only when explicitly requested.
+
 ## 2026-07-13 — Repository setup state recorded
 
 ### Completed

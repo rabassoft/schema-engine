@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_SCHEMA_KEYWORD",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["amount"],
+      "documentPath": ["properties", "amount", "minLength"],
+      "parameters": {
+        "keyword": "minLength",
+        "fieldType": "number"
+      },
+      "fallbackMessage": "Schema keyword \"minLength\" is incompatible with field type \"number\"."
+    }
+  ]
+}

@@ -296,7 +296,7 @@ Las entradas más cercanas a convertirse en ADR son:
 
 ## 5. Historial
 
-| Fecha | Cambio |
-|---|---|
+| Fecha      | Cambio                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes. |
-| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001. |
+| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                              |

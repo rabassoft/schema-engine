@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "name",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "UI name",
+        "description": "UI description",
+        "hint": "Short help",
+        "tooltip": "More help",
+        "placeholder": "Ada",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "diagnostics": []
+}

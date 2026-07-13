@@ -1,0 +1,16 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "MISSING_FIELD_TYPE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["name"],
+      "documentPath": ["properties", "name", "type"],
+      "parameters": {
+        "field": "name"
+      },
+      "fallbackMessage": "Field \"name\" must declare a type."
+    }
+  ]
+}

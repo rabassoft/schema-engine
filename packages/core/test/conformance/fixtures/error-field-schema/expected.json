@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_FIELD_SCHEMA",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["name"],
+      "documentPath": ["properties", "name"],
+      "parameters": {
+        "field": "name",
+        "actualType": "string"
+      },
+      "fallbackMessage": "Schema for field \"name\" must be an object."
+    }
+  ]
+}

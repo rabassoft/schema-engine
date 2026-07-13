@@ -1,0 +1,16 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "UNSUPPORTED_SCHEMA_DIALECT",
+      "severity": "error",
+      "source": "schema",
+      "documentPath": ["$schema"],
+      "parameters": {
+        "declaredDialect": "http://json-schema.org/draft-07/schema#",
+        "supportedDialect": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "fallbackMessage": "Schema dialect \"http://json-schema.org/draft-07/schema#\" is not supported."
+    }
+  ]
+}

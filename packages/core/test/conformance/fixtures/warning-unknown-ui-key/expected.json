@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "definition": {
+    "fields": []
+  },
+  "diagnostics": [
+    {
+      "code": "UNKNOWN_UI_SCHEMA_KEY",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["layout"],
+      "parameters": {
+        "key": "layout"
+      },
+      "fallbackMessage": "Unknown UI Schema key \"layout\" is ignored."
+    }
+  ]
+}

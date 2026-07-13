@@ -1,0 +1,14 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_UI_SCHEMA",
+      "severity": "error",
+      "source": "ui-schema",
+      "parameters": {
+        "actualType": "array"
+      },
+      "fallbackMessage": "UI Schema must be an object."
+    }
+  ]
+}

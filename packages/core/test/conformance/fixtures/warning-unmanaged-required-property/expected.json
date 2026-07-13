@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "name",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "UNMANAGED_REQUIRED_PROPERTY",
+      "severity": "warning",
+      "source": "schema",
+      "dataPath": ["ghost"],
+      "documentPath": ["required", 0],
+      "parameters": {
+        "field": "ghost"
+      },
+      "fallbackMessage": "Required property \"ghost\" is not managed by this form."
+    }
+  ]
+}

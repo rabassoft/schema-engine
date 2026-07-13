@@ -1,17 +1,20 @@
 # Visión General del Proyecto: Rabassoft Schema Engine
 
 ## 1. Propósito y Objetivos
+
 Rabassoft Schema Engine es un ecosistema modular para la generación dinámica de interfaces de usuario impulsadas por metadatos (JSON Schema + UI Schema).
 
 El sistema aísla por completo la lógica de validación y estado de la capa de presentación, permitiendo que un mismo motor lógico sirva tanto para paneles densos de configuración técnica (`@rabassoft/property-inspector-ui`) como para formularios comerciales de usuario final (`@rabassoft/dynamic-forms-ui`).
 
 ## 2. Principios de Diseño Fundamentales
-* **Agnosticismo de Framework (Capa 0):** La lógica pura (validación, recursividad, máquinas de estado) sobrevive a migraciones de tecnología.
-* **Desacoplamiento Visual (Headless UI):** El motor lógico no está atado a ninguna librería de componentes. La interfaz visual se "conecta" al motor.
-* **Principio Abierto/Cerrado (Open/Closed):** Permite la inyección de editores/componentes personalizados desde el exterior.
-* **Adopción de Estándares Modernos:** Aprovechamiento de arquitecturas Zoneless, reactividad granular y funciones Standalone.
+
+- **Agnosticismo de Framework (Capa 0):** La lógica pura (validación, recursividad, máquinas de estado) sobrevive a migraciones de tecnología.
+- **Desacoplamiento Visual (Headless UI):** El motor lógico no está atado a ninguna librería de componentes. La interfaz visual se "conecta" al motor.
+- **Principio Abierto/Cerrado (Open/Closed):** Permite la inyección de editores/componentes personalizados desde el exterior.
+- **Adopción de Estándares Modernos:** Aprovechamiento de arquitecturas Zoneless, reactividad granular y funciones Standalone.
 
 ## 3. Índice de Decisiones Arquitectónicas (ADRs Globales)
+
 Las decisiones a continuación aplican a **todo** el ecosistema. Las decisiones específicas de implementación para un framework residen en `.ai-docs/adrs/<framework>/`.
 
 Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los marcados para revisión no son autoritativos cuando entren en conflicto con la especificación.

@@ -1,0 +1,18 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "UNSUPPORTED_FIELD_TYPE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["address"],
+      "documentPath": ["properties", "address", "type"],
+      "parameters": {
+        "field": "address",
+        "actualType": "string",
+        "actualValue": "object"
+      },
+      "fallbackMessage": "Field \"address\" has an unsupported type."
+    }
+  ]
+}

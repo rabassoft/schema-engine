@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "name",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "DUPLICATE_UI_ORDER_FIELD",
+      "severity": "warning",
+      "source": "ui-schema",
+      "dataPath": ["name"],
+      "documentPath": ["order", 1],
+      "parameters": {
+        "field": "name",
+        "firstIndex": 0,
+        "duplicateIndex": 1
+      },
+      "fallbackMessage": "UI order repeats field \"name\"."
+    }
+  ]
+}

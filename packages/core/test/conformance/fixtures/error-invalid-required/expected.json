@@ -1,0 +1,18 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "documentPath": ["required", 1],
+      "parameters": {
+        "keyword": "required",
+        "expected": "unique string",
+        "actualType": "string",
+        "actualValue": "name"
+      },
+      "fallbackMessage": "Schema keyword \"required\" has an invalid value."
+    }
+  ]
+}

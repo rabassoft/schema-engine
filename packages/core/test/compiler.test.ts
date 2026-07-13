@@ -1,0 +1,237 @@
+import { describe, expect, it } from 'vitest';
+import { compileFormDefinition } from '../src/index.js';
+
+const dialect = 'https://json-schema.org/draft/2020-12/schema';
+
+describe('compileFormDefinition', () => {
+  it('normalizes all primitive field kinds and constraints', () => {
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 5,
+            pattern: '^a',
+          },
+          amount: {
+            type: 'number',
+            minimum: 0,
+            maximum: 10,
+            multipleOf: 0.5,
+          },
+          count: { type: 'integer' },
+          active: { type: 'boolean' },
+        },
+        required: ['text'],
+      },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.definition.fields).toEqual([
+      {
+        key: 'text',
+        name: 'text',
+        path: ['text'],
+        required: true,
+        label: 'text',
+        kind: 'string',
+        constraints: { minLength: 1, maxLength: 5, pattern: '^a' },
+      },
+      {
+        key: 'amount',
+        name: 'amount',
+        path: ['amount'],
+        required: false,
+        label: 'amount',
+        kind: 'number',
+        numericType: 'number',
+        constraints: { minimum: 0, maximum: 10, multipleOf: 0.5 },
+        ui: {},
+      },
+      {
+        key: 'count',
+        name: 'count',
+        path: ['count'],
+        required: false,
+        label: 'count',
+        kind: 'number',
+        numericType: 'integer',
+        constraints: {},
+        ui: {},
+      },
+      {
+        key: 'active',
+        name: 'active',
+        path: ['active'],
+        required: false,
+        label: 'active',
+        kind: 'boolean',
+      },
+    ]);
+  });
+
+  it('uses explicit empty UI text values without falling back', () => {
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            title: 'Schema title',
+            description: 'Schema description',
+          },
+        },
+      },
+      uiSchema: {
+        fields: { name: { label: '', description: '', hint: '' } },
+      },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.definition.fields[0]).toMatchObject({
+      label: '',
+      description: '',
+      hint: '',
+    });
+  });
+
+  it('accepts default metadata without copying it into the definition', () => {
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { name: { type: 'string', default: 'Ada' } },
+      },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.definition.fields[0]).not.toHaveProperty('default');
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it('freezes the full result and does not mutate its inputs', () => {
+    const input = {
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { name: { type: 'string' } },
+      },
+    };
+    const before = structuredClone(input);
+    const result = compileFormDefinition(input);
+
+    expect(input).toEqual(before);
+    expect(Object.isFrozen(result)).toBe(true);
+    expect(Object.isFrozen(result.diagnostics)).toBe(true);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(Object.isFrozen(result.definition)).toBe(true);
+    expect(Object.isFrozen(result.definition.fields)).toBe(true);
+    expect(Object.isFrozen(result.definition.fields[0])).toBe(true);
+    expect(Object.isFrozen(result.definition.fields[0]?.path)).toBe(true);
+  });
+
+  it('does not traverse values of unknown keywords', () => {
+    const opaque = Object.defineProperty({}, 'hidden', {
+      enumerable: true,
+      get() {
+        throw new Error('must not be read');
+      },
+    });
+
+    expect(() =>
+      compileFormDefinition({
+        schema: {
+          $schema: dialect,
+          type: 'object',
+          properties: {},
+          'x-opaque': opaque,
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  it('returns a diagnostic for an invalid call object', () => {
+    const result = compileFormDefinition(null as never);
+    expect(result).toMatchObject({
+      success: false,
+      diagnostics: [{ code: 'INVALID_COMPILER_INPUT' }],
+    });
+  });
+
+  it('never returns a partial definition when independent errors exist', () => {
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: {
+          first: { type: 'array' },
+          second: { type: 'string', minLength: -1 },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+    expect(result).not.toHaveProperty('definition');
+    expect(result.diagnostics.map(({ code }) => code)).toEqual([
+      'UNSUPPORTED_FIELD_TYPE',
+      'INVALID_SCHEMA_KEYWORD_VALUE',
+    ]);
+  });
+
+  it('skips compatibility diagnostics below invalid field schemas', () => {
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { active: {} },
+      },
+      uiSchema: {
+        fields: {
+          active: {
+            placeholder: 'Unknown type',
+            options: { decimalPlaces: 2 },
+          },
+        },
+      },
+    });
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual([
+      'MISSING_FIELD_TYPE',
+    ]);
+  });
+
+  it('reports every repeated unknown order entry only as unknown', () => {
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: { name: { type: 'string' } },
+      },
+      uiSchema: { order: ['missing', 'missing'] },
+    });
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual([
+      'UNKNOWN_UI_ORDER_FIELD',
+      'UNKNOWN_UI_ORDER_FIELD',
+    ]);
+  });
+
+  it('is deterministic for repeated compilation of the same objects', () => {
+    const input = {
+      schema: {
+        type: 'object',
+        properties: { name: { type: 'string', 'x-extra': true } },
+      },
+    };
+
+    expect(compileFormDefinition(input)).toEqual(compileFormDefinition(input));
+  });
+});

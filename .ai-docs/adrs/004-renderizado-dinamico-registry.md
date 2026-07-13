@@ -7,8 +7,10 @@
 **4. Decisión:** Se implementará el concepto del **Patrón Registry** a nivel lógico. La Capa 0 mantendrá un diccionario estandarizado (registro) que mapeará los tipos de datos del esquema (ej. `string`, `boolean`, `enum`) a identificadores únicos. Las capas puente de cada framework consumirán este diccionario para resolver y pintar sus respectivos componentes acoplados a la UI.
 
 **5. Alternativas Consideradas:**
-* Delegar toda la lógica de resolución a los paquetes puente. Descartado porque obligaría a reescribir las reglas de inferencia del JSON Schema (ej. saber que un `string` con formato `date-time` es un calendario) en cada framework.
+
+- Delegar toda la lógica de resolución a los paquetes puente. Descartado porque obligaría a reescribir las reglas de inferencia del JSON Schema (ej. saber que un `string` con formato `date-time` es un calendario) en cada framework.
 
 **6. Consecuencias:**
-* *Positivas:* La lógica para deducir qué control visual corresponde a qué propiedad del JSON Schema se centraliza en Vanilla TypeScript y es reutilizable.
-* *Negativas:* Obliga a establecer contratos estrictos mediante interfaces/tipos entre la Capa 0 y los puentes de framework.
+
+- _Positivas:_ La lógica para deducir qué control visual corresponde a qué propiedad del JSON Schema se centraliza en Vanilla TypeScript y es reutilizable.
+- _Negativas:_ Obliga a establecer contratos estrictos mediante interfaces/tipos entre la Capa 0 y los puentes de framework.

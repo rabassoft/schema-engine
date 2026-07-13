@@ -1,0 +1,19 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_UI_SCHEMA_VALUE",
+      "severity": "error",
+      "source": "ui-schema",
+      "dataPath": ["name"],
+      "documentPath": ["fields", "name", "label"],
+      "parameters": {
+        "key": "label",
+        "expected": "string",
+        "actualType": "number",
+        "actualValue": 42
+      },
+      "fallbackMessage": "UI Schema key \"label\" has an invalid value."
+    }
+  ]
+}

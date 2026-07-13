@@ -1,0 +1,11 @@
+{
+  "fields": {
+    "name": {
+      "label": "UI name",
+      "description": "UI description",
+      "hint": "Short help",
+      "tooltip": "More help",
+      "placeholder": "Ada"
+    }
+  }
+}

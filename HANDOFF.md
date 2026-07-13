@@ -1,12 +1,12 @@
 # Schema Engine — Codex Handoff
 
 - **Handoff date:** 13 July 2026
-- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.3`, status `Draft`
-- **Implementation status:** Architecture only; no production code or monorepo has been created yet.
+- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.5`, status `Draft`
+- **Implementation status:** M1 minimal compiler completed in `packages/core`; runtime, operations, validators, adapters, and renderers are not implemented.
 
 ## 1. Current objective
 
-Review and approve the proposed compiler-only implementation plan for transforming the limited JSON Schema + UI Schema subset into a normalized `FormDefinition` with diagnostics.
+Review and approve the proposed M2 root-level immutable-operations plan.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -84,9 +84,9 @@ The acceptance review confirmed:
 
 Acceptance of ADR-005 authorizes planning the compiler increment; it does not by itself authorize implementation.
 
-## 6. Proposed compiler implementation plan
+## 6. Completed compiler implementation plan
 
-[`PLAN-001: Minimal compiler-only implementation`](.ai-docs/plans/001-compiler-only-implementation.md) is proposed and pending review. It defines this increment:
+[`PLAN-001: Minimal compiler-only implementation`](.ai-docs/plans/001-compiler-only-implementation.md) is completed. It delivered this increment:
 
 ```text
 JSON Schema + UI Schema
@@ -117,8 +117,18 @@ Suggested conformance fixtures:
 - `error-root-not-object`
 - `error-unsupported-type`
 
-## 7. Recommended next Codex prompt
+## 7. Proposed immutable-operations plan
+
+[`PLAN-002: Root-level immutable operations`](.ai-docs/plans/002-root-immutable-operations.md)
+is Proposed and awaiting explicit approval.
+
+Its scope is limited to the public operation/result contracts,
+`applyOperation()`, `applyFormOperation()`, deterministic runtime diagnostics,
+operation fixtures, and verification. Both utilities accept only a single
+string root-property path segment in M2. No M2 production code has been added.
+
+## 8. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `SPEC-001`, accepted ADR-005 and ADR-006, PLAN-001, the deferred-decisions register, and the ADR index. Do not implement code. Review PLAN-001 for decision completeness, compatibility with the specifications and ADRs, diagnostic coverage, conformance fixtures, and first-prototype scope. Report required changes before deciding whether to approve it.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, `SPEC-001`, accepted ADR-005 and ADR-006, completed PLAN-001, proposed PLAN-002, the deferred-decisions register, and the ADR index. Formally review PLAN-002 against the normative specification and deferred scope. Check its contracts, diagnostic behavior, immutability guarantees, fixtures, and acceptance criteria. Report any required corrections; if none remain, mark PLAN-002 Approved. Do not implement M2 during the review.

@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "definition": {
+    "fields": []
+  },
+  "diagnostics": [
+    {
+      "code": "MISSING_SCHEMA_DIALECT",
+      "severity": "warning",
+      "source": "schema",
+      "documentPath": ["$schema"],
+      "parameters": {
+        "assumedDialect": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "fallbackMessage": "Schema dialect is missing; assuming https://json-schema.org/draft/2020-12/schema."
+    }
+  ]
+}

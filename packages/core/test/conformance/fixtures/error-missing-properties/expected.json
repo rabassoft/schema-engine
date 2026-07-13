@@ -1,0 +1,13 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "MISSING_SCHEMA_PROPERTIES",
+      "severity": "error",
+      "source": "schema",
+      "documentPath": ["properties"],
+      "parameters": {},
+      "fallbackMessage": "The root schema must declare properties."
+    }
+  ]
+}

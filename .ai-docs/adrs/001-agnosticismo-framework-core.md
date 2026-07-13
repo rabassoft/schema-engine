@@ -7,8 +7,10 @@
 **4. Decisión:** Se construirá una "Capa 0" (`@rabassoft/schema-engine-core`) en TypeScript Vanilla puro, agnóstica a la UI. La gestión del estado y validación se orquestarán de forma independiente.
 
 **5. Alternativas Consideradas:**
-* Reimplementar la lógica para cada framework. Descartada por el alto coste de mantenimiento y riesgo de desincronización de validaciones.
+
+- Reimplementar la lógica para cada framework. Descartada por el alto coste de mantenimiento y riesgo de desincronización de validaciones.
 
 **6. Consecuencias:**
-* *Positivas:* Lógica de negocio a prueba de migraciones. Testing unitario ultra rápido.
-* *Negativas:* Requiere mantener paquetes "puente" (`@rabassoft/schema-engine-angular`) para traducir el estado agnóstico a las primitivas reactivas del framework destino.
+
+- _Positivas:_ Lógica de negocio a prueba de migraciones. Testing unitario ultra rápido.
+- _Negativas:_ Requiere mantener paquetes "puente" (`@rabassoft/schema-engine-angular`) para traducir el estado agnóstico a las primitivas reactivas del framework destino.

@@ -9,7 +9,15 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository currently contains architecture documentation only. Implementation must follow the approved specifications and ADRs.
+The repository contains the completed M1 compiler increment and its architecture documentation. The controlled runtime and framework adapters are not implemented yet. Implementation must follow the approved specifications, ADRs, and plans.
+
+## Current implementation
+
+`packages/core` exposes the framework-neutral `@rabassoft/schema-engine` API,
+including `compileFormDefinition()` and the normalized compiler contracts.
+
+The compiler currently supports only the root-object and primitive-field subset
+defined in SPEC-001 and ADR-005.
 
 ## Branch workflow
 

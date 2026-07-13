@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "definition": {
+    "fields": [
+      {
+        "key": "amount",
+        "name": "amount",
+        "path": ["amount"],
+        "required": false,
+        "label": "amount",
+        "placeholder": "0.00",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {
+          "multipleOf": 0.01
+        },
+        "ui": {
+          "decimalPlaces": 2,
+          "showTrailingZeros": true
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

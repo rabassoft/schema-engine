@@ -1,0 +1,24 @@
+{
+  "name": "@rabassoft/schema-engine-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "build": "pnpm --filter @rabassoft/schema-engine build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "pnpm --filter @rabassoft/schema-engine test",
+    "test:package": "pnpm --filter @rabassoft/schema-engine test:package",
+    "typecheck": "pnpm --filter @rabassoft/schema-engine typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.63.0",
+    "vitest": "^4.1.10"
+  }
+}
