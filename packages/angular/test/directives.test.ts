@@ -17,6 +17,7 @@ import {
   SchemaFieldOutletDirective,
   SchemaFormDirective,
   provideSchemaEngineAngular,
+  provideSchemaTextResolver,
   type AngularRendererType,
 } from '../dist/index.js';
 import { FakeRenderer } from '../dist/testing/fake-renderer.js';
@@ -26,7 +27,7 @@ const compiled = compileFormDefinition({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'object',
     properties: {
-      name: { type: 'string' },
+      name: { type: 'string', enum: ['Ada', 'Grace'] },
       age: { type: 'integer' },
     },
   },
@@ -182,6 +183,57 @@ describe('Angular adapter directives', () => {
     });
     expect(renderer.locale()).toBe('ca');
     expect(FakeRenderer.destroyed).toBe(0);
+  });
+
+  it('reprojects choice texts by identity and locale without replacing the renderer', () => {
+    let choiceCalls = 0;
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaTextResolver({
+          resolve(text, context) {
+            if (context.member !== 'choice') return text;
+            choiceCalls += 1;
+            if (context.choice.value === 'Grace') throw new Error('hidden');
+            return `${context.locale}:${text}`;
+          },
+        }),
+        provideSchemaEngineAngular({
+          id: 'fake',
+          renderer: FakeRenderer,
+          tester: () => 1,
+        }),
+      ],
+    });
+    const fixture = TestBed.createComponent(OutletHost);
+    fixture.detectChanges();
+    TestBed.tick();
+    const renderer = FakeRenderer.latest;
+    expect(renderer?.texts().choiceLabels).toEqual(['en:Ada', 'Grace']);
+    expect(choiceCalls).toBe(2);
+    expect(FakeRenderer.created).toBe(1);
+    expect(
+      fixture.componentInstance.diagnostics
+        .flat()
+        .filter(({ code }) => code === 'TEXT_RESOLUTION_FAILED'),
+    ).toHaveLength(1);
+
+    fixture.componentInstance.form?.focus(['age']);
+    TestBed.tick();
+    expect(choiceCalls).toBe(2);
+    expect(fixture.componentInstance.diagnostics).toHaveLength(1);
+
+    fixture.componentInstance.config.set(createConfig({ locale: 'ca' }));
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(FakeRenderer.latest).toBe(renderer);
+    expect(FakeRenderer.created).toBe(1);
+    expect(renderer?.texts().choiceLabels).toEqual(['ca:Ada', 'Grace']);
+    expect(choiceCalls).toBe(4);
+    expect(
+      fixture.componentInstance.diagnostics
+        .flat()
+        .filter(({ code }) => code === 'TEXT_RESOLUTION_FAILED'),
+    ).toHaveLength(2);
   });
 
   it('replaces and destroys the renderer only after a successful runtime swap', () => {

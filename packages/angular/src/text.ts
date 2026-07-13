@@ -9,6 +9,7 @@ import type {
   FieldDefinition,
   FieldRuntimeSnapshot,
   FieldTextMember,
+  StringChoiceDefinition,
   TextResolutionContext,
   TextResolver,
 } from '@rabassoft/schema-engine';
@@ -20,6 +21,7 @@ export interface AngularFieldTextSnapshot {
   readonly hint?: string;
   readonly tooltip?: string;
   readonly placeholder?: string;
+  readonly choiceLabels: readonly string[];
   readonly issueMessages: readonly string[];
 }
 
@@ -56,7 +58,7 @@ export class AngularTextProjector {
     const common = { formId, locale, field } as const;
     const resolve = (
       source: string,
-      member: Exclude<FieldTextMember, 'issue'>,
+      member: Exclude<FieldTextMember, 'choice' | 'issue'>,
     ): string =>
       resolveText(
         this.parsed.resolver,
@@ -64,6 +66,30 @@ export class AngularTextProjector {
         { ...common, member },
         diagnostics,
       );
+    const label = resolve(field.label, 'label');
+    const description =
+      field.description === undefined
+        ? undefined
+        : resolve(field.description, 'description');
+    const hint =
+      field.hint === undefined ? undefined : resolve(field.hint, 'hint');
+    const tooltip =
+      field.tooltip === undefined
+        ? undefined
+        : resolve(field.tooltip, 'tooltip');
+    const placeholder =
+      field.placeholder === undefined
+        ? undefined
+        : resolve(field.placeholder, 'placeholder');
+    const choiceLabels = ownChoices(field).map((choice) =>
+      resolveText(
+        this.parsed.resolver,
+        choice.label,
+        { ...common, member: 'choice', choice },
+        diagnostics,
+        true,
+      ),
+    );
     const issueMessages = snapshot.issues.map((issue) =>
       resolveText(
         this.parsed.resolver,
@@ -74,19 +100,12 @@ export class AngularTextProjector {
     );
     return Object.freeze({
       texts: Object.freeze({
-        label: resolve(field.label, 'label'),
-        ...(field.description === undefined
-          ? {}
-          : { description: resolve(field.description, 'description') }),
-        ...(field.hint === undefined
-          ? {}
-          : { hint: resolve(field.hint, 'hint') }),
-        ...(field.tooltip === undefined
-          ? {}
-          : { tooltip: resolve(field.tooltip, 'tooltip') }),
-        ...(field.placeholder === undefined
-          ? {}
-          : { placeholder: resolve(field.placeholder, 'placeholder') }),
+        label,
+        ...(description === undefined ? {} : { description }),
+        ...(hint === undefined ? {} : { hint }),
+        ...(tooltip === undefined ? {} : { tooltip }),
+        ...(placeholder === undefined ? {} : { placeholder }),
+        choiceLabels: Object.freeze(choiceLabels),
         issueMessages: Object.freeze(issueMessages),
       }),
       diagnostics: Object.freeze(diagnostics),
@@ -135,6 +154,7 @@ function resolveText(
   source: string,
   context: TextResolutionContext,
   diagnostics: Diagnostic[],
+  rejectBlank = false,
 ): string {
   let result: unknown;
   try {
@@ -145,6 +165,10 @@ function resolveText(
   }
   if (typeof result !== 'string') {
     diagnostics.push(textDiagnostic(context, 'non-string-result'));
+    return source;
+  }
+  if (rejectBlank && result.trim().length === 0) {
+    diagnostics.push(textDiagnostic(context, 'blank-string-result'));
     return source;
   }
   return result;
@@ -160,12 +184,26 @@ function textDiagnostic(
     {
       field: context.field.name,
       member: context.member,
-      ...(context.member === 'issue' ? { issueCode: context.issue.code } : {}),
+      ...(context.member === 'choice'
+        ? { choiceValue: context.choice.value }
+        : context.member === 'issue'
+          ? { issueCode: context.issue.code }
+          : {}),
       reason,
     },
     `Text resolution failed for field "${context.field.name}".`,
     context.field.path,
   );
+}
+
+function ownChoices(field: FieldDefinition): readonly StringChoiceDefinition[] {
+  if (field.kind !== 'string') return [];
+  const descriptor = Object.getOwnPropertyDescriptor(field, 'choices');
+  return descriptor !== undefined &&
+    'value' in descriptor &&
+    Array.isArray(descriptor.value)
+    ? (descriptor.value as readonly StringChoiceDefinition[])
+    : [];
 }
 
 function findDescriptor(
@@ -195,5 +233,9 @@ function safeType(value: unknown): string {
 }
 
 export function emptyTextSnapshot(): AngularFieldTextSnapshot {
-  return Object.freeze({ label: '', issueMessages: Object.freeze([]) });
+  return Object.freeze({
+    label: '',
+    choiceLabels: Object.freeze([]),
+    issueMessages: Object.freeze([]),
+  });
 }

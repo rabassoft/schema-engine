@@ -4,10 +4,17 @@ import { provideSchemaEngineAngular } from '../renderer.js';
 import type { AngularRendererRegistration } from '../renderer.js';
 import { SchemaBooleanRendererComponent } from './boolean-renderer.js';
 import { SchemaNumberRendererComponent } from './number-renderer.js';
+import { SchemaStringEnumRendererComponent } from './string-enum-renderer.js';
 import { SchemaStringRendererComponent } from './string-renderer.js';
 
 const nativeRegistrations: readonly AngularRendererRegistration[] =
   Object.freeze([
+    Object.freeze({
+      id: 'native-string-enum',
+      renderer: SchemaStringEnumRendererComponent,
+      tester: (field: FieldDefinition) => (hasOwnChoices(field) ? 20 : null),
+      priority: 0,
+    }),
     Object.freeze({
       id: 'native-string',
       renderer: SchemaStringRendererComponent,
@@ -28,6 +35,17 @@ const nativeRegistrations: readonly AngularRendererRegistration[] =
       priority: 0,
     }),
   ]);
+
+function hasOwnChoices(field: FieldDefinition): boolean {
+  if (field.kind !== 'string') return false;
+  const descriptor = Object.getOwnPropertyDescriptor(field, 'choices');
+  return (
+    descriptor !== undefined &&
+    'value' in descriptor &&
+    Array.isArray(descriptor.value) &&
+    descriptor.value.length > 0
+  );
+}
 
 export function provideSchemaEngineAngularNative(
   ...customRegistrations: readonly AngularRendererRegistration[]

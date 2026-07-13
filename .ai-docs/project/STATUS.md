@@ -7,12 +7,13 @@
 
 - **Updated:** 2026-07-13 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `0ca1f39` (`develop` is seven commits ahead of
+- **Committed revision:** `17561d2` (`develop` is eight commits ahead of
   `origin/develop`; no push has been performed by Codex)
 - **Specification:** SPEC-001 Draft v0.1.13
 - **Plan:** PLAN-006 revision 1, Approved
 - **Phase:** M1–M5 completed; M6 active
-- **Working tree:** PLAN-006 step 3 is implemented and verified but uncommitted
+- **Working tree:** PLAN-006 steps 4 and 5 are implemented and verified but
+  uncommitted
 
 ## Current objective
 
@@ -22,40 +23,40 @@ capability.
 
 ## In progress
 
-None. PLAN-006 step 3 is complete in the working tree; no implementation task is
-active.
+None.
 
 ## Latest completed work
 
-- Committed PLAN-006 step 2 as `0ca1f39` with repository identity
+- Committed PLAN-006 step 3 as `17561d2` with repository identity
   `Rabassoft <ricard@rabassoft.com>`; no push was performed.
-- Added two-pass runtime definition validation: the complete historical base
-  shape is checked first, then own string `choices` are inspected safely.
-- Rejects malformed arrays, indices, entries, members, duplicate values, and
-  blank labels with the exact frozen choices-specific diagnostic before the
-  external validator can run.
-- Accepts valid frozen manual choices, inherited absence, missing values, and
-  out-of-enum strings when the external validator permits them; caller-owned
-  definitions remain untouched, and both operation utilities provably ignore
-  accessor-shaped `choices` without production operation changes.
-- Verified the workspace with 165 passing tests plus formatting, lint, type
-  checking, builds, package smoke, framework boundaries, and diff integrity.
+- Completed step 4 choice text contracts and projection with exact contexts,
+  diagnostics, identity, locale, descriptor-safety, and immutability coverage.
+- Added Public Experimental `SchemaStringEnumRendererComponent` with the fixed
+  selector and existing Angular root entry point.
+- Implemented a private Signal Forms token buffer: missing/out-of-enum uses the
+  disabled empty sentinel and every choice, including domain `""`, uses its
+  positional token without optimistic state.
+- Registered `native-string-enum` at rank 20 and priority 0 using an own-data
+  descriptor tester; ordinary strings retain the rank-10 fallback.
+- Added focused rank, descriptor-safety, sentinel, token, empty-domain-value,
+  and controlled-reconciliation tests; the workspace now passes 172 tests.
 
 ## Exact next action
 
-Implement PLAN-006 step 4 only: extend neutral text contracts and Angular choice
-text projection with focused identity, resolver, fallback, diagnostic, locale,
-descriptor-safety, ordering, and immutability tests.
+Implement PLAN-006 step 6 only: add integration, accessibility, resolver,
+controlled-state, zoneless, and package-surface tests for the native string-enum
+renderer.
 
-Before implementation, review the current uncommitted step-3 diff and PLAN-006
-sections 2, 8, 11, 12, 13.3, 14, 15, and 16.
+Before implementation, review the current uncommitted step-4 and step-5 diff
+and PLAN-006 sections 2, 9, 10, 11, 12, 13.4, 13.5, 14, 15, and 16.
 
 ## Blockers and conflicts
 
 - No implementation blocker.
 - No active documentation conflict.
-- PLAN-006 revision 1 and SPEC-001 Draft v0.1.13 authorize step 4.
-- Step 3 passes verification and remains uncommitted; preserve its diff.
+- PLAN-006 revision 1 and SPEC-001 Draft v0.1.13 authorize step 6.
+- Step 3 is committed in `17561d2`; the verified step-4 and step-5 diff remains
+  uncommitted and there is no active implementation task.
 
 ## Open questions outside the active scope
 
@@ -69,13 +70,14 @@ sections 2, 8, 11, 12, 13.3, 14, 15, and 16.
 ## Latest verification
 
 - `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
-- `pnpm test` passed: 11 files and 165 tests (129 core, 36 Angular).
+- `pnpm test` passed: 13 files and 172 tests (129 core, 43 Angular).
 - `pnpm build` and `pnpm test:package` passed for both packages.
 - No dependency, lockfile, package version, or publication setting changed.
 - Core still has zero runtime dependencies and no Angular, RxJS, DOM, or browser
   imports; Angular Forms imports remain limited to `@angular/forms/signals`.
-- Operations do not read `choices`; runtime actions do not enforce enum
-  membership; the external validator remains authoritative.
+- Operations do not read `choices`; runtime actions, text projection, and the
+  select do not enforce enum membership; the external validator remains
+  authoritative.
 - All 31 Markdown files resolve their local links and `git diff --check` passed.
 
 ## Task document map

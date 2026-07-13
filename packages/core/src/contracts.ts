@@ -148,13 +148,28 @@ export interface ValidationIssue {
   readonly fallbackMessage?: string;
 }
 export type FieldTextMember =
-  'label' | 'description' | 'hint' | 'tooltip' | 'placeholder' | 'issue';
+  | 'label'
+  | 'description'
+  | 'hint'
+  | 'tooltip'
+  | 'placeholder'
+  | 'choice'
+  | 'issue';
 export type TextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
       readonly field: FieldDefinition;
-      readonly member: Exclude<FieldTextMember, 'issue'>;
+      readonly member: Exclude<FieldTextMember, 'choice' | 'issue'>;
+      readonly choice?: never;
+      readonly issue?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly field: FieldDefinition;
+      readonly member: 'choice';
+      readonly choice: StringChoiceDefinition;
       readonly issue?: never;
     }
   | {
@@ -162,6 +177,7 @@ export type TextResolutionContext =
       readonly locale: string;
       readonly field: FieldDefinition;
       readonly member: 'issue';
+      readonly choice?: never;
       readonly issue: ValidationIssue;
     };
 export interface TextResolver {

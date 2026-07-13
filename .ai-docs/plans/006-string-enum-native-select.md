@@ -942,3 +942,31 @@ Malformed manual choices now fail before validation with the exact specific
 diagnostic, while every unrelated base-definition failure preserves its
 historical diagnostic. Text projection and Angular remain unchanged at this
 checkpoint.
+
+## 25. Choice text projection implementation checkpoint
+
+- **Date:** 2026-07-13
+- **Completed:** Step 4 neutral choice text contracts, Angular choice
+  projection, exact failure diagnostics, and focused identity, locale,
+  descriptor-safety, ordering, and immutability tests.
+- **Boundary:** No renderer, native select, registration, operation, runtime
+  validation, dependency, or package configuration changed at this checkpoint.
+
+Choice text resolution now uses the exact source choice, preserves a non-blank
+source fallback, and retains the outlet's existing four-part projection
+identity. The verified step-4 diff remains uncommitted; step 5 is the next
+implementation boundary.
+
+## 26. Native select implementation checkpoint
+
+- **Date:** 2026-07-13
+- **Completed:** Step 5 controlled native string-enum select, Public
+  Experimental root export, rank-20 built-in registration, and focused
+  specialization, descriptor-safety, token, and reconciliation tests.
+- **Boundary:** Step-6 integration, full accessibility, consumer override,
+  zoneless, destruction, and package-surface coverage remains pending.
+
+The renderer uses only normalized own choices and resolved text snapshots. Its
+private Signal Forms leaf carries an empty missing/out-of-enum sentinel or a
+positional choice token; no render, reconciliation, or external value mutates
+application state or emits an operation.

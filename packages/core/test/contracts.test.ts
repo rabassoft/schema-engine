@@ -1,8 +1,11 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import type {
   FieldUiSchema,
+  FieldTextMember,
+  FieldDefinition,
   StringChoiceDefinition,
   StringFieldDefinition,
+  TextResolutionContext,
 } from '../src/index.js';
 
 describe('public string choice contracts', () => {
@@ -37,5 +40,24 @@ describe('public string choice contracts', () => {
     expectTypeOf<FieldUiSchema['enumLabels']>().toEqualTypeOf<
       Readonly<Record<string, string>> | undefined
     >();
+    expectTypeOf<FieldTextMember>().toEqualTypeOf<
+      | 'label'
+      | 'description'
+      | 'hint'
+      | 'tooltip'
+      | 'placeholder'
+      | 'choice'
+      | 'issue'
+    >();
+    expectTypeOf<
+      Extract<TextResolutionContext, { member: 'choice' }>
+    >().toEqualTypeOf<{
+      readonly formId: string;
+      readonly locale: string;
+      readonly field: FieldDefinition;
+      readonly member: 'choice';
+      readonly choice: StringChoiceDefinition;
+      readonly issue?: never;
+    }>();
   });
 });

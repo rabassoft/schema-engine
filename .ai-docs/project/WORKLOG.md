@@ -6,6 +6,85 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-13 — M6 PLAN-006 step 5 completed
+
+### Completed
+
+- Added standalone Public Experimental
+  `SchemaStringEnumRendererComponent` at the fixed module and selector and
+  exported it through the existing Angular root entry point.
+- Reused M5's native semantic structure, deterministic IDs, resolved texts,
+  issue presentation, focus/blur outputs, accessibility attributes, and
+  renderer interface.
+- Bound the select to one private string-valued Angular 22 Signal Forms leaf;
+  the empty internal token represents missing/out-of-enum and positional
+  `choice:<index>` tokens represent exact domain choices, including `""`.
+- Reconciled the presentation token from controlled snapshots without emitting
+  and emitted only the exact domain string selected by a valid user token.
+- Added the descriptor-safe `native-string-enum` registration at rank 20 and
+  priority 0 while retaining the generic string rank-10 fallback and the single
+  immutable ADR-007 registration sequence.
+- Added focused tests for specialization, ordinary-string fallback,
+  inherited/accessor safety, the disabled sentinel, token order, empty domain
+  strings, and controlled reconciliation.
+
+### Verification
+
+- Workspace formatting, linting, type checking, builds, and package smoke
+  passed.
+- The full suite passed: 13 files and 172 tests, comprising 129 core and 43
+  Angular tests.
+- Core remains framework-neutral with zero runtime dependencies; Angular Forms
+  imports remain limited to Signal Forms.
+- The select receives only normalized choices and resolved texts, performs no
+  business validation or optimistic mutation, and exposes no token helper from
+  the Angular root entry point.
+- No dependency, lockfile, package version, peer range, publication setting, or
+  deferred capability changed.
+- All 31 Markdown links resolve and `git diff --check` passes.
+
+### Pending
+
+- Implement PLAN-006 step 6 integration, accessibility, resolver,
+  controlled-state, zoneless, and package-surface coverage.
+
+## 2026-07-13 — M6 PLAN-006 step 4 completed
+
+### Completed
+
+- Extended `FieldTextMember` with `choice` and made regular, choice, and issue
+  resolution contexts structurally exclusive; choice contexts carry the exact
+  immutable source choice.
+- Added always-present frozen `choiceLabels` to Angular text snapshots and
+  projected own data-descriptor choices after ordinary field texts and before
+  issues.
+- Preserved source labels when choice resolution throws, returns a non-string,
+  or returns a blank string, emitting one exact frozen runtime warning per
+  failing choice in definition order.
+- Preserved the outlet's field/form/locale/issues text identity: unrelated
+  snapshot changes do not repeat choice work or diagnostics, while locale
+  changes reproject labels without replacing the renderer.
+- Added focused public-contract, direct projector, fallback, diagnostic,
+  descriptor-safety, ordering, immutability, identity, and locale tests.
+
+### Verification
+
+- Workspace formatting, linting, type checking, builds, and package smoke
+  passed.
+- The full suite passed: 12 files and 169 tests, comprising 129 core and 40
+  Angular tests.
+- Core remains framework-neutral with zero runtime dependencies; Angular Forms
+  imports remain limited to Signal Forms.
+- Text projection performs no enum-membership validation, no native select or
+  renderer registration entered step 4, and no dependency or package surface
+  setting changed.
+- All 31 Markdown links resolve and `git diff --check` passes.
+
+### Pending
+
+- Implement PLAN-006 step 5: add the native select component and its provider
+  registration.
+
 ## 2026-07-13 — M6 PLAN-006 step 3 completed
 
 ### Completed
