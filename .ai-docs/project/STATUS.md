@@ -7,34 +7,35 @@
 
 - **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `a9c46b9` (`develop` is one commit ahead of
-  `origin/develop`; no push has been performed for this commit)
+- **Committed revision:** current `HEAD`, G0 matrix and consumer checkpoint
+  (`develop` is three commits ahead of `origin/develop`; no push has been
+  performed for this checkpoint)
 - **Specification:** SPEC-001 Draft v0.1.13
 - **Last implementation plan:** PLAN-006 revision 1, Completed
 - **Review gate:** G0, Approved and active
 - **Phase:** M1–M6 completed; no active implementation milestone
-- **Working tree:** uncommitted documentation-only checkpoint recording G0
-  approval
+- **Working tree:** clean after committing the G0 matrix and minimal consumer;
+  no product code changed
 
 ## Current objective
 
-Complete G0 by reviewing the already implemented SPEC-001 boundary. Produce an
-acceptance evidence map, exercise a minimal Angular consumer, repeat full
-verification, and accept SPEC-001 only if every criterion passes.
+Complete G0 by reviewing the already implemented SPEC-001 boundary. The
+22-criterion evidence map and minimal Angular consumer pass; repeat full
+verification and accept SPEC-001 only if the final review also passes.
 
 ## In progress
 
-- G0 formal prototype closure, limited to review and evidence. No behavior,
-  public API stability, publication setting, or deferred capability is active.
+- G0 formal prototype closure. The evidence matrix maps 22/22 criteria with no
+  gap and the minimal built-package Angular consumer passes. Full verification
+  is the next pending gate; no product behavior or deferred capability is active.
 
 ## Latest completed work
 
-- Approved and activated G0 as a review-only gate with fail-closed acceptance:
-  findings keep SPEC-001 Draft and become separate work.
-- Synchronized the canonical post-M6 checkpoint and corrected the obsolete
-  M1-only repository description.
-- Recorded M7-M12 as a proposed dependency-ordered sequence without activating
-  or promoting deferred capabilities.
+- Added and passed a minimal Angular consumer that imports both built package
+  roots, renders all primitive field kinds, and completes a controlled update.
+- Completed the G0 acceptance matrix with direct automated evidence for all 22
+  SPEC-001 walking-skeleton criteria and no identified evidence gap.
+- Approved and activated G0 as a review-only gate with fail-closed acceptance.
 - Completed PLAN-006 and M6 end to end with 175 tests, builds, package smoke,
   declaration review, architectural boundary checks, and controlled native
   string enum behavior.
@@ -43,8 +44,9 @@ verification, and accept SPEC-001 only if every criterion passes.
 
 ## Exact next action
 
-Prepare the G0 evidence matrix mapping all 22 SPEC-001 acceptance criteria to
-tests, fixtures, declarations, package checks, or an identified evidence gap.
+Run the complete G0 verification: frozen install; format, lint, typecheck, full
+tests, builds, package smoke, declarations, architectural boundaries, Markdown
+links, and diff integrity.
 
 ## Blockers and conflicts
 
@@ -52,8 +54,11 @@ tests, fixtures, declarations, package checks, or an identified evidence gap.
 - No active documentation conflict.
 - PLAN-006 revision 1 and M6 are completed; SPEC-001 remains Draft v0.1.13 until
   G0 passes.
-- `develop` points to `a9c46b9` and is one commit ahead of `origin/develop`; the
-  working tree contains only this uncommitted G0 approval checkpoint.
+- All 22 acceptance criteria have mapped evidence and the consumer check passes;
+  G0 remains open for full verification and the end-to-end SPEC review.
+- The committed G0 matrix and consumer checkpoint is the current `HEAD`; the
+  working tree is clean and `develop` is three commits ahead of
+  `origin/develop`.
 
 ## Open questions outside the active scope
 
@@ -80,11 +85,18 @@ tests, fixtures, declarations, package checks, or an identified evidence gap.
   stale-reference, and diff-integrity checks.
 - The G0 approval checkpoint passes formatting, local-link, state-consistency,
   and diff-integrity checks.
+- The evidence inventory maps 22/22 criteria with no gap; formatting, all 32
+  Markdown files and their local links, state consistency, and diff integrity
+  pass for this checkpoint.
+- `pnpm test:consumer` passed after both package builds: 1 test file and 1 test.
+  Workspace lint and typecheck also pass; the lockfile is unchanged.
 
 ## Task document map
 
 - Normative behavior: `.ai-docs/specs/001-controlled-form-runtime.md`
 - Active review gate and future sequence: `.ai-docs/project/ROADMAP.md`
+- G0 acceptance evidence: `.ai-docs/reviews/001-spec-001-acceptance.md`
+- Minimal built-package consumer: `packages/angular/test/consumer.test.ts`
 - Completed delivery contract: `.ai-docs/plans/006-string-enum-native-select.md`
 - Last accepted increment decision: `.ai-docs/adrs/011-enum-string-normalizado-select-nativo.md`
 - Supporting ADR status and links: `.ai-docs/adrs/000-index.md`

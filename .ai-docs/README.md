@@ -13,6 +13,12 @@
 
 - [SPEC-001: Controlled Form Runtime](./specs/001-controlled-form-runtime.md)
 
+## Acceptance reviews
+
+- [G0: SPEC-001 acceptance evidence](./reviews/001-spec-001-acceptance.md) — In
+  progress; 22/22 criteria mapped and consumer passed, with final verification
+  and end-to-end review pending.
+
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)

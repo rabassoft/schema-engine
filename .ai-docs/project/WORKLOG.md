@@ -6,6 +6,55 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — G0 minimal Angular consumer passed
+
+### Completed
+
+- Added a reproducible `pnpm test:consumer` command that builds both public
+  packages before running the consumer integration.
+- Added a consumer host that imports only the core and Angular package roots,
+  compiles a root schema with all four primitive kinds, renders native controls,
+  applies an emitted `set-value`, and confirms the external value.
+- Kept the test under the existing Angular package so package self-resolution
+  loads `dist` without adding a workspace package, dependency, or lockfile entry.
+
+### Verification
+
+- `pnpm test:consumer` passed: both package builds plus 1 test file and 1 test.
+- `pnpm lint` and `pnpm typecheck` passed for the workspace.
+- The consumer contains no workspace `src` import and no product source, public
+  contract, dependency, lockfile, version, or publication setting changed.
+
+### Pending
+
+- Run the complete frozen-install, format, test, package, declaration, boundary,
+  link, and diff verification required by G0.
+- Review SPEC-001 end to end before acceptance.
+
+## 2026-07-14 — G0 acceptance evidence matrix completed
+
+### Completed
+
+- Mapped all 22 SPEC-001 walking-skeleton acceptance criteria to direct tests,
+  conformance fixtures, implementation boundaries, or package evidence.
+- Found no acceptance-criterion evidence gap during the inventory; kept the
+  distinction between mapped evidence and a passing G0 execution.
+- Added a persistent G0 review document with fail-closed assessments and the
+  remaining gate requirements.
+
+### Verification
+
+- Formatting, all 32 Markdown files and their local links, state consistency,
+  and `git diff --check` pass for the documentation-only matrix checkpoint.
+- No code, public contract, package, dependency, lockfile, publication setting,
+  or deferred capability changed.
+
+### Pending
+
+- Implement and run the minimal Angular consumer against built package entry
+  points, without workspace `src` imports.
+- Repeat full verification and review SPEC-001 end to end before acceptance.
+
 ## 2026-07-14 — G0 formal prototype closure approved
 
 ### Decision

@@ -9,6 +9,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "test": "pnpm build && pnpm -r --if-present test",
+    "test:consumer": "pnpm build && pnpm --filter @rabassoft/schema-engine-angular exec vitest run test/consumer.test.ts",
     "test:package": "pnpm build && pnpm -r --if-present test:package",
     "typecheck": "pnpm build && pnpm -r --if-present typecheck"
   },

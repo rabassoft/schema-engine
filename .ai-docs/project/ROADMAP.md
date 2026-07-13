@@ -38,6 +38,11 @@
 - Mantener todas las APIs públicas como Experimental salvo que una ADR separada
   las promueva.
 
+**Progreso:** la matriz de evidencia relaciona los 22 criterios con pruebas
+automatizadas y no identifica gaps. El consumidor Angular mínimo contra los
+paquetes construidos ha superado su prueba. Continúan pendientes la verificación
+completa y la revisión integral de SPEC-001.
+
 G0 solo podrá cerrarse y marcar SPEC-001 como Accepted si toda la evidencia
 pasa. Cualquier hallazgo mantendrá la SPEC en Draft y se trasladará a trabajo
 separado antes de repetir la revisión.
