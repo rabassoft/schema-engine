@@ -2,6 +2,156 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — PLAN-006 revision 1 approved
+
+### Completed
+
+- Recorded the user's explicit approval of PLAN-006 revision 1 after its
+  repeated eight-area review passed without a remaining finding.
+- Promoted the plan's exact normative contracts for string enums,
+  `enumLabels`, immutable choices, manual-definition validation, choice text
+  projection, diagnostics, and the native Angular select to SPEC-001 Draft
+  v0.1.13.
+- Synchronized the plan, SPEC index, architecture README, ROADMAP, STATUS,
+  WORKLOG, and HANDOFF while keeping M6 planned but inactive.
+- Left production code, package versions, publication settings, API stability,
+  and D-010/D-024/D-036/D-037 plus all other deferred decisions unchanged.
+
+### Verification
+
+- Confirmed PLAN-006 is Approved revision 1 and SPEC-001 plus its index and
+  HANDOFF consistently report Draft v0.1.13.
+- Confirmed M6 remains inactive and the next action starts with PLAN-006 step 1.
+- Ran formatting, local Markdown-link validation, active-state searches, and
+  `git diff --check`; no code test was required for this documentation-only
+  approval task.
+
+### Pending
+
+- Begin M6 by marking the implementation task and milestone active, then add
+  the neutral string-choice contracts, UI metadata extension, root exports, and
+  focused contract tests from PLAN-006 step 1.
+
+## 2026-07-13 — PLAN-006 revision 1 review corrections completed
+
+### Completed
+
+- Added `schema-blocked` enum state and exact UI cascade behavior, preserving
+  independent outer `enumLabels` shape errors without derived compatibility or
+  member diagnostics below blocked schema branches.
+- Completed the choice `TEXT_RESOLUTION_FAILED` contract with frozen data path,
+  absent document path, per-choice ordering, projection identity, and one-time
+  diagnostic-batch forwarding.
+- Fixed the public renderer selector as `schema-string-enum-renderer`, its exact
+  native module path, package export smoke assertion, and Angular TestBed/resolver
+  creation boundary.
+- Added cascade-specific fixture and focused-test requirements and marked
+  PLAN-006 revision 1.
+- Repeated all eight formal checklist areas with no remaining finding; kept M6
+  inactive and PLAN-006 Proposed pending explicit approval.
+
+### Verification
+
+- Rechecked the corrected plan against current compiler cascade behavior,
+  ADR-005/007/008/009/011, PLAN-002/005, Angular text projection, public package
+  boundaries, and current Angular 22 select/FormField documentation.
+- Confirmed consistent Proposed revision 1 state across PLAN-006, README,
+  ROADMAP, STATUS, WORKLOG, and HANDOFF.
+- Ran formatting, local Markdown-link validation, state searches, and
+  `git diff --check`; no code test was required for documentation-only changes.
+
+### Pending
+
+- Explicitly approve or revise PLAN-006 revision 1. Approval may promote its
+  exact contracts to SPEC-001 Draft v0.1.13 before implementation.
+
+## 2026-07-13 — PLAN-006 second formal review completed
+
+### Completed
+
+- Re-reviewed proposed PLAN-006 against compiler cascade behavior, ADR-011,
+  Angular public metadata, and current official Angular 22 Signal Forms docs.
+- Confirmed that `[formField]` supports native selects with dynamic options and
+  that the selected Signal Forms boundary remains viable.
+- Found three required corrections: model schema-blocked enum states without
+  derived UI cascades; complete choice text diagnostic paths/frequency; and fix
+  the public component selector, module, and safe package test boundary.
+- Recorded the findings in PLAN-006 without applying their substantive fixes.
+- Kept PLAN-006 Proposed revision 0, SPEC-001 Draft v0.1.12, and M6 inactive.
+
+### Verification
+
+- Rechecked all eight plan areas and confirmed that scope, controlled state,
+  validation ownership, tokens, ranks, deferred exclusions, dependencies, and
+  tooling remain otherwise sound.
+- Ran formatting, local Markdown-link validation, state consistency searches,
+  and `git diff --check`; no code test was required for the documentation-only
+  review.
+
+### Pending
+
+- Apply all three corrections, publish PLAN-006 revision 1, and repeat the
+  eight checklist areas before considering approval.
+
+## 2026-07-13 — PLAN-006 proposed and formally reviewed
+
+### Completed
+
+- Reviewed accepted ADR-011 against the implemented compiler, runtime creation,
+  operations, Angular text projection, renderer resolver, native Signal Forms
+  controls, package surfaces, and test infrastructure.
+- Drafted proposed PLAN-006 for string enum normalization, UI labels, runtime
+  choice validation, localized choice projection, and a ranked native select.
+- Closed UI diagnostic cascades, base-versus-choice runtime diagnostics, safe
+  descriptor reads, and the internal missing/choice DOM token protocol.
+- Defined the implementation sequence, exact fixtures, public Experimental API
+  changes, full verification matrix, and M6 lifecycle.
+- Repeated all eight formal checklist areas with no remaining finding; kept
+  PLAN-006 Proposed and M6 inactive pending explicit approval.
+
+### Verification
+
+- Checked PLAN-006 against SPEC-001 Draft v0.1.12, ADR-005/007/008/009/011,
+  completed PLAN-002/005, current source and tests, and D-010/D-024/D-036/D-037.
+- Confirmed that the plan adds no dependency, package, entry point, version,
+  publication setting, deferred capability, or implementation change.
+- Ran formatting, local Markdown-link validation, active-state searches, and
+  `git diff --check`; no code test was required for the documentation-only plan.
+
+### Pending
+
+- Explicitly approve or revise PLAN-006. Only approval may promote its contracts
+  to SPEC-001 Draft v0.1.13 and authorize implementation preparation.
+
+## 2026-07-13 — ADR-011 accepted and D-008 promoted
+
+### Completed
+
+- Committed the ADR-011 proposal, formal review, corrections, and repeated
+  review on `develop` as `c8728bb` with repository identity
+  `Rabassoft <ricard@rabassoft.com>`; no push was performed.
+- Accepted ADR-011 revision 1 after all eight review areas passed without
+  remaining findings.
+- Amended ADR-005 only for the accepted string-enum subset and promoted D-008.
+- Split the unpromoted `const` and `format` concerns into deferred D-036 and
+  D-037 without changing their behavior.
+- Updated SPEC-001 to Draft v0.1.12 as planning state, synchronized its index,
+  the ADR index, STATUS, and HANDOFF, and left all implementation unchanged.
+
+### Verification
+
+- Confirmed that ADR-011, ADR-005, D-008, D-036, D-037, SPEC-001, both indexes,
+  STATUS, WORKLOG, and HANDOFF report one consistent accepted/planning state.
+- Confirmed that SPEC-001 Draft v0.1.12 records ADR-011 as accepted but not yet
+  implemented, while `const`, `format`, and other exclusions remain deferred.
+- Ran formatting, local Markdown-link validation, and `git diff --check`; no
+  code test was required because the acceptance changed documentation only.
+
+### Pending
+
+- Draft and formally review PLAN-006 for ADR-011. Do not implement it until the
+  plan is explicitly approved.
+
 ## 2026-07-13 — ADR-011 review corrections completed
 
 ### Completed

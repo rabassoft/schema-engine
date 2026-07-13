@@ -1,19 +1,19 @@
 # Schema Engine — Codex Handoff
 
 - **Handoff date:** 13 July 2026
-- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.11`, status `Draft`
+- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.13`, status `Draft`
 - **Implementation status:** M1 through M5 completed: framework-neutral compiler, operations, and runtime in `packages/core`, plus the Angular 22 adapter and accessible native HTML renderer kit in `packages/angular`.
 
 ## 1. Current objective
 
-No implementation task is active. ADR-010 revision 1 is accepted, pre-SPEC
-ADR-002 is Superseded, and D-028 is Promoted. D-024's custom-renderer concern is
-resolved while its Angular validation bridge remains Deferred. D-008 has been
-reviewed and split. Proposed ADR-011 now defines the minimal string-enum
-increment while keeping `const` and `format` deferred. Its three formal-review
-corrections are applied and the repeated eight-area review passed. The next
-action is an explicit acceptance or revision decision; no implementation task
-is active.
+No implementation task is active. ADR-011 revision 1 is accepted after its
+repeated eight-area review passed. It promotes D-008 as a minimal string-enum
+increment and explicitly amends ADR-005 only for that subset. `const` and
+`format` remain deferred separately as D-036 and D-037. PLAN-006 revision 1 is
+approved after incorporating all three second-review corrections and passing
+the repeated eight-area review. Its exact contracts are promoted to SPEC-001
+Draft v0.1.13. The exact next action is to begin M6 by marking it active and
+implementing the neutral contracts and exports in PLAN-006 step 1.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -217,16 +217,16 @@ field context, and neither directly produces the normalized whole-model issues
 required by core `SchemaValidator`. Revisit only with a concrete consumer that
 defines root-versus-field scope and canonical error/path mapping.
 
-## 14. Reviewed D-008 boundary and proposed enum decision
+## 14. Accepted D-008 boundary and enum decision
 
-D-008 currently groups three different concerns. Draft 2020-12 defines `enum`
+D-008 originally grouped three different concerns. Draft 2020-12 defines `enum`
 and `const` as assertions over instance values, while the standard dialect uses
 `format` as an annotation by default. Renderer selection is a separate adapter
 policy applied only after the compiler has produced normalized metadata.
 
 The approved split produced
 [`ADR-011: String enum normalization and native select renderer`](.ai-docs/adrs/011-enum-string-normalizado-select-nativo.md),
-currently Proposed. It limits the first increment to unique non-empty string
+now Accepted. It limits the first increment to unique non-empty string
 enums, normalizes immutable choices, obtains optional labels from UI Schema,
 extends text resolution for choices, preserves external validation ownership,
 and specializes the Angular native renderer through ADR-007 ranks.
@@ -236,15 +236,35 @@ case. `format` remains deferred and ignored with a warning under ADR-005;
 promoting it requires explicitly revising that accepted policy. Non-string
 enums, radios and clearing back to missing also remain outside ADR-011.
 
-No implementation task is active. D-008 remains Candidate and ADR-011 remains
-Proposed revision 1. Its formal review corrections now preserve exclusive
-choice/issue text contexts, safely validate compiled and manually supplied
-choices without broadening PLAN-002, and guarantee non-blank accessible labels
-including the empty-string value. The repeated eight-area review passed without
-remaining findings.
+No implementation task is active. D-008 is Promoted, ADR-011 is Accepted
+revision 1, and approved PLAN-006 has promoted the executable contract to
+SPEC-001 Draft v0.1.13. Its review corrections preserve exclusive choice/issue
+text contexts, safely validate compiled and manually supplied choices without
+broadening PLAN-002, and guarantee non-blank accessible labels including the
+empty-string value. `const` and `format` remain tracked independently as D-036
+and D-037.
 
-## 15. Recommended next Codex prompt
+## 15. Approved PLAN-006
+
+[`PLAN-006: String enum normalization and native select`](.ai-docs/plans/006-string-enum-native-select.md)
+is Approved revision 1. It defines descriptor-safe string enum parsing, `enumLabels`,
+immutable choices, runtime validation for manual definitions, exclusive choice
+text context, deterministic text fallbacks, a rank-20 native select, internal
+position tokens, controlled reconciliation, fixtures, package checks, and the
+full acceptance matrix.
+
+Revision 1 closes all three second-review findings: schema-blocked enum branches
+now suppress derived UI cascades while retaining independent outer shape
+errors; choice text diagnostics have exact path, frequency, identity, and batch
+forwarding; and the Public Angular component has a fixed selector/module plus
+unambiguous package smoke and TestBed/resolver creation checks. The repeated
+eight-area review passed without a remaining finding. Its exact normative
+contracts are incorporated in SPEC-001 Draft v0.1.13. M6 is planned but not
+active, and production code remains unchanged until an implementation task
+begins.
+
+## 16. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-010, proposed ADR-011 revision 1 and its repeated formal review, completed PLAN-001 through PLAN-005, D-008/D-010 in the deferred-decisions register, and the ADR index. Decide whether to accept or revise ADR-011. If accepted, synchronize ADR-005, D-008, STATUS, WORKLOG, HANDOFF, and SPEC planning state without implementing the enum increment.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 Draft v0.1.13, accepted ADR-005 through ADR-011, completed PLAN-001 through PLAN-005, approved PLAN-006 revision 1, promoted D-008, D-010/D-024/D-036/D-037 in the deferred register, and the ADR index. Begin M6 by updating persistent state and marking the milestone active, then implement PLAN-006 step 1: neutral `StringChoiceDefinition`, `StringFieldDefinition.choices`, `FieldUiSchema.enumLabels`, and root exports with focused contract tests. Do not activate deferred capabilities.

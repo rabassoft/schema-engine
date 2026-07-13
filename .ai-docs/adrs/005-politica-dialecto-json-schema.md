@@ -4,6 +4,8 @@
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md)
+- **Revisado parcialmente por:**
+  [`ADR-011`](./011-enum-string-normalizado-select-nativo.md)
 
 ## 1. Contexto y problema
 
@@ -66,6 +68,13 @@ El catálogo inicial queda cerrado de la siguiente forma:
 - Cualquier otra keyword conocida de Draft 2020-12 que no aparezca en las
   listas anteriores produce `UNSUPPORTED_SCHEMA_KEYWORD` como error
   bloqueante.
+
+ADR-011 introduce una excepción aceptada a este catálogo: `enum` se soporta
+únicamente en schemas de campo directos con `type: "string"` que satisfacen su
+subconjunto no vacío, homogéneo y sin duplicados. Sus demás ubicaciones, tipos y
+formas continúan siendo incompatibles o no soportados según ADR-011. `const`
+permanece no soportada y `format` continúa siendo una anotación conocida
+ignorada con warning.
 
 Que una keyword figure en el catálogo soportado no permite usarla fuera de las
 ubicaciones o tipos definidos en `SPEC-001`. Un uso incompatible es un error de
@@ -200,3 +209,11 @@ Esta decisión deberá revisarse cuando se promueva alguno de estos trabajos:
 
 - [JSON Schema Core Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core)
 - [Dialect and vocabulary declaration](https://json-schema.org/understanding-json-schema/reference/schema)
+
+## 9. Enmienda aceptada por ADR-011
+
+El 13 de julio de 2026 se aceptó ADR-011 como ampliación mínima del subconjunto
+de keywords. Esta enmienda no sustituye la política de dialecto, keywords
+desconocidas, diagnósticos deterministas ni validación externa de esta ADR; solo
+retira `enum` de la categoría genérica de keyword conocida no soportada para el
+caso string definido por ADR-011.

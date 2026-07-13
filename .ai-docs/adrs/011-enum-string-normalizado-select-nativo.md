@@ -1,16 +1,17 @@
 # ADR 011: Enum de strings normalizado y renderer select nativo
 
-- **Estado:** Proposed
+- **Estado:** Accepted
 - **Fecha:** 13 de julio de 2026
+- **Fecha de aceptación:** 13 de julio de 2026
 - **Revisión:** 1 — correcciones de la revisión formal
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md),
   [`ADR-005`](./005-politica-dialecto-json-schema.md),
   [`ADR-007`](./007-resolucion-renderers-testers.md),
   [`ADR-009`](./009-politica-api-publica-estabilidad.md),
   [`D-008`](../roadmap/deferred-decisions.md)
-- **Revisión parcial al aceptar:** El catálogo de keywords de ADR-005 dejaría
-  de clasificar `enum` como no soportada únicamente en campos `string` que
-  satisfagan este contrato. `const` y `format` no cambiarían.
+- **Revisa parcialmente:** El catálogo de keywords de ADR-005 deja de
+  clasificar `enum` como no soportada únicamente en campos `string` que
+  satisfagan este contrato. `const` y `format` no cambian.
 
 ## 1. Contexto y problema
 
@@ -31,7 +32,7 @@ El siguiente incremento debe demostrar el recorrido completo desde una
 restricción normalizada hasta un renderer especializado sin introducir tipos
 mixtos, null, composición, nuevos modos de estado ni validación dentro de la UI.
 
-## 2. Decisión propuesta
+## 2. Decisión
 
 ### 2.1 Alcance de JSON Schema
 
@@ -540,3 +541,17 @@ Resultado de las ocho áreas:
 La revisión repetida no acepta la ADR, no promueve D-008 y no modifica SPEC-001,
 ADR-005 ni implementación. Esas acciones requieren una decisión explícita
 posterior.
+
+## 12. Resultado de aceptación
+
+- **Fecha:** 13 de julio de 2026
+- **Resultado:** Accepted, revision 1.
+- **Revisión:** Las ocho áreas de aceptación se repitieron después de aplicar
+  las tres correcciones y no quedó ningún hallazgo abierto.
+
+La aceptación revisa de forma explícita el catálogo de ADR-005 únicamente para
+el subconjunto de `enum` definido aquí y promueve la parte correspondiente de
+D-008. Autoriza sincronizar SPEC-001 y preparar un plan de implementación, pero
+no autoriza por sí sola cambios en paquetes, contratos ejecutables, versiones o
+publicación. `const`, `format`, enums no string, radios y limpieza a missing
+permanecen diferidos.

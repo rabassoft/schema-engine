@@ -85,29 +85,24 @@ Cada decisión debe registrar:
 - **Motivo:** Exige resolver semántica de evaluación antes de derivar UI.
 - **Retomar cuando:** Se seleccione el dialecto y exista una capa de resolución de schema.
 
-## D-008: Enum, const y format
+## D-008: Enum de strings y renderer select
 
-- **Estado:** Candidate
-- **Pregunta:** ¿Cómo deducir selectores, radios, fechas, emails y renderers especializados?
-- **Motivo:** Depende del sistema definitivo de resolución de renderers.
-- **Retomar cuando:** El registry/tester básico esté implementado.
+- **Estado:** Promoted
+- **Resolución:**
+  [`ADR-011`](../adrs/011-enum-string-normalizado-select-nativo.md)
 - **Revisión de frontera:** La revisión del 13 de julio de 2026 confirma que
   esta entrada agrupa tres responsabilidades distintas. `enum` y `const` son
   assertions sobre los datos; `format` es una annotation por defecto en Draft
   2020-12; y la elección entre selector, radios u otro renderer es una política
   de presentación posterior sobre una definición normalizada.
-- **Dirección de trabajo aprobada:** Elaborar primero una decisión acotada de
-  `enum`; mantener `const` y `format` aplazados hasta que tengan casos de uso y
-  contratos propios. Esta aprobación solo autoriza preparar la ADR y no cambia
-  SPEC-001, ADR-005 ni la implementación.
-- **Propuesta activa:** [`ADR-011`](../adrs/011-enum-string-normalizado-select-nativo.md)
-  plantea `enum` solo para campos string, choices normalizados, labels desde UI
-  Schema y un select Angular nativo. D-008 permanece Candidate hasta la
-  aceptación explícita de la ADR.
+- **Decisión:** ADR-011 acepta `enum` solo para campos string, choices
+  normalizados, labels desde UI Schema y un select Angular nativo. PLAN-006
+  revisión 1 está aprobado y sus contratos están promovidos a SPEC-001 Draft
+  v0.1.13; M6 todavía no ha comenzado.
 - **Revisión formal:** Las tres correcciones sobre contexto de textos,
   validación segura de choices manuales y labels accesibles no blank fueron
   incorporadas en ADR-011 revision 1. La repetición de las ocho áreas pasó sin
-  hallazgos; la propuesta sigue pendiente de aceptación explícita.
+  hallazgos.
 
 ## D-009: Null y campos triestado
 
@@ -331,18 +326,42 @@ Cada decisión debe registrar:
 - **Motivo:** Requiere contratos suficientemente maduros y pruebas de conformidad.
 - **Retomar cuando:** Exista al menos un segundo adaptador o implementación independiente.
 
+## D-036: Const y presentación de valores fijos
+
+- **Estado:** Deferred
+- **Pregunta:** ¿Debe `const` producir una presentación fixed, readonly, hidden
+  o ningún renderer?
+- **Motivo:** La assertion de datos no determina por sí sola la interacción ni
+  la presentación adecuada.
+- **Retomar cuando:** Exista un caso consumidor concreto para valores fijos y
+  se defina quién controla su presencia y visualización.
+- **Documento esperado:** ADR de semántica normalizada y presentación de
+  valores fijos.
+
+## D-037: Format y renderers semánticos especializados
+
+- **Estado:** Deferred
+- **Pregunta:** ¿Qué formatos se soportan y cuáles actúan como annotation,
+  assertion o hint de presentación?
+- **Motivo:** ADR-005 trata `format` como anotación ignorada; cambiarlo requiere
+  una política explícita de validación y renderers por formato.
+- **Retomar cuando:** Exista un caso consumidor concreto para un formato y se
+  defina su vocabulario, validación y fallback visual.
+- **Documento esperado:** ADR que revise explícitamente ADR-005.
+
 ## 4. Próximas decisiones a promover
 
 Las entradas más cercanas a convertirse en ADR son:
 
-1. **D-008 — Enum, const y format.**
-2. **D-010 — Acción explícita para limpiar un campo.**
-3. **D-005 — Objetos anidados.**
+1. **D-010 — Acción explícita para limpiar un campo.**
+2. **D-005 — Objetos anidados.**
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                            |
+| 13-07-2026 | Se acepta ADR-011, D-008 se promueve y `const`/`format` se separan como D-036 y D-037 sin activar su implementación.            |
 | 13-07-2026 | D-024 registra custom renderers como resueltos por ADR-007/009 y aplaza el bridge Angular hasta existir un consumidor concreto. |
 | 13-07-2026 | Se acepta ADR-010, ADR-002 queda Superseded y D-028 se promueve con versionado y compatibilidad explícitos.                     |
 | 13-07-2026 | Se propone ADR-010 para resolver D-028 y sustituir el lockstep Angular del ADR-002 pre-SPEC.                                    |

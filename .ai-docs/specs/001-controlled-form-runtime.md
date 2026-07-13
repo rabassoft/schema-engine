@@ -1,7 +1,7 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Draft
-- **Versión:** 0.1.11
+- **Versión:** 0.1.13
 - **Fecha:** 13 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
@@ -12,6 +12,10 @@
 - **Instanciación Angular:** [`ADR-008`](../adrs/008-instanciacion-renderers-angular.md)
 - **Plan de adaptador Angular:** [`PLAN-004`](../plans/004-angular-adapter.md)
 - **Plan de renderers HTML nativos:** [`PLAN-005`](../plans/005-native-html-renderers.md)
+- **Plan de enum string y select nativo aprobado:**
+  [`PLAN-006`](../plans/006-string-enum-native-select.md)
+- **Decisión arquitectónica del incremento:**
+  [`ADR-011`](../adrs/011-enum-string-normalizado-select-nativo.md)
 
 ## 1. Propósito
 
@@ -39,7 +43,7 @@ La primera versión deberá:
 Quedan fuera del alcance inicial:
 
 - Objetos anidados y arrays.
-- `$ref`, `enum`, `const`, `format`, `allOf`, `anyOf`, `oneOf`, `if`, `then` y `else`.
+- `$ref`, `const`, `format`, `allOf`, `anyOf`, `oneOf`, `if`, `then` y `else`.
 - Layouts complejos, secciones, pestañas o wizards declarados en UI Schema.
 - Validación asíncrona.
 - Actualización dinámica de la definición compilada.
@@ -50,6 +54,13 @@ Quedan fuera del alcance inicial:
 - Editor visual, colaboración, auditoría, undo/redo o licenciamiento.
 
 Las decisiones aplazadas se registran en [`deferred-decisions.md`](../roadmap/deferred-decisions.md).
+
+ADR-011 y PLAN-006 incorporan al contrato del siguiente incremento un
+subconjunto de `enum` exclusivo de campos string, con choices normalizados y un
+renderer select nativo. Este contrato todavía no forma parte de la
+implementación completada M1-M5; M6 permanece inactivo hasta que comience una
+tarea de implementación. `const`, `format`, enums no string y las demás
+exclusiones de ADR-011 permanecen fuera de alcance.
 
 ## 4. Terminología
 
@@ -178,6 +189,8 @@ Los campos deberán declarar `type` explícitamente.
 - `minLength`
 - `maxLength`
 - `pattern`
+- `enum`, únicamente como array propio, no vacío, denso, compuesto por strings
+  exactas y sin duplicados en un campo directo
 
 #### Number e integer
 
@@ -214,6 +227,7 @@ export interface FieldUiSchema {
   readonly hint?: string;
   readonly tooltip?: string;
   readonly placeholder?: string;
+  readonly enumLabels?: Readonly<Record<string, string>>;
   readonly options?: {
     readonly decimalPlaces?: number;
     readonly showTrailingZeros?: boolean;
@@ -232,6 +246,33 @@ Reglas:
 - `placeholder` se admitirá inicialmente en campos `string`, `number` e `integer`. Su uso en un campo no compatible generará un warning no bloqueante.
 - `decimalPlaces` y `showTrailingZeros` son exclusivamente visuales.
 - La precisión válida continúa dependiendo de `multipleOf`.
+- `enumLabels` es un miembro directo del campo UI, no de `options`, y sus keys
+  corresponden exactamente a valores del `enum` string compatible.
+- Cada label propio deberá ser string no blank según
+  `label.trim().length > 0`; el texto se conserva opaco y sin transformarlo.
+- Una key estructuralmente válida que no corresponda a una choice producirá
+  `UNKNOWN_ENUM_LABEL` y se ignorará sin alterar el orden del `enum`.
+- Un `enumLabels` con forma exterior inválida producirá
+  `INVALID_UI_SCHEMA_VALUE` incluso si la rama del schema está bloqueada.
+- Un objeto `enumLabels` estructuralmente válido sobre un campo válido sin
+  `enum` producirá un único `INCOMPATIBLE_UI_OPTION` con
+  `reason: 'missing-compatible-enum'` y no recorrerá sus miembros.
+- Un objeto exterior válido sobre un tipo ausente/no soportado o un enum
+  `schema-blocked` se ignorará sin diagnósticos derivados de compatibilidad o
+  members. Solo un enum string válido permite recorrer los labels.
+- Todas las inspecciones de `enumLabels` usarán propiedades propias y
+  descriptores; ningún accessor se ejecutará, tampoco en una rama ignorada.
+
+La forma exterior accessor producirá `INVALID_UI_SCHEMA_VALUE` en
+`['fields', fieldName, 'enumLabels']` con `key: 'enumLabels'`,
+`expected: 'object'` y `actualType: 'accessor'`. Un valor null, array o no
+objeto usará el mismo código, key, expected y path con su descripción segura.
+Con enum válido, los keys propios enumerables se recorrerán en orden
+`Object.keys()`: un descriptor ausente/accessor, valor no string o string blank
+producirá `INVALID_UI_SCHEMA_VALUE` en
+`['fields', fieldName, 'enumLabels', labelKey]`, con `key: labelKey`,
+`expected: 'non-blank string'` y el actual seguro. Esa entrada no producirá
+además `UNKNOWN_ENUM_LABEL`.
 
 ### 7.3 Precedencia y semántica de textos
 
@@ -274,6 +315,11 @@ export interface BaseFieldDefinition {
   readonly placeholder?: string;
 }
 
+export interface StringChoiceDefinition {
+  readonly value: string;
+  readonly label: string;
+}
+
 export type FieldDefinition =
   StringFieldDefinition | NumberFieldDefinition | BooleanFieldDefinition;
 
@@ -284,6 +330,7 @@ export interface StringFieldDefinition extends BaseFieldDefinition {
     readonly maxLength?: number;
     readonly pattern?: string;
   };
+  readonly choices?: readonly StringChoiceDefinition[];
 }
 
 export interface NumberFieldDefinition extends BaseFieldDefinition {
@@ -313,6 +360,18 @@ export type DataPath = readonly PathSegment[];
 ```
 
 La definición será inmutable durante la vida del runtime. Un cambio de JSON Schema o UI Schema requerirá recompilar y crear un runtime nuevo.
+
+`choices` ausente significa que el campo string no declara un `enum` soportado.
+Cuando esté presente será no vacío, conservará el orden del schema, contendrá
+valores string exactos y únicos, y asignará a cada choice un label fuente no
+blank. El array, cada choice y la definición compilada serán profundamente
+inmutables. Renderers y testers consumirán esta normalización y nunca el JSON
+Schema crudo.
+
+`StringChoiceDefinition`, las extensiones transitivas de definición/UI/textos y
+el componente Angular de enum serán Public + Experimental + Active conforme a
+ADR-009. No se añade ningún entry point ni export map y ninguna API se promueve
+a Stable.
 
 ### 8.1 Entrada de compilación
 
@@ -353,6 +412,53 @@ normalización de UI Schema, la inmutabilidad observable, los parámetros de
 diagnóstico y los fixtures obligatorios para el primer incremento del
 compilador. Cualquier error produce `success: false` sin definición parcial;
 un resultado con solo warnings puede incluir una definición válida.
+
+### 8.3 Normalización de `enum` string
+
+La clasificación de la keyword será:
+
+- `enum` válido en un campo string directo: soportado y normalizado;
+- `enum` en number, integer o boolean: `INCOMPATIBLE_SCHEMA_KEYWORD` bloqueante;
+- `enum` en la raíz: `UNSUPPORTED_SCHEMA_KEYWORD` bloqueante;
+- `const`: continúa como `UNSUPPORTED_SCHEMA_KEYWORD`;
+- `format`: continúa como `IGNORED_SCHEMA_KEYWORD` warning.
+
+El candidato interno distinguirá `absent`, `valid` y `schema-blocked`. Un tipo
+ausente o no soportado no genera candidato. Solo `valid` transporta valores;
+`schema-blocked` conserva el error del schema e impide diagnósticos UI derivados
+de compatibilidad o members.
+
+La inspección será descriptor-safe y seguirá estas reglas:
+
+1. Un descriptor accessor para `enum` producirá
+   `INVALID_SCHEMA_KEYWORD_VALUE`, `expected: 'array of unique strings'` y
+   `actualType: 'accessor'`, sin ejecutar el getter.
+2. Un valor que no sea array producirá el mismo diagnóstico y `expected` con
+   la descripción segura del valor actual.
+3. Un array vacío utilizará
+   `expected: 'non-empty array of unique strings'`.
+4. Los índices se inspeccionarán de `0` a `length - 1` mediante su descriptor
+   propio. Un índice ausente/sparse o accessor usará `expected: 'string'` y
+   `actualType: 'missing'` o `'accessor'`, respectivamente.
+5. Un elemento no string usará `expected: 'string'`; la segunda aparición y
+   cada aparición posterior de un duplicado usará
+   `expected: 'unique string'`.
+6. Se recopilarán todos los errores de elementos independientemente
+   descubribles en orden de índice. Cualquier error deja la rama
+   `schema-blocked` y no produce una definición parcial.
+7. Las strings válidas se copiarán en orden sin trim, coercion, case folding,
+   normalización Unicode ni mutación del array fuente.
+
+Los `documentPath` serán la ruta exacta de la keyword o del índice bajo
+`['properties', fieldName, 'enum']`; los diagnósticos de campo usarán
+`dataPath: [fieldName]`. Los diagnósticos de schema precederán a los de UI
+Schema.
+
+Tras una compilación sin errores bloqueantes, cada value recibirá como label su
+entrada propia válida en `enumLabels`; en su ausencia se usará el propio value
+si es no blank o `JSON.stringify(value)` si es blank. Esto hace visibles `""`
+y strings formadas solo por espacios sin cambiar el valor de dominio. El orden
+siempre pertenece al `enum`.
 
 ## 9. Modelo controlado
 
@@ -689,14 +795,29 @@ Los campos sin foco se reformatearán inmediatamente. El campo numérico activo 
 
 ```ts
 export type FieldTextMember =
-  'label' | 'description' | 'hint' | 'tooltip' | 'placeholder' | 'issue';
+  | 'label'
+  | 'description'
+  | 'hint'
+  | 'tooltip'
+  | 'placeholder'
+  | 'choice'
+  | 'issue';
 
 export type TextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
       readonly field: FieldDefinition;
-      readonly member: Exclude<FieldTextMember, 'issue'>;
+      readonly member: Exclude<FieldTextMember, 'choice' | 'issue'>;
+      readonly choice?: never;
+      readonly issue?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly field: FieldDefinition;
+      readonly member: 'choice';
+      readonly choice: StringChoiceDefinition;
       readonly issue?: never;
     }
   | {
@@ -704,6 +825,7 @@ export type TextResolutionContext =
       readonly locale: string;
       readonly field: FieldDefinition;
       readonly member: 'issue';
+      readonly choice?: never;
       readonly issue: ValidationIssue;
     };
 
@@ -714,9 +836,40 @@ export interface TextResolver {
 
 La implementación por defecto devolverá el texto sin modificar. Cambiar el
 locale volverá a resolver etiquetas, descripciones, hints, tooltips,
-placeholders y mensajes. El outlet Angular proyectará un snapshot de textos
-resueltos e inmutable para que renderers nativos y personalizados compartan la
-misma política.
+placeholders, choices y mensajes. El outlet Angular proyectará un snapshot de
+textos resueltos e inmutable para que renderers nativos y personalizados
+compartan la misma política.
+
+```ts
+export interface AngularFieldTextSnapshot {
+  readonly label: string;
+  readonly description?: string;
+  readonly hint?: string;
+  readonly tooltip?: string;
+  readonly placeholder?: string;
+  readonly choiceLabels: readonly string[];
+  readonly issueMessages: readonly string[];
+}
+```
+
+`choiceLabels` existirá siempre, estará vacío sin choices, será inmutable y se
+alineará por índice con `field.choices`. El orden de proyección será label,
+description, hint, tooltip, placeholder, choices en orden de definición e
+issues en orden de snapshot.
+
+Cada choice se resolverá con su objeto original en la rama `member: 'choice'`.
+Una excepción, resultado no string o string blank conservará el label fuente no
+blank y emitirá un `TEXT_RESOLUTION_FAILED` warning de fuente `runtime` con
+`field`, `member: 'choice'`, `choiceValue` y reason `exception`,
+`non-string-result` o `blank-string-result`. Su `dataPath` será una copia
+inmutable de `field.path` y no tendrá `documentPath`.
+
+Se añadirá exactamente un warning por choice fallida, en orden de choice, en
+cada proyección. El array completo de diagnósticos será inmutable y el outlet
+lo reenviará una sola vez. La identidad de proyección será exactamente la
+identidad del field, `formId`, locale e identidad del array de issues del campo:
+un cambio de cualquiera puede reproyectar, mientras otros cambios de snapshot
+no repiten la resolución ni sus diagnósticos.
 
 ## 20. Comportamiento de los renderers iniciales
 
@@ -754,6 +907,48 @@ submission, `FormRoot` ni bridges compat de Angular Forms.
 - Desmarcar emitirá `false`.
 - No se restaurará automáticamente el estado ausente.
 
+### 20.4 Enum string y select nativo
+
+Un campo string con `choices` propias y válidas se especializará mediante
+`SchemaStringEnumRendererComponent`, componente standalone Public +
+Experimental + Active con selector `schema-string-enum-renderer`, ubicado en
+`packages/angular/src/native/string-enum-renderer.ts` y exportado desde el entry
+point Angular existente. Importará `FormField` y usará change detection
+`OnPush`.
+
+Su registration `native-string-enum` tendrá rank `20` y priority `0`. El
+renderer string genérico conservará rank `10`, y los overrides de consumidor
+seguirán las reglas de rank, priority y orden de ADR-007. El provider headless
+no lo incluirá; `provideSchemaEngineAngularNative()` lo añadirá a la misma
+secuencia inmutable de registrations.
+
+El tester leerá únicamente el descriptor propio `choices` y devolverá rank 20
+solo para una data property con array no vacío. No ejecutará accessors ni
+recorrerá los miembros de las choices; la validación estructural completa
+pertenece a la creación del runtime.
+
+El `<select>` enlazará un único leaf string de Signal Forms privado cuyo valor
+será solo un token de presentación:
+
+- `''` representará el centinela interno para missing o valor externo fuera del
+  enum;
+- cada choice usará `choice:<index>` y se mapeará de vuelta al value exacto;
+- el string de dominio `""` será una choice ordinaria y nunca colisionará con el
+  centinela;
+- el centinela será disabled, mostrará el placeholder resuelto si existe y no
+  ofrecerá todavía una acción de limpieza;
+- una selección de usuario válida emitirá solo `setValue` con el string de
+  dominio; tokens malformed, fuera de rango o el centinela se ignorarán;
+- render inicial, reconciliación externa, rechazo, locale, blur y cambio de
+  textos no emitirán operaciones ni corregirán el modelo controlado.
+
+El componente reutilizará el contrato accesible de los renderers M5: label,
+description, hint, tooltip, issues, foco, blur, IDs, `aria-describedby`,
+`aria-invalid`, `aria-required`, `focusBoundControl()` y destrucción del binding
+local. Los option texts procederán exclusivamente de `texts.choiceLabels`.
+Ningún renderer resolverá textos, interpretará schema crudo, validará pertenencia
+al enum, elegirá defaults ni mutará estado de aplicación.
+
 ## 21. Runtime y snapshots
 
 ### 21.1 Creación
@@ -786,6 +981,37 @@ export type AngularControlledFormConfig<TData extends object> = Omit<
 ```
 
 `undefined` utilizará `LOCALE_ID`; una string vacía seguirá siendo inválida.
+
+Después de validar la forma base de cada field, la creación inspeccionará el
+miembro propio `choices` únicamente cuando `kind === 'string'`:
+
+- un miembro ausente o heredado equivale a no declarar choices;
+- un miembro propio accessor es inválido y nunca se ejecuta;
+- un data member propio deberá ser un array denso y no vacío;
+- cada índice deberá ser una data property propia con un objeto no array;
+- cada choice deberá aportar data properties propias `value` y `label`;
+- `value` deberá ser string y único; `label`, string no blank;
+- sparse arrays, accessors, miembros ausentes/heredados, duplicados y valores
+  malformed serán inválidos.
+
+Una definición manual inválida por choices bloqueará antes de invocar
+`SchemaValidator.validate()` y devolverá exactamente un diagnóstico inmutable
+`INVALID_RUNTIME_OPTIONS`, severidad `error`, fuente `runtime`, con:
+
+```ts
+{
+  member: 'definition',
+  expected: 'valid FormDefinition with string choices',
+  reason: 'invalid-value',
+  actualType: 'object',
+}
+```
+
+Los errores de la forma base conservarán
+`expected: 'valid root FormDefinition'`. El runtime no clonará ni congelará una
+definición manual y no la revalidará en cada acción; mutarla después de crear el
+runtime no está soportado. `applyOperation()` y `applyFormOperation()` no leerán
+ni validarán `choices`, y runtime/operaciones no impondrán pertenencia al enum.
 
 ### 21.2 Snapshot público
 
@@ -931,10 +1157,43 @@ El primer incremento del compilador utilizará estos códigos normativos:
 | `UNKNOWN_UI_FIELD`             | `warning` | `ui-schema` |
 | `INCOMPATIBLE_PLACEHOLDER`     | `warning` | `ui-schema` |
 | `INCOMPATIBLE_UI_OPTION`       | `warning` | `ui-schema` |
+| `UNKNOWN_ENUM_LABEL`           | `warning` | `ui-schema` |
 
 Los parámetros y `documentPath` exactos quedan definidos en PLAN-001. Los
 diagnósticos sobre campos incluirán `dataPath: [fieldName]`; los diagnósticos de
 raíz no incluirán `dataPath`.
+
+PLAN-006 amplía este contrato para `enum` y `enumLabels`:
+
+- `INVALID_SCHEMA_KEYWORD_VALUE` apunta a la keyword o índice exacto y usa los
+  `expected` cerrados `array of unique strings`,
+  `non-empty array of unique strings`, `string` o `unique string`;
+- `INCOMPATIBLE_SCHEMA_KEYWORD` diagnostica `enum` sobre number, integer o
+  boolean;
+- `UNKNOWN_ENUM_LABEL` usa:
+
+  ```ts
+  {
+    dataPath: [fieldName],
+    documentPath: ['fields', fieldName, 'enumLabels', labelKey],
+    parameters: { field: fieldName, value: labelKey },
+  }
+  ```
+
+- `INCOMPATIBLE_UI_OPTION` aparece solo para un campo válido sin enum y usa:
+
+  ```ts
+  {
+    field,
+    fieldType,
+    option: 'enumLabels',
+    reason: 'missing-compatible-enum',
+  }
+  ```
+
+- schema diagnostics preceden UI diagnostics, los errores de elementos siguen
+  índice ascendente y una rama bloqueada suprime únicamente diagnósticos UI
+  derivados, no un error independiente de forma exterior de `enumLabels`.
 
 El incremento M2 utilizará estos códigos normativos, todos con severidad
 `error`, fuente `runtime` y sin `documentPath`:
@@ -963,6 +1222,10 @@ M5 añade warnings Angular con fuente `runtime`:
 | `NUMBER_FORMAT_FAILED`   | Intl no puede formatear y se utiliza la representación canónica |
 
 PLAN-005 fija parámetros, razones, orden, inmutabilidad y frecuencia.
+PLAN-006 añade `member: 'choice'`, `choiceValue` y las razones `exception`,
+`non-string-result` y `blank-string-result`; fija copia inmutable de
+`field.path`, ausencia de `documentPath`, orden por choice y una sola entrega
+por batch de proyección.
 
 ## 25. Ciclo de vida
 
@@ -1014,6 +1277,16 @@ La implementación mínima se considerará válida cuando demuestre:
 15. Structural sharing observable en pruebas.
 16. Diagnósticos de compilación y runtime sin excepciones esperables.
 17. Destrucción idempotente del runtime.
+18. Normalización descriptor-safe de enum string y `enumLabels` a choices
+    inmutables, ordenadas y con labels no blank.
+19. Rechazo seguro de choices manuales malformed antes de ejecutar el
+    validador, sin ampliar la inspección de operaciones.
+20. Resolución localizada de choice texts con fallback y diagnósticos
+    deterministas.
+21. Selección rank-20 del renderer Angular nativo, con fallback string rank 10
+    y overrides ADR-007.
+22. `<select>` controlado que distingue missing del string vacío, no corrige
+    valores externos y no emite durante reconciliación o locale.
 
 ## 28. Escenarios de conformidad
 
@@ -1067,19 +1340,33 @@ textos mediante un `TextResolver` neutral y mantiene `@angular/forms/signals`
 limitado a la capa Angular. No se incorporan Signal Forms validation schemas,
 Reactive Forms, Template-driven Forms, compat, submit ni persistencia.
 
+ADR-011 y PLAN-006 revisión 1 están aceptados para el siguiente incremento.
+Esta versión de SPEC incorpora sus contratos normativos de `enum` string,
+choices, labels resolubles, validación estructural de definiciones manuales y
+renderer select nativo. M6 continúa planificado pero inactivo: aprobar el plan y
+promover el contrato no modifica por sí solo la implementación completada en
+M1-M5.
+
+El inicio de M6 deberá activar el milestone y seguir la secuencia exacta de
+PLAN-006, empezando por los contratos neutrales y sus exports. D-010, el bridge
+de validación de D-024, D-036, D-037 y las demás decisiones aplazadas conservan
+su estado.
+
 ## 30. Historial
 
-| Versión | Fecha      | Cambio                                                                                                            |
-| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| 0.1.11  | 13-07-2026 | Se incorpora PLAN-005, Signal Forms como buffer visual privado y los renderers HTML nativos.                      |
-| 0.1.10  | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-004 para el adaptador Angular headless.                                 |
-| 0.1.9   | 13-07-2026 | Se incorpora ADR-008 y se cierra la instanciación inline de renderers Angular.                                    |
-| 0.1.8   | 13-07-2026 | Se incorpora ADR-007 y se cierra la estrategia neutral de resolución de renderers.                                |
-| 0.1.7   | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-003 y el schema fuente en las opciones del runtime.                     |
-| 0.1.6   | 13-07-2026 | Se incorpora el contrato diagnóstico aprobado de PLAN-002.                                                        |
-| 0.1.5   | 13-07-2026 | Se limita M2 a propiedades raíz y se define `ApplyOperationResult`.                                               |
-| 0.1.4   | 13-07-2026 | Se incorpora el contrato diagnóstico normativo y la referencia al PLAN-001 aprobado.                              |
-| 0.1.3   | 13-07-2026 | Se define la entrada de `compileFormDefinition()` y se aclaran los miembros obligatorios y opcionales de la raíz. |
-| 0.1.2   | 13-07-2026 | Se referencia ADR-005 y se cierra la selección del dialecto inicial de JSON Schema.                               |
-| 0.1.1   | 13-07-2026 | Se añaden `hint`, `tooltip` y `placeholder` al contrato de UI y a la definición normalizada.                      |
-| 0.1.0   | 13-07-2026 | Primera consolidación de las decisiones del runtime controlado.                                                   |
+| Versión | Fecha      | Cambio                                                                                                                 |
+| ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.1.13  | 13-07-2026 | Se incorpora PLAN-006 aprobado: contratos exactos de enum string, choices, textos y select nativo, aún sin iniciar M6. |
+| 0.1.12  | 13-07-2026 | Se registra ADR-011 como próximo incremento aceptado de enum string, aún pendiente de plan e implementación.           |
+| 0.1.11  | 13-07-2026 | Se incorpora PLAN-005, Signal Forms como buffer visual privado y los renderers HTML nativos.                           |
+| 0.1.10  | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-004 para el adaptador Angular headless.                                      |
+| 0.1.9   | 13-07-2026 | Se incorpora ADR-008 y se cierra la instanciación inline de renderers Angular.                                         |
+| 0.1.8   | 13-07-2026 | Se incorpora ADR-007 y se cierra la estrategia neutral de resolución de renderers.                                     |
+| 0.1.7   | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-003 y el schema fuente en las opciones del runtime.                          |
+| 0.1.6   | 13-07-2026 | Se incorpora el contrato diagnóstico aprobado de PLAN-002.                                                             |
+| 0.1.5   | 13-07-2026 | Se limita M2 a propiedades raíz y se define `ApplyOperationResult`.                                                    |
+| 0.1.4   | 13-07-2026 | Se incorpora el contrato diagnóstico normativo y la referencia al PLAN-001 aprobado.                                   |
+| 0.1.3   | 13-07-2026 | Se define la entrada de `compileFormDefinition()` y se aclaran los miembros obligatorios y opcionales de la raíz.      |
+| 0.1.2   | 13-07-2026 | Se referencia ADR-005 y se cierra la selección del dialecto inicial de JSON Schema.                                    |
+| 0.1.1   | 13-07-2026 | Se añaden `hint`, `tooltip` y `placeholder` al contrato de UI y a la definición normalizada.                           |
+| 0.1.0   | 13-07-2026 | Primera consolidación de las decisiones del runtime controlado.                                                        |
