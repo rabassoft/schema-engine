@@ -600,13 +600,25 @@ function validateOptions<TData extends object>(
         invalidOption('formId', 'non-empty string', options.formId),
       ]),
     };
-  if (!validDefinition(options.definition))
+  const definitionValidation = validateDefinition(options.definition);
+  if (definitionValidation === 'invalid-base')
     return {
       success: false,
       diagnostics: freezeDiagnostics([
         invalidOption(
           'definition',
           'valid root FormDefinition',
+          options.definition,
+        ),
+      ]),
+    };
+  if (definitionValidation === 'invalid-choices')
+    return {
+      success: false,
+      diagnostics: freezeDiagnostics([
+        invalidOption(
+          'definition',
+          'valid FormDefinition with string choices',
           options.definition,
         ),
       ]),
@@ -789,30 +801,30 @@ function normalizeIssue(
   return { success: true, issue };
 }
 
-function validDefinition(
-  value: unknown,
-): value is ControlledFormRuntimeOptions<object>['definition'] {
-  if (!isRecord(value)) return false;
+type DefinitionValidation = 'valid' | 'invalid-base' | 'invalid-choices';
+
+function validateDefinition(value: unknown): DefinitionValidation {
+  if (!isRecord(value)) return 'invalid-base';
   const fieldsEntry = read(value, 'fields');
   if (fieldsEntry.kind !== 'value' || !Array.isArray(fieldsEntry.value))
-    return false;
+    return 'invalid-base';
   const fields: readonly unknown[] = fieldsEntry.value;
   const paths = new Set<string>();
   for (const field of fields) {
-    if (!isRecord(field)) return false;
+    if (!isRecord(field)) return 'invalid-base';
     const pathEntry = read(field, 'path');
     const path =
       pathEntry.kind === 'value' ? safePath(pathEntry.value) : undefined;
     const key = read(field, 'key');
     const kind = read(field, 'kind');
     if (path === undefined || path.length !== 1 || typeof path[0] !== 'string')
-      return false;
+      return 'invalid-base';
     if (
       key.kind !== 'value' ||
       typeof key.value !== 'string' ||
       paths.has(path[0])
     )
-      return false;
+      return 'invalid-base';
     let supported =
       kind.kind === 'value' &&
       (kind.value === 'string' || kind.value === 'boolean');
@@ -822,8 +834,51 @@ function validDefinition(
         numeric.kind === 'value' &&
         (numeric.value === 'number' || numeric.value === 'integer');
     }
-    if (!supported) return false;
+    if (!supported) return 'invalid-base';
     paths.add(path[0]);
+  }
+
+  for (const field of fields) {
+    if (!isRecord(field)) return 'invalid-base';
+    const kind = read(field, 'kind');
+    if (
+      kind.kind === 'value' &&
+      kind.value === 'string' &&
+      !validStringChoices(field)
+    )
+      return 'invalid-choices';
+  }
+  return 'valid';
+}
+
+function validStringChoices(field: Record<string, unknown>): boolean {
+  const choicesEntry = read(field, 'choices');
+  if (choicesEntry.kind === 'missing') return true;
+  if (
+    choicesEntry.kind !== 'value' ||
+    !Array.isArray(choicesEntry.value) ||
+    choicesEntry.value.length === 0
+  )
+    return false;
+
+  const values = new Set<string>();
+  const choices: readonly unknown[] = choicesEntry.value;
+  for (let index = 0; index < choices.length; index += 1) {
+    const choiceEntry = read(choices, String(index));
+    if (choiceEntry.kind !== 'value' || !isRecord(choiceEntry.value))
+      return false;
+    const valueEntry = read(choiceEntry.value, 'value');
+    const labelEntry = read(choiceEntry.value, 'label');
+    if (
+      valueEntry.kind !== 'value' ||
+      typeof valueEntry.value !== 'string' ||
+      values.has(valueEntry.value) ||
+      labelEntry.kind !== 'value' ||
+      typeof labelEntry.value !== 'string' ||
+      labelEntry.value.trim().length === 0
+    )
+      return false;
+    values.add(valueEntry.value);
   }
   return true;
 }

@@ -929,3 +929,16 @@ package version, publication setting, or API stability state changed in step 1.
 The implementation preserves root `enum` and `const` as unsupported, `format`
 as an ignored annotation, non-string enums as incompatible, and every deferred
 capability as inactive.
+
+## 24. Runtime boundary implementation checkpoint
+
+- **Date:** 2026-07-13
+- **Completed:** Step 3 descriptor-safe validation of manually supplied string
+  choices plus runtime and operation-boundary tests.
+- **Boundary:** Operations remain unchanged, runtime actions do not enforce enum
+  membership, and the external validator remains authoritative.
+
+Malformed manual choices now fail before validation with the exact specific
+diagnostic, while every unrelated base-definition failure preserves its
+historical diagnostic. Text projection and Angular remain unchanged at this
+checkpoint.

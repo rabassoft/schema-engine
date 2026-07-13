@@ -107,6 +107,199 @@ describe('controlled runtime', () => {
     });
   });
 
+  it('accepts valid frozen choices and out-of-enum controlled strings', () => {
+    const choice = Object.freeze({ value: 'draft', label: 'Draft' });
+    const choices = Object.freeze([choice]);
+    const manualDefinition = {
+      fields: [{ ...definition.fields[0], choices }],
+    } as FormDefinition;
+    const validate = vi.fn((): ValidationResult => ({
+      valid: true,
+      issues: [],
+    }));
+    const result = createControlledFormRuntime(
+      options({
+        definition: manualDefinition,
+        value: { name: 'external' },
+        baselineValue: {},
+        validator: { validate },
+      }),
+    );
+
+    expect(result.success).toBe(true);
+    expect(validate).toHaveBeenCalledTimes(1);
+    expect(Object.isFrozen(manualDefinition)).toBe(false);
+    expect(Object.isFrozen(manualDefinition.fields)).toBe(false);
+    if (!result.success) return;
+    expect(result.runtime.requestSetValue(['name'], 'another')).toMatchObject({
+      success: true,
+      effects: { operationEmitted: true, snapshotChanged: false },
+    });
+    expect(
+      result.runtime.updateExternalState({ value: { name: 'confirmed' } }),
+    ).toMatchObject({ success: true });
+    expect(validate).toHaveBeenCalledTimes(2);
+    expect(result.runtime.getSnapshot().value).toEqual({ name: 'confirmed' });
+  });
+
+  it('treats inherited choices as absent', () => {
+    const field = Object.assign(Object.create({ choices: [] }) as object, {
+      ...definition.fields[0],
+    });
+    const result = createControlledFormRuntime(
+      options({ definition: { fields: [field] } as never }),
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects malformed manual choices before invoking the validator', () => {
+    let getterCalls = 0;
+    const baseField = () => ({ ...definition.fields[0] });
+    const choicesAccessor = Object.defineProperty(baseField(), 'choices', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return [{ value: 'draft', label: 'Draft' }];
+      },
+    });
+    const accessorIndex: unknown[] = [];
+    Object.defineProperty(accessorIndex, 0, {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return { value: 'draft', label: 'Draft' };
+      },
+    });
+    const accessorValue = Object.defineProperty({ label: 'Draft' }, 'value', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return 'draft';
+      },
+    });
+    const accessorLabel = Object.defineProperty({ value: 'draft' }, 'label', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return 'Draft';
+      },
+    });
+    const sparse: unknown[] = [];
+    sparse.length = 1;
+    const inheritedMembers = Object.create({
+      value: 'draft',
+      label: 'Draft',
+    }) as object;
+    const invalidFields: readonly object[] = [
+      choicesAccessor,
+      { ...baseField(), choices: {} },
+      { ...baseField(), choices: [] },
+      { ...baseField(), choices: sparse },
+      { ...baseField(), choices: accessorIndex },
+      { ...baseField(), choices: [null] },
+      { ...baseField(), choices: [[]] },
+      { ...baseField(), choices: [{ value: 'draft' }] },
+      { ...baseField(), choices: [inheritedMembers] },
+      { ...baseField(), choices: [accessorValue] },
+      { ...baseField(), choices: [accessorLabel] },
+      { ...baseField(), choices: [{ value: 1, label: 'One' }] },
+      {
+        ...baseField(),
+        choices: [
+          { value: 'draft', label: 'Draft' },
+          { value: 'draft', label: 'Duplicate' },
+        ],
+      },
+      { ...baseField(), choices: [{ value: 'draft', label: 1 }] },
+      { ...baseField(), choices: [{ value: 'draft', label: '   ' }] },
+    ];
+
+    for (const field of invalidFields) {
+      const validate = vi.fn(() => ({ valid: true, issues: [] }));
+      const result = createControlledFormRuntime(
+        options({
+          definition: { fields: [field] } as never,
+          validator: { validate },
+        }),
+      );
+
+      expect(result).toMatchObject({
+        success: false,
+        diagnostics: [
+          {
+            code: 'INVALID_RUNTIME_OPTIONS',
+            severity: 'error',
+            source: 'runtime',
+            parameters: {
+              member: 'definition',
+              expected: 'valid FormDefinition with string choices',
+              reason: 'invalid-value',
+              actualType: 'object',
+            },
+          },
+        ],
+      });
+      expect(result.diagnostics).toHaveLength(1);
+      expect(Object.isFrozen(result.diagnostics)).toBe(true);
+      expect(Object.isFrozen(result.diagnostics[0])).toBe(true);
+      expect(Object.isFrozen(result.diagnostics[0]?.parameters)).toBe(true);
+      expect(validate).not.toHaveBeenCalled();
+    }
+    expect(getterCalls).toBe(0);
+  });
+
+  it('preserves the base-definition diagnostic for unrelated failures', () => {
+    const result = createControlledFormRuntime(
+      options({ definition: { fields: null } as never }),
+    );
+
+    expect(result).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          code: 'INVALID_RUNTIME_OPTIONS',
+          parameters: {
+            member: 'definition',
+            expected: 'valid root FormDefinition',
+            reason: 'invalid-value',
+            actualType: 'object',
+          },
+        },
+      ],
+    });
+  });
+
+  it('prioritizes complete base-definition validation over choices', () => {
+    let getterCalls = 0;
+    const choicesAccessor = Object.defineProperty(
+      { ...definition.fields[0] },
+      'choices',
+      {
+        enumerable: true,
+        get() {
+          getterCalls += 1;
+          return [];
+        },
+      },
+    );
+    const result = createControlledFormRuntime(
+      options({
+        definition: { fields: [choicesAccessor, null] } as never,
+      }),
+    );
+
+    expect(result).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          parameters: { expected: 'valid root FormDefinition' },
+        },
+      ],
+    });
+    expect(getterCalls).toBe(0);
+  });
+
   it('rejects accessor-shaped external contracts without invoking getters', () => {
     let calls = 0;
     const validatorResult = Object.defineProperty({}, 'valid', {

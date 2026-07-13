@@ -224,6 +224,36 @@ describe('root immutable operations', () => {
     });
   });
 
+  it('never inspects choices while applying structural operations', () => {
+    let getterCalls = 0;
+    const field = Object.defineProperty(
+      { ...definition.fields[0] },
+      'choices',
+      {
+        enumerable: true,
+        get() {
+          getterCalls += 1;
+          return [{ value: 'Ada', label: 'Ada' }];
+        },
+      },
+    );
+    const current = Object.defineProperty({ name: 'Ada' }, 'choices', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return 'opaque application data';
+      },
+    });
+    const operation = set(['name'], { kind: 'value', value: 'Ada' }, 'Grace');
+
+    expect(applyOperation(current, operation).success).toBe(true);
+    expect(
+      applyFormOperation({ fields: [field] } as never, current, operation)
+        .success,
+    ).toBe(true);
+    expect(getterCalls).toBe(0);
+  });
+
   it('rejects undefined set values', () => {
     expect(
       applyOperation({}, set(['name'], { kind: 'missing' }, undefined)),

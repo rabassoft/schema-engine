@@ -6,6 +6,50 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-13 — M6 PLAN-006 step 3 completed
+
+### Completed
+
+- Replaced the boolean runtime definition check with a two-pass result that
+  first validates the complete historical base shape and only then inspects
+  string choices.
+- Accepted absent or inherited `choices` and valid caller-owned frozen choices
+  without cloning or freezing manual definitions.
+- Added descriptor-safe rejection for own choices accessors, non-array and empty
+  values, sparse/accessor indices, non-object/array entries, missing/inherited/
+  accessor members, non-string or duplicate values, and non-string/blank labels.
+- Preserved the existing base-definition diagnostic for every unrelated shape
+  failure, including when an earlier field exposes malformed choices.
+- Ensured malformed choices produce exactly one frozen
+  `INVALID_RUNTIME_OPTIONS` diagnostic with
+  `expected: 'valid FormDefinition with string choices'` before invoking the
+  external validator.
+- Confirmed runtime creation and controlled updates accept missing and
+  out-of-enum strings when the external validator allows them.
+- Added operation tests proving `applyOperation()` and `applyFormOperation()` do
+  not execute or inspect accessor-shaped `choices`; no operation production code
+  changed.
+
+### Verification
+
+- Workspace formatting, linting, type checking, builds, and package smoke
+  passed.
+- The full suite passed: 11 files and 165 tests, comprising 129 core and 36
+  Angular tests.
+- Focused coverage includes 15 malformed choices shapes, getter suppression,
+  base-error precedence, frozen diagnostics, inherited absence, caller
+  ownership, validator suppression, and out-of-enum controlled flow.
+- Core remains framework-neutral with zero runtime dependencies; Angular Forms
+  imports remain limited to Signal Forms.
+- No dependency, lockfile, package version, public contract, operation contract,
+  deferred capability, or Angular behavior changed.
+- All 31 Markdown links resolve and `git diff --check` passes.
+
+### Pending
+
+- Implement PLAN-006 step 4: extend neutral text contracts and Angular choice
+  projection with focused tests.
+
 ## 2026-07-13 — M6 PLAN-006 step 2 completed
 
 ### Completed
