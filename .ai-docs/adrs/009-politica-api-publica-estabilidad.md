@@ -1,7 +1,8 @@
 # ADR 009: Límite de API pública y política de estabilidad
 
-- **Estado:** Proposed
+- **Estado:** Accepted
 - **Fecha:** 13 de julio de 2026
+- **Fecha de aceptación:** 13 de julio de 2026
 - **Revisión:** 1 — correcciones de la revisión formal
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md), [`ADR-006`](./006-limite-paquete-inicial.md), [`D-029`](../roadmap/deferred-decisions.md)
 - **Requiere revisión posterior:** [`D-028`](../roadmap/deferred-decisions.md)
@@ -25,7 +26,7 @@ ADR-006 fijó el nombre y entry point inicial del core, pero dejó la política 
 estabilidad en D-029. D-028 conserva por separado la decisión de SemVer,
 versionado entre paquetes y matriz de compatibilidad con Angular.
 
-## 2. Decisión propuesta
+## 2. Decisión
 
 ### 2.1 Qué constituye API pública
 
@@ -246,9 +247,9 @@ Revisar esta decisión cuando se proponga un nuevo paquete o entry point, antes
 de la primera publicación, cuando exista un segundo adaptador de framework o si
 la superficie raíz Angular necesita dividirse por costes medidos.
 
-## 7. Checklist de aceptación
+## 7. Resultado de la aceptación
 
-Antes de aceptar, confirmar:
+La revisión formal y la aceptación confirmaron:
 
 1. Que `package.json#exports` más el índice raíz es el límite público correcto.
 2. Que todos los exports del inventario quedan Public + Experimental + Active

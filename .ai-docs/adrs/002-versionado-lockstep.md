@@ -1,5 +1,12 @@
 # ADR 002: Estrategia de Versionado Sincronizado (Lockstep) y Compatibilidad
 
+- **Estado:** Superseded
+- **Sustituido por:** [`ADR-010`](./010-versionado-semver-compatibilidad.md)
+
+> Esta decisión se conserva como contexto histórico. ADR-010 sustituye el
+> lockstep con la major de Angular por versionado independiente, SemVer para la
+> superficie Stable y compatibilidad explícita mediante peers y matriz.
+
 **1. Título:** Adopción de Lockstep Versioning para paquetes dependientes de framework.
 **2. Fecha:** 12 de Julio de 2026.
 **3. Contexto:** Los consumidores necesitan garantías estrictas de compatibilidad al instalar adaptadores específicos del framework (`@rabassoft/schema-engine-angular`) para evitar errores `ERESOLVE` en NPM y fallos de _build_.

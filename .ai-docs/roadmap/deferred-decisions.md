@@ -205,10 +205,25 @@ Cada decisión debe registrar:
 
 ## D-024: Renderers personalizados y bridges de validación del framework
 
-- **Estado:** Candidate
-- **Pregunta:** ¿Cómo registrar componentes propios y adaptar validadores como Angular `ValidatorFn`?
-- **Motivo:** Debe preservarse el contrato neutral y normalizar todos los resultados.
-- **Retomar cuando:** Se defina el registry del adaptador Angular.
+- **Estado:** Deferred
+- **Resolución parcial:** El registro de componentes propios ya está resuelto por
+  [`ADR-007`](../adrs/007-resolucion-renderers-testers.md) y
+  [`ADR-009`](../adrs/009-politica-api-publica-estabilidad.md) mediante
+  `provideSchemaRenderer()`, contratos públicos de renderer y resolución
+  determinista; no queda una decisión abierta de registry.
+- **Pregunta restante:** ¿Debe el paquete Angular adaptar `ValidatorFn`, el
+  contrato `Validator` de Signal Forms, o ninguno de ellos al puerto neutral
+  `SchemaValidator`?
+- **Motivo:** `ValidatorFn` recibe un `AbstractControl` y devuelve un mapa de
+  errores arbitrario, mientras el core valida el modelo completo y requiere
+  issues normalizados con paths canónicos. Signal Forms introduce otro contrato
+  de validator basado en `FieldContext`. Un bridge genérico inventaría semántica
+  de controles, parents, estado y mapeo de paths que el runtime neutral no posee.
+- **Retomar cuando:** Un consumidor concreto necesite reutilizar validadores
+  Angular y pueda definir si son de raíz o campo, cómo se construye el contexto
+  y cómo se normalizan códigos, parámetros y paths.
+- **Documento esperado:** ADR específico del bridge de validación Angular; no
+  debe reabrir el contrato ya resuelto de custom renderers.
 
 ## D-025: Design tokens y theming
 
@@ -236,19 +251,26 @@ Cada decisión debe registrar:
 
 ## D-028: Versionado de paquetes y compatibilidad con frameworks
 
-- **Estado:** Research
+- **Estado:** Promoted
 - **Pregunta:** ¿Lockstep con la major del framework o SemVer propio con peer dependencies y matriz de compatibilidad?
 - **Motivo:** El ADR actual de lockstep necesita revisión antes de publicarse.
 - **Dirección recomendada:** SemVer del producto + rangos de peer dependencies + matriz de compatibilidad.
 - **Retomar cuando:** Se confirme el mapa de paquetes y la API pública inicial.
+- **Resolución:** [`ADR-010`](../adrs/010-versionado-semver-compatibilidad.md)
+  acepta SemVer independiente para cada paquete, peers y matriz explícitos,
+  compatibilidad Angular inicial `>=22.0.6 <23.0.0` con versiones alineadas y
+  una ventana Stable de 180 días más una MINOR posterior antes de retirada en
+  una MAJOR.
 
 ## D-029: Estabilidad de API pública
 
-- **Estado:** Candidate
+- **Estado:** Promoted
 - **Pregunta:** ¿Qué paquetes, tipos y funciones serán públicos y cuáles internos?
 - **Motivo:** Debe definirse antes de la primera publicación, pero después del walking skeleton.
-- **Documento esperado:** ADR de public API y política de deprecación.
-- **Propuesta en revisión:** [`ADR-009`](../adrs/009-politica-api-publica-estabilidad.md)
+- **Resolución:** [`ADR-009`](../adrs/009-politica-api-publica-estabilidad.md)
+  acepta los entry points explícitos como única frontera pública, clasifica el
+  inventario raíz como Public + Experimental + Active y mantiene internos los
+  deep imports, helpers y el token crudo de registros Angular.
 
 ## D-030: Localización avanzada
 
@@ -296,14 +318,18 @@ Cada decisión debe registrar:
 
 Las entradas más cercanas a convertirse en ADR son:
 
-1. **D-024 — Custom renderers y bridges Angular.**
-2. **D-028 — Versionado de paquetes.**
-3. **D-029 — API pública.**
+1. **D-008 — Enum, const y format.**
+2. **D-010 — Acción explícita para limpiar un campo.**
+3. **D-005 — Objetos anidados.**
 
 ## 5. Historial
 
-| Fecha      | Cambio                                                                                                                        |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| 13-07-2026 | Se propone ADR-009 para delimitar la API pública y su política de estabilidad; D-029 permanece Candidate hasta su aceptación. |
-| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes.            |
-| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                                         |
+| Fecha      | Cambio                                                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 13-07-2026 | D-024 registra custom renderers como resueltos por ADR-007/009 y aplaza el bridge Angular hasta existir un consumidor concreto. |
+| 13-07-2026 | Se acepta ADR-010, ADR-002 queda Superseded y D-028 se promueve con versionado y compatibilidad explícitos.                     |
+| 13-07-2026 | Se propone ADR-010 para resolver D-028 y sustituir el lockstep Angular del ADR-002 pre-SPEC.                                    |
+| 13-07-2026 | Se acepta ADR-009 y D-029 se promueve con la frontera pública y la política de estabilidad iniciales.                           |
+| 13-07-2026 | Se propone ADR-009 para delimitar la API pública y su política de estabilidad; D-029 permanece Candidate hasta su aceptación.   |
+| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes.              |
+| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                                           |

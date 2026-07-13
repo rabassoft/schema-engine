@@ -20,14 +20,15 @@ Las decisiones a continuación aplican a **todo** el ecosistema. Las decisiones 
 Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los marcados para revisión no son autoritativos cuando entren en conflicto con la especificación.
 
 1. [ADR 001: Desacoplamiento del framework reactivo (Core en Vanilla TS)](./001-agnosticismo-framework-core.md) — Pre-SPEC; dirección alineada, estado formal pendiente de normalización; el nombre provisional del paquete queda sustituido por ADR-006.
-2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Requiere revisión**; relacionado con D-028.
+2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Superseded por ADR-010.**
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
 4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
 5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
-9. [ADR 009: Límite de API pública y política de estabilidad](./009-politica-api-publica-estabilidad.md) — **Proposed.**
+9. [ADR 009: Límite de API pública y política de estabilidad](./009-politica-api-publica-estabilidad.md) — **Accepted.**
+10. [ADR 010: Versionado independiente, SemVer Stable y compatibilidad explícita](./010-versionado-semver-compatibilidad.md) — **Accepted.**
 
 ## 4. ADRs específicos de Angular
 

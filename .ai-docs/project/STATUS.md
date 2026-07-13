@@ -8,7 +8,9 @@
 - Updated by: Ricard / Codex
 - Repository revision: current `develop` HEAD contains revised proposed ADR-009,
   its reviewed Angular public-surface correction, and the final review record;
-  two commits ahead of `origin/develop`; GitHub default branch is `main`
+  the accepted ADR-009/010 records and D-024 boundary review are committed in
+  the current checkout, three commits ahead of `origin/develop`; GitHub default
+  branch is `main`
 
 ## Current phase
 
@@ -16,7 +18,7 @@ M1 through M5 completed; no implementation task active.
 
 ## Current objective
 
-Obtain an explicit acceptance decision for revised proposed ADR-009.
+Prepare the next product decision after completing the D-024 boundary review.
 
 ## Latest completed work
 
@@ -134,6 +136,37 @@ Obtain an explicit acceptance decision for revised proposed ADR-009.
 - Completed the final formal review of ADR-009's seven acceptance areas with no
   remaining findings; kept ADR-009 Proposed and D-029 Candidate pending an
   explicit acceptance decision.
+- Accepted ADR-009 after its completed formal review and promoted D-029; all
+  current intended root exports remain Public + Experimental + Active, and no
+  publication or additional implementation was authorized.
+- Reviewed D-028 against pre-SPEC ADR-002, accepted ADR-006/009, current package
+  manifests, partial Angular compilation, and current official SemVer, npm, and
+  Angular guidance.
+- Drafted proposed ADR-010 with independent product SemVer, explicit core and
+  Angular peer ranges, a tested compatibility matrix, release coordination, and
+  an exact Stable deprecation window.
+- Formally reviewed ADR-010's seven acceptance areas and found three required
+  corrections: honest SemVer treatment of Public + Experimental APIs after
+  `1.0.0`, aligned resolved versions for Angular core/forms peers, and an
+  unambiguous definition of the required subsequent MINOR release.
+- Revised ADR-010 to define Stable SemVer plus an explicit Experimental
+  extension, require aligned Angular core/forms versions, and define the later
+  MINOR as a published release retaining the deprecated contract.
+- Repeated the seven-area formal review with no remaining findings; kept
+  ADR-010 Proposed, ADR-002 pending review, and D-028 Research until explicit
+  acceptance.
+- Accepted ADR-010 revision 1, marked the historical lockstep ADR-002
+  Superseded, and promoted D-028 without changing package versions, dependency
+  sections, or publication settings.
+- Reviewed D-024 and recorded custom renderer registration as already resolved
+  by ADR-007/009 and the implemented Angular API.
+- Deferred the remaining Angular validation bridge because `ValidatorFn`, Signal
+  Forms `Validator`, and neutral whole-model `SchemaValidator` have different
+  control, context, error, and path semantics without a concrete consumer
+  mapping requirement.
+- Committed the reviewed ADR-009/010 acceptance records, ADR-002 supersession,
+  D-028/D-029 promotions, and D-024 boundary review on `develop` with repository
+  identity `Rabassoft <ricard@rabassoft.com>`.
 
 ## In progress
 
@@ -141,13 +174,14 @@ None. No implementation task is active.
 
 ## Next action
 
-Explicitly accept ADR-009 and promote D-029, or request a further revision. Do
-not implement publication, SemVer enforcement, or additional API changes as
-part of that decision.
+Review D-008 (`enum`, `const`, and `format`) as the smallest next product
+candidate now that renderer resolution is implemented. Separate data semantics,
+compiler contracts, validation ownership, and renderer selection before
+drafting an ADR or implementation plan.
 
 ## Blockers
 
-None. There is no implementation blocker or documentation conflict.
+None. There is no implementation blocker or remaining documentation conflict.
 
 ## Open questions
 
@@ -155,8 +189,9 @@ None. There is no implementation blocker or documentation conflict.
 - The Angular `ValidatorFn` bridge portion of D-024 remains deferred and outside
   completed M5.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
-- ADR-009 remains Proposed and D-029 remains Candidate; the only open decision
-  in this increment is whether to accept the reviewed policy.
+- The D-024 Angular validation bridge remains deferred until a concrete consumer
+  defines root-versus-field scope, control context, and normalization of codes,
+  parameters, and paths. Custom renderer registration is no longer open.
 
 ## Verification status
 
@@ -194,9 +229,40 @@ None. There is no implementation blocker or documentation conflict.
 - The final formal review passed all seven acceptance areas: entry-point
   boundary, complete inventory, Angular extension surface, unsupported imports,
   orthogonal policy axes, D-028 separation, and acceptance scope.
-- The reviewed source entry points and generated declarations agree, ADR-009
-  remains Proposed, and D-029 remains Candidate; no documentation conflict was
-  found.
+- The reviewed source entry points and generated declarations agree; ADR-009,
+  the ADR index, D-029, STATUS, WORKLOG, and HANDOFF consistently record the
+  acceptance and promotion.
+- No implementation verification was required for the acceptance-only
+  documentation update; no package version, publication setting, or public API
+  changed.
+- Proposed ADR-010 was checked against ADR-002, ADR-006, ADR-009, D-028, both
+  package manifests, Angular partial-compilation settings, and the actual
+  cross-package imports.
+- Current official SemVer, npm, Angular release/support, Angular compatibility,
+  library peer-dependency, and partial-compilation documentation were reviewed.
+- ADR-010, the ADR index, D-028, STATUS, WORKLOG, and HANDOFF consistently keep
+  the decision Proposed/Research; package manifests remain unchanged.
+- The formal review passed independent versioning, initial release rules, core
+  peer ownership, bounded Angular support, range-change classification, and
+  acceptance scope, subject to the three corrections recorded above.
+- SemVer 2.0.0 rules 1, 5, and 8 were rechecked against ADR-009; Angular library
+  peer and partial-compilation guidance was rechecked against the proposed
+  compatibility matrix.
+- Revision 1 explicitly scopes SemVer guarantees to Public + Stable, labels the
+  Experimental extension, requires aligned Angular peer tuples, and defines the
+  later MINOR as a published release retaining the deprecated contract.
+- The repeated formal review passed all seven acceptance areas; ADR-010, the ADR
+  index, D-028, STATUS, WORKLOG, and HANDOFF consistently retain
+  Proposed/Research states pending acceptance.
+- ADR-010, ADR-002, the ADR index, D-028, STATUS, WORKLOG, and HANDOFF now
+  consistently record Accepted/Superseded/Promoted states.
+- Acceptance changed documentation only; both package manifests remain at
+  `0.0.0`, private, and otherwise unchanged.
+- D-024 was checked against SPEC-001, ADR-007/009, the implemented Angular
+  renderer surface, core `SchemaValidator` normalization, Angular 22
+  `ValidatorFn`, and the stable Signal Forms `Validator` contract.
+- D-024 and the next-candidate list consistently record the bridge as Deferred
+  and D-008 as the next decision; no public contract or implementation changed.
 
 ## Relevant documents
 
@@ -206,6 +272,7 @@ None. There is no implementation blocker or documentation conflict.
 - `.ai-docs/adrs/007-resolucion-renderers-testers.md`
 - `.ai-docs/adrs/008-instanciacion-renderers-angular.md`
 - `.ai-docs/adrs/009-politica-api-publica-estabilidad.md`
+- `.ai-docs/adrs/010-versionado-semver-compatibilidad.md`
 - `.ai-docs/plans/001-compiler-only-implementation.md`
 - `.ai-docs/plans/002-root-immutable-operations.md`
 - `.ai-docs/plans/003-controlled-runtime.md`

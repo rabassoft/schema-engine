@@ -6,9 +6,10 @@
 
 ## 1. Current objective
 
-No implementation task is active. The final formal review of revised proposed
-ADR-009 passed all seven acceptance areas. Obtain an explicit decision to accept
-the public API and stability policy or revise it again.
+No implementation task is active. ADR-010 revision 1 is accepted, pre-SPEC
+ADR-002 is Superseded, and D-028 is Promoted. D-024's custom-renderer concern is
+resolved while its Angular validation bridge remains Deferred. Review D-008 as
+the smallest next product decision.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -45,10 +46,9 @@ An entry in that file is not authorization to implement it. Promote a deferred i
 
 The repository contains ADRs created before `SPEC-001`. They provide useful context but are not automatically authoritative where they conflict with the specification.
 
-The following pre-SPEC ADRs are pending review and must not be treated as
+The following pre-SPEC Angular ADRs are pending review and must not be treated as
 authoritative where they conflict with `SPEC-001`:
 
-- Global ADR-002: versioning aligned directly with Angular major versions.
 - Angular ADR-001: statements coupling Signals, RxJS, Zone.js, and zoneless behavior.
 - Angular ADR-002: a historical empty placeholder replaced by accepted ADR-008.
 
@@ -57,6 +57,9 @@ Do not rewrite these ADRs as part of an unrelated task. Surface conflicts explic
 ADR-004 has now been superseded by accepted ADR-007. Renderer selection uses
 deterministic scored testers over normalized `FieldDefinition` in the adapter;
 the core owns no component registry.
+
+ADR-002 is now Superseded by accepted ADR-010. Package versions follow
+independent product versioning rather than Angular-major lockstep.
 
 Accepted ADR-008 resolves D-027: inline renderers are created with
 `ViewContainerRef.createComponent()`, an explicit `EnvironmentInjector`, and
@@ -171,23 +174,47 @@ Signal Form as the business source of truth and confines it to a private
 renderer-local buffer reconciled from core snapshots. Its contracts are promoted
 to SPEC-001 v0.1.11. The final suite passes 140 tests: 104 core and 36 Angular.
 
-## 11. Proposed public API decision
+## 11. Accepted public API decision
 
 [`ADR-009: Public API boundary and stability policy`](.ai-docs/adrs/009-politica-api-publica-estabilidad.md)
-is Proposed. It treats only explicit package export-map entry points as public,
+is Accepted. It treats only explicit package export-map entry points as public,
 classifies every intended root export as Public, Experimental, and Active,
 excludes deep imports and internal helpers, and treats visibility, stability,
 and lifecycle as separate axes. The reviewed correction removes the raw
 `SCHEMA_RENDERER_REGISTRATIONS` token from the root entry point while retaining
 `provideSchemaRenderer`, `AngularRendererResolver`, and renderer contracts as
-public extension APIs. D-028 still owns SemVer, package coordination, Angular
-compatibility, and the exact deprecation window. Acceptance does not authorize
-publication or additional code changes. The final formal review found no
-remaining issue; ADR-009 remains Proposed and D-029 remains Candidate until an
-explicit acceptance decision is recorded.
+public extension APIs. Accepted ADR-010 now owns SemVer, package coordination,
+Angular compatibility, and the exact deprecation window. Acceptance does not
+authorize publication or additional code changes. The final formal review found no
+remaining issue, and D-029 is Promoted. All intended root exports remain
+Experimental until a separate explicit promotion.
 
-## 12. Recommended next Codex prompt
+## 12. Accepted package-versioning decision
+
+[`ADR-010: Independent versioning, Stable SemVer, and explicit compatibility`](.ai-docs/adrs/010-versionado-semver-compatibilidad.md)
+is Accepted. It assigns independent product SemVer to core and the Angular
+adapter instead of aligning the adapter major with Angular. The adapter declares
+the core and used Angular packages as bounded peers and publishes a tested
+compatibility matrix. The initial proposal starts both packages at `0.1.0`,
+supports Angular `>=22.0.6 <23.0.0`, and requires 180 days plus one subsequent
+MINOR before a Stable API can be removed in a MAJOR. ADR-002 is Superseded and
+D-028 is Promoted, but manifests remain private at `0.0.0`. Revision 1 explicitly
+describes its Experimental extension to strict SemVer, requires Angular
+core/forms peers to resolve to the same version, and defines the later MINOR as
+one published release that retains the deprecated contract.
+
+## 13. Reviewed Angular extension boundary
+
+D-024 originally combined custom renderers with Angular validation bridges. The
+renderer half is complete under ADR-007/009 and the implemented
+`provideSchemaRenderer()` API. A generic bridge remains Deferred: Angular
+`ValidatorFn` consumes `AbstractControl`, Signal Forms `Validator` consumes
+field context, and neither directly produces the normalized whole-model issues
+required by core `SchemaValidator`. Revisit only with a concrete consumer that
+defines root-versus-field scope and canonical error/path mapping.
+
+## 14. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-008, revised proposed ADR-009, completed PLAN-001 through PLAN-005, the deferred-decisions register, and the ADR index. Record an explicit decision to accept ADR-009 and promote D-029, or request a further revision; do not implement publication or additional API changes.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-010, completed PLAN-001 through PLAN-005, D-008 in the deferred-decisions register, and the ADR index. Review D-008 as the smallest next product candidate; separate `enum`, `const`, and `format` data semantics, compiler contracts, validation ownership, and renderer selection before drafting an ADR or implementation plan.
