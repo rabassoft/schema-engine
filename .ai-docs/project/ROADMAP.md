@@ -9,5 +9,7 @@
 - [x] M3 — Runtime controlado
   - Completado el 13 de julio de 2026.
   - Estado controlado, validación, snapshots, interacción, scopes, listeners y disposal.
-- [ ] M4 — Adaptador Angular
+- [x] M4 — Adaptador Angular
+  - Completado el 13 de julio de 2026.
+  - Adaptador headless Angular 22, Signals, resolución de renderers y outlet con ViewContainerRef.
 - [ ] M5 — Renderer HTML

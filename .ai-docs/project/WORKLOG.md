@@ -2,6 +2,46 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — M4 Angular adapter completed
+
+### Completed
+
+- Added the private `@rabassoft/schema-engine-angular` package on Angular 22.0.6 with partial `ngc` compilation and no Angular dependency in core.
+- Implemented the standalone controlled-form and field-outlet directives, Signals snapshot projection, controlled intent forwarding, transactional runtime replacement, and deterministic renderer resolution.
+- Implemented ADR-008 renderer creation through `ViewContainerRef.createComponent()` with an explicit environment injector and creation-time signal bindings.
+- Added lifecycle-safe renderer replacement, including preservation of the active renderer when a proposed parent runtime replacement is rejected.
+- Completed PLAN-004 and milestone M4 without native HTML controls, Angular Forms, RxJS bridging, Zone.js coupling, persistence, or deferred capabilities.
+
+### Verification
+
+- `pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm test:package` passed.
+- All 119 tests pass: 104 core tests and 15 Angular resolver/directive tests, including explicit zoneless coverage.
+- Angular package smoke coverage verifies root exports and resolver construction; `git diff --check` and local Markdown-link validation passed.
+
+### Pending
+
+- Draft and formally review PLAN-005 for M5 native HTML renderers before implementation.
+
+## 2026-07-13 — ADR-008 committed and PLAN-004 approved
+
+### Completed
+
+- Committed ADR-008 and the D-027 resolution as `bae261f`.
+- Drafted PLAN-004 for a private Angular 22 headless adapter package.
+- Formally reviewed and approved Signals projection, transactional runtime recreation, provider-based renderer registrations, deterministic resolution, the common renderer contract, and the ViewContainerRef outlet lifecycle.
+- Kept native HTML renderers in M5 and excluded RxJS, Zone.js coupling, Angular Forms, persistence, lazy rendering, and deferred capabilities.
+
+### Verification
+
+- Checked PLAN-004 against SPEC-001 v0.1.9, ADR-006/007/008, completed PLAN-003, D-013, D-024, D-026, D-028, and D-029.
+- Verified Angular 22 is actively supported and compatible with the workspace TypeScript 6.0 baseline.
+- Ran formatting, diff, and local Markdown-link validation.
+
+### Pending
+
+- Promote PLAN-004's approved public contracts and diagnostics to SPEC-001.
+- Implement and verify M4 only after that promotion.
+
 ## 2026-07-13 — ADR-008 committed
 
 ### Completed

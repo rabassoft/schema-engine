@@ -1,12 +1,12 @@
 # Schema Engine — Codex Handoff
 
 - **Handoff date:** 13 July 2026
-- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.9`, status `Draft`
-- **Implementation status:** M1 compiler, M2 root immutable operations, and M3 controlled runtime completed in `packages/core`; framework adapters and renderers are not implemented.
+- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.10`, status `Draft`
+- **Implementation status:** M1 through M4 completed: framework-neutral compiler, operations, and runtime in `packages/core`, plus the headless Angular 22 adapter in `packages/angular`; native HTML renderers remain unimplemented.
 
 ## 1. Current objective
 
-Prepare and formally review PLAN-004 for the Angular adapter.
+Prepare and formally review PLAN-005 for the M5 native HTML renderer increment.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -48,7 +48,7 @@ authoritative where they conflict with `SPEC-001`:
 
 - Global ADR-002: versioning aligned directly with Angular major versions.
 - Angular ADR-001: statements coupling Signals, RxJS, Zone.js, and zoneless behavior.
-- Angular ADR-002: an empty `ViewContainerRef` placeholder that records no accepted decision.
+- Angular ADR-002: a historical empty placeholder replaced by accepted ADR-008.
 
 Do not rewrite these ADRs as part of an unrelated task. Surface conflicts explicitly and handle them through a dedicated review.
 
@@ -60,6 +60,11 @@ Accepted ADR-008 resolves D-027: inline renderers are created with
 `ViewContainerRef.createComponent()`, an explicit `EnvironmentInjector`, and
 creation-time input/output bindings. Standalone `createComponent()` remains for
 out-of-tree UI and is outside M4.
+
+[PLAN-004](.ai-docs/plans/004-angular-adapter.md) is completed. M4 added the
+private Angular 22 headless adapter, Signals projection, provider-based renderer
+resolution, and the ViewContainerRef outlet infrastructure. Native HTML controls
+remain M5.
 
 ## 5. Accepted architecture increment
 
@@ -145,8 +150,16 @@ was formally reviewed, approved, implemented, and completed. It closes source-sc
 creation/subscription results, diagnostic parameters, and listener isolation
 while keeping M3 framework-neutral and application-controlled.
 
-## 9. Recommended next Codex prompt
+## 9. Completed Angular-adapter plan
+
+[`PLAN-004: Angular controlled-form adapter`](.ai-docs/plans/004-angular-adapter.md)
+was formally reviewed, approved, implemented, and completed. The private
+adapter package uses Angular Signals and public creation-time bindings without
+RxJS, Zone.js coupling, Angular Forms, native controls, or core framework
+dependencies.
+
+## 10. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.9, accepted ADR-005 through ADR-008, completed PLAN-001 through PLAN-003, the deferred-decisions register, and the ADR index. Do not implement M4. Propose a decision-complete PLAN-004 for the Angular adapter, including package boundary, Signals projection, providers, renderer registration/resolution, ViewContainerRef bindings, lifecycle, diagnostics, fixtures, and verification.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.10, accepted ADR-005 through ADR-008, completed PLAN-001 through PLAN-004, the deferred-decisions register, and the ADR index. Prepare and formally review PLAN-005 for M5 native HTML renderers; do not implement M5 until its plan is approved.

@@ -1,7 +1,7 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Draft
-- **Versión:** 0.1.9
+- **Versión:** 0.1.10
 - **Fecha:** 13 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
@@ -10,6 +10,7 @@
 - **Plan de runtime aprobado:** [`PLAN-003`](../plans/003-controlled-runtime.md)
 - **Resolución de renderers:** [`ADR-007`](../adrs/007-resolucion-renderers-testers.md)
 - **Instanciación Angular:** [`ADR-008`](../adrs/008-instanciacion-renderers-angular.md)
+- **Plan de adaptador Angular:** [`PLAN-004`](../plans/004-angular-adapter.md)
 
 ## 1. Propósito
 
@@ -993,10 +994,16 @@ D-027 queda resuelta por ADR-008. No permanece ninguna decisión arquitectónica
 inmediata que bloquee la preparación de PLAN-004. Las demás decisiones
 aplazadas conservan su estado en el registro correspondiente.
 
+PLAN-004 define el adaptador Angular 22 headless, la proyección mediante
+Signals, el contrato común de renderers, registrations por providers, resolución
+determinista y el outlet basado en `ViewContainerRef.createComponent()`. Los
+controles HTML nativos permanecen fuera de M4.
+
 ## 30. Historial
 
 | Versión | Fecha      | Cambio                                                                                                            |
 | ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| 0.1.10  | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-004 para el adaptador Angular headless.                                 |
 | 0.1.9   | 13-07-2026 | Se incorpora ADR-008 y se cierra la instanciación inline de renderers Angular.                                    |
 | 0.1.8   | 13-07-2026 | Se incorpora ADR-007 y se cierra la estrategia neutral de resolución de renderers.                                |
 | 0.1.7   | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-003 y el schema fuente en las opciones del runtime.                     |

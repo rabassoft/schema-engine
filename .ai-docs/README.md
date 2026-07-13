@@ -17,5 +17,6 @@
 - [PLAN-001: Minimal compiler-only implementation](./plans/001-compiler-only-implementation.md) — Completed
 - [PLAN-002: Root-level immutable operations](./plans/002-root-immutable-operations.md) — Completed
 - [PLAN-003: Controlled form runtime](./plans/003-controlled-runtime.md) — Completed
+- [PLAN-004: Angular controlled-form adapter](./plans/004-angular-adapter.md) — Completed
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

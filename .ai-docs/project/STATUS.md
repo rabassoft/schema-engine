@@ -6,15 +6,15 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: `develop` contains committed reviewed M3 and ADR-008 documentation, four commits ahead of `origin/develop`; GitHub default branch is `main`
+- Repository revision: `develop` contains committed reviewed M3 and ADR-008 at `bae261f`, four commits ahead of `origin/develop`, with the completed M4 increment uncommitted; GitHub default branch is `main`
 
 ## Current phase
 
-M1, M2, and M3 completed; architecture validation before M4.
+M1 through M4 completed; no implementation task is active.
 
 ## Current objective
 
-Prepare and formally review PLAN-004 for the M4 Angular adapter.
+Prepare the next reviewed increment for M5 native HTML renderers.
 
 ## Latest completed work
 
@@ -60,14 +60,25 @@ Prepare and formally review PLAN-004 for the M4 Angular adapter.
   `ViewContainerRef.createComponent()` plus creation-time bindings.
 - Committed the D-027/ADR-008 resolution on `develop` as
   `Rabassoft <ricard@rabassoft.com>`.
+- Drafted, formally reviewed, and approved PLAN-004 for the Angular 22 headless
+  adapter, Signals projection, renderer resolver, and ViewContainerRef outlet.
+- Implemented the private `@rabassoft/schema-engine-angular` package with a
+  controlled-form directive, Signals snapshot projection, immutable renderer
+  resolver, and inline field outlet using creation-time input/output bindings.
+- Added standard and explicit zoneless TestBed coverage for controlled intents,
+  transactional runtime replacement, renderer lifecycle, diagnostics, and
+  package construction; all 119 repository tests pass.
+- Completed PLAN-004 and milestone M4 without adding Angular, RxJS, DOM, or
+  browser dependencies to the core package and without implementing M5 controls.
 
 ## In progress
 
-No implementation task is active. D-027 is resolved and M4 planning is ready.
+None. No active implementation task.
 
 ## Next action
 
-Draft and formally approve PLAN-004 before implementing the Angular adapter.
+Draft and formally review PLAN-005 for M5 native HTML renderers before any M5
+implementation.
 
 ## Blockers
 
@@ -75,35 +86,26 @@ None.
 
 ## Open questions
 
-- None blocking PLAN-004; D-024 details belong in the adapter plan.
+- None. The Angular `ValidatorFn` bridge portion of D-024 remains deferred and
+  outside completed M4.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
 
 ## Verification status
 
-- `CI=true pnpm install --frozen-lockfile` passed with the pinned lockfile.
-- `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
-- `pnpm test` passed: 4 test files and 82 tests, including all compiler and
-  operation conformance fixtures.
-- `pnpm build` and `pnpm test:package` passed.
-- Built package exports verified with zero runtime dependencies.
-- `git diff --check` and local Markdown link validation passed.
-- PLAN-002 was checked against SPEC-001 and the deferred-decisions register.
-- The formal review checked PLAN-002 against the implemented M1 contracts and
-  closed all identified decision ambiguities before approval.
-- SPEC-001 v0.1.6 includes the M2 diagnostic contract.
-- `pnpm test` passes with 4 test files and 82 tests, including 27 operation
-  fixtures and all 30 compiler fixtures.
-- SPEC-001 v0.1.7 includes the approved M3 option contract.
-- `pnpm test` passes with 6 test files and 103 tests, including 10 runtime
-  fixtures.
-- M3 accessor-safety regression coverage passes; the suite now contains 104
-  tests.
-- ADR-007 was checked against SPEC-001, ADR-003/004, D-016, D-023, D-024,
-  D-026, and D-027.
-- ADR-008 was checked against current official Angular documentation for
-  `ViewContainerRef.createComponent`, `NgComponentOutlet`, standalone
-  `createComponent`, and creation-time bindings.
-- Current checkout is `develop`; M3 and ADR-007 are committed locally and not pushed.
+- `pnpm install --frozen-lockfile` passed with Angular 22.0.6 resolved from the
+  pinned lockfile.
+- `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed across both
+  packages.
+- `pnpm test` passed: 8 test files and 119 tests, including 15 Angular adapter
+  tests and all existing M1-M3 fixtures.
+- `pnpm build` passed, including Angular partial compilation with `ngc`.
+- `pnpm test:package` passed for both root entry points and constructs the
+  Angular resolver from an environment injector.
+- `git diff --check` passed; local Markdown links were validated.
+- The core package remains free of Angular and runtime dependencies; no native
+  renderer or deferred capability entered M4.
+- Current checkout is `develop`; the completed M4 increment is uncommitted and
+  nothing was pushed in this task.
 
 ## Relevant documents
 
@@ -114,8 +116,13 @@ None.
 - `.ai-docs/adrs/008-instanciacion-renderers-angular.md`
 - `.ai-docs/plans/001-compiler-only-implementation.md`
 - `.ai-docs/plans/002-root-immutable-operations.md`
+- `.ai-docs/plans/003-controlled-runtime.md`
+- `.ai-docs/plans/004-angular-adapter.md`
 - `.ai-docs/roadmap/deferred-decisions.md`
 - `.ai-docs/adrs/000-index.md`
 - `packages/core/src/index.ts`
 - `packages/core/test/conformance/fixtures/`
 - `packages/core/test/operations/fixtures/`
+- `packages/core/test/runtime/fixtures/`
+- `packages/angular/src/index.ts`
+- `packages/angular/test/`
