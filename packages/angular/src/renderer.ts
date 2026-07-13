@@ -14,16 +14,19 @@ import type {
   FieldDefinition,
   FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
+import type { AngularFieldTextSnapshot } from './text.js';
 
 export interface AngularFieldRenderer {
   readonly field: InputSignal<FieldDefinition>;
   readonly snapshot: InputSignal<FieldRuntimeSnapshot>;
   readonly formId: InputSignal<string>;
   readonly locale: InputSignal<string>;
+  readonly texts: InputSignal<AngularFieldTextSnapshot>;
   readonly setValue: OutputEmitterRef<unknown>;
   readonly removeValue: OutputEmitterRef<void>;
   readonly fieldFocus: OutputEmitterRef<void>;
   readonly fieldBlur: OutputEmitterRef<void>;
+  readonly rendererDiagnostics: OutputEmitterRef<readonly Diagnostic[]>;
 }
 
 export type AngularRendererType = Type<AngularFieldRenderer>;

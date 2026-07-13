@@ -2,6 +2,7 @@ import { Component, input, output } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   compileFormDefinition,
+  type Diagnostic,
   type FieldDefinition,
   type FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
@@ -11,6 +12,7 @@ import {
   SCHEMA_RENDERER_REGISTRATIONS,
   provideSchemaEngineAngular,
   type AngularFieldRenderer,
+  type AngularFieldTextSnapshot,
   type AngularRendererRegistration,
 } from '../src/index.js';
 
@@ -20,10 +22,12 @@ class TestRenderer implements AngularFieldRenderer {
   readonly snapshot = input.required<FieldRuntimeSnapshot>();
   readonly formId = input.required<string>();
   readonly locale = input.required<string>();
+  readonly texts = input.required<AngularFieldTextSnapshot>();
   readonly setValue = output<unknown>();
   readonly removeValue = output<void>();
   readonly fieldFocus = output<void>();
   readonly fieldBlur = output<void>();
+  readonly rendererDiagnostics = output<readonly Diagnostic[]>();
 }
 
 const field = getField();
@@ -156,7 +160,7 @@ describe('AngularRendererResolver', () => {
     const caller = registration('stable', 1) as {
       id: string;
       renderer: typeof TestRenderer;
-      tester: () => number | null;
+      tester: (field: FieldDefinition) => number | null;
       priority: number;
     };
     TestBed.configureTestingModule({

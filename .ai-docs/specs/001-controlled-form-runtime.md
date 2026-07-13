@@ -1,7 +1,7 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Draft
-- **Versión:** 0.1.10
+- **Versión:** 0.1.11
 - **Fecha:** 13 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
@@ -11,6 +11,7 @@
 - **Resolución de renderers:** [`ADR-007`](../adrs/007-resolucion-renderers-testers.md)
 - **Instanciación Angular:** [`ADR-008`](../adrs/008-instanciacion-renderers-angular.md)
 - **Plan de adaptador Angular:** [`PLAN-004`](../plans/004-angular-adapter.md)
+- **Plan de renderers HTML nativos:** [`PLAN-005`](../plans/005-native-html-renderers.md)
 
 ## 1. Propósito
 
@@ -687,14 +688,44 @@ Los campos sin foco se reformatearán inmediatamente. El campo numérico activo 
 ### 19.2 Resolución de textos
 
 ```ts
+export type FieldTextMember =
+  'label' | 'description' | 'hint' | 'tooltip' | 'placeholder' | 'issue';
+
+export type TextResolutionContext =
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly field: FieldDefinition;
+      readonly member: Exclude<FieldTextMember, 'issue'>;
+      readonly issue?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly field: FieldDefinition;
+      readonly member: 'issue';
+      readonly issue: ValidationIssue;
+    };
+
 export interface TextResolver {
   resolve(text: string, context: TextResolutionContext): string;
 }
 ```
 
-La implementación por defecto devolverá el texto sin modificar. Cambiar el locale volverá a resolver etiquetas, descripciones, hints, tooltips, placeholders y mensajes.
+La implementación por defecto devolverá el texto sin modificar. Cambiar el
+locale volverá a resolver etiquetas, descripciones, hints, tooltips,
+placeholders y mensajes. El outlet Angular proyectará un snapshot de textos
+resueltos e inmutable para que renderers nativos y personalizados compartan la
+misma política.
 
 ## 20. Comportamiento de los renderers iniciales
+
+Cada renderer Angular nativo utilizará un `form()` y `FormField` privado de
+Angular 22 para enlazar exclusivamente el control hoja. Su modelo local será un
+buffer efímero de presentación: no será value, baseline, snapshot, validación,
+dirty ni touched autoritativo. Una confirmación externa reconciliará el buffer y
+blur restaurará el último valor confirmado. No se crearán schemas de validación,
+submission, `FormRoot` ni bridges compat de Angular Forms.
 
 ### 20.1 String
 
@@ -741,6 +772,20 @@ export interface ControlledFormRuntimeOptions<TData extends object> {
 ```
 
 `formId` será obligatorio y distinguirá instancias visuales de una misma definición.
+
+El adaptador Angular expondrá una configuración pre-release equivalente salvo
+por locale opcional:
+
+```ts
+export type AngularControlledFormConfig<TData extends object> = Omit<
+  ControlledFormRuntimeOptions<TData>,
+  'locale'
+> & {
+  readonly locale?: string;
+};
+```
+
+`undefined` utilizará `LOCALE_ID`; una string vacía seguirá siendo inválida.
 
 ### 21.2 Snapshot público
 
@@ -908,6 +953,17 @@ El incremento M2 utilizará estos códigos normativos, todos con severidad
 PLAN-002 define sus parámetros, razones cerradas, orden, mensajes fallback,
 inmutabilidad y reglas de seguridad exactos.
 
+M5 añade warnings Angular con fuente `runtime`:
+
+| Código                   | Propósito                                                       |
+| ------------------------ | --------------------------------------------------------------- |
+| `INVALID_TEXT_RESOLVER`  | El resolver configurado no expone un método seguro y callable   |
+| `TEXT_RESOLUTION_FAILED` | Una resolución falla y utiliza el texto fuente como fallback    |
+| `INVALID_NUMBER_LOCALE`  | Intl rechaza el locale y el renderer utiliza `en-US`            |
+| `NUMBER_FORMAT_FAILED`   | Intl no puede formatear y se utiliza la representación canónica |
+
+PLAN-005 fija parámetros, razones, orden, inmutabilidad y frecuencia.
+
 ## 25. Ciclo de vida
 
 El runtime expondrá:
@@ -999,10 +1055,23 @@ Signals, el contrato común de renderers, registrations por providers, resoluci�
 determinista y el outlet basado en `ViewContainerRef.createComponent()`. Los
 controles HTML nativos permanecen fuera de M4.
 
+PLAN-005 completa M5 con renderers HTML nativos accesibles para string,
+number/integer y boolean. Cada renderer utiliza un Signal Form Angular 22
+privado como buffer efímero del control mediante `form()` y `FormField`; ese
+buffer nunca sustituye al valor confirmado, baseline, validación, touched,
+dirty, issues u operaciones del runtime neutral. Los valores confirmados
+reconcilian el buffer y blur descarta ediciones no confirmadas.
+
+El adaptador obtiene `LOCALE_ID` cuando no existe locale explícito, proyecta
+textos mediante un `TextResolver` neutral y mantiene `@angular/forms/signals`
+limitado a la capa Angular. No se incorporan Signal Forms validation schemas,
+Reactive Forms, Template-driven Forms, compat, submit ni persistencia.
+
 ## 30. Historial
 
 | Versión | Fecha      | Cambio                                                                                                            |
 | ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| 0.1.11  | 13-07-2026 | Se incorpora PLAN-005, Signal Forms como buffer visual privado y los renderers HTML nativos.                      |
 | 0.1.10  | 13-07-2026 | Se incorpora el contrato aprobado de PLAN-004 para el adaptador Angular headless.                                 |
 | 0.1.9   | 13-07-2026 | Se incorpora ADR-008 y se cierra la instanciación inline de renderers Angular.                                    |
 | 0.1.8   | 13-07-2026 | Se incorpora ADR-007 y se cierra la estrategia neutral de resolución de renderers.                                |

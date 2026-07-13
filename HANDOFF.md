@@ -1,12 +1,13 @@
 # Schema Engine — Codex Handoff
 
 - **Handoff date:** 13 July 2026
-- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.10`, status `Draft`
-- **Implementation status:** M1 through M4 completed: framework-neutral compiler, operations, and runtime in `packages/core`, plus the headless Angular 22 adapter in `packages/angular`; native HTML renderers remain unimplemented.
+- **Current specification:** `SPEC-001: Controlled Form Runtime`, version `0.1.11`, status `Draft`
+- **Implementation status:** M1 through M5 completed: framework-neutral compiler, operations, and runtime in `packages/core`, plus the Angular 22 adapter and accessible native HTML renderer kit in `packages/angular`.
 
 ## 1. Current objective
 
-Prepare and formally review PLAN-005 for the M5 native HTML renderer increment.
+No implementation task is active. Select and formally scope the next increment;
+push `develop` only after explicit authorization.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -64,7 +65,7 @@ out-of-tree UI and is outside M4.
 [PLAN-004](.ai-docs/plans/004-angular-adapter.md) is completed. M4 added the
 private Angular 22 headless adapter, Signals projection, provider-based renderer
 resolution, and the ViewContainerRef outlet infrastructure. Native HTML controls
-remain M5.
+were completed in M5.
 
 ## 5. Accepted architecture increment
 
@@ -158,8 +159,19 @@ adapter package uses Angular Signals and public creation-time bindings without
 RxJS, Zone.js coupling, Angular Forms, native controls, or core framework
 dependencies.
 
-## 10. Recommended next Codex prompt
+## 10. Completed native-renderer plan
+
+[`PLAN-005: Native HTML renderers`](.ai-docs/plans/005-native-html-renderers.md)
+was formally reviewed, approved, implemented, and completed. It includes the confirmed `LOCALE_ID` fallback,
+neutral `TextResolver` projection, accessible native string/number/boolean
+components, Angular 22 Signal Forms leaf bindings, controlled localized numeric
+editing, diagnostics, and conformance fixtures. The re-review rejects using a
+Signal Form as the business source of truth and confines it to a private
+renderer-local buffer reconciled from core snapshots. Its contracts are promoted
+to SPEC-001 v0.1.11. The final suite passes 140 tests: 104 core and 36 Angular.
+
+## 11. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.10, accepted ADR-005 through ADR-008, completed PLAN-001 through PLAN-004, the deferred-decisions register, and the ADR index. Prepare and formally review PLAN-005 for M5 native HTML renderers; do not implement M5 until its plan is approved.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.11, accepted ADR-005 through ADR-008, completed PLAN-001 through PLAN-005, the deferred-decisions register, and the ADR index. Select and formally scope the next implementation increment; do not push or implement it without explicit approval.

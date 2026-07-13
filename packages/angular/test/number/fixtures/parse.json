@@ -1,0 +1,74 @@
+[
+  { "locale": "en-US", "numericType": "number", "text": "", "kind": "empty" },
+  {
+    "locale": "en-US",
+    "numericType": "number",
+    "text": "-",
+    "kind": "incomplete"
+  },
+  {
+    "locale": "en-US",
+    "numericType": "number",
+    "text": "12.",
+    "kind": "incomplete"
+  },
+  {
+    "locale": "en-US",
+    "numericType": "number",
+    "text": "1,234.5",
+    "kind": "value",
+    "value": 1234.5
+  },
+  {
+    "locale": "en-US",
+    "numericType": "number",
+    "text": "12,34.5",
+    "kind": "invalid"
+  },
+  {
+    "locale": "es-ES",
+    "numericType": "number",
+    "text": "12,5",
+    "kind": "value",
+    "value": 12.5
+  },
+  {
+    "locale": "es-ES",
+    "numericType": "number",
+    "text": "12,",
+    "kind": "incomplete"
+  },
+  {
+    "locale": "es-ES",
+    "numericType": "integer",
+    "text": "12,5",
+    "kind": "invalid"
+  },
+  {
+    "locale": "ar-EG",
+    "numericType": "number",
+    "text": "١٢٫٥",
+    "kind": "value",
+    "value": 12.5
+  },
+  {
+    "locale": "en-US",
+    "numericType": "number",
+    "text": "-0",
+    "kind": "value",
+    "value": 0,
+    "negativeZero": true
+  },
+  {
+    "locale": "en-US",
+    "numericType": "number",
+    "text": "1e3",
+    "kind": "invalid"
+  },
+  {
+    "locale": "en-US",
+    "numericType": "number",
+    "text": "+1",
+    "kind": "invalid"
+  }
+]

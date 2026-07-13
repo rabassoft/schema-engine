@@ -18,5 +18,6 @@
 - [PLAN-002: Root-level immutable operations](./plans/002-root-immutable-operations.md) — Completed
 - [PLAN-003: Controlled form runtime](./plans/003-controlled-runtime.md) — Completed
 - [PLAN-004: Angular controlled-form adapter](./plans/004-angular-adapter.md) — Completed
+- [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

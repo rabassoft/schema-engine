@@ -8,6 +8,7 @@ import {
   input,
   inputBinding,
   outputBinding,
+  signal,
   type ComponentRef,
 } from '@angular/core';
 import type {
@@ -21,6 +22,11 @@ import {
   AngularRendererResolver,
   type AngularFieldRenderer,
 } from './renderer.js';
+import {
+  AngularTextProjector,
+  emptyTextSnapshot,
+  type AngularFieldTextSnapshot,
+} from './text.js';
 
 @Directive({ selector: '[schemaFieldOutlet]', standalone: true })
 export class SchemaFieldOutletDirective {
@@ -31,10 +37,38 @@ export class SchemaFieldOutletDirective {
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly environmentInjector = inject(EnvironmentInjector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly textProjector = inject(AngularTextProjector);
+  private readonly textsState =
+    signal<AngularFieldTextSnapshot>(emptyTextSnapshot());
   private componentRef: ComponentRef<AngularFieldRenderer> | undefined;
   private lastIdentity: readonly unknown[] | undefined;
+  private lastTextIdentity: readonly unknown[] | undefined;
 
   constructor() {
+    effect(() => {
+      const field = this.schemaFieldOutlet();
+      const snapshot = this.form.snapshot();
+      const context = readRuntimeContext(this.form);
+      if (snapshot === undefined || context === undefined) return;
+      const fieldSnapshot = findFieldSnapshot(snapshot.fields, field);
+      if (fieldSnapshot === undefined) return;
+      const identity = [
+        field,
+        context.formId,
+        snapshot.locale,
+        fieldSnapshot.issues,
+      ] as const;
+      if (sameIdentity(this.lastTextIdentity, identity)) return;
+      this.lastTextIdentity = identity;
+      const projection = this.textProjector.project(
+        field,
+        fieldSnapshot,
+        context.formId,
+        snapshot.locale,
+      );
+      this.textsState.set(projection.texts);
+      this.form.reportDiagnostics(projection.diagnostics);
+    });
     effect(() => {
       const field = this.schemaFieldOutlet();
       const snapshot = this.form.snapshot();
@@ -87,6 +121,7 @@ export class SchemaFieldOutletDirective {
                 () => readRuntimeContext(this.form)?.formId ?? '',
               ),
               inputBinding('locale', () => this.form.snapshot()?.locale ?? ''),
+              inputBinding('texts', () => this.textsState()),
               outputBinding<unknown>('setValue', (value) => {
                 this.form.requestSetValue(this.schemaFieldOutlet().path, value);
               }),
@@ -99,6 +134,10 @@ export class SchemaFieldOutletDirective {
               outputBinding<void>('fieldBlur', () => {
                 this.form.blur(this.schemaFieldOutlet().path);
               }),
+              outputBinding<readonly Diagnostic[]>(
+                'rendererDiagnostics',
+                (diagnostics) => this.form.reportDiagnostics(diagnostics),
+              ),
             ],
           },
         );

@@ -1,6 +1,7 @@
 import {
   DestroyRef,
   Directive,
+  LOCALE_ID,
   computed,
   effect,
   inject,
@@ -23,8 +24,10 @@ import {
   type ValidationVisibility,
 } from '@rabassoft/schema-engine';
 
-export type AngularControlledFormConfig<TData extends object> =
-  ControlledFormRuntimeOptions<TData>;
+export type AngularControlledFormConfig<TData extends object> = Omit<
+  ControlledFormRuntimeOptions<TData>,
+  'locale'
+> & { readonly locale?: string };
 
 type RuntimeContext = Readonly<{ formId: string }>;
 const runtimeContexts = new WeakMap<
@@ -62,6 +65,7 @@ export class SchemaFormDirective<TData extends object> {
   private unsubscribeSnapshot: (() => void) | undefined;
   private unsubscribeOperations: (() => void) | undefined;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly defaultLocale = inject(LOCALE_ID);
 
   constructor() {
     runtimeContexts.set(this, this.runtimeContextState.asReadonly());
@@ -117,6 +121,7 @@ export class SchemaFormDirective<TData extends object> {
   }
 
   private synchronize(config: AngularControlledFormConfig<TData>): void {
+    const locale = config.locale ?? this.defaultLocale;
     const previous = this.lastConfig;
     if (
       this.runtime === undefined ||
@@ -126,14 +131,14 @@ export class SchemaFormDirective<TData extends object> {
       previous.schema !== config.schema ||
       previous.validator !== config.validator
     ) {
-      this.replaceRuntime(config);
+      this.replaceRuntime(config, locale);
       return;
     }
 
     const update = this.runtime.updateExternalState({
       value: config.value,
       baselineValue: config.baselineValue,
-      locale: config.locale,
+      locale,
     });
     this.reportDiagnostics(update.diagnostics);
     if (!update.success) return;
@@ -142,11 +147,16 @@ export class SchemaFormDirective<TData extends object> {
       config.validationVisibility ?? 'touched',
     );
     this.reportDiagnostics(visibility.diagnostics);
-    if (visibility.success) this.lastConfig = config;
+    if (visibility.success) {
+      this.lastConfig = config;
+    }
   }
 
-  private replaceRuntime(config: AngularControlledFormConfig<TData>): void {
-    const creation = createControlledFormRuntime(config);
+  private replaceRuntime(
+    config: AngularControlledFormConfig<TData>,
+    locale: string,
+  ): void {
+    const creation = createControlledFormRuntime({ ...config, locale });
     this.reportDiagnostics(creation.diagnostics);
     if (!creation.success) return;
 

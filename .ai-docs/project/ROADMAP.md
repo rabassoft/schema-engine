@@ -12,4 +12,6 @@
 - [x] M4 — Adaptador Angular
   - Completado el 13 de julio de 2026.
   - Adaptador headless Angular 22, Signals, resolución de renderers y outlet con ViewContainerRef.
-- [ ] M5 — Renderer HTML
+- [x] M5 — Renderer HTML
+  - Completado el 13 de julio de 2026.
+  - Renderers nativos accesibles, Signal Forms locales, textos reemplazables y edición numérica localizada y controlada.

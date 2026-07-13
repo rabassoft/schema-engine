@@ -2,6 +2,97 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — M5 diff reviewed and committed
+
+### Completed
+
+- Reviewed every tracked and untracked M5 change against SPEC-001 v0.1.11, PLAN-005, ADR-007, ADR-008, and the deferred-decisions register.
+- Found and fixed a localized negative-number round-trip failure caused by invisible directional literals emitted by `Intl.NumberFormat` for RTL locales.
+- Added coverage proving that renderer editing text produced for `ar-EG` parses back to the same confirmed negative value.
+- Created the authorized M5 commit on `develop` using `Rabassoft <ricard@rabassoft.com>`.
+
+### Verification
+
+- Formatting, linting, type checking, all 140 tests, builds, package smoke tests, diff checks, documentation links, dependency boundaries, and repository-state checks passed after the review correction.
+- The final worktree is clean and the commit contains the complete reviewed M5 increment.
+
+### Pending
+
+- Select and formally scope the next increment. No push was performed.
+
+## 2026-07-13 — M5 native HTML renderers completed
+
+### Completed
+
+- Added Angular 22 native string, number/integer, and boolean renderers backed by private Signal Forms leaf buffers while retaining application-controlled state.
+- Added deterministic native registrations with custom override composition, `LOCALE_ID` fallback, neutral replaceable text resolution, accessible semantic markup, and isolated adapter diagnostics.
+- Added localized numeric parsing and formatting with incomplete edit preservation, strict integer handling, empty-value removal, locale fallback, and separate grouped display and ungrouped edit forms.
+- Completed PLAN-005 and milestone M5 without promoting Signal Forms validation, persistence, advanced schema capabilities, or other deferred work.
+
+### Verification
+
+- Frozen installation, formatting, linting, type checking, builds, package smoke tests, diff checks, documentation-link checks, dependency-boundary checks, and forms-import checks passed.
+- All 140 tests pass: 104 core tests and 36 Angular tests across 10 test files.
+
+### Pending
+
+- Review the completed M5 diff and commit it only when explicitly requested.
+
+## 2026-07-13 — PLAN-005 re-reviewed for Angular 22 Signal Forms
+
+### Completed
+
+- Verified from current official Angular 22 documentation that Signal Forms, `form()`, `FormField`, `FieldTree`, and custom-control contracts are stable.
+- Rejected using Signal Forms over the application business model because its writable model binding would bypass strict core operations and controlled confirmation.
+- Revised PLAN-005 so each native renderer uses one private Signal Form leaf as an ephemeral control buffer, reconciled from confirmed runtime snapshots and reset on blur.
+- Added `@angular/forms/signals` dependency boundaries, focus/reset behavior, local-state ownership, D-002/D-024 exclusions, integration tests, acceptance checks, and the single-entry-point peer-dependency trade-off.
+- Completed the seven-area formal re-review and left the revised plan Proposed pending explicit approval.
+
+### Verification
+
+- Checked the revised design against SPEC-001, ADR-007/008, PLAN-004, current M4 contracts, and official Angular 22 Signal Forms overview, models, custom controls, `form()`, `FormField`, field state, and JSON-driven forms guidance.
+- Formatting, diff, and local Markdown-link validation passed.
+
+### Pending
+
+- Explicitly approve or revise PLAN-005. After approval, promote its contracts to SPEC-001 v0.1.11 before M5 implementation.
+
+## 2026-07-13 — PLAN-005 proposed
+
+### Completed
+
+- Confirmed that M5 will close the SPEC-001 `LOCALE_ID` fallback and replaceable `TextResolver` requirements instead of deferring them.
+- Drafted PLAN-005 for accessible native string, number/integer, and boolean renderers in the private Angular package.
+- Defined the pre-release locale and renderer contract revisions, neutral text contracts, native provider composition, deterministic IDs, semantic markup, controlled numeric editing grammar, Intl fallbacks, diagnostics, fixtures, and acceptance boundary.
+- Kept Angular Forms, browser-owned validation, clear affordances, validator bridges, theming, enum/format, advanced localization, package publication, and other deferred work outside M5.
+
+### Verification
+
+- Checked the proposal against SPEC-001 v0.1.10, ADR-007, ADR-008, completed PLAN-004, current M4 source contracts, and the applicable deferred entries.
+- Confirmed the proposal does not authorize implementation before formal review and SPEC promotion.
+- Formatting, diff, and local Markdown-link validation passed.
+
+### Pending
+
+- Formally review PLAN-005 and approve or revise all six checklist areas before implementing M5.
+
+## 2026-07-13 — M4 committed and M5 planning boundary reviewed
+
+### Completed
+
+- Committed the completed M4 Angular adapter increment on `develop` as `f7199d6` using `Rabassoft <ricard@rabassoft.com>`.
+- Began PLAN-005 preparation by checking SPEC-001, ADR-006 through ADR-008, PLAN-004, the current Angular contracts, and the deferred-decisions register.
+- Identified that SPEC-001 still requires Angular `LOCALE_ID` fallback and replaceable text resolution, while completed PLAN-004 requires explicit locale input and provides no `TextResolver` projection.
+
+### Verification
+
+- Confirmed commit author, email, subject, branch, and a clean worktree immediately after the M4 commit.
+- Confirmed `develop` is five commits ahead of `origin/develop`; no push was performed.
+
+### Pending
+
+- Decide whether PLAN-005 absorbs `LOCALE_ID` fallback and `TextResolver` projection or SPEC-001 defers them before drafting a decision-complete M5 plan.
+
 ## 2026-07-13 — M4 Angular adapter completed
 
 ### Completed

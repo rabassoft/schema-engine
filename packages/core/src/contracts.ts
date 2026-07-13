@@ -140,6 +140,26 @@ export interface ValidationIssue {
   readonly parameters: Readonly<Record<string, unknown>>;
   readonly fallbackMessage?: string;
 }
+export type FieldTextMember =
+  'label' | 'description' | 'hint' | 'tooltip' | 'placeholder' | 'issue';
+export type TextResolutionContext =
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly field: FieldDefinition;
+      readonly member: Exclude<FieldTextMember, 'issue'>;
+      readonly issue?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly field: FieldDefinition;
+      readonly member: 'issue';
+      readonly issue: ValidationIssue;
+    };
+export interface TextResolver {
+  resolve(text: string, context: TextResolutionContext): string;
+}
 export interface ValidationResult {
   readonly valid: boolean;
   readonly issues: readonly ValidationIssue[];
