@@ -6,7 +6,7 @@
 
 - Date: 2026-07-13
 - Updated by: Ricard / Codex
-- Repository revision: `develop` contains the committed M2 implementation and documentation, one commit ahead of `origin/develop`; GitHub default branch is `main`
+- Repository revision: `develop` contains committed M2 and proposed PLAN-003 documentation, two commits ahead of `origin/develop`; GitHub default branch is `main`
 
 ## Current phase
 
@@ -14,7 +14,7 @@ M1 and M2 completed; architecture validation before M3.
 
 ## Current objective
 
-Review the completed M2 increment and prepare a decision-complete M3 controlled-runtime plan.
+Review and approve PLAN-003 for the M3 controlled-runtime increment.
 
 ## Latest completed work
 
@@ -39,15 +39,21 @@ Review the completed M2 increment and prepare a decision-complete M3 controlled-
 - Completed PLAN-002 and milestone M2.
 - Committed the completed M2 increment on `develop` as
   `Rabassoft <ricard@rabassoft.com>`.
+- Reviewed commit `3347858` with no functional or documentation findings.
+- Drafted PLAN-003 for controlled state, validation, immutable snapshots,
+  subscriptions, interaction, scopes, and disposal.
+- Committed the proposed PLAN-003 documentation on `develop` as
+  `Rabassoft <ricard@rabassoft.com>`.
 
 ## In progress
 
-No implementation task is active. PLAN-002 and M2 are complete.
+No implementation task is active. PLAN-003 is Proposed and awaiting formal
+review.
 
 ## Next action
 
-Review the completed M2 diff, then propose and approve PLAN-003 before
-implementing the controlled runtime.
+Formally review PLAN-003 and resolve its public option/result/diagnostic changes
+before approval. Do not implement M3 before approval.
 
 ## Blockers
 
@@ -55,7 +61,8 @@ None.
 
 ## Open questions
 
-- None within completed PLAN-002.
+- PLAN-003 promotes source-schema ownership and listener-exception reporting;
+  their exact public contracts require formal review.
 - Other pre-runtime decisions remain listed in section 29 of SPEC-001.
 
 ## Verification status

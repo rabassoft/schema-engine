@@ -2,6 +2,44 @@
 
 This document is append-only. New entries must be added at the top.
 
+## 2026-07-13 — Proposed PLAN-003 committed
+
+### Completed
+
+- Committed the proposed PLAN-003 and its persistent-state documentation on `develop`.
+- Used repository identity `Rabassoft <ricard@rabassoft.com>`.
+- Kept the commit local; no push was performed.
+
+### Verification
+
+- Formatting, diff, and local Markdown-link validation passed before commit.
+
+### Pending
+
+- Formally review and approve PLAN-003 before production code.
+- Implement M3 only after closing its public contracts and diagnostics.
+
+## 2026-07-13 — M2 reviewed and PLAN-003 proposed
+
+### Completed
+
+- Reviewed committed M2 commit `3347858` across contracts, implementation, diagnostics, fixtures, tests, and documentation.
+- Found no functional defect, regression, or documentation conflict in M2.
+- Drafted PLAN-003 for the complete framework-neutral controlled runtime milestone.
+- Proposed explicit source-schema access for synchronous validation and isolated listener-exception reporting.
+- Kept Angular, renderers, persistence, async validation, optimistic projection, nested objects, arrays, and deferred infrastructure out of scope.
+
+### Verification
+
+- `git show --check 3347858` passed and commit attribution is `Rabassoft <ricard@rabassoft.com>`.
+- Reconciled PLAN-003 with SPEC-001 v0.1.6, completed PLAN-001/002, ADR-005/006, and the deferred-decisions register.
+- Ran formatting, diff, and local Markdown-link validation for the plan documentation.
+
+### Pending
+
+- Formally review and approve PLAN-003.
+- Promote approved public-contract changes to SPEC-001 before implementing M3.
+
 ## 2026-07-13 — M2 changes committed
 
 ### Completed

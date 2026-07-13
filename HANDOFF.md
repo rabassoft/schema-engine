@@ -6,8 +6,7 @@
 
 ## 1. Current objective
 
-Review the completed M2 root-level immutable-operations increment and prepare
-the M3 controlled-runtime plan.
+Review and approve proposed PLAN-003 for the M3 controlled runtime.
 
 The project is intentionally being developed in small validated increments. Do not expand the scope merely because a future capability appears in the roadmap.
 
@@ -131,8 +130,15 @@ malformed-path, form-definition-shape, and diagnostic-order behavior. M2
 production code is exported from `@rabassoft/schema-engine` with 27 operation
 fixtures and focused unit coverage.
 
-## 8. Recommended next Codex prompt
+## 8. Proposed controlled-runtime plan
+
+[`PLAN-003: Controlled form runtime`](.ai-docs/plans/003-controlled-runtime.md)
+is Proposed and awaiting formal review. It closes the source-schema access and
+listener-isolation directions while keeping M3 framework-neutral and
+application-controlled.
+
+## 9. Recommended next Codex prompt
 
 Use this prompt in the next Codex session:
 
-> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.6, accepted ADR-005 and ADR-006, completed PLAN-001 and PLAN-002, the deferred-decisions register, and the ADR index. Review the completed M2 diff and verification evidence. Do not implement M3. Propose a decision-complete PLAN-003 for the controlled runtime in the smallest scope consistent with SPEC-001.
+> Read `AGENTS.md`, `HANDOFF.md`, `STATUS.md`, SPEC-001 v0.1.6, accepted ADR-005 and ADR-006, completed PLAN-001 and PLAN-002, proposed PLAN-003, the deferred-decisions register, and the ADR index. Formally review PLAN-003 for decision completeness, especially validator source-schema access, creation/subscription result contracts, listener exceptions, validation normalization, scopes, structural sharing, diagnostics, and fixtures. Do not implement M3 during the review.
