@@ -7,27 +7,26 @@
 
 - **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `d2fb65e`, checkpoint 5 Angular collection projection
-  (`develop` is sixteen commits ahead of
+- **Committed revision:** `ffa9900`, checkpoint 6 package/consumer migration
+  (`develop` is seventeen commits ahead of
   `origin/develop`; no push performed)
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2 and SPEC-003
   v0.1.2
-- **Last implementation plan:** PLAN-010 revision 0, Approved; checkpoints 1–6
-  completed, checkpoint 7 pending
-- **Last completed implementation plan:** PLAN-009 revision 1
-- **Active implementation task:** None; checkpoint 7 is the next authorized task
+- **Last implementation plan:** PLAN-010 revision 0, Completed after final
+  repeated review with zero findings
+- **Last completed implementation plan:** PLAN-010 revision 0
+- **Active implementation task:** None
 - **Last accepted ADR:** ADR-015 revision 4
-- **Promoted capabilities:** D-005/M9 implemented; D-006/M10 checkpoints 1–6
-  implemented under PLAN-010
-- **Phase:** M1–M9 and G0 completed; M10 checkpoint 6 of 7 completed
+- **Promoted capabilities:** D-005/M9 and D-006/M10 implemented
+- **Phase:** M1–M10 and G0 completed
 - **Package candidates:** private independent `0.1.0` artifacts; unpublished
-- **Working tree:** uncommitted completed checkpoint 6 package/documentation
-  migration, one mixed-operation correction and persistent-state updates
+- **Working tree:** uncommitted completed checkpoint 7 review and
+  persistent-state closure
 
 ## Current objective
 
-Complete M10 incrementally under approved PLAN-010 without activating a later
-checkpoint before its dependencies and verification are green.
+Preserve the completed M10 boundary and select later work only through its
+deferred-decision promotion, normative review and approved delivery gates.
 
 ## In progress
 
@@ -35,37 +34,35 @@ checkpoint before its dependencies and verification are green.
 
 ## Latest completed work
 
-- Completed PLAN-010 checkpoint 6 by migrating root/package documentation,
-  release notes, declaration inventory, package smoke and built/clean consumers
-  to the accepted SPEC-003 collection boundary.
-- Added tarball declaration evidence for the exact Public collection inventory,
-  Angular stable reads/requests and template-aware renderer/outlet contracts;
-  Internal collection hosts/helpers remain absent from the root export.
-- Extended packaged core/Angular consumers through compilation, stable reads,
-  item-leaf operations, fixed collection projection and movement.
-- Corrected `applyFormOperation()` so ordinary leaf operations accept a valid
-  mixed definition containing collections, with focused regression evidence.
-- Preserved private `0.1.0` manifests, exact artifact inventory, dependencies,
-  peers, lockfile, publication boundary and Experimental classification.
+- Completed PLAN-010 checkpoint 7 and M10 after the repeated implementation
+  review passed all 12 SPEC-003 scenario areas with zero findings.
+- Corrected stale active M10 state in SPEC/ADR headers, indexes, ROADMAP, plan
+  and delivery registers without changing accepted behavior or architecture.
+- Confirmed the exact Public Experimental M10 declaration inventory and the
+  Internal Angular collection/item host boundary.
+- Repeated the frozen install and complete test/package/consumer matrix after
+  correction; all checks pass.
+- Preserved private `0.1.0` manifests, dependencies, peers/exports, lockfile,
+  publication prohibition and Experimental classification.
 
 ## Exact next action
 
-Execute PLAN-010 checkpoint 7: run the complete scenario/verification matrix,
-inspect declarations and the entire M10 diff, document findings, correct them
-and repeat full review/checks until a zero-finding review completes M10.
+Review promotion readiness for M11 by evaluating D-014 and D-007 together and
+fixing a narrow resolved-schema/model boundary before drafting any ADR, SPEC or
+implementation plan.
 
 ## Blockers and conflicts
 
 - No open review finding, implementation blocker or documentation conflict.
 - SPEC-001 v0.1.15 remains the behavioral baseline and SPEC-002 v0.1.2 is
   authoritative only for the completed nested-object extension.
-- D-006/M10 remains registrally Promoted; checkpoints 1–6 are complete and only
-  the narrow PLAN-010 sequence is authorized. All other array/deferred
-  capabilities remain inactive.
+- D-006 remains registrally Promoted and its narrow M10 delivery is complete.
+  All other array/deferred capabilities remain inactive.
 - ADR-005 revision 2, ADR-015 revision 4, SPEC-003 v0.1.2 and PLAN-010 revision
   0 are accepted/approved in the required order.
-- M10 normative/review documents and checkpoints 1–5 are committed through
-  `d2fb65e`; completed checkpoint 6 is uncommitted and nothing was pushed.
+- M10 normative documents and checkpoints 1–6 are committed through `ffa9900`;
+  completed checkpoint 7 review/state closure is uncommitted and nothing was
+  pushed.
 
 ## Open questions
 
@@ -75,7 +72,7 @@ and repeat full review/checks until a zero-finding review completes M10.
 
 - `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, both builds and
   `git diff --check` pass.
-- All 58 Markdown files and 262 local link targets resolve.
+- All 59 Markdown files and 263 local link targets resolve.
 - All 248 core and 68 Angular tests pass (316 total).
 - `pnpm test:package`, `pnpm test:consumer`, exact-inventory
   `pnpm test:artifacts` and `pnpm test:consumer:clean` pass.
@@ -88,7 +85,9 @@ and repeat full review/checks until a zero-finding review completes M10.
 
 ## Task document map
 
-- Final implementation review:
+- Final M10 implementation review:
+  `.ai-docs/reviews/015-plan-010-implementation-review.md`
+- Final M9 implementation review:
   `.ai-docs/reviews/006-plan-009-implementation-review.md`
 - Accepted M10 promotion review:
   `.ai-docs/reviews/007-m10-arrays-promotion.md`
@@ -108,7 +107,7 @@ and repeat full review/checks until a zero-finding review completes M10.
   `.ai-docs/reviews/013-adr-015-revision-4-review.md`
 - PLAN-010 complete review:
   `.ai-docs/reviews/014-plan-010-review.md`
-- Approved M10 delivery contract:
+- Completed M10 delivery contract:
   `.ai-docs/plans/010-homogeneous-object-collections.md`
 - Approved and completed delivery contract:
   `.ai-docs/plans/009-nested-object-runtime.md`

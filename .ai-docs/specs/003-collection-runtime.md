@@ -13,8 +13,9 @@
   [`ADR-015 revision 4`](../adrs/015-modelo-colecciones-identidad-operaciones.md)
 - **Accepted dialect decision:**
   [`ADR-005 revision 2`](../adrs/005-politica-dialecto-json-schema.md)
-- **Implementation plan:** Approved PLAN-010 revision 0
-- **Implementation authorized:** Yes — PLAN-010 checkpoints 1–7; not started
+- **Implementation plan:** Completed PLAN-010 revision 0
+- **Implementation state:** All seven checkpoints completed after final
+  repeated implementation review with zero findings
 
 ## 1. Status and authority
 

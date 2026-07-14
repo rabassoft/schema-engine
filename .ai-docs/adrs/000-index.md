@@ -23,7 +23,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Superseded por ADR-010.**
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
 4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
-5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 2; conserva M1–M9 y añade el diseño M10 tras revisión completa ciclo 3 sin hallazgos, sin autorizar implementación.**
+5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 2; conserva M1–M9 y gobierna el subconjunto M10 implementado por PLAN-010.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
@@ -33,7 +33,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 12. [ADR 012: Limpieza explícita de campos nativos](./012-limpieza-explicita-campos.md) — **Accepted, revision 1; promueve D-010/M7.**
 13. [ADR 013: Preparación verificable de artefactos experimentales 0.1](./013-preparacion-artefactos-experimentales-0-1.md) — **Accepted revision 1; prepara candidatos locales M8 sin autorizar publicación.**
 14. [ADR 014: Normalized nested-object model and deep controlled paths](./014-modelo-objetos-anidados-paths-profundos.md) — **Accepted revision 2; implemented by completed PLAN-009 after final zero-finding review.**
-15. [ADR 015: Collection templates, stable item identity and controlled structural operations](./015-modelo-colecciones-identidad-operaciones.md) — **Accepted revision 4; widens only the existing object text context to array nodes after complete review cycle 1 passed with zero findings; no implementation is authorized.**
+15. [ADR 015: Collection templates, stable item identity and controlled structural operations](./015-modelo-colecciones-identidad-operaciones.md) — **Accepted revision 4; implemented by completed PLAN-010 after final repeated review with zero findings.**
 
 ## 4. ADRs específicos de Angular
 

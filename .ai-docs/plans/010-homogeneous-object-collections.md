@@ -1,12 +1,13 @@
 # PLAN-010: Homogeneous object collection runtime
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-14
 - **Approval date:** 2026-07-14
 - **Review revision:** 0
 - **Review state:** Complete review cycle 1 passed all nine areas with zero
   findings; formally approved by Ricard
-- **Implementation state:** Checkpoints 1–6 completed; checkpoint 7 pending
+- **Implementation state:** Checkpoints 1–7 completed; final repeated review
+  passed with zero findings
 - **Implementation authorized:** Yes — checkpoints 1–7 only
 - **Requires:** accepted
   [`SPEC-001` v0.1.15](../specs/001-controlled-form-runtime.md),
@@ -505,8 +506,9 @@ explicit formal approval decision.
 Ricard explicitly approved PLAN-010 revision 0 on 14 July 2026 after complete
 review cycle 1 passed all nine areas with zero findings. Approval authorizes
 only checkpoints 1–7 and their stated verification/stop conditions.
-Checkpoints 1–6 are complete; checkpoint 7 remains pending. No excluded
-capability, Stable promotion or publication is authorized.
+Checkpoints 1–7 are complete after the final repeated implementation review
+passed with zero findings. No excluded capability, Stable promotion or
+publication is authorized.
 
 ### 15.3 Implementation checkpoint 1
 
@@ -617,3 +619,22 @@ integrated consumer, exact artifacts, 58 Markdown files/262 local links and
 clean core/Angular 22 consumers pass. Manifests, versions, dependencies, peers,
 exports, lockfile, publication and Stable state remain unchanged. Checkpoint 7
 is the next authorized action.
+
+### 15.9 Implementation checkpoint 7
+
+Checkpoint 7 completed on 14 July 2026. The complete M10 implementation diff,
+all 12 SPEC-003 scenario rows, emitted declarations, root exports, private
+artifacts, built/clean consumers and deferred boundaries were reviewed against
+SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, ADR-005 revision 2,
+ADR-007/008/009, ADR-014 revision 2 and ADR-015 revision 4.
+
+Review cycle 1 found only stale active implementation-state metadata in the
+SPEC/ADR headers, documentation index, roadmap and delivery registers. Those
+conflicts were corrected without changing product behavior or accepted
+contracts. Cycle 2 repeated the entire review and passed with zero findings.
+
+The frozen install, formatting, lint, typecheck, builds, 248 core tests, 68
+Angular tests, package smoke, integrated consumer, exact private artifacts,
+clean core/Angular 22 consumers, Markdown links and diff checks all pass.
+Manifests, versions, dependencies, peers, exports, lockfile, publication and
+Stable state remain unchanged. PLAN-010 and M10 are complete.

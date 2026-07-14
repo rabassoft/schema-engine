@@ -6,6 +6,33 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-010 checkpoint 7 and M10 completed
+
+### Review and corrections
+
+- Reviewed the complete M10 implementation diff, all 12 SPEC-003 scenario
+  areas, declarations, packages, consumers and deferred boundaries against the
+  accepted SPECs, ADRs and PLAN-010.
+- Cycle 1 found no product or contract defect. It found stale active M10 state
+  in SPEC/ADR headers, indexes, ROADMAP, PLAN-010 and delivery registers.
+- Corrected only those current-state conflicts, added review 015 and repeated
+  the complete review; cycle 2 passed with zero findings.
+
+### Verification
+
+- `CI=true pnpm install --frozen-lockfile`, formatting, lint, typecheck, builds
+  and `git diff --check` pass.
+- All 248 core and 68 Angular tests pass (316 total).
+- Package smoke, built consumer, exact private artifacts and clean core plus
+  Angular 22.0.6 lower/upper consumers pass.
+- All 59 Markdown files and 263 local links resolve. No manifest, version,
+  dependency, peer/export, lockfile, publication or Stable state changed.
+
+### Next
+
+- Review M11 promotion readiness by evaluating D-014 and D-007 together before
+  drafting normative or implementation documents.
+
 ## 2026-07-14 — PLAN-010 checkpoint 6 completed
 
 ### Implementation

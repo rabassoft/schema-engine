@@ -98,9 +98,9 @@ Cada decisión debe registrar:
   publicación.
 - **Estado de entrega:** ADR-015 revisión 4, ADR-005 revisión 2 y SPEC-003
   v0.1.2 están Accepted. PLAN-010 revisión 0 pasó su revisión completa y fue
-  aprobado explícitamente. Checkpoints 1–6 están completados; checkpoint 7
-  sigue pendiente. Publicación y todo alcance no listado siguen sin
-  autorización.
+  aprobado explícitamente. Sus siete checkpoints y M10 están completados tras
+  una revisión integral repetida y matriz final sin hallazgos. Publicación y
+  todo alcance no listado siguen sin autorización.
 
 ## D-007: Composición y condicionales de JSON Schema
 
@@ -434,10 +434,9 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-006 — Arrays:** ejecutar PLAN-010 checkpoint 7: matriz completa,
-   inspección de declaraciones y diff M10 integral, corrección de todos los
-   hallazgos y repetición de revisión/checks hasta cero hallazgos antes de
-   completar M10.
+1. **M11 — D-014 + D-007:** revisar conjuntamente la condición de reanudación
+   y la frontera de promoción para un modelo intermedio resuelto antes de
+   diseñar `$ref` o applicators.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
@@ -445,13 +444,14 @@ Cada decisión debe registrar:
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
 de M8; D-040 conserva la publicación como Deferred, D-005 está implementado
 dentro del alcance de M9 aunque conserva su estado registral Promoted, D-006
-queda Promoted con implementación M10 autorizada por PLAN-010 y todas las demás
-entradas mantienen su estado hasta una promoción y aprobación explícitas.
+queda Promoted con M10 completado por PLAN-010 y todas las demás entradas
+mantienen su estado hasta una promoción y aprobación explícitas.
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | PLAN-010 checkpoint 7 repite revisión y matriz completas sin hallazgos; PLAN-010 y M10 quedan completados sin publicar.                  |
 | 14-07-2026 | PLAN-010 checkpoint 6 migra docs, declaraciones, paquetes, artefactos y consumidores; checkpoint 7 queda pendiente.                      |
 | 14-07-2026 | PLAN-010 checkpoint 5 completa la proyección Angular estable y accesible de colecciones/ítems; checkpoint 6 queda pendiente.             |
 | 14-07-2026 | PLAN-010 checkpoint 4 completa runtime, snapshots, requests, scopes, interacción y sharing de colecciones; checkpoint 5 queda pendiente. |

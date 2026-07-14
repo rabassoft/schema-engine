@@ -18,11 +18,12 @@
   [`ADR-005 revision 1`](./005-politica-dialecto-json-schema.md),
   [`ADR-009`](./009-politica-api-publica-estabilidad.md), and
   [`ADR-014 revision 2`](./014-modelo-objetos-anidados-paths-profundos.md)
-- **Satisfied follow-up:** ADR-005 revision 2 accepted
-- **Current follow-up:** decide formal acceptance or rejection of SPEC-003
-  Draft v0.1.2 after complete review cycle 3 passed with zero findings;
-  PLAN-010 remains unauthorized
-- **Implementation authorized:** No
+- **Satisfied follow-ups:** ADR-005 revision 2 and SPEC-003 v0.1.2 accepted;
+  PLAN-010 revision 0 approved and completed
+- **Implementation authority:** This ADR alone authorized no implementation;
+  all seven PLAN-010 checkpoints subsequently completed M10 after final
+  repeated review with zero findings
+- **Current follow-up:** None for M10; publication remains Deferred in D-040
 
 ## 1. Context
 

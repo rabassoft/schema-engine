@@ -59,7 +59,7 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7-M9 están completados bajo sus ADR, SPEC y planes aceptados. M10-M12
+> M7-M10 están completados bajo sus ADR, SPEC y planes aceptados. M11-M12
 > continúan como propuestas de planificación. La publicación real permanece
 > Deferred en D-040 y requiere una solicitud y aprobación explícitas.
 
@@ -97,15 +97,24 @@ separado antes de repetir la revisión.
   evidencia, y la revisión integral repetida más toda la matriz finalizaron sin
   hallazgos.
 
+### M10 — Colecciones homogéneas de objetos — completado
+
+- D-006 fue promovido tras su revisión; ADR-015 revisión 4, ADR-005 revisión 2
+  y SPEC-003 v0.1.2 fijaron la frontera normativa aceptada.
+- PLAN-010 revisión 0 fue aprobado y sus checkpoints 1–6 implementaron
+  contratos/templates, compiler, operaciones, runtime, proyección Angular y
+  migración de paquetes/consumidores.
+- Checkpoint 7 revisó los 12 escenarios SPEC-003, declaraciones y diff M10
+  completo. Tras corregir solo estados documentales obsoletos, la revisión
+  integral repetida y toda la matriz pasaron sin hallazgos.
+- M10 no activa arrays primitivos/anidados, tuples, composición, layout,
+  custom collection renderers, persistencia, publicación ni APIs Stable.
+
 ### Orden de dependencias a más largo plazo
 
-1. **M10 — Arrays (D-006):** ADR-015 revisión 4, ADR-005 revisión 2 y SPEC-003
-   v0.1.2 están aceptadas. PLAN-010 revisión 0 superó su revisión completa sin
-   hallazgos y está aprobado; implementación autorizada, checkpoint 1 todavía
-   no iniciado.
-2. **M11 — Resolución y composición de schemas (D-014 + D-007):** establecer el
+1. **M11 — Resolución y composición de schemas (D-014 + D-007):** establecer el
    modelo intermedio resuelto antes de `$ref` y applicators.
-3. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de
+2. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de
    contenedores y un contrato neutral de layout.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
