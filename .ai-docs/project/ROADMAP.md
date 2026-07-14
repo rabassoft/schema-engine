@@ -60,10 +60,11 @@ separado antes de repetir la revisión.
 ## Secuencia post-G0
 
 > M7-M10 están completados bajo sus ADR, SPEC y planes aceptados. M11 tiene
-> aceptada la arquitectura estrecha de D-041 y dispone de SPEC-004 v0.1.0 Draft
-> pendiente de revisión completa, sin plan ni implementación activos. M12
-> continúa como propuesta de planificación. La publicación real permanece
-> Deferred en D-040 y requiere una solicitud y aprobación explícitas.
+> aceptadas la arquitectura estrecha de D-041 y SPEC-004 v0.1.1 tras superar
+> revisión completa ciclo 5 sin hallazgos; PLAN-011 es el siguiente gate y aún
+> no existe plan aprobado ni implementación activa. M12 continúa como propuesta
+> de planificación. La publicación real permanece Deferred en D-040 y requiere
+> una solicitud y aprobación explícitas.
 
 ### M9 — Objetos anidados — completado
 
@@ -103,22 +104,22 @@ separado antes de repetir la revisión.
 
 - D-006 fue promovido tras su revisión; ADR-015 revisión 4, ADR-005 revisión 2
   y SPEC-003 v0.1.2 fijaron la frontera normativa aceptada.
-- PLAN-010 revisión 0 fue aprobado y sus checkpoints 1–6 implementaron
-  contratos/templates, compiler, operaciones, runtime, proyección Angular y
-  migración de paquetes/consumidores.
-- Checkpoint 7 revisó los 12 escenarios SPEC-003, declaraciones y diff M10
-  completo. Tras corregir solo estados documentales obsoletos, la revisión
-  integral repetida y toda la matriz pasaron sin hallazgos.
+- PLAN-010 revisión 0 completó sus siete checkpoints. Los checkpoints 1–6
+  entregaron contratos/templates, compiler, operaciones, runtime, proyección
+  Angular y migración de paquetes/consumidores; checkpoint 7 revisó los 12
+  escenarios SPEC-003, declaraciones y diff M10 completo. Tras corregir solo
+  estados documentales obsoletos, la revisión integral repetida y toda la
+  matriz pasaron sin hallazgos.
 - M10 no activa arrays primitivos/anidados, tuples, composición, layout,
   custom collection renderers, persistencia, publicación ni APIs Stable.
 
 ### Orden de dependencias a más largo plazo
 
-1. **M11 — Resolución estática local de schemas (D-041):** especificar el
-   comportamiento observable de `$defs` y `$ref` local conforme a ADR-016 y
-   ADR-005 revisión 3. SPEC-004 v0.1.0 está Draft y debe superar revisión
-   completa y aceptación antes de preparar un plan. D-007 completo, applicators
-   y composición permanecen diferidos.
+1. **M11 — Resolución estática local de schemas (D-041):** SPEC-004 v0.1.1
+   Accepted fija el comportamiento observable de `$defs` y `$ref` local
+   conforme a ADR-016 y ADR-005 revisión 3. El siguiente gate es preparar y
+   revisar PLAN-011; no hay implementación autorizada. D-007 completo,
+   applicators y composición permanecen diferidos.
 2. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de
    contenedores y un contrato neutral de layout.
 

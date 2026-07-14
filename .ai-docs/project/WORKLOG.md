@@ -6,6 +6,72 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — SPEC-004 accepted and current documentation reconciled
+
+### Completed
+
+- Formally accepted SPEC-004 v0.1.1 after review 019 cycle 5 passed all ten
+  areas with zero findings; changed acceptance/gate metadata without altering
+  its normative contract.
+- Corrected the stale `0.1.0` release claim so it records completed M1–M10, G0
+  and all seven PLAN-010 checkpoints while keeping unimplemented SPEC-004
+  behavior outside the candidate.
+- Tightened ROADMAP's M10 completion and M11 next gate, and replaced ADR-016's
+  completed follow-up header with the current plan/implementation boundary.
+- Reconciled current indexes, onboarding documents and D-041 with accepted
+  SPEC-004 and the next PLAN-011 preparation/review gate.
+- Extended `docs:check` to reject the identified stale M10 release/roadmap and
+  ADR-016 authorization phrases.
+
+### Verification
+
+- Documentation consistency, formatting, lint, local-link and diff checks
+  passed.
+- SPEC metadata, indexes, onboarding summaries, release scope, roadmap and
+  ADR-016 current headers agree on the accepted gate and inactive
+  implementation.
+- No production code, normative SPEC content, dependency, package,
+  publication, Stable classification, commit or push changed.
+
+### Next
+
+- Draft PLAN-011 for SPEC-004 v0.1.1, review it completely and repeat review
+  after corrections until a full cycle passes with zero findings; do not
+  implement before explicit plan approval.
+
+## 2026-07-14 — SPEC-004 complete review passed
+
+### Completed
+
+- Reviewed SPEC-004 completely against ADR-016, ADR-005 revision 3, all
+  accepted SPECs, ADR-009, D-007/D-014/D-041 and the primary standards.
+- Corrected six cycle-1 contract/evidence findings in Draft v0.1.1: array
+  element bounds, root `$ref` order, `$defs` continuation, cycle locator,
+  supported-position coverage and direct standards references.
+- Cycle 2 found and corrected a stale Draft version in canonical state and
+  extended `docs:check` to compare accepted/proposed SPEC metadata with source
+  files and onboarding indexes.
+- Cycle 3 found and corrected the omitted SPEC-004 entry in the dedicated SPEC
+  index and made `docs:check` validate that index without parsing it as a SPEC.
+- Cycle 4 found and corrected cross-entry state/version matching in the SPEC
+  index check.
+- Repeated complete cycle 5 passed all ten review areas with zero findings or
+  documentation conflicts.
+- Kept SPEC-004 Draft and left acceptance, planning and implementation inactive.
+
+### Verification
+
+- Documentation metadata, formatting, lint, all local links and diff checks
+  passed.
+- Review 019 records all nine corrections and the zero-finding cycle 5.
+- No production code, Public signature, dependency, package, publication or
+  Stable state changed.
+
+### Next
+
+- Decide formal acceptance of SPEC-004 v0.1.1; do not prepare an implementation
+  plan unless Ricard accepts it explicitly.
+
 ## 2026-07-14 — SPEC-004 v0.1.0 drafted
 
 ### Completed

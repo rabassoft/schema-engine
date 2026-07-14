@@ -13,10 +13,11 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 
 The repository contains the completed M1-M10 controlled-form runtime and private
 local release candidates. Its G0 review passed; SPEC-001 v0.1.15, SPEC-002
-v0.1.2 and SPEC-003 v0.1.2 are Accepted; and PLAN-010 completed the M10
-homogeneous-object collection extension. M11 has accepted reference-resolution
-architecture, while SPEC-004 v0.1.0 is Draft and awaits complete review before
-any implementation plan. The live checkpoint is recorded in
+v0.1.2, SPEC-003 v0.1.2 and SPEC-004 v0.1.1 are Accepted; and PLAN-010
+completed the M10 homogeneous-object collection extension. M11 has accepted
+reference-resolution architecture and behavior after complete review cycle 5
+passed with zero findings. PLAN-011 preparation/review is the next gate; no M11
+implementation is authorized. The live checkpoint is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation

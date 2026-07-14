@@ -477,15 +477,17 @@ Cada decisión debe registrar:
   hallazgos; el ciclo 2 pasó las diez áreas sin hallazgos.
 - **Aceptación normativa:** Ricard aceptó ADR-005 revision 3 formalmente el 14
   de julio de 2026.
-- **Siguiente gate:** revisar completamente y aceptar
-  [`SPEC-004 v0.1.0 Draft`](../specs/004-local-reference-resolution.md) antes de
-  cualquier plan o implementación.
+- **Aceptación de SPEC:** Ricard aceptó
+  [`SPEC-004 v0.1.1`](../specs/004-local-reference-resolution.md) el 15 de julio
+  de 2026 después de que [`review 019`](../reviews/019-spec-004-review.md) ciclo
+  5 pasara sin hallazgos.
+- **Siguiente gate:** preparar y revisar PLAN-011; no implementar antes de su
+  aprobación explícita.
 
 ## 4. Próximo trabajo de decisión
 
-1. **M11 — SPEC-004:** revisar completamente el contrato observable v0.1.0
-   Draft de resolución estática local conforme a ADR-016 y ADR-005 revision 3;
-   aceptar la SPEC antes de preparar cualquier plan.
+1. **M11 — PLAN-011:** preparar y revisar el plan de implementación del contrato
+   observable SPEC-004 v0.1.1 Accepted; no implementar antes de aprobarlo.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
@@ -500,6 +502,8 @@ mantienen su estado hasta una promoción y aprobación explícitas.
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 15-07-2026 | SPEC-004 v0.1.1 queda Accepted tras revisión completa ciclo 5 sin hallazgos; se autoriza preparar/revisar PLAN-011, no implementar.      |
+| 14-07-2026 | SPEC-004 v0.1.1 corrige nueve hallazgos y la revisión completa ciclo 5 pasa sin hallazgos; aceptación formal pendiente.                  |
 | 14-07-2026 | SPEC-004 v0.1.0 queda Draft con el contrato observable D-041; requiere revisión completa y aceptación antes de cualquier plan.           |
 | 14-07-2026 | ADR-005 revision 3 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar SPEC-004, no plan ni implementación.        |
 | 14-07-2026 | ADR-016 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar ADR-005 revisión 3, no SPEC ni implementación.         |

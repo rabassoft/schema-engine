@@ -1,8 +1,9 @@
 # SPEC-004: Same-document Static JSON Schema Reference Resolution
 
-- **State:** Draft
-- **Version:** 0.1.0
+- **State:** Accepted
+- **Version:** 0.1.1
 - **Date:** 14 July 2026
+- **Acceptance date:** 15 July 2026
 - **Milestone:** M11 — Same-document static reference resolution
 - **Promoted capability:** [`D-041`](../roadmap/deferred-decisions.md)
 - **Accepted baselines:**
@@ -13,22 +14,22 @@
   [`ADR-016`](../adrs/016-resolucion-referencias-locales.md)
 - **Accepted dialect decision:**
   [`ADR-005 revision 3`](../adrs/005-politica-dialecto-json-schema.md)
-- **Implementation plan:** None; preparation is prohibited before SPEC
-  acceptance
+- **Implementation plan:** None; preparation and review of a separate plan are
+  authorized, but implementation requires its explicit approval
 - **Implementation state:** Inactive
 
 ## 1. Status and authority
 
-This Draft specifies the observable D-041 extension required by accepted
-ADR-016 and ADR-005 revision 3. It extends the accepted specifications only
+This Accepted specification defines the observable D-041 extension required by
+accepted ADR-016 and ADR-005 revision 3. It extends the accepted specifications
+only
 where it explicitly replaces their `$defs`/`$ref` exclusions. Every unchanged
 compiler, normalized-definition, runtime, operation, Angular, validation,
 package, stability and publication rule remains authoritative.
 
-Drafting or reviewing this document does not activate reference behavior.
-Acceptance may authorize preparation and review of a separate implementation
-plan; it will not approve that plan or authorize code, publication or Stable
-API promotion.
+Acceptance authorizes preparation and review of a separate implementation plan;
+it does not approve that plan or activate reference behavior, code,
+publication or Stable API promotion.
 
 ## 2. Goals
 
@@ -172,6 +173,11 @@ The contents of a valid entry are lazy. Keywords and descendants are inspected
 only when a valid reference reaches that schema object. An unused definition
 therefore produces no content diagnostic.
 
+All selected entries are inspected in order. An invalid entry blocks a
+successful compile result and remains unavailable to references, but does not
+stop independent later entries from being validated/indexed or valid entries
+from being resolved for independently collectible diagnostics.
+
 ## 6. Reference objects
 
 An own `$ref` descriptor at a supported non-root schema position classifies
@@ -197,7 +203,9 @@ target resolution and normalization for that branch; ignored annotations and
 unknown opaque siblings do not.
 
 Root `$ref` is always invalid and never replaces the accepted inline root. Its
-independent root siblings continue through the existing root checks.
+descriptor is inspected after dialect, collection-policy exterior and `$defs`
+indexing but before the accepted ordinary root members. Its independent root
+siblings then continue through the existing root checks.
 
 ## 7. Reference syntax and pointer decoding
 
@@ -240,6 +248,15 @@ If traversal crosses an array, the raw decoded pointer token must match exactly
 `0|[1-9][0-9]*`. `-`, signs, leading zeroes, whitespace and other spellings are
 `non-canonical-array-index`. The token is compared textually before any safe
 conversion of an existing index to `number`.
+
+A syntactically canonical token resolves an array only when its mathematical
+value selects an existing array element: it is strictly less than `length` and
+has an own enumerable data descriptor at that exact decimal key. A canonical
+out-of-range or too-large token is `missing-target`, even if the JavaScript
+array has an extra non-element property with that name. A sparse element is
+also `missing-target`; a non-enumerable or accessor element uses its exact
+unresolved-target reason. Only a successfully resolved array element converts
+its token to the safe numeric segment used by `DocumentPath`.
 
 ### 7.2 Invalid-reference diagnostic
 
@@ -372,9 +389,10 @@ reference chain emits one `CYCLIC_SCHEMA_REFERENCE`:
 }
 ```
 
-`firstDocumentPath` is the first active occurrence of the repeated target.
-`referenceChain` includes the `$ref` that closes the cycle. The diagnostic
-stops only its dependent branch.
+`firstDocumentPath` is the canonical target `documentPath` recorded at the
+first active occurrence of the repeated target, never a `$ref` keyword path.
+`referenceChain` includes the `$ref` that closes the cycle. The diagnostic stops
+only its dependent branch.
 
 Repeated acyclic references to one target are valid. Internal resolution
 metadata may be shared, but normalized definitions, UI precedence, keys and
@@ -466,8 +484,9 @@ A future implementation plan must map fixtures and focused tests for:
    exteriors;
 3. missing/accessor/non-schema entries, including an invalid entry that is
    unused and one referenced from multiple use sites;
-4. primitive, nested-object and collection targets normalized at shallow and
-   deep use sites;
+4. references in every supported non-root position: primitive field, nested
+   object, array property, array `items` root and item descendant, at shallow
+   and deep use sites;
 5. one target reused with different structural UI metadata, required state,
    managed keys and paths;
 6. collection policies keyed by referenced array use sites and their exact
@@ -517,11 +536,20 @@ SPEC-004 may be accepted only when:
 9. a complete review is repeated after every correction until one cycle passes
    with zero findings and no documentation conflict.
 
-Acceptance will authorize preparation and review of a separate implementation
-plan only. Explicit plan approval will still be required before code changes.
+Ricard formally accepted SPEC-004 v0.1.1 on 15 July 2026 after review 019 cycle
+5 passed all ten areas with zero findings. Acceptance authorizes preparation
+and review of a separate implementation plan only. Explicit plan approval is
+still required before code changes.
 
-## 17. History
+## 17. Standards references
 
-| Version | Date       | Change                                                |
-| ------- | ---------- | ----------------------------------------------------- |
-| 0.1.0   | 14-07-2026 | Initial Draft after acceptance of ADR-005 revision 3. |
+- [JSON Schema Core Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core)
+- [RFC 3986: URI Generic Syntax](https://www.rfc-editor.org/rfc/rfc3986)
+- [RFC 6901: JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901)
+
+## 18. History
+
+| Version | Date       | Change                                                                       |
+| ------- | ---------- | ---------------------------------------------------------------------------- |
+| 0.1.1   | 15-07-2026 | Accepted after nine findings were closed and complete review cycle 5 passed. |
+| 0.1.0   | 14-07-2026 | Initial Draft after acceptance of ADR-005 revision 3.                        |

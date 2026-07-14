@@ -18,9 +18,9 @@
   — Accepted after F-001 through F-007 were closed and complete review
   cycle 3 passed with zero findings. Completed PLAN-010 implements it after a
   final repeated review with zero findings.
-- [SPEC-004 v0.1.0: Same-document Static JSON Schema Reference Resolution](./specs/004-local-reference-resolution.md)
-  — Draft; closes the proposed observable D-041 contract and awaits complete
-  review before acceptance or any implementation plan.
+- [SPEC-004 v0.1.1: Same-document Static JSON Schema Reference Resolution](./specs/004-local-reference-resolution.md)
+  — Accepted after nine findings were corrected across four cycles and
+  repeated complete review cycle 5 passed with zero findings.
 
 ## Acceptance reviews
 
@@ -64,14 +64,17 @@
 - [M11 ADR-005 revision 3 complete review — Cycles 1–2](./reviews/018-adr-005-revision-3-review.md)
   — Six findings corrected; cycle 2 passed all ten areas with zero findings.
   Ricard then accepted revision 3 formally.
+- [M11 SPEC-004 complete review — Cycles 1–5](./reviews/019-spec-004-review.md)
+  — Nine findings corrected; cycle 5 passed all ten areas with zero findings.
+  Ricard then formally accepted SPEC-004 v0.1.1.
 
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
   — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
-  normative contract; SPEC-004 v0.1.0 is Draft pending review and no
-  implementation is authorized.
+  normative contract; SPEC-004 v0.1.1 is Accepted, with no implementation
+  authorized before a separate plan is approved.
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
   and Ricard accepted the revision.
@@ -123,8 +126,9 @@ increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
 contracts. PLAN-009 revision 1 passed its repeated complete review and is
 approved and completed after its final zero-finding review. M10 has accepted
 normative contracts and completed PLAN-010 revision 0 after its final repeated
-zero-finding review. M11 reference-resolution architecture is accepted and
-SPEC-004 v0.1.0 is Draft pending complete review; no M11 implementation plan is
-active. M12 remains a planning proposal only.
+zero-finding review. M11 reference-resolution architecture and SPEC-004 v0.1.1
+are accepted after complete review passed with zero findings; PLAN-011
+preparation/review is next and no M11 implementation plan is active. M12 remains
+a planning proposal only.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

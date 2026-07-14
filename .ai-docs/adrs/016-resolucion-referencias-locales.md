@@ -10,11 +10,12 @@
   [`ADR-005 revision 2`](./005-politica-dialecto-json-schema.md),
   [`ADR-009`](./009-politica-api-publica-estabilidad.md) and
   [`ADR-014 revision 2`](./014-modelo-objetos-anidados-paths-profundos.md)
-- **Authorized follow-up:** Draft and review ADR-005 revision 3
+- **Completed follow-up:** ADR-005 revision 3 and SPEC-004 v0.1.1 are Accepted
 - **Complete review:**
   [`review 017`](../reviews/017-adr-016-review.md) cycle 2 passed all eight areas
   with zero findings; Ricard then accepted ADR-016 formally
-- **SPEC, plan and implementation authorized:** No
+- **Plan preparation/review authorized:** Yes; no plan is approved and no
+  implementation is authorized
 
 ## 1. Context
 

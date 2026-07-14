@@ -5,26 +5,26 @@
 
 ## Checkpoint
 
-- **Updated:** 2026-07-14 by Ricard / Codex
+- **Updated:** 2026-07-15 by Ricard / Codex
 - **Branch:** `develop`
-- **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2 and SPEC-003
-  v0.1.2
-- **Last proposed specification:** SPEC-004 v0.1.0, Draft
+- **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
+  v0.1.2 and SPEC-004 v0.1.1
+- **Last proposed specification:** None
 - **Last implementation plan:** PLAN-010 revision 0, Completed after final
   repeated review with zero findings
 - **Last completed implementation plan:** PLAN-010 revision 0
 - **Active implementation task:** None
 - **Last accepted ADR:** ADR-005 revision 3
 - **Last proposed ADR:** None
-- **Promoted capabilities:** D-005/M9 and D-006/M10 implemented; D-041 promoted
-  for normative M11 design only
-- **Phase:** M1–M10 and G0 completed
+- **Promoted capabilities:** D-005/M9 and D-006/M10 implemented; D-041/M11 has
+  accepted architecture and behavior but no approved implementation plan
+- **Phase:** M1–M10 and G0 completed; M11 normative design accepted
 - **Package candidates:** private independent `0.1.0` artifacts; unpublished
 
 ## Current objective
 
-Complete the formal review of SPEC-004 v0.1.0 without activating an
-implementation plan or code before its separate acceptance gate.
+Prepare and completely review PLAN-011 for the accepted SPEC-004 v0.1.1
+delivery boundary without implementing it before explicit plan approval.
 
 ## In progress
 
@@ -32,22 +32,22 @@ implementation plan or code before its separate acceptance gate.
 
 ## Latest completed work
 
-- Drafted SPEC-004 v0.1.0 with the complete observable D-041 compiler,
-  diagnostic, provenance, ordering and conformance contract.
-- Corrected the stale ADR-index gate so ADR-016 now points through completed
-  ADR-005 revision 3 to SPEC-004 drafting/review only.
-- Preserved every Public signature and kept D-007, D-014, implementation,
-  package, publication and Stable boundaries inactive.
-- Removed volatile scope, milestone and version claims from the stable AI
-  operating guides and made active-scope recovery explicit.
+- Formally accepted SPEC-004 v0.1.1 after review 019 cycle 5 passed all ten
+  areas with zero findings; no implementation plan was approved.
+- Reconciled current release, roadmap, ADR/index and onboarding metadata with
+  completed M10 and accepted SPEC-004, and added automated stale-claim checks.
+- Completed SPEC-004 review 019 cycles 1–5: nine findings were corrected and
+  the repeated complete cycle passed with zero findings.
+- Updated SPEC-004 to v0.1.1 with exact array-element, root-reference,
+  registry-continuation, cycle-locator and conformance contracts.
 - Formally accepted ADR-005 revision 3 after review 018 cycle 2 passed all ten
   areas with zero findings.
 
 ## Exact next action
 
-Perform the complete review of SPEC-004 v0.1.0 against ADR-016, ADR-005 revision
-3, all accepted SPECs and D-041; record findings and do not accept the SPEC or
-prepare a plan until a repeated complete review passes with zero findings.
+Draft PLAN-011 for the accepted SPEC-004 v0.1.1 boundary, then review it
+completely and repeat after corrections until a full cycle passes with zero
+findings; do not implement before explicit plan approval.
 
 ## Blockers and conflicts
 
@@ -60,29 +60,31 @@ prepare a plan until a repeated complete review passes with zero findings.
   remains Deferred outside D-041.
 - Review 016 is accepted, D-041 is Promoted for normative design only and
   ADR-016 is Accepted after a zero-finding repeated review.
-- ADR-005 revision 3 is Accepted for normative M11 design, but `$defs`/`$ref`
-  remain behaviorally inactive while SPEC-004 v0.1.0 is Draft and until an
-  implementation plan is separately approved.
+- SPEC-004 v0.1.1 is Accepted, but `$defs`/`$ref` remain behaviorally inactive
+  until PLAN-011 is separately prepared, reviewed and approved, then
+  implemented and verified.
 - ADR-016, ADR-005 revision 3, ADR-015 revision 4, SPEC-003 v0.1.2 and PLAN-010
   revision 0 are accepted/approved in the required order.
 
 ## Open questions
 
-- None outside the required SPEC-004 complete review and acceptance decision.
+- None before PLAN-011 drafting and review expose delivery questions.
 
 ## Latest verification
 
 - Documentation consistency, formatting, lint and diff checks pass.
 - All local Markdown targets resolve through `pnpm docs:check`.
-- SPEC-004 drafting consistency checks against its accepted authorities pass;
-  formal complete review remains the exact next action.
-- No production code, public contract, dependency, package, publication or
-  Stable classification changed.
+- SPEC-004 review 019 cycle 5 passes all ten areas with zero findings.
+- Stale M10/release and completed ADR-016 gate phrases are rejected by
+  `pnpm docs:check`.
+- No production code, normative SPEC content, dependency, package, publication
+  or Stable classification changed.
 
 ## Task document map
 
-- Draft observable M11 contract:
+- Accepted observable M11 contract:
   `.ai-docs/specs/004-local-reference-resolution.md`
+- Complete SPEC-004 review: `.ai-docs/reviews/019-spec-004-review.md`
 - Accepted M11 architecture: `.ai-docs/adrs/016-resolucion-referencias-locales.md`
 - Accepted dialect/reference contract:
   `.ai-docs/adrs/005-politica-dialecto-json-schema.md`, section 12

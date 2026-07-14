@@ -23,7 +23,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Superseded por ADR-010.**
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
 4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
-5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 3; incorpora solo D-041 tras revisión completa ciclo 2 sin hallazgos; SPEC-004 v0.1.0 está Draft pendiente de revisión y no hay implementación autorizada.**
+5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 3; incorpora solo D-041; SPEC-004 v0.1.1 está Accepted tras revisión completa ciclo 5 sin hallazgos, sin implementación autorizada.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
@@ -34,7 +34,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 13. [ADR 013: Preparación verificable de artefactos experimentales 0.1](./013-preparacion-artefactos-experimentales-0-1.md) — **Accepted revision 1; prepara candidatos locales M8 sin autorizar publicación.**
 14. [ADR 014: Normalized nested-object model and deep controlled paths](./014-modelo-objetos-anidados-paths-profundos.md) — **Accepted revision 2; implemented by completed PLAN-009 after final zero-finding review.**
 15. [ADR 015: Collection templates, stable item identity and controlled structural operations](./015-modelo-colecciones-identidad-operaciones.md) — **Accepted revision 4; implemented by completed PLAN-010 after final repeated review with zero findings.**
-16. [ADR 016: Same-document static JSON Schema reference resolution](./016-resolucion-referencias-locales.md) — **Accepted after complete review cycle 2 passed all eight areas with zero findings; ADR-005 revision 3 completed its follow-up gate and now authorizes drafting and reviewing SPEC-004 only.**
+16. [ADR 016: Same-document static JSON Schema reference resolution](./016-resolucion-referencias-locales.md) — **Accepted; ADR-005 revision 3 and SPEC-004 v0.1.1 completed its normative follow-up gates after zero-finding reviews.**
 
 ## 4. ADRs específicos de Angular
 
