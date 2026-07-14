@@ -12,12 +12,13 @@ import {
 import type {
   Diagnostic,
   FieldDefinition,
+  FieldTemplate,
   FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
 import type { AngularFieldTextSnapshot } from './text.js';
 
 export interface AngularFieldRenderer {
-  readonly field: InputSignal<FieldDefinition>;
+  readonly field: InputSignal<FieldDefinition | FieldTemplate>;
   readonly snapshot: InputSignal<FieldRuntimeSnapshot>;
   readonly formId: InputSignal<string>;
   readonly locale: InputSignal<string>;
@@ -30,7 +31,9 @@ export interface AngularFieldRenderer {
 }
 
 export type AngularRendererType = Type<AngularFieldRenderer>;
-export type RendererTester = (field: FieldDefinition) => number | null;
+export type RendererTester = (
+  field: FieldDefinition | FieldTemplate,
+) => number | null;
 
 export interface AngularRendererRegistration {
   readonly id: string;
@@ -86,7 +89,7 @@ export class AngularRendererResolver {
     Object.freeze(this);
   }
 
-  resolve(field: FieldDefinition): RendererResolutionResult {
+  resolve(field: FieldDefinition | FieldTemplate): RendererResolutionResult {
     if (!this.ready) {
       return Object.freeze({
         success: false,
@@ -146,13 +149,19 @@ export class AngularRendererResolver {
     });
 
     if (selected === undefined) {
+      const path = 'path' in field ? field.path : undefined;
       diagnostics.push(
         adapterDiagnostic(
           'NO_RENDERER_MATCH',
           'error',
-          { field: field.name, path: Object.freeze([...field.path]) },
+          {
+            field: field.name,
+            ...('path' in field
+              ? { path: Object.freeze([...field.path]) }
+              : { relativePath: Object.freeze([...field.relativePath]) }),
+          },
           `No renderer matches field "${field.name}".`,
-          field.path,
+          path,
         ),
       );
       return Object.freeze({

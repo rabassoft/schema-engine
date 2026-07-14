@@ -5,6 +5,9 @@ import {
   type Provider,
 } from '@angular/core';
 import type {
+  ArrayNodeDefinition,
+  ArrayRuntimeSnapshot,
+  CollectionTextMember,
   Diagnostic,
   FieldDefinition,
   FieldTemplate,
@@ -13,6 +16,7 @@ import type {
   ObjectFieldDefinition,
   ObjectRuntimeSnapshot,
   ObjectTextMember,
+  ItemRuntimeSnapshot,
   StringChoiceDefinition,
   TextResolutionContext,
   TextResolver,
@@ -26,6 +30,10 @@ type FieldTextResolutionContext = Extract<
 type ObjectTextResolutionContext = Extract<
   TextResolutionContext,
   { readonly node: unknown }
+>;
+type CollectionTextResolutionContext = Extract<
+  TextResolutionContext,
+  { readonly collection: ArrayNodeDefinition }
 >;
 
 export interface AngularFieldTextSnapshot {
@@ -45,6 +53,20 @@ export interface AngularObjectTextSnapshot {
   readonly description?: string;
   readonly hint?: string;
   readonly tooltip?: string;
+  readonly issueMessages: readonly string[];
+}
+
+/** @internal */
+export interface AngularCollectionTextSnapshot extends AngularObjectTextSnapshot {
+  readonly identityError?: string;
+}
+
+/** @internal */
+export interface AngularItemTextSnapshot {
+  readonly label: string;
+  readonly remove: string;
+  readonly moveEarlier: string;
+  readonly moveLater: string;
   readonly issueMessages: readonly string[];
 }
 
@@ -69,6 +91,30 @@ export interface TextProjectionResult {
 /** @internal */
 export interface ObjectTextProjectionResult {
   readonly texts: AngularObjectTextSnapshot;
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+/** @internal */
+export interface CollectionNodeTextProjectionResult {
+  readonly texts: Omit<AngularCollectionTextSnapshot, 'identityError'>;
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+/** @internal */
+export interface OptionalTextProjectionResult {
+  readonly text?: string;
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+/** @internal */
+export interface IssueTextProjectionResult {
+  readonly messages: readonly string[];
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+/** @internal */
+export interface ItemActionTextProjectionResult {
+  readonly texts: Omit<AngularItemTextSnapshot, 'issueMessages'>;
   readonly diagnostics: readonly Diagnostic[];
 }
 
@@ -198,6 +244,161 @@ export class AngularTextProjector {
       diagnostics: Object.freeze(diagnostics),
     });
   }
+
+  /** @internal */
+  projectCollectionNode(
+    collection: ArrayNodeDefinition,
+    formId: string,
+    locale: string,
+  ): CollectionNodeTextProjectionResult {
+    const diagnostics: Diagnostic[] = [...this.parsed.diagnostics];
+    const nodeCommon = { formId, locale, node: collection } as const;
+    const resolveNode = (
+      source: string,
+      member: Exclude<ObjectTextMember, 'issue'>,
+      rejectBlank = false,
+    ): string =>
+      resolveText(
+        this.parsed.resolver,
+        source,
+        { ...nodeCommon, member },
+        diagnostics,
+        collection.path,
+        rejectBlank,
+      );
+    const label = resolveNode(collection.label, 'label', true);
+    const description =
+      collection.description === undefined
+        ? undefined
+        : resolveNode(collection.description, 'description');
+    const hint =
+      collection.hint === undefined
+        ? undefined
+        : resolveNode(collection.hint, 'hint');
+    const tooltip =
+      collection.tooltip === undefined
+        ? undefined
+        : resolveNode(collection.tooltip, 'tooltip');
+    return Object.freeze({
+      texts: Object.freeze({
+        label,
+        ...(description === undefined ? {} : { description }),
+        ...(hint === undefined ? {} : { hint }),
+        ...(tooltip === undefined ? {} : { tooltip }),
+        issueMessages: Object.freeze([]),
+      }),
+      diagnostics: Object.freeze(diagnostics),
+    });
+  }
+
+  /** @internal */
+  projectCollectionIdentity(
+    collection: ArrayNodeDefinition,
+    snapshot: ArrayRuntimeSnapshot,
+    formId: string,
+    locale: string,
+  ): OptionalTextProjectionResult {
+    if (snapshot.identityState.kind !== 'invalid')
+      return Object.freeze({ diagnostics: Object.freeze([]) });
+    const diagnostics: Diagnostic[] = [];
+    const text = resolveText(
+      this.parsed.resolver,
+      'Collection items have invalid identity.',
+      { formId, locale, collection, member: 'identity-error' },
+      diagnostics,
+      collection.path,
+      true,
+    );
+    return Object.freeze({ text, diagnostics: Object.freeze(diagnostics) });
+  }
+
+  /** @internal */
+  projectCollectionIssues(
+    collection: ArrayNodeDefinition,
+    snapshot: ArrayRuntimeSnapshot,
+    formId: string,
+    locale: string,
+  ): IssueTextProjectionResult {
+    const diagnostics: Diagnostic[] = [];
+    const common = { formId, locale, node: collection } as const;
+    const messages = snapshot.issues.map((issue) =>
+      resolveText(
+        this.parsed.resolver,
+        issue.fallbackMessage ?? issue.code,
+        { ...common, member: 'issue', issue },
+        diagnostics,
+        collection.path,
+      ),
+    );
+    return Object.freeze({
+      messages: Object.freeze(messages),
+      diagnostics: Object.freeze(diagnostics),
+    });
+  }
+
+  /** @internal */
+  projectItemActions(
+    collection: ArrayNodeDefinition,
+    item: ItemRuntimeSnapshot,
+    formId: string,
+    locale: string,
+  ): ItemActionTextProjectionResult {
+    const diagnostics: Diagnostic[] = [...this.parsed.diagnostics];
+    const common = { formId, locale, collection, item } as const;
+    const resolve = (
+      source: string,
+      member: Exclude<CollectionTextMember, 'identity-error' | 'issue'>,
+    ): string =>
+      resolveText(
+        this.parsed.resolver,
+        source,
+        { ...common, member },
+        diagnostics,
+        collection.path,
+        true,
+      );
+    const position = item.index + 1;
+    const label = resolve(`Item ${position}`, 'item-label');
+    const remove = resolve(`Remove item ${position}`, 'remove-item');
+    const moveEarlier = resolve(
+      `Move item ${position} earlier`,
+      'move-item-earlier',
+    );
+    const moveLater = resolve(`Move item ${position} later`, 'move-item-later');
+    return Object.freeze({
+      texts: Object.freeze({
+        label,
+        remove,
+        moveEarlier,
+        moveLater,
+      }),
+      diagnostics: Object.freeze(diagnostics),
+    });
+  }
+
+  /** @internal */
+  projectItemIssues(
+    collection: ArrayNodeDefinition,
+    item: ItemRuntimeSnapshot,
+    formId: string,
+    locale: string,
+  ): IssueTextProjectionResult {
+    const diagnostics: Diagnostic[] = [];
+    const common = { formId, locale, collection, item } as const;
+    const messages = item.issues.map((issue) =>
+      resolveText(
+        this.parsed.resolver,
+        issue.fallbackMessage ?? issue.code,
+        { ...common, member: 'issue', issue },
+        diagnostics,
+        collection.path,
+      ),
+    );
+    return Object.freeze({
+      messages: Object.freeze(messages),
+      diagnostics: Object.freeze(diagnostics),
+    });
+  }
 }
 
 function parseResolver(candidate: unknown): {
@@ -239,7 +440,10 @@ function invalidResolver(reason: string, actualType: string) {
 function resolveText(
   resolver: (text: string, context: TextResolutionContext) => unknown,
   source: string,
-  context: FieldTextResolutionContext | ObjectTextResolutionContext,
+  context:
+    | FieldTextResolutionContext
+    | ObjectTextResolutionContext
+    | CollectionTextResolutionContext,
   diagnostics: Diagnostic[],
   diagnosticPath?: readonly (string | number)[],
   rejectBlank = false,
@@ -267,10 +471,32 @@ function resolveText(
 }
 
 function textDiagnostic(
-  context: FieldTextResolutionContext | ObjectTextResolutionContext,
+  context:
+    | FieldTextResolutionContext
+    | ObjectTextResolutionContext
+    | CollectionTextResolutionContext,
   reason: string,
   diagnosticPath?: readonly (string | number)[],
 ): Diagnostic {
+  if ('collection' in context) {
+    const itemId = context.item?.address.itemId;
+    return adapterDiagnostic(
+      'TEXT_RESOLUTION_FAILED',
+      'warning',
+      {
+        node: context.collection.name,
+        nodeKind: 'array',
+        member: context.member,
+        ...(itemId === undefined ? {} : { itemId }),
+        ...(context.member === 'issue'
+          ? { issueCode: context.issue.code }
+          : {}),
+        reason,
+      },
+      `Text resolution failed for collection "${context.collection.name}".`,
+      context.collection.path,
+    );
+  }
   if ('node' in context) {
     const isArray = context.node.kind === 'array';
     return adapterDiagnostic(
@@ -361,6 +587,25 @@ export function emptyTextSnapshot(): AngularFieldTextSnapshot {
 export function emptyObjectTextSnapshot(): AngularObjectTextSnapshot {
   return Object.freeze({
     label: '',
+    issueMessages: Object.freeze([]),
+  });
+}
+
+/** @internal */
+export function emptyCollectionTextSnapshot(): AngularCollectionTextSnapshot {
+  return Object.freeze({
+    label: '',
+    issueMessages: Object.freeze([]),
+  });
+}
+
+/** @internal */
+export function emptyItemTextSnapshot(): AngularItemTextSnapshot {
+  return Object.freeze({
+    label: '',
+    remove: '',
+    moveEarlier: '',
+    moveLater: '',
     issueMessages: Object.freeze([]),
   });
 }

@@ -6,7 +6,7 @@
 - **Review revision:** 0
 - **Review state:** Complete review cycle 1 passed all nine areas with zero
   findings; formally approved by Ricard
-- **Implementation state:** Checkpoints 1–4 completed; checkpoints 5–7 pending
+- **Implementation state:** Checkpoints 1–5 completed; checkpoints 6–7 pending
 - **Implementation authorized:** Yes — checkpoints 1–7 only
 - **Requires:** accepted
   [`SPEC-001` v0.1.15](../specs/001-controlled-form-runtime.md),
@@ -505,7 +505,7 @@ explicit formal approval decision.
 Ricard explicitly approved PLAN-010 revision 0 on 14 July 2026 after complete
 review cycle 1 passed all nine areas with zero findings. Approval authorizes
 only checkpoints 1–7 and their stated verification/stop conditions.
-Checkpoints 1–4 are complete; checkpoints 5–7 remain pending. No excluded
+Checkpoints 1–5 are complete; checkpoints 6–7 remain pending. No excluded
 capability, Stable promotion or publication is authorized.
 
 ### 15.3 Implementation checkpoint 1
@@ -577,3 +577,23 @@ Format, lint, typecheck, builds, 247 core tests, 59 Angular tests, package smoke
 integrated consumer and exact artifact checks pass. Angular collection/item
 hosts and projection behavior remain inactive; checkpoint 5 is the next
 authorized action.
+
+### 15.7 Implementation checkpoint 5
+
+Checkpoint 5 completed on 14 July 2026. Angular now projects array snapshots
+through fixed Internal collection/item hosts with stable-keyed item views,
+stable leaf addresses and existing primitive renderer/Signal Form buffers.
+Semantic legends, localized adjacent remove/move actions, collision-safe IDs,
+invalid-identity suppression and controlled rejection behavior preserve
+application ownership.
+
+Confirmed moves retain logical renderer and DOM focus ownership. Confirmed
+removal restores focus to the next item, previous item or collection legend;
+removed descendants are destroyed. Ordinary, identity, issue and item-action
+text identities are isolated, and synchronous partial collection/item host
+failures stop only their subtree with exact diagnostics.
+
+Format, lint, typecheck, builds, 247 core tests, 68 Angular tests, package smoke,
+integrated consumer, exact artifacts and clean core/Angular 22 consumers pass.
+No root export, manifest, lockfile, dependency, publication or Stable state
+changed. Checkpoint 6 is the next authorized action.

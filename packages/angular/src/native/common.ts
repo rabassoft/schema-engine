@@ -1,6 +1,8 @@
 import type {
+  CollectionNodeAddress,
   DataPath,
   FieldDefinition,
+  FieldTemplate,
   FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
 import type { AngularFieldTextSnapshot } from '../text.js';
@@ -15,12 +17,46 @@ export interface FieldIds {
   readonly errors: string;
 }
 
+/** @internal */
+export interface FieldInstanceContext {
+  readonly snapshot: Signal<FieldRuntimeSnapshot>;
+  readonly address: Signal<CollectionNodeAddress | undefined>;
+}
+
+/** @internal */
+export const FIELD_INSTANCE_CONTEXT = new InjectionToken<FieldInstanceContext>(
+  'FIELD_INSTANCE_CONTEXT',
+);
+
 export function nodeIdBase(formId: string, path: DataPath): string {
   return `se-${encodeURIComponent(JSON.stringify([formId, path]))}`;
 }
 
-export function fieldIds(formId: string, field: FieldDefinition): FieldIds {
-  const base = nodeIdBase(formId, field.path);
+export function itemNodeIdBase(
+  formId: string,
+  collectionPath: DataPath,
+  itemId: string,
+  relativePath: readonly string[],
+): string {
+  return `se-${encodeURIComponent(
+    JSON.stringify([formId, 'item', collectionPath, itemId, relativePath]),
+  )}`;
+}
+
+export function fieldIds(
+  formId: string,
+  field: FieldDefinition | FieldTemplate,
+  address?: CollectionNodeAddress,
+): FieldIds {
+  const base =
+    address === undefined
+      ? nodeIdBase(formId, (field as FieldDefinition).path)
+      : itemNodeIdBase(
+          formId,
+          address.collectionPath,
+          address.itemId,
+          address.relativePath,
+        );
   return Object.freeze({
     control: base,
     label: `${base}-label`,
@@ -53,3 +89,4 @@ export function describedBy(
   ];
   return values.length === 0 ? null : values.join(' ');
 }
+import { InjectionToken, type Signal } from '@angular/core';

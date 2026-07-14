@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
@@ -11,11 +12,17 @@ import { FormField, disabled, form } from '@angular/forms/signals';
 import type {
   Diagnostic,
   FieldDefinition,
+  FieldTemplate,
   FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
 import type { AngularFieldRenderer } from '../renderer.js';
 import type { AngularFieldTextSnapshot } from '../text.js';
-import { describedBy, fieldDisabled, fieldIds } from './common.js';
+import {
+  FIELD_INSTANCE_CONTEXT,
+  describedBy,
+  fieldDisabled,
+  fieldIds,
+} from './common.js';
 
 @Component({
   selector: 'schema-string-renderer',
@@ -72,7 +79,7 @@ import { describedBy, fieldDisabled, fieldIds } from './common.js';
   `,
 })
 export class SchemaStringRendererComponent implements AngularFieldRenderer {
-  readonly field = input.required<FieldDefinition>();
+  readonly field = input.required<FieldDefinition | FieldTemplate>();
   readonly snapshot = input.required<FieldRuntimeSnapshot>();
   readonly formId = input.required<string>();
   readonly locale = input.required<string>();
@@ -84,11 +91,14 @@ export class SchemaStringRendererComponent implements AngularFieldRenderer {
   readonly rendererDiagnostics = output<readonly Diagnostic[]>();
 
   private readonly controlModel = signal('');
+  private readonly instanceContext = inject(FIELD_INSTANCE_CONTEXT, {
+    optional: true,
+  });
   protected readonly controlField = form(this.controlModel, (path) =>
     disabled(path, { when: () => fieldDisabled(this.snapshot()) }),
   );
   protected readonly ids = computed(() =>
-    fieldIds(this.formId(), this.field()),
+    fieldIds(this.formId(), this.field(), this.instanceContext?.address()),
   );
   protected readonly describedBy = computed(() =>
     describedBy(this.ids(), this.texts(), this.snapshot()),

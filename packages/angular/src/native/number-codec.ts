@@ -1,6 +1,8 @@
 import type {
+  DataPath,
   Diagnostic,
   NumberFieldDefinition,
+  FieldTemplate,
 } from '@rabassoft/schema-engine';
 import { adapterDiagnostic } from '../renderer.js';
 
@@ -16,14 +18,14 @@ export interface NumberCodec {
   parse(text: string, integer: boolean): NumericParseResult;
   format(
     value: number,
-    field: NumberFieldDefinition,
+    field: NumberRendererField,
   ): {
     readonly text: string;
     readonly diagnostics: readonly Diagnostic[];
   };
   formatEditing(
     value: number,
-    field: NumberFieldDefinition,
+    field: NumberRendererField,
   ): {
     readonly text: string;
     readonly diagnostics: readonly Diagnostic[];
@@ -42,7 +44,10 @@ interface LocaleSymbols {
 
 export function createNumberCodec(
   requestedLocale: string,
-  field: NumberFieldDefinition,
+  field: NumberRendererField,
+  diagnosticPath: DataPath | undefined = 'path' in field
+    ? field.path
+    : undefined,
 ): NumberCodec {
   let locale = requestedLocale;
   let diagnostics: readonly Diagnostic[] = Object.freeze([]);
@@ -56,7 +61,7 @@ export function createNumberCodec(
         'warning',
         { field: field.name, locale: requestedLocale, fallbackLocale: locale },
         `Number locale "${requestedLocale}" is invalid; "${locale}" is used.`,
-        field.path,
+        diagnosticPath,
       ),
     ]);
   }
@@ -66,13 +71,16 @@ export function createNumberCodec(
     diagnostics,
     parse: (text: string, integer: boolean) =>
       parseNumber(text, symbols, integer),
-    format: (value: number, definition: NumberFieldDefinition) =>
-      formatNumber(value, locale, definition, true),
-    formatEditing: (value: number, definition: NumberFieldDefinition) =>
-      formatNumber(value, locale, definition, false),
+    format: (value: number, definition: NumberRendererField) =>
+      formatNumber(value, locale, definition, true, diagnosticPath),
+    formatEditing: (value: number, definition: NumberRendererField) =>
+      formatNumber(value, locale, definition, false, diagnosticPath),
   };
   return Object.freeze(codec);
 }
+
+type NumberRendererField =
+  NumberFieldDefinition | Extract<FieldTemplate, { readonly kind: 'number' }>;
 
 function localeSymbols(locale: string): LocaleSymbols {
   const digits = new Map<string, string>();
@@ -179,12 +187,19 @@ function normalizeDigits(
 function formatNumber(
   value: number,
   locale: string,
-  field: NumberFieldDefinition,
+  field: NumberRendererField,
   useGrouping: boolean,
+  diagnosticPath: DataPath | undefined,
 ): { readonly text: string; readonly diagnostics: readonly Diagnostic[] } {
   const decimalPlaces = field.ui.decimalPlaces;
   if (decimalPlaces !== undefined && decimalPlaces > 100)
-    return failedFormat(value, locale, field, 'unsupported-decimal-places');
+    return failedFormat(
+      value,
+      locale,
+      field,
+      'unsupported-decimal-places',
+      diagnosticPath,
+    );
   try {
     const options: Intl.NumberFormatOptions = !useGrouping
       ? {
@@ -211,15 +226,16 @@ function formatNumber(
       diagnostics: Object.freeze([]),
     });
   } catch {
-    return failedFormat(value, locale, field, 'intl-failure');
+    return failedFormat(value, locale, field, 'intl-failure', diagnosticPath);
   }
 }
 
 function failedFormat(
   value: number,
   locale: string,
-  field: NumberFieldDefinition,
+  field: NumberRendererField,
   reason: string,
+  diagnosticPath: DataPath | undefined,
 ) {
   return Object.freeze({
     text: String(value),
@@ -229,7 +245,7 @@ function failedFormat(
         'warning',
         { field: field.name, locale, reason },
         `Number formatting failed for field "${field.name}".`,
-        field.path,
+        diagnosticPath,
       ),
     ]),
   });

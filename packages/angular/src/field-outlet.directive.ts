@@ -12,11 +12,14 @@ import {
   type ComponentRef,
 } from '@angular/core';
 import type {
+  CollectionNodeAddress,
   DataPath,
   Diagnostic,
   FieldDefinition,
+  FieldTemplate,
   FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
+import { FIELD_INSTANCE_CONTEXT } from './native/common.js';
 import { SchemaFormDirective, readRuntimeContext } from './form.directive.js';
 import {
   adapterDiagnostic,
@@ -30,14 +33,17 @@ import {
 } from './text.js';
 
 interface RendererBinding {
-  readonly path: DataPath;
+  readonly target: DataPath | CollectionNodeAddress;
+  readonly address?: CollectionNodeAddress;
   readonly runtimeContext: NonNullable<ReturnType<typeof readRuntimeContext>>;
   active: boolean;
 }
 
 @Directive({ selector: '[schemaFieldOutlet]', standalone: true })
 export class SchemaFieldOutletDirective {
-  readonly schemaFieldOutlet = input.required<FieldDefinition>();
+  readonly schemaFieldOutlet = input.required<
+    FieldDefinition | FieldTemplate
+  >();
 
   private readonly form = inject(SchemaFormDirective);
   private readonly resolver = inject(AngularRendererResolver);
@@ -45,6 +51,9 @@ export class SchemaFieldOutletDirective {
   private readonly environmentInjector = inject(EnvironmentInjector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly textProjector = inject(AngularTextProjector);
+  private readonly instanceContext = inject(FIELD_INSTANCE_CONTEXT, {
+    optional: true,
+  });
   private readonly textsState =
     signal<AngularFieldTextSnapshot>(emptyTextSnapshot());
   private componentRef: ComponentRef<AngularFieldRenderer> | undefined;
@@ -58,7 +67,7 @@ export class SchemaFieldOutletDirective {
       const snapshot = this.form.snapshot();
       const context = readRuntimeContext(this.form);
       if (snapshot === undefined || context === undefined) return;
-      const fieldSnapshot = findFieldSnapshot(snapshot.fields, field);
+      const fieldSnapshot = this.fieldSnapshot(snapshot.fields, field);
       if (fieldSnapshot === undefined) return;
       const identity = [
         field,
@@ -81,7 +90,8 @@ export class SchemaFieldOutletDirective {
       const field = this.schemaFieldOutlet();
       const snapshot = this.form.snapshot();
       const runtimeContext = readRuntimeContext(this.form);
-      const identity = [field, runtimeContext] as const;
+      const address = this.instanceContext?.address();
+      const identity = [field, runtimeContext, address?.itemId] as const;
       if (
         !this.form.ready() ||
         snapshot === undefined ||
@@ -92,12 +102,19 @@ export class SchemaFieldOutletDirective {
       this.lastIdentity = identity;
       this.destroyComponent();
 
-      const fieldSnapshot = findFieldSnapshot(snapshot.fields, field);
+      const fieldSnapshot = this.fieldSnapshot(snapshot.fields, field);
       if (fieldSnapshot === undefined) {
         this.form.reportDiagnostics([
           outletDiagnostic(
             'MISSING_FIELD_SNAPSHOT',
-            { field: field.name, path: Object.freeze([...field.path]) },
+            {
+              field: field.name,
+              ...('path' in field
+                ? { path: Object.freeze([...field.path]) }
+                : {
+                    relativePath: Object.freeze([...field.relativePath]),
+                  }),
+            },
             `Field snapshot "${field.name}" is missing.`,
             field,
           ),
@@ -109,10 +126,20 @@ export class SchemaFieldOutletDirective {
       this.form.reportDiagnostics(resolution.diagnostics);
       if (!resolution.success) return;
 
-      const boundPath = Object.freeze([...field.path]);
+      const boundAddress =
+        address === undefined
+          ? undefined
+          : Object.freeze({
+              collectionPath: Object.freeze([...address.collectionPath]),
+              itemId: address.itemId,
+              relativePath: Object.freeze([...address.relativePath]),
+            });
+      const boundTarget =
+        boundAddress ?? Object.freeze([...(field as FieldDefinition).path]);
       const boundRuntimeContext = runtimeContext;
       const binding: RendererBinding = {
-        path: boundPath,
+        target: boundTarget,
+        ...(boundAddress === undefined ? {} : { address: boundAddress }),
         runtimeContext: boundRuntimeContext,
         active: true,
       };
@@ -127,7 +154,7 @@ export class SchemaFieldOutletDirective {
               inputBinding(
                 'snapshot',
                 () =>
-                  findFieldSnapshot(
+                  this.fieldSnapshot(
                     this.form.snapshot()?.fields ?? [],
                     this.schemaFieldOutlet(),
                   ) ?? fieldSnapshot,
@@ -142,33 +169,42 @@ export class SchemaFieldOutletDirective {
                 if (
                   binding.active &&
                   readRuntimeContext(this.form) === boundRuntimeContext &&
-                  this.allowsIntent(boundPath)
-                )
-                  this.form.requestSetValue(boundPath, value);
+                  this.allowsIntent()
+                ) {
+                  if (binding.address === undefined)
+                    this.form.requestSetValue(
+                      binding.target as DataPath,
+                      value,
+                    );
+                  else this.form.requestSetItemValue(binding.address, value);
+                }
               }),
               outputBinding<void>('removeValue', () => {
                 if (
                   binding.active &&
                   readRuntimeContext(this.form) === boundRuntimeContext &&
-                  this.allowsIntent(boundPath)
-                )
-                  this.form.requestRemoveValue(boundPath);
+                  this.allowsIntent()
+                ) {
+                  if (binding.address === undefined)
+                    this.form.requestRemoveValue(binding.target as DataPath);
+                  else this.form.requestRemoveItemValue(binding.address);
+                }
               }),
               outputBinding<void>('fieldFocus', () => {
                 if (
                   binding.active &&
                   readRuntimeContext(this.form) === boundRuntimeContext &&
-                  this.allowsIntent(boundPath)
+                  this.allowsIntent()
                 )
-                  this.form.focus(boundPath);
+                  this.form.focus(binding.target);
               }),
               outputBinding<void>('fieldBlur', () => {
                 if (
                   binding.active &&
                   readRuntimeContext(this.form) === boundRuntimeContext &&
-                  this.allowsIntent(boundPath)
+                  this.allowsIntent()
                 )
-                  this.form.blur(boundPath);
+                  this.form.blur(binding.target);
               }),
               outputBinding<readonly Diagnostic[]>(
                 'rendererDiagnostics',
@@ -187,6 +223,7 @@ export class SchemaFieldOutletDirective {
             { id: resolution.registration.id, field: field.name },
             `Renderer "${resolution.registration.id}" could not be instantiated.`,
             field,
+            fieldSnapshot.path,
           ),
         ]);
       }
@@ -211,30 +248,38 @@ export class SchemaFieldOutletDirective {
       binding !== undefined &&
       readRuntimeContext(this.form) === binding.runtimeContext &&
       snapshot !== undefined &&
-      findFieldSnapshotByPath(snapshot.fields, binding.path)?.focused === true
+      (binding.address === undefined
+        ? findFieldSnapshotByPath(snapshot.fields, binding.target as DataPath)
+        : this.form.getCollectionNodeSnapshot(binding.address)
+      )?.focused === true
     )
-      this.form.blur(binding.path);
+      this.form.blur(binding.target);
     if (index >= 0) this.viewContainer.remove(index);
     else if (!ref.hostView.destroyed) ref.destroy();
   }
 
-  private allowsIntent(path: DataPath): boolean {
-    const presence = findFieldSnapshotByPath(
+  private allowsIntent(): boolean {
+    const presence = this.fieldSnapshot(
       this.form.snapshot()?.fields ?? [],
-      path,
+      this.schemaFieldOutlet(),
     )?.presence;
     return !(
       presence?.kind === 'blocked' &&
       presence.reason === 'incompatible-ancestor'
     );
   }
-}
 
-function findFieldSnapshot(
-  snapshots: readonly FieldRuntimeSnapshot[],
-  field: FieldDefinition,
-): FieldRuntimeSnapshot | undefined {
-  return findFieldSnapshotByPath(snapshots, field.path);
+  private fieldSnapshot(
+    snapshots: readonly FieldRuntimeSnapshot[],
+    field: FieldDefinition | FieldTemplate,
+  ): FieldRuntimeSnapshot | undefined {
+    return (
+      this.instanceContext?.snapshot() ??
+      ('path' in field
+        ? findFieldSnapshotByPath(snapshots, field.path)
+        : undefined)
+    );
+  }
 }
 
 function findFieldSnapshotByPath(
@@ -263,13 +308,14 @@ function outletDiagnostic(
   code: string,
   parameters: Readonly<Record<string, unknown>>,
   fallbackMessage: string,
-  field: FieldDefinition,
+  field: FieldDefinition | FieldTemplate,
+  snapshotPath?: DataPath,
 ): Diagnostic {
   return adapterDiagnostic(
     code,
     'error',
     parameters,
     fallbackMessage,
-    field.path,
+    snapshotPath ?? ('path' in field ? field.path : undefined),
   );
 }

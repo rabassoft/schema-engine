@@ -12,6 +12,9 @@ import {
 } from '@angular/core';
 import {
   createControlledFormRuntime,
+  type CollectionItemAddress,
+  type CollectionNodeAddress,
+  type CollectionPlacement,
   type ControlledFormRuntimeOptions,
   type DataPath,
   type Diagnostic,
@@ -21,6 +24,8 @@ import {
   type FormRuntimeSnapshot,
   type FormScope,
   type NodeRuntimeSnapshot,
+  type ItemRuntimeSnapshot,
+  type RuntimeTreeSnapshot,
   type RuntimeActionResult,
   type ValidationSnapshot,
   type ValidationVisibility,
@@ -117,12 +122,60 @@ export class SchemaFormDirective<TData extends object> {
     return this.runAction('requestRemoveValue', path);
   }
 
-  focus(path: DataPath): RuntimeActionResult {
-    return this.runAction('focus', path);
+  getItemSnapshot(
+    address: CollectionItemAddress,
+  ): ItemRuntimeSnapshot | undefined {
+    return this.runtime?.getItemSnapshot(address);
   }
 
-  blur(path: DataPath): RuntimeActionResult {
-    return this.runAction('blur', path);
+  getCollectionNodeSnapshot(
+    address: CollectionNodeAddress,
+  ): RuntimeTreeSnapshot | undefined {
+    return this.runtime?.getCollectionNodeSnapshot(address);
+  }
+
+  requestSetItemValue(
+    target: CollectionNodeAddress,
+    value: unknown,
+  ): RuntimeActionResult {
+    return this.runAction('requestSetItemValue', target, value);
+  }
+
+  requestRemoveItemValue(target: CollectionNodeAddress): RuntimeActionResult {
+    return this.runAction('requestRemoveItemValue', target);
+  }
+
+  requestInsertItem(
+    collectionPath: readonly string[],
+    itemId: string,
+    item: unknown,
+    placement: CollectionPlacement,
+  ): RuntimeActionResult {
+    return this.runAction('requestInsertItem', {
+      collectionPath,
+      itemId,
+      item,
+      placement,
+    });
+  }
+
+  requestRemoveItem(address: CollectionItemAddress): RuntimeActionResult {
+    return this.runAction('requestRemoveItem', address);
+  }
+
+  requestMoveItem(
+    address: CollectionItemAddress,
+    placement: CollectionPlacement,
+  ): RuntimeActionResult {
+    return this.runAction('requestMoveItem', address, placement);
+  }
+
+  focus(target: DataPath | CollectionNodeAddress): RuntimeActionResult {
+    return this.runAction('focus', target);
+  }
+
+  blur(target: DataPath | CollectionNodeAddress): RuntimeActionResult {
+    return this.runAction('blur', target);
   }
 
   resetTouched(scope?: FormScope): RuntimeActionResult {
@@ -224,6 +277,11 @@ export class SchemaFormDirective<TData extends object> {
     action:
       | 'requestSetValue'
       | 'requestRemoveValue'
+      | 'requestSetItemValue'
+      | 'requestRemoveItemValue'
+      | 'requestInsertItem'
+      | 'requestRemoveItem'
+      | 'requestMoveItem'
       | 'focus'
       | 'blur'
       | 'resetTouched'
@@ -246,11 +304,46 @@ export class SchemaFormDirective<TData extends object> {
       case 'requestRemoveValue':
         result = this.runtime.requestRemoveValue(first as DataPath);
         break;
+      case 'requestSetItemValue':
+        result = this.runtime.requestSetItemValue(
+          first as CollectionNodeAddress,
+          second,
+        );
+        break;
+      case 'requestRemoveItemValue':
+        result = this.runtime.requestRemoveItemValue(
+          first as CollectionNodeAddress,
+        );
+        break;
+      case 'requestInsertItem': {
+        const request = first as {
+          readonly collectionPath: readonly string[];
+          readonly itemId: string;
+          readonly item: unknown;
+          readonly placement: CollectionPlacement;
+        };
+        result = this.runtime.requestInsertItem(
+          request.collectionPath,
+          request.itemId,
+          request.item,
+          request.placement,
+        );
+        break;
+      }
+      case 'requestRemoveItem':
+        result = this.runtime.requestRemoveItem(first as CollectionItemAddress);
+        break;
+      case 'requestMoveItem':
+        result = this.runtime.requestMoveItem(
+          first as CollectionItemAddress,
+          second as CollectionPlacement,
+        );
+        break;
       case 'focus':
-        result = this.runtime.focus(first as DataPath);
+        result = this.runtime.focus(first as DataPath | CollectionNodeAddress);
         break;
       case 'blur':
-        result = this.runtime.blur(first as DataPath);
+        result = this.runtime.blur(first as DataPath | CollectionNodeAddress);
         break;
       case 'resetTouched':
         result = this.runtime.resetTouched(first as FormScope | undefined);

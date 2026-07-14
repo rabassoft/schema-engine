@@ -2,6 +2,7 @@ import { Component, input, output, type OnDestroy } from '@angular/core';
 import type {
   Diagnostic,
   FieldDefinition,
+  FieldTemplate,
   FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
 import type { AngularFieldRenderer } from '../renderer.js';
@@ -15,7 +16,7 @@ export class FakeRenderer implements AngularFieldRenderer, OnDestroy {
   static destroyed = 0;
   static emitOnDestroy = false;
 
-  readonly field = input.required<FieldDefinition>();
+  readonly field = input.required<FieldDefinition | FieldTemplate>();
   readonly snapshot = input.required<FieldRuntimeSnapshot>();
   readonly formId = input.required<string>();
   readonly locale = input.required<string>();

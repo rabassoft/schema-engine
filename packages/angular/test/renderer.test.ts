@@ -4,6 +4,7 @@ import {
   compileFormDefinition,
   type Diagnostic,
   type FieldDefinition,
+  type FieldTemplate,
   type FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -18,7 +19,7 @@ import { SCHEMA_RENDERER_REGISTRATIONS } from '../src/renderer.js';
 
 @Component({ selector: 'test-renderer', standalone: true, template: '' })
 class TestRenderer implements AngularFieldRenderer {
-  readonly field = input.required<FieldDefinition>();
+  readonly field = input.required<FieldDefinition | FieldTemplate>();
   readonly snapshot = input.required<FieldRuntimeSnapshot>();
   readonly formId = input.required<string>();
   readonly locale = input.required<string>();
@@ -160,7 +161,7 @@ describe('AngularRendererResolver', () => {
     const caller = registration('stable', 1) as {
       id: string;
       renderer: typeof TestRenderer;
-      tester: (field: FieldDefinition) => number | null;
+      tester: (field: FieldDefinition | FieldTemplate) => number | null;
       priority: number;
     };
     TestBed.configureTestingModule({

@@ -6,6 +6,47 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-010 checkpoint 5 completed
+
+### Implementation
+
+- Added fixed Internal Angular collection and item hosts with stable-keyed
+  views, stable leaf addresses and existing primitive renderer/Signal Form
+  buffers; arrays never enter renderer selection.
+- Added semantic collection/item legends, localized adjacent remove/move
+  controls, exact stable instance IDs and invalid-identity subtree suppression.
+- Routed item leaf value/remove/focus/blur intentions through stable addresses
+  while preserving absolute routing for non-collection fields.
+- Preserved renderer and DOM focus ownership across confirmed movement,
+  restored removal focus to next/previous/collection legends and destroyed
+  removed or partial descendants deterministically.
+- Isolated ordinary collection, identity, issue, item-action and item-issue
+  text identities so reprojection retains hosts, renderers and presentation
+  buffers; synchronous host failures stop only their own subtree.
+
+### Review and verification
+
+- Focused evidence covers semantic/ID relationships, stable operations,
+  controlled rejection, renderer reuse/destruction, all focus fallbacks,
+  invalid identity, exact text order/fallback, locale reprojection and both
+  collection/item host failure boundaries.
+- Review corrected transitive template renderer types, positional number
+  diagnostics, independent text-reprojection identities and an unintended new
+  tarball artifact caused by a separate Internal helper module.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, builds and
+  `git diff --check` pass; all 247 core and 68 Angular tests pass (315 total).
+- `pnpm test:package`, `pnpm test:consumer`, exact-inventory
+  `pnpm test:artifacts` and `pnpm test:consumer:clean` pass, including clean
+  core plus Angular 22.0.6 lower/upper consumers. The first clean-consumer run
+  failed only because sandbox DNS was blocked; the authorized retry passed.
+- No root export, manifest, version, dependency, peer/export, lockfile,
+  publication or Stable state changed.
+
+### Next
+
+- Execute PLAN-010 checkpoint 6: root declarations, package smoke,
+  documentation, exact artifact allowlists and built/clean consumer migration.
+
 ## 2026-07-14 — PLAN-010 checkpoint 4 completed
 
 ### Implementation

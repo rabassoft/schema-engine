@@ -1,5 +1,5 @@
 import type { EnvironmentProviders } from '@angular/core';
-import type { FieldDefinition } from '@rabassoft/schema-engine';
+import type { FieldDefinition, FieldTemplate } from '@rabassoft/schema-engine';
 import { provideSchemaEngineAngular } from '../renderer.js';
 import type { AngularRendererRegistration } from '../renderer.js';
 import { SchemaBooleanRendererComponent } from './boolean-renderer.js';
@@ -12,31 +12,34 @@ const nativeRegistrations: readonly AngularRendererRegistration[] =
     Object.freeze({
       id: 'native-string-enum',
       renderer: SchemaStringEnumRendererComponent,
-      tester: (field: FieldDefinition) => (hasOwnChoices(field) ? 20 : null),
+      tester: (field: FieldDefinition | FieldTemplate) =>
+        hasOwnChoices(field) ? 20 : null,
       priority: 0,
     }),
     Object.freeze({
       id: 'native-string',
       renderer: SchemaStringRendererComponent,
-      tester: (field: FieldDefinition) => (field.kind === 'string' ? 10 : null),
+      tester: (field: FieldDefinition | FieldTemplate) =>
+        field.kind === 'string' ? 10 : null,
       priority: 0,
     }),
     Object.freeze({
       id: 'native-number',
       renderer: SchemaNumberRendererComponent,
-      tester: (field: FieldDefinition) => (field.kind === 'number' ? 10 : null),
+      tester: (field: FieldDefinition | FieldTemplate) =>
+        field.kind === 'number' ? 10 : null,
       priority: 0,
     }),
     Object.freeze({
       id: 'native-boolean',
       renderer: SchemaBooleanRendererComponent,
-      tester: (field: FieldDefinition) =>
+      tester: (field: FieldDefinition | FieldTemplate) =>
         field.kind === 'boolean' ? 10 : null,
       priority: 0,
     }),
   ]);
 
-function hasOwnChoices(field: FieldDefinition): boolean {
+function hasOwnChoices(field: FieldDefinition | FieldTemplate): boolean {
   if (field.kind !== 'string') return false;
   const descriptor = Object.getOwnPropertyDescriptor(field, 'choices');
   return (
