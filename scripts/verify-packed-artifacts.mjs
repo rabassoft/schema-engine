@@ -113,22 +113,34 @@ try {
     'BaseNodeDefinition',
     'BaseNodeTemplate',
     'CollectionItemAddress',
+    'CollectionIdentityState',
     'CollectionNodeAddress',
+    'CollectionPlacement',
     'CollectionPolicy',
+    'CollectionTextMember',
     'CollectionTextResolutionContext',
     'FieldTemplate',
     'FormNodeDefinition',
     'FormNodeTemplate',
     'FormScopeTarget',
+    'InsertItemOperation',
+    'ItemIdentityDefinition',
     'ItemRuntimeSnapshot',
+    'ItemUiSchema',
+    'MoveItemOperation',
     'ObjectFieldDefinition',
     'ObjectItemTemplateDefinition',
+    'ObjectNodeTemplate',
     'ObjectPresence',
     'NodeRuntimeSnapshot',
     'ObjectRuntimeSnapshot',
     'ObjectTextMember',
     'ObjectTextResolutionContext',
     'ObjectUiSchema',
+    'RemoveItemOperation',
+    'RemoveItemValueOperation',
+    'RuntimeTreeSnapshot',
+    'SetItemValueOperation',
   ]) {
     assert.ok(
       coreIndex.includes(publicName),
@@ -167,7 +179,11 @@ try {
   for (const internalName of [
     'SchemaNodeOutletComponent',
     'ObjectHostFactory',
+    'CollectionHostFactory',
+    'ItemHostFactory',
     'AngularObjectTextSnapshot',
+    'AngularCollectionTextSnapshot',
+    'FIELD_INSTANCE_CONTEXT',
   ]) {
     assert.equal(
       angularIndex.includes(internalName),
@@ -182,6 +198,36 @@ try {
   assert.ok(
     formDeclaration.includes('ɵɵComponentDeclaration'),
     'SchemaFormDirective must remain an attribute component',
+  );
+  for (const method of [
+    'getItemSnapshot',
+    'getCollectionNodeSnapshot',
+    'requestSetItemValue',
+    'requestRemoveItemValue',
+    'requestInsertItem',
+    'requestRemoveItem',
+    'requestMoveItem',
+  ]) {
+    assert.ok(
+      formDeclaration.includes(`${method}(`),
+      `Missing Angular collection projection ${method}`,
+    );
+  }
+  const rendererDeclaration = readTarballText(
+    tarballs.angular,
+    'package/dist/renderer.d.ts',
+  );
+  assert.ok(
+    rendererDeclaration.includes('FieldDefinition | FieldTemplate'),
+    'Angular renderer declarations do not accept item templates',
+  );
+  const outletDeclaration = readTarballText(
+    tarballs.angular,
+    'package/dist/field-outlet.directive.d.ts',
+  );
+  assert.ok(
+    outletDeclaration.includes('FieldDefinition | FieldTemplate'),
+    'Angular field outlet declaration does not accept item templates',
   );
 
   assert.equal(core.dependencies, undefined);

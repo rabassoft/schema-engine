@@ -11,30 +11,33 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository contains the completed M1-M8 controlled-form prototype and
-private local release candidates. Its G0 review passed, SPEC-001 v0.1.15 and
-SPEC-002 v0.1.2 are Accepted, and completed PLAN-009 implements the M9
-nested-object extension. The remaining sequence is recorded in the
-[roadmap](./.ai-docs/project/ROADMAP.md).
+The repository contains the completed M1-M9 controlled-form prototype and
+private local release candidates. Its G0 review passed; SPEC-001 v0.1.15,
+SPEC-002 v0.1.2 and SPEC-003 v0.1.2 are Accepted; and approved PLAN-010 is
+delivering the M10 homogeneous-object collection extension incrementally. The
+current checkpoint is recorded in [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
 
 `packages/core` exposes the framework-neutral `@rabassoft/schema-engine` API:
 compiler, immutable deep operations, controlled runtime, validation contracts,
-recursive object/leaf snapshots, scopes, diagnostics, and text contracts.
+recursive object/collection/item/leaf snapshots, stable collection operations,
+scopes, diagnostics, and text contracts.
 
 `packages/angular` exposes the Angular 22 headless adapter and accessible native
 HTML renderers for string, number/integer, boolean, and string enum fields. It
 recursively projects normalized inline object groups with semantic fieldsets,
-canonical IDs and localized object text. Its private control buffers use
-Angular Signal Forms without moving controlled state, validation, or operations
-out of the core/application boundary.
+fixed homogeneous collection/item groups, canonical stable IDs and localized
+text. Its private primitive-leaf control buffers use Angular Signal Forms
+without moving controlled state, validation, identity, or operations out of
+the core/application boundary.
 
-The implemented boundary is the root object plus recursively nested inline
-objects and primitive leaves defined by SPEC-001 v0.1.15 and SPEC-002 v0.1.2.
-Arrays, references, composition, async validation, persistence, advanced
-layouts, custom object containers, and other registered deferred decisions are
-not active.
+The implemented boundary is the root object, recursively nested inline objects,
+primitive leaves and SPEC-003 homogeneous arrays of inline object items with
+application-owned stable string identity. Arrays of primitives, arrays inside
+collection item templates, tuples, references, composition, generated
+identity, async validation, persistence, advanced layouts, custom collection
+renderers and other deferred decisions are not active.
 
 ## Branch workflow
 

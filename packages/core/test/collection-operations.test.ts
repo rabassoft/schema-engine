@@ -70,6 +70,40 @@ function move(
 }
 
 describe('M10 collection operations', () => {
+  it('applies an ordinary leaf operation in a mixed collection definition', () => {
+    const title = {
+      key: '["title"]',
+      name: 'title',
+      path: ['title'],
+      required: false,
+      label: 'Title',
+      kind: 'string',
+      constraints: {},
+    } as const;
+    const collection = definition().nodes[0]!;
+    const mixed: FormDefinition = {
+      nodes: [title, collection],
+      fields: [title],
+    };
+    const result = applyFormOperation(
+      mixed,
+      { title: 'Before', rows: [] },
+      {
+        ...base('set-value'),
+        type: 'set-value',
+        path: ['title'],
+        expected: { kind: 'value', value: 'Before' },
+        value: 'After',
+      },
+    );
+
+    expect(result).toMatchObject({
+      success: true,
+      changed: true,
+      value: { title: 'After', rows: [] },
+    });
+  });
+
   it('applies a stable leaf set after concurrent movement and preserves references off path', () => {
     const first = { id: 'a', name: 'Ada' };
     const second = { id: 'b', name: 'Bob' };

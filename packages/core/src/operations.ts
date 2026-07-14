@@ -6,7 +6,7 @@ import type {
 } from './contracts.js';
 import { diagnostic } from './internal/diagnostics.js';
 import {
-  collectNestedFormDefinitionDefects,
+  collectCollectionFormDefinitionDefects,
   type NestedDefinitionDefect,
 } from './internal/nested-definition.js';
 import {
@@ -568,7 +568,7 @@ function validateDefinition(
   }
   if (diagnostics.length > 0) return { diagnostics };
 
-  const nestedDefects = collectNestedFormDefinitionDefects(definition);
+  const nestedDefects = collectCollectionFormDefinitionDefects(definition);
   if (nestedDefects.length > 0) {
     return {
       diagnostics: nestedDefects.map((defect) =>
@@ -628,10 +628,19 @@ function nestedFormDiagnostic(
       ...(defect.firstNodeIndexPath === undefined
         ? {}
         : { firstNodeIndexPath: [...defect.firstNodeIndexPath] }),
+      ...(defect.templateIndexPath === undefined
+        ? {}
+        : { templateIndexPath: [...defect.templateIndexPath] }),
+      ...(defect.firstTemplateIndexPath === undefined
+        ? {}
+        : { firstTemplateIndexPath: [...defect.firstTemplateIndexPath] }),
       ...(defect.fieldIndex === undefined
         ? {}
         : { fieldIndex: defect.fieldIndex }),
       ...(defect.path === undefined ? {} : { path: [...defect.path] }),
+      ...(defect.relativePath === undefined
+        ? {}
+        : { relativePath: [...defect.relativePath] }),
     },
     'Form definition is invalid.',
     dataPath,

@@ -6,6 +6,37 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-010 checkpoint 6 completed
+
+### Implementation
+
+- Migrated repository/package README files and private `0.1.0` candidate notes
+  to the accepted homogeneous object-collection boundary and exact exclusions.
+- Extended core/Angular package smoke, declaration inventory, built consumer
+  and clean consumers through collection compilation, stable reads/requests,
+  fixed Angular projection and controlled operation application.
+- Kept collection/item hosts and text/lifecycle helpers Internal while checking
+  the complete accepted Public collection type and Angular method inventory.
+- Corrected ordinary `set-value`/`remove-value` definition validation for mixed
+  forms containing valid collection nodes; added a focused regression test.
+
+### Review and verification
+
+- Repeated review corrected ambiguous “nested array” documentation and the
+  clean-consumer operation narrowing after the mixed-form defect was fixed.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, builds and
+  `git diff --check` pass; all 248 core and 68 Angular tests pass (316 total).
+- `pnpm test:package`, `pnpm test:consumer`, exact-inventory
+  `pnpm test:artifacts` and `pnpm test:consumer:clean` pass, including clean
+  core plus Angular 22.0.6 lower/upper consumers.
+- All 58 Markdown files and 262 local links resolve. No manifest, version,
+  dependency, peer/export, lockfile, publication or Stable state changed.
+
+### Next
+
+- Execute PLAN-010 checkpoint 7: complete scenario matrix, declaration and
+  full-diff review, correct every finding and repeat until zero findings.
+
 ## 2026-07-14 — PLAN-010 checkpoint 5 completed
 
 ### Implementation

@@ -85,3 +85,67 @@ if (runtimeResult.success) {
   assert.deepEqual(removed.value, { profile: {} });
   runtimeResult.runtime.dispose();
 }
+
+const collectionSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    rows: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+        },
+        required: ['id'],
+      },
+    },
+  },
+};
+const collectionCompilation = compileFormDefinition({
+  schema: collectionSchema,
+  collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
+});
+assert.equal(collectionCompilation.success, true);
+if (!collectionCompilation.success)
+  throw new Error('Collection compilation failed');
+const collectionValue = {
+  rows: [
+    { id: 'a', name: 'Ada' },
+    { id: 'b', name: 'Bob' },
+  ],
+};
+const collectionRuntime = createControlledFormRuntime({
+  formId: 'collection-smoke',
+  definition: collectionCompilation.definition,
+  schema: collectionSchema,
+  value: collectionValue,
+  baselineValue: collectionValue,
+  locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+});
+assert.equal(collectionRuntime.success, true);
+if (!collectionRuntime.success) throw new Error('Collection runtime failed');
+const itemAddress = { collectionPath: ['rows'], itemId: 'a' };
+const nameAddress = { ...itemAddress, relativePath: ['name'] };
+assert.equal(collectionRuntime.runtime.getItemSnapshot(itemAddress)?.index, 0);
+assert.equal(
+  collectionRuntime.runtime.getCollectionNodeSnapshot(nameAddress)?.nodeKind,
+  'field',
+);
+const collectionOperations = [];
+collectionRuntime.runtime.subscribeOperations((operation) =>
+  collectionOperations.push(operation),
+);
+collectionRuntime.runtime.requestSetItemValue(nameAddress, 'Grace');
+assert.equal(collectionOperations[0]?.type, 'set-item-value');
+const collectionApplied = applyFormOperation(
+  collectionCompilation.definition,
+  collectionValue,
+  collectionOperations[0],
+);
+assert.equal(collectionApplied.success, true);
+if (!collectionApplied.success) throw new Error('Collection set failed');
+assert.equal(collectionApplied.value.rows[0].name, 'Grace');
+collectionRuntime.runtime.dispose();

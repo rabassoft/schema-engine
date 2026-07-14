@@ -6,7 +6,7 @@
 - **Review revision:** 0
 - **Review state:** Complete review cycle 1 passed all nine areas with zero
   findings; formally approved by Ricard
-- **Implementation state:** Checkpoints 1–5 completed; checkpoints 6–7 pending
+- **Implementation state:** Checkpoints 1–6 completed; checkpoint 7 pending
 - **Implementation authorized:** Yes — checkpoints 1–7 only
 - **Requires:** accepted
   [`SPEC-001` v0.1.15](../specs/001-controlled-form-runtime.md),
@@ -505,7 +505,7 @@ explicit formal approval decision.
 Ricard explicitly approved PLAN-010 revision 0 on 14 July 2026 after complete
 review cycle 1 passed all nine areas with zero findings. Approval authorizes
 only checkpoints 1–7 and their stated verification/stop conditions.
-Checkpoints 1–5 are complete; checkpoints 6–7 remain pending. No excluded
+Checkpoints 1–6 are complete; checkpoint 7 remains pending. No excluded
 capability, Stable promotion or publication is authorized.
 
 ### 15.3 Implementation checkpoint 1
@@ -597,3 +597,23 @@ Format, lint, typecheck, builds, 247 core tests, 68 Angular tests, package smoke
 integrated consumer, exact artifacts and clean core/Angular 22 consumers pass.
 No root export, manifest, lockfile, dependency, publication or Stable state
 changed. Checkpoint 6 is the next authorized action.
+
+### 15.8 Implementation checkpoint 6
+
+Checkpoint 6 completed on 14 July 2026. Root/package documentation and local
+candidate notes now describe the accepted homogeneous object-collection
+boundary and its precise exclusions. Package smoke, exact tarball declaration
+inspection, the built Angular consumer and clean core/Angular consumers exercise
+collection policies, stable reads/requests, fixed Angular projection and
+controlled confirmation through package-root imports.
+
+Consumer migration exposed and corrected one integration defect: ordinary
+`set-value`/`remove-value` application now validates valid mixed definitions
+containing collection nodes instead of rejecting the collection as an invalid
+legacy node. Focused regression evidence preserves exact mixed-form behavior.
+
+Format, lint, typecheck, builds, 248 core tests, 68 Angular tests, package smoke,
+integrated consumer, exact artifacts, 58 Markdown files/262 local links and
+clean core/Angular 22 consumers pass. Manifests, versions, dependencies, peers,
+exports, lockfile, publication and Stable state remain unchanged. Checkpoint 7
+is the next authorized action.

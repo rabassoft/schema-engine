@@ -184,7 +184,12 @@ function createCoreConsumer(tarball, packageManager, typescriptVersion) {
   });
   writeFileSync(
     join(directory, 'src/main.ts'),
-    `import { applyFormOperation, compileFormDefinition, createControlledFormRuntime } from '@rabassoft/schema-engine';
+    `import {
+  applyFormOperation,
+  compileFormDefinition,
+  createControlledFormRuntime,
+  type FormOperation,
+} from '@rabassoft/schema-engine';
 
 const schema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -194,13 +199,28 @@ const schema = {
       type: 'object',
       properties: { address: { type: 'string' } },
     },
+    rows: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+        },
+        required: ['id'],
+      },
+    },
   },
 };
 const compiled = compileFormDefinition({
   schema,
+  collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
 });
 if (!compiled.success) throw new Error('Compilation failed');
-const source: { profile?: { address?: string } } = {};
+const source: {
+  profile?: { address?: string };
+  rows: { id: string; name?: string }[];
+} = { rows: [{ id: 'a', name: 'Ada' }] };
 const created = createControlledFormRuntime({
   formId: 'clean-core',
   definition: compiled.definition,
@@ -213,16 +233,51 @@ const created = createControlledFormRuntime({
 if (!created.success) throw new Error('Runtime creation failed');
 const profile = created.runtime.getNodeSnapshot(['profile']);
 const address = created.runtime.getFieldSnapshot(['profile', 'address']);
-if (profile?.nodeKind !== 'object' || address?.nodeKind !== 'field') {
+const item = created.runtime.getItemSnapshot({
+  collectionPath: ['rows'],
+  itemId: 'a',
+});
+const itemName = created.runtime.getCollectionNodeSnapshot({
+  collectionPath: ['rows'],
+  itemId: 'a',
+  relativePath: ['name'],
+});
+if (
+  profile?.nodeKind !== 'object' ||
+  address?.nodeKind !== 'field' ||
+  item?.nodeKind !== 'item' ||
+  itemName?.nodeKind !== 'field'
+) {
   throw new Error('Nested declarations are unavailable');
 }
-let operation;
-created.runtime.subscribeOperations((candidate) => { operation = candidate; });
+const operations: FormOperation[] = [];
+created.runtime.subscribeOperations((candidate) => operations.push(candidate));
 created.runtime.requestSetValue(['profile', 'address'], 'Rabassoft');
-if (operation === undefined) throw new Error('Deep operation was not emitted');
-const applied = applyFormOperation(compiled.definition, source, operation);
+const deepOperation = operations.at(-1);
+if (deepOperation === undefined)
+  throw new Error('Deep operation was not emitted');
+const applied = applyFormOperation(compiled.definition, source, deepOperation);
 if (!applied.success || applied.value.profile?.address !== 'Rabassoft') {
   throw new Error('Deep operation failed');
+}
+created.runtime.requestSetItemValue(
+  { collectionPath: ['rows'], itemId: 'a', relativePath: ['name'] },
+  'Grace',
+);
+const collectionOperation = operations.at(-1);
+if (collectionOperation?.type !== 'set-item-value') {
+  throw new Error('Stable collection operation was not emitted');
+}
+const collectionApplied = applyFormOperation(
+  compiled.definition,
+  source,
+  collectionOperation,
+);
+if (
+  !collectionApplied.success ||
+  collectionApplied.value.rows[0]?.name !== 'Grace'
+) {
+  throw new Error('Stable collection operation failed');
 }
 created.runtime.dispose();
 `,
@@ -316,6 +371,7 @@ import {
 
 interface ConsumerValue {
   profile?: { address?: { street?: string } };
+  rows: { id: string; name?: string }[];
 }
 
 const schema = {
@@ -333,10 +389,23 @@ const schema = {
         },
       },
     },
+    rows: {
+      type: 'array',
+      title: 'People',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string', title: 'Name' },
+        },
+        required: ['id'],
+      },
+    },
   },
 };
 const compiled = compileFormDefinition({
   schema,
+  collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
 });
 if (!compiled.success) throw new Error('Compilation failed');
 const definition = compiled.definition;
@@ -351,13 +420,13 @@ const validator: SchemaValidator = {
   template: '<form [schemaForm]="config" (schemaOperation)="apply($event)"></form>',
 })
 class CleanConsumerComponent {
-  value: ConsumerValue = {};
+  value: ConsumerValue = { rows: [{ id: 'a', name: 'Ada' }] };
   config: AngularControlledFormConfig<ConsumerValue> = {
     formId: 'clean-angular',
     definition,
     schema,
     value: this.value,
-    baselineValue: {},
+    baselineValue: { rows: [{ id: 'a', name: 'Ada' }] },
     validator,
     locale: 'en',
   };

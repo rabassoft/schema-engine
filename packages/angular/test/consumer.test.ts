@@ -27,6 +27,10 @@ interface ConsumerValue {
     };
   };
   readonly active?: boolean;
+  readonly rows: readonly {
+    readonly id: string;
+    readonly name?: string;
+  }[];
 }
 
 const schema = Object.freeze({
@@ -48,9 +52,24 @@ const schema = Object.freeze({
       }),
     }),
     active: Object.freeze({ type: 'boolean', title: 'Active' }),
+    rows: Object.freeze({
+      type: 'array',
+      title: 'People',
+      items: Object.freeze({
+        type: 'object',
+        properties: Object.freeze({
+          id: Object.freeze({ type: 'string' }),
+          name: Object.freeze({ type: 'string', title: 'Name' }),
+        }),
+        required: Object.freeze(['id', 'name']),
+      }),
+    }),
   }),
 });
-const compilation = compileFormDefinition({ schema });
+const compilation = compileFormDefinition({
+  schema,
+  collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
+});
 if (!compilation.success)
   throw new Error('The consumer schema must compile successfully.');
 const definition = compilation.definition;
@@ -59,6 +78,10 @@ const initialValue: Readonly<ConsumerValue> = Object.freeze({
     address: Object.freeze({ street: 'Main' }),
   }),
   active: false,
+  rows: Object.freeze([
+    Object.freeze({ id: 'a', name: 'Ada' }),
+    Object.freeze({ id: 'b', name: 'Bob' }),
+  ]),
 });
 const validator: SchemaValidator = Object.freeze({
   validate: () => ({ valid: true, issues: [] }),
@@ -101,7 +124,7 @@ class ConsumerHost {
 describe('minimal built-package Angular consumer', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('renders a localized two-depth form and confirms deep set/remove operations', () => {
+  it('renders nested objects and stable collections from the built packages', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -120,8 +143,14 @@ describe('minimal built-package Angular consumer', () => {
       Array.from(root.querySelectorAll('legend'), ({ textContent }) =>
         textContent?.trim(),
       ),
-    ).toEqual(['en:Profile', 'en:Address']);
-    expect(root.querySelectorAll('input[type="text"]')).toHaveLength(1);
+    ).toEqual([
+      'en:Profile',
+      'en:Address',
+      'en:People',
+      'en:Item 1',
+      'en:Item 2',
+    ]);
+    expect(root.querySelectorAll('input[type="text"]')).toHaveLength(3);
     expect(root.querySelectorAll('input[type="checkbox"]')).toHaveLength(1);
     const ids = Array.from(root.querySelectorAll('[id]'), ({ id }) => id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -151,6 +180,7 @@ describe('minimal built-package Angular consumer', () => {
     expect(fixture.componentInstance.value()).toEqual({
       profile: { address: {} },
       active: false,
+      rows: initialValue.rows,
     });
     expect(root.querySelector(`[id="${streetId}-clear"]`)).toBeNull();
     expect(document.activeElement).toBe(street);
@@ -161,11 +191,51 @@ describe('minimal built-package Angular consumer', () => {
         focused: true,
       },
     );
+
+    const itemNameId = itemBase('g0-consumer', ['rows'], 'a', ['name']);
+    const itemName = byId(root, itemNameId) as HTMLInputElement;
+    itemName.value = 'Grace';
+    itemName.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'set-item-value',
+      target: { itemId: 'a', relativePath: ['name'] },
+      value: 'Grace',
+    });
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(itemName.value).toBe('Grace');
+
+    fixture.componentInstance.form?.requestMoveItem(
+      { collectionPath: ['rows'], itemId: 'a' },
+      { kind: 'after', itemId: 'b' },
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'move-item',
+      itemId: 'a',
+      placement: { kind: 'after', itemId: 'b' },
+    });
+    expect(
+      byId(root, `${itemBase('g0-consumer', ['rows'], 'a', [])}--legend`)
+        .textContent,
+    ).toContain('en:Item 2');
   });
 });
 
 function nodeBase(formId: string, path: readonly string[]): string {
   return `se-${encodeURIComponent(JSON.stringify([formId, path]))}`;
+}
+
+function itemBase(
+  formId: string,
+  collectionPath: readonly string[],
+  itemId: string,
+  relativePath: readonly string[],
+): string {
+  return `se-${encodeURIComponent(
+    JSON.stringify([formId, 'item', collectionPath, itemId, relativePath]),
+  )}`;
 }
 
 function byId(root: HTMLElement, id: string): HTMLElement {

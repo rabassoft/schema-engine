@@ -35,7 +35,23 @@ assert.equal('sentinelToken' in angularApi, false);
 assert.equal('choiceToken' in angularApi, false);
 assert.equal('SchemaNodeOutletComponent' in angularApi, false);
 assert.equal('ObjectHostFactory' in angularApi, false);
+assert.equal('CollectionHostFactory' in angularApi, false);
+assert.equal('ItemHostFactory' in angularApi, false);
 assert.equal('AngularObjectTextSnapshot' in angularApi, false);
+assert.equal('AngularCollectionTextSnapshot' in angularApi, false);
+assert.equal('FIELD_INSTANCE_CONTEXT' in angularApi, false);
+
+for (const method of [
+  'getItemSnapshot',
+  'getCollectionNodeSnapshot',
+  'requestSetItemValue',
+  'requestRemoveItemValue',
+  'requestInsertItem',
+  'requestRemoveItem',
+  'requestMoveItem',
+]) {
+  assert.equal(typeof SchemaFormDirective.prototype[method], 'function');
+}
 
 const injector = createEnvironmentInjector(
   [provideSchemaEngineAngular()],

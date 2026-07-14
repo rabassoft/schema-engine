@@ -39,21 +39,26 @@ Import only from `@rabassoft/schema-engine-angular`. Deep imports into `dist`,
 `src`, or other physical paths are unsupported.
 
 The package provides the Angular 22 adapter, renderer extension contract, and
-native HTML renderers for the SPEC-001/SPEC-002 subset. `SchemaFormDirective`
-projects normalized inline object groups and primitive leaves recursively; an
-application supplies one controlled config and applies emitted deep operations:
+native HTML renderers for the SPEC-001/SPEC-002/SPEC-003 subset.
+`SchemaFormDirective` projects normalized inline object groups, fixed
+homogeneous collection/item groups and primitive leaves recursively; an
+application supplies one controlled config and applies emitted deep or stable
+collection operations:
 
 ```html
 <form [schemaForm]="config()" (schemaOperation)="applyOperation($event)"></form>
 ```
 
-Object groups use semantic fieldsets, localized object text and canonical
-path-derived IDs. Native leaves remain replaceable through the renderer
-extension contract. The adapter does not own domain data, validation,
-persistence, submit flows, or runtime behavior.
+Object/collection/item groups use semantic fieldsets, localized text and
+collision-safe canonical IDs. Item views and leaf intentions follow stable item
+identity across movement; remove/move actions are fixed and accessible, while
+insertion remains application-owned. Native leaves remain replaceable through
+the renderer extension contract. The adapter does not own domain data,
+identity, validation, persistence, submit flows, or runtime behavior.
 
-Arrays, references, composition, advanced layouts and custom object-container
-renderers remain outside the supported boundary.
+Arrays of primitives, arrays inside collection item templates, tuples,
+references, composition, advanced layouts, generated identity, implicit Add
+controls and custom collection renderers remain outside the supported boundary.
 
 See the [Schema Engine repository](https://github.com/rabassoft/schema-engine)
-for SPEC-001, SPEC-002, ADRs, plans, and current project status.
+for SPEC-001, SPEC-002, SPEC-003, ADRs, plans, and current project status.
