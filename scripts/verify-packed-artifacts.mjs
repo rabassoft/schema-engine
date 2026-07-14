@@ -17,6 +17,7 @@ const CORE_MODULES = Object.freeze([
   'index',
   'internal/collection-address',
   'internal/collection-operation',
+  'internal/collection-runtime',
   'internal/diagnostics',
   'internal/immutable',
   'internal/keywords',

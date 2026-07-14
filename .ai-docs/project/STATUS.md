@@ -7,9 +7,9 @@
 
 - **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `1ecaf14`, M10 normative baseline and PLAN-010
-  checkpoint 1 (`develop` is twelve commits ahead of `origin/develop`; no push
-  performed)
+- **Committed revision:** `651eb57`, PLAN-010 checkpoints 2–3 collection
+  compiler and operations (`develop` is thirteen commits ahead of
+  `origin/develop`; no push performed)
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2 and SPEC-003
   v0.1.2
 - **Last implementation plan:** PLAN-010 revision 0, Approved; checkpoints 1–3
@@ -21,9 +21,8 @@
   implemented under PLAN-010
 - **Phase:** M1–M9 and G0 completed; M10 checkpoint 3 of 7 completed
 - **Package candidates:** private independent `0.1.0` artifacts; unpublished
-- **Working tree:** uncommitted PLAN-010 checkpoints 2–3 compiler,
-  operations, contracts, tests and persistent-state updates; no active
-  implementation task
+- **Working tree:** uncommitted checkpoint 4 identity/presence inspection
+  foundations, focused tests and state update; runtime integration is active
 
 ## Current objective
 
@@ -32,7 +31,10 @@ checkpoint before its dependencies and verification are green.
 
 ## In progress
 
-- None.
+- PLAN-010 checkpoint 4: implement collection external-state identity
+  inspection, runtime snapshots/sharing/reads, requests,
+  validation/scopes/interaction and runtime fixtures. Do not activate Angular
+  collection hosts or checkpoint 5 projection behavior.
 
 ## Latest completed work
 
@@ -65,8 +67,8 @@ validation/scopes/interaction and runtime fixtures; verify it before checkpoint 
   capabilities remain inactive.
 - ADR-005 revision 2, ADR-015 revision 4, SPEC-003 v0.1.2 and PLAN-010 revision
   0 are accepted/approved in the required order.
-- M10 normative/review documents and checkpoint 1 are committed in `1ecaf14`
-  and unpushed.
+- M10 normative/review documents and checkpoints 1–3 are committed through
+  `651eb57` and unpushed.
 
 ## Open questions
 
