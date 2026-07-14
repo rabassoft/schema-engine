@@ -59,12 +59,10 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7-M10 están completados bajo sus ADR, SPEC y planes aceptados. M11 tiene
-> aceptadas la arquitectura estrecha de D-041 y SPEC-004 v0.1.1 tras superar
-> revisión completa ciclo 5 sin hallazgos; PLAN-011 es el siguiente gate y aún
-> no existe plan aprobado ni implementación activa. M12 continúa como propuesta
-> de planificación. La publicación real permanece Deferred en D-040 y requiere
-> una solicitud y aprobación explícitas.
+> M7-M11 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-011
+> completó sus cinco checkpoints y la revisión final repetida pasó sin
+> hallazgos. M12 continúa como propuesta de planificación. La publicación real
+> permanece Deferred en D-040 y requiere una solicitud y aprobación explícitas.
 
 ### M9 — Objetos anidados — completado
 
@@ -113,14 +111,22 @@ separado antes de repetir la revisión.
 - M10 no activa arrays primitivos/anidados, tuples, composición, layout,
   custom collection renderers, persistencia, publicación ni APIs Stable.
 
+### M11 — Resolución estática local de schemas — completado
+
+- D-041 fue promovido para el slice local estático; ADR-016, ADR-005 revisión 3
+  y SPEC-004 v0.1.1 fijaron la arquitectura y el comportamiento aceptados.
+- PLAN-011 revisión 0 completó sus cinco checkpoints: fundamentos Internal,
+  registry/decoder/resolver descriptor-safe, integración del compiler,
+  19 escenarios de conformidad y revisión final completa.
+- La revisión 021 corrigió una delimitación de provenance entre referencias de
+  item y políticas del array; el ciclo 2 repitió la revisión y toda la matriz
+  con cero hallazgos.
+- M11 no activa referencias externas/dinámicas, anchors, applicators,
+  composición, AST público, I/O, callbacks, publicación ni APIs Stable.
+
 ### Orden de dependencias a más largo plazo
 
-1. **M11 — Resolución estática local de schemas (D-041):** SPEC-004 v0.1.1
-   Accepted fija el comportamiento observable de `$defs` y `$ref` local
-   conforme a ADR-016 y ADR-005 revisión 3. El siguiente gate es preparar y
-   revisar PLAN-011; no hay implementación autorizada. D-007 completo,
-   applicators y composición permanecen diferidos.
-2. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de
+1. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de
    contenedores y un contrato neutral de layout.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta

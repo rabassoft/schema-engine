@@ -23,6 +23,7 @@ const CORE_MODULES = Object.freeze([
   'internal/keywords',
   'internal/nested-definition',
   'internal/path',
+  'internal/schema-reference',
   'internal/value',
   'operations',
   'runtime',
@@ -153,6 +154,9 @@ try {
     'copyCollectionItemAddress',
     'normalizeDataPath',
     'readOwnValue',
+    'ResolvedSchemaCursor',
+    'ReferenceChain',
+    'DefinitionRegistryInspection',
   ]) {
     assert.equal(
       coreIndex.includes(internalName),

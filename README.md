@@ -11,13 +11,12 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository contains the completed M1-M10 controlled-form runtime and private
+The repository contains the completed M1-M11 controlled-form runtime and private
 local release candidates. Its G0 review passed; SPEC-001 v0.1.15, SPEC-002
-v0.1.2, SPEC-003 v0.1.2 and SPEC-004 v0.1.1 are Accepted; and PLAN-010
-completed the M10 homogeneous-object collection extension. M11 has accepted
-reference-resolution architecture and behavior after complete review cycle 5
-passed with zero findings. PLAN-011 preparation/review is the next gate; no M11
-implementation is authorized. The live checkpoint is recorded in
+v0.1.2, SPEC-003 v0.1.2 and SPEC-004 v0.1.1 are Accepted. PLAN-011 revision 0
+implemented same-document local reference resolution; all five checkpoints and
+the repeated final review are complete with zero findings. The live checkpoint
+is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
@@ -35,12 +34,14 @@ text. Its private primitive-leaf control buffers use Angular Signal Forms
 without moving controlled state, validation, identity, or operations out of
 the core/application boundary.
 
-The implemented boundary is the root object, recursively nested inline objects,
-primitive leaves and SPEC-003 homogeneous arrays of inline object items with
-application-owned stable string identity. Arrays of primitives, arrays inside
-collection item templates, tuples, references, composition, generated
-identity, async validation, persistence, advanced layouts, custom collection
-renderers and other deferred decisions are not active.
+The implemented boundary is the root object, recursively nested objects,
+primitive leaves and SPEC-003 homogeneous arrays of object items with
+application-owned stable string identity. The SPEC-004 subset resolves static
+same-document fragment-only `$ref` values into root `$defs` at supported
+non-root schema positions. External/dynamic references, anchors, arrays of
+primitives, arrays inside collection item templates, tuples, composition,
+generated identity, async validation, persistence, advanced layouts, custom
+collection renderers and other deferred decisions are not active.
 
 ## Branch workflow
 

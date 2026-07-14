@@ -11,33 +11,25 @@ assert.equal(typeof applyOperation, 'function');
 assert.equal(typeof applyFormOperation, 'function');
 assert.equal(typeof createControlledFormRuntime, 'function');
 
-const result = compileFormDefinition({
-  schema: {
-    $schema: 'https://json-schema.org/draft/2020-12/schema',
-    type: 'object',
-    properties: {
-      profile: {
-        type: 'object',
-        properties: { address: { type: 'string' } },
-      },
+const referencedSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  $defs: {
+    profile: {
+      type: 'object',
+      properties: { address: { type: 'string' } },
     },
   },
-});
+  type: 'object',
+  properties: { profile: { $ref: '#/$defs/profile' } },
+};
+const result = compileFormDefinition({ schema: referencedSchema });
 
 assert.equal(result.success, true);
 
 const runtimeResult = createControlledFormRuntime({
   formId: 'smoke',
   definition: result.definition,
-  schema: {
-    type: 'object',
-    properties: {
-      profile: {
-        type: 'object',
-        properties: { address: { type: 'string' } },
-      },
-    },
-  },
+  schema: referencedSchema,
   value: {},
   baselineValue: {},
   locale: 'en',

@@ -193,8 +193,7 @@ function createCoreConsumer(tarball, packageManager, typescriptVersion) {
 
 const schema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
-  type: 'object',
-  properties: {
+  $defs: {
     profile: {
       type: 'object',
       properties: { address: { type: 'string' } },
@@ -210,6 +209,11 @@ const schema = {
         required: ['id'],
       },
     },
+  },
+  type: 'object',
+  properties: {
+    profile: { $ref: '#/$defs/profile' },
+    rows: { $ref: '#/$defs/rows' },
   },
 };
 const compiled = compileFormDefinition({
@@ -376,8 +380,7 @@ interface ConsumerValue {
 
 const schema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
-  type: 'object',
-  properties: {
+  $defs: {
     profile: {
       type: 'object',
       title: 'Profile',
@@ -401,6 +404,11 @@ const schema = {
         required: ['id'],
       },
     },
+  },
+  type: 'object',
+  properties: {
+    profile: { $ref: '#/$defs/profile' },
+    rows: { $ref: '#/$defs/rows' },
   },
 };
 const compiled = compileFormDefinition({

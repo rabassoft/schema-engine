@@ -6,6 +6,235 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — PLAN-011 and M11 completed
+
+### Completed
+
+- Reviewed the entire PLAN-011/M11 authority, implementation, diagnostics,
+  19-scenario evidence, declarations, packages, consumers, documentation and
+  deferred boundaries in review 021.
+- Corrected cycle 1's policy-provenance finding: item reference chains now end
+  before array-level missing-policy diagnostics and remain attached only to
+  item-dependent semantic policy failures.
+- Added exact regressions for an inline array with referenced `items`, a
+  referenced array, and applicable item-dependent policy provenance.
+- Repeated the complete review in cycle 2 with zero findings, completing all
+  five PLAN-011 checkpoints and M11.
+- Reconciled SPEC/ADR/plan indexes, ROADMAP, D-041, release/package/root guides
+  and persistent state to the completed implementation without changing
+  accepted contracts.
+
+### Verification
+
+- Frozen-lockfile installation passed with the unchanged dependency graph.
+- All 328 core and 68 Angular tests pass.
+- Formatting, documentation, lint, full typecheck/build, package smoke,
+  repository consumer, exact packed artifacts and diff checks pass.
+- Isolated core and lower/upper Angular 22.0.6 consumers build from private
+  local `0.1.0` tarballs; deep imports remain blocked.
+- Root declarations/exports, Public contracts, manifests, dependencies,
+  lockfile, publication state and Stable classification remain unchanged.
+
+### Next
+
+- No implementation task is active. Evaluate M12 promotion readiness for
+  D-011/D-012 before any architecture, SPEC, plan or implementation work.
+
+## 2026-07-15 — PLAN-011 checkpoint 4 completed
+
+### Completed
+
+- Mapped every one of the 19 SPEC-004 scenarios to serializable conformance,
+  focused compiler/resolver or hostile programmatic evidence.
+- Covered every invalid/unresolved reason, precedence, registry ordering and
+  laziness, supported position, use-site normalization, cycle domain,
+  provenance exclusion, branch stopping and depth-5,000 behavior.
+- Proved the runtime validator receives the exact original referenced schema
+  object and existing runtime/operation/Angular paths consume only normalized
+  definitions.
+- Updated core package smoke and isolated core/lower/upper Angular 22 consumers
+  to compile/use referenced definitions through unchanged root imports.
+- Added the new Internal module to the exact tarball allowlist and explicit
+  guards preventing its types from entering root declarations.
+- Reconciled current implementation documentation while keeping M11 incomplete
+  until the final checkpoint 5 review.
+
+### Verification
+
+- Core tests pass 326/326 and Angular tests pass 68/68.
+- Formatting, documentation, lint, full typecheck/build/test, package smoke,
+  repository consumer, packed artifact and diff checks pass.
+- Isolated core and lower/upper Angular 22 clean consumers build successfully;
+  deep imports remain blocked.
+- The first complete matrix found three strict-lint matcher issues and the next
+  artifact pass found the expected Internal module absent from its allowlist;
+  both were corrected and the applicable full matrix repeated successfully.
+- No Public signature/export, runtime/operation/Angular production behavior,
+  manifest, dependency, lockfile, publication or Stable classification changed.
+
+### Next
+
+- Execute PLAN-011 checkpoint 5: complete diff/declaration review, full matrix
+  and repeated implementation review until one complete cycle has zero
+  findings; then close M11 with no active task.
+
+## 2026-07-15 — PLAN-011 checkpoint 3 completed
+
+### Completed
+
+- Integrated `$defs` inspection and root/non-root `$ref` classification into
+  the existing compiler after dialect and policy-exterior processing.
+- Normalized resolved primitive, object, array, item-root and item-descendant
+  targets independently at each managed use site without exposing resolver
+  metadata or changing Public contracts.
+- Added canonical target-path cycle tracking separately from active raw-object
+  containment tracking and preserved legal acyclic target reuse.
+- Added exact target document paths, use-site data/template paths and immutable
+  outermost-to-innermost reference provenance while excluding independent UI,
+  policy-exterior and unused-policy diagnostics.
+- Corrected two inaccurate expectations from the first focused test run; no
+  compiler behavior correction was required by that run.
+
+### Verification
+
+- Repeated focused reference tests pass 56/56 and all core tests pass 304/304.
+- Core typecheck, build and package smoke pass.
+- Documentation consistency, formatting, lint, local links and diff checks
+  pass.
+- No Public contract/export, runtime, operation, Angular production file,
+  manifest, dependency, lockfile, publication or Stable classification changed.
+
+### Next
+
+- Complete PLAN-011 checkpoint 4 with all 19 conformance/evidence rows,
+  validator identity, runtime/operation/Angular/package regressions and clean
+  consumers; keep checkpoint 5 inactive until this matrix is green.
+
+## 2026-07-15 — PLAN-011 checkpoint 2 completed
+
+### Completed
+
+- Extended the Internal `schema-reference` module with lazy `$defs`
+  exterior/entry inspection and ordered continuation after invalid entries.
+- Added exact fragment-only decoding, single UTF-8 percent-decoding, RFC 6901
+  token decoding, `$defs` scope enforcement and structural external-URI
+  classification without browser/Node URL APIs.
+- Added iterative mechanical target traversal through own enumerable data
+  descriptors, canonical textual array-index handling and exact decoded-prefix
+  failures without executing accessors.
+- Preserved exact schema identity, immutable target/reference provenance,
+  hostile `__proto__` handling and depth-5,000 traversal.
+- Corrected the first focused-run findings so failing sparse/non-enumerable/
+  accessor array tokens remain strings and inherited-member evidence uses an
+  ordinary object.
+- Kept compiler/root keyword behavior unchanged; `$defs`/`$ref` remain
+  behaviorally inactive until checkpoint 3.
+
+### Verification
+
+- Repeated checkpoint-focused tests pass 49/49 and all core tests pass 297/297.
+- Core typecheck, build and package smoke pass.
+- Documentation consistency, formatting, lint, local links and diff checks
+  pass.
+- No Public contract/export, compiler behavior, runtime, operation, Angular
+  production file, manifest, dependency, lockfile, publication or Stable
+  classification changed.
+
+### Next
+
+- Implement PLAN-011 checkpoint 3 compiler integration for reference
+  classification, target normalization, cycles, global ordering and provenance;
+  do not begin checkpoint 4 until focused integrated evidence is green.
+
+## 2026-07-15 — PLAN-011 approved; checkpoint 1 completed
+
+### Completed
+
+- Ricard formally approved PLAN-011 revision 0 after review 020 cycle 1 passed
+  all ten acceptance areas with zero findings.
+- Added an Internal `schema-reference` module for copied/frozen document paths,
+  reference chains, resolved cursors and diagnostic target/first/chain paths.
+- Preserved the exact caller schema object without cloning or freezing it and
+  kept the module absent from the root Public export.
+- Added four focused tests for caller mutation, nested isolation, hostile/lone
+  surrogate segments, exact schema identity and frozen diagnostic provenance.
+- Kept compiler/keyword behavior unchanged, so `$defs`/`$ref` remain inactive;
+  checkpoint 2 has not started.
+
+### Verification
+
+- Four focused tests and all 252 core tests pass.
+- Core typecheck, build and package smoke pass.
+- Documentation consistency, formatting, lint, local links and diff checks
+  pass.
+- No Public contract/export, runtime, operation, Angular production file,
+  manifest, dependency, lockfile, publication or Stable classification changed.
+
+### Next
+
+- Implement PLAN-011 checkpoint 2 Internal `$defs` exterior/index,
+  URI-fragment/JSON Pointer decoding and mechanical target resolution; do not
+  integrate or activate compiler reference behavior before checkpoint 3.
+
+## 2026-07-15 — PLAN-011 complete review passed
+
+### Completed
+
+- Reviewed PLAN-011 revision 0 completely against SPEC-004 v0.1.1, ADR-016,
+  ADR-005 revision 3, ADR-009, the accepted baselines and D-007/D-014/D-041.
+- Inspected the M10 compiler, diagnostic/immutable helpers, Public contracts,
+  conformance harness, package scripts and clean-consumer boundary.
+- Confirmed one concrete evidence row for each of the 19 SPEC scenarios, five
+  ordered checkpoints and objective completion/stop conditions.
+- Complete review cycle 1 passed all ten acceptance areas with zero findings,
+  requested corrections or documentation conflicts.
+- Kept PLAN-011 Proposed and implementation inactive pending Ricard's separate
+  formal approval decision.
+
+### Verification
+
+- Documentation consistency, formatting, lint, all local links and diff checks
+  passed.
+- Review 020 records the ten-area matrix and current-implementation fit.
+- No production code, Public contract, dependency, package, publication or
+  Stable classification changed.
+
+### Next
+
+- Decide formal approval of PLAN-011 revision 0; do not start checkpoint 1
+  unless Ricard approves it explicitly.
+
+## 2026-07-15 — PLAN-011 revision 0 drafted
+
+### Completed
+
+- Inspected the accepted SPEC-004 v0.1.1 contract, ADR-016, ADR-005 revision 3,
+  ADR-009 and the completed M10 compiler/test/package boundaries.
+- Drafted PLAN-011 revision 0 with a zero-signature Public migration, Internal
+  registry/decoder/cursor boundary and five gated implementation checkpoints.
+- Mapped all 19 SPEC-004 conformance scenarios to exact fixture/programmatic,
+  hostile/deep, validator, package and clean-consumer evidence.
+- Fixed expected production diff and stop conditions so runtime, operations,
+  Angular production, Public contracts, manifests, dependencies, publication
+  and deferred D-007/D-014 behavior remain closed.
+- Reconciled SPEC metadata, ROADMAP, D-041, onboarding and canonical status with
+  the Proposed plan while keeping implementation inactive.
+
+### Verification
+
+- Documentation consistency, formatting, lint, local-link and diff checks
+  passed.
+- PLAN-011 links resolve and its 19 scenario rows, five checkpoints, complete
+  matrix and repeated-review gate are explicit.
+- No production code, Public contract, dependency, package, publication or
+  Stable classification changed.
+
+### Next
+
+- Review PLAN-011 revision 0 completely against every accepted authority and
+  the current implementation; repeat after corrections until a complete cycle
+  passes with zero findings, then decide approval separately.
+
 ## 2026-07-15 — SPEC-004 accepted and current documentation reconciled
 
 ### Completed

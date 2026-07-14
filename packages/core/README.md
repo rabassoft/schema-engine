@@ -29,8 +29,10 @@ supported.
 ## Prototype boundary
 
 The current runtime supports a root object whose properties may recursively
-contain inline objects, primitive `string`, `number`, `integer`, and `boolean`
-leaves, and homogeneous arrays of inline object items. Collections require an
+contain objects, primitive `string`, `number`, `integer`, and `boolean` leaves,
+and homogeneous arrays of object items. The compiler resolves the accepted
+SPEC-004 static same-document fragment-only `$ref` subset through root `$defs`
+at supported non-root positions. Collections require an
 application-owned stable string identity property supplied through
 `collectionPolicies`. It provides normalized immutable definitions and
 snapshots, stable item addresses, positional read paths, synchronous external
@@ -39,10 +41,10 @@ collection operations. Object/item nesting is processed iteratively without an
 arbitrary depth limit; the application remains the only source of truth for
 values and identity.
 
-Arrays of primitives, arrays inside collection item templates, tuples,
-references, composition, generated/editable identity, async validation,
-persistence, advanced layouts, custom collection renderers, and other deferred
-capabilities are not included.
+External/dynamic references, anchors, arrays of primitives, arrays inside
+collection item templates, tuples, composition, generated/editable identity,
+async validation, persistence, advanced layouts, custom collection renderers,
+and other deferred capabilities are not included.
 
 See the [Schema Engine repository](https://github.com/rabassoft/schema-engine)
-for SPEC-001, SPEC-002, SPEC-003, ADRs, plans, and current project status.
+for SPEC-001 through SPEC-004, ADRs, plans, and current project status.

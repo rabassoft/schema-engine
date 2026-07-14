@@ -10,21 +10,20 @@
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2 and SPEC-004 v0.1.1
 - **Last proposed specification:** None
-- **Last implementation plan:** PLAN-010 revision 0, Completed after final
-  repeated review with zero findings
-- **Last completed implementation plan:** PLAN-010 revision 0
+- **Last implementation plan:** PLAN-011 revision 0, Completed after final
+  repeated implementation review passed with zero findings
+- **Last completed implementation plan:** PLAN-011 revision 0
 - **Active implementation task:** None
 - **Last accepted ADR:** ADR-005 revision 3
 - **Last proposed ADR:** None
-- **Promoted capabilities:** D-005/M9 and D-006/M10 implemented; D-041/M11 has
-  accepted architecture and behavior but no approved implementation plan
-- **Phase:** M1–M10 and G0 completed; M11 normative design accepted
+- **Promoted capabilities:** D-005/M9, D-006/M10 and D-041/M11 implemented
+- **Phase:** M1–M11 and G0 completed
 - **Package candidates:** private independent `0.1.0` artifacts; unpublished
 
 ## Current objective
 
-Prepare and completely review PLAN-011 for the accepted SPEC-004 v0.1.1
-delivery boundary without implementing it before explicit plan approval.
+Preserve the completed M1–M11 baseline and keep M12/deferred capabilities
+inactive until an explicit promotion-readiness task is authorized.
 
 ## In progress
 
@@ -32,22 +31,23 @@ delivery boundary without implementing it before explicit plan approval.
 
 ## Latest completed work
 
-- Formally accepted SPEC-004 v0.1.1 after review 019 cycle 5 passed all ten
-  areas with zero findings; no implementation plan was approved.
-- Reconciled current release, roadmap, ADR/index and onboarding metadata with
-  completed M10 and accepted SPEC-004, and added automated stale-claim checks.
-- Completed SPEC-004 review 019 cycles 1–5: nine findings were corrected and
-  the repeated complete cycle passed with zero findings.
-- Updated SPEC-004 to v0.1.1 with exact array-element, root-reference,
-  registry-continuation, cycle-locator and conformance contracts.
-- Formally accepted ADR-005 revision 3 after review 018 cycle 2 passed all ten
-  areas with zero findings.
+- Completed PLAN-011 revision 0 and M11 after review 021 cycle 2 repeated the
+  complete implementation review and full matrix with zero findings.
+- Corrected the final-review policy-provenance finding so item-target chains
+  apply only to item-dependent semantic policy diagnostics, never an inline
+  array's missing policy.
+- Completed PLAN-011 checkpoint 4 with all 19 SPEC-004 evidence rows, exact
+  validator-schema identity, package/artifact checks and isolated
+  core/lower/upper Angular 22 consumers passing.
+- Completed PLAN-011 checkpoint 3 by integrating descriptor-safe root/non-root
+  reference classification, resolved-target normalization, separate cycle
+  domains, exact ordering and immutable provenance into the existing compiler.
 
 ## Exact next action
 
-Draft PLAN-011 for the accepted SPEC-004 v0.1.1 boundary, then review it
-completely and repeat after corrections until a full cycle passes with zero
-findings; do not implement before explicit plan approval.
+Evaluate M12 promotion readiness for D-011/D-012 before drafting architecture,
+SPEC or plan; do not activate implementation without a separate explicit
+decision.
 
 ## Blockers and conflicts
 
@@ -58,32 +58,48 @@ findings; do not implement before explicit plan approval.
   All other array/deferred capabilities remain inactive.
 - D-014 remains Research outside its narrow D-041 responsibility and D-007
   remains Deferred outside D-041.
-- Review 016 is accepted, D-041 is Promoted for normative design only and
-  ADR-016 is Accepted after a zero-finding repeated review.
-- SPEC-004 v0.1.1 is Accepted, but `$defs`/`$ref` remain behaviorally inactive
-  until PLAN-011 is separately prepared, reviewed and approved, then
-  implemented and verified.
+- D-041 remains registrally Promoted and its narrow M11 delivery is complete;
+  D-007/D-014 work outside that slice remains inactive.
+- SPEC-004 v0.1.1 is accepted and PLAN-011 revision 0/M11 are complete after
+  final repeated review with zero findings.
 - ADR-016, ADR-005 revision 3, ADR-015 revision 4, SPEC-003 v0.1.2 and PLAN-010
   revision 0 are accepted/approved in the required order.
 
 ## Open questions
 
-- None before PLAN-011 drafting and review expose delivery questions.
+- None.
 
 ## Latest verification
 
 - Documentation consistency, formatting, lint and diff checks pass.
 - All local Markdown targets resolve through `pnpm docs:check`.
 - SPEC-004 review 019 cycle 5 passes all ten areas with zero findings.
-- Stale M10/release and completed ADR-016 gate phrases are rejected by
-  `pnpm docs:check`.
-- No production code, normative SPEC content, dependency, package, publication
-  or Stable classification changed.
+- Stale M10/M11 release, SPEC, ROADMAP, ADR-index and completed ADR-016 gate
+  phrases are rejected by `pnpm docs:check`.
+- PLAN-011 maps every SPEC-004 conformance scenario to concrete evidence and
+  declares no Public signature, Angular production or package-shape change.
+- PLAN-011 review 020 cycle 1 passes all ten acceptance areas with zero
+  findings.
+- PLAN-011 final matrix passes 328 core and 68 Angular tests, frozen-lockfile
+  installation, full typecheck/build, package smoke, packed artifacts,
+  repository consumer and lower/upper Angular 22 clean consumers.
+- Review 021 cycle 2 passes all implementation areas with zero findings after
+  correcting the cycle 1 policy-provenance finding.
+- Root declarations/exports, Public contracts, manifests, dependencies and
+  lockfile remain unchanged; Internal resolver types are absent from root
+  declarations and deep imports remain blocked.
+- No Public export/contract, dependency, manifest, lockfile, publication or
+  Stable classification changed.
 
 ## Task document map
 
 - Accepted observable M11 contract:
   `.ai-docs/specs/004-local-reference-resolution.md`
+- Completed M11 delivery contract:
+  `.ai-docs/plans/011-local-reference-resolution.md`
+- Complete PLAN-011 review: `.ai-docs/reviews/020-plan-011-review.md`
+- Final PLAN-011 implementation review:
+  `.ai-docs/reviews/021-plan-011-implementation-review.md`
 - Complete SPEC-004 review: `.ai-docs/reviews/019-spec-004-review.md`
 - Accepted M11 architecture: `.ai-docs/adrs/016-resolucion-referencias-locales.md`
 - Accepted dialect/reference contract:

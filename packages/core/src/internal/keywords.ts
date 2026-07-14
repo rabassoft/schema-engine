@@ -74,6 +74,8 @@ export const KNOWN_DRAFT_2020_12_KEYWORDS = new Set([
 
 export const ROOT_SUPPORTED_KEYWORDS = new Set([
   '$schema',
+  '$defs',
+  '$ref',
   'type',
   'properties',
   'required',
@@ -106,7 +108,9 @@ export const NUMBER_FIELD_KEYWORDS = new Set([
 export const BOOLEAN_FIELD_KEYWORDS = SHARED_FIELD_KEYWORDS;
 
 export const COMPILER_SUPPORTED_KEYWORDS = new Set([
-  ...ROOT_SUPPORTED_KEYWORDS,
+  ...[...ROOT_SUPPORTED_KEYWORDS].filter(
+    (keyword) => keyword !== '$defs' && keyword !== '$ref',
+  ),
   ...STRING_FIELD_KEYWORDS,
   ...NUMBER_FIELD_KEYWORDS,
 ]);

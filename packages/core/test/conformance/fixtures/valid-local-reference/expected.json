@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"value\"]",
+        "name": "value",
+        "path": ["value"],
+        "required": true,
+        "label": "Referenced value",
+        "kind": "string",
+        "constraints": { "minLength": 2 }
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"value\"]",
+        "name": "value",
+        "path": ["value"],
+        "required": true,
+        "label": "Referenced value",
+        "kind": "string",
+        "constraints": { "minLength": 2 }
+      }
+    ]
+  },
+  "diagnostics": []
+}

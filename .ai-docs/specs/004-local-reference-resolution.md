@@ -14,16 +14,17 @@
   [`ADR-016`](../adrs/016-resolucion-referencias-locales.md)
 - **Accepted dialect decision:**
   [`ADR-005 revision 3`](../adrs/005-politica-dialecto-json-schema.md)
-- **Implementation plan:** None; preparation and review of a separate plan are
-  authorized, but implementation requires its explicit approval
-- **Implementation state:** Inactive
+- **Implementation plan:**
+  [`PLAN-011 revision 0`](../plans/011-local-reference-resolution.md), Approved
+  after complete review cycle 1 passed with zero findings
+- **Implementation state:** Implemented by completed PLAN-011 after final
+  repeated implementation review passed with zero findings
 
 ## 1. Status and authority
 
 This Accepted specification defines the observable D-041 extension required by
 accepted ADR-016 and ADR-005 revision 3. It extends the accepted specifications
-only
-where it explicitly replaces their `$defs`/`$ref` exclusions. Every unchanged
+only where it explicitly replaces their `$defs`/`$ref` exclusions. Every unchanged
 compiler, normalized-definition, runtime, operation, Angular, validation,
 package, stability and publication rule remains authoritative.
 

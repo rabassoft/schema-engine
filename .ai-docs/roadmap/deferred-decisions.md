@@ -464,7 +464,7 @@ Cada decisión debe registrar:
   `FormDefinition` público sin cambios por defecto.
 - **Excluye:** `$id`, anchors, `$dynamicRef`, recursos/documentos externos,
   red/callbacks, applicators, condicionales, vocabularios, AST público/versionado,
-  render plan, multi-formato, implementación, publicación y Stable.
+  render plan, multi-formato, publicación y Stable.
 - **Documento actual:**
   [`ADR-016` Accepted](../adrs/016-resolucion-referencias-locales.md).
 - **Revisión completa:** [`review 017`](../reviews/017-adr-016-review.md) corrigió
@@ -481,13 +481,24 @@ Cada decisión debe registrar:
   [`SPEC-004 v0.1.1`](../specs/004-local-reference-resolution.md) el 15 de julio
   de 2026 después de que [`review 019`](../reviews/019-spec-004-review.md) ciclo
   5 pasara sin hallazgos.
-- **Siguiente gate:** preparar y revisar PLAN-011; no implementar antes de su
-  aprobación explícita.
+- **Plan propuesto:**
+  [`PLAN-011 revision 0`](../plans/011-local-reference-resolution.md) fue
+  aprobado formalmente y mapea los
+  19 escenarios y cinco checkpoints sin cambiar firmas públicas;
+  [`review 020`](../reviews/020-plan-011-review.md) ciclo 1 pasó las diez áreas
+  sin hallazgos.
+- **Entrega:** PLAN-011 revisión 0 completó sus cinco checkpoints; registry,
+  decoder, resolución mecánica, integración del compiler, los 19 escenarios,
+  paquetes y consumidores pasan. Review 021 ciclo 2 repitió la revisión final
+  completa con cero hallazgos.
+- **Siguiente gate:** ninguno para D-041; cualquier ampliación requiere promover
+  separadamente D-007, D-014 u otra capacidad diferida aplicable.
 
 ## 4. Próximo trabajo de decisión
 
-1. **M11 — PLAN-011:** preparar y revisar el plan de implementación del contrato
-   observable SPEC-004 v0.1.1 Accepted; no implementar antes de aprobarlo.
+1. **M12 — UI Schema avanzado:** evaluar la preparación conjunta de D-011 y
+   D-012 antes de redactar arquitectura, SPEC o plan; no hay implementación
+   autorizada.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
@@ -502,6 +513,14 @@ mantienen su estado hasta una promoción y aprobación explícitas.
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 15-07-2026 | PLAN-011 y M11 se completan; review 021 ciclo 2 y toda la matriz pasan sin hallazgos tras corregir provenance de políticas.              |
+| 15-07-2026 | PLAN-011 checkpoint 4 completa los 19 escenarios, paquetes y consumidores; 326 core/68 Angular tests pasan.                              |
+| 15-07-2026 | PLAN-011 checkpoint 3 integra `$defs`/`$ref`, ciclos, orden y provenance en el compiler; 304 tests core pasan.                           |
+| 15-07-2026 | PLAN-011 checkpoint 2 completa registry/decoder/resolver Internal y 297 tests core pasan; compiler/reference behavior sigue intacto.     |
+| 15-07-2026 | PLAN-011 checkpoint 1 completa fundamentos Internal inmutables y 252 tests core pasan; referencias siguen inactivas.                     |
+| 15-07-2026 | PLAN-011 revisión 0 queda Approved; checkpoint 1 inicia solo fundamentos Internal inmutables sin activar referencias.                    |
+| 15-07-2026 | PLAN-011 revisión 0 supera revisión completa ciclo 1 sin hallazgos y permanece Proposed pendiente de aprobación formal.                  |
+| 15-07-2026 | PLAN-011 revisión 0 queda Proposed con 19 escenarios y cinco checkpoints; requiere revisión completa y aprobación antes de implementar.  |
 | 15-07-2026 | SPEC-004 v0.1.1 queda Accepted tras revisión completa ciclo 5 sin hallazgos; se autoriza preparar/revisar PLAN-011, no implementar.      |
 | 14-07-2026 | SPEC-004 v0.1.1 corrige nueve hallazgos y la revisión completa ciclo 5 pasa sin hallazgos; aceptación formal pendiente.                  |
 | 14-07-2026 | SPEC-004 v0.1.0 queda Draft con el contrato observable D-041; requiere revisión completa y aceptación antes de cualquier plan.           |

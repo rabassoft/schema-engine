@@ -35,6 +35,26 @@ const staleCurrentClaims = [
     pattern: /\*\*SPEC, plan and implementation authorized:\*\* No/i,
     description: 'pre-SPEC-004 authorization gate',
   },
+  {
+    path: '.ai-docs/releases/0.1.0.md',
+    pattern: /accepted but unimplemented SPEC-004/i,
+    description: 'pre-completion M11 release scope',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /Checkpoint 3 aún no empezó/i,
+    description: 'pre-integration PLAN-011 state',
+  },
+  {
+    path: '.ai-docs/specs/004-local-reference-resolution.md',
+    pattern: /behavior remains inactive/i,
+    description: 'pre-completion SPEC-004 implementation state',
+  },
+  {
+    path: '.ai-docs/adrs/000-index.md',
+    pattern: /sin implementación autorizada/i,
+    description: 'pre-completion D-041 ADR index state',
+  },
 ];
 const ignoredDirectories = new Set([
   '.git',

@@ -1,0 +1,19 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "UNRESOLVED_SCHEMA_REFERENCE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["value"],
+      "documentPath": ["properties", "value", "$ref"],
+      "parameters": {
+        "reason": "missing-target",
+        "reference": "#/$defs/missing",
+        "targetDocumentPath": ["$defs", "missing"],
+        "referenceChain": [["properties", "value", "$ref"]]
+      },
+      "fallbackMessage": "Schema reference target could not be resolved."
+    }
+  ]
+}

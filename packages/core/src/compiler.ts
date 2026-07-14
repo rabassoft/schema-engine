@@ -27,6 +27,15 @@ import {
   STRING_FIELD_KEYWORDS,
 } from './internal/keywords.js';
 import {
+  appendReferencePath,
+  decodeSchemaReference,
+  inspectDefinitionRegistry,
+  referenceDiagnosticParameters,
+  resolveSchemaReference,
+  type InvalidSchemaReferenceReason,
+  type ReferenceChain,
+} from './internal/schema-reference.js';
+import {
   actualType,
   describeActualValue,
   describeDeclaredDialect,
@@ -137,6 +146,28 @@ interface ParsedCollectionPolicies {
   readonly byPath: ReadonlyMap<string, ParsedCollectionPolicy>;
 }
 
+interface ReferenceContext {
+  readonly rootSchema: Record<string, unknown>;
+  readonly registryAvailable: boolean;
+  readonly activeTargets: Map<string, readonly (string | number)[]>;
+}
+
+interface ResolvedUseSite {
+  readonly kind: 'resolved';
+  readonly schema: Record<string, unknown>;
+  readonly documentPath: readonly (string | number)[];
+  readonly referenceChain: ReferenceChain;
+  readonly activatedTargets: readonly string[];
+}
+
+interface BlockedUseSite {
+  readonly kind: 'blocked';
+  readonly referenceChain: ReferenceChain;
+  readonly activatedTargets: readonly string[];
+}
+
+type ResolvedUseSiteResult = ResolvedUseSite | BlockedUseSite;
+
 const SUPPORTED_FIELD_TYPES = new Set<FieldType>([
   'string',
   'number',
@@ -230,6 +261,27 @@ export function compileFormDefinition(
     const dialectValid = inspectDialect(rawSchema, diagnostics);
     diagnostics.push(...policyDiagnostics);
     if (dialectValid) {
+      const registry = inspectDefinitionRegistry(rawSchema);
+      for (const problem of registry.problems) {
+        diagnostics.push(
+          diagnostic({
+            code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+            severity: 'error',
+            source: 'schema',
+            documentPath: problem.documentPath,
+            parameters: {
+              keyword: '$defs',
+              ...(problem.definition === undefined
+                ? {}
+                : { definition: problem.definition }),
+              expected: problem.expected,
+              actualType: problem.actualType,
+            },
+            fallbackMessage: 'Schema keyword "$defs" has an invalid value.',
+          }),
+        );
+      }
+      inspectRootReference(rawSchema, diagnostics);
       const root = inspectRootSchema(rawSchema, diagnostics);
       propertyNames = root.propertyNames;
 
@@ -241,6 +293,11 @@ export function compileFormDefinition(
           rawSchema,
           collectionPolicies,
           usedPolicyIndices,
+          {
+            rootSchema: rawSchema,
+            registryAvailable: registry.kind !== 'invalid-exterior',
+            activeTargets: new Map(),
+          },
         );
         candidatesByName = new Map(
           candidates.map((candidate) => [candidate.name, candidate] as const),
@@ -548,6 +605,293 @@ function inspectDialect(
   return true;
 }
 
+function inspectRootReference(
+  schema: Record<string, unknown>,
+  diagnostics: Diagnostic[],
+): void {
+  const descriptor = Object.getOwnPropertyDescriptor(schema, '$ref');
+  if (descriptor === undefined) return;
+  const referencePath = ['$ref'] as const;
+  const referenceChain = appendReferencePath([], referencePath);
+  const reference =
+    'value' in descriptor && typeof descriptor.value === 'string'
+      ? descriptor.value
+      : undefined;
+  diagnostics.push(
+    diagnostic({
+      code: 'INVALID_SCHEMA_REFERENCE',
+      severity: 'error',
+      source: 'schema',
+      documentPath: referencePath,
+      parameters: referenceDiagnosticParameters(
+        {
+          reason: 'root-reference-not-supported',
+          ...(reference === undefined ? {} : { reference }),
+        },
+        { referenceChain },
+      ),
+      fallbackMessage: 'Schema reference is invalid.',
+    }),
+  );
+}
+
+function resolveUseSiteSchema(
+  schema: Record<string, unknown>,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  inheritedChain: ReferenceChain,
+  diagnostics: Diagnostic[],
+  context: ReferenceContext,
+  templatePath?: readonly string[],
+): ResolvedUseSiteResult {
+  let currentSchema = schema;
+  let currentDocumentPath = documentPath;
+  let referenceChain = inheritedChain;
+  const activatedTargets: string[] = [];
+
+  while (true) {
+    const descriptor = Object.getOwnPropertyDescriptor(currentSchema, '$ref');
+    if (descriptor === undefined) {
+      return {
+        kind: 'resolved',
+        schema: currentSchema,
+        documentPath: currentDocumentPath,
+        referenceChain,
+        activatedTargets,
+      };
+    }
+
+    const referencePath = [...currentDocumentPath, '$ref'];
+    referenceChain = appendReferencePath(referenceChain, referencePath);
+    let reference: string | undefined;
+    let invalidReason: InvalidSchemaReferenceReason | undefined;
+    let decoded: ReturnType<typeof decodeSchemaReference> | undefined;
+    if (!('value' in descriptor)) {
+      invalidReason = 'accessor-reference';
+    } else if (typeof descriptor.value !== 'string') {
+      invalidReason = 'non-string-reference';
+    } else {
+      reference = descriptor.value;
+      decoded = decodeSchemaReference(reference);
+      invalidReason = decoded.kind === 'invalid' ? decoded.reason : undefined;
+    }
+
+    if (invalidReason !== undefined) {
+      pushReferenceDiagnostic(
+        diagnostics,
+        diagnostic({
+          code: 'INVALID_SCHEMA_REFERENCE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: referencePath,
+          parameters: referenceDiagnosticParameters(
+            {
+              reason: invalidReason,
+              ...(reference === undefined ? {} : { reference }),
+            },
+            { referenceChain },
+          ),
+          fallbackMessage: 'Schema reference is invalid.',
+        }),
+        templatePath,
+      );
+    }
+
+    const compatible = inspectReferenceSiblings(
+      currentSchema,
+      dataPath,
+      currentDocumentPath,
+      referenceChain,
+      diagnostics,
+      templatePath,
+    );
+    if (
+      invalidReason !== undefined ||
+      !compatible ||
+      !context.registryAvailable ||
+      decoded?.kind !== 'decoded' ||
+      reference === undefined
+    ) {
+      return { kind: 'blocked', referenceChain, activatedTargets };
+    }
+
+    const resolution = resolveSchemaReference(
+      context.rootSchema,
+      decoded.tokens,
+      referenceChain,
+    );
+    if (resolution.kind === 'invalid') {
+      pushReferenceDiagnostic(
+        diagnostics,
+        diagnostic({
+          code: 'INVALID_SCHEMA_REFERENCE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: referencePath,
+          parameters: referenceDiagnosticParameters(
+            { reason: resolution.reason, reference },
+            { referenceChain },
+          ),
+          fallbackMessage: 'Schema reference is invalid.',
+        }),
+        templatePath,
+      );
+      return { kind: 'blocked', referenceChain, activatedTargets };
+    }
+    if (resolution.kind === 'unresolved') {
+      pushReferenceDiagnostic(
+        diagnostics,
+        diagnostic({
+          code: 'UNRESOLVED_SCHEMA_REFERENCE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: referencePath,
+          parameters: referenceDiagnosticParameters(
+            { reason: resolution.reason, reference },
+            {
+              targetDocumentPath: resolution.targetDocumentPath,
+              referenceChain,
+            },
+          ),
+          fallbackMessage: 'Schema reference target could not be resolved.',
+        }),
+        templatePath,
+      );
+      return { kind: 'blocked', referenceChain, activatedTargets };
+    }
+
+    const targetPath = resolution.cursor.documentPath;
+    const targetKey = JSON.stringify(targetPath);
+    const firstDocumentPath = context.activeTargets.get(targetKey);
+    if (firstDocumentPath !== undefined) {
+      pushReferenceDiagnostic(
+        diagnostics,
+        diagnostic({
+          code: 'CYCLIC_SCHEMA_REFERENCE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: referencePath,
+          parameters: referenceDiagnosticParameters(
+            {},
+            { firstDocumentPath, referenceChain },
+          ),
+          fallbackMessage: 'Schema reference cycle detected.',
+        }),
+        templatePath,
+      );
+      return { kind: 'blocked', referenceChain, activatedTargets };
+    }
+
+    context.activeTargets.set(targetKey, targetPath);
+    activatedTargets.push(targetKey);
+    currentSchema = resolution.cursor.schema;
+    currentDocumentPath = resolution.cursor.documentPath;
+  }
+}
+
+function inspectReferenceSiblings(
+  schema: Record<string, unknown>,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  referenceChain: ReferenceChain,
+  diagnostics: Diagnostic[],
+  templatePath?: readonly string[],
+): boolean {
+  let compatible = true;
+  for (const keyword of Object.keys(schema)) {
+    if (keyword === '$ref') continue;
+    const keywordPath = [...documentPath, keyword];
+    let value: Diagnostic;
+    if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+      value = schemaKeywordDiagnostic(
+        'IGNORED_SCHEMA_KEYWORD',
+        'warning',
+        keyword,
+        keywordPath,
+        `Known annotation "${keyword}" is ignored by the compiler.`,
+        dataPath,
+      );
+    } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+      compatible = false;
+      value = diagnostic({
+        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: keywordPath,
+        parameters: { keyword, fieldType: 'reference' },
+        fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "reference".`,
+      });
+    } else {
+      value = schemaKeywordDiagnostic(
+        'UNKNOWN_SCHEMA_KEYWORD',
+        'warning',
+        keyword,
+        keywordPath,
+        `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+        dataPath,
+      );
+    }
+    pushReferenceDiagnostic(
+      diagnostics,
+      {
+        ...value,
+        parameters: referenceDiagnosticParameters(value.parameters, {
+          referenceChain,
+        }),
+      },
+      templatePath,
+    );
+  }
+  return compatible;
+}
+
+function pushReferenceDiagnostic(
+  diagnostics: Diagnostic[],
+  value: Diagnostic,
+  templatePath?: readonly string[],
+): void {
+  diagnostics.push(
+    templatePath === undefined ? value : withTemplatePath(value, templatePath),
+  );
+}
+
+function releaseReferenceTargets(
+  context: ReferenceContext,
+  activatedTargets: readonly string[],
+): void {
+  for (let index = activatedTargets.length - 1; index >= 0; index -= 1) {
+    context.activeTargets.delete(activatedTargets[index] as string);
+  }
+}
+
+function addReferenceChainToRange(
+  diagnostics: Diagnostic[],
+  start: number,
+  referenceChain: ReferenceChain,
+): void {
+  if (referenceChain.length === 0) return;
+  for (let index = start; index < diagnostics.length; index += 1) {
+    const current = diagnostics[index];
+    if (
+      current === undefined ||
+      Object.hasOwn(current.parameters, 'referenceChain')
+    ) {
+      continue;
+    }
+    diagnostics[index] = {
+      ...current,
+      parameters: referenceDiagnosticParameters(current.parameters, {
+        referenceChain,
+      }),
+    };
+  }
+}
+
 function inspectRootSchema(
   schema: Record<string, unknown>,
   diagnostics: Diagnostic[],
@@ -846,12 +1190,17 @@ function inspectNodes(
   rootSchema: Record<string, unknown>,
   collectionPolicies: ParsedCollectionPolicies,
   usedPolicyIndices: Set<number>,
+  referenceContext: ReferenceContext,
 ): NodeCandidate[] {
   const candidates: NodeCandidate[] = [];
   type Frame =
     | {
         readonly kind: 'exit';
         readonly schema: Record<string, unknown>;
+        readonly previousDocumentPath?: readonly (string | number)[];
+        readonly diagnosticStart: number;
+        readonly referenceChain: ReferenceChain;
+        readonly activatedTargets: readonly string[];
       }
     | {
         readonly kind: 'node';
@@ -861,6 +1210,7 @@ function inspectNodes(
         readonly dataPath: readonly string[];
         readonly documentPath: readonly (string | number)[];
         readonly output: NodeCandidate[];
+        readonly referenceChain: ReferenceChain;
       };
   const active = new Map<object, readonly (string | number)[]>([
     [rootSchema, []],
@@ -881,6 +1231,7 @@ function inspectNodes(
       dataPath: [name],
       documentPath: ['properties', name],
       output: candidates,
+      referenceChain: [],
     });
   }
 
@@ -890,7 +1241,14 @@ function inspectNodes(
       break;
     }
     if (frame.kind === 'exit') {
-      active.delete(frame.schema);
+      if (frame.previousDocumentPath === undefined) active.delete(frame.schema);
+      else active.set(frame.schema, frame.previousDocumentPath);
+      releaseReferenceTargets(referenceContext, frame.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        frame.diagnosticStart,
+        frame.referenceChain,
+      );
       continue;
     }
 
@@ -901,7 +1259,9 @@ function inspectNodes(
       dataPath,
       documentPath: fieldPath,
       output,
+      referenceChain: inheritedChain,
     } = frame;
+    const diagnosticStart = diagnostics.length;
 
     if (rawField === ACCESSOR_VALUE || !isOrdinaryRecord(rawField)) {
       diagnostics.push(
@@ -922,22 +1282,48 @@ function inspectNodes(
       continue;
     }
 
-    if (!Object.hasOwn(rawField, 'type')) {
+    const resolved = resolveUseSiteSchema(
+      rawField,
+      dataPath,
+      fieldPath,
+      inheritedChain,
+      diagnostics,
+      referenceContext,
+    );
+    if (resolved.kind === 'blocked') {
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
+      continue;
+    }
+    const field = resolved.schema;
+    const resolvedFieldPath = resolved.documentPath;
+
+    if (!Object.hasOwn(field, 'type')) {
       diagnostics.push(
         diagnostic({
           code: 'MISSING_FIELD_TYPE',
           severity: 'error',
           source: 'schema',
           dataPath,
-          documentPath: [...fieldPath, 'type'],
+          documentPath: [...resolvedFieldPath, 'type'],
           parameters: { field: name },
           fallbackMessage: `Field "${name}" must declare a type.`,
         }),
       );
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
       continue;
     }
 
-    const typeDescriptor = Object.getOwnPropertyDescriptor(rawField, 'type');
+    const typeDescriptor = Object.getOwnPropertyDescriptor(field, 'type');
     const rawType: unknown =
       typeDescriptor !== undefined && 'value' in typeDescriptor
         ? typeDescriptor.value
@@ -949,7 +1335,7 @@ function inspectNodes(
           severity: 'error',
           source: 'schema',
           dataPath,
-          documentPath: [...fieldPath, 'type'],
+          documentPath: [...resolvedFieldPath, 'type'],
           parameters: {
             field: name,
             ...(rawType === ACCESSOR_VALUE
@@ -959,6 +1345,12 @@ function inspectNodes(
           fallbackMessage: `Field "${name}" has an unsupported type.`,
         }),
       );
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
       continue;
     }
 
@@ -967,64 +1359,103 @@ function inspectNodes(
         inspectValidField(
           name,
           rawType as FieldType,
-          rawField,
+          field,
           required,
           diagnostics,
           dataPath,
-          fieldPath,
+          resolvedFieldPath,
         ),
+      );
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
       );
       continue;
     }
 
-    const firstDocumentPath = active.get(rawField);
-    if (firstDocumentPath !== undefined) {
+    const firstDocumentPath = active.get(field);
+    if (
+      firstDocumentPath !== undefined &&
+      resolved.activatedTargets.length === 0
+    ) {
       diagnostics.push(
         diagnostic({
           code: 'CYCLIC_SCHEMA_OBJECT',
           severity: 'error',
           source: 'schema',
           dataPath,
-          documentPath: fieldPath,
+          documentPath: resolvedFieldPath,
           parameters: { firstDocumentPath: [...firstDocumentPath] },
           fallbackMessage: 'Schema object cycle detected.',
         }),
+      );
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
       );
       continue;
     }
 
     if (rawType === 'array') {
-      active.set(rawField, fieldPath);
+      active.set(field, resolvedFieldPath);
       const array = inspectArrayCandidate(
         name,
-        rawField,
+        field,
         required,
         dataPath,
-        fieldPath,
+        resolvedFieldPath,
         diagnostics,
         active,
         collectionPolicies,
         usedPolicyIndices,
+        referenceContext,
+        resolved.referenceChain,
       );
-      active.delete(rawField);
+      if (firstDocumentPath === undefined) active.delete(field);
+      else active.set(field, firstDocumentPath);
       if (array !== undefined) output.push(array);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
       continue;
     }
 
     const object = inspectObjectCandidate(
       name,
-      rawField,
+      field,
       required,
       dataPath,
-      fieldPath,
+      resolvedFieldPath,
       diagnostics,
     );
     if (object === undefined) {
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
       continue;
     }
     output.push(object.candidate);
-    active.set(rawField, fieldPath);
-    stack.push({ kind: 'exit', schema: rawField });
+    active.set(field, resolvedFieldPath);
+    stack.push({
+      kind: 'exit',
+      schema: field,
+      ...(firstDocumentPath === undefined
+        ? {}
+        : { previousDocumentPath: firstDocumentPath }),
+      diagnosticStart,
+      referenceChain: resolved.referenceChain,
+      activatedTargets: resolved.activatedTargets,
+    });
     const childNames = Object.keys(object.properties);
     for (let index = childNames.length - 1; index >= 0; index -= 1) {
       const childName = childNames[index] as string;
@@ -1041,8 +1472,9 @@ function inspectNodes(
             : ACCESSOR_VALUE,
         required: object.requiredNames.has(childName),
         dataPath: [...dataPath, childName],
-        documentPath: [...fieldPath, 'properties', childName],
+        documentPath: [...resolvedFieldPath, 'properties', childName],
         output: object.candidate.children,
+        referenceChain: resolved.referenceChain,
       });
     }
   }
@@ -1060,6 +1492,8 @@ function inspectArrayCandidate(
   active: Map<object, readonly (string | number)[]>,
   collectionPolicies: ParsedCollectionPolicies,
   usedPolicyIndices: Set<number>,
+  referenceContext: ReferenceContext,
+  referenceChain: ReferenceChain,
 ): ArrayCandidate | undefined {
   let schemaTitle: string | undefined;
   let schemaDescription: string | undefined;
@@ -1190,8 +1624,27 @@ function inspectArrayCandidate(
     return undefined;
   }
 
-  const firstItemsPath = active.get(itemsMember.value);
-  if (firstItemsPath !== undefined) {
+  const itemDiagnosticStart = diagnostics.length;
+  const resolvedItems = resolveUseSiteSchema(
+    itemsMember.value,
+    dataPath,
+    itemsPath,
+    referenceChain,
+    diagnostics,
+    referenceContext,
+    [],
+  );
+  const itemSchema =
+    resolvedItems.kind === 'resolved' ? resolvedItems.schema : undefined;
+  const resolvedItemsPath =
+    resolvedItems.kind === 'resolved' ? resolvedItems.documentPath : itemsPath;
+  const firstItemsPath =
+    itemSchema === undefined ? undefined : active.get(itemSchema);
+  if (
+    itemSchema !== undefined &&
+    firstItemsPath !== undefined &&
+    resolvedItems.activatedTargets.length === 0
+  ) {
     diagnostics.push(
       withTemplatePath(
         diagnostic({
@@ -1199,12 +1652,18 @@ function inspectArrayCandidate(
           severity: 'error',
           source: 'schema',
           dataPath,
-          documentPath: itemsPath,
+          documentPath: resolvedItemsPath,
           parameters: { firstDocumentPath: [...firstItemsPath] },
           fallbackMessage: 'Schema object cycle detected.',
         }),
         [],
       ),
+    );
+    releaseReferenceTargets(referenceContext, resolvedItems.activatedTargets);
+    addReferenceChainToRange(
+      diagnostics,
+      itemDiagnosticStart,
+      resolvedItems.referenceChain,
     );
     if (collectionPolicies.valid && policy === undefined) {
       diagnostics.push(
@@ -1221,29 +1680,43 @@ function inspectArrayCandidate(
     return undefined;
   }
 
-  const item = inspectItemRoot(
-    name,
-    itemsMember.value,
-    dataPath,
-    itemsPath,
-    diagnostics,
-  );
+  const item =
+    itemSchema === undefined
+      ? undefined
+      : inspectItemRoot(
+          name,
+          itemSchema,
+          dataPath,
+          resolvedItemsPath,
+          diagnostics,
+        );
   const children: NodeCandidate[] = [];
   let identitySchemaCompatible = false;
   if (item !== undefined) {
-    active.set(itemsMember.value, itemsPath);
+    active.set(itemSchema as Record<string, unknown>, resolvedItemsPath);
     identitySchemaCompatible = inspectItemTemplateChildren(
       item.properties,
       item.requiredNames,
       policy?.itemIdentityProperty,
       children,
       dataPath,
-      itemsPath,
+      resolvedItemsPath,
       diagnostics,
       active,
+      referenceContext,
+      resolvedItems.referenceChain,
     );
-    active.delete(itemsMember.value);
+    if (firstItemsPath === undefined)
+      active.delete(itemSchema as Record<string, unknown>);
+    else active.set(itemSchema as Record<string, unknown>, firstItemsPath);
   }
+
+  releaseReferenceTargets(referenceContext, resolvedItems.activatedTargets);
+  addReferenceChainToRange(
+    diagnostics,
+    itemDiagnosticStart,
+    resolvedItems.referenceChain,
+  );
 
   if (collectionPolicies.valid) {
     if (policy === undefined) {
@@ -1267,6 +1740,7 @@ function inspectArrayCandidate(
           dataPath,
           'identity-property-not-found',
           'direct item property',
+          resolvedItems.referenceChain,
         ),
       );
     } else if (!item.requiredNames.has(policy.itemIdentityProperty)) {
@@ -1276,6 +1750,7 @@ function inspectArrayCandidate(
           dataPath,
           'identity-property-not-required',
           'required item property',
+          resolvedItems.referenceChain,
         ),
       );
     } else if (!identitySchemaCompatible) {
@@ -1285,6 +1760,7 @@ function inspectArrayCandidate(
           dataPath,
           'identity-schema-incompatible',
           'required direct string identity property',
+          resolvedItems.referenceChain,
         ),
       );
     }
@@ -1509,9 +1985,18 @@ function inspectItemTemplateChildren(
   itemDocumentPath: readonly (string | number)[],
   diagnostics: Diagnostic[],
   active: Map<object, readonly (string | number)[]>,
+  referenceContext: ReferenceContext,
+  inheritedReferenceChain: ReferenceChain,
 ): boolean {
   type Frame =
-    | { readonly kind: 'exit'; readonly schema: Record<string, unknown> }
+    | {
+        readonly kind: 'exit';
+        readonly schema: Record<string, unknown>;
+        readonly previousDocumentPath?: readonly (string | number)[];
+        readonly diagnosticStart: number;
+        readonly referenceChain: ReferenceChain;
+        readonly activatedTargets: readonly string[];
+      }
     | {
         readonly kind: 'node';
         readonly name: string;
@@ -1520,6 +2005,7 @@ function inspectItemTemplateChildren(
         readonly templatePath: readonly string[];
         readonly documentPath: readonly (string | number)[];
         readonly output: NodeCandidate[];
+        readonly referenceChain: ReferenceChain;
       };
   const stack: Frame[] = [];
   const names = Object.keys(properties);
@@ -1535,6 +2021,7 @@ function inspectItemTemplateChildren(
       templatePath: [name],
       documentPath: [...itemDocumentPath, 'properties', name],
       output,
+      referenceChain: inheritedReferenceChain,
     });
   }
   let identityCompatible = false;
@@ -1542,7 +2029,14 @@ function inspectItemTemplateChildren(
     const frame = stack.pop();
     if (frame === undefined) break;
     if (frame.kind === 'exit') {
-      active.delete(frame.schema);
+      if (frame.previousDocumentPath === undefined) active.delete(frame.schema);
+      else active.set(frame.schema, frame.previousDocumentPath);
+      releaseReferenceTargets(referenceContext, frame.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        frame.diagnosticStart,
+        frame.referenceChain,
+      );
       continue;
     }
     const start = diagnostics.length;
@@ -1570,7 +2064,23 @@ function inspectItemTemplateChildren(
       addTemplatePathToRange(diagnostics, start, frame.templatePath);
       continue;
     }
-    const schema = frame.schemaValue;
+    const resolved = resolveUseSiteSchema(
+      frame.schemaValue,
+      arrayPath,
+      frame.documentPath,
+      frame.referenceChain,
+      diagnostics,
+      referenceContext,
+      frame.templatePath,
+    );
+    if (resolved.kind === 'blocked') {
+      addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
+    const schema = resolved.schema;
+    const resolvedDocumentPath = resolved.documentPath;
     const typeMember = ownDataValue(schema, 'type');
     if (!typeMember.present) {
       diagnostics.push(
@@ -1579,12 +2089,14 @@ function inspectItemTemplateChildren(
           severity: 'error',
           source: 'schema',
           dataPath: arrayPath,
-          documentPath: [...frame.documentPath, 'type'],
+          documentPath: [...resolvedDocumentPath, 'type'],
           parameters: { field: frame.name },
           fallbackMessage: `Field "${frame.name}" must declare a type.`,
         }),
       );
       addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
     const rawType = typeMember.accessor ? ACCESSOR_VALUE : typeMember.value;
@@ -1594,10 +2106,12 @@ function inspectItemTemplateChildren(
         schema,
         rawType,
         arrayPath,
-        frame.documentPath,
+        resolvedDocumentPath,
         frame.templatePath,
         diagnostics,
       );
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
     if (rawType === 'array') {
@@ -1608,7 +2122,7 @@ function inspectItemTemplateChildren(
             severity: 'error',
             source: 'schema',
             dataPath: arrayPath,
-            documentPath: [...frame.documentPath, 'type'],
+            documentPath: [...resolvedDocumentPath, 'type'],
             parameters: {
               field: frame.name,
               reason: 'nested-array-not-supported',
@@ -1618,6 +2132,8 @@ function inspectItemTemplateChildren(
           frame.templatePath,
         ),
       );
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
     if (typeof rawType !== 'string' || !SUPPORTED_NODE_TYPES.has(rawType)) {
@@ -1627,7 +2143,7 @@ function inspectItemTemplateChildren(
           severity: 'error',
           source: 'schema',
           dataPath: arrayPath,
-          documentPath: [...frame.documentPath, 'type'],
+          documentPath: [...resolvedDocumentPath, 'type'],
           parameters: {
             field: frame.name,
             ...(rawType === ACCESSOR_VALUE
@@ -1638,6 +2154,8 @@ function inspectItemTemplateChildren(
         }),
       );
       addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
     if (rawType !== 'object') {
@@ -1648,26 +2166,30 @@ function inspectItemTemplateChildren(
         frame.required,
         diagnostics,
         arrayPath,
-        frame.documentPath,
+        resolvedDocumentPath,
       );
       frame.output.push({ ...candidate, templatePath: frame.templatePath });
       addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
     const firstPath = active.get(schema);
-    if (firstPath !== undefined) {
+    if (firstPath !== undefined && resolved.activatedTargets.length === 0) {
       diagnostics.push(
         diagnostic({
           code: 'CYCLIC_SCHEMA_OBJECT',
           severity: 'error',
           source: 'schema',
           dataPath: arrayPath,
-          documentPath: frame.documentPath,
+          documentPath: resolvedDocumentPath,
           parameters: { firstDocumentPath: [...firstPath] },
           fallbackMessage: 'Schema object cycle detected.',
         }),
       );
       addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
     const object = inspectObjectCandidate(
@@ -1675,18 +2197,29 @@ function inspectItemTemplateChildren(
       schema,
       frame.required,
       arrayPath,
-      frame.documentPath,
+      resolvedDocumentPath,
       diagnostics,
     );
     addTemplatePathToRange(diagnostics, start, frame.templatePath);
-    if (object === undefined) continue;
+    if (object === undefined) {
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
     const candidate: ObjectCandidate = {
       ...object.candidate,
       templatePath: frame.templatePath,
     };
     frame.output.push(candidate);
-    active.set(schema, frame.documentPath);
-    stack.push({ kind: 'exit', schema });
+    active.set(schema, resolvedDocumentPath);
+    stack.push({
+      kind: 'exit',
+      schema,
+      ...(firstPath === undefined ? {} : { previousDocumentPath: firstPath }),
+      diagnosticStart: start,
+      referenceChain: resolved.referenceChain,
+      activatedTargets: resolved.activatedTargets,
+    });
     const childNames = Object.keys(object.properties);
     for (let index = childNames.length - 1; index >= 0; index -= 1) {
       const childName = childNames[index] as string;
@@ -1698,8 +2231,9 @@ function inspectItemTemplateChildren(
           member.present && !member.accessor ? member.value : ACCESSOR_VALUE,
         required: object.requiredNames.has(childName),
         templatePath: [...frame.templatePath, childName],
-        documentPath: [...frame.documentPath, 'properties', childName],
+        documentPath: [...resolvedDocumentPath, 'properties', childName],
         output: candidate.children,
+        referenceChain: resolved.referenceChain,
       });
     }
   }
@@ -1815,8 +2349,9 @@ function semanticCollectionPolicyDiagnostic(
     | 'identity-property-not-required'
     | 'identity-schema-incompatible',
   expected: string,
+  referenceChain: ReferenceChain,
 ): Diagnostic {
-  return diagnostic({
+  const value = diagnostic({
     code: 'INVALID_COLLECTION_POLICY',
     severity: 'error',
     source: 'schema',
@@ -1829,6 +2364,14 @@ function semanticCollectionPolicyDiagnostic(
     },
     fallbackMessage: 'Collection policy is incompatible with the item schema.',
   });
+  return referenceChain.length === 0
+    ? value
+    : {
+        ...value,
+        parameters: referenceDiagnosticParameters(value.parameters, {
+          referenceChain,
+        }),
+      };
 }
 
 function addTemplatePathToRange(
