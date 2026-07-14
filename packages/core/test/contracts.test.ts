@@ -3,6 +3,7 @@ import type {
   FieldUiSchema,
   FieldTextMember,
   FieldDefinition,
+  FieldTemplate,
   StringChoiceDefinition,
   StringFieldDefinition,
   TextResolutionContext,
@@ -62,7 +63,7 @@ describe('public string choice contracts', () => {
     >().toEqualTypeOf<{
       readonly formId: string;
       readonly locale: string;
-      readonly field: FieldDefinition;
+      readonly field: FieldDefinition | FieldTemplate;
       readonly member: 'choice';
       readonly choice: StringChoiceDefinition;
       readonly issue?: never;

@@ -6,7 +6,7 @@
 - **Review revision:** 0
 - **Review state:** Complete review cycle 1 passed all nine areas with zero
   findings; formally approved by Ricard
-- **Implementation state:** Checkpoints 1–3 completed; checkpoints 4–7 pending
+- **Implementation state:** Checkpoints 1–4 completed; checkpoints 5–7 pending
 - **Implementation authorized:** Yes — checkpoints 1–7 only
 - **Requires:** accepted
   [`SPEC-001` v0.1.15](../specs/001-controlled-form-runtime.md),
@@ -505,7 +505,7 @@ explicit formal approval decision.
 Ricard explicitly approved PLAN-010 revision 0 on 14 July 2026 after complete
 review cycle 1 passed all nine areas with zero findings. Approval authorizes
 only checkpoints 1–7 and their stated verification/stop conditions.
-Checkpoints 1–3 are complete; checkpoints 4–7 remain pending. No excluded
+Checkpoints 1–4 are complete; checkpoints 5–7 remain pending. No excluded
 capability, Stable promotion or publication is authorized.
 
 ### 15.3 Implementation checkpoint 1
@@ -555,3 +555,25 @@ identity and expectation staleness, accessors, descriptors, opaque references
 and diagnostic precedence. Existing M9 operations remain unchanged. Collection
 runtime snapshots, requests and Angular hosts remain inactive; checkpoint 4 is
 the next authorized action.
+
+### 15.6 Implementation checkpoint 4
+
+Checkpoint 4 completed on 14 July 2026. The controlled runtime now inspects
+current and baseline collection identity without invoking accessors, publishes
+stable collection/item/template snapshots plus dynamic leaf projections, and
+reconciles dirty, interaction and structural sharing by item identity.
+
+Positional reads remain observation-only; stable reads, all five collection
+requests, stable focus/blur and collection-aware validation scopes are active.
+Issue assignment follows positional validator paths with array/item/deepest
+managed fallbacks, invalid identity exposes no addressable descendants, and
+start/end insertion alone permits compatible missing-path materialization.
+
+Focused runtime evidence covers hostile argument/member parsing, current then
+baseline inspection order, deep iterative item trees, identity recovery,
+movement/removal interaction, immutable replacement sharing, all request
+variants, dirty matrices, validation visibility and exact blocking paths.
+Format, lint, typecheck, builds, 247 core tests, 59 Angular tests, package smoke,
+integrated consumer and exact artifact checks pass. Angular collection/item
+hosts and projection behavior remain inactive; checkpoint 5 is the next
+authorized action.

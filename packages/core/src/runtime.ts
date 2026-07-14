@@ -1,10 +1,14 @@
 import type {
+  CollectionItemAddress,
+  CollectionNodeAddress,
+  CollectionPlacement,
   ControlledFormRuntimeOptions,
   CreateControlledFormRuntimeResult,
   DataPath,
   Diagnostic,
   ExternalStateUpdate,
   FieldDefinition,
+  FieldTemplate,
   FieldPresence,
   FieldRuntimeSnapshot,
   FormNodeDefinition,
@@ -12,11 +16,13 @@ import type {
   FormRuntime,
   FormRuntimeSnapshot,
   FormScope,
+  ItemRuntimeSnapshot,
   OperationListener,
   NodeRuntimeSnapshot,
   ObjectFieldDefinition,
   ObjectPresence,
   ObjectRuntimeSnapshot,
+  RuntimeTreeSnapshot,
   RuntimeActionResult,
   SnapshotListener,
   SubscribeResult,
@@ -27,8 +33,21 @@ import type {
 import { diagnostic } from './internal/diagnostics.js';
 import {
   type NestedDefinitionDefect,
-  validateNestedFormDefinition,
+  validateCollectionFormDefinition,
 } from './internal/nested-definition.js';
+import {
+  canonicalInstanceNodeKey,
+  canonicalItemKey,
+  copyCollectionItemAddress,
+  copyCollectionNodeAddress,
+} from './internal/collection-address.js';
+import {
+  buildCollectionSnapshotShell,
+  collectionIdentityDiagnostics,
+  firstManagedDataAccessor,
+  inspectCollectionValue,
+  inspectDefinedCollections,
+} from './internal/collection-runtime.js';
 import {
   canonicalDataPathKey,
   copyStringDataPath,
@@ -56,7 +75,14 @@ export function createControlledFormRuntime<TData extends object>(
   return Object.freeze({
     success: true,
     runtime,
-    diagnostics: validation.diagnostics,
+    diagnostics: freezeDiagnostics([
+      ...collectionStateDiagnostics(
+        checked.options.value,
+        checked.options.baselineValue,
+        checked.options.definition.nodes,
+      ),
+      ...validation.diagnostics,
+    ]),
   });
 }
 
@@ -80,7 +106,8 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     string,
     ReadonlySet<string>
   >;
-  private snapshotByKey = new Map<string, NodeRuntimeSnapshot>();
+  private snapshotByKey = new Map<string, RuntimeTreeSnapshot>();
+  private snapshotByPath = new Map<string, RuntimeTreeSnapshot>();
   private nextOperationId = 1;
   private disposed = false;
 
@@ -107,15 +134,41 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   }
 
   getFieldSnapshot(path: DataPath): FieldRuntimeSnapshot | undefined {
-    const key = managedPathKey(path);
+    const key = positionalPathKey(path);
     const snapshot =
-      key === undefined ? undefined : this.snapshotByKey.get(key);
+      key === undefined ? undefined : this.snapshotByPath.get(key);
     return snapshot?.nodeKind === 'field' ? snapshot : undefined;
   }
 
-  getNodeSnapshot(path: DataPath): NodeRuntimeSnapshot | undefined {
-    const key = managedPathKey(path);
-    return key === undefined ? undefined : this.snapshotByKey.get(key);
+  getNodeSnapshot(path: DataPath): RuntimeTreeSnapshot | undefined {
+    const key = positionalPathKey(path);
+    return key === undefined ? undefined : this.snapshotByPath.get(key);
+  }
+
+  getItemSnapshot(
+    address: CollectionItemAddress,
+  ): ItemRuntimeSnapshot | undefined {
+    const copied = copyCollectionItemAddress(address);
+    if (copied === undefined) return undefined;
+    const snapshot = this.snapshotByKey.get(
+      canonicalItemKey(copied.collectionPath, copied.itemId),
+    );
+    return snapshot?.nodeKind === 'item' ? snapshot : undefined;
+  }
+
+  getCollectionNodeSnapshot(
+    address: CollectionNodeAddress,
+  ): RuntimeTreeSnapshot | undefined {
+    const copied = copyCollectionNodeAddress(address);
+    if (copied === undefined) return undefined;
+    if (copied.relativePath.length === 0) return this.getItemSnapshot(copied);
+    return this.snapshotByKey.get(
+      canonicalInstanceNodeKey(
+        copied.collectionPath,
+        copied.itemId,
+        copied.relativePath,
+      ),
+    );
   }
 
   subscribe(listener: SnapshotListener<TData>): SubscribeResult {
@@ -236,8 +289,30 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         this.focused = undefined;
       }
     }
-    this.snapshot = this.buildSnapshot(this.snapshot);
+    const previousSnapshot = this.snapshot;
+    this.snapshot = this.buildSnapshot(previousSnapshot);
+    let interactionChanged = false;
+    if (valueChanged) {
+      for (const key of [...this.touched]) {
+        if (!this.snapshotByKey.has(key)) {
+          this.touched.delete(key);
+          interactionChanged = true;
+        }
+      }
+      if (this.focused !== undefined && !this.snapshotByKey.has(this.focused)) {
+        this.focused = undefined;
+        interactionChanged = true;
+      }
+    }
+    if (interactionChanged) {
+      this.snapshot = this.buildSnapshot(previousSnapshot);
+    }
     return actionSuccess(true, false, [
+      ...collectionStateDiagnostics(
+        nextValue as object,
+        nextBaseline as object,
+        this.options.definition.nodes,
+      ),
       ...validation.diagnostics,
       ...this.notifySnapshots(),
     ]);
@@ -251,12 +326,48 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     return this.request(path, 'remove-value');
   }
 
-  focus(path: DataPath): RuntimeActionResult {
-    return this.interact('focus', path);
+  requestSetItemValue(
+    target: CollectionNodeAddress,
+    value: unknown,
+  ): RuntimeActionResult {
+    return this.requestCollectionLeaf('set-item-value', target, value);
   }
 
-  blur(path: DataPath): RuntimeActionResult {
-    return this.interact('blur', path);
+  requestRemoveItemValue(target: CollectionNodeAddress): RuntimeActionResult {
+    return this.requestCollectionLeaf('remove-item-value', target);
+  }
+
+  requestInsertItem(
+    collectionPath: readonly string[],
+    itemId: string,
+    item: unknown,
+    placement: CollectionPlacement,
+  ): RuntimeActionResult {
+    return this.requestCollectionStructural(
+      'insert-item',
+      { collectionPath, itemId },
+      placement,
+      item,
+    );
+  }
+
+  requestRemoveItem(address: CollectionItemAddress): RuntimeActionResult {
+    return this.requestCollectionStructural('remove-item', address);
+  }
+
+  requestMoveItem(
+    address: CollectionItemAddress,
+    placement: CollectionPlacement,
+  ): RuntimeActionResult {
+    return this.requestCollectionStructural('move-item', address, placement);
+  }
+
+  focus(target: DataPath | CollectionNodeAddress): RuntimeActionResult {
+    return this.interact('focus', target);
+  }
+
+  blur(target: DataPath | CollectionNodeAddress): RuntimeActionResult {
+    return this.interact('blur', target);
   }
 
   resetTouched(scope?: FormScope): RuntimeActionResult {
@@ -309,7 +420,14 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         (issue.path.length === 0 && parsed.includeGlobal) ||
         (() => {
           const key = assignedIssueKey(issue.path, this.nodeByKey);
-          return key !== undefined && parsed.nodeKeys.has(key);
+          const runtimeKey = assignedRuntimeIssueKey(
+            issue.path,
+            this.snapshotByPath,
+          );
+          return (
+            (runtimeKey !== undefined && parsed.nodeKeys.has(runtimeKey)) ||
+            (key !== undefined && parsed.nodeKeys.has(key))
+          );
         })(),
     );
     return Object.freeze({
@@ -439,7 +557,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
             ...describeActualValue(nextValue),
           },
           'Operation value is incompatible with the field.',
-          field.path as readonly string[],
+          field.path,
         ),
       ]);
     const snapshot = this.snapshotByKey.get(key) as
@@ -460,8 +578,8 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       return actionFailure([
         incompatibleRuntimeAncestor(
           type === 'set-value' ? 'requestSetValue' : 'requestRemoveValue',
-          field.path as readonly string[],
-          snapshot.presence.at as readonly string[],
+          field.path,
+          snapshot.presence.at,
           this.value,
         ),
       ]);
@@ -499,12 +617,327 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     return actionSuccess(false, true, this.notifyOperations(operation));
   }
 
+  private requestCollectionLeaf(
+    type: 'set-item-value' | 'remove-item-value',
+    target: CollectionNodeAddress,
+    nextValue?: unknown,
+  ): RuntimeActionResult {
+    const action =
+      type === 'set-item-value'
+        ? 'requestSetItemValue'
+        : 'requestRemoveItemValue';
+    const disposed = this.disposedResult(action);
+    if (disposed) return disposed;
+    const parsedTarget = parseRuntimeNodeAddress(target, action, 'target');
+    if (parsedTarget.address === undefined)
+      return actionFailure(parsedTarget.diagnostics);
+    const copied = parsedTarget.address;
+    const collection = this.collectionDefinition(copied.collectionPath);
+    if (collection === undefined) {
+      return actionFailure([
+        invalidCollectionManaged(action, copied.collectionPath),
+      ]);
+    }
+    const field = collection.item.fields.find(
+      (candidate) =>
+        canonicalDataPathKey(candidate.relativePath) ===
+        canonicalDataPathKey(copied.relativePath),
+    );
+    if (field === undefined) {
+      return actionFailure([
+        invalidRuntimeTarget(
+          action,
+          'relativePath',
+          'managed primitive leaf',
+          hasTemplateObject(collection, copied.relativePath)
+            ? 'non-leaf-target'
+            : 'node-not-managed',
+          copied.collectionPath,
+        ),
+      ]);
+    }
+    const item = this.getItemSnapshot(copied);
+    if (item === undefined)
+      return actionFailure([this.unaddressable(action, collection)]);
+    const snapshot = this.getCollectionNodeSnapshot(copied);
+    if (snapshot?.nodeKind !== 'field') {
+      return actionFailure([
+        invalidCollectionManaged(action, copied.collectionPath),
+      ]);
+    }
+    if (
+      snapshot.presence.kind === 'blocked' &&
+      snapshot.presence.reason === 'incompatible-ancestor'
+    ) {
+      return actionFailure([
+        incompatibleRuntimeAncestor(
+          action,
+          snapshot.path,
+          snapshot.presence.at,
+          this.value,
+        ),
+      ]);
+    }
+    if (type === 'set-item-value' && !compatible(field, nextValue)) {
+      return actionFailure([
+        runtimeDiagnostic(
+          'INCOMPATIBLE_COLLECTION_OPERATION_VALUE',
+          {
+            operationType: type,
+            reason: 'leaf-type',
+            actualType: actualType(nextValue),
+            field: field.name,
+            fieldType: fieldType(field),
+          },
+          'Collection operation value is incompatible.',
+          snapshot.path,
+        ),
+      ]);
+    }
+    if (
+      type === 'remove-item-value' &&
+      (snapshot.presence.kind === 'missing' ||
+        snapshot.presence.kind === 'blocked')
+    ) {
+      return actionSuccess(false, false);
+    }
+    const present = snapshot.presence.kind === 'value';
+    const actual = present ? snapshot.presence.value : undefined;
+    if (type === 'set-item-value' && present && Object.is(actual, nextValue)) {
+      return actionSuccess(false, false);
+    }
+    const operation = Object.freeze({
+      type,
+      metadata: Object.freeze({
+        id: this.nextOperationId,
+        formId: this.options.formId,
+      }),
+      target: copied,
+      identityProperty: collection.identity.property,
+      expected: present
+        ? Object.freeze({ kind: 'value' as const, value: actual })
+        : Object.freeze({ kind: 'missing' as const }),
+      ...(type === 'set-item-value' ? { value: nextValue } : {}),
+      source: 'user' as const,
+    }) as FormOperation;
+    this.nextOperationId += 1;
+    return actionSuccess(false, true, this.notifyOperations(operation));
+  }
+
+  private requestCollectionStructural(
+    type: 'insert-item' | 'remove-item' | 'move-item',
+    address: CollectionItemAddress,
+    placement?: CollectionPlacement,
+    item?: unknown,
+  ): RuntimeActionResult {
+    const action =
+      type === 'insert-item'
+        ? 'requestInsertItem'
+        : type === 'remove-item'
+          ? 'requestRemoveItem'
+          : 'requestMoveItem';
+    const disposed = this.disposedResult(action);
+    if (disposed) return disposed;
+    const parsedAddress = parseRuntimeItemAddress(address, action, 'address');
+    if (parsedAddress.address === undefined)
+      return actionFailure(parsedAddress.diagnostics);
+    const copied = parsedAddress.address;
+    const normalizedPlacement =
+      type === 'remove-item'
+        ? undefined
+        : parseRuntimePlacement(
+            placement,
+            copied.itemId,
+            action,
+            copied.collectionPath,
+          );
+    if (
+      normalizedPlacement !== undefined &&
+      'diagnostics' in normalizedPlacement
+    )
+      return actionFailure(normalizedPlacement.diagnostics);
+    const copiedPlacement = normalizedPlacement;
+    const collection = this.collectionDefinition(copied.collectionPath);
+    if (collection === undefined) {
+      return actionFailure([
+        invalidCollectionManaged(action, copied.collectionPath),
+      ]);
+    }
+    const array = this.snapshotByKey.get(collection.key);
+    if (array?.nodeKind !== 'array') {
+      return actionFailure([
+        invalidCollectionManaged(action, copied.collectionPath),
+      ]);
+    }
+    const missingMaterialization =
+      type === 'insert-item' &&
+      (copiedPlacement?.kind === 'start' || copiedPlacement?.kind === 'end');
+    if (
+      array.identityState.kind === 'invalid' ||
+      array.presence.kind === 'incompatible' ||
+      (array.presence.kind === 'blocked' &&
+        (array.presence.reason === 'incompatible-ancestor' ||
+          !missingMaterialization)) ||
+      (array.presence.kind === 'missing' && !missingMaterialization)
+    ) {
+      return actionFailure([this.unaddressable(action, collection)]);
+    }
+    const existing = this.getItemSnapshot(copied);
+    if (type !== 'insert-item' && existing === undefined) {
+      return actionFailure([this.unaddressable(action, collection)]);
+    }
+    if (type === 'insert-item' && existing !== undefined) {
+      return actionFailure([
+        unaddressableDiagnostic(
+          action,
+          'item-id-already-exists',
+          collection.path,
+        ),
+      ]);
+    }
+    if (
+      copiedPlacement !== undefined &&
+      (copiedPlacement.kind === 'before' || copiedPlacement.kind === 'after') &&
+      this.getItemSnapshot({
+        collectionPath: copied.collectionPath,
+        itemId: copiedPlacement.itemId,
+      }) === undefined
+    ) {
+      return actionFailure([
+        unaddressableDiagnostic(action, 'anchor-not-found', collection.path),
+      ]);
+    }
+    if (type === 'insert-item') {
+      if (!isOrdinaryObject(item)) {
+        return actionFailure([
+          runtimeDiagnostic(
+            'INCOMPATIBLE_COLLECTION_OPERATION_VALUE',
+            {
+              operationType: type,
+              reason: 'item-not-object',
+              actualType: actualType(item),
+            },
+            'Collection operation value is incompatible.',
+            copied.collectionPath,
+          ),
+        ]);
+      }
+      const identity = readOwnDataMember(item, collection.identity.property);
+      if (identity.kind !== 'value' || identity.value !== copied.itemId) {
+        return actionFailure([
+          runtimeDiagnostic(
+            'INCOMPATIBLE_COLLECTION_OPERATION_VALUE',
+            {
+              operationType: type,
+              reason: 'item-identity-mismatch',
+              actualType: actualType(
+                identity.kind === 'value' ? identity.value : undefined,
+              ),
+              identityProperty: collection.identity.property,
+            },
+            'Collection operation value is incompatible.',
+            copied.collectionPath,
+          ),
+        ]);
+      }
+    }
+    const operation = Object.freeze({
+      type,
+      metadata: Object.freeze({
+        id: this.nextOperationId,
+        formId: this.options.formId,
+      }),
+      collectionPath: copied.collectionPath,
+      identityProperty: collection.identity.property,
+      itemId: copied.itemId,
+      ...(type === 'insert-item' ? { item, placement: copiedPlacement } : {}),
+      ...(type === 'move-item' ? { placement: copiedPlacement } : {}),
+      source: 'user' as const,
+    }) as FormOperation;
+    this.nextOperationId += 1;
+    return actionSuccess(false, true, this.notifyOperations(operation));
+  }
+
+  private collectionDefinition(
+    path: readonly string[],
+  ): Extract<FormNodeDefinition, { kind: 'array' }> | undefined {
+    const node = this.nodeByKey.get(canonicalDataPathKey(path));
+    return node?.kind === 'array' ? node : undefined;
+  }
+
+  private unaddressable(
+    action: string,
+    collection: Extract<FormNodeDefinition, { kind: 'array' }>,
+  ): Diagnostic {
+    const snapshot = this.snapshotByKey.get(collection.key);
+    const reason =
+      snapshot?.nodeKind !== 'array'
+        ? 'collection-not-managed'
+        : snapshot.identityState.kind === 'invalid'
+          ? 'invalid-identity'
+          : snapshot.presence.kind === 'missing'
+            ? 'collection-missing'
+            : snapshot.presence.kind === 'incompatible'
+              ? 'incompatible-array'
+              : snapshot.presence.kind === 'blocked'
+                ? snapshot.presence.reason === 'incompatible-ancestor'
+                  ? 'incompatible-ancestor'
+                  : 'collection-missing'
+                : 'item-not-found';
+    const blockingPath =
+      snapshot?.nodeKind === 'array' &&
+      snapshot.presence.kind === 'blocked' &&
+      snapshot.presence.reason === 'incompatible-ancestor'
+        ? snapshot.presence.at
+        : undefined;
+    return unaddressableDiagnostic(
+      action,
+      reason,
+      collection.path,
+      blockingPath,
+    );
+  }
+
   private interact(
     action: 'focus' | 'blur',
-    path: DataPath,
+    target: DataPath | CollectionNodeAddress,
   ): RuntimeActionResult {
     const disposed = this.disposedResult(action);
     if (disposed) return disposed;
+    if (!Array.isArray(target)) {
+      const parsedTarget = parseRuntimeNodeAddress(target, action, 'target');
+      if (parsedTarget.address === undefined)
+        return actionFailure(parsedTarget.diagnostics);
+      const copied = parsedTarget.address;
+      const collection = this.collectionDefinition(copied.collectionPath);
+      if (collection === undefined)
+        return actionFailure([
+          invalidCollectionManaged(action, copied.collectionPath),
+        ]);
+      const field = collection.item.fields.find(
+        (candidate) =>
+          canonicalDataPathKey(candidate.relativePath) ===
+          canonicalDataPathKey(copied.relativePath),
+      );
+      if (field === undefined)
+        return actionFailure([
+          invalidRuntimeTarget(
+            action,
+            'relativePath',
+            'managed primitive leaf',
+            hasTemplateObject(collection, copied.relativePath)
+              ? 'non-leaf-target'
+              : 'node-not-managed',
+            copied.collectionPath,
+          ),
+        ]);
+      const snapshot = this.getCollectionNodeSnapshot(copied);
+      if (snapshot?.nodeKind !== 'field') {
+        return actionFailure([this.unaddressable(action, collection)]);
+      }
+      return this.interactWithKey(action, snapshot.key, snapshot);
+    }
+    const path = target;
     const key = managedPathKey(path);
     const field = key === undefined ? undefined : this.fieldByKey.get(key);
     if (key === undefined || field === undefined)
@@ -524,8 +957,29 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       return actionFailure([
         incompatibleRuntimeAncestor(
           action,
-          field.path as readonly string[],
-          snapshot.presence.at as readonly string[],
+          field.path,
+          snapshot.presence.at,
+          this.value,
+        ),
+      ]);
+    }
+    return this.interactWithKey(action, key, snapshot);
+  }
+
+  private interactWithKey(
+    action: 'focus' | 'blur',
+    key: string,
+    snapshot: FieldRuntimeSnapshot | undefined,
+  ): RuntimeActionResult {
+    if (
+      snapshot?.presence.kind === 'blocked' &&
+      snapshot.presence.reason === 'incompatible-ancestor'
+    ) {
+      return actionFailure([
+        incompatibleRuntimeAncestor(
+          action,
+          snapshot.path,
+          snapshot.presence.at,
           this.value,
         ),
       ]);
@@ -572,6 +1026,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       nodeByKey: this.nodeByKey,
     });
     this.snapshotByKey = built.byKey;
+    this.snapshotByPath = built.byPath;
     return Object.freeze({
       value: this.value,
       locale: this.locale,
@@ -588,7 +1043,11 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   }
 
   private fieldNames(): ReadonlySet<string> {
-    return new Set(this.fieldByKey.keys());
+    const result = new Set(this.fieldByKey.keys());
+    for (const snapshot of this.snapshotByKey.values()) {
+      if (snapshot.nodeKind === 'field') result.add(snapshot.key);
+    }
+    return result;
   }
 
   private parseScope(scope: unknown): ParsedScope {
@@ -597,6 +1056,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       this.nodeByKey,
       this.descendantNodeKeys,
       this.descendantFieldKeys,
+      this.snapshotByKey,
     );
   }
 
@@ -617,6 +1077,30 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         ])
       : undefined;
   }
+}
+
+function collectionStateDiagnostics(
+  value: object,
+  baselineValue: object,
+  definitions: readonly FormNodeDefinition[],
+): readonly Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  for (const root of [value, baselineValue]) {
+    for (const entry of inspectDefinedCollections(root, definitions)) {
+      if (
+        entry.inspection.success &&
+        entry.inspection.presence.kind === 'array'
+      ) {
+        diagnostics.push(
+          ...collectionIdentityDiagnostics(
+            entry.definition,
+            entry.inspection.identity,
+          ),
+        );
+      }
+    }
+  }
+  return freezeDiagnostics(diagnostics);
 }
 
 interface ValidOptions<TData extends object> {
@@ -676,7 +1160,9 @@ function validateOptions<TData extends object>(
         invalidOption('formId', 'non-empty string', options.formId),
       ]),
     };
-  const definitionValidation = validateNestedFormDefinition(options.definition);
+  const definitionValidation = validateCollectionFormDefinition(
+    options.definition,
+  );
   if (!definitionValidation.success)
     return {
       success: false,
@@ -800,12 +1286,7 @@ function runValidator(
     if (!normalized.success) return normalized;
     issues.push(normalized.issue);
     const path = normalized.issue.path;
-    const stringPath = copyStringDataPath(path, true);
-    if (
-      path.length !== 0 &&
-      (stringPath === undefined ||
-        assignedIssueKey(stringPath, nodes) === undefined)
-    )
+    if (path.length !== 0 && assignedIssueKey(path, nodes) === undefined)
       diagnostics.push(
         runtimeDiagnostic(
           'UNKNOWN_VALIDATION_ISSUE_PATH',
@@ -941,6 +1422,13 @@ function managedPathKey(path: unknown): string | undefined {
   return copied === undefined ? undefined : canonicalDataPathKey(copied);
 }
 
+function positionalPathKey(path: unknown): string | undefined {
+  const copied = safePath(path);
+  return copied === undefined || copied.length === 0
+    ? undefined
+    : canonicalDataPathKey(copied);
+}
+
 function validateManagedExternalData(
   value: unknown,
   definitions: readonly FormNodeDefinition[],
@@ -963,50 +1451,24 @@ function validateManagedExternalData(
         : `External state member "${member}" is invalid.`,
     );
   }
-  const stack: Array<{
-    readonly parent: object;
-    readonly node: FormNodeDefinition;
-  }> = [];
-  for (let index = definitions.length - 1; index >= 0; index -= 1) {
-    stack.push({
-      parent: value,
-      node: definitions[index] as FormNodeDefinition,
-    });
-  }
-  while (stack.length > 0) {
-    const frame = stack.pop();
-    if (frame === undefined) break;
-    const entry = readOwnDataMember(frame.parent, frame.node.name);
-    if (entry.kind === 'accessor') {
-      return runtimeDiagnostic(
-        phase === 'creation'
-          ? 'INVALID_RUNTIME_OPTIONS'
-          : 'INVALID_EXTERNAL_STATE_UPDATE',
-        {
-          member,
-          expected: 'ordinary data tree at managed paths',
-          reason: 'invalid-value',
-          actualType: 'object',
-          propertyReason: 'accessor',
-        },
-        phase === 'creation'
-          ? `Runtime option "${member}" is invalid.`
-          : `External state member "${member}" is invalid.`,
-        frame.node.path as readonly string[],
-      );
-    }
-    if (
-      frame.node.kind === 'object' &&
-      entry.kind === 'value' &&
-      isOrdinaryObject(entry.value)
-    ) {
-      for (let index = frame.node.children.length - 1; index >= 0; index -= 1) {
-        stack.push({
-          parent: entry.value,
-          node: frame.node.children[index] as FormNodeDefinition,
-        });
-      }
-    }
+  const accessor = firstManagedDataAccessor(value, definitions);
+  if (accessor !== undefined) {
+    return runtimeDiagnostic(
+      phase === 'creation'
+        ? 'INVALID_RUNTIME_OPTIONS'
+        : 'INVALID_EXTERNAL_STATE_UPDATE',
+      {
+        member,
+        expected: 'ordinary data tree at managed paths',
+        reason: 'invalid-value',
+        actualType: 'object',
+        propertyReason: 'accessor',
+      },
+      phase === 'creation'
+        ? `Runtime option "${member}" is invalid.`
+        : `External state member "${member}" is invalid.`,
+      accessor,
+    );
   }
   return undefined;
 }
@@ -1019,7 +1481,7 @@ function invalidDefinitionOption(
     'INVALID_RUNTIME_OPTIONS',
     {
       member: 'definition',
-      expected: 'valid nested FormDefinition',
+      expected: 'valid collection FormDefinition',
       reason: 'invalid-value',
       ...describeActualValue(value),
       definitionReason: defect.reason,
@@ -1031,12 +1493,25 @@ function invalidDefinitionOption(
         : {
             firstNodeIndexPath: Object.freeze([...defect.firstNodeIndexPath]),
           }),
+      ...(defect.templateIndexPath === undefined
+        ? {}
+        : { templateIndexPath: Object.freeze([...defect.templateIndexPath]) }),
+      ...(defect.firstTemplateIndexPath === undefined
+        ? {}
+        : {
+            firstTemplateIndexPath: Object.freeze([
+              ...defect.firstTemplateIndexPath,
+            ]),
+          }),
       ...(defect.fieldIndex === undefined
         ? {}
         : { fieldIndex: defect.fieldIndex }),
       ...(defect.path === undefined
         ? {}
         : { path: Object.freeze([...defect.path]) }),
+      ...(defect.relativePath === undefined
+        ? {}
+        : { relativePath: Object.freeze([...defect.relativePath]) }),
     },
     'Runtime option "definition" is invalid.',
   );
@@ -1074,14 +1549,18 @@ function resolveFieldPresence(root: object, path: DataPath): FieldPresence {
 
 function incompatibleRuntimeAncestor(
   action: string,
-  path: readonly string[],
-  blockingPath: readonly string[],
+  path: DataPath,
+  blockingPath: DataPath,
   root: object,
 ): Diagnostic {
   let current: unknown = root;
   for (const name of blockingPath) {
-    if (!isOrdinaryObject(current)) break;
-    const entry = readOwnDataMember(current, name);
+    if (
+      (typeof name === 'number' && !Array.isArray(current)) ||
+      (typeof name === 'string' && !isOrdinaryObject(current))
+    )
+      break;
+    const entry = readOwnDataMember(current as object, name);
     current = entry.kind === 'value' ? entry.value : undefined;
   }
   return runtimeDiagnostic(
@@ -1095,6 +1574,378 @@ function incompatibleRuntimeAncestor(
     'Runtime action is blocked by an incompatible ancestor.',
     path,
   );
+}
+
+function invalidRuntimeTarget(
+  action: string,
+  member: string,
+  expected: string,
+  reason: string,
+  path?: readonly string[],
+  actual?: unknown,
+): Diagnostic {
+  return runtimeDiagnostic(
+    'INVALID_COLLECTION_RUNTIME_TARGET',
+    {
+      action,
+      member,
+      expected,
+      reason,
+      ...(reason === 'invalid-value' ? { actualType: actualType(actual) } : {}),
+    },
+    'Collection runtime target is invalid.',
+    path,
+  );
+}
+
+interface RuntimeItemAddressParse {
+  readonly address?: CollectionItemAddress;
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+interface RuntimeNodeAddressParse {
+  readonly address?: CollectionNodeAddress;
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+function parseRuntimeItemAddress(
+  value: unknown,
+  action: string,
+  exteriorMember: string,
+): RuntimeItemAddressParse {
+  if (!isOrdinaryObject(value)) {
+    return {
+      diagnostics: Object.freeze([
+        invalidRuntimeTarget(
+          action,
+          exteriorMember,
+          'collection item address',
+          'invalid-value',
+          undefined,
+          value,
+        ),
+      ]),
+    };
+  }
+  const diagnostics: Diagnostic[] = [];
+  const collectionPath = parseRuntimeStringPath(
+    value,
+    'collectionPath',
+    'non-empty string-only path',
+    action,
+    diagnostics,
+  );
+  const itemId = parseRuntimeItemId(value, action, diagnostics, collectionPath);
+  if (collectionPath === undefined || itemId === undefined) {
+    return { diagnostics: Object.freeze(diagnostics) };
+  }
+  return {
+    address: Object.freeze({ collectionPath, itemId }),
+    diagnostics: Object.freeze(diagnostics),
+  };
+}
+
+function parseRuntimeNodeAddress(
+  value: unknown,
+  action: string,
+  exteriorMember: string,
+): RuntimeNodeAddressParse {
+  if (!isOrdinaryObject(value)) {
+    return {
+      diagnostics: Object.freeze([
+        invalidRuntimeTarget(
+          action,
+          exteriorMember,
+          'collection node address',
+          'invalid-value',
+          undefined,
+          value,
+        ),
+      ]),
+    };
+  }
+  const diagnostics: Diagnostic[] = [];
+  const collectionPath = parseRuntimeStringPath(
+    value,
+    'collectionPath',
+    'non-empty string-only path',
+    action,
+    diagnostics,
+  );
+  const itemId = parseRuntimeItemId(value, action, diagnostics, collectionPath);
+  const relativePath = parseRuntimeStringPath(
+    value,
+    'relativePath',
+    'non-empty string-only relative path',
+    action,
+    diagnostics,
+    collectionPath,
+  );
+  if (
+    collectionPath === undefined ||
+    itemId === undefined ||
+    relativePath === undefined
+  ) {
+    return { diagnostics: Object.freeze(diagnostics) };
+  }
+  return {
+    address: Object.freeze({ collectionPath, itemId, relativePath }),
+    diagnostics: Object.freeze(diagnostics),
+  };
+}
+
+function parseRuntimeStringPath(
+  object: object,
+  member: string,
+  expected: string,
+  action: string,
+  diagnostics: Diagnostic[],
+  dataPath?: readonly string[],
+): readonly string[] | undefined {
+  const entry = readOwnDataMember(object, member);
+  if (entry.kind !== 'value') {
+    diagnostics.push(
+      invalidRuntimeTarget(
+        action,
+        member,
+        expected,
+        entry.kind === 'accessor' ? 'accessor-member' : 'missing-member',
+        dataPath,
+      ),
+    );
+    return undefined;
+  }
+  if (!Array.isArray(entry.value) || entry.value.length === 0) {
+    diagnostics.push(
+      invalidRuntimeTarget(
+        action,
+        member,
+        expected,
+        'invalid-value',
+        dataPath,
+        entry.value,
+      ),
+    );
+    return undefined;
+  }
+  const result: string[] = [];
+  let valid = true;
+  for (let index = 0; index < entry.value.length; index += 1) {
+    const segment = readOwnDataMember(entry.value, String(index));
+    const indexedMember = `${member}[${index}]`;
+    if (segment.kind !== 'value') {
+      diagnostics.push(
+        invalidRuntimeTarget(
+          action,
+          indexedMember,
+          'string',
+          segment.kind === 'accessor' ? 'accessor-member' : 'missing-member',
+          dataPath,
+        ),
+      );
+      valid = false;
+    } else if (typeof segment.value !== 'string') {
+      diagnostics.push(
+        invalidRuntimeTarget(
+          action,
+          indexedMember,
+          'string',
+          'invalid-value',
+          dataPath,
+          segment.value,
+        ),
+      );
+      valid = false;
+    } else {
+      result.push(segment.value);
+    }
+  }
+  return valid ? Object.freeze(result) : undefined;
+}
+
+function parseRuntimeItemId(
+  object: object,
+  action: string,
+  diagnostics: Diagnostic[],
+  dataPath?: readonly string[],
+): string | undefined {
+  const entry = readOwnDataMember(object, 'itemId');
+  if (entry.kind !== 'value') {
+    diagnostics.push(
+      invalidRuntimeTarget(
+        action,
+        'itemId',
+        'non-blank string',
+        entry.kind === 'accessor' ? 'accessor-member' : 'missing-member',
+        dataPath,
+      ),
+    );
+    return undefined;
+  }
+  if (typeof entry.value !== 'string' || entry.value.trim().length === 0) {
+    diagnostics.push(
+      invalidRuntimeTarget(
+        action,
+        'itemId',
+        'non-blank string',
+        'invalid-value',
+        dataPath,
+        entry.value,
+      ),
+    );
+    return undefined;
+  }
+  return entry.value;
+}
+
+function invalidCollectionManaged(
+  action: string,
+  path: readonly string[],
+): Diagnostic {
+  return runtimeDiagnostic(
+    'INVALID_COLLECTION_RUNTIME_TARGET',
+    {
+      action,
+      member: 'collectionPath',
+      expected: 'managed primitive leaf',
+      reason: 'node-not-managed',
+    },
+    'Collection runtime target is invalid.',
+    path,
+  );
+}
+
+function hasTemplateObject(
+  collection: Extract<FormNodeDefinition, { kind: 'array' }>,
+  relativePath: readonly string[],
+): boolean {
+  const key = canonicalDataPathKey(relativePath);
+  const stack = [...collection.item.children].reverse();
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (node === undefined) break;
+    if (
+      node.kind === 'object' &&
+      canonicalDataPathKey(node.relativePath) === key
+    )
+      return true;
+    if (node.kind === 'object') {
+      for (let index = node.children.length - 1; index >= 0; index -= 1) {
+        stack.push(node.children[index] as (typeof node.children)[number]);
+      }
+    }
+  }
+  return false;
+}
+
+function unaddressableDiagnostic(
+  action: string,
+  reason: string,
+  path: DataPath,
+  blockingPath?: DataPath,
+): Diagnostic {
+  return runtimeDiagnostic(
+    'UNADDRESSABLE_COLLECTION',
+    {
+      action,
+      reason,
+      ...(blockingPath === undefined
+        ? {}
+        : { blockingPath: Object.freeze([...blockingPath]) }),
+    },
+    'Collection is not addressable.',
+    path,
+  );
+}
+
+function parseRuntimePlacement(
+  value: unknown,
+  itemId: string,
+  action: string,
+  dataPath: readonly string[],
+): CollectionPlacement | { readonly diagnostics: readonly Diagnostic[] } {
+  if (!isOrdinaryObject(value)) {
+    return {
+      diagnostics: Object.freeze([
+        invalidRuntimeTarget(
+          action,
+          'placement',
+          'collection placement',
+          'invalid-value',
+          dataPath,
+          value,
+        ),
+      ]),
+    };
+  }
+  const kind = readOwnDataMember(value, 'kind');
+  if (kind.kind !== 'value') {
+    return {
+      diagnostics: Object.freeze([
+        invalidRuntimeTarget(
+          action,
+          'placement.kind',
+          'collection placement',
+          kind.kind === 'accessor' ? 'accessor-member' : 'missing-member',
+          dataPath,
+        ),
+      ]),
+    };
+  }
+  if (kind.value === 'start' || kind.value === 'end') {
+    return Object.freeze({ kind: kind.value });
+  }
+  if (kind.value !== 'before' && kind.value !== 'after') {
+    return {
+      diagnostics: Object.freeze([
+        invalidRuntimeTarget(
+          action,
+          'placement.kind',
+          'collection placement',
+          'invalid-value',
+          dataPath,
+          kind.value,
+        ),
+      ]),
+    };
+  }
+  const anchor = readOwnDataMember(value, 'itemId');
+  if (
+    anchor.kind !== 'value' ||
+    typeof anchor.value !== 'string' ||
+    anchor.value.trim().length === 0
+  ) {
+    return {
+      diagnostics: Object.freeze([
+        invalidRuntimeTarget(
+          action,
+          'placement.itemId',
+          'non-blank string',
+          anchor.kind === 'accessor'
+            ? 'accessor-member'
+            : anchor.kind === 'missing'
+              ? 'missing-member'
+              : 'invalid-value',
+          dataPath,
+          anchor.kind === 'value' ? anchor.value : undefined,
+        ),
+      ]),
+    };
+  }
+  if (anchor.value === itemId) {
+    return {
+      diagnostics: Object.freeze([
+        invalidRuntimeTarget(
+          action,
+          'placement.itemId',
+          'different anchor item',
+          'self-anchor',
+          dataPath,
+        ),
+      ]),
+    };
+  }
+  return Object.freeze({ kind: kind.value, itemId: anchor.value });
 }
 
 type Entry =
@@ -1185,7 +2036,8 @@ interface SnapshotBuildResult {
   readonly nodes: readonly NodeRuntimeSnapshot[];
   readonly fields: readonly FieldRuntimeSnapshot[];
   readonly globalIssues: readonly ValidationIssue[];
-  readonly byKey: Map<string, NodeRuntimeSnapshot>;
+  readonly byKey: Map<string, RuntimeTreeSnapshot>;
+  readonly byPath: Map<string, RuntimeTreeSnapshot>;
 }
 
 function buildNestedSnapshots<TData extends object>(
@@ -1195,7 +2047,8 @@ function buildNestedSnapshots<TData extends object>(
   const previousByKey = indexSnapshots(input.previous?.nodes ?? EMPTY);
   const nodes = new Array<NodeRuntimeSnapshot>(input.definitions.length);
   const fields: FieldRuntimeSnapshot[] = [];
-  const byKey = new Map<string, NodeRuntimeSnapshot>();
+  const byKey = new Map<string, RuntimeTreeSnapshot>();
+  const byPath = new Map<string, RuntimeTreeSnapshot>();
   type Frame =
     | {
         readonly phase: 'enter';
@@ -1267,11 +2120,44 @@ function buildNestedSnapshots<TData extends object>(
           : candidate;
       frame.output[frame.index] = snapshot;
       byKey.set(snapshot.key, snapshot);
+      byPath.set(canonicalDataPathKey(snapshot.path), snapshot);
       continue;
     }
 
     const current = inspectNodeState(frame.current, frame.definition);
     const baseline = inspectNodeState(frame.baseline, frame.definition);
+    if (frame.definition.kind === 'array') {
+      const collectionIssues =
+        assigned.byKey.get(frame.definition.key) ?? EMPTY;
+      const currentCollection = inspectCollectionValue(
+        input.value,
+        frame.definition.path as readonly string[],
+        frame.definition.identity.property,
+      );
+      const baselineCollection = inspectCollectionValue(
+        input.baseline,
+        frame.definition.path as readonly string[],
+        frame.definition.identity.property,
+      );
+      const previous = previousByKey.get(frame.definition.key);
+      const snapshot = buildCollectionSnapshotShell(
+        frame.definition,
+        currentCollection,
+        baselineCollection,
+        collectionIssues,
+        previous?.nodeKind === 'array' ? previous : undefined,
+        input.touched,
+        input.focused,
+        input.visibility === 'all',
+        collectForcedKeys(input.forcedScopes),
+      );
+      if (snapshot !== undefined) {
+        frame.output[frame.index] = snapshot;
+        indexRuntimeTree(snapshot, byKey, byPath);
+        for (const item of snapshot.items) fields.push(...item.fields);
+      }
+      continue;
+    }
     if (frame.definition.kind === 'object') {
       const children = new Array<NodeRuntimeSnapshot>(
         frame.definition.children.length,
@@ -1331,6 +2217,7 @@ function buildNestedSnapshots<TData extends object>(
     frame.output[frame.index] = snapshot;
     fields.push(snapshot);
     byKey.set(snapshot.key, snapshot);
+    byPath.set(canonicalDataPathKey(snapshot.path), snapshot);
   }
 
   return {
@@ -1338,6 +2225,7 @@ function buildNestedSnapshots<TData extends object>(
     fields: Object.freeze(fields),
     globalIssues: assigned.global,
     byKey,
+    byPath,
   };
 }
 
@@ -1422,22 +2310,60 @@ function isForced(
   return [...scopes.values()].some((scope) => scope.has(key));
 }
 
+function collectForcedKeys(
+  scopes: ReadonlyMap<string, ReadonlySet<string>>,
+): ReadonlySet<string> {
+  const result = new Set<string>();
+  for (const keys of scopes.values()) {
+    for (const key of keys) result.add(key);
+  }
+  return result;
+}
+
 function indexSnapshots(
   nodes: readonly NodeRuntimeSnapshot[],
-): ReadonlyMap<string, NodeRuntimeSnapshot> {
-  const result = new Map<string, NodeRuntimeSnapshot>();
-  const stack = [...nodes].reverse();
+): ReadonlyMap<string, RuntimeTreeSnapshot> {
+  const result = new Map<string, RuntimeTreeSnapshot>();
+  const stack: RuntimeTreeSnapshot[] = [...nodes].reverse();
   while (stack.length > 0) {
     const node = stack.pop();
     if (node === undefined) continue;
     result.set(node.key, node);
-    if (node.nodeKind === 'object') {
+    if (node.nodeKind === 'object' || node.nodeKind === 'item') {
+      for (let index = node.children.length - 1; index >= 0; index -= 1) {
+        stack.push(node.children[index] as NodeRuntimeSnapshot);
+      }
+    } else if (node.nodeKind === 'array') {
+      for (let index = node.items.length - 1; index >= 0; index -= 1) {
+        stack.push(node.items[index] as ItemRuntimeSnapshot);
+      }
+    }
+  }
+  return result;
+}
+
+function indexRuntimeTree(
+  root: RuntimeTreeSnapshot,
+  byKey: Map<string, RuntimeTreeSnapshot>,
+  byPath: Map<string, RuntimeTreeSnapshot>,
+): void {
+  const stack: RuntimeTreeSnapshot[] = [root];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (node === undefined) break;
+    byKey.set(node.key, node);
+    const path = node.nodeKind === 'item' ? node.dataPath : node.path;
+    byPath.set(canonicalDataPathKey(path), node);
+    if (node.nodeKind === 'array') {
+      for (let index = node.items.length - 1; index >= 0; index -= 1) {
+        stack.push(node.items[index] as ItemRuntimeSnapshot);
+      }
+    } else if (node.nodeKind === 'object' || node.nodeKind === 'item') {
       for (let index = node.children.length - 1; index >= 0; index -= 1) {
         stack.push(node.children[index] as NodeRuntimeSnapshot);
       }
     }
   }
-  return result;
 }
 
 function assignIssues(
@@ -1468,22 +2394,68 @@ function assignedIssueKey(
   path: DataPath,
   nodes: ReadonlyMap<string, FormNodeDefinition>,
 ): string | undefined {
+  if (path.length === 0) return undefined;
+  const firstNumeric = path.findIndex((segment) => typeof segment === 'number');
+  if (firstNumeric >= 0) {
+    const collectionPath = path.slice(0, firstNumeric);
+    const key = canonicalDataPathKey(collectionPath);
+    return nodes.get(key)?.kind === 'array' ? key : undefined;
+  }
   const copied = copyStringDataPath(path, true);
-  if (copied === undefined || copied.length === 0) return undefined;
+  if (copied === undefined) return undefined;
   const exact = canonicalDataPathKey(copied);
   if (nodes.has(exact)) return exact;
   for (let length = copied.length - 1; length > 0; length -= 1) {
     const key = canonicalDataPathKey(copied.slice(0, length));
-    if (nodes.get(key)?.kind === 'object') return key;
+    const node = nodes.get(key);
+    if (node?.kind === 'object' || node?.kind === 'array') return key;
   }
   return undefined;
 }
+
+function assignedRuntimeIssueKey(
+  path: DataPath,
+  snapshots: ReadonlyMap<string, RuntimeTreeSnapshot>,
+): string | undefined {
+  for (let length = path.length; length > 0; length -= 1) {
+    const snapshot = snapshots.get(canonicalDataPathKey(path.slice(0, length)));
+    if (snapshot !== undefined) return snapshot.key;
+  }
+  return undefined;
+}
+
+function collectScopeTree(
+  root: RuntimeTreeSnapshot,
+  nodeKeys: Set<string>,
+  fieldKeys: Set<string>,
+): void {
+  const stack: RuntimeTreeSnapshot[] = [root];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (node === undefined) break;
+    nodeKeys.add(node.key);
+    if (node.nodeKind === 'field') {
+      fieldKeys.add(node.key);
+    } else if (node.nodeKind === 'array') {
+      for (let index = node.items.length - 1; index >= 0; index -= 1) {
+        stack.push(node.items[index] as ItemRuntimeSnapshot);
+      }
+    } else {
+      for (let index = node.children.length - 1; index >= 0; index -= 1) {
+        stack.push(node.children[index] as NodeRuntimeSnapshot);
+      }
+    }
+  }
+}
 function fieldType(
-  field: FieldDefinition,
+  field: FieldDefinition | FieldTemplate,
 ): 'string' | 'number' | 'integer' | 'boolean' {
   return field.kind === 'number' ? field.numericType : field.kind;
 }
-function compatible(field: FieldDefinition, value: unknown): boolean {
+function compatible(
+  field: FieldDefinition | FieldTemplate,
+  value: unknown,
+): boolean {
   const type = fieldType(field);
   return (
     (type === 'string' && typeof value === 'string') ||
@@ -1579,6 +2551,7 @@ function parseScope(
   nodes: ReadonlyMap<string, FormNodeDefinition>,
   descendantNodes: ReadonlyMap<string, ReadonlySet<string>>,
   descendantFields: ReadonlyMap<string, ReadonlySet<string>>,
+  runtimeSnapshots: ReadonlyMap<string, RuntimeTreeSnapshot>,
 ): ParsedScope {
   if (!isRecord(scope))
     return {
@@ -1628,8 +2601,46 @@ function parseScope(
   for (let index = 0; index < paths.length; index += 1) {
     const pathEntry = read(paths, String(index));
     const path = pathEntry.kind === 'value' ? pathEntry.value : undefined;
-    const key = managedPathKey(path);
-    if (key === undefined || !nodes.has(key))
+    const staticKey = Array.isArray(path) ? managedPathKey(path) : undefined;
+    const staticRuntime =
+      staticKey === undefined ? undefined : runtimeSnapshots.get(staticKey);
+    const stableNode =
+      !Array.isArray(path) && isRecord(path)
+        ? (() => {
+            const relativePath = readOwnDataMember(path, 'relativePath');
+            if (relativePath.kind !== 'missing') {
+              const nodeAddress = copyCollectionNodeAddress(path);
+              if (nodeAddress === undefined) return undefined;
+              return nodeAddress.relativePath.length === 0
+                ? runtimeSnapshots.get(
+                    canonicalItemKey(
+                      nodeAddress.collectionPath,
+                      nodeAddress.itemId,
+                    ),
+                  )
+                : runtimeSnapshots.get(
+                    canonicalInstanceNodeKey(
+                      nodeAddress.collectionPath,
+                      nodeAddress.itemId,
+                      nodeAddress.relativePath,
+                    ),
+                  );
+            }
+            const itemAddress = copyCollectionItemAddress(path);
+            return itemAddress === undefined
+              ? undefined
+              : runtimeSnapshots.get(
+                  canonicalItemKey(
+                    itemAddress.collectionPath,
+                    itemAddress.itemId,
+                  ),
+                );
+          })()
+        : undefined;
+    if (
+      (staticKey === undefined || !nodes.has(staticKey)) &&
+      stableNode === undefined
+    )
       diagnostics.push(
         runtimeDiagnostic(
           'UNKNOWN_SCOPE_PATH',
@@ -1639,11 +2650,15 @@ function parseScope(
           'warning',
         ),
       );
-    else {
-      for (const descendant of descendantNodes.get(key) ?? EMPTY) {
+    else if (stableNode !== undefined) {
+      collectScopeTree(stableNode, nodeKeys, fieldKeys);
+    } else if (staticRuntime?.nodeKind === 'array') {
+      collectScopeTree(staticRuntime, nodeKeys, fieldKeys);
+    } else if (staticKey !== undefined) {
+      for (const descendant of descendantNodes.get(staticKey) ?? EMPTY) {
         nodeKeys.add(descendant);
       }
-      for (const descendant of descendantFields.get(key) ?? EMPTY) {
+      for (const descendant of descendantFields.get(staticKey) ?? EMPTY) {
         fieldKeys.add(descendant);
       }
     }
@@ -1758,7 +2773,7 @@ function runtimeDiagnostic(
   code: string,
   parameters: Readonly<Record<string, unknown>>,
   fallbackMessage: string,
-  dataPath?: readonly string[],
+  dataPath?: DataPath,
   severity: 'warning' | 'error' = 'error',
 ): Diagnostic {
   const safe = Object.freeze({ ...parameters });

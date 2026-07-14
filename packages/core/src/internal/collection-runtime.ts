@@ -13,7 +13,6 @@ import type {
   FormNodeTemplate,
   NodeRuntimeSnapshot,
   ObjectPresence,
-  ObjectRuntimeSnapshot,
   ValidationIssue,
 } from '../contracts.js';
 import {
@@ -52,6 +51,7 @@ export type CollectionValueInspection =
       readonly presence: ArrayPresence;
       readonly identity: CollectionIdentityInspection;
       readonly value?: readonly unknown[];
+      readonly unavailableValue?: unknown;
     }
   | {
       readonly success: false;
@@ -110,6 +110,7 @@ export function inspectCollectionValue(
           reason: 'incompatible-ancestor',
           at: prefix,
         }),
+        entry.value,
       );
     }
     current = entry.value;
@@ -122,6 +123,25 @@ export function inspectDefinedCollections(
   definitions: readonly FormNodeDefinition[],
 ): readonly InspectedCollection[] {
   const result: InspectedCollection[] = [];
+  for (const node of collectionDefinitions(definitions)) {
+    result.push(
+      Object.freeze({
+        definition: node,
+        inspection: inspectCollectionValue(
+          root,
+          node.path as readonly string[],
+          node.identity.property,
+        ),
+      }),
+    );
+  }
+  return Object.freeze(result);
+}
+
+function collectionDefinitions(
+  definitions: readonly FormNodeDefinition[],
+): readonly ArrayNodeDefinition[] {
+  const result: ArrayNodeDefinition[] = [];
   const stack: FormNodeDefinition[] = [];
   for (let index = definitions.length - 1; index >= 0; index -= 1) {
     stack.push(definitions[index] as FormNodeDefinition);
@@ -130,16 +150,7 @@ export function inspectDefinedCollections(
     const node = stack.pop();
     if (node === undefined) break;
     if (node.kind === 'array') {
-      result.push(
-        Object.freeze({
-          definition: node,
-          inspection: inspectCollectionValue(
-            root,
-            node.path as readonly string[],
-            node.identity.property,
-          ),
-        }),
-      );
+      result.push(node);
       continue;
     }
     if (node.kind === 'object') {
@@ -155,10 +166,12 @@ export function firstManagedCollectionAccessor(
   root: object,
   definitions: readonly FormNodeDefinition[],
 ): DataPath | undefined {
-  for (const { definition, inspection } of inspectDefinedCollections(
-    root,
-    definitions,
-  )) {
+  for (const definition of collectionDefinitions(definitions)) {
+    const inspection = inspectCollectionValue(
+      root,
+      definition.path as readonly string[],
+      definition.identity.property,
+    );
     if (!inspection.success) return inspection.accessorPath;
     if (
       inspection.presence.kind !== 'array' ||
@@ -169,15 +182,70 @@ export function firstManagedCollectionAccessor(
     const items: readonly object[] = inspection.identity.items;
     for (let index = 0; index < items.length; index += 1) {
       const item = items[index] as object;
-      for (const field of definition.item.fields) {
-        const accessor = firstAccessorAtRelativePath(
-          item,
-          field.relativePath,
-          definition.path,
-          index,
-        );
-        if (accessor !== undefined) return accessor;
+      const accessor = firstTemplateAccessor(
+        item,
+        definition.item.children,
+        definition.path,
+        index,
+      );
+      if (accessor !== undefined) return accessor;
+    }
+  }
+  return undefined;
+}
+
+export function firstManagedDataAccessor(
+  root: object,
+  definitions: readonly FormNodeDefinition[],
+): DataPath | undefined {
+  const stack: Array<{
+    readonly parent: object;
+    readonly node: FormNodeDefinition;
+  }> = [];
+  for (let index = definitions.length - 1; index >= 0; index -= 1) {
+    stack.push({
+      parent: root,
+      node: definitions[index] as FormNodeDefinition,
+    });
+  }
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    const entry = readOwnDataMember(frame.parent, frame.node.name);
+    if (entry.kind === 'accessor') return frame.node.path;
+    if (
+      frame.node.kind === 'object' &&
+      entry.kind === 'value' &&
+      isOrdinaryObject(entry.value)
+    ) {
+      for (let child = frame.node.children.length - 1; child >= 0; child -= 1) {
+        stack.push({
+          parent: entry.value,
+          node: frame.node.children[child] as FormNodeDefinition,
+        });
       }
+      continue;
+    }
+    if (
+      frame.node.kind !== 'array' ||
+      entry.kind !== 'value' ||
+      !Array.isArray(entry.value)
+    ) {
+      continue;
+    }
+    const identity = inspectCollectionIdentity(
+      entry.value,
+      frame.node.identity.property,
+    );
+    if (identity.state.kind !== 'valid') continue;
+    for (let index = 0; index < identity.items.length; index += 1) {
+      const accessor = firstTemplateAccessor(
+        identity.items[index] as object,
+        frame.node.item.children,
+        frame.node.path,
+        index,
+      );
+      if (accessor !== undefined) return accessor;
     }
   }
   return undefined;
@@ -220,6 +288,8 @@ export function buildCollectionSnapshotShell(
   previous?: ArrayRuntimeSnapshot,
   touched: ReadonlySet<string> = new Set(),
   focused?: string,
+  showAll = false,
+  forced: ReadonlySet<string> = new Set(),
 ): ArrayRuntimeSnapshot | undefined {
   if (!current.success || !baseline.success) return undefined;
   const addressable =
@@ -254,12 +324,11 @@ export function buildCollectionSnapshotShell(
         issues,
         touched,
         focused,
+        showAll,
+        forced,
+        prior,
       );
-      items.push(
-        prior !== undefined && sameItemSnapshot(prior, candidate)
-          ? prior
-          : candidate,
-      );
+      items.push(candidate);
     }
   }
   const structuralDirty = collectionShellDirty(current, baseline);
@@ -280,7 +349,9 @@ export function buildCollectionSnapshotShell(
       current.identity.state.kind === 'valid' &&
       items.every((item) => item.valid),
     issues: ownIssues,
-    showIssues: ownIssues.length > 0 && collectionTouched,
+    showIssues:
+      ownIssues.length > 0 &&
+      (showAll || collectionTouched || forced.has(definition.key)),
     items: frozenItems,
   });
   return previous !== undefined && sameCollectionShell(previous, candidate)
@@ -301,7 +372,7 @@ function collectionOwnIssues(
       if (!startsWithPath(issue.path, path)) return false;
       if (current.identity.state.kind === 'invalid') return true;
       const index = issue.path[path.length];
-      return typeof index === 'number' && (index < 0 || index >= length);
+      return typeof index !== 'number' || index < 0 || index >= length;
     }),
   );
 }
@@ -315,7 +386,13 @@ export function buildItemFieldSnapshots(
   issues: readonly ValidationIssue[] = Object.freeze([]),
   touched: ReadonlySet<string> = new Set(),
   focused?: string,
+  showAll = false,
+  forced: ReadonlySet<string> = new Set(),
+  previous?: ItemRuntimeSnapshot,
 ): readonly FieldRuntimeSnapshot[] {
+  const previousByKey = new Map(
+    (previous?.fields ?? []).map((field) => [field.key, field]),
+  );
   return Object.freeze(
     collection.item.fields.map((field) => {
       const key = canonicalInstanceNodeKey(
@@ -339,10 +416,14 @@ export function buildItemFieldSnapshots(
           ? undefined
           : resolveTemplateFieldPresence(baselineItem, field, positionalPrefix);
       const ownIssues = Object.freeze(
-        issues.filter((issue) => samePath(issue.path, path)),
+        issues.filter(
+          (issue) =>
+            assignedItemTemplateKey(collection, issue.path, index, itemId) ===
+            key,
+        ),
       );
       const isTouched = touched.has(key);
-      return Object.freeze({
+      const candidate: FieldRuntimeSnapshot = Object.freeze({
         nodeKind: 'field',
         key,
         path,
@@ -355,8 +436,13 @@ export function buildItemFieldSnapshots(
         focused: focused === key,
         valid: ownIssues.length === 0,
         issues: ownIssues,
-        showIssues: ownIssues.length > 0 && isTouched,
+        showIssues:
+          ownIssues.length > 0 && (showAll || isTouched || forced.has(key)),
       });
+      const prior = previousByKey.get(key);
+      return prior !== undefined && sameFieldSnapshot(prior, candidate)
+        ? prior
+        : candidate;
     }),
   );
 }
@@ -370,6 +456,9 @@ export function buildItemSnapshot(
   issues: readonly ValidationIssue[] = Object.freeze([]),
   touched: ReadonlySet<string> = new Set(),
   focused?: string,
+  showAll = false,
+  forced: ReadonlySet<string> = new Set(),
+  previous?: ItemRuntimeSnapshot,
 ): ItemRuntimeSnapshot {
   const fields = buildItemFieldSnapshots(
     collection,
@@ -380,28 +469,30 @@ export function buildItemSnapshot(
     issues,
     touched,
     focused,
+    showAll,
+    forced,
+    previous,
   );
   const fieldsByKey = new Map(fields.map((field) => [field.key, field]));
-  const children = Object.freeze(
-    collection.item.children.map((template) =>
-      buildTemplateSnapshot(
-        collection,
-        template,
-        item,
-        baselineItem,
-        itemId,
-        index,
-        issues,
-        fieldsByKey,
-      ),
-    ),
+  const children = buildTemplateSnapshots(
+    collection,
+    collection.item.children,
+    item,
+    baselineItem,
+    itemId,
+    index,
+    issues,
+    fieldsByKey,
+    showAll,
+    forced,
+    previous,
   );
   const dataPath = Object.freeze([...collection.path, index]);
   const ownIssues = Object.freeze(
     issues.filter(
       (issue) =>
-        samePath(issue.path, dataPath) ||
-        samePath(issue.path, [...dataPath, collection.identity.property]),
+        assignedItemTemplateKey(collection, issue.path, index, itemId) ===
+        undefined,
     ),
   );
   const address = Object.freeze({
@@ -409,7 +500,7 @@ export function buildItemSnapshot(
     itemId,
   });
   const itemTouched = children.some((child) => child.touched);
-  return Object.freeze({
+  const candidate: ItemRuntimeSnapshot = Object.freeze({
     nodeKind: 'item',
     key: canonicalItemKey(address.collectionPath, itemId),
     address,
@@ -420,10 +511,17 @@ export function buildItemSnapshot(
     focused: children.some((child) => child.focused),
     valid: ownIssues.length === 0 && children.every((child) => child.valid),
     issues: ownIssues,
-    showIssues: ownIssues.length > 0 && itemTouched,
+    showIssues:
+      ownIssues.length > 0 &&
+      (showAll ||
+        itemTouched ||
+        forced.has(canonicalItemKey(address.collectionPath, itemId))),
     children,
     fields,
   });
+  return previous !== undefined && sameItemSnapshot(previous, candidate)
+    ? previous
+    : candidate;
 }
 
 export function inspectCollectionIdentity(
@@ -505,35 +603,61 @@ function freezeDefect(
   });
 }
 
-function successful(presence: ArrayPresence): CollectionValueInspection {
+function successful(
+  presence: ArrayPresence,
+  unavailableValue?: unknown,
+): CollectionValueInspection {
   return Object.freeze({
     success: true,
     presence,
     identity: VALID_IDENTITY,
+    ...(unavailableValue === undefined ? {} : { unavailableValue }),
   });
 }
 
-function firstAccessorAtRelativePath(
+function firstTemplateAccessor(
   item: object,
-  relativePath: readonly string[],
+  templates: readonly FormNodeTemplate[],
   collectionPath: DataPath,
   index: number,
 ): DataPath | undefined {
-  let current = item;
-  for (let offset = 0; offset < relativePath.length; offset += 1) {
-    const property = relativePath[offset] as string;
-    const entry = readOwnDataMember(current, property);
-    const path = Object.freeze([
-      ...collectionPath,
-      index,
-      ...relativePath.slice(0, offset + 1),
-    ]);
-    if (entry.kind === 'accessor') return path;
-    if (entry.kind !== 'value' || offset === relativePath.length - 1) {
-      return undefined;
+  const stack: Array<{
+    readonly parent: object;
+    readonly template: FormNodeTemplate;
+  }> = [];
+  for (let child = templates.length - 1; child >= 0; child -= 1) {
+    stack.push({
+      parent: item,
+      template: templates[child] as FormNodeTemplate,
+    });
+  }
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    const entry = readOwnDataMember(frame.parent, frame.template.name);
+    if (entry.kind === 'accessor') {
+      return Object.freeze([
+        ...collectionPath,
+        index,
+        ...frame.template.relativePath,
+      ]);
     }
-    if (!isOrdinaryObject(entry.value)) return undefined;
-    current = entry.value;
+    if (
+      frame.template.kind === 'object' &&
+      entry.kind === 'value' &&
+      isOrdinaryObject(entry.value)
+    ) {
+      for (
+        let child = frame.template.children.length - 1;
+        child >= 0;
+        child -= 1
+      ) {
+        stack.push({
+          parent: entry.value,
+          template: frame.template.children[child] as FormNodeTemplate,
+        });
+      }
+    }
   }
   return undefined;
 }
@@ -565,6 +689,20 @@ function collectionShellDirty(
   if (current.presence.kind === 'array' && baseline.presence.kind === 'array') {
     return !Object.is(current.value, baseline.value);
   }
+  if (
+    current.presence.kind === 'blocked' &&
+    baseline.presence.kind === 'blocked'
+  ) {
+    if (
+      current.presence.reason !== baseline.presence.reason ||
+      !samePath(current.presence.at, baseline.presence.at)
+    )
+      return true;
+    return (
+      current.presence.reason === 'incompatible-ancestor' &&
+      !Object.is(current.unavailableValue, baseline.unavailableValue)
+    );
+  }
   return false;
 }
 
@@ -582,7 +720,10 @@ function sameCollectionShell(
         left.identityState.index === right.identityState.index &&
         left.identityState.firstIndex === right.identityState.firstIndex)) &&
     left.dirty === right.dirty &&
+    left.touched === right.touched &&
+    left.focused === right.focused &&
     left.valid === right.valid &&
+    left.showIssues === right.showIssues &&
     left.issues.length === right.issues.length &&
     left.issues.every((issue, index) => issue === right.issues[index]) &&
     left.items.length === right.items.length &&
@@ -659,6 +800,54 @@ function samePath(left: DataPath, right: DataPath): boolean {
     left.length === right.length &&
     left.every((segment, index) => segment === right[index])
   );
+}
+
+function assignedItemTemplateKey(
+  collection: ArrayNodeDefinition,
+  issuePath: DataPath,
+  index: number,
+  itemId: string,
+): string | undefined | null {
+  const collectionPath = collection.path;
+  if (
+    !startsWithPath(issuePath, collectionPath) ||
+    issuePath[collectionPath.length] !== index
+  ) {
+    return null;
+  }
+  const relativePath = issuePath.slice(collectionPath.length + 1);
+  if (
+    relativePath.length === 0 ||
+    (relativePath.length === 1 &&
+      relativePath[0] === collection.identity.property)
+  ) {
+    return undefined;
+  }
+  let best: FormNodeTemplate | undefined;
+  const stack: FormNodeTemplate[] = [...collection.item.children].reverse();
+  while (stack.length > 0) {
+    const template = stack.pop();
+    if (template === undefined) break;
+    if (
+      startsWithPath(relativePath, template.relativePath) &&
+      (best === undefined ||
+        template.relativePath.length > best.relativePath.length)
+    ) {
+      best = template;
+    }
+    if (template.kind === 'object') {
+      for (let child = template.children.length - 1; child >= 0; child -= 1) {
+        stack.push(template.children[child] as FormNodeTemplate);
+      }
+    }
+  }
+  return best === undefined
+    ? undefined
+    : canonicalInstanceNodeKey(
+        collection.path as readonly string[],
+        itemId,
+        best.relativePath,
+      );
 }
 
 function startsWithPath(path: DataPath, prefix: DataPath): boolean {
@@ -781,74 +970,152 @@ function sameReferences(
   );
 }
 
-function buildTemplateSnapshot(
+function buildTemplateSnapshots(
   collection: ArrayNodeDefinition,
-  template: FormNodeTemplate,
+  templates: readonly FormNodeTemplate[],
   item: object,
   baselineItem: object | undefined,
   itemId: string,
   index: number,
   issues: readonly ValidationIssue[],
   fieldsByKey: ReadonlyMap<string, FieldRuntimeSnapshot>,
-): NodeRuntimeSnapshot {
-  const key = canonicalInstanceNodeKey(
-    collection.path as readonly string[],
-    itemId,
-    template.relativePath,
-  );
-  if (template.kind !== 'object') {
-    return fieldsByKey.get(key) as FieldRuntimeSnapshot;
+  showAll: boolean,
+  forced: ReadonlySet<string>,
+  previous?: ItemRuntimeSnapshot,
+): readonly NodeRuntimeSnapshot[] {
+  const roots = new Array<NodeRuntimeSnapshot>(templates.length);
+  const previousByKey = indexTemplateSnapshots(previous?.children ?? []);
+  type Frame =
+    | {
+        readonly phase: 'enter';
+        readonly template: FormNodeTemplate;
+        readonly output: NodeRuntimeSnapshot[];
+        readonly index: number;
+      }
+    | {
+        readonly phase: 'exit';
+        readonly template: Extract<FormNodeTemplate, { kind: 'object' }>;
+        readonly children: NodeRuntimeSnapshot[];
+        readonly output: NodeRuntimeSnapshot[];
+        readonly index: number;
+      };
+  const stack: Frame[] = [];
+  for (let rootIndex = templates.length - 1; rootIndex >= 0; rootIndex -= 1) {
+    stack.push({
+      phase: 'enter',
+      template: templates[rootIndex] as FormNodeTemplate,
+      output: roots,
+      index: rootIndex,
+    });
   }
-  const children = Object.freeze(
-    template.children.map((child) =>
-      buildTemplateSnapshot(
-        collection,
-        child,
-        item,
-        baselineItem,
-        itemId,
-        index,
-        issues,
-        fieldsByKey,
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    const key = canonicalInstanceNodeKey(
+      collection.path as readonly string[],
+      itemId,
+      frame.template.relativePath,
+    );
+    if (frame.phase === 'enter') {
+      if (frame.template.kind !== 'object') {
+        frame.output[frame.index] = fieldsByKey.get(
+          key,
+        ) as FieldRuntimeSnapshot;
+        continue;
+      }
+      const children = new Array<NodeRuntimeSnapshot>(
+        frame.template.children.length,
+      );
+      stack.push({
+        phase: 'exit',
+        template: frame.template,
+        children,
+        output: frame.output,
+        index: frame.index,
+      });
+      for (
+        let childIndex = frame.template.children.length - 1;
+        childIndex >= 0;
+        childIndex -= 1
+      ) {
+        stack.push({
+          phase: 'enter',
+          template: frame.template.children[childIndex] as FormNodeTemplate,
+          output: children,
+          index: childIndex,
+        });
+      }
+      continue;
+    }
+    const prefix = [...collection.path, index];
+    const presence = resolveTemplateObjectPresence(
+      item,
+      frame.template.relativePath,
+      prefix,
+    );
+    const baselinePresence =
+      baselineItem === undefined
+        ? undefined
+        : resolveTemplateObjectPresence(
+            baselineItem,
+            frame.template.relativePath,
+            prefix,
+          );
+    const ownIssues = Object.freeze(
+      issues.filter(
+        (issue) =>
+          assignedItemTemplateKey(collection, issue.path, index, itemId) ===
+          key,
       ),
-    ),
-  );
-  const prefix = [...collection.path, index];
-  const presence = resolveTemplateObjectPresence(
-    item,
-    template.relativePath,
-    prefix,
-  );
-  const baselinePresence =
-    baselineItem === undefined
-      ? undefined
-      : resolveTemplateObjectPresence(
-          baselineItem,
-          template.relativePath,
-          prefix,
-        );
-  const path = Object.freeze([...prefix, ...template.relativePath]);
-  const ownIssues = Object.freeze(
-    issues.filter((issue) => samePath(issue.path, path)),
-  );
-  const touched = children.some((child) => child.touched);
-  const snapshot: ObjectRuntimeSnapshot = Object.freeze({
-    nodeKind: 'object',
-    key,
-    path,
-    presence,
-    dirty:
-      baselinePresence === undefined
-        ? false
-        : templateObjectDirty(presence, baselinePresence, children),
-    touched,
-    focused: children.some((child) => child.focused),
-    valid: ownIssues.length === 0 && children.every((child) => child.valid),
-    issues: ownIssues,
-    showIssues: ownIssues.length > 0 && touched,
-    children,
-  });
-  return snapshot;
+    );
+    const children = Object.freeze(frame.children);
+    const touched = children.some((child) => child.touched);
+    const candidate: NodeRuntimeSnapshot = Object.freeze({
+      nodeKind: 'object',
+      key,
+      path: Object.freeze([
+        ...collection.path,
+        index,
+        ...frame.template.relativePath,
+      ]),
+      presence,
+      dirty:
+        baselinePresence === undefined
+          ? false
+          : templateObjectDirty(presence, baselinePresence, children),
+      touched,
+      focused: children.some((child) => child.focused),
+      valid: ownIssues.length === 0 && children.every((child) => child.valid),
+      issues: ownIssues,
+      showIssues:
+        ownIssues.length > 0 && (showAll || touched || forced.has(key)),
+      children,
+    });
+    const prior = previousByKey.get(key);
+    frame.output[frame.index] =
+      prior !== undefined && sameNodeSnapshot(prior, candidate)
+        ? prior
+        : candidate;
+  }
+  return Object.freeze(roots);
+}
+
+function indexTemplateSnapshots(
+  roots: readonly NodeRuntimeSnapshot[],
+): ReadonlyMap<string, NodeRuntimeSnapshot> {
+  const result = new Map<string, NodeRuntimeSnapshot>();
+  const stack = [...roots].reverse();
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (node === undefined) break;
+    result.set(node.key, node);
+    if (node.nodeKind === 'object') {
+      for (let index = node.children.length - 1; index >= 0; index -= 1) {
+        stack.push(node.children[index] as NodeRuntimeSnapshot);
+      }
+    }
+  }
+  return result;
 }
 
 function resolveTemplateObjectPresence(

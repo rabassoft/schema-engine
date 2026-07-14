@@ -6,6 +6,46 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-010 checkpoint 4 completed
+
+### Implementation
+
+- Activated recoverable descriptor-safe current/baseline collection identity
+  inspection and atomic managed-accessor rejection before validator execution.
+- Added immutable array, item and template-instance snapshots, dynamic leaf
+  projection, stable and positional reads, identity-based reconciliation and
+  complete observable-state structural sharing.
+- Activated all five controlled collection intentions, stable focus/blur,
+  missing-path start/end insertion, positional validation assignment and
+  collection/item/node scopes with visibility and touched reset behavior.
+- Kept application state authoritative, numeric paths observation-only, core
+  framework-neutral and Angular collection/item hosts inactive until checkpoint 5.
+
+### Review and verification
+
+- Repeated review corrected fixed-order hostile action diagnostics, deep
+  recursive snapshot construction, missing-ancestor materialization, vanished
+  interaction cleanup, dynamic array scopes, fine-grained sharing, exact
+  incompatible blocking paths, dirty ownership and definition/item/template
+  accessor order.
+- Added focused evidence for all request variants, invalid/recovering identity,
+  current-before-baseline diagnostics, positional issue fallbacks, hostile
+  descriptors, depth-1,200 item trees, controlled confirmation and immutable
+  replacement sharing.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, both builds,
+  `git diff --check` and all 58 Markdown files/262 local links pass; all 247
+  core and 59 Angular tests pass (306 total).
+- `pnpm test:package`, `pnpm test:consumer`, exact-inventory
+  `pnpm test:artifacts` and `pnpm test:consumer:clean` pass, including clean
+  core plus Angular 22.0.6 lower/upper consumers. No manifest, version,
+  dependency, peer/export, lockfile, publication or Stable state changed.
+
+### Next
+
+- Execute PLAN-010 checkpoint 5: Internal Angular collection/item/text
+  projection, stable views, actions, accessibility, focus/lifecycle/failure
+  behavior and focused tests.
+
 ## 2026-07-14 — PLAN-010 checkpoint 3 completed
 
 ### Implementation

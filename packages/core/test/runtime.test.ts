@@ -305,7 +305,7 @@ describe('controlled runtime', () => {
             source: 'runtime',
             parameters: {
               member: 'definition',
-              expected: 'valid nested FormDefinition',
+              expected: 'valid collection FormDefinition',
               reason: 'invalid-value',
               actualType: 'object',
               definitionReason: 'invalid-node',
@@ -334,7 +334,7 @@ describe('controlled runtime', () => {
           code: 'INVALID_RUNTIME_OPTIONS',
           parameters: {
             member: 'definition',
-            expected: 'valid nested FormDefinition',
+            expected: 'valid collection FormDefinition',
             reason: 'invalid-value',
             actualType: 'object',
             definitionReason: 'nodes-not-array',
@@ -370,7 +370,7 @@ describe('controlled runtime', () => {
       success: false,
       diagnostics: [
         {
-          parameters: { expected: 'valid nested FormDefinition' },
+          parameters: { expected: 'valid collection FormDefinition' },
         },
       ],
     });

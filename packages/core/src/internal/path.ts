@@ -42,7 +42,9 @@ export function copyStringDataPath(
   return Object.freeze(result);
 }
 
-export function canonicalDataPathKey(path: readonly string[]): string {
+export function canonicalDataPathKey(
+  path: readonly (string | number)[],
+): string {
   return JSON.stringify(path);
 }
 

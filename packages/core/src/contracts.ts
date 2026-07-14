@@ -321,7 +321,7 @@ export type FieldTextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
-      readonly field: FieldDefinition;
+      readonly field: FieldDefinition | FieldTemplate;
       readonly member: Exclude<FieldTextMember, 'choice' | 'issue'>;
       readonly choice?: never;
       readonly issue?: never;
@@ -329,7 +329,7 @@ export type FieldTextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
-      readonly field: FieldDefinition;
+      readonly field: FieldDefinition | FieldTemplate;
       readonly member: 'choice';
       readonly choice: StringChoiceDefinition;
       readonly issue?: never;
@@ -337,7 +337,7 @@ export type FieldTextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
-      readonly field: FieldDefinition;
+      readonly field: FieldDefinition | FieldTemplate;
       readonly member: 'issue';
       readonly choice?: never;
       readonly issue: ValidationIssue;
@@ -523,7 +523,8 @@ export interface ItemRuntimeSnapshot {
   readonly fields: readonly FieldRuntimeSnapshot[];
 }
 export type RuntimeTreeSnapshot = NodeRuntimeSnapshot | ItemRuntimeSnapshot;
-export type NodeRuntimeSnapshot = ObjectRuntimeSnapshot | FieldRuntimeSnapshot;
+export type NodeRuntimeSnapshot =
+  ObjectRuntimeSnapshot | ArrayRuntimeSnapshot | FieldRuntimeSnapshot;
 export interface FormRuntimeSnapshot<TData extends object> {
   readonly value: Readonly<TData>;
   readonly locale: string;
@@ -536,7 +537,7 @@ export interface FormRuntimeSnapshot<TData extends object> {
 }
 export interface FormScope {
   readonly id: string;
-  readonly paths: readonly DataPath[];
+  readonly paths: readonly FormScopeTarget[];
   readonly includeGlobalIssues?: boolean;
 }
 export type FormScopeTarget =
@@ -561,14 +562,36 @@ export type SubscribeResult =
 export interface FormRuntime<TData extends object> {
   getSnapshot(): FormRuntimeSnapshot<TData>;
   getFieldSnapshot(path: DataPath): FieldRuntimeSnapshot | undefined;
-  getNodeSnapshot(path: DataPath): NodeRuntimeSnapshot | undefined;
+  getNodeSnapshot(path: DataPath): RuntimeTreeSnapshot | undefined;
+  getItemSnapshot(
+    address: CollectionItemAddress,
+  ): ItemRuntimeSnapshot | undefined;
+  getCollectionNodeSnapshot(
+    address: CollectionNodeAddress,
+  ): RuntimeTreeSnapshot | undefined;
   subscribe(listener: SnapshotListener<TData>): SubscribeResult;
   subscribeOperations(listener: OperationListener): SubscribeResult;
   updateExternalState(update: ExternalStateUpdate<TData>): RuntimeActionResult;
   requestSetValue(path: DataPath, value: unknown): RuntimeActionResult;
   requestRemoveValue(path: DataPath): RuntimeActionResult;
-  focus(path: DataPath): RuntimeActionResult;
-  blur(path: DataPath): RuntimeActionResult;
+  requestSetItemValue(
+    target: CollectionNodeAddress,
+    value: unknown,
+  ): RuntimeActionResult;
+  requestRemoveItemValue(target: CollectionNodeAddress): RuntimeActionResult;
+  requestInsertItem(
+    collectionPath: readonly string[],
+    itemId: string,
+    item: unknown,
+    placement: CollectionPlacement,
+  ): RuntimeActionResult;
+  requestRemoveItem(address: CollectionItemAddress): RuntimeActionResult;
+  requestMoveItem(
+    address: CollectionItemAddress,
+    placement: CollectionPlacement,
+  ): RuntimeActionResult;
+  focus(target: DataPath | CollectionNodeAddress): RuntimeActionResult;
+  blur(target: DataPath | CollectionNodeAddress): RuntimeActionResult;
   resetTouched(scope?: FormScope): RuntimeActionResult;
   setValidationVisibility(
     visibility: ValidationVisibility,

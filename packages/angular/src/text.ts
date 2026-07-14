@@ -7,6 +7,7 @@ import {
 import type {
   Diagnostic,
   FieldDefinition,
+  FieldTemplate,
   FieldRuntimeSnapshot,
   FieldTextMember,
   ObjectFieldDefinition,
@@ -20,7 +21,7 @@ import { adapterDiagnostic } from './renderer.js';
 
 type FieldTextResolutionContext = Extract<
   TextResolutionContext,
-  { readonly field: FieldDefinition }
+  { readonly field: FieldDefinition | FieldTemplate }
 >;
 type ObjectTextResolutionContext = Extract<
   TextResolutionContext,
@@ -77,7 +78,7 @@ export class AngularTextProjector {
   private readonly parsed = parseResolver(this.candidate);
 
   project(
-    field: FieldDefinition,
+    field: FieldDefinition | FieldTemplate,
     snapshot: FieldRuntimeSnapshot,
     formId: string,
     locale: string,
@@ -94,6 +95,7 @@ export class AngularTextProjector {
         source,
         { ...common, member },
         diagnostics,
+        snapshot.path,
         rejectBlank,
       );
     const label = resolve(field.label, 'label');
@@ -118,6 +120,7 @@ export class AngularTextProjector {
         choice.label,
         { ...common, member: 'choice', choice },
         diagnostics,
+        snapshot.path,
         true,
       ),
     );
@@ -127,6 +130,7 @@ export class AngularTextProjector {
         issue.fallbackMessage ?? issue.code,
         { ...common, member: 'issue', issue },
         diagnostics,
+        snapshot.path,
       ),
     );
     return Object.freeze({
@@ -162,6 +166,7 @@ export class AngularTextProjector {
         source,
         { ...common, member },
         diagnostics,
+        snapshot.path,
         rejectBlank,
       );
     const label = resolve(node.label, 'label', true);
@@ -179,6 +184,7 @@ export class AngularTextProjector {
         issue.fallbackMessage ?? issue.code,
         { ...common, member: 'issue', issue },
         diagnostics,
+        snapshot.path,
       ),
     );
     return Object.freeze({
@@ -235,21 +241,26 @@ function resolveText(
   source: string,
   context: FieldTextResolutionContext | ObjectTextResolutionContext,
   diagnostics: Diagnostic[],
+  diagnosticPath?: readonly (string | number)[],
   rejectBlank = false,
 ): string {
   let result: unknown;
   try {
     result = resolver(source, context);
   } catch {
-    diagnostics.push(textDiagnostic(context, 'exception'));
+    diagnostics.push(textDiagnostic(context, 'exception', diagnosticPath));
     return source;
   }
   if (typeof result !== 'string') {
-    diagnostics.push(textDiagnostic(context, 'non-string-result'));
+    diagnostics.push(
+      textDiagnostic(context, 'non-string-result', diagnosticPath),
+    );
     return source;
   }
   if (rejectBlank && result.trim().length === 0) {
-    diagnostics.push(textDiagnostic(context, 'blank-string-result'));
+    diagnostics.push(
+      textDiagnostic(context, 'blank-string-result', diagnosticPath),
+    );
     return source;
   }
   return result;
@@ -258,6 +269,7 @@ function resolveText(
 function textDiagnostic(
   context: FieldTextResolutionContext | ObjectTextResolutionContext,
   reason: string,
+  diagnosticPath?: readonly (string | number)[],
 ): Diagnostic {
   if ('node' in context) {
     const isArray = context.node.kind === 'array';
@@ -293,11 +305,14 @@ function textDiagnostic(
       reason,
     },
     `Text resolution failed for field "${context.field.name}".`,
-    context.field.path,
+    diagnosticPath ??
+      ('path' in context.field ? context.field.path : undefined),
   );
 }
 
-function ownChoices(field: FieldDefinition): readonly StringChoiceDefinition[] {
+function ownChoices(
+  field: FieldDefinition | FieldTemplate,
+): readonly StringChoiceDefinition[] {
   if (field.kind !== 'string') return [];
   const descriptor = Object.getOwnPropertyDescriptor(field, 'choices');
   return descriptor !== undefined &&
