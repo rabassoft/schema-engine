@@ -31,6 +31,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 10. [ADR 010: Versionado independiente, SemVer Stable y compatibilidad explícita](./010-versionado-semver-compatibilidad.md) — **Accepted.**
 11. [ADR 011: Enum de strings normalizado y renderer select nativo](./011-enum-string-normalizado-select-nativo.md) — **Accepted; revision 1 superó las ocho áreas de revisión y promueve D-008.**
 12. [ADR 012: Limpieza explícita de campos nativos](./012-limpieza-explicita-campos.md) — **Accepted, revision 1; promueve D-010/M7.**
+13. [ADR 013: Preparación verificable de artefactos experimentales 0.1](./013-preparacion-artefactos-experimentales-0-1.md) — **Accepted revision 1; prepara candidatos locales M8 sin autorizar publicación.**
 
 ## 4. ADRs específicos de Angular
 

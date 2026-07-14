@@ -9,7 +9,9 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "test": "pnpm build && pnpm -r --if-present test",
+    "test:artifacts": "pnpm build && node scripts/verify-packed-artifacts.mjs",
     "test:consumer": "pnpm build && pnpm --filter @rabassoft/schema-engine-angular exec vitest run test/consumer.test.ts",
+    "test:consumer:clean": "pnpm build && node scripts/verify-clean-consumers.mjs",
     "test:package": "pnpm build && pnpm -r --if-present test:package",
     "typecheck": "pnpm build && pnpm -r --if-present typecheck"
   },

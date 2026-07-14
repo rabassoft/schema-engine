@@ -389,21 +389,43 @@ Cada decisión debe registrar:
 - **Documento esperado:** SPEC de inicialización explícita y, si afecta a la
   arquitectura o API pública, ADR y plan aprobados.
 
+## D-040: Publicación real de paquetes
+
+- **Estado:** Deferred
+- **Pregunta:** ¿Dónde, con qué visibilidad, licencia, access, provenance,
+  credenciales y proceso se publicarán los artefactos preparados por M8?
+- **Motivo:** Probar tarballs locales no concede términos de distribución ni
+  autoriza efectos remotos, y `private: true` debe seguir bloqueando una
+  publicación accidental durante M8.
+- **Retomar cuando:** ADR-013, PLAN-008 y M8 estén completados y Ricard decida
+  iniciar explícitamente una primera publicación.
+- **Documento esperado:** ADR de publicación que resuelva también la relación
+  con D-034, seguido de un plan aprobado para registry, access, provenance,
+  credenciales, tags y rollback.
+
 ## 4. Próximas decisiones a promover
 
 Las entradas más cercanas a convertirse en ADR son:
 
-1. **D-005 — Objetos anidados.**
+1. **D-040 — Publicación real**, solo después de completar M8 y recibir una
+   solicitud explícita de publicación.
+2. **D-005 — Objetos anidados.**
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
-secuencia posterior. ADR-012 promueve únicamente D-010/M7; D-005 continúa como
-Candidate y todas las demás entradas conservan el estado registrado aquí hasta
-una promoción y aprobación explícitas.
+secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
+de M8; D-040 conserva la publicación como Deferred, D-005 continúa Candidate y
+todas las demás entradas mantienen su estado hasta una promoción y aprobación
+explícitas.
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | PLAN-008 y M8 se completan con candidatos privados 0.1.0 verificados; D-040 y D-034 continúan Deferred.                         |
+| 14-07-2026 | PLAN-008 revision 2 supera la revisión formal repetida; M8 sigue inactivo y D-040 continúa Deferred.                            |
+| 14-07-2026 | Se acepta ADR-013 revision 1; D-040 sigue Deferred y PLAN-008 puede pasar a revisión sin activar M8.                            |
+| 14-07-2026 | ADR-013 revision 1 supera la revisión formal repetida; D-040 continúa Deferred y la aceptación sigue pendiente.                 |
+| 14-07-2026 | Se propone ADR-013 y PLAN-008 para preparar artefactos 0.1 locales; D-040 separa y difiere la publicación real.                 |
 | 14-07-2026 | Se acepta ADR-012 revision 1, D-010 queda Promoted y M7 avanza a sincronización de SPEC y preparación de PLAN-007.              |
 | 14-07-2026 | ADR-012 revision 1 supera sus ocho criterios tras precisar foco, accesibilidad y migración; D-010 sigue Candidate.              |
 | 14-07-2026 | Se propone ADR-012 para revisar la limpieza explícita nativa; D-010 permanece Candidate y M7 no está activo.                    |

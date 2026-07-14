@@ -25,6 +25,11 @@
   - Completado el 14 de julio de 2026 bajo PLAN-007 revisión 2 y ADR-012.
   - Acción nativa accesible y localizable para los cuatro renderers, flujo
     `remove-value` controlado y protección de foco/rutas durante lifecycle.
+- [x] M8 — Preparación de la versión experimental 0.1
+  - Completado el 14 de julio de 2026 bajo ADR-013 revisión 1 y PLAN-008
+    revisión 2, sin publicación.
+  - Candidatos privados `0.1.0`, manifests/peers alineados, tarballs
+    inspeccionados y consumidores limpios para los extremos Angular 22.
 
 ## Gate de revisión completado
 
@@ -54,17 +59,9 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7 está completado bajo ADR-012 y PLAN-007 revision 2. M8-M12 continúan como
-> propuestas de planificación. Ninguna otra decisión diferida se promueve sin
-> revisar y aprobar explícitamente su ADR, SPEC y/o plan de implementación.
-
-### M8 — Preparación de la versión experimental 0.1
-
-- Validar la instalación desde artefactos empaquetados y un consumidor limpio.
-- Aplicar las comprobaciones de versión, peer ranges, matriz de compatibilidad,
-  declaraciones y release notes de ADR-010.
-- Mantener la publicación como decisión explícita separada; este hito no implica
-  registry, licencia, provenance, credenciales ni automatización.
+> M7 y M8 están completados bajo sus ADR y planes aceptados. M9-M12 continúan
+> como propuestas de planificación. La publicación real permanece Deferred en
+> D-040 y requiere una solicitud y aprobación explícitas.
 
 ### M9 — Objetos anidados
 

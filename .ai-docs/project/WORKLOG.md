@@ -6,6 +6,148 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-008 and M8 completed
+
+### Completed
+
+- Prepared both packages as private independent `0.1.0` local candidates.
+- Moved core from Angular runtime dependencies to peer + dev dependency and
+  aligned Angular peers to `>=22.0.6 <23.0.0` without upgrading dependencies.
+- Added package-local Experimental/no-distribution READMEs and candidate release
+  notes with the exact compatibility matrix.
+- Added deterministic tarball allowlist/manifest checks and isolated core,
+  Angular lower and Angular upper consumers using strict peers and pnpm 10.28.2.
+- Resolved the upper stable Angular endpoint as `22.0.6`, equal to the lower
+  endpoint, and verified the aligned tuple in both consumers.
+- Completed PLAN-008 revision 2 and M8 without publishing, distributing,
+  licensing, changing product source or promoting API stability.
+
+### Corrections and final review
+
+- Added `rxjs@7.8.2` only to the temporary Angular consumers to satisfy
+  Angular's own strict peer contract.
+- Corrected the consumer's typed parent injector, credential sanitization, pnpm
+  assertion and stale root version text.
+- Repeated the complete matrix after corrections; the final review has zero
+  findings or requested changes.
+
+### Verification
+
+- Frozen install, format, lint, typecheck, 179 tests, builds, package smoke,
+  existing consumer, artifact checks and all three clean consumers pass.
+- Tarballs contain only package manifest, README and allowed `dist` output;
+  transformed manifests contain no `workspace:` specifier.
+- Lower/upper evidence is Angular `22.0.6`, resolved 2026-07-14 from public npm
+  metadata with aligned Angular packages and no credentials.
+- No remote mutation, external tarball distribution, registry configuration,
+  license, provenance, tag or GitHub Release occurred.
+
+### Pending
+
+- Review the D-005/M9 nested-object promotion boundary. D-040 remains Deferred
+  until publication is explicitly requested.
+
+## 2026-07-14 — PLAN-008 revision 2 approved and M8 started
+
+### Decision
+
+- Ricard explicitly approved PLAN-008 revision 2 after its second repeated
+  review passed with zero findings.
+- M8 implementation is active only for private local `0.1.0` candidates,
+  artifact verification and the clean-consumer matrix.
+- Publication, external distribution, license, registry writes, credentials,
+  provenance, tags and Stable API promotion remain unauthorized.
+
+### Pending
+
+- Implement PLAN-008 steps 2–6 and close M8 only after the complete matrix and
+  final repeated review pass.
+
+## 2026-07-14 — ADR-013 accepted and PLAN-008 revision 2 reviewed
+
+### Completed
+
+- Recorded Ricard's explicit acceptance of ADR-013 revision 1 without changing
+  manifests or activating M8.
+- Formally reviewed PLAN-008 against accepted ADR-009/010/013, the manifests,
+  artifact boundary, clean-consumer matrix, D-034/D-040 and publication safety.
+- Corrected public read-only registry access, the exact stable upper Angular
+  endpoint, strict isolated peer installation and local no-distribution
+  documentation.
+- The first repetition found four stale `latest patch` phrases; revision 2
+  normalizes them and the second complete repetition passes all eight areas.
+- PLAN-008 remains Proposed revision 2; review completion does not approve it or
+  activate M8.
+
+### Verification
+
+- Documentation formatting, all 36 Markdown documents and 168 local links,
+  state/revision consistency and `git diff --check` pass.
+- No manifest, dependency, lockfile, product source, export, version,
+  publication setting or API stability state changed.
+
+### Pending
+
+- Ricard must explicitly approve PLAN-008 revision 2 before M8 implementation
+  can begin.
+
+## 2026-07-14 — ADR-013 revision 1 passed formal review
+
+### Completed
+
+- Reviewed ADR-013 against SPEC-001, ADR-006/009/010, current manifests,
+  D-034/D-040, M8 scope and publication safety.
+- Corrected three findings: read-only registry access versus remote mutation,
+  the exact stable upper Angular version rule, and the no-license/no-external-
+  distribution boundary for local tarballs.
+- Repeated all eight areas successfully. ADR-013 remains Proposed revision 1;
+  the review does not accept it, approve PLAN-008 or activate M8.
+
+### Verification
+
+- Documentation formatting, all 36 Markdown documents and 168 local links,
+  review/state consistency and `git diff --check` pass.
+- No manifest, dependency, lockfile, product source, export, version,
+  publication setting or API stability state changed.
+
+### Pending
+
+- Ricard must explicitly accept ADR-013 revision 1 before PLAN-008 receives its
+  formal review.
+
+## 2026-07-14 — M8 scope reviewed and ADR-013/PLAN-008 drafted
+
+### Completed
+
+- Committed completed PLAN-007/M7 as `d90a834` with Rabassoft authorship.
+- Reviewed M8 against SPEC-001, ADR-006/009/010, D-028/D-029 and the real
+  package manifests and build outputs.
+- Drafted ADR-013 and PLAN-008 revision 0 for private `0.1.0` candidate
+  tarballs, exact peer metadata, artifact inspection and clean consumers at the
+  Angular 22 lower and latest-in-range endpoints.
+- Identified the current core dependency placement and Angular lower peer bound
+  as the two manifest conflicts M8 must correct; no manifest was changed.
+- Registered actual publication as D-040 so license, registry, access,
+  provenance, credentials, tags and automation remain explicitly deferred.
+- Corrected stale root README and non-normative SPEC prose that still described
+  M7 as pending.
+
+### Review and verification
+
+- The initial eight-area M8 scope review passes without an unresolved drafting
+  finding; it does not accept ADR-013, approve PLAN-008 or activate M8.
+- Documentation formatting and `git diff --check` pass.
+- All 36 Markdown documents and 168 local links resolve.
+- Package manifests, dependencies, lockfile, runtime source, exports, versions,
+  publication settings and API stability remain unchanged in this planning
+  checkpoint.
+
+### Pending
+
+- Formally review ADR-013 revision 0 and repeat after any correction until a
+  complete pass has zero findings. PLAN-008 review and approval follow only
+  after the ADR is accepted.
+
 ## 2026-07-14 — PLAN-007 and M7 completed
 
 ### Completed

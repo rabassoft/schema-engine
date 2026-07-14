@@ -19,6 +19,8 @@
   [`ADR-011`](../adrs/011-enum-string-normalizado-select-nativo.md)
 - **Limpieza explícita de campos nativos:**
   [`ADR-012`](../adrs/012-limpieza-explicita-campos.md)
+- **Plan de limpieza explícita completado:**
+  [`PLAN-007`](../plans/007-explicit-native-field-clearing.md)
 
 ## 1. Propósito
 
@@ -1412,14 +1414,14 @@ modificar el alcance completado de M1-M5 ni activar capacidades adicionales.
 
 ADR-012 revision 1 fue aceptada el 14 de julio de 2026 y promueve D-010/M7.
 Esta versión incorpora su contrato normativo de limpieza nativa, localización,
-accesibilidad, foco y API Experimental. PLAN-007 y la implementación continúan
-pendientes.
+accesibilidad, foco y API Experimental. PLAN-007 revisión 2 y M7 se completaron
+el 14 de julio de 2026 sin ampliar ese contrato.
 
-M1-M6 implementan el walking skeleton descrito por esta SPEC. SPEC-001 v0.1.14
-fue aceptada tras superar G0; v0.1.15 incorpora la decisión M7 aceptada, cuya
-implementación permanece pendiente de PLAN-007. La aceptación no promociona
-automáticamente APIs públicas a Stable. El bridge de validación de D-024,
-D-036, D-037 y las demás decisiones aplazadas conservan su estado.
+M1-M7 implementan el walking skeleton y la extensión de limpieza descritos por
+esta SPEC. SPEC-001 v0.1.14 fue aceptada tras superar G0; v0.1.15 incorpora la
+decisión M7 aceptada y ya implementada. La aceptación o implementación no
+promociona automáticamente APIs públicas a Stable. El bridge de validación de
+D-024, D-036, D-037 y las demás decisiones aplazadas conservan su estado.
 
 ## 30. Historial
 

@@ -11,11 +11,11 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository contains the completed M1-M6 controlled-form prototype. Its G0
-review passed and SPEC-001 v0.1.15 is Accepted. ADR-012 defines the approved M7
-boundary, but PLAN-007 and implementation have not started; the remaining
-M8-M12 sequence is recorded in the
-[roadmap](./.ai-docs/project/ROADMAP.md) and requires separate approval.
+The repository contains the completed M1-M7 controlled-form prototype and M8
+private local release candidates. Its G0 review passed and SPEC-001 v0.1.15 is
+Accepted. ADR-012/PLAN-007 govern explicit native field clearing, while
+ADR-013/PLAN-008 govern verified `0.1.0` tarballs without publication. The
+remaining sequence is recorded in the [roadmap](./.ai-docs/project/ROADMAP.md).
 
 ## Current implementation
 
@@ -38,5 +38,6 @@ active.
 - `main` represents the stable, deployment-ready line.
 - `develop` is the integration branch for ongoing development.
 
-Both packages remain private at version `0.0.0`. No publication or deployment
-automation is configured yet.
+Both packages are private local candidates at version `0.1.0`. No publication,
+external distribution, license, registry write, or deployment automation is
+configured or authorized.

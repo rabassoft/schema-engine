@@ -37,9 +37,12 @@
 - [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
 - [PLAN-007: Explicit native field clearing](./plans/007-explicit-native-field-clearing.md) — Completed revision 2
+- [PLAN-008: Experimental 0.1 artifact preparation](./plans/008-experimental-0-1-artifact-preparation.md) — Completed revision 2
 
 M1-M7 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
-increment. M8-M12 remain proposals rather than approved delivery commitments.
+increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
+`0.1.0` candidates. M8 completed without publication; M9-M12 remain unapproved
+delivery commitments.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.
