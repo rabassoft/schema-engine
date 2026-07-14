@@ -6,6 +6,146 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-007 and M7 completed
+
+### Completed
+
+- Added the Public + Experimental `clear` text member and required Angular
+  `clearLabel` with exact non-blank fallback diagnostics.
+- Added presence-driven localized clear buttons, deterministic label/action IDs,
+  accessible names, and focus-before-remove behavior to all four native
+  renderers.
+- Pinned outlet outputs to captured field/runtime identities, reconciled
+  same-runtime focused detach, and deactivated bindings before destruction so
+  stale callbacks cannot target a replacement field or runtime.
+- Covered missing, falsy, required, incompatible, enum, numeric-empty,
+  controlled confirmation/rejection, pointer/keyboard, focus/touched, locale,
+  lifecycle, custom renderer, package, and built-consumer behavior.
+- Completed PLAN-007 revision 2 and M7 without promoting APIs to Stable or
+  activating another deferred capability.
+
+### Verification
+
+- Frozen installation passed with the lockfile unchanged after network access
+  restored the local dependency tree.
+- Formatting, lint, typecheck, 129 core tests, 50 Angular tests, both builds,
+  package smoke, and the built-package consumer pass.
+- Declaration inspection shows only `FieldTextMember: 'clear'` and required
+  `AngularFieldTextSnapshot.clearLabel`; entry points and export maps are
+  unchanged.
+- Core isolation, Angular Signal Forms imports, dependency/package boundaries,
+  all 34 Markdown files and 156 local links, and `git diff --check` pass.
+- The final full review was repeated after correcting its only lint finding and
+  completed with zero findings or requested changes.
+
+### Pending
+
+- Select and review the next post-M7 milestone. M8 remains a proposal and does
+  not authorize publication.
+
+## 2026-07-14 — PLAN-007 revision 2 approved and M7 started
+
+### Decision
+
+- Ricard explicitly approved PLAN-007 revision 2 after its corrected second
+  review completed with zero findings.
+- M7 implementation begins with the neutral and Angular clear-text contracts;
+  every other deferred capability remains inactive.
+- The persistent delivery workflow now requires complete review repetition
+  after every correction until a full pass produces no findings or requested
+  changes; only then may work be approved or completed.
+
+### Boundary
+
+- Approval authorizes only PLAN-007's six steps and exact production boundary.
+- It does not authorize publication, new dependencies, new entry points, or API
+  promotion to Stable.
+
+### Pending
+
+- Implement, test, and verify M7 before marking PLAN-007 or the milestone
+  complete.
+
+## 2026-07-14 — PLAN-007 revision 2 passed second review
+
+### Completed
+
+- Repeated the full PLAN-007 review independently, emphasizing outlet lifecycle,
+  focus/blur ordering, public declarations, and transition races.
+- Found that existing output callbacks resolve the current reactive field path,
+  so an old renderer event could target an incoming field during replacement.
+- Corrected the plan to capture field path and runtime identity per
+  `ComponentRef` and use that identity for all four outputs and focus cleanup.
+- Repeated all eight formal areas successfully. PLAN-007 remains Proposed
+  revision 2 and M7 implementation remains inactive.
+
+### Verification
+
+- Documentation formatting, local links, revision/approval state,
+  contract-consistency and stale-path searches, product-diff scope, and
+  `git diff --check` pass.
+- No product code, accepted SPEC/ADR, public declaration, package, dependency,
+  lockfile, or publication setting changed.
+
+### Pending
+
+- Explicitly approve PLAN-007 revision 2 or return it for correction. Do not
+  implement M7 before approval.
+
+## 2026-07-14 — PLAN-007 revision 1 passed formal review
+
+### Completed
+
+- Reviewed PLAN-007 against all eight areas, SPEC-001 v0.1.15, ADR-009/012,
+  completed PLAN-004/005/006, current declarations, text projection, outlet,
+  native renderers, and controlled runtime boundaries.
+- Corrected the complete clear-text diagnostic shape, including its existing
+  fallback message.
+- Closed the focus-destruction gap with a private same-runtime outlet rule that
+  blurs the previously bound focused path before detach while preventing stale
+  paths from reaching a replacement runtime.
+- Repeated all eight areas successfully. PLAN-007 remains Proposed revision 1;
+  review completion does not approve or activate M7 implementation.
+
+### Verification
+
+- Documentation formatting, local links, proposal/review/approval state,
+  contract-consistency searches, product-diff scope, and `git diff --check`
+  pass.
+- No product code, accepted SPEC/ADR, public declaration, package, dependency,
+  lockfile, or publication setting changed.
+
+### Pending
+
+- Explicitly approve PLAN-007 revision 1 or return it for correction. Do not
+  implement M7 before approval.
+
+## 2026-07-14 — PLAN-007 drafted for M7 review
+
+### Completed
+
+- Drafted PLAN-007 as Proposed against SPEC-001 v0.1.15, ADR-009, ADR-012
+  revision 1, and the existing core/Angular contracts.
+- Fixed the exact public Experimental text extensions, clear-text diagnostic,
+  focus-before-output ordering, deterministic accessible IDs, per-renderer
+  behavior, controlled confirmation/rejection, implementation boundary, tests,
+  and package/declaration checks.
+- Confirmed that M7 reuses the existing `remove-value`, runtime request, Angular
+  output, and outlet flow without authorizing a new core or public action
+  contract.
+
+### Verification
+
+- Documentation formatting, local links, plan/state consistency, product-diff
+  scope, and `git diff --check` pass.
+- No product code, accepted SPEC/ADR, package, dependency, lockfile, or
+  publication setting changed.
+
+### Pending
+
+- Review PLAN-007's eight formal areas, apply any corrections, repeat the
+  checklist, and explicitly approve it before implementation.
+
 ## 2026-07-14 — ADR-012 accepted and D-010 promoted to M7
 
 ### Decision

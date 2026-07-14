@@ -89,6 +89,7 @@ describe('Angular adapter directives', () => {
     FakeRenderer.latest = undefined;
     FakeRenderer.created = 0;
     FakeRenderer.destroyed = 0;
+    FakeRenderer.emitOnDestroy = false;
   });
 
   it('projects snapshots and emits controlled operations', () => {
@@ -150,6 +151,7 @@ describe('Angular adapter directives', () => {
       kind: 'value',
       value: 'Ada',
     });
+    expect(renderer.texts().clearLabel).toBe('Clear');
 
     renderer.setValue.emit('Grace');
     renderer.removeValue.emit();
@@ -270,6 +272,34 @@ describe('Angular adapter directives', () => {
     );
   });
 
+  it('ignores every old renderer output once runtime replacement starts', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaEngineAngular({
+          id: 'fake',
+          renderer: FakeRenderer,
+          tester: () => 1,
+        }),
+      ],
+    });
+    const fixture = TestBed.createComponent(OutletHost);
+    fixture.detectChanges();
+    TestBed.tick();
+    FakeRenderer.emitOnDestroy = true;
+
+    fixture.componentInstance.config.set(
+      createConfig({ formId: 'replacement' }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect(fixture.componentInstance.operations).toEqual([]);
+    expect(fixture.componentInstance.form?.snapshot()?.fields).toMatchObject([
+      { path: ['name'], focused: false, touched: false },
+      { path: ['age'], focused: false, touched: false },
+    ]);
+  });
+
   it('replaces the renderer when its normalized field definition changes', () => {
     TestBed.configureTestingModule({
       providers: [
@@ -285,13 +315,44 @@ describe('Angular adapter directives', () => {
     TestBed.tick();
     const first = FakeRenderer.latest;
 
+    first?.fieldFocus.emit();
+    TestBed.tick();
+    expect(
+      fixture.componentInstance.form
+        ?.snapshot()
+        ?.fields.find(({ path }) => path[0] === 'name'),
+    ).toMatchObject({ focused: true, touched: false });
+
     fixture.componentInstance.field.set(ageField);
+    first?.setValue.emit('Before replacement');
+    first?.removeValue.emit();
+    first?.fieldBlur.emit();
+    first?.fieldFocus.emit();
+    expect(fixture.componentInstance.operations.slice(-2)).toMatchObject([
+      { type: 'set-value', path: ['name'], value: 'Before replacement' },
+      { type: 'remove-value', path: ['name'] },
+    ]);
+    expect(
+      fixture.componentInstance.form
+        ?.snapshot()
+        ?.fields.find(({ path }) => path[0] === 'name'),
+    ).toMatchObject({ focused: true, touched: true });
     fixture.detectChanges();
     TestBed.tick();
 
     expect(FakeRenderer.latest).not.toBe(first);
     expect(FakeRenderer.latest?.field()).toBe(ageField);
     expect(FakeRenderer.destroyed).toBe(1);
+    expect(
+      fixture.componentInstance.form
+        ?.snapshot()
+        ?.fields.find(({ path }) => path[0] === 'name'),
+    ).toMatchObject({ focused: false, touched: true });
+    expect(
+      fixture.componentInstance.form
+        ?.snapshot()
+        ?.fields.find(({ path }) => path[0] === 'age'),
+    ).toMatchObject({ focused: false, touched: false });
   });
 
   it('reports missing snapshots and renderer instantiation failures', () => {

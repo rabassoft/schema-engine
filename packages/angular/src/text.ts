@@ -21,6 +21,7 @@ export interface AngularFieldTextSnapshot {
   readonly hint?: string;
   readonly tooltip?: string;
   readonly placeholder?: string;
+  readonly clearLabel: string;
   readonly choiceLabels: readonly string[];
   readonly issueMessages: readonly string[];
 }
@@ -59,12 +60,14 @@ export class AngularTextProjector {
     const resolve = (
       source: string,
       member: Exclude<FieldTextMember, 'choice' | 'issue'>,
+      rejectBlank = false,
     ): string =>
       resolveText(
         this.parsed.resolver,
         source,
         { ...common, member },
         diagnostics,
+        rejectBlank,
       );
     const label = resolve(field.label, 'label');
     const description =
@@ -81,6 +84,7 @@ export class AngularTextProjector {
       field.placeholder === undefined
         ? undefined
         : resolve(field.placeholder, 'placeholder');
+    const clearLabel = resolve('Clear', 'clear', true);
     const choiceLabels = ownChoices(field).map((choice) =>
       resolveText(
         this.parsed.resolver,
@@ -105,6 +109,7 @@ export class AngularTextProjector {
         ...(hint === undefined ? {} : { hint }),
         ...(tooltip === undefined ? {} : { tooltip }),
         ...(placeholder === undefined ? {} : { placeholder }),
+        clearLabel,
         choiceLabels: Object.freeze(choiceLabels),
         issueMessages: Object.freeze(issueMessages),
       }),
@@ -235,6 +240,7 @@ function safeType(value: unknown): string {
 export function emptyTextSnapshot(): AngularFieldTextSnapshot {
   return Object.freeze({
     label: '',
+    clearLabel: 'Clear',
     choiceLabels: Object.freeze([]),
     issueMessages: Object.freeze([]),
   });

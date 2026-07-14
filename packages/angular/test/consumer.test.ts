@@ -49,7 +49,20 @@ const initialValue: Readonly<ConsumerValue> = Object.freeze({
   active: false,
 });
 const validator: SchemaValidator = Object.freeze({
-  validate: () => ({ valid: true, issues: [] }),
+  validate: (_schema: unknown, value: unknown) =>
+    Object.hasOwn(value as object, 'name')
+      ? { valid: true, issues: [] }
+      : {
+          valid: false,
+          issues: [
+            {
+              code: 'required',
+              path: ['name'],
+              parameters: {},
+              fallbackMessage: 'Name is required.',
+            },
+          ],
+        },
 });
 
 @Component({
@@ -76,6 +89,7 @@ class ConsumerHost {
       baselineValue: initialValue,
       locale: 'en',
       validator,
+      validationVisibility: 'all',
     }),
   );
   @ViewChild(SchemaFormDirective)
@@ -107,6 +121,14 @@ describe('minimal built-package Angular consumer', () => {
     const root = fixture.nativeElement as HTMLElement;
     expect(root.querySelectorAll('input[type="text"]')).toHaveLength(3);
     expect(root.querySelectorAll('input[type="checkbox"]')).toHaveLength(1);
+    expect(root.querySelectorAll('button[type="button"]')).toHaveLength(4);
+    expect(
+      new Set(
+        Array.from(root.querySelectorAll('[id]'), ({ id }) => id).filter(
+          Boolean,
+        ),
+      ).size,
+    ).toBe(root.querySelectorAll('[id]').length);
     expect(fixture.componentInstance.form?.snapshot()?.value).toEqual(
       initialValue,
     );
@@ -132,5 +154,37 @@ describe('minimal built-package Angular consumer', () => {
       name: 'Grace',
     });
     expect(nameInput.value).toBe('Grace');
+
+    const clear = root.querySelector(
+      '#se-g0-consumer-name-clear',
+    ) as HTMLButtonElement;
+    expect(clear.getAttribute('aria-labelledby')).toBe(
+      'se-g0-consumer-name-clear se-g0-consumer-name-label',
+    );
+    clear.click();
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'remove-value',
+      path: ['name'],
+    });
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(fixture.componentInstance.value()).toEqual({
+      amount: 12.5,
+      age: 36,
+      active: false,
+    });
+    expect(root.querySelector('#se-g0-consumer-name-clear')).toBeNull();
+    expect(document.activeElement).toBe(nameInput);
+    expect(
+      fixture.componentInstance.form
+        ?.snapshot()
+        ?.fields.find(({ path }) => path[0] === 'name'),
+    ).toMatchObject({
+      presence: { kind: 'missing' },
+      focused: true,
+      valid: false,
+      showIssues: true,
+    });
+    expect(root.textContent).toContain('Name is required.');
   });
 });

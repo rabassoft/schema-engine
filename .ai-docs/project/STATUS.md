@@ -11,106 +11,84 @@
   v0.1.15 checkpoint (`develop` is five commits ahead of `origin/develop`; no
   push has been performed for this checkpoint)
 - **Specification:** SPEC-001 v0.1.15, Accepted
-- **Last implementation plan:** PLAN-006 revision 1, Completed
+- **Last implementation plan:** PLAN-007 revision 2, Completed
+- **Active implementation plan:** None
 - **Last accepted decision:** ADR-012 revision 1
 - **Review gate:** G0 completed
-- **Phase:** M1–M6 and G0 completed; M7 decision accepted, planning pending
-- **Working tree:** clean after committing the ADR-012 acceptance and SPEC
-  synchronization; no product code changed
+- **Phase:** M1–M7 and G0 completed; M8–M12 remain proposals
+- **Working tree:** uncommitted M7 implementation and completion documentation;
+  no active implementation task
 
 ## Current objective
 
-Prepare PLAN-007 for the accepted M7 explicit native field-clearing contract.
-No implementation task or approved M7 delivery plan is active.
+Select and review the next post-M7 milestone without activating implementation
+or publication prematurely.
 
 ## In progress
 
-- None. ADR-012 and SPEC-001 synchronization are complete; PLAN-007 has not yet
-  been drafted and no implementation task is active.
+- None.
 
 ## Latest completed work
 
-- Accepted ADR-012 revision 1, promoted D-010/M7, and synchronized the normative
-  contract into SPEC-001 v0.1.15 without authorizing implementation.
-- Reviewed ADR-012, incorporated three required precisions, and passed all eight
-  acceptance criteria on repetition.
-- Repeated the end-to-end review without findings, completed G0, and accepted
-  SPEC-001 v0.1.14.
-- Repeated format, lint, typecheck, 176 tests, builds, package smoke, and the
-  built-package consumer successfully for acceptance.
-- Resolved G0-F001 through G0-F003 in documentation via D-038, D-039, and the
-  accepted `SubscribeResult` contract without changing product code.
+- Completed PLAN-007 revision 2 and M7: all four native renderers now expose a
+  localized, accessible, presence-driven clear action through the existing
+  controlled `remove-value` flow.
+- Hardened outlet lifecycle routing by capturing field/runtime identity,
+  reconciling focused same-runtime detach, and ignoring stale destruction-time
+  outputs.
+- Repeated the complete implementation review after corrections; the final pass
+  produced zero findings or requested changes and all 179 tests passed.
+- Added the persistent rule that every correction must be followed by a full
+  applicable review until a complete pass has zero findings.
+- Approved PLAN-007 revision 2 after its corrected second review completed with
+  zero findings.
 
 ## Exact next action
 
-Draft PLAN-007 with exact steps, tests, declaration review, focus ordering,
-controlled rejection, localization diagnostics, and package checks required by
-ADR-012; do not implement until the plan is reviewed and approved.
+Review the M8 preparation boundary and decide whether to draft its required
+decision and delivery plan; do not publish packages or change publication
+settings yet.
 
 ## Blockers and conflicts
 
 - No active implementation blocker or documentation conflict.
-- G0-F001 through G0-F003 are resolved and the repeated review found no further
-  issue.
 - SPEC-001 is Accepted, but every public API remains Experimental unless a
   separate ADR promotes it to Stable.
-- ADR-012 and the M7 contract are accepted; PLAN-007 and implementation remain
-  pending.
-- `develop` is five commits ahead of `origin/develop`; the ADR-012/SPEC-001
-  checkpoint is committed and no push was performed.
+- M8 is only a roadmap proposal. License, registry, provenance, credentials,
+  automation, and actual publication require separate review and approval.
+- `develop` is five commits ahead of `origin/develop`; the M7 working-tree
+  changes are not committed or pushed.
 
 ## Open questions outside the active scope
 
-- D-010 is Promoted by ADR-012; D-005/M9 remains Candidate and its roadmap
-  placement does not promote it.
-- D-038 and D-039 remain Deferred; correcting SPEC-001 does not promote their
-  implementation.
-- Publication under M8 remains a separate future decision, including license,
-  registry, provenance, credentials, and automation.
+- D-005/M9 remains Candidate; its roadmap placement does not promote it.
+- D-038 and D-039 remain Deferred.
 - D-024, D-036, D-037, and every other deferred item remain inactive.
 
 ## Latest verification
 
 - `CI=true pnpm install --frozen-lockfile` passed with the lockfile unchanged.
 - `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
-- `pnpm test` passed: 14 files and 176 tests (129 core, 47 Angular).
-- `pnpm build` and `pnpm test:package` passed for both packages.
-- No dependency, lockfile, package version, or publication setting changed.
-- Core still has zero runtime dependencies and no Angular, RxJS, DOM, or browser
-  imports; Angular Forms imports remain limited to `@angular/forms/signals`.
-- Operations do not read `choices`; runtime actions, text projection, and the
-  select do not enforce enum membership; the external validator remains
-  authoritative.
-- All 32 Markdown files and 141 local links resolve; `git diff --check` passed.
-- The documentation-only post-M6 synchronization passes formatting, local-link,
-  stale-reference, and diff-integrity checks.
-- The G0 approval checkpoint passes formatting, local-link, state-consistency,
-  and diff-integrity checks.
-- The evidence inventory maps 22/22 criteria with no gap.
-- `pnpm test:consumer` passed after both package builds: 1 test file and 1 test.
-  Workspace lint and typecheck also pass; the lockfile is unchanged.
-- Declaration/public-surface inspection and architectural boundary searches
-  passed without unintended manifest, package-entry, dependency, or lockfile
-  changes.
-- The G0 corrective documentation passes formatting, 32-document/143-link
-  resolution, contract-consistency searches, and diff integrity.
-- The repeated review passes format, lint, typecheck, 14 files/176 tests, both
-  builds, package smoke, consumer, declaration, boundary, 143-link, and diff
-  checks with no finding.
-- ADR-012 revision 1 and its repeated review pass formatting, all 33 Markdown
-  documents and 149 local links, state-consistency searches, and diff integrity.
-- ADR-012 acceptance and SPEC-001 v0.1.15 synchronization pass formatting, all
-  33 Markdown documents and 150 local links, accepted/promoted/version
-  consistency searches, and diff integrity.
+- `pnpm test` passed: 129 core and 50 Angular tests (179 total).
+- `pnpm build`, `pnpm test:package`, and `pnpm test:consumer` passed.
+- Built declarations expose only the intended Experimental additions:
+  `FieldTextMember: 'clear'` and required
+  `AngularFieldTextSnapshot.clearLabel`.
+- Core isolation, Angular Signal Forms imports, dependency/package boundaries,
+  all 34 Markdown files and 156 local links, and `git diff --check` passed.
+- No dependency, lockfile, manifest, package version, entry point, export map,
+  publication setting, or Stable API status changed.
+- The complete review was repeated after corrections and finished with zero
+  findings or unresolved changes.
 
 ## Task document map
 
 - Normative behavior: `.ai-docs/specs/001-controlled-form-runtime.md`
-- Review-gate state and future sequence: `.ai-docs/project/ROADMAP.md`
+- Roadmap and future sequence: `.ai-docs/project/ROADMAP.md`
 - G0 acceptance evidence: `.ai-docs/reviews/001-spec-001-acceptance.md`
-- Minimal built-package consumer: `packages/angular/test/consumer.test.ts`
-- Completed delivery contract: `.ai-docs/plans/006-string-enum-native-select.md`
-- Last accepted increment decision: `.ai-docs/adrs/012-limpieza-explicita-campos.md`
+- Completed M7 delivery contract:
+  `.ai-docs/plans/007-explicit-native-field-clearing.md`
+- M7 architectural decision: `.ai-docs/adrs/012-limpieza-explicita-campos.md`
 - Supporting ADR status and links: `.ai-docs/adrs/000-index.md`
 - Deferred boundaries: `.ai-docs/roadmap/deferred-decisions.md`
 - Append-only history: `.ai-docs/project/WORKLOG.md`

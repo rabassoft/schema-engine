@@ -12,6 +12,7 @@ export class FakeRenderer implements AngularFieldRenderer, OnDestroy {
   static latest: FakeRenderer | undefined;
   static created = 0;
   static destroyed = 0;
+  static emitOnDestroy = false;
 
   readonly field = input.required<FieldDefinition>();
   readonly snapshot = input.required<FieldRuntimeSnapshot>();
@@ -31,5 +32,11 @@ export class FakeRenderer implements AngularFieldRenderer, OnDestroy {
 
   ngOnDestroy(): void {
     FakeRenderer.destroyed += 1;
+    if (FakeRenderer.emitOnDestroy) {
+      this.setValue.emit('destroyed');
+      this.removeValue.emit();
+      this.fieldFocus.emit();
+      this.fieldBlur.emit();
+    }
   }
 }

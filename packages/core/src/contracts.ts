@@ -153,6 +153,7 @@ export type FieldTextMember =
   | 'hint'
   | 'tooltip'
   | 'placeholder'
+  | 'clear'
   | 'choice'
   | 'issue';
 export type TextResolutionContext =

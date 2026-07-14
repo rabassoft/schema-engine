@@ -78,7 +78,7 @@ const validValidator: SchemaValidator = Object.freeze({
   imports: [SchemaFormDirective, SchemaFieldOutletDirective],
   template: `<div
     [schemaForm]="config()"
-    (schemaOperation)="operations.push($event)"
+    (schemaOperation)="recordOperation($event)"
     (schemaDiagnostics)="diagnostics.push($event)"
   >
     <ng-container [schemaFieldOutlet]="field()" />
@@ -88,10 +88,25 @@ class NativeHost {
   readonly config = signal(createConfig());
   readonly field = signal(fields[0]!);
   readonly operations: FormOperation[] = [];
+  readonly operationFocusStates: boolean[] = [];
   readonly diagnostics: (readonly Diagnostic[])[] = [];
   @ViewChild(SchemaFormDirective) form?: SchemaFormDirective<
     Record<string, unknown>
   >;
+
+  recordOperation(operation: FormOperation): void {
+    this.operations.push(operation);
+    const fieldSnapshot = this.form
+      ?.snapshot()
+      ?.fields.find(
+        ({ path }) =>
+          path.length === operation.path.length &&
+          path.every((segment, index) =>
+            Object.is(segment, operation.path[index]),
+          ),
+      );
+    this.operationFocusStates.push(fieldSnapshot?.focused ?? false);
+  }
 }
 
 describe('native Signal Forms renderers', () => {
@@ -343,6 +358,7 @@ describe('native Signal Forms renderers', () => {
       'ca:status.placeholder',
     );
     expect(select.options[1]?.textContent?.trim()).toBe('ca:status.empty');
+    expect(root.querySelector('button')?.textContent?.trim()).toBe('ca:Clear');
     expect(fixture.componentInstance.operations).toHaveLength(2);
 
     const operationCount = fixture.componentInstance.operations.length;
@@ -379,6 +395,148 @@ describe('native Signal Forms renderers', () => {
     expect(fixture.componentInstance.operations).toMatchObject([
       { type: 'set-value', value: 'published' },
     ]);
+  });
+
+  it('clears every present native value with focus-first accessible actions', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaTextResolver({
+          resolve: (text, context) =>
+            context.member === 'clear' ? 'Erase' : text,
+        }),
+        provideSchemaEngineAngularNative(),
+      ],
+    });
+    const cases = [
+      {
+        field: fields[0]!,
+        key: 'name',
+        value: { name: '', amount: 1234.5 },
+        expected: '',
+      },
+      {
+        field: fields[0]!,
+        key: 'name',
+        value: { name: 42, amount: 1234.5 },
+        expected: 42,
+      },
+      {
+        field: fields[1]!,
+        key: 'amount',
+        value: { name: 'Ada', amount: -0 },
+        expected: -0,
+      },
+      {
+        field: fields[1]!,
+        key: 'amount',
+        value: { name: 'Ada', amount: 'legacy' },
+        expected: 'legacy',
+      },
+      {
+        field: fields[2]!,
+        key: 'active',
+        value: { name: 'Ada', amount: 1234.5, active: false },
+        expected: false,
+      },
+      {
+        field: fields[2]!,
+        key: 'active',
+        value: { name: 'Ada', amount: 1234.5, active: 'legacy' },
+        expected: 'legacy',
+      },
+      {
+        field: fields[3]!,
+        key: 'status',
+        value: { name: 'Ada', amount: 1234.5, status: '' },
+        expected: '',
+      },
+      {
+        field: fields[3]!,
+        key: 'status',
+        value: { name: 'Ada', amount: 1234.5, status: 'legacy' },
+        expected: 'legacy',
+      },
+      {
+        field: fields[3]!,
+        key: 'status',
+        value: { name: 'Ada', amount: 1234.5, status: 42 },
+        expected: 42,
+      },
+    ] as const;
+
+    for (const current of cases) {
+      const fixture = TestBed.createComponent(NativeHost);
+      fixture.componentInstance.field.set(current.field);
+      fixture.componentInstance.config.set(
+        createConfig({ value: current.value }),
+      );
+      fixture.detectChanges();
+      TestBed.tick();
+      const root = fixture.nativeElement as HTMLElement;
+      const control = root.querySelector('input, select') as HTMLElement;
+      const label = root.querySelector('label') as HTMLLabelElement;
+      const button = root.querySelector('button') as HTMLButtonElement;
+      const base = `se-native%20form-${current.key}`;
+
+      expect(button).not.toBeNull();
+      expect(button.type).toBe('button');
+      expect(button.id).toBe(`${base}-clear`);
+      expect(button.textContent?.trim()).toBe('Erase');
+      expect(label.id).toBe(`${base}-label`);
+      expect(label.htmlFor).toBe(control.id);
+      expect(button.getAttribute('aria-labelledby')).toBe(
+        `${base}-clear ${base}-label`,
+      );
+
+      if (current.key === 'name' && current.expected === '') {
+        control.focus();
+        expect(
+          fixture.componentInstance.form?.snapshot()?.fields[0]?.focused,
+        ).toBe(true);
+        button.focus();
+        expect(document.activeElement).toBe(button);
+        expect(
+          fixture.componentInstance.form?.snapshot()?.fields[0],
+        ).toMatchObject({ focused: false, touched: true });
+      }
+
+      button.click();
+      expect(document.activeElement).toBe(control);
+      const operation = fixture.componentInstance.operations.at(-1);
+      expect(operation).toMatchObject({
+        type: 'remove-value',
+        path: [current.key],
+      });
+      if (operation?.type !== 'remove-value')
+        throw new Error('clear must emit remove-value');
+      expect(Object.is(operation.expected.value, current.expected)).toBe(true);
+      expect(fixture.componentInstance.operationFocusStates.at(-1)).toBe(true);
+      expect(root.querySelector('button')).toBe(button);
+
+      if (current.key === 'name' && current.expected === '') {
+        const count = fixture.componentInstance.operations.length;
+        button.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+        );
+        button.dispatchEvent(
+          new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }),
+        );
+        button.click();
+        expect(fixture.componentInstance.operations).toHaveLength(count + 1);
+      }
+
+      const confirmedMissing = { ...current.value } as Record<string, unknown>;
+      delete confirmedMissing[current.key];
+      const operationCount = fixture.componentInstance.operations.length;
+      fixture.componentInstance.config.set(
+        createConfig({ value: confirmedMissing }),
+      );
+      fixture.detectChanges();
+      TestBed.tick();
+      expect(root.querySelector('button')).toBeNull();
+      expect(fixture.componentInstance.operations).toHaveLength(operationCount);
+      fixture.destroy();
+    }
   });
 
   it('uses LOCALE_ID, resolves text, and keeps string edits controlled', () => {
@@ -456,10 +614,14 @@ describe('native Signal Forms renderers', () => {
     });
 
     input.value = '';
+    const operationCount = fixture.componentInstance.operations.length;
     input.dispatchEvent(new Event('input', { bubbles: true }));
     expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
       type: 'remove-value',
     });
+    expect(fixture.componentInstance.operations).toHaveLength(
+      operationCount + 1,
+    );
 
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
@@ -479,6 +641,7 @@ describe('native Signal Forms renderers', () => {
     const input = root.querySelector('input') as HTMLInputElement;
     expect(input.checked).toBe(false);
     expect(input.hasAttribute('aria-required')).toBe(false);
+    expect(root.querySelector('button')).toBeNull();
 
     input.checked = true;
     input.dispatchEvent(new Event('change', { bubbles: true }));

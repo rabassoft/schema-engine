@@ -19,6 +19,7 @@ const ordinaryField = compileField({ type: 'string' });
 const texts: AngularFieldTextSnapshot = Object.freeze({
   label: 'Status',
   placeholder: 'Choose status',
+  clearLabel: 'Clear',
   choiceLabels: Object.freeze(['Empty', 'Draft']),
   issueMessages: Object.freeze([]),
 });

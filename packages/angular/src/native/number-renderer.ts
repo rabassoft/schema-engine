@@ -25,7 +25,9 @@ import { createNumberCodec } from './number-codec.js';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div>
-      <label [for]="ids().control">{{ texts().label }}</label>
+      <label [id]="ids().label" [for]="ids().control">{{
+        texts().label
+      }}</label>
       @if (texts().description; as description) {
         <p [id]="ids().description">{{ description }}</p>
       }
@@ -51,6 +53,16 @@ import { createNumberCodec } from './number-codec.js';
         (focus)="onFocus()"
         (blur)="onBlur()"
       />
+      @if (snapshot().presence.kind === 'value') {
+        <button
+          type="button"
+          [id]="ids().clear"
+          [attr.aria-labelledby]="ids().clear + ' ' + ids().label"
+          (click)="onClear()"
+        >
+          {{ texts().clearLabel }}
+        </button>
+      }
       @if (snapshot().showIssues && texts().issueMessages.length > 0) {
         <ul [id]="ids().errors" aria-live="polite">
           @for (message of texts().issueMessages; track $index) {
@@ -163,6 +175,11 @@ export class SchemaNumberRendererComponent implements AngularFieldRenderer {
       this.controlField().reset(formatted.text);
     }
     this.fieldFocus.emit();
+  }
+
+  protected onClear(): void {
+    this.controlField().focusBoundControl();
+    this.removeValue.emit();
   }
 
   focus(options?: FocusOptions): void {

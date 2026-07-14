@@ -21,6 +21,10 @@
   - Completado el 14 de julio de 2026 bajo PLAN-006 revisión 1.
   - Enum string y `enumLabels` normalizados, choices y textos resolubles,
     validación estructural segura y select Angular controlado según ADR-011.
+- [x] M7 — Limpieza explícita de campos
+  - Completado el 14 de julio de 2026 bajo PLAN-007 revisión 2 y ADR-012.
+  - Acción nativa accesible y localizable para los cuatro renderers, flujo
+    `remove-value` controlado y protección de foco/rutas durante lifecycle.
 
 ## Gate de revisión completado
 
@@ -50,18 +54,9 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7 tiene decisión y contrato aceptados, pero carece aún de PLAN-007 aprobado e
-> implementación. M8-M12 continúan como propuestas de planificación. Ninguna
-> otra decisión diferida se promueve sin revisar y aprobar explícitamente su
-> ADR, SPEC y/o plan de implementación.
-
-### M7 — Limpieza explícita de campos
-
-- Candidato de origen: D-010.
-- Estado: ADR-012 revision 1 Accepted; contrato sincronizado en SPEC-001
-  v0.1.15, PLAN-007 pendiente e implementación no iniciada.
-- Preparar, revisar y aprobar PLAN-007 para la affordance común, accesible y
-  localizable que distingue missing, `""`, `0` y `false` antes de implementar.
+> M7 está completado bajo ADR-012 y PLAN-007 revision 2. M8-M12 continúan como
+> propuestas de planificación. Ninguna otra decisión diferida se promueve sin
+> revisar y aprobar explícitamente su ADR, SPEC y/o plan de implementación.
 
 ### M8 — Preparación de la versión experimental 0.1
 

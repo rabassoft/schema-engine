@@ -73,6 +73,14 @@ During implementation, preserve unrelated dirty changes, implement only the
 approved scope, add unit tests and conformance fixtures, and report any
 code/documentation conflict.
 
+Formal reviews must converge before approval or completion. When a review finds
+an error, ambiguity, conflict, or requested change, apply the correction and
+repeat the complete applicable review rather than checking only the changed
+fragment. Continue correction and full-review cycles until one complete pass
+produces zero findings and no unresolved change request. Only that zero-finding
+pass may support approval or completion, and its outcome must be recorded in
+persistent project state.
+
 At task completion:
 
 1. run applicable formatting, linting, type checks, tests, builds, package

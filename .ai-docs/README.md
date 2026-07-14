@@ -36,10 +36,10 @@
 - [PLAN-004: Angular controlled-form adapter](./plans/004-angular-adapter.md) — Completed
 - [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
+- [PLAN-007: Explicit native field clearing](./plans/007-explicit-native-field-clearing.md) — Completed revision 2
 
-M1-M6 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 promotes
-D-010 and defines M7's approved architectural boundary; PLAN-007 and
-implementation remain pending. M8-M12 remain proposals rather than approved
-delivery commitments.
+M1-M7 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
+PLAN-007 revision 2 govern the completed explicit native field-clearing
+increment. M8-M12 remain proposals rather than approved delivery commitments.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

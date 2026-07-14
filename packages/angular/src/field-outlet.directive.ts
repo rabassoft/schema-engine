@@ -12,6 +12,7 @@ import {
   type ComponentRef,
 } from '@angular/core';
 import type {
+  DataPath,
   Diagnostic,
   FieldDefinition,
   FieldRuntimeSnapshot,
@@ -28,6 +29,12 @@ import {
   type AngularFieldTextSnapshot,
 } from './text.js';
 
+interface RendererBinding {
+  readonly path: DataPath;
+  readonly runtimeContext: NonNullable<ReturnType<typeof readRuntimeContext>>;
+  active: boolean;
+}
+
 @Directive({ selector: '[schemaFieldOutlet]', standalone: true })
 export class SchemaFieldOutletDirective {
   readonly schemaFieldOutlet = input.required<FieldDefinition>();
@@ -41,6 +48,7 @@ export class SchemaFieldOutletDirective {
   private readonly textsState =
     signal<AngularFieldTextSnapshot>(emptyTextSnapshot());
   private componentRef: ComponentRef<AngularFieldRenderer> | undefined;
+  private componentBinding: RendererBinding | undefined;
   private lastIdentity: readonly unknown[] | undefined;
   private lastTextIdentity: readonly unknown[] | undefined;
 
@@ -101,6 +109,14 @@ export class SchemaFieldOutletDirective {
       this.form.reportDiagnostics(resolution.diagnostics);
       if (!resolution.success) return;
 
+      const boundPath = Object.freeze([...field.path]);
+      const boundRuntimeContext = runtimeContext;
+      const binding: RendererBinding = {
+        path: boundPath,
+        runtimeContext: boundRuntimeContext,
+        active: true,
+      };
+
       try {
         this.componentRef = this.viewContainer.createComponent(
           resolution.registration.renderer,
@@ -123,16 +139,32 @@ export class SchemaFieldOutletDirective {
               inputBinding('locale', () => this.form.snapshot()?.locale ?? ''),
               inputBinding('texts', () => this.textsState()),
               outputBinding<unknown>('setValue', (value) => {
-                this.form.requestSetValue(this.schemaFieldOutlet().path, value);
+                if (
+                  binding.active &&
+                  readRuntimeContext(this.form) === boundRuntimeContext
+                )
+                  this.form.requestSetValue(boundPath, value);
               }),
               outputBinding<void>('removeValue', () => {
-                this.form.requestRemoveValue(this.schemaFieldOutlet().path);
+                if (
+                  binding.active &&
+                  readRuntimeContext(this.form) === boundRuntimeContext
+                )
+                  this.form.requestRemoveValue(boundPath);
               }),
               outputBinding<void>('fieldFocus', () => {
-                this.form.focus(this.schemaFieldOutlet().path);
+                if (
+                  binding.active &&
+                  readRuntimeContext(this.form) === boundRuntimeContext
+                )
+                  this.form.focus(boundPath);
               }),
               outputBinding<void>('fieldBlur', () => {
-                this.form.blur(this.schemaFieldOutlet().path);
+                if (
+                  binding.active &&
+                  readRuntimeContext(this.form) === boundRuntimeContext
+                )
+                  this.form.blur(boundPath);
               }),
               outputBinding<readonly Diagnostic[]>(
                 'rendererDiagnostics',
@@ -141,7 +173,9 @@ export class SchemaFieldOutletDirective {
             ],
           },
         );
+        this.componentBinding = binding;
       } catch {
+        binding.active = false;
         this.destroyComponent();
         this.form.reportDiagnostics([
           outletDiagnostic(
@@ -158,12 +192,24 @@ export class SchemaFieldOutletDirective {
 
   private destroyComponent(): void {
     const ref = this.componentRef;
+    const binding = this.componentBinding;
     this.componentRef = undefined;
+    this.componentBinding = undefined;
+    if (binding !== undefined) binding.active = false;
     if (ref === undefined) {
       this.viewContainer.clear();
       return;
     }
     const index = this.viewContainer.indexOf(ref.hostView);
+    const snapshot = this.form.snapshot();
+    if (
+      index >= 0 &&
+      binding !== undefined &&
+      readRuntimeContext(this.form) === binding.runtimeContext &&
+      snapshot !== undefined &&
+      findFieldSnapshotByPath(snapshot.fields, binding.path)?.focused === true
+    )
+      this.form.blur(binding.path);
     if (index >= 0) this.viewContainer.remove(index);
     else if (!ref.hostView.destroyed) ref.destroy();
   }
@@ -173,12 +219,17 @@ function findFieldSnapshot(
   snapshots: readonly FieldRuntimeSnapshot[],
   field: FieldDefinition,
 ): FieldRuntimeSnapshot | undefined {
+  return findFieldSnapshotByPath(snapshots, field.path);
+}
+
+function findFieldSnapshotByPath(
+  snapshots: readonly FieldRuntimeSnapshot[],
+  path: DataPath,
+): FieldRuntimeSnapshot | undefined {
   return snapshots.find(
     (snapshot) =>
-      snapshot.path.length === field.path.length &&
-      snapshot.path.every((segment, index) =>
-        Object.is(segment, field.path[index]),
-      ),
+      snapshot.path.length === path.length &&
+      snapshot.path.every((segment, index) => Object.is(segment, path[index])),
   );
 }
 

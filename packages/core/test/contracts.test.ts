@@ -46,9 +46,17 @@ describe('public string choice contracts', () => {
       | 'hint'
       | 'tooltip'
       | 'placeholder'
+      | 'clear'
       | 'choice'
       | 'issue'
     >();
+    const clearContext = {
+      formId: 'form',
+      locale: 'en',
+      field,
+      member: 'clear',
+    } satisfies TextResolutionContext;
+    expect(clearContext.member).toBe('clear');
     expectTypeOf<
       Extract<TextResolutionContext, { member: 'choice' }>
     >().toEqualTypeOf<{

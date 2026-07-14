@@ -6,6 +6,8 @@ import type { AngularFieldTextSnapshot } from '../text.js';
 
 export interface FieldIds {
   readonly control: string;
+  readonly label: string;
+  readonly clear: string;
   readonly description: string;
   readonly hint: string;
   readonly tooltip: string;
@@ -16,6 +18,8 @@ export function fieldIds(formId: string, field: FieldDefinition): FieldIds {
   const base = `se-${encodeURIComponent(formId)}-${encodeURIComponent(field.key)}`;
   return Object.freeze({
     control: base,
+    label: `${base}-label`,
+    clear: `${base}-clear`,
     description: `${base}-description`,
     hint: `${base}-hint`,
     tooltip: `${base}-tooltip`,
