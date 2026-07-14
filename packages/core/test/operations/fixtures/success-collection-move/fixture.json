@@ -1,0 +1,13 @@
+{
+  "mode": "structural",
+  "currentValue": { "rows": [{ "id": "a" }, { "id": "b" }, { "id": "c" }] },
+  "operation": {
+    "type": "move-item",
+    "metadata": { "id": 1, "formId": "form" },
+    "collectionPath": ["rows"],
+    "identityProperty": "id",
+    "itemId": "c",
+    "placement": { "kind": "before", "itemId": "a" },
+    "source": "user"
+  }
+}

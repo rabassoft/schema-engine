@@ -6,6 +6,81 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-010 checkpoint 3 completed
+
+### Implementation
+
+- Widened `FormOperation` to the five accepted stable collection variants and
+  added descriptor-safe fixed-order parsing with the exact collection shape,
+  managed-path, compatibility and stale diagnostic families.
+- Implemented schema-neutral and definition-aware stable-identity application
+  for item leaf set/remove plus item insert/remove/move, including complete
+  identity scans, stable anchors, expectation semantics and successful
+  already-satisfied move no-effects.
+- Preserved atomicity, opaque inserted item references, unaffected item/object
+  references and off-path descriptors while cloning only the ancestor chain
+  and affected array. Start/end insertion alone can materialize a missing
+  compatible collection path.
+- Kept collection runtime snapshots, requests, validation/interaction and
+  Angular collection hosts inactive for their later checkpoints.
+
+### Review and verification
+
+- Added focused hostile-object and immutable-effect tests plus JSON fixtures
+  for all five variants; review corrected leaf-value and anchor precedence,
+  positional leaf diagnostics, iterator safety and the Angular test narrowing
+  required by the now-complete Public operation union.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, both builds and
+  `git diff --check` pass.
+- All 207 core and 59 Angular tests pass (266 total).
+- `pnpm test:package`, `pnpm test:consumer`, exact-inventory
+  `pnpm test:artifacts` and `pnpm test:consumer:clean` pass with clean core and
+  Angular 22.0.6 consumers.
+- No manifest, version, dependency, peer/export, lockfile, publication or
+  Stable state changed.
+
+### Next
+
+- Execute PLAN-010 checkpoint 4: collection external-state identity
+  inspection, runtime snapshots/sharing/reads, requests,
+  validation/scopes/interaction and runtime fixtures.
+
+## 2026-07-14 — PLAN-010 checkpoint 2 completed
+
+### Implementation
+
+- Added descriptor-safe exterior collection-policy parsing, canonical path
+  indexing and exact missing/unused/semantic identity diagnostics without
+  retaining or invoking caller objects.
+- Extended iterative schema traversal with supported arrays, inline object
+  items, identity exclusion, nested object/primitive descendants, cycle safety
+  and explicit nested-array stopping.
+- Added structural array/item UI traversal, identity-entry rejection, exact
+  array/template paths and immutable `ArrayNodeDefinition` plus static item
+  template construction; global fields remain non-collection leaves only.
+- Activated `ArrayNodeDefinition` only in `FormNodeDefinition`. Existing M9
+  operations/runtime still reject collection definitions until their approved
+  checkpoints and no Angular collection host was added.
+
+### Review and verification
+
+- Repeated review corrected M9 array fixture migration, matched-policy handling
+  for invalid `items`, non-array `items` classification, array/item UI cycles,
+  item-root diagnostic ordering and deep/independent array coverage.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, both builds and
+  `git diff --check` pass.
+- All 189 core and 59 Angular tests pass (248 total), including the new compiler
+  conformance fixture and depth-1,200 item template.
+- `pnpm test:package`, `pnpm test:consumer`, `pnpm test:artifacts` and
+  `pnpm test:consumer:clean` pass with clean core and Angular 22.0.6 consumers.
+- No manifest, version, dependency, peer/export, lockfile, publication or
+  Stable state changed.
+
+### Next
+
+- Execute PLAN-010 checkpoint 3: implement the five collection operations and
+  pure/form helper diagnostics, descriptor behavior and fixtures.
+
 ## 2026-07-14 — PLAN-010 checkpoint 1 completed
 
 ### Implementation

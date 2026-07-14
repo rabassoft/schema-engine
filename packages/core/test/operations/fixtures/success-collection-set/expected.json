@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "value": {
+    "rows": [
+      { "id": "b", "name": "Bob" },
+      { "id": "a", "name": "Grace" }
+    ]
+  },
+  "changed": true,
+  "diagnostics": []
+}

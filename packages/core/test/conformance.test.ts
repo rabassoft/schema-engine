@@ -16,6 +16,7 @@ describe('compiler conformance fixtures', async () => {
       await readFile(new URL('expected.json', directory), 'utf8'),
     ) as unknown;
     let uiSchema: unknown;
+    let collectionPolicies: unknown;
 
     try {
       uiSchema = JSON.parse(
@@ -27,7 +28,25 @@ describe('compiler conformance fixtures', async () => {
       }
     }
 
-    expect(compileFormDefinition({ schema, uiSchema })).toEqual(expected);
+    try {
+      collectionPolicies = JSON.parse(
+        await readFile(new URL('collection-policies.json', directory), 'utf8'),
+      ) as unknown;
+    } catch (error) {
+      if (!isMissingFileError(error)) {
+        throw error;
+      }
+    }
+
+    expect(
+      compileFormDefinition({
+        schema,
+        uiSchema,
+        ...(collectionPolicies === undefined
+          ? {}
+          : { collectionPolicies: collectionPolicies as never }),
+      }),
+    ).toEqual(expected);
   });
 });
 

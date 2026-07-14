@@ -914,6 +914,11 @@ function buildDefinitionIndexes(
       continue;
     }
     nodes.set(frame.node.key, frame.node);
+    if (frame.node.kind === 'array') {
+      descendantNodes.set(frame.node.key, new Set([frame.node.key]));
+      descendantFields.set(frame.node.key, new Set());
+      continue;
+    }
     if (frame.node.kind !== 'object') {
       fields.set(frame.node.key, frame.node);
       descendantNodes.set(frame.node.key, new Set([frame.node.key]));

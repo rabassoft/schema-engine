@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"rows\"]",
+        "name": "rows",
+        "path": ["rows"],
+        "required": false,
+        "label": "People",
+        "kind": "array",
+        "identity": { "property": "id" },
+        "item": {
+          "kind": "item-template",
+          "children": [
+            {
+              "key": "[\"template\",[\"rows\"],[\"name\"]]",
+              "name": "name",
+              "relativePath": ["name"],
+              "required": true,
+              "label": "Full name",
+              "kind": "string",
+              "constraints": { "minLength": 1 }
+            }
+          ],
+          "fields": [
+            {
+              "key": "[\"template\",[\"rows\"],[\"name\"]]",
+              "name": "name",
+              "relativePath": ["name"],
+              "required": true,
+              "label": "Full name",
+              "kind": "string",
+              "constraints": { "minLength": 1 }
+            }
+          ]
+        }
+      }
+    ],
+    "fields": []
+  },
+  "diagnostics": []
+}

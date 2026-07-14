@@ -1,0 +1,14 @@
+{
+  "mode": "structural",
+  "currentValue": { "rows": [{ "id": "b" }] },
+  "operation": {
+    "type": "insert-item",
+    "metadata": { "id": 1, "formId": "form" },
+    "collectionPath": ["rows"],
+    "identityProperty": "id",
+    "itemId": "a",
+    "item": { "id": "a", "name": "Ada" },
+    "placement": { "kind": "before", "itemId": "b" },
+    "source": "user"
+  }
+}

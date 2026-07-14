@@ -1,0 +1,16 @@
+{
+  "mode": "structural",
+  "currentValue": { "rows": [{ "id": "a", "name": "Ada" }] },
+  "operation": {
+    "type": "remove-item-value",
+    "metadata": { "id": 1, "formId": "form" },
+    "target": {
+      "collectionPath": ["rows"],
+      "itemId": "a",
+      "relativePath": ["name"]
+    },
+    "identityProperty": "id",
+    "expected": { "kind": "value", "value": "Ada" },
+    "source": "user"
+  }
+}

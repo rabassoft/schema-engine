@@ -411,7 +411,8 @@ describe('compileFormDefinition', () => {
     expect(result.success).toBe(false);
     expect(result).not.toHaveProperty('definition');
     expect(result.diagnostics.map(({ code }) => code)).toEqual([
-      'UNSUPPORTED_FIELD_TYPE',
+      'INVALID_SCHEMA_KEYWORD_VALUE',
+      'MISSING_COLLECTION_POLICY',
       'INVALID_SCHEMA_KEYWORD_VALUE',
     ]);
   });

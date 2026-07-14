@@ -16,8 +16,8 @@
   — Accepted v0.1.2; implemented by completed PLAN-009.
 - [SPEC-003: Homogeneous Object Collection Controlled Runtime Extension](./specs/003-collection-runtime.md)
   — Accepted v0.1.2 after F-001 through F-007 were closed and complete review
-  cycle 3 passed with zero findings. PLAN-010 is approved and checkpoint 1 is
-  complete.
+  cycle 3 passed with zero findings. PLAN-010 is approved and checkpoints 1–3
+  are complete.
 
 ## Acceptance reviews
 
@@ -48,7 +48,7 @@
   Ricard formally accepted the SPEC.
 - [M10 PLAN-010 complete review](./reviews/014-plan-010-review.md) — Revision 0
   passed all nine areas with zero findings and Ricard formally approved it;
-  checkpoint 1 is complete and checkpoint 2 is next.
+  checkpoints 1–3 are complete and checkpoint 4 is next.
 
 ## Architecture Decision Records
 
@@ -92,7 +92,7 @@
 - [PLAN-007: Explicit native field clearing](./plans/007-explicit-native-field-clearing.md) — Completed revision 2
 - [PLAN-008: Experimental 0.1 artifact preparation](./plans/008-experimental-0-1-artifact-preparation.md) — Completed revision 2
 - [PLAN-009: Nested-object controlled runtime](./plans/009-nested-object-runtime.md) — Completed revision 1
-- [PLAN-010: Homogeneous object collection runtime](./plans/010-homogeneous-object-collections.md) — Approved revision 0; checkpoint 1 completed
+- [PLAN-010: Homogeneous object collection runtime](./plans/010-homogeneous-object-collections.md) — Approved revision 0; checkpoints 1–3 completed
 
 M1-M7 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
@@ -100,7 +100,7 @@ increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
 `0.1.0` candidates. M8 completed without publication; M9 has accepted normative
 contracts. PLAN-009 revision 1 passed its repeated complete review and is
 approved and completed after its final zero-finding review. M10 has accepted
-normative contracts and approved PLAN-010 revision 0; checkpoint 1 is complete
-and checkpoint 2 is next. M11-M12 remain proposed only.
+normative contracts and approved PLAN-010 revision 0; checkpoints 1–3 are
+complete and checkpoint 4 is next. M11-M12 remain proposed only.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

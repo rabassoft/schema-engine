@@ -1,0 +1,11 @@
+{
+  "fields": {
+    "rows": {
+      "label": "People",
+      "item": {
+        "order": ["name"],
+        "fields": { "name": { "label": "Full name" } }
+      }
+    }
+  }
+}

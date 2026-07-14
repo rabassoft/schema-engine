@@ -2,17 +2,25 @@
   "success": false,
   "diagnostics": [
     {
-      "code": "UNSUPPORTED_FIELD_TYPE",
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
       "severity": "error",
       "source": "schema",
       "dataPath": ["address"],
-      "documentPath": ["properties", "address", "type"],
+      "documentPath": ["properties", "address", "items"],
       "parameters": {
-        "field": "address",
-        "actualType": "string",
-        "actualValue": "array"
+        "keyword": "items",
+        "expected": "inline object item schema",
+        "actualType": "missing"
       },
-      "fallbackMessage": "Field \"address\" has an unsupported type."
+      "fallbackMessage": "Schema keyword \"items\" has an invalid value."
+    },
+    {
+      "code": "MISSING_COLLECTION_POLICY",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["address"],
+      "parameters": { "arrayPath": ["address"] },
+      "fallbackMessage": "Collection policy is required."
     }
   ]
 }

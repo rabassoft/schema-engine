@@ -65,7 +65,8 @@ export interface ObjectFieldDefinition extends BaseNodeDefinition {
   readonly children: readonly FormNodeDefinition[];
 }
 
-export type FormNodeDefinition = ObjectFieldDefinition | FieldDefinition;
+export type FormNodeDefinition =
+  ObjectFieldDefinition | ArrayNodeDefinition | FieldDefinition;
 
 export interface BaseFieldDefinition extends BaseNodeDefinition {
   readonly placeholder?: string;
@@ -268,7 +269,14 @@ export interface MoveItemOperation {
   readonly source: 'user';
 }
 
-export type FormOperation = SetValueOperation | RemoveValueOperation;
+export type FormOperation =
+  | SetValueOperation
+  | RemoveValueOperation
+  | SetItemValueOperation
+  | RemoveItemValueOperation
+  | InsertItemOperation
+  | RemoveItemOperation
+  | MoveItemOperation;
 
 export type ApplyOperationResult<TData extends object> =
   | {

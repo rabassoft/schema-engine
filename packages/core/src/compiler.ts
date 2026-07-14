@@ -1,13 +1,17 @@
 import type {
+  ArrayNodeDefinition,
   BooleanFieldDefinition,
   CompileFormDefinitionInput,
   CompileFormResult,
   Diagnostic,
   FieldDefinition,
+  FieldTemplate,
   FormDefinition,
   FormNodeDefinition,
   NumberFieldDefinition,
+  ObjectItemTemplateDefinition,
   ObjectFieldDefinition,
+  ObjectNodeTemplate,
   StringFieldDefinition,
 } from './contracts.js';
 import { diagnostic, hasErrors } from './internal/diagnostics.js';
@@ -64,6 +68,7 @@ interface FieldCandidate {
   readonly stringEnum: StringEnumState;
   readonly dataPath: readonly string[];
   readonly documentPath: readonly (string | number)[];
+  readonly templatePath?: readonly string[];
 }
 
 interface ObjectCandidate {
@@ -75,9 +80,23 @@ interface ObjectCandidate {
   readonly dataPath: readonly string[];
   readonly documentPath: readonly (string | number)[];
   readonly children: NodeCandidate[];
+  readonly templatePath?: readonly string[];
 }
 
-type NodeCandidate = FieldCandidate | ObjectCandidate;
+interface ArrayCandidate {
+  readonly name: string;
+  readonly type: 'array';
+  readonly required: boolean;
+  readonly schemaTitle?: string;
+  readonly schemaDescription?: string;
+  readonly dataPath: readonly string[];
+  readonly documentPath: readonly (string | number)[];
+  readonly identityProperty?: string;
+  readonly policyIndex?: number;
+  readonly children: NodeCandidate[];
+}
+
+type NodeCandidate = FieldCandidate | ObjectCandidate | ArrayCandidate;
 
 interface ParsedFieldUi {
   readonly label?: string;
@@ -100,7 +119,23 @@ interface ParsedObjectUi extends ParsedFieldUi {
   readonly fields: ReadonlyMap<string, ParsedNodeUi>;
 }
 
-type ParsedNodeUi = ParsedFieldUi | ParsedObjectUi;
+interface ParsedArrayUi extends ParsedFieldUi {
+  item: ParsedUiSchema;
+}
+
+type ParsedNodeUi = ParsedFieldUi | ParsedObjectUi | ParsedArrayUi;
+
+interface ParsedCollectionPolicy {
+  readonly index: number;
+  readonly path: readonly string[];
+  readonly itemIdentityProperty: string;
+}
+
+interface ParsedCollectionPolicies {
+  readonly valid: boolean;
+  readonly policies: readonly ParsedCollectionPolicy[];
+  readonly byPath: ReadonlyMap<string, ParsedCollectionPolicy>;
+}
 
 const SUPPORTED_FIELD_TYPES = new Set<FieldType>([
   'string',
@@ -108,7 +143,11 @@ const SUPPORTED_FIELD_TYPES = new Set<FieldType>([
   'integer',
   'boolean',
 ]);
-const SUPPORTED_NODE_TYPES = new Set([...SUPPORTED_FIELD_TYPES, 'object']);
+const SUPPORTED_NODE_TYPES = new Set([
+  ...SUPPORTED_FIELD_TYPES,
+  'object',
+  'array',
+]);
 const OBJECT_FIELD_KEYWORDS = new Set([
   'type',
   'properties',
@@ -117,6 +156,14 @@ const OBJECT_FIELD_KEYWORDS = new Set([
   'description',
   'default',
 ]);
+const ARRAY_FIELD_KEYWORDS = new Set([
+  'type',
+  'items',
+  'title',
+  'description',
+  'default',
+]);
+const ITEM_ROOT_KEYWORDS = new Set(['type', 'properties', 'required']);
 
 const UI_ROOT_KEYS = new Set(['order', 'fields']);
 const UI_FIELD_KEYS = new Set([
@@ -158,6 +205,12 @@ export function compileFormDefinition(
 
   const rawSchema = rawInput.schema;
   const rawUiSchema = rawInput.uiSchema;
+  const policyDiagnostics: Diagnostic[] = [];
+  const collectionPolicies = inspectCollectionPolicies(
+    rawInput,
+    policyDiagnostics,
+  );
+  const usedPolicyIndices = new Set<number>();
   let candidates: NodeCandidate[] = [];
   let propertyNames: readonly string[] | undefined;
   let candidatesByName: ReadonlyMap<string, NodeCandidate> | undefined;
@@ -172,40 +225,70 @@ export function compileFormDefinition(
         fallbackMessage: 'The root schema must be an object.',
       }),
     );
-  } else if (inspectDialect(rawSchema, diagnostics)) {
-    const root = inspectRootSchema(rawSchema, diagnostics);
-    propertyNames = root.propertyNames;
+    diagnostics.push(...policyDiagnostics);
+  } else {
+    const dialectValid = inspectDialect(rawSchema, diagnostics);
+    diagnostics.push(...policyDiagnostics);
+    if (dialectValid) {
+      const root = inspectRootSchema(rawSchema, diagnostics);
+      propertyNames = root.propertyNames;
 
-    if (root.canInspectFields && root.properties !== undefined) {
-      candidates = inspectNodes(
-        root.properties,
-        root.requiredNames,
-        diagnostics,
-        rawSchema,
-      );
-      candidatesByName = new Map(
-        candidates.map((candidate) => [candidate.name, candidate] as const),
-      );
+      if (root.canInspectFields && root.properties !== undefined) {
+        candidates = inspectNodes(
+          root.properties,
+          root.requiredNames,
+          diagnostics,
+          rawSchema,
+          collectionPolicies,
+          usedPolicyIndices,
+        );
+        candidatesByName = new Map(
+          candidates.map((candidate) => [candidate.name, candidate] as const),
+        );
 
-      for (const entry of root.requiredEntries) {
-        if (!Object.hasOwn(root.properties, entry.name)) {
-          diagnostics.push(
-            diagnostic({
-              code: 'UNMANAGED_REQUIRED_PROPERTY',
-              severity: 'warning',
-              source: 'schema',
-              dataPath: [entry.name],
-              documentPath: ['required', entry.index],
-              parameters: { field: entry.name },
-              fallbackMessage: `Required property "${entry.name}" is not managed by this form.`,
-            }),
-          );
+        for (const entry of root.requiredEntries) {
+          if (!Object.hasOwn(root.properties, entry.name)) {
+            diagnostics.push(
+              diagnostic({
+                code: 'UNMANAGED_REQUIRED_PROPERTY',
+                severity: 'warning',
+                source: 'schema',
+                dataPath: [entry.name],
+                documentPath: ['required', entry.index],
+                parameters: { field: entry.name },
+                fallbackMessage: `Required property "${entry.name}" is not managed by this form.`,
+              }),
+            );
+          }
         }
       }
     }
   }
 
-  const nested = candidates.some((candidate) => candidate.type === 'object');
+  if (collectionPolicies.valid) {
+    for (const policy of collectionPolicies.policies) {
+      if (!usedPolicyIndices.has(policy.index)) {
+        diagnostics.push(
+          diagnostic({
+            code: 'UNUSED_COLLECTION_POLICY',
+            severity: 'error',
+            source: 'schema',
+            parameters: { policyIndex: policy.index, arrayPath: policy.path },
+            fallbackMessage:
+              'Collection policy does not target a supported array.',
+          }),
+        );
+      }
+    }
+  }
+
+  const nested = candidates.some(
+    (candidate) =>
+      candidate.type !== 'string' &&
+      candidate.type !== 'number' &&
+      candidate.type !== 'integer' &&
+      candidate.type !== 'boolean',
+  );
   const parsedUi = nested
     ? inspectNestedUiSchema(rawUiSchema, candidates, diagnostics)
     : inspectUiSchema(
@@ -226,6 +309,166 @@ export function compileFormDefinition(
     success: true,
     definition,
     diagnostics,
+  });
+}
+
+function inspectCollectionPolicies(
+  input: Record<string, unknown>,
+  diagnostics: Diagnostic[],
+): ParsedCollectionPolicies {
+  const member = ownDataValue(input, 'collectionPolicies');
+  if (!member.present) {
+    return { valid: true, policies: [], byPath: new Map() };
+  }
+  if (member.accessor || !Array.isArray(member.value)) {
+    diagnostics.push(
+      invalidCollectionPolicy({
+        reason: 'policies-not-array',
+        expected: 'array',
+        ...(member.accessor ? {} : { actualType: actualType(member.value) }),
+      }),
+    );
+    return { valid: false, policies: [], byPath: new Map() };
+  }
+
+  const policies: ParsedCollectionPolicy[] = [];
+  const byPath = new Map<string, ParsedCollectionPolicy>();
+  for (let index = 0; index < member.value.length; index += 1) {
+    const entry = ownDataValue(member.value, index);
+    if (!entry.present) {
+      diagnostics.push(
+        invalidCollectionPolicy({
+          reason: 'sparse-policy',
+          policyIndex: index,
+          expected: 'collection policy object',
+        }),
+      );
+      return { valid: false, policies: [], byPath: new Map() };
+    }
+    if (entry.accessor) {
+      diagnostics.push(
+        invalidCollectionPolicy({
+          reason: 'policy-index-accessor',
+          policyIndex: index,
+          expected: 'collection policy object',
+        }),
+      );
+      return { valid: false, policies: [], byPath: new Map() };
+    }
+    if (!isOrdinaryRecord(entry.value)) {
+      diagnostics.push(
+        invalidCollectionPolicy({
+          reason: 'policy-not-object',
+          policyIndex: index,
+          expected: 'collection policy object',
+          actualType: actualType(entry.value),
+        }),
+      );
+      return { valid: false, policies: [], byPath: new Map() };
+    }
+
+    const pathMember = ownDataValue(entry.value, 'path');
+    const path = inspectPolicyPath(pathMember);
+    if (path === undefined) {
+      diagnostics.push(
+        invalidCollectionPolicy({
+          reason: !pathMember.present
+            ? 'member-missing'
+            : pathMember.accessor
+              ? 'member-accessor'
+              : 'invalid-path',
+          policyIndex: index,
+          member: 'path',
+          expected: 'non-empty string-only path',
+          ...(!pathMember.present || pathMember.accessor
+            ? {}
+            : { actualType: actualType(pathMember.value) }),
+        }),
+      );
+      return { valid: false, policies: [], byPath: new Map() };
+    }
+
+    const identityMember = ownDataValue(entry.value, 'itemIdentityProperty');
+    if (
+      !identityMember.present ||
+      identityMember.accessor ||
+      typeof identityMember.value !== 'string'
+    ) {
+      diagnostics.push(
+        invalidCollectionPolicy({
+          reason: !identityMember.present
+            ? 'member-missing'
+            : identityMember.accessor
+              ? 'member-accessor'
+              : 'invalid-identity-property',
+          policyIndex: index,
+          member: 'itemIdentityProperty',
+          expected: 'string',
+          ...(!identityMember.present || identityMember.accessor
+            ? {}
+            : { actualType: actualType(identityMember.value) }),
+        }),
+      );
+      return { valid: false, policies: [], byPath: new Map() };
+    }
+
+    const key = JSON.stringify(path);
+    const first = byPath.get(key);
+    if (first !== undefined) {
+      diagnostics.push(
+        invalidCollectionPolicy({
+          reason: 'duplicate-array-path',
+          policyIndex: index,
+          expected: 'non-empty string-only path',
+          firstPolicyIndex: first.index,
+        }),
+      );
+      return { valid: false, policies: [], byPath: new Map() };
+    }
+    const policy = Object.freeze({
+      index,
+      path,
+      itemIdentityProperty: identityMember.value,
+    });
+    policies.push(policy);
+    byPath.set(key, policy);
+  }
+  return {
+    valid: true,
+    policies: Object.freeze(policies),
+    byPath,
+  };
+}
+
+function inspectPolicyPath(member: OwnValue): readonly string[] | undefined {
+  if (!member.present || member.accessor || !Array.isArray(member.value)) {
+    return undefined;
+  }
+  if (member.value.length === 0) return undefined;
+  const path: string[] = [];
+  for (let index = 0; index < member.value.length; index += 1) {
+    const segment = ownDataValue(member.value, index);
+    if (
+      !segment.present ||
+      segment.accessor ||
+      typeof segment.value !== 'string'
+    ) {
+      return undefined;
+    }
+    path.push(segment.value);
+  }
+  return Object.freeze(path);
+}
+
+function invalidCollectionPolicy(
+  parameters: Readonly<Record<string, unknown>>,
+): Diagnostic {
+  return diagnostic({
+    code: 'INVALID_COLLECTION_POLICY',
+    severity: 'error',
+    source: 'schema',
+    parameters,
+    fallbackMessage: 'Collection policy configuration is invalid.',
   });
 }
 
@@ -431,6 +674,20 @@ function inspectRootKeyword(
     return;
   }
 
+  if (keyword === 'items') {
+    diagnostics.push(
+      diagnostic({
+        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+        severity: 'error',
+        source: 'schema',
+        documentPath: [keyword],
+        parameters: { keyword, fieldType: 'object' },
+        fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "object".`,
+      }),
+    );
+    return;
+  }
+
   if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
     diagnostics.push(
       schemaKeywordDiagnostic(
@@ -587,6 +844,8 @@ function inspectNodes(
   requiredNames: ReadonlySet<string>,
   diagnostics: Diagnostic[],
   rootSchema: Record<string, unknown>,
+  collectionPolicies: ParsedCollectionPolicies,
+  usedPolicyIndices: Set<number>,
 ): NodeCandidate[] {
   const candidates: NodeCandidate[] = [];
   type Frame =
@@ -703,7 +962,7 @@ function inspectNodes(
       continue;
     }
 
-    if (rawType !== 'object') {
+    if (SUPPORTED_FIELD_TYPES.has(rawType as FieldType)) {
       output.push(
         inspectValidField(
           name,
@@ -731,6 +990,24 @@ function inspectNodes(
           fallbackMessage: 'Schema object cycle detected.',
         }),
       );
+      continue;
+    }
+
+    if (rawType === 'array') {
+      active.set(rawField, fieldPath);
+      const array = inspectArrayCandidate(
+        name,
+        rawField,
+        required,
+        dataPath,
+        fieldPath,
+        diagnostics,
+        active,
+        collectionPolicies,
+        usedPolicyIndices,
+      );
+      active.delete(rawField);
+      if (array !== undefined) output.push(array);
       continue;
     }
 
@@ -771,6 +1048,809 @@ function inspectNodes(
   }
 
   return candidates;
+}
+
+function inspectArrayCandidate(
+  name: string,
+  schema: Record<string, unknown>,
+  required: boolean,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+  active: Map<object, readonly (string | number)[]>,
+  collectionPolicies: ParsedCollectionPolicies,
+  usedPolicyIndices: Set<number>,
+): ArrayCandidate | undefined {
+  let schemaTitle: string | undefined;
+  let schemaDescription: string | undefined;
+  const policy = collectionPolicies.valid
+    ? collectionPolicies.byPath.get(JSON.stringify(dataPath))
+    : undefined;
+  if (policy !== undefined) usedPolicyIndices.add(policy.index);
+  for (const keyword of Object.keys(schema)) {
+    const keywordPath = [...documentPath, keyword];
+    if (!ARRAY_FIELD_KEYWORDS.has(keyword)) {
+      if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+        diagnostics.push(
+          schemaKeywordDiagnostic(
+            'IGNORED_SCHEMA_KEYWORD',
+            'warning',
+            keyword,
+            keywordPath,
+            `Known annotation "${keyword}" is ignored by the compiler.`,
+            dataPath,
+          ),
+        );
+      } else if (
+        keyword !== '$schema' &&
+        (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
+      ) {
+        diagnostics.push(
+          diagnostic({
+            code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+            severity: 'error',
+            source: 'schema',
+            dataPath,
+            documentPath: keywordPath,
+            parameters: { keyword, fieldType: 'array' },
+            fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "array".`,
+          }),
+        );
+      } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+        diagnostics.push(
+          schemaKeywordDiagnostic(
+            'UNSUPPORTED_SCHEMA_KEYWORD',
+            'error',
+            keyword,
+            keywordPath,
+            `Schema keyword "${keyword}" is not supported.`,
+            dataPath,
+          ),
+        );
+      } else {
+        diagnostics.push(
+          schemaKeywordDiagnostic(
+            'UNKNOWN_SCHEMA_KEYWORD',
+            'warning',
+            keyword,
+            keywordPath,
+            `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+            dataPath,
+          ),
+        );
+      }
+      continue;
+    }
+    if (keyword !== 'title' && keyword !== 'description') continue;
+    const member = ownDataValue(schema, keyword);
+    if (!member.present) continue;
+    const expected = keyword === 'title' ? 'non-blank string' : 'string';
+    if (
+      member.accessor ||
+      typeof member.value !== 'string' ||
+      (keyword === 'title' && member.value.trim().length === 0)
+    ) {
+      diagnostics.push(
+        member.accessor
+          ? invalidSchemaKeywordDescriptor(
+              keyword,
+              expected,
+              keywordPath,
+              dataPath,
+              'accessor',
+            )
+          : invalidSchemaKeywordValue(
+              keyword,
+              member.value,
+              expected,
+              keywordPath,
+              dataPath,
+            ),
+      );
+    } else if (keyword === 'title') schemaTitle = member.value;
+    else schemaDescription = member.value;
+  }
+
+  const itemsPath = [...documentPath, 'items'];
+  const itemsMember = ownDataValue(schema, 'items');
+  if (
+    !itemsMember.present ||
+    itemsMember.accessor ||
+    !isOrdinaryRecord(itemsMember.value)
+  ) {
+    diagnostics.push(
+      !itemsMember.present || itemsMember.accessor
+        ? invalidSchemaKeywordDescriptor(
+            'items',
+            'inline object item schema',
+            itemsPath,
+            dataPath,
+            !itemsMember.present ? 'missing' : 'accessor',
+          )
+        : invalidSchemaKeywordValue(
+            'items',
+            itemsMember.value,
+            'inline object item schema',
+            itemsPath,
+            dataPath,
+          ),
+    );
+    if (collectionPolicies.valid && policy === undefined) {
+      diagnostics.push(
+        diagnostic({
+          code: 'MISSING_COLLECTION_POLICY',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          parameters: { arrayPath: [...dataPath] },
+          fallbackMessage: 'Collection policy is required.',
+        }),
+      );
+    }
+    return undefined;
+  }
+
+  const firstItemsPath = active.get(itemsMember.value);
+  if (firstItemsPath !== undefined) {
+    diagnostics.push(
+      withTemplatePath(
+        diagnostic({
+          code: 'CYCLIC_SCHEMA_OBJECT',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: itemsPath,
+          parameters: { firstDocumentPath: [...firstItemsPath] },
+          fallbackMessage: 'Schema object cycle detected.',
+        }),
+        [],
+      ),
+    );
+    if (collectionPolicies.valid && policy === undefined) {
+      diagnostics.push(
+        diagnostic({
+          code: 'MISSING_COLLECTION_POLICY',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          parameters: { arrayPath: [...dataPath] },
+          fallbackMessage: 'Collection policy is required.',
+        }),
+      );
+    }
+    return undefined;
+  }
+
+  const item = inspectItemRoot(
+    name,
+    itemsMember.value,
+    dataPath,
+    itemsPath,
+    diagnostics,
+  );
+  const children: NodeCandidate[] = [];
+  let identitySchemaCompatible = false;
+  if (item !== undefined) {
+    active.set(itemsMember.value, itemsPath);
+    identitySchemaCompatible = inspectItemTemplateChildren(
+      item.properties,
+      item.requiredNames,
+      policy?.itemIdentityProperty,
+      children,
+      dataPath,
+      itemsPath,
+      diagnostics,
+      active,
+    );
+    active.delete(itemsMember.value);
+  }
+
+  if (collectionPolicies.valid) {
+    if (policy === undefined) {
+      diagnostics.push(
+        diagnostic({
+          code: 'MISSING_COLLECTION_POLICY',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          parameters: { arrayPath: [...dataPath] },
+          fallbackMessage: 'Collection policy is required.',
+        }),
+      );
+    } else if (
+      item === undefined ||
+      !Object.hasOwn(item.properties, policy.itemIdentityProperty)
+    ) {
+      diagnostics.push(
+        semanticCollectionPolicyDiagnostic(
+          policy,
+          dataPath,
+          'identity-property-not-found',
+          'direct item property',
+        ),
+      );
+    } else if (!item.requiredNames.has(policy.itemIdentityProperty)) {
+      diagnostics.push(
+        semanticCollectionPolicyDiagnostic(
+          policy,
+          dataPath,
+          'identity-property-not-required',
+          'required item property',
+        ),
+      );
+    } else if (!identitySchemaCompatible) {
+      diagnostics.push(
+        semanticCollectionPolicyDiagnostic(
+          policy,
+          dataPath,
+          'identity-schema-incompatible',
+          'required direct string identity property',
+        ),
+      );
+    }
+  }
+
+  return {
+    name,
+    type: 'array',
+    required,
+    ...(schemaTitle === undefined ? {} : { schemaTitle }),
+    ...(schemaDescription === undefined ? {} : { schemaDescription }),
+    dataPath,
+    documentPath,
+    ...(policy === undefined
+      ? {}
+      : {
+          identityProperty: policy.itemIdentityProperty,
+          policyIndex: policy.index,
+        }),
+    children,
+  };
+}
+
+function inspectItemRoot(
+  name: string,
+  schema: Record<string, unknown>,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+):
+  | {
+      readonly properties: Record<string, unknown>;
+      readonly requiredNames: ReadonlySet<string>;
+    }
+  | undefined {
+  let properties: Record<string, unknown> | undefined;
+  const requiredEntries: RequiredEntry[] = [];
+  const requiredNames = new Set<string>();
+
+  const typeMember = ownDataValue(schema, 'type');
+  if (!typeMember.present) {
+    diagnostics.push(
+      withTemplatePath(
+        diagnostic({
+          code: 'MISSING_FIELD_TYPE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: [...documentPath, 'type'],
+          parameters: { field: name },
+          fallbackMessage: `Field "${name}" must declare a type.`,
+        }),
+        [],
+      ),
+    );
+  } else if (typeMember.accessor || typeMember.value !== 'object') {
+    diagnostics.push(
+      withTemplatePath(
+        diagnostic({
+          code: 'UNSUPPORTED_FIELD_TYPE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: [...documentPath, 'type'],
+          parameters: {
+            field: name,
+            ...(typeMember.accessor
+              ? { actualType: 'accessor' }
+              : describeActualValue(typeMember.value)),
+          },
+          fallbackMessage: `Field "${name}" has an unsupported type.`,
+        }),
+        [],
+      ),
+    );
+  }
+
+  const propertiesMember = ownDataValue(schema, 'properties');
+  if (!propertiesMember.present) {
+    diagnostics.push(
+      withTemplatePath(
+        diagnostic({
+          code: 'MISSING_SCHEMA_PROPERTIES',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: [...documentPath, 'properties'],
+          parameters: {},
+          fallbackMessage: 'Object schema must declare properties.',
+        }),
+        [],
+      ),
+    );
+  } else if (
+    propertiesMember.accessor ||
+    !isOrdinaryRecord(propertiesMember.value)
+  ) {
+    diagnostics.push(
+      withTemplatePath(
+        diagnostic({
+          code: 'INVALID_SCHEMA_PROPERTIES',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: [...documentPath, 'properties'],
+          parameters: {
+            actualType: propertiesMember.accessor
+              ? 'accessor'
+              : actualType(propertiesMember.value),
+          },
+          fallbackMessage: 'Schema properties must be an object.',
+        }),
+        [],
+      ),
+    );
+  } else {
+    properties = propertiesMember.value;
+  }
+
+  const requiredMember = ownDataValue(schema, 'required');
+  if (requiredMember.present) {
+    const start = diagnostics.length;
+    if (requiredMember.accessor) {
+      diagnostics.push(
+        invalidSchemaKeywordDescriptor(
+          'required',
+          'array of unique strings',
+          [...documentPath, 'required'],
+          dataPath,
+          'accessor',
+        ),
+      );
+    } else {
+      inspectRequiredAtPath(
+        requiredMember.value,
+        requiredEntries,
+        requiredNames,
+        diagnostics,
+        dataPath,
+        [...documentPath, 'required'],
+      );
+    }
+    addTemplatePathToRange(diagnostics, start, []);
+  }
+
+  for (const keyword of Object.keys(schema)) {
+    if (ITEM_ROOT_KEYWORDS.has(keyword)) continue;
+    const keywordPath = [...documentPath, keyword];
+    let itemDiagnostic: Diagnostic;
+    if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+      itemDiagnostic = schemaKeywordDiagnostic(
+        'IGNORED_SCHEMA_KEYWORD',
+        'warning',
+        keyword,
+        keywordPath,
+        `Known annotation "${keyword}" is ignored by the compiler.`,
+        dataPath,
+      );
+    } else if (
+      keyword !== '$schema' &&
+      (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
+    ) {
+      itemDiagnostic = diagnostic({
+        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: keywordPath,
+        parameters: { keyword, fieldType: 'object' },
+        fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "object".`,
+      });
+    } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+      itemDiagnostic = schemaKeywordDiagnostic(
+        'UNSUPPORTED_SCHEMA_KEYWORD',
+        'error',
+        keyword,
+        keywordPath,
+        `Schema keyword "${keyword}" is not supported.`,
+        dataPath,
+      );
+    } else {
+      itemDiagnostic = schemaKeywordDiagnostic(
+        'UNKNOWN_SCHEMA_KEYWORD',
+        'warning',
+        keyword,
+        keywordPath,
+        `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+        dataPath,
+      );
+    }
+    diagnostics.push(withTemplatePath(itemDiagnostic, []));
+  }
+
+  if (properties === undefined) return undefined;
+  for (const entry of requiredEntries) {
+    if (!Object.hasOwn(properties, entry.name)) {
+      diagnostics.push(
+        withTemplatePath(
+          diagnostic({
+            code: 'UNMANAGED_REQUIRED_PROPERTY',
+            severity: 'warning',
+            source: 'schema',
+            dataPath,
+            documentPath: [...documentPath, 'required', entry.index],
+            parameters: { field: entry.name },
+            fallbackMessage: `Required property "${entry.name}" is not managed by this form.`,
+          }),
+          [],
+        ),
+      );
+    }
+  }
+  return { properties, requiredNames };
+}
+
+function inspectItemTemplateChildren(
+  properties: Record<string, unknown>,
+  requiredNames: ReadonlySet<string>,
+  identityProperty: string | undefined,
+  output: NodeCandidate[],
+  arrayPath: readonly string[],
+  itemDocumentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+  active: Map<object, readonly (string | number)[]>,
+): boolean {
+  type Frame =
+    | { readonly kind: 'exit'; readonly schema: Record<string, unknown> }
+    | {
+        readonly kind: 'node';
+        readonly name: string;
+        readonly schemaValue: unknown;
+        readonly required: boolean;
+        readonly templatePath: readonly string[];
+        readonly documentPath: readonly (string | number)[];
+        readonly output: NodeCandidate[];
+      };
+  const stack: Frame[] = [];
+  const names = Object.keys(properties);
+  for (let index = names.length - 1; index >= 0; index -= 1) {
+    const name = names[index] as string;
+    const member = ownDataValue(properties, name);
+    stack.push({
+      kind: 'node',
+      name,
+      schemaValue:
+        member.present && !member.accessor ? member.value : ACCESSOR_VALUE,
+      required: requiredNames.has(name),
+      templatePath: [name],
+      documentPath: [...itemDocumentPath, 'properties', name],
+      output,
+    });
+  }
+  let identityCompatible = false;
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    if (frame.kind === 'exit') {
+      active.delete(frame.schema);
+      continue;
+    }
+    const start = diagnostics.length;
+    if (
+      frame.schemaValue === ACCESSOR_VALUE ||
+      !isOrdinaryRecord(frame.schemaValue)
+    ) {
+      diagnostics.push(
+        diagnostic({
+          code: 'INVALID_FIELD_SCHEMA',
+          severity: 'error',
+          source: 'schema',
+          dataPath: arrayPath,
+          documentPath: frame.documentPath,
+          parameters: {
+            field: frame.name,
+            actualType:
+              frame.schemaValue === ACCESSOR_VALUE
+                ? 'accessor'
+                : actualType(frame.schemaValue),
+          },
+          fallbackMessage: `Schema for field "${frame.name}" must be an object.`,
+        }),
+      );
+      addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      continue;
+    }
+    const schema = frame.schemaValue;
+    const typeMember = ownDataValue(schema, 'type');
+    if (!typeMember.present) {
+      diagnostics.push(
+        diagnostic({
+          code: 'MISSING_FIELD_TYPE',
+          severity: 'error',
+          source: 'schema',
+          dataPath: arrayPath,
+          documentPath: [...frame.documentPath, 'type'],
+          parameters: { field: frame.name },
+          fallbackMessage: `Field "${frame.name}" must declare a type.`,
+        }),
+      );
+      addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      continue;
+    }
+    const rawType = typeMember.accessor ? ACCESSOR_VALUE : typeMember.value;
+    if (frame.templatePath.length === 1 && frame.name === identityProperty) {
+      identityCompatible = inspectIdentitySchema(
+        frame.name,
+        schema,
+        rawType,
+        arrayPath,
+        frame.documentPath,
+        frame.templatePath,
+        diagnostics,
+      );
+      continue;
+    }
+    if (rawType === 'array') {
+      diagnostics.push(
+        withTemplatePath(
+          diagnostic({
+            code: 'UNSUPPORTED_FIELD_TYPE',
+            severity: 'error',
+            source: 'schema',
+            dataPath: arrayPath,
+            documentPath: [...frame.documentPath, 'type'],
+            parameters: {
+              field: frame.name,
+              reason: 'nested-array-not-supported',
+            },
+            fallbackMessage: `Field "${frame.name}" has an unsupported type.`,
+          }),
+          frame.templatePath,
+        ),
+      );
+      continue;
+    }
+    if (typeof rawType !== 'string' || !SUPPORTED_NODE_TYPES.has(rawType)) {
+      diagnostics.push(
+        diagnostic({
+          code: 'UNSUPPORTED_FIELD_TYPE',
+          severity: 'error',
+          source: 'schema',
+          dataPath: arrayPath,
+          documentPath: [...frame.documentPath, 'type'],
+          parameters: {
+            field: frame.name,
+            ...(rawType === ACCESSOR_VALUE
+              ? { actualType: 'accessor' }
+              : describeActualValue(rawType)),
+          },
+          fallbackMessage: `Field "${frame.name}" has an unsupported type.`,
+        }),
+      );
+      addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      continue;
+    }
+    if (rawType !== 'object') {
+      const candidate = inspectValidField(
+        frame.name,
+        rawType as FieldType,
+        schema,
+        frame.required,
+        diagnostics,
+        arrayPath,
+        frame.documentPath,
+      );
+      frame.output.push({ ...candidate, templatePath: frame.templatePath });
+      addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      continue;
+    }
+    const firstPath = active.get(schema);
+    if (firstPath !== undefined) {
+      diagnostics.push(
+        diagnostic({
+          code: 'CYCLIC_SCHEMA_OBJECT',
+          severity: 'error',
+          source: 'schema',
+          dataPath: arrayPath,
+          documentPath: frame.documentPath,
+          parameters: { firstDocumentPath: [...firstPath] },
+          fallbackMessage: 'Schema object cycle detected.',
+        }),
+      );
+      addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      continue;
+    }
+    const object = inspectObjectCandidate(
+      frame.name,
+      schema,
+      frame.required,
+      arrayPath,
+      frame.documentPath,
+      diagnostics,
+    );
+    addTemplatePathToRange(diagnostics, start, frame.templatePath);
+    if (object === undefined) continue;
+    const candidate: ObjectCandidate = {
+      ...object.candidate,
+      templatePath: frame.templatePath,
+    };
+    frame.output.push(candidate);
+    active.set(schema, frame.documentPath);
+    stack.push({ kind: 'exit', schema });
+    const childNames = Object.keys(object.properties);
+    for (let index = childNames.length - 1; index >= 0; index -= 1) {
+      const childName = childNames[index] as string;
+      const member = ownDataValue(object.properties, childName);
+      stack.push({
+        kind: 'node',
+        name: childName,
+        schemaValue:
+          member.present && !member.accessor ? member.value : ACCESSOR_VALUE,
+        required: object.requiredNames.has(childName),
+        templatePath: [...frame.templatePath, childName],
+        documentPath: [...frame.documentPath, 'properties', childName],
+        output: candidate.children,
+      });
+    }
+  }
+  return identityCompatible;
+}
+
+function inspectIdentitySchema(
+  name: string,
+  schema: Record<string, unknown>,
+  rawType: unknown,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  templatePath: readonly string[],
+  diagnostics: Diagnostic[],
+): boolean {
+  let compatible = rawType === 'string';
+  if (!compatible) {
+    diagnostics.push(
+      withTemplatePath(
+        diagnostic({
+          code: 'UNSUPPORTED_FIELD_TYPE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: [...documentPath, 'type'],
+          parameters: {
+            field: name,
+            ...(rawType === ACCESSOR_VALUE
+              ? { actualType: 'accessor' }
+              : describeActualValue(rawType)),
+          },
+          fallbackMessage: `Field "${name}" has an unsupported type.`,
+        }),
+        templatePath,
+      ),
+    );
+  }
+  for (const keyword of Object.keys(schema)) {
+    if (keyword === 'type') continue;
+    const keywordPath = [...documentPath, keyword];
+    if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        withTemplatePath(
+          schemaKeywordDiagnostic(
+            'IGNORED_SCHEMA_KEYWORD',
+            'warning',
+            keyword,
+            keywordPath,
+            `Known annotation "${keyword}" is ignored by the compiler.`,
+            dataPath,
+          ),
+          templatePath,
+        ),
+      );
+    } else if (
+      keyword !== '$schema' &&
+      (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
+    ) {
+      compatible = false;
+      diagnostics.push(
+        withTemplatePath(
+          diagnostic({
+            code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+            severity: 'error',
+            source: 'schema',
+            dataPath,
+            documentPath: keywordPath,
+            parameters: { keyword, fieldType: 'string' },
+            fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "string".`,
+          }),
+          templatePath,
+        ),
+      );
+    } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+      compatible = false;
+      diagnostics.push(
+        withTemplatePath(
+          schemaKeywordDiagnostic(
+            'UNSUPPORTED_SCHEMA_KEYWORD',
+            'error',
+            keyword,
+            keywordPath,
+            `Schema keyword "${keyword}" is not supported.`,
+            dataPath,
+          ),
+          templatePath,
+        ),
+      );
+    } else {
+      diagnostics.push(
+        withTemplatePath(
+          schemaKeywordDiagnostic(
+            'UNKNOWN_SCHEMA_KEYWORD',
+            'warning',
+            keyword,
+            keywordPath,
+            `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+            dataPath,
+          ),
+          templatePath,
+        ),
+      );
+    }
+  }
+  return compatible;
+}
+
+function semanticCollectionPolicyDiagnostic(
+  policy: ParsedCollectionPolicy,
+  dataPath: readonly string[],
+  reason:
+    | 'identity-property-not-found'
+    | 'identity-property-not-required'
+    | 'identity-schema-incompatible',
+  expected: string,
+): Diagnostic {
+  return diagnostic({
+    code: 'INVALID_COLLECTION_POLICY',
+    severity: 'error',
+    source: 'schema',
+    dataPath,
+    parameters: {
+      reason,
+      policyIndex: policy.index,
+      member: 'itemIdentityProperty',
+      expected,
+    },
+    fallbackMessage: 'Collection policy is incompatible with the item schema.',
+  });
+}
+
+function addTemplatePathToRange(
+  diagnostics: Diagnostic[],
+  start: number,
+  templatePath: readonly string[],
+): void {
+  for (let index = start; index < diagnostics.length; index += 1) {
+    const current = diagnostics[index];
+    if (current !== undefined)
+      diagnostics[index] = withTemplatePath(current, templatePath);
+  }
+}
+
+function withTemplatePath(
+  value: Diagnostic,
+  templatePath: readonly string[],
+): Diagnostic {
+  return {
+    ...value,
+    parameters: { ...value.parameters, templatePath: [...templatePath] },
+  };
 }
 
 const ACCESSOR_VALUE = Symbol('accessor');
@@ -824,7 +1904,7 @@ function inspectObjectCandidate(
         );
       } else if (
         keyword !== '$schema' &&
-        COMPILER_SUPPORTED_KEYWORDS.has(keyword)
+        (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
       ) {
         diagnostics.push(
           diagnostic({
@@ -1038,7 +2118,7 @@ function inspectValidField(
         );
       } else if (
         keyword !== '$schema' &&
-        COMPILER_SUPPORTED_KEYWORDS.has(keyword)
+        (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
       ) {
         if (keyword === 'enum') {
           stringEnum = { kind: 'schema-blocked' };
@@ -1737,7 +2817,12 @@ function inspectNestedUiSchema(
   rawUiSchema: unknown,
   candidates: readonly NodeCandidate[],
   diagnostics: Diagnostic[],
+  rootDocumentPath: readonly (string | number)[] = [],
+  ancestorActive: ReadonlyMap<object, readonly (string | number)[]> = new Map(),
+  identityProperty?: string,
+  templateArrayPath?: readonly string[],
 ): ParsedUiSchema {
+  const diagnosticsStart = diagnostics.length;
   const result = {
     order: [] as string[],
     fields: new Map<string, ParsedNodeUi>(),
@@ -1777,9 +2862,8 @@ function inspectNestedUiSchema(
         readonly dataPath: readonly string[];
         readonly documentPath: readonly (string | number)[];
       };
-  const active = new Map<object, readonly (string | number)[]>([
-    [rawUiSchema, []],
-  ]);
+  const active = new Map<object, readonly (string | number)[]>(ancestorActive);
+  active.set(rawUiSchema, rootDocumentPath);
   const stack: ContainerFrame[] = [
     {
       kind: 'container',
@@ -1788,7 +2872,7 @@ function inspectNestedUiSchema(
       order: result.order,
       fields: result.fields,
       dataPath: [],
-      documentPath: [],
+      documentPath: rootDocumentPath,
     },
   ];
 
@@ -1869,6 +2953,65 @@ function inspectNestedUiSchema(
           dataPath: nodePath,
           documentPath: uiPath,
         });
+      } else if (candidate.type === 'array') {
+        const arrayUi = parsed as ParsedArrayUi;
+        const itemMember =
+          rawNode === undefined
+            ? { present: false as const }
+            : ownDataValue(rawNode, 'item');
+        let rawItem: Record<string, unknown> | undefined;
+        if (itemMember.present) {
+          if (itemMember.accessor || !isOrdinaryRecord(itemMember.value)) {
+            diagnostics.push(
+              itemMember.accessor
+                ? invalidUiDescriptor(
+                    'item',
+                    'item UI object',
+                    [...uiPath, 'item'],
+                    nodePath,
+                    'accessor',
+                  )
+                : invalidUiValue(
+                    'item',
+                    itemMember.value,
+                    'item UI object',
+                    [...uiPath, 'item'],
+                    nodePath,
+                  ),
+            );
+          } else {
+            const firstItemPath =
+              rawNode !== undefined && itemMember.value === rawNode
+                ? uiPath
+                : active.get(itemMember.value);
+            if (firstItemPath !== undefined) {
+              diagnostics.push(
+                diagnostic({
+                  code: 'CYCLIC_UI_SCHEMA_OBJECT',
+                  severity: 'error',
+                  source: 'ui-schema',
+                  dataPath: nodePath,
+                  documentPath: [...uiPath, 'item'],
+                  parameters: { firstDocumentPath: [...firstItemPath] },
+                  fallbackMessage: 'UI Schema object cycle detected.',
+                }),
+              );
+            } else rawItem = itemMember.value;
+          }
+        }
+        if (rawItem !== undefined) {
+          const nestedActive = new Map(active);
+          if (rawNode !== undefined) nestedActive.set(rawNode, uiPath);
+          arrayUi.item = inspectNestedUiSchema(
+            rawItem,
+            candidate.children,
+            diagnostics,
+            [...uiPath, 'item'],
+            nestedActive,
+            candidate.identityProperty,
+            nodePath,
+          );
+        }
       }
       continue;
     }
@@ -1945,15 +3088,30 @@ function inspectNestedUiSchema(
       for (const name of Object.keys(rawFields)) {
         if (!knownNames.has(name)) {
           diagnostics.push(
-            diagnostic({
-              code: 'UNKNOWN_UI_FIELD',
-              severity: 'warning',
-              source: 'ui-schema',
-              dataPath: [...frame.dataPath, name],
-              documentPath: [...fieldsPath, name],
-              parameters: { field: name },
-              fallbackMessage: `UI Schema references unknown field "${name}".`,
-            }),
+            name === identityProperty
+              ? diagnostic({
+                  code: 'INCOMPATIBLE_UI_OPTION',
+                  severity: 'warning',
+                  source: 'ui-schema',
+                  dataPath: [...frame.dataPath, name],
+                  documentPath: [...fieldsPath, name],
+                  parameters: {
+                    field: name,
+                    fieldType: 'string',
+                    option: 'identity',
+                    reason: 'identity-property',
+                  },
+                  fallbackMessage: `UI identity entry is incompatible with field "${name}".`,
+                })
+              : diagnostic({
+                  code: 'UNKNOWN_UI_FIELD',
+                  severity: 'warning',
+                  source: 'ui-schema',
+                  dataPath: [...frame.dataPath, name],
+                  documentPath: [...fieldsPath, name],
+                  parameters: { field: name },
+                  fallbackMessage: `UI Schema references unknown field "${name}".`,
+                }),
           );
         }
       }
@@ -1979,6 +3137,20 @@ function inspectNestedUiSchema(
         dataPath: frame.dataPath,
         documentPath: frame.documentPath,
       });
+    }
+  }
+  if (templateArrayPath !== undefined) {
+    for (let index = diagnosticsStart; index < diagnostics.length; index += 1) {
+      const current = diagnostics[index];
+      if (current === undefined) continue;
+      const templatePath = (current.dataPath ?? []).filter(
+        (segment): segment is string => typeof segment === 'string',
+      );
+      diagnostics[index] = {
+        ...current,
+        dataPath: [...templateArrayPath],
+        parameters: { ...current.parameters, templatePath },
+      };
     }
   }
   return result;
@@ -2139,17 +3311,20 @@ function inspectNestedNodeUi(
     enumLabels?: ReadonlyMap<string, string>;
     order?: string[];
     fields?: Map<string, ParsedNodeUi>;
+    item?: ParsedUiSchema;
   } = {};
   if (candidate.type === 'object') {
     parsed.order = [];
     parsed.fields = new Map();
+  } else if (candidate.type === 'array') {
+    parsed.item = { order: [], fields: new Map() };
   }
   if (value === undefined) {
     return parsed;
   }
-  const allowed =
+  const allowed = new Set(
     candidate.type === 'object'
-      ? new Set([
+      ? [
           ...UI_ROOT_KEYS,
           'label',
           'description',
@@ -2158,8 +3333,12 @@ function inspectNestedNodeUi(
           'placeholder',
           'enumLabels',
           'options',
-        ])
-      : new Set([...UI_FIELD_KEYS, 'order', 'fields']);
+          'item',
+        ]
+      : candidate.type === 'array'
+        ? [...UI_FIELD_KEYS, 'order', 'fields', 'item']
+        : [...UI_FIELD_KEYS, 'order', 'fields', 'item'],
+  );
   for (const key of Object.keys(value)) {
     if (!allowed.has(key)) {
       diagnostics.push(unknownUiKey(key, [...documentPath, key], dataPath));
@@ -2169,7 +3348,8 @@ function inspectNestedNodeUi(
     const member = ownDataValue(value, key);
     if (!member.present) continue;
     const expected =
-      candidate.type === 'object' && key === 'label'
+      (candidate.type === 'object' || candidate.type === 'array') &&
+      key === 'label'
         ? 'non-blank string'
         : 'string';
     if (
@@ -2218,7 +3398,11 @@ function inspectNestedNodeUi(
               dataPath,
             ),
       );
-    } else if (candidate.type === 'object' || candidate.type === 'boolean') {
+    } else if (
+      candidate.type === 'object' ||
+      candidate.type === 'array' ||
+      candidate.type === 'boolean'
+    ) {
       diagnostics.push(
         diagnostic({
           code: 'INCOMPATIBLE_PLACEHOLDER',
@@ -2248,6 +3432,46 @@ function inspectNestedNodeUi(
     dataPath,
     documentPath,
   );
+  const item = ownDataValue(value, 'item');
+  if (item.present && candidate.type !== 'array') {
+    const path = [...documentPath, 'item'];
+    if (item.accessor || !isOrdinaryRecord(item.value)) {
+      diagnostics.push(
+        item.accessor
+          ? invalidUiDescriptor(
+              'item',
+              'item UI object',
+              path,
+              dataPath,
+              'accessor',
+            )
+          : invalidUiValue(
+              'item',
+              item.value,
+              'item UI object',
+              path,
+              dataPath,
+            ),
+      );
+    } else {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_UI_OPTION',
+          severity: 'warning',
+          source: 'ui-schema',
+          dataPath,
+          documentPath: path,
+          parameters: {
+            field: candidate.name,
+            fieldType: candidate.type,
+            option: 'item',
+            reason: candidate.type === 'object' ? 'object-node' : 'leaf-node',
+          },
+          fallbackMessage: `UI option "item" is incompatible with field "${candidate.name}".`,
+        }),
+      );
+    }
+  }
   if (candidate.type !== 'object') {
     for (const key of ['order', 'fields'] as const) {
       const member = ownDataValue(value, key);
@@ -2287,7 +3511,7 @@ function inspectNestedNodeUi(
               field: candidate.name,
               fieldType: candidate.type,
               option: key,
-              reason: 'leaf-node',
+              reason: candidate.type === 'array' ? 'array-node' : 'leaf-node',
             },
             fallbackMessage: `UI option "${key}" is incompatible with leaf field "${candidate.name}".`,
           }),
@@ -2323,7 +3547,7 @@ function inspectNestedEnumLabels(
     );
     return;
   }
-  if (candidate.type === 'object') {
+  if (candidate.type === 'object' || candidate.type === 'array') {
     diagnostics.push(
       diagnostic({
         code: 'INCOMPATIBLE_UI_OPTION',
@@ -2333,11 +3557,11 @@ function inspectNestedEnumLabels(
         documentPath: path,
         parameters: {
           field: candidate.name,
-          fieldType: 'object',
+          fieldType: candidate.type,
           option: 'enumLabels',
-          reason: 'object-node',
+          reason: candidate.type === 'object' ? 'object-node' : 'array-node',
         },
-        fallbackMessage: `UI option "enumLabels" is incompatible with object field "${candidate.name}".`,
+        fallbackMessage: `UI option "enumLabels" is incompatible with ${candidate.type} field "${candidate.name}".`,
       }),
     );
     return;
@@ -2460,7 +3684,7 @@ function inspectNestedOptions(
               dataPath,
             ),
       );
-    } else if (candidate.type === 'object') {
+    } else if (candidate.type === 'object' || candidate.type === 'array') {
       diagnostics.push(
         diagnostic({
           code: 'INCOMPATIBLE_UI_OPTION',
@@ -2470,11 +3694,11 @@ function inspectNestedOptions(
           documentPath: optionPath,
           parameters: {
             field: candidate.name,
-            fieldType: 'object',
+            fieldType: candidate.type,
             option,
-            reason: 'object-node',
+            reason: candidate.type === 'object' ? 'object-node' : 'array-node',
           },
-          fallbackMessage: `UI option "${option}" is incompatible with object field "${candidate.name}".`,
+          fallbackMessage: `UI option "${option}" is incompatible with ${candidate.type} field "${candidate.name}".`,
         }),
       );
     } else if (candidate.type !== 'number' && candidate.type !== 'integer') {
@@ -2516,7 +3740,39 @@ function buildNestedDefinition(
     const frame = stack.pop();
     if (frame === undefined) break;
     const candidate = frame.candidate;
-    if (candidate.type === 'object') {
+    if (candidate.type === 'array') {
+      if (candidate.identityProperty === undefined) {
+        throw new Error(
+          `Internal compiler error: missing identity for collection "${candidate.name}".`,
+        );
+      }
+      const arrayUi = frame.ui as ParsedArrayUi | undefined;
+      const item = buildItemTemplate(
+        candidate,
+        arrayUi?.item ?? { order: [], fields: new Map() },
+      );
+      const node: ArrayNodeDefinition = {
+        key: JSON.stringify(candidate.dataPath),
+        name: candidate.name,
+        path: candidate.dataPath,
+        required: candidate.required,
+        label:
+          arrayUi?.label ??
+          candidate.schemaTitle ??
+          accessibleName(candidate.name),
+        ...(arrayUi?.description !== undefined
+          ? { description: arrayUi.description }
+          : candidate.schemaDescription === undefined
+            ? {}
+            : { description: candidate.schemaDescription }),
+        ...(arrayUi?.hint === undefined ? {} : { hint: arrayUi.hint }),
+        ...(arrayUi?.tooltip === undefined ? {} : { tooltip: arrayUi.tooltip }),
+        kind: 'array',
+        identity: { property: candidate.identityProperty },
+        item,
+      };
+      frame.output.push(node);
+    } else if (candidate.type === 'object') {
       const objectUi = frame.ui as ParsedObjectUi | undefined;
       const children: FormNodeDefinition[] = [];
       const label =
@@ -2555,6 +3811,164 @@ function buildNestedDefinition(
     }
   }
   return { nodes, fields };
+}
+
+function buildItemTemplate(
+  collection: ArrayCandidate,
+  ui: ParsedUiSchema,
+): ObjectItemTemplateDefinition {
+  const children: Array<ObjectNodeTemplate | FieldTemplate> = [];
+  const fields: FieldTemplate[] = [];
+  type Frame = {
+    readonly candidate: NodeCandidate;
+    readonly ui: ParsedNodeUi | undefined;
+    readonly output: Array<ObjectNodeTemplate | FieldTemplate>;
+  };
+  const stack: Frame[] = [];
+  pushTemplateBuildFrames(collection.children, ui, children, stack);
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    const candidate = frame.candidate;
+    if (candidate.type === 'array' || candidate.templatePath === undefined) {
+      throw new Error('Internal compiler error: invalid item template node.');
+    }
+    if (candidate.type === 'object') {
+      const objectUi = frame.ui as ParsedObjectUi | undefined;
+      const nestedChildren: Array<ObjectNodeTemplate | FieldTemplate> = [];
+      const node: ObjectNodeTemplate = {
+        kind: 'object',
+        key: JSON.stringify([
+          'template',
+          collection.dataPath,
+          candidate.templatePath,
+        ]),
+        name: candidate.name,
+        relativePath: candidate.templatePath,
+        required: candidate.required,
+        label:
+          objectUi?.label ??
+          candidate.schemaTitle ??
+          accessibleName(candidate.name),
+        ...(objectUi?.description !== undefined
+          ? { description: objectUi.description }
+          : candidate.schemaDescription === undefined
+            ? {}
+            : { description: candidate.schemaDescription }),
+        ...(objectUi?.hint === undefined ? {} : { hint: objectUi.hint }),
+        ...(objectUi?.tooltip === undefined
+          ? {}
+          : { tooltip: objectUi.tooltip }),
+        children: nestedChildren,
+      };
+      frame.output.push(node);
+      pushTemplateBuildFrames(
+        candidate.children,
+        objectUi ?? { order: [], fields: new Map() },
+        nestedChildren,
+        stack,
+      );
+    } else {
+      const field = buildFieldTemplate(
+        collection.dataPath,
+        candidate,
+        frame.ui,
+      );
+      frame.output.push(field);
+      fields.push(field);
+    }
+  }
+  return { kind: 'item-template', children, fields };
+}
+
+function pushTemplateBuildFrames(
+  candidates: readonly NodeCandidate[],
+  ui: ParsedUiSchema | ParsedObjectUi,
+  output: Array<ObjectNodeTemplate | FieldTemplate>,
+  stack: Array<{
+    readonly candidate: NodeCandidate;
+    readonly ui: ParsedNodeUi | undefined;
+    readonly output: Array<ObjectNodeTemplate | FieldTemplate>;
+  }>,
+): void {
+  const byName = new Map(
+    candidates.map((candidate) => [candidate.name, candidate] as const),
+  );
+  const names = [
+    ...ui.order,
+    ...candidates
+      .map((candidate) => candidate.name)
+      .filter((name) => !ui.order.includes(name)),
+  ];
+  for (let index = names.length - 1; index >= 0; index -= 1) {
+    const name = names[index] as string;
+    const candidate = byName.get(name);
+    if (candidate === undefined) {
+      throw new Error(
+        `Internal compiler error: missing template node "${name}".`,
+      );
+    }
+    stack.push({ candidate, ui: ui.fields.get(name), output });
+  }
+}
+
+function buildFieldTemplate(
+  collectionPath: readonly string[],
+  candidate: FieldCandidate,
+  ui: ParsedFieldUi | undefined,
+): FieldTemplate {
+  if (candidate.templatePath === undefined) {
+    throw new Error('Internal compiler error: missing template path.');
+  }
+  const base = {
+    key: JSON.stringify(['template', collectionPath, candidate.templatePath]),
+    name: candidate.name,
+    relativePath: candidate.templatePath,
+    required: candidate.required,
+    label: ui?.label ?? candidate.schemaTitle ?? accessibleName(candidate.name),
+    ...(ui?.description !== undefined
+      ? { description: ui.description }
+      : candidate.schemaDescription === undefined
+        ? {}
+        : { description: candidate.schemaDescription }),
+    ...(ui?.hint === undefined ? {} : { hint: ui.hint }),
+    ...(ui?.tooltip === undefined ? {} : { tooltip: ui.tooltip }),
+    ...(ui?.placeholder === undefined ? {} : { placeholder: ui.placeholder }),
+  };
+  if (candidate.type === 'string') {
+    return {
+      ...base,
+      kind: 'string',
+      constraints: { ...candidate.stringConstraints },
+      ...(candidate.stringEnum.kind === 'valid'
+        ? {
+            choices: candidate.stringEnum.values.map((value) => ({
+              value,
+              label:
+                ui?.enumLabels?.get(value) ??
+                (value.trim().length > 0 ? value : JSON.stringify(value)),
+            })),
+          }
+        : {}),
+    };
+  }
+  if (candidate.type === 'number' || candidate.type === 'integer') {
+    return {
+      ...base,
+      kind: 'number',
+      numericType: candidate.type,
+      constraints: { ...candidate.numberConstraints },
+      ui: {
+        ...(ui?.decimalPlaces === undefined
+          ? {}
+          : { decimalPlaces: ui.decimalPlaces }),
+        ...(ui?.showTrailingZeros === undefined
+          ? {}
+          : { showTrailingZeros: ui.showTrailingZeros }),
+      },
+    };
+  }
+  return { ...base, kind: 'boolean' };
 }
 
 function pushBuildFrames(

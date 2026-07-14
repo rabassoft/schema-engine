@@ -1,0 +1,22 @@
+{
+  "mode": "structural",
+  "currentValue": {
+    "rows": [
+      { "id": "b", "name": "Bob" },
+      { "id": "a", "name": "Ada" }
+    ]
+  },
+  "operation": {
+    "type": "set-item-value",
+    "metadata": { "id": 1, "formId": "form" },
+    "target": {
+      "collectionPath": ["rows"],
+      "itemId": "a",
+      "relativePath": ["name"]
+    },
+    "identityProperty": "id",
+    "expected": { "kind": "value", "value": "Ada" },
+    "value": "Grace",
+    "source": "user"
+  }
+}

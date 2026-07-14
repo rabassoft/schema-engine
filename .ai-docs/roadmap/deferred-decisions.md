@@ -98,7 +98,7 @@ Cada decisión debe registrar:
   publicación.
 - **Estado de entrega:** ADR-015 revisión 4, ADR-005 revisión 2 y SPEC-003
   v0.1.2 están Accepted. PLAN-010 revisión 0 pasó su revisión completa y fue
-  aprobado explícitamente. Checkpoint 1 está completado; checkpoints 2–7
+  aprobado explícitamente. Checkpoints 1–3 están completados; checkpoints 4–7
   siguen pendientes. Publicación y todo alcance no listado siguen sin
   autorización.
 
@@ -434,8 +434,8 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-006 — Arrays:** ejecutar PLAN-010 checkpoint 2: política, compilación de
-   arrays/items/UI estructural, templates inmutables y fixtures de conformidad.
+1. **D-006 — Arrays:** ejecutar PLAN-010 checkpoint 3: cinco operaciones de
+   colección, helpers puros/form, diagnósticos, descriptor safety y fixtures.
    No ampliar el alcance aprobado ni iniciar checkpoints dependientes antes de
    verificarlo.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
@@ -452,6 +452,7 @@ entradas mantienen su estado hasta una promoción y aprobación explícitas.
 
 | Fecha      | Cambio                                                                                                                              |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | PLAN-010 checkpoint 2 completa policies, compiler array/item/UI, templates inmutables y fixtures con matriz verde.                  |
 | 14-07-2026 | PLAN-010 checkpoint 1 completa contratos Public, helpers Internal, validación de definición y paquetes/consumidores.                |
 | 14-07-2026 | PLAN-010 revisión 0 se aprueba tras revisión completa sin hallazgos; M10 queda autorizado, checkpoint 1 aún no iniciado.            |
 | 14-07-2026 | Se acepta la revisión de promoción M10; D-006 queda Promoted para diseño normativo, sin autorizar implementación.                   |

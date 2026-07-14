@@ -16,6 +16,7 @@ const CORE_MODULES = Object.freeze([
   'contracts',
   'index',
   'internal/collection-address',
+  'internal/collection-operation',
   'internal/diagnostics',
   'internal/immutable',
   'internal/keywords',

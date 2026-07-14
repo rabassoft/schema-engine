@@ -6,7 +6,7 @@
 - **Review revision:** 0
 - **Review state:** Complete review cycle 1 passed all nine areas with zero
   findings; formally approved by Ricard
-- **Implementation state:** Checkpoint 1 completed; checkpoints 2–7 pending
+- **Implementation state:** Checkpoints 1–3 completed; checkpoints 4–7 pending
 - **Implementation authorized:** Yes — checkpoints 1–7 only
 - **Requires:** accepted
   [`SPEC-001` v0.1.15](../specs/001-controlled-form-runtime.md),
@@ -505,7 +505,7 @@ explicit formal approval decision.
 Ricard explicitly approved PLAN-010 revision 0 on 14 July 2026 after complete
 review cycle 1 passed all nine areas with zero findings. Approval authorizes
 only checkpoints 1–7 and their stated verification/stop conditions.
-Checkpoint 1 is complete; checkpoints 2–7 remain pending. No excluded
+Checkpoints 1–3 are complete; checkpoints 4–7 remain pending. No excluded
 capability, Stable promotion or publication is authorized.
 
 ### 15.3 Implementation checkpoint 1
@@ -522,3 +522,36 @@ collection hosts.
 Format, lint, typecheck, builds, 177 core tests, 59 Angular tests, package smoke,
 integrated consumer, exact artifacts and clean core/Angular 22 consumers pass.
 Checkpoint 2 is the next authorized action.
+
+### 15.4 Implementation checkpoint 2
+
+Checkpoint 2 completed on 14 July 2026. It added descriptor-safe collection
+policy normalization, supported array/item schema traversal, semantic identity
+policy checks, structural item UI traversal and immutable array definitions
+with static item templates. Identity is excluded from editable/global leaf
+projections, template diagnostics retain absolute array paths plus relative
+`templatePath`, and nested arrays stop before inspecting `items`.
+
+Compiler/manual-definition unit and conformance fixtures cover hostile
+descriptors, policy failures, identity/UI exclusion, cycles, independent/deep
+arrays, exact diagnostic ordering and non-recursive depth. Existing M9 runtime
+and operation consumers retain their collection-rejecting validator; checkpoint
+3 is the next authorized action.
+
+### 15.5 Implementation checkpoint 3
+
+Checkpoint 3 completed on 14 July 2026. `FormOperation` now includes the five
+accepted collection variants. A dedicated Internal helper validates their
+descriptor-safe shape in fixed order, applies definition-aware collection and
+template membership, scans complete stable identity sequences and performs
+atomic immutable leaf, insert, remove and move effects. Schema-neutral
+application retains opaque inserted item references; definition-aware leaf
+sets enforce primitive compatibility only after target and expectation
+resolution.
+
+Programmatic and JSON conformance evidence covers all five variants, concurrent
+movement, no-effect placement, missing materialization, stable anchors,
+identity and expectation staleness, accessors, descriptors, opaque references
+and diagnostic precedence. Existing M9 operations remain unchanged. Collection
+runtime snapshots, requests and Angular hosts remain inactive; checkpoint 4 is
+the next authorized action.

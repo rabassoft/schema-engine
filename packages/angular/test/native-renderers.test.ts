@@ -93,6 +93,10 @@ class NativeHost {
 
   recordOperation(operation: FormOperation): void {
     this.operations.push(operation);
+    if (operation.type !== 'set-value' && operation.type !== 'remove-value') {
+      this.operationFocusStates.push(false);
+      return;
+    }
     const fieldSnapshot = this.form
       ?.snapshot()
       ?.fields.find(

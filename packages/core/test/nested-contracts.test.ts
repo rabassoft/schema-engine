@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import type {
+  ArrayNodeDefinition,
   FieldPresence,
   FieldDefinition,
   FormDefinition,
@@ -90,7 +91,9 @@ describe('M9 public contract foundations', () => {
     expect(snapshot.nodeKind).toBe('object');
     expect(context.node).toBe(address);
     expectTypeOf<FormNodeDefinition>().toMatchTypeOf<
-      ObjectFieldDefinition | FormDefinition['fields'][number]
+      | ObjectFieldDefinition
+      | ArrayNodeDefinition
+      | FormDefinition['fields'][number]
     >();
   });
 });

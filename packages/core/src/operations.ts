@@ -16,6 +16,10 @@ import {
   readOwnDataMember,
 } from './internal/path.js';
 import { actualType, describeActualValue } from './internal/value.js';
+import {
+  applyCollectionOperation,
+  isCollectionOperation,
+} from './internal/collection-operation.js';
 
 type ParsedExpectation =
   | { readonly kind: 'missing' }
@@ -60,6 +64,9 @@ function apply<TData extends object>(
   currentValue: Readonly<TData>,
   operation: FormOperation,
 ): ApplyOperationResult<TData> {
+  if (isCollectionOperation(operation)) {
+    return applyCollectionOperation(definition, currentValue, operation);
+  }
   const targetDiagnostic = validateTarget(currentValue);
   const parsed = validateOperation(operation);
   const shapeDiagnostics = [

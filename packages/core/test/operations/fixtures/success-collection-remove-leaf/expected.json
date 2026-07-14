@@ -1,0 +1,6 @@
+{
+  "success": true,
+  "value": { "rows": [{ "id": "a" }] },
+  "changed": true,
+  "diagnostics": []
+}
