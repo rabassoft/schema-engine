@@ -6,6 +6,32 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — M11 promotion-readiness review completed
+
+### Review
+
+- Evaluated D-014 and D-007 restart conditions against accepted Draft 2020-12
+  policy, completed M9/M10 models and the current compiler pipeline.
+- Confirmed D-014 is ready for a narrow promotion decision, but D-007 cannot be
+  promoted wholesale because the required resolution layer does not exist.
+- Recommended separating same-document `$defs` + static fragment `$ref`
+  resolution into a new identifier, with an Internal resolver and unchanged
+  Public `FormDefinition` by default.
+- Kept D-014 Research and D-007 Deferred pending Ricard's explicit acceptance,
+  correction or rejection; no ADR, SPEC, plan or implementation was activated.
+
+### Verification
+
+- Documentation formatting, 60 Markdown files/267 local links, state
+  consistency and `git diff --check` pass.
+- No product, manifest, dependency, peer/export, lockfile, publication or
+  Stable state changed.
+
+### Next
+
+- Decide review 016 formally. If accepted, register/promote only the narrow
+  static local-reference slice and draft ADR-016 before later normative work.
+
 ## 2026-07-14 — PLAN-010 checkpoint 7 and M10 completed
 
 ### Review and corrections

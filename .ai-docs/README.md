@@ -51,6 +51,10 @@
 - [M10 PLAN-010 implementation review — Cycles 1–2](./reviews/015-plan-010-implementation-review.md)
   — Current-state documentation conflicts were corrected; cycle 2 repeated the
   complete review and matrix with zero findings, completing M10.
+- [M11 resolved-schema promotion-readiness review](./reviews/016-m11-resolution-promotion-readiness.md)
+  — Recommends separating a same-document static `$defs`/`$ref` resolution
+  slice from D-007; formal acceptance remains pending and no implementation is
+  active.
 
 ## Architecture Decision Records
 

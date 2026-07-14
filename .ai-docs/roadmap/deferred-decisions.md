@@ -108,6 +108,12 @@ Cada decisión debe registrar:
 - **Incluye:** `$ref`, `allOf`, `anyOf`, `oneOf`, `if/then/else`, `dependentSchemas` y vocabularios.
 - **Motivo:** Exige resolver semántica de evaluación antes de derivar UI.
 - **Retomar cuando:** Se seleccione el dialecto y exista una capa de resolución de schema.
+- **Revisión de preparación M11:**
+  [`review 016`](../reviews/016-m11-resolution-promotion-readiness.md)
+  confirma que Draft 2020-12 está seleccionado, pero la capa de resolución aún
+  no existe. Recomienda no promover D-007 completo y separar primero un slice
+  estático local de `$defs` + `$ref` por JSON Pointer; la aceptación o rechazo
+  de esa separación sigue pendiente.
 
 ## D-008: Enum de strings y renderer select
 
@@ -183,6 +189,13 @@ Cada decisión debe registrar:
   Research.
 - **Retomar cuando:** Se implementen objetos, referencias o múltiples formatos de entrada.
 - **Documento esperado:** ADR sobre pipeline de compilación y compatibilidad del modelo intermedio.
+- **Revisión de preparación M11:**
+  [`review 016`](../reviews/016-m11-resolution-promotion-readiness.md)
+  confirma que la condición se satisface por los objetos/colecciones ya
+  implementados. Recomienda una capa Internal de resolución estática local que
+  conserve `FormDefinition` y el schema original; el AST público, versionado,
+  render plan y pipeline multi-formato seguirían en Research. La promoción
+  formal sigue pendiente.
 
 ## D-015: Fuentes de metadatos adicionales
 
@@ -434,9 +447,10 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M11 — D-014 + D-007:** revisar conjuntamente la condición de reanudación
-   y la frontera de promoción para un modelo intermedio resuelto antes de
-   diseñar `$ref` o applicators.
+1. **M11 — decisión de promoción:** aceptar, corregir o rechazar la recomendación
+   de [`review 016`](../reviews/016-m11-resolution-promotion-readiness.md):
+   separar una capacidad nueva de resolución local estática basada en D-014 y
+   un slice de D-007, manteniendo el resto de D-007 Deferred.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
@@ -451,6 +465,7 @@ mantienen su estado hasta una promoción y aprobación explícitas.
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | La revisión de preparación M11 recomienda separar resolución local estática de D-007 completo; aceptación pendiente.                     |
 | 14-07-2026 | PLAN-010 checkpoint 7 repite revisión y matriz completas sin hallazgos; PLAN-010 y M10 quedan completados sin publicar.                  |
 | 14-07-2026 | PLAN-010 checkpoint 6 migra docs, declaraciones, paquetes, artefactos y consumidores; checkpoint 7 queda pendiente.                      |
 | 14-07-2026 | PLAN-010 checkpoint 5 completa la proyección Angular estable y accesible de colecciones/ítems; checkpoint 6 queda pendiente.             |
