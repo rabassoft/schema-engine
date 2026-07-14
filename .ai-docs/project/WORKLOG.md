@@ -6,6 +6,89 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — ADR-012 accepted and D-010 promoted to M7
+
+### Decision
+
+- Ricard accepted ADR-012 revision 1 after its three review corrections and
+  successful repetition of all eight acceptance criteria.
+- D-010 is Promoted and M7 has an accepted architectural boundary for explicit
+  native field clearing.
+- SPEC-001 advances to Accepted v0.1.15 with normative clear text, controlled
+  removal, native renderer, focus, accessibility, diagnostic, API, and M7
+  acceptance contracts.
+- Acceptance authorizes preparation of PLAN-007, not implementation,
+  publication, new core operations, or API promotion to Stable.
+
+### Verification
+
+- Formatting, all Markdown links, accepted/proposed state consistency, version
+  consistency, and `git diff --check` pass.
+- No product code, executable public contract, package, dependency, or lockfile
+  changed.
+
+### Pending
+
+- Draft, review, and approve PLAN-007 before implementing M7.
+
+## 2026-07-14 — ADR-012 revision 1 passed formal review
+
+### Completed
+
+- Reviewed ADR-012 against its eight acceptance criteria and the current
+  operation, runtime, renderer, text, focus, declaration, ADR, and SPEC
+  boundaries.
+- Required and incorporated three precisions: focus is requested before the
+  synchronous remove output; deterministic label/action IDs define the
+  accessible name; and clear-text diagnostics plus the required snapshot-member
+  migration are exact.
+- Repeated all eight areas successfully: core reuse, required/validation,
+  presence, controlled flow, focus/accessibility, localization, public API, and
+  exclusions.
+- Kept ADR-012 Proposed revision 1, D-010 Candidate, and M7 inactive pending an
+  explicit acceptance decision.
+
+### Verification
+
+- Formatting, all 33 Markdown documents and their 149 local links,
+  state-consistency searches, and `git diff --check` pass.
+- No code, accepted SPEC/ADR, public contract, package, dependency, or lockfile
+  changed.
+
+### Pending
+
+- Explicitly accept or reject ADR-012 revision 1. Acceptance would promote
+  D-010/M7 and authorize SPEC synchronization, not implementation.
+
+## 2026-07-14 — ADR-012 proposed for explicit native field clearing
+
+### Completed
+
+- Reviewed D-010 against accepted SPEC-001, ADR-009/011, PLAN-004/005/006, the
+  existing `remove-value` operation, runtime action, Angular renderer contract,
+  text projection, and all four native renderers.
+- Drafted ADR-012 as Proposed with a narrow M7 boundary: reuse `removeValue`,
+  preserve controlled confirmation/rejection, distinguish falsy values from
+  missing, permit required-field removal, and add an accessible localizable
+  native action.
+- Kept the core operation/runtime unchanged and limited the proposed public
+  contract change to `FieldTextMember: 'clear'` and
+  `AngularFieldTextSnapshot.clearLabel`, both Experimental under ADR-009.
+- Recorded focus integrity, TextResolver fallback, package/declaration checks,
+  and type-specific behavior as mandatory PLAN-007 evidence.
+
+### Verification
+
+- Documentation formatting, local links, status consistency, and
+  `git diff --check` pass.
+- No code, SPEC, accepted ADR, package, public API, dependency, or lockfile was
+  changed.
+
+### Pending
+
+- Review ADR-012's eight acceptance criteria. D-010 remains Candidate and M7
+  remains inactive until explicit acceptance.
+
 ## 2026-07-14 — G0 passed and SPEC-001 v0.1.14 accepted
 
 ### Completed

@@ -114,10 +114,17 @@ Cada decisión debe registrar:
 
 ## D-010: Acción explícita para limpiar un campo
 
-- **Estado:** Candidate
+- **Estado:** Promoted
+- **Resolución:** [`ADR-012`](../adrs/012-limpieza-explicita-campos.md) revision
+  1, Accepted.
 - **Pregunta:** ¿Debe todo renderer poder solicitar `remove-value` mediante una acción visual de limpieza?
 - **Motivo:** No es imprescindible para el walking skeleton, salvo el vaciado numérico.
-- **Retomar cuando:** Se diseñe la API común de affordances del renderer.
+- **Condición satisfecha:** ADR-012 define la affordance nativa y su frontera de
+  API, foco, localización y accesibilidad.
+- **Decisión:** M7 reutiliza `remove-value` y el output Angular existente para
+  una acción nativa explícita, controlada, accesible y localizable. No añade una
+  operación de core, no obliga a custom renderers y mantiene reset, defaults,
+  permisos y nuevas políticas de touched fuera de alcance.
 
 ## D-011: UI Schema avanzado
 
@@ -386,18 +393,20 @@ Cada decisión debe registrar:
 
 Las entradas más cercanas a convertirse en ADR son:
 
-1. **D-010 — Acción explícita para limpiar un campo.**
-2. **D-005 — Objetos anidados.**
+1. **D-005 — Objetos anidados.**
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
-secuencia M7-M12 todavía propuesta. G0 no promueve decisiones diferidas: D-010
-y D-005 continúan como Candidate y todas las demás conservan el estado
-registrado aquí hasta una promoción y aprobación explícitas.
+secuencia posterior. ADR-012 promueve únicamente D-010/M7; D-005 continúa como
+Candidate y todas las demás entradas conservan el estado registrado aquí hasta
+una promoción y aprobación explícitas.
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | Se acepta ADR-012 revision 1, D-010 queda Promoted y M7 avanza a sincronización de SPEC y preparación de PLAN-007.              |
+| 14-07-2026 | ADR-012 revision 1 supera sus ocho criterios tras precisar foco, accesibilidad y migración; D-010 sigue Candidate.              |
+| 14-07-2026 | Se propone ADR-012 para revisar la limpieza explícita nativa; D-010 permanece Candidate y M7 no está activo.                    |
 | 14-07-2026 | G0 se completa y SPEC-001 v0.1.14 queda Accepted sin promover ninguna decisión diferida ni API a Stable.                        |
 | 14-07-2026 | G0 difiere como D-038 y D-039 los helpers no implementados de baseline parcial y aplicación explícita de defaults.              |
 | 14-07-2026 | PLAN-006 y M6 se completan con enum string normalizado y select Angular controlado, manteniendo las exclusiones diferidas.      |

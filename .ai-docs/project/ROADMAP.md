@@ -48,19 +48,20 @@ G0 solo podrá cerrarse y marcar SPEC-001 como Accepted si toda la evidencia
 pasa. Cualquier hallazgo mantendrá la SPEC en Draft y se trasladará a trabajo
 separado antes de repetir la revisión.
 
-## Secuencia post-G0 propuesta
+## Secuencia post-G0
 
-> M7-M12 continúan como propuesta de planificación, no como compromiso de
-> entrega aprobado. Ninguna decisión diferida se promueve hasta revisar y
-> aprobar explícitamente su ADR, SPEC y/o plan de implementación.
+> M7 tiene decisión y contrato aceptados, pero carece aún de PLAN-007 aprobado e
+> implementación. M8-M12 continúan como propuestas de planificación. Ninguna
+> otra decisión diferida se promueve sin revisar y aprobar explícitamente su
+> ADR, SPEC y/o plan de implementación.
 
 ### M7 — Limpieza explícita de campos
 
 - Candidato de origen: D-010.
-- Decidir una affordance de limpieza común, accesible y localizable, incluida la
-  distinción entre missing, `""` y `false`.
-- Revisar y aceptar la decisión arquitectónica y de contrato público antes de
-  preparar PLAN-007 y la implementación.
+- Estado: ADR-012 revision 1 Accepted; contrato sincronizado en SPEC-001
+  v0.1.15, PLAN-007 pendiente e implementación no iniciada.
+- Preparar, revisar y aprobar PLAN-007 para la affordance común, accesible y
+  localizable que distingue missing, `""`, `0` y `false` antes de implementar.
 
 ### M8 — Preparación de la versión experimental 0.1
 

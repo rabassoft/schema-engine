@@ -7,44 +7,45 @@
 
 - **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** current `HEAD`, G0 acceptance checkpoint (`develop`
-  is four commits ahead of `origin/develop`; no push has been performed for
-  this checkpoint)
-- **Specification:** SPEC-001 v0.1.14, Accepted
+- **Committed revision:** current `HEAD`, ADR-012 acceptance and SPEC-001
+  v0.1.15 checkpoint (`develop` is five commits ahead of `origin/develop`; no
+  push has been performed for this checkpoint)
+- **Specification:** SPEC-001 v0.1.15, Accepted
 - **Last implementation plan:** PLAN-006 revision 1, Completed
+- **Last accepted decision:** ADR-012 revision 1
 - **Review gate:** G0 completed
-- **Phase:** M1–M6 completed; no active implementation milestone
-- **Working tree:** clean after committing the G0 review, correction, and
-  acceptance documentation; no product code changed
+- **Phase:** M1–M6 and G0 completed; M7 decision accepted, planning pending
+- **Working tree:** clean after committing the ADR-012 acceptance and SPEC
+  synchronization; no product code changed
 
 ## Current objective
 
-Choose the next post-G0 milestone without implicitly promoting roadmap
-candidates. No implementation milestone or delivery plan is active.
+Prepare PLAN-007 for the accepted M7 explicit native field-clearing contract.
+No implementation task or approved M7 delivery plan is active.
 
 ## In progress
 
-- None. G0 and SPEC-001 acceptance are complete; no implementation task is
-  active.
+- None. ADR-012 and SPEC-001 synchronization are complete; PLAN-007 has not yet
+  been drafted and no implementation task is active.
 
 ## Latest completed work
 
+- Accepted ADR-012 revision 1, promoted D-010/M7, and synchronized the normative
+  contract into SPEC-001 v0.1.15 without authorizing implementation.
+- Reviewed ADR-012, incorporated three required precisions, and passed all eight
+  acceptance criteria on repetition.
 - Repeated the end-to-end review without findings, completed G0, and accepted
   SPEC-001 v0.1.14.
 - Repeated format, lint, typecheck, 176 tests, builds, package smoke, and the
   built-package consumer successfully for acceptance.
 - Resolved G0-F001 through G0-F003 in documentation via D-038, D-039, and the
   accepted `SubscribeResult` contract without changing product code.
-- Completed the original G0 review and full verification with 22/22 criteria
-  mapped and no evidence gap.
-- Added and passed the minimal built-package Angular consumer with all four
-  primitive field kinds and a controlled update.
 
 ## Exact next action
 
-Decide whether to promote D-010 as M7 (explicit field clearing). If approved,
-review its architectural and public-contract boundary before drafting the ADR
-or PLAN-007; otherwise select another proposed post-G0 milestone explicitly.
+Draft PLAN-007 with exact steps, tests, declaration review, focus ordering,
+controlled rejection, localization diagnostics, and package checks required by
+ADR-012; do not implement until the plan is reviewed and approved.
 
 ## Blockers and conflicts
 
@@ -52,14 +53,16 @@ or PLAN-007; otherwise select another proposed post-G0 milestone explicitly.
 - G0-F001 through G0-F003 are resolved and the repeated review found no further
   issue.
 - SPEC-001 is Accepted, but every public API remains Experimental unless a
-  separate ADR promotes it.
-- `develop` is four commits ahead of `origin/develop`; the G0 acceptance
+  separate ADR promotes it to Stable.
+- ADR-012 and the M7 contract are accepted; PLAN-007 and implementation remain
+  pending.
+- `develop` is five commits ahead of `origin/develop`; the ADR-012/SPEC-001
   checkpoint is committed and no push was performed.
 
 ## Open questions outside the active scope
 
-- D-010/M7 and D-005/M9 remain Candidate; their roadmap placement does not
-  promote them.
+- D-010 is Promoted by ADR-012; D-005/M9 remains Candidate and its roadmap
+  placement does not promote it.
 - D-038 and D-039 remain Deferred; correcting SPEC-001 does not promote their
   implementation.
 - Publication under M8 remains a separate future decision, including license,
@@ -94,6 +97,11 @@ or PLAN-007; otherwise select another proposed post-G0 milestone explicitly.
 - The repeated review passes format, lint, typecheck, 14 files/176 tests, both
   builds, package smoke, consumer, declaration, boundary, 143-link, and diff
   checks with no finding.
+- ADR-012 revision 1 and its repeated review pass formatting, all 33 Markdown
+  documents and 149 local links, state-consistency searches, and diff integrity.
+- ADR-012 acceptance and SPEC-001 v0.1.15 synchronization pass formatting, all
+  33 Markdown documents and 150 local links, accepted/promoted/version
+  consistency searches, and diff integrity.
 
 ## Task document map
 
@@ -102,7 +110,7 @@ or PLAN-007; otherwise select another proposed post-G0 milestone explicitly.
 - G0 acceptance evidence: `.ai-docs/reviews/001-spec-001-acceptance.md`
 - Minimal built-package consumer: `packages/angular/test/consumer.test.ts`
 - Completed delivery contract: `.ai-docs/plans/006-string-enum-native-select.md`
-- Last accepted increment decision: `.ai-docs/adrs/011-enum-string-normalizado-select-nativo.md`
+- Last accepted increment decision: `.ai-docs/adrs/012-limpieza-explicita-campos.md`
 - Supporting ADR status and links: `.ai-docs/adrs/000-index.md`
 - Deferred boundaries: `.ai-docs/roadmap/deferred-decisions.md`
 - Append-only history: `.ai-docs/project/WORKLOG.md`

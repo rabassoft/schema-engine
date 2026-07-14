@@ -37,8 +37,9 @@
 - [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
 
-M1-M6 and G0 are completed, and SPEC-001 v0.1.14 is Accepted. M7-M12 remain a
-proposal rather than an approved delivery commitment. No deferred decision
-becomes active merely by appearing in the roadmap.
+M1-M6 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 promotes
+D-010 and defines M7's approved architectural boundary; PLAN-007 and
+implementation remain pending. M8-M12 remain proposals rather than approved
+delivery commitments.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

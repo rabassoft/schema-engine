@@ -1,7 +1,7 @@
 # SPEC-001: Controlled Form Runtime
 
 - **Estado:** Accepted
-- **Versión:** 0.1.14
+- **Versión:** 0.1.15
 - **Fecha:** 14 de julio de 2026
 - **Fecha de aceptación:** 14 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
@@ -17,6 +17,8 @@
   [`PLAN-006`](../plans/006-string-enum-native-select.md)
 - **Decisión arquitectónica del incremento:**
   [`ADR-011`](../adrs/011-enum-string-normalizado-select-nativo.md)
+- **Limpieza explícita de campos nativos:**
+  [`ADR-012`](../adrs/012-limpieza-explicita-campos.md)
 
 ## 1. Propósito
 
@@ -61,6 +63,10 @@ subconjunto de `enum` exclusivo de campos string, con choices normalizados y un
 renderer select nativo. Este contrato amplía la implementación completada
 M1-M5 mediante el milestone M6. `const`, `format`, enums no string y las demás
 exclusiones de ADR-011 permanecen fuera de alcance.
+
+ADR-012 incorpora al contrato de M7 una acción explícita de limpieza para los
+cuatro renderers Angular nativos. Reutiliza `remove-value`, mantiene el flujo
+controlado y no activa reset, defaults, permisos, null ni nuevas operaciones.
 
 ## 4. Terminología
 
@@ -801,6 +807,7 @@ export type FieldTextMember =
   | 'hint'
   | 'tooltip'
   | 'placeholder'
+  | 'clear'
   | 'choice'
   | 'issue';
 
@@ -848,15 +855,24 @@ export interface AngularFieldTextSnapshot {
   readonly hint?: string;
   readonly tooltip?: string;
   readonly placeholder?: string;
+  readonly clearLabel: string;
   readonly choiceLabels: readonly string[];
   readonly issueMessages: readonly string[];
 }
 ```
 
-`choiceLabels` existirá siempre, estará vacío sin choices, será inmutable y se
-alineará por índice con `field.choices`. El orden de proyección será label,
-description, hint, tooltip, placeholder, choices en orden de definición e
-issues en orden de snapshot.
+`clearLabel` existirá siempre, será no blank e inmutable. `choiceLabels`
+existirá siempre, estará vacío sin choices, será inmutable y se alineará por
+índice con `field.choices`. El orden de proyección será label, description,
+hint, tooltip, placeholder, clear, choices en orden de definición e issues en
+orden de snapshot.
+
+La acción clear resolverá la fuente neutral `Clear` con `member: 'clear'` y el
+contexto del field. Una excepción, resultado no string o blank conservará
+`Clear` y emitirá exactamente un `TEXT_RESOLUTION_FAILED` por proyección, con
+`member: 'clear'`, reason `exception`, `non-string-result` o
+`blank-string-result`, `dataPath` como copia inmutable de `field.path` y sin
+`documentPath`.
 
 Cada choice se resolverá con su objeto original en la rama `member: 'choice'`.
 Una excepción, resultado no string o string blank conservará el label fuente no
@@ -937,7 +953,7 @@ será solo un token de presentación:
 - el string de dominio `""` será una choice ordinaria y nunca colisionará con el
   centinela;
 - el centinela será disabled, mostrará el placeholder resuelto si existe y no
-  ofrecerá todavía una acción de limpieza;
+  actuará por sí mismo como limpieza;
 - una selección de usuario válida emitirá solo `setValue` con el string de
   dominio; tokens malformed, fuera de rango o el centinela se ignorarán;
 - render inicial, reconciliación externa, rechazo, locale, blur y cambio de
@@ -949,6 +965,25 @@ description, hint, tooltip, issues, foco, blur, IDs, `aria-describedby`,
 local. Los option texts procederán exclusivamente de `texts.choiceLabels`.
 Ningún renderer resolverá textos, interpretará schema crudo, validará pertenencia
 al enum, elegirá defaults ni mutará estado de aplicación.
+
+### 20.5 Limpieza explícita
+
+Los cuatro renderers nativos mostrarán un botón `type="button"` únicamente
+cuando `snapshot.presence.kind === 'value'`, incluidos `""`, `0`, `false` y
+valores incompatibles con el renderer. Required no ocultará ni deshabilitará la
+acción; el validador externo conservará la autoridad sobre sus issues.
+
+La activación solicitará foco sobre el control mediante `focusBoundControl()`
+antes de emitir exactamente un `removeValue`. El intento de foco no condicionará
+la intención. La aplicación podrá confirmar o rechazar la operación y el
+renderer no proyectará missing optimistamente ni emitirá durante render,
+reconciliación, locale, textos o lifecycle.
+
+`FieldIds` incluirá `label` y `clear`. El botón mostrará `clearLabel` y usará
+`aria-labelledby` en el orden `ids.clear ids.label`. La acción no equivale a
+`""`, `0`, `false`, `null`, un default, reset ni persistencia. Los custom
+renderers recibirán el snapshot de textos ampliado, pero no estarán obligados a
+mostrar la affordance.
 
 ## 21. Runtime y snapshots
 
@@ -1304,6 +1339,19 @@ La implementación mínima se considerará válida cuando demuestre:
 22. `<select>` controlado que distingue missing del string vacío, no corrige
     valores externos y no emite durante reconciliación o locale.
 
+### 27.1 Criterios del incremento M7
+
+M7 deberá demostrar una limpieza explícita nativa que:
+
+1. reutiliza `remove-value` sin ampliar el core;
+2. distingue missing de `""`, `0` y `false`;
+3. cubre los cuatro renderers, required y valores externos incompatibles;
+4. preserva confirmación, rechazo y reconciliación controlados;
+5. mantiene foco, touched y destrucción coherentes para pointer y teclado;
+6. resuelve un `clearLabel` no blank con fallback y diagnósticos deterministas;
+7. ofrece nombres accesibles e IDs únicos; y
+8. conserva package, declaraciones y fronteras arquitectónicas.
+
 ## 28. Escenarios de conformidad
 
 ### Escenario A: formulario sencillo
@@ -1362,16 +1410,22 @@ choices, labels resolubles, validación estructural de definiciones manuales y
 renderer select nativo. PLAN-006 quedó completado el 14 de julio de 2026 sin
 modificar el alcance completado de M1-M5 ni activar capacidades adicionales.
 
+ADR-012 revision 1 fue aceptada el 14 de julio de 2026 y promueve D-010/M7.
+Esta versión incorpora su contrato normativo de limpieza nativa, localización,
+accesibilidad, foco y API Experimental. PLAN-007 y la implementación continúan
+pendientes.
+
 M1-M6 implementan el walking skeleton descrito por esta SPEC. SPEC-001 v0.1.14
-fue aceptada tras superar G0 y repetir la revisión después de resolver sus tres
-hallazgos normativos. La aceptación no promociona automáticamente APIs públicas
-a Stable. D-010, el bridge de validación de D-024, D-036, D-037 y las demás
-decisiones aplazadas conservan su estado.
+fue aceptada tras superar G0; v0.1.15 incorpora la decisión M7 aceptada, cuya
+implementación permanece pendiente de PLAN-007. La aceptación no promociona
+automáticamente APIs públicas a Stable. El bridge de validación de D-024,
+D-036, D-037 y las demás decisiones aplazadas conservan su estado.
 
 ## 30. Historial
 
 | Versión | Fecha      | Cambio                                                                                                                 |
 | ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.1.15  | 14-07-2026 | Se incorpora ADR-012 Accepted: limpieza explícita nativa, textos, foco, accesibilidad y frontera pública Experimental. |
 | 0.1.14  | 14-07-2026 | G0 difiere los helpers no implementados, alinea `SubscribeResult` y acepta la SPEC tras repetir la revisión.           |
 | 0.1.13  | 13-07-2026 | Se incorpora PLAN-006 aprobado: contratos exactos de enum string, choices, textos y select nativo, aún sin iniciar M6. |
 | 0.1.12  | 13-07-2026 | Se registra ADR-011 como próximo incremento aceptado de enum string, aún pendiente de plan e implementación.           |
