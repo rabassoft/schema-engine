@@ -11,19 +11,22 @@
 
 ## Specifications
 
-- [SPEC-001: Controlled Form Runtime](./specs/001-controlled-form-runtime.md)
-- [SPEC-002: Nested Object Controlled Runtime Extension](./specs/002-nested-object-runtime.md)
-  — Accepted v0.1.2; implemented by completed PLAN-009.
-- [SPEC-003: Homogeneous Object Collection Controlled Runtime Extension](./specs/003-collection-runtime.md)
-  — Accepted v0.1.2 after F-001 through F-007 were closed and complete review
+- [SPEC-001 v0.1.15: Controlled Form Runtime](./specs/001-controlled-form-runtime.md)
+- [SPEC-002 v0.1.2: Nested Object Controlled Runtime Extension](./specs/002-nested-object-runtime.md)
+  — Accepted; implemented by completed PLAN-009.
+- [SPEC-003 v0.1.2: Homogeneous Object Collection Controlled Runtime Extension](./specs/003-collection-runtime.md)
+  — Accepted after F-001 through F-007 were closed and complete review
   cycle 3 passed with zero findings. Completed PLAN-010 implements it after a
   final repeated review with zero findings.
+- [SPEC-004 v0.1.0: Same-document Static JSON Schema Reference Resolution](./specs/004-local-reference-resolution.md)
+  — Draft; closes the proposed observable D-041 contract and awaits complete
+  review before acceptance or any implementation plan.
 
 ## Acceptance reviews
 
 - [G0: SPEC-001 acceptance evidence](./reviews/001-spec-001-acceptance.md) —
   Passed; 22/22 criteria, consumer, complete verification, and repeated
-  end-to-end review passed. SPEC-001 v0.1.14 is Accepted.
+  end-to-end review passed. SPEC-001 v0.1.15 is Accepted.
 - [M9: Nested-object promotion review](./reviews/002-m9-nested-object-promotion.md)
   — Accepted; D-005 is Promoted for normative design under the reviewed narrow
   boundary, with implementation still inactive.
@@ -67,7 +70,8 @@
 - [ADR index](./adrs/000-index.md)
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
   — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
-  normative contract and authorizes drafting SPEC-004, not implementation.
+  normative contract; SPEC-004 v0.1.0 is Draft pending review and no
+  implementation is authorized.
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
   and Ricard accepted the revision.
@@ -92,7 +96,7 @@
   zero findings and was formally accepted.
 - [ADR-016: Same-document static JSON Schema reference resolution](./adrs/016-resolucion-referencias-locales.md)
   — Accepted after complete review cycle 2 passed all eight areas with zero
-  findings; authorizes drafting ADR-005 revision 3 only.
+  findings; it enabled the reviewed ADR-005 revision 3 normative update.
 
 ## Roadmap and deferred decisions
 
@@ -119,6 +123,8 @@ increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
 contracts. PLAN-009 revision 1 passed its repeated complete review and is
 approved and completed after its final zero-finding review. M10 has accepted
 normative contracts and completed PLAN-010 revision 0 after its final repeated
-zero-finding review. M11-M12 remain proposed only.
+zero-finding review. M11 reference-resolution architecture is accepted and
+SPEC-004 v0.1.0 is Draft pending complete review; no M11 implementation plan is
+active. M12 remains a planning proposal only.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

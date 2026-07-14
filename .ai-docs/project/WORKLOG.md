@@ -6,6 +6,65 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — SPEC-004 v0.1.0 drafted
+
+### Completed
+
+- Drafted the observable same-document static `$defs`/`$ref` extension required
+  by accepted ADR-016 and ADR-005 revision 3.
+- Closed registry/reference catalogs, fragment and JSON Pointer parsing,
+  mechanical target traversal, normalization, provenance, cycle domains,
+  ordering and branch stopping.
+- Defined exact diagnostic families and nineteen conformance groups without
+  adding a Public symbol or changing an existing signature.
+- Corrected the ADR index's stale completed follow-up gate and reconciled the
+  documentation index, onboarding README, roadmap, deferred register and live
+  status.
+- Kept SPEC-004 Draft and every plan, implementation, package, publication and
+  Stable gate inactive.
+
+### Verification
+
+- Documentation consistency, formatting, lint, local-link and diff checks
+  passed.
+- Drafting consistency against all accepted SPECs, ADR-016, ADR-005 revision 3
+  and D-041 passed; formal complete review remains pending.
+- No production code, dependency, manifest, package or Public signature changed.
+
+### Next
+
+- Perform and record the complete SPEC-004 review; repeat it after every
+  correction until a full cycle passes with zero findings before deciding
+  acceptance.
+
+## 2026-07-14 — Stable AI guidance realigned
+
+### Completed
+
+- Removed current milestone, version and schema-shape duplication from the
+  stable `AGENTS.md` and `HANDOFF.md` operating guidance.
+- Made `STATUS.md` and Accepted SPECs the explicit sources for recovering active
+  scope, and clarified full-document and read-only review behavior.
+- Reconciled root/documentation indexes and ROADMAP with completed M10 and the
+  accepted narrow D-041 M11 architecture.
+- Compacted the live task-document map and removed ephemeral ahead/push claims
+  from canonical project state.
+- Added `pnpm docs:check` to validate stable-guide purity, accepted SPEC versions
+  and local Markdown targets.
+
+### Verification
+
+- Documentation consistency, formatting, lint and diff checks passed.
+- A repeated complete review of the stable guides, onboarding indexes, current
+  status and M11 roadmap scope passed with zero findings.
+- No architecture, public contract, production code, dependency, package,
+  publication or Stable state changed.
+
+### Next
+
+- Draft and completely review SPEC-004 before preparing any M11 implementation
+  plan.
+
 ## 2026-07-14 — ADR-005 revision 3 accepted
 
 ### Decision

@@ -59,8 +59,10 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7-M10 están completados bajo sus ADR, SPEC y planes aceptados. M11-M12
-> continúan como propuestas de planificación. La publicación real permanece
+> M7-M10 están completados bajo sus ADR, SPEC y planes aceptados. M11 tiene
+> aceptada la arquitectura estrecha de D-041 y dispone de SPEC-004 v0.1.0 Draft
+> pendiente de revisión completa, sin plan ni implementación activos. M12
+> continúa como propuesta de planificación. La publicación real permanece
 > Deferred en D-040 y requiere una solicitud y aprobación explícitas.
 
 ### M9 — Objetos anidados — completado
@@ -112,8 +114,11 @@ separado antes de repetir la revisión.
 
 ### Orden de dependencias a más largo plazo
 
-1. **M11 — Resolución y composición de schemas (D-014 + D-007):** establecer el
-   modelo intermedio resuelto antes de `$ref` y applicators.
+1. **M11 — Resolución estática local de schemas (D-041):** especificar el
+   comportamiento observable de `$defs` y `$ref` local conforme a ADR-016 y
+   ADR-005 revisión 3. SPEC-004 v0.1.0 está Draft y debe superar revisión
+   completa y aceptación antes de preparar un plan. D-007 completo, applicators
+   y composición permanecen diferidos.
 2. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de
    contenedores y un contrato neutral de layout.
 

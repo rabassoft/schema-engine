@@ -13,9 +13,10 @@ revision, version, or verification results. Read
    questions, and latest verification.
 3. Inspect `git status --short --branch` and the scoped diff before changing a
    dirty working tree.
-4. Read only the sections of the active SPEC and approved PLAN named by
-   `STATUS.md`; read them completely when changing architecture or public
-   contracts.
+4. Read the task-relevant sections of the active SPEC and approved PLAN named by
+   `STATUS.md`. Read the entire applicable SPEC or PLAN before approving it,
+   changing architecture or public contracts, or declaring its delivery
+   complete.
 5. Open `.ai-docs/adrs/000-index.md`, then read only the ADRs applicable to the
    task.
 6. Search `.ai-docs/roadmap/deferred-decisions.md` for the identifiers or
@@ -41,33 +42,29 @@ If two authoritative documents conflict, stop and report the conflict. Do not
 resolve it silently or use this handoff as an authority over a SPEC or accepted
 ADR.
 
-## Stable architectural boundary
+## Stable architectural invariants
 
 Schema Engine is framework-neutral. Angular is the first reference adapter but
 does not own domain definitions, validation, operations, controlled state, or
 runtime behavior.
 
-The active prototype remains limited to:
+The application owns controlled values and baselines. Core exposes immutable
+framework-neutral definitions, snapshots, subscriptions, validation contracts,
+and strict incremental operations. Persistence and external side effects remain
+outside runtime.
 
-- root object schemas with recursive inline object properties;
-- primitive `string`, `number`, `integer`, and `boolean` leaves;
-- the explicit JSON Schema and UI Schema subsets in SPEC-001 and SPEC-002;
-- synchronous validation through an external adapter;
-- application ownership of `value` and `baselineValue`;
-- immutable snapshots, subscriptions, and strict incremental operations;
-- Angular with native HTML controls as the first adapter.
-
-Do not introduce arrays, references, composition, async validation, optimistic
-state, persistence, advanced layouts, custom object-container renderers, visual
-builders, plugin systems, undo/redo, or another deferred capability without an
-approved SPEC, ADR, or plan.
+This stable handoff deliberately does not enumerate current schema shapes,
+accepted document versions, milestones, or promoted capabilities. Recover those
+from `STATUS.md`, Accepted SPECs, and the deferred-decisions register. Treat
+everything outside that recovered boundary as inactive until its required gates
+are complete.
 
 ## Task boundary and closure
 
 Start with the smallest deliverable named in `STATUS.md`. Mark its `In progress`
 section before substantial edits. Preserve unrelated working-tree changes.
 
-At task completion:
+At completion of a task that changes persistent project state:
 
 1. run verification proportional to the change;
 2. restore `STATUS.md` to a compact no-active-task checkpoint containing the
@@ -77,6 +74,10 @@ At task completion:
 5. update a SPEC, ADR, plan, or deferred entry only when its own contract or
    state changed;
 6. do not commit or push unless explicitly requested.
+
+Read-only orientation, questions, diagnoses, and reviews do not require a
+persistent-state edit unless the user accepts a decision or explicitly requests
+that their outcome be recorded.
 
 ## Recommended fresh-task prompt
 

@@ -29,11 +29,11 @@ Do not read the whole append-only `WORKLOG.md` by default. Read its newest entry
 when more detail about the current dirty checkpoint is needed; search historical
 entries by identifier, milestone, or date when investigating the past.
 
-`STATUS.md` is the canonical current state. SPEC-001 is the primary behavioral
-baseline; an Accepted extension SPEC is authoritative only for the promoted
-scope it explicitly replaces. Pre-SPEC ADRs are subject to review when they
-conflict with an Accepted SPEC. When authoritative documents conflict, stop and
-report the conflict rather than silently choosing one.
+`STATUS.md` is the canonical current state. The Accepted baseline SPEC is the
+primary behavioral baseline; an Accepted extension SPEC is authoritative only
+for the promoted scope it explicitly replaces. Older ADRs are subject to review
+when they conflict with an Accepted SPEC. When authoritative documents
+conflict, stop and report the conflict rather than silently choosing one.
 
 ## Architectural constraints
 
@@ -50,16 +50,18 @@ report the conflict rather than silently choosing one.
   through a SPEC, ADR, or approved plan.
 - Do not silently change public contracts or accepted decisions.
 
-## Current prototype boundary
+## Active-scope recovery
 
-Only root object schemas whose properties may recursively contain inline object
-groups and primitive `string`, `number`, `integer`, and `boolean` leaves; the
-SPEC-001/SPEC-002 JSON/UI Schema subset; synchronous external validation;
-controlled state; and Angular native HTML controls are in scope.
+Do not encode the current milestone, accepted versions, implemented schema
+shapes, or next capability in this stable guide. Recover the active boundary
+from `STATUS.md`, then confirm it against the Accepted baseline and extension
+SPECs and the deferred-decisions register.
 
-Do not add arrays, references, composition, async validation, optimistic state,
-advanced layouts, custom object-container renderers, visual builders, plugins,
-undo/redo, or commercial features to the initial increment.
+Treat every capability not present in that recovered boundary as inactive. Do
+not implement or document it as active until its required SPEC, ADR, review, or
+approved plan gate has been completed. If the active scope changes, update the
+current-state documents and indexes; change this guide only when an operating
+rule or stable architectural invariant changes.
 
 ## Delivery workflow
 
@@ -83,7 +85,7 @@ produces zero findings and no unresolved change request. Only that zero-finding
 pass may support approval or completion, and its outcome must be recorded in
 persistent project state.
 
-At task completion:
+At completion of a task that changes persistent project state:
 
 1. run applicable formatting, linting, type checks, tests, builds, package
    checks, link checks, and diff checks;
@@ -96,6 +98,16 @@ At task completion:
    state changes;
 6. do not mark work complete when verification fails;
 7. do not commit or push unless explicitly requested.
+
+A read-only question, diagnosis, or review does not by itself authorize a
+`STATUS.md` or `WORKLOG.md` edit. Record it only when the user accepts a decision,
+requests documentation changes, or the work otherwise changes persistent
+project state.
+
+When a milestone, accepted version, plan state, or promoted capability changes,
+run `pnpm docs:check` and reconcile `STATUS.md`, `ROADMAP.md`, the documentation
+indexes, and onboarding README files before completion. Do not copy that
+volatile state into `AGENTS.md` or `HANDOFF.md`.
 
 ## Document responsibilities
 

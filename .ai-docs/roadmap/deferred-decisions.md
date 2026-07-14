@@ -477,14 +477,15 @@ Cada decisión debe registrar:
   hallazgos; el ciclo 2 pasó las diez áreas sin hallazgos.
 - **Aceptación normativa:** Ricard aceptó ADR-005 revision 3 formalmente el 14
   de julio de 2026.
-- **Siguiente gate:** redactar y revisar SPEC-004 antes de cualquier plan o
-  implementación.
+- **Siguiente gate:** revisar completamente y aceptar
+  [`SPEC-004 v0.1.0 Draft`](../specs/004-local-reference-resolution.md) antes de
+  cualquier plan o implementación.
 
 ## 4. Próximo trabajo de decisión
 
-1. **M11 — SPEC-004:** redactar el contrato observable de resolución estática
-   local conforme a ADR-016 y ADR-005 revision 3; revisar y aceptar la SPEC
-   antes de preparar cualquier plan.
+1. **M11 — SPEC-004:** revisar completamente el contrato observable v0.1.0
+   Draft de resolución estática local conforme a ADR-016 y ADR-005 revision 3;
+   aceptar la SPEC antes de preparar cualquier plan.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
@@ -499,6 +500,7 @@ mantienen su estado hasta una promoción y aprobación explícitas.
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | SPEC-004 v0.1.0 queda Draft con el contrato observable D-041; requiere revisión completa y aceptación antes de cualquier plan.           |
 | 14-07-2026 | ADR-005 revision 3 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar SPEC-004, no plan ni implementación.        |
 | 14-07-2026 | ADR-016 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar ADR-005 revisión 3, no SPEC ni implementación.         |
 | 14-07-2026 | Ricard acepta review 016; D-041 queda Promoted para diseño local estático y se propone ADR-016 sin autorizar implementación.             |
