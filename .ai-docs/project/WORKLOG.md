@@ -6,6 +6,442 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-010 checkpoint 1 completed
+
+### Implementation
+
+- Added the accepted framework-neutral collection policy, structural UI,
+  template, definition, address, snapshot, operation, scope and text contract
+  shapes and their root type exports.
+- Added descriptor-safe address copying and tagged canonical collection keys,
+  plus iterative manual collection-definition/template validation with exact
+  reasons and frozen locators behind a separate Internal entry.
+- Migrated the declaration-only Angular object/array text diagnostic branch and
+  the exact private tarball allowlist without activating compiler, operation,
+  runtime or Angular collection-host behavior.
+- Added focused contract, hostile-address and manual-definition tests. Review
+  corrected projection-locator coverage, exact item-member defect
+  classification, the sparse-array fixture and premature acceptance of
+  collection definitions by existing M9 runtime/operation consumers.
+
+### Verification
+
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, builds and
+  `git diff --check` pass.
+- All 177 core and 59 Angular tests pass (236 total).
+- `pnpm test:package`, `pnpm test:consumer`, `pnpm test:artifacts` and
+  `pnpm test:consumer:clean` pass; clean core and Angular 22.0.6 lower/upper
+  consumers build from the private local `0.1.0` tarballs.
+- The initial clean-consumer attempt failed only because sandbox DNS could not
+  reach npm; the authorized network retry passed. No manifest, version,
+  dependency, peer/export, lockfile, publication or Stable state changed.
+
+### Next
+
+- Execute PLAN-010 checkpoint 2: collection policies, array/item/structural-UI
+  compilation, immutable templates and compiler/manual-definition conformance
+  fixtures.
+
+## 2026-07-14 — PLAN-010 revision 0 approved
+
+### Approval
+
+- Ricard formally approved PLAN-010 revision 0 after complete review cycle 1
+  passed all nine areas with zero findings and no documentation conflict.
+- Approval authorizes exactly checkpoints 1–7 and their verification/stop
+  conditions. Checkpoint 1 has not started.
+- Primitive/nested arrays, tuples, refs/composition, generated/editable
+  identity, factories/defaults, batches/optimism, layout, custom collection
+  renderers, persistence, Stable promotion and publication remain unauthorized.
+
+### State synchronization and verification
+
+- Updated SPEC-003, PLAN/review metadata, README, ROADMAP, D-006 and STATUS to
+  distinguish approved-but-not-started implementation from completed work.
+- `pnpm format:check`, `git diff --check` and documentation links pass; no code,
+  package, manifest, dependency, peer, lockfile or publication state changed.
+
+### Next
+
+- Start PLAN-010 checkpoint 1 with Public neutral contracts/exports and shared
+  Internal collection address/definition-validation helpers, then verify it
+  before checkpoint 2.
+
+## 2026-07-14 — SPEC-003 accepted; PLAN-010 proposed and reviewed
+
+### Acceptance
+
+- Ricard formally accepted SPEC-003 v0.1.2 after complete review cycle 3 passed
+  all six areas with zero findings and no documentation conflict.
+- Acceptance authorizes preparation/review of PLAN-010 only; implementation,
+  Stable promotion and publication remain separate gates.
+
+### PLAN-010
+
+- Drafted PLAN-010 revision 0 with seven ordered checkpoints covering Public
+  contracts, compiler, operations, runtime, Angular, packages and final closure.
+- Mapped all 12 SPEC-003 conformance scenarios to concrete fixture,
+  programmatic, declaration, package and clean-consumer evidence.
+- Complete review cycle 1 passed all nine areas with zero findings; the plan
+  remains Proposed and implementation is not authorized.
+- Corrected one stale ROADMAP sentence that still called completed PLAN-009
+  checkpoint 7 pending.
+
+### Verification and next
+
+- `pnpm format:check`, `git diff --check` and documentation links pass; all 58
+  Markdown files have 262 valid local link targets.
+- Decide formal approval or rejection of PLAN-010 revision 0. Do not start
+  checkpoint 1 before explicit approval.
+
+## 2026-07-14 — ADR-015 revision 4 accepted; SPEC-003 cycle 3 passed
+
+### Acceptance and correction
+
+- Ricard formally accepted ADR-015 revision 4 after its complete review passed
+  all six areas with zero findings.
+- Corrected F-007 in SPEC-003 Draft v0.1.2 by widening only
+  `ObjectTextResolutionContext.node` to
+  `ObjectFieldDefinition | ArrayNodeDefinition` and closing the exact ordinary
+  array-node text/issue behavior.
+- Preserved all collection-specific contexts, existing text semantics,
+  framework ownership and deferred boundaries.
+
+### Repeated review
+
+- Repeated the complete SPEC-003 review against SPEC-001/SPEC-002, ADR-005
+  revision 2, ADR-015 revision 4 and D-006/M10.
+- Cycle 3 passed all six areas with zero findings and no documentation
+  conflict; F-001 through F-007 are closed.
+- `pnpm format:check` and `git diff --check` pass. SPEC-003 remains Draft;
+  PLAN-010 and implementation remain unauthorized.
+
+### Next
+
+- Decide formal acceptance or rejection of SPEC-003 Draft v0.1.2. Review
+  completion does not accept the SPEC.
+
+## 2026-07-14 — ADR-015 revision 4 proposed and review passed
+
+### Proposal
+
+- Widened only `ObjectTextResolutionContext.node` from
+  `ObjectFieldDefinition` to
+  `ObjectFieldDefinition | ArrayNodeDefinition` so collection ordinary texts
+  and own issues can use the Public `TextResolver` truthfully.
+- Named the transitive `TextResolutionContext`/`TextResolver.resolve()` Public
+  delta without adding a symbol or changing any text member, source, fallback,
+  diagnostic or projection order.
+- Kept fixed collection-node projection Internal and preserved revisions 1–3,
+  all deferred boundaries and every later authorization gate.
+
+### Review and verification
+
+- Completed all six revision 4 review areas in cycle 1 with zero findings and
+  no documentation conflict.
+- `pnpm format:check`, `git diff --check` and the documentation link check pass;
+  all 56 Markdown files have 249 valid local link targets.
+- SPEC-003 remains unchanged at Draft v0.1.1; PLAN-010 and implementation
+  remain unauthorized.
+
+### Next
+
+- Decide formal acceptance or rejection of ADR-015 revision 4. A passing review
+  does not accept the proposal.
+
+## 2026-07-14 — ADR-015 revision 3 accepted; SPEC-003 cycle 2 found F-007
+
+### Acceptance and corrections
+
+- Ricard formally accepted ADR-015 revision 3 after its zero-finding complete
+  review.
+- Corrected all six SPEC-003 cycle-1 findings in Draft v0.1.1: exact policy
+  identity names, item issue resolution, item leaf/text declarations, stable
+  focus/blur, closed collection diagnostics and manual/external runtime safety.
+- Preserved every operation discriminant, controlled-state rule, Angular
+  ownership boundary and deferred exclusion.
+
+### Repeated review
+
+- Cycle 2 confirmed all six corrections across the complete review matrix.
+- Found F-007: collection-node label/description/hint/tooltip and own issues
+  cannot be represented by accepted object or collection text contexts.
+- Recommended narrow ADR-015 revision 4 widening only
+  `ObjectTextResolutionContext.node` to object or array definitions and naming
+  the exact transitive Public delta.
+
+### Next
+
+- Decide whether to prepare ADR-015 revision 4. SPEC-003 remains Draft;
+  PLAN-010 and implementation remain unauthorized.
+
+## 2026-07-14 — ADR-015 revision 3 proposed and review passed
+
+### Proposal
+
+- Added only the missing item-root `issue` branch to
+  `CollectionTextMember`/`CollectionTextResolutionContext`.
+- Reused the accepted `issue.fallbackMessage ?? issue.code` source, blank issue
+  result semantics and resolver isolation from field/object issue projection.
+- Named every transitive Public Experimental change and kept the fixed Angular
+  item text projector Internal.
+
+### Review
+
+- Completed all six revision 3 review areas in cycle 1 with zero findings and
+  no documentation conflict.
+- Confirmed no identity, operation, snapshot, validation assignment, scope,
+  Angular ownership, package, stability or deferred boundary changed.
+- Revision 3 remains Proposed; review does not constitute formal acceptance.
+
+### Next
+
+- Decide formal acceptance or rejection of ADR-015 revision 3. SPEC-003
+  corrections and repeated review remain paused until that decision.
+
+## 2026-07-14 — SPEC-003 complete review cycle 1 found six issues
+
+### Review
+
+- Reviewed the complete Draft against SPEC-001/SPEC-002, ADR-015 revision 2,
+  ADR-005 revision 2, the D-006/M10 boundary, declaration-ready contracts and
+  authorization gates.
+- Recorded six findings: policy identity names were narrowed beyond the ADRs;
+  item-root issues lack a legal text context; item leaf/text signatures are not
+  declaration-ready; focus/blur lack stable item addressing; collection
+  operation diagnostics remain open; and manual-definition/external-tree
+  safety is underspecified.
+- Confirmed the remaining template/instance, identity, traversal, operation,
+  controlled-state, Angular ownership and deferred-boundary areas are aligned.
+
+### Conflict
+
+- ADR-015 revision 2 exposes item-root validator issues but its closed Public
+  `CollectionTextResolutionContext` has no `issue` branch. SPEC-003 cannot fix
+  this without silently changing an Accepted Public contract.
+- Recommended a narrow ADR-015 revision 3 adding only item-root issue text
+  resolution and its exact Public inventory delta.
+
+### Next
+
+- Decide whether to prepare ADR-015 revision 3. SPEC-003 corrections and the
+  repeated complete review remain paused; PLAN-010 and implementation are
+  unauthorized.
+
+## 2026-07-14 — SPEC-003 Draft v0.1.0 prepared
+
+### Result
+
+- Drafted the complete observable M10 contract for homogeneous inline-object
+  collections with application-owned stable string identity.
+- Consolidated accepted schema/UI/policy, template/instance, path/address,
+  snapshot, dirty/interaction, five-operation, validation/scope, text, Angular
+  and exact Public Experimental migration decisions.
+- Closed proposed policy, invalid-identity, unaddressable-action, operation,
+  text and fixed-host diagnostics for subsequent complete review.
+- Preserved primitive/nested arrays, tuples, refs/composition,
+  defaults/factories, optimistic/batch behavior, layout, publication and Stable
+  promotion as inactive.
+- Corrected the deferred register's stale next-work pointer from preparing
+  already accepted ADR-015 to reviewing SPEC-003.
+
+### Verification
+
+- Documentation formatting, local links and diff checks are recorded in the
+  current `STATUS.md` checkpoint.
+- No implementation, package, manifest, lockfile or accepted contract changed.
+
+### Next
+
+- Perform a complete SPEC-003 review, apply corrections and repeat the full
+  review until one cycle passes with zero findings. Acceptance, PLAN-010 and
+  implementation remain separate later gates.
+
+## 2026-07-14 — ADR-005 revision 2 accepted
+
+### Decision
+
+- Ricard accepted ADR-005 revision 2 after cycle 3 passed all nine review areas
+  with zero findings.
+- Revision 1 remains the implemented M1–M9 authority; accepted revision 2 adds
+  only the narrow M10 array/item/identity schema and structural UI design.
+- Acceptance authorizes preparing SPEC-003 as a separate task. It does not
+  authorize PLAN-010, implementation, packages, Stable promotion or
+  publication.
+
+### Next
+
+- Draft SPEC-003 for the complete observable M10 behavior and its exact
+  relationship to SPEC-001/SPEC-002, ADR-015 revision 2 and ADR-005 revision 2.
+
+## 2026-07-14 — ADR-005 revision 2 complete review passed
+
+### Review and corrections
+
+- Completed three full review cycles across all nine revision 2 acceptance
+  areas.
+- Cycle 1 corrected policy branch stopping, incompatible keyword diagnostics
+  and exact structural UI shape/cycles/paths/order.
+- Cycle 2 restored the accepted `INCOMPATIBLE_SCHEMA_KEYWORD` parameter
+  envelope without composite aliases.
+- Cycle 3 passed all nine areas with zero findings and no documentation
+  conflict.
+
+### State
+
+- ADR-005 revision 1 remains Accepted and authoritative for implemented M1–M9.
+- Revision 2 remains Proposed and is ready for formal acceptance or rejection.
+- No SPEC, plan, implementation, package, Stable or publication gate changed.
+
+### Next
+
+- Decide formal acceptance of ADR-005 revision 2. Acceptance would authorize
+  preparing SPEC-003 as the next separate task only.
+
+## 2026-07-14 — ADR-015 revision 2 accepted
+
+### Resolution
+
+- Added only `ArrayUiSchema`, `ItemUiSchema` and the transitive
+  `UiNodeSchema`/UI input migration omitted by revision 1's exact Public
+  inventory.
+- Confirmed schema-kind-directed interpretation, framework-neutral ownership
+  and exclusion of identity, actions, layout, renderer authority and every
+  other deferred capability from UI Schema.
+- The complete six-area review passed with zero findings and Ricard authorized
+  and accepted the narrow revision 2 correction.
+- The conflict blocking ADR-005 revision 2 review is resolved; no SPEC, plan,
+  implementation or publication is authorized.
+
+### Next
+
+- Resume the complete ADR-005 revision 2 review and repeat it after any
+  correction until zero findings.
+
+## 2026-07-14 — ADR-005 revision 2 drafted; UI inventory conflict found
+
+### Result
+
+- Preserved ADR-005 revision 1 as the Accepted authority for implemented
+  M1–M9 behavior and added revision 2 only as a Proposed M10 section.
+- Defined the narrow supported `type: "array"`/single inline object `items`
+  catalog, mandatory direct identity schema, descriptor-safe traversal,
+  active-ancestry cycles, template-relative diagnostic paths and deterministic
+  order.
+- Added minimal structural `ArrayUiSchema`/`ItemUiSchema` metadata without item
+  action text, identity editing, cardinality or layout semantics.
+- Kept primitive/nested arrays, tuples, all other array keywords, refs,
+  composition, defaults/factories, implementation and publication inactive.
+
+### Conflict
+
+- The cross-document check found that accepted ADR-015 revision 1 declares an
+  exact Public migration inventory but omits `ArrayUiSchema`, `ItemUiSchema` and
+  the `UiNodeSchema` change required by this draft.
+- Reviewing or accepting ADR-005 revision 2 as written would therefore create a
+  silent Public-contract change contrary to ADR-009 and ADR-015.
+- Recommended resolution: prepare a narrowly scoped ADR-015 revision 2 adding
+  only the missing UI migration inventory, repeat its complete review and seek
+  explicit acceptance before resuming ADR-005 revision 2 review.
+
+### Verification
+
+- Documentation formatting, all 50 Markdown files, 231 local links and diff
+  verification pass.
+- No SPEC, plan, package, manifest, lockfile or implementation changed.
+
+### Next
+
+- Decide whether to prepare the recommended narrow ADR-015 revision 2. ADR-005
+  revision 2 review remains paused until the Public UI inventory conflict is
+  resolved.
+
+## 2026-07-14 — ADR-015 revision 1 accepted
+
+### Decision
+
+- Ricard accepted ADR-015 revision 1 after cycle 4 passed all nine review areas
+  with zero findings.
+- The accepted decision fixes application-owned stable string identity,
+  template/instance separation, stable addresses, five item intentions,
+  snapshots/scopes and fixed Angular ownership for M10 normative design.
+- Acceptance authorizes preparation and review of ADR-005 revision 2 only; it
+  does not authorize SPEC-003, PLAN-010, implementation or publication.
+
+### Next
+
+- Prepare ADR-005 revision 2 for the narrow M10 array-schema traversal and
+  compatibility policy while preserving accepted revision 1 for implemented
+  M9 behavior.
+
+## 2026-07-14 — ADR-015 complete review passed
+
+### Review and corrections
+
+- Completed four full ADR-015 review cycles across all nine acceptance areas.
+- Cycle 1 corrected seven findings covering ADR-014 key/DOM compatibility,
+  self-contained operations, exact item-leaf variants, missing-array insertion,
+  dirty aggregation, Angular accessibility/focus/failure behavior and the
+  Public migration inventory.
+- Cycle 2 corrected three transitive findings covering static versus dynamic
+  leaf projections, item-root lookup typing, opaque inserted-item ownership and
+  runtime materialization below missing ancestors.
+- Cycle 3 corrected one sequence conflict that prematurely authorized SPEC-003
+  before acceptance of ADR-005 revision 2.
+- Repeated the complete review after each correction set; cycle 3 exposed the
+  final sequence conflict and cycle 4 then passed all nine areas with zero
+  findings and no documentation conflict.
+
+### State
+
+- ADR-015 is Proposed revision 1 and ready for formal acceptance or rejection.
+- No SPEC, accepted ADR, plan, implementation, package or publication state
+  changed.
+- Implementation remains blocked by accepted ADR-015, ADR-005 revision 2,
+  SPEC-003 and an explicitly approved PLAN-010.
+
+### Verification
+
+- Documentation formatting, all 50 Markdown files and 228 local links, and diff
+  checks pass.
+- The scoped working tree contains only ADR-015/review/current-state
+  documentation.
+
+### Next
+
+- Decide formal acceptance of ADR-015 revision 1. If accepted, prepare ADR-005
+  revision 2 next without drafting SPEC-003 or implementing arrays.
+
+## 2026-07-14 — ADR-015 revision 0 proposed
+
+### Result
+
+- Drafted ADR-015 as the first normative M10 decision under the accepted D-006
+  boundary, without changing a SPEC, plan, package or implementation.
+- Selected a direct required application-owned string property declared by a
+  neutral collection policy; identity is non-editable instance metadata rather
+  than an index, callback, UI option or runtime-generated value.
+- Separated immutable item templates, positional data paths and stable item
+  addresses; proposed identity/anchor-based leaf, insert, remove and move
+  operations with controlled confirmation and no batches or optimism.
+- Defined array/item snapshots, dirty and interaction reconciliation,
+  validation/scopes, fixed accessible Angular ownership and the required
+  Experimental API migration families.
+- Preserved primitive/nested arrays, tuples, refs/composition, defaults,
+  advanced layouts, publication and every other deferred boundary.
+
+### Verification
+
+- Documentation formatting, all 49 Markdown files and 226 local links, and diff
+  checks pass.
+- No code, manifest, lockfile, package, SPEC, accepted ADR or plan changed.
+
+### Next
+
+- Perform a complete ADR-015 review across all nine acceptance areas; apply
+  corrections and repeat the full review until it has zero findings before
+  deciding acceptance.
+
 ## 2026-07-14 — D-006/M10 promotion accepted
 
 ### Decision

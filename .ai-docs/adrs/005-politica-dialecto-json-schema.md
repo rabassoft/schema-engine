@@ -1,9 +1,9 @@
 # ADR 005: Política de dialecto y compatibilidad de JSON Schema
 
-- **Estado:** Accepted revision 1
+- **Estado:** Accepted revision 2
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
-- **Revisión aceptada:** 1 — 14 de julio de 2026
+- **Revisión aceptada:** 2 — arrays homogéneos de objetos inline
 - **Fecha de aceptación de revisión 1:** 14 de julio de 2026
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md)
 - **Revisado parcialmente por:**
@@ -11,6 +11,15 @@
 - **Revisión 1 coordinada con:**
   [`ADR-014`](./014-modelo-objetos-anidados-paths-profundos.md) y
   [`SPEC-002`](../specs/002-nested-object-runtime.md)
+- **Fecha de aceptación de revisión 2:** 14 de julio de 2026
+- **Revisión 2 coordinada con:**
+  [`ADR-015`](./015-modelo-colecciones-identidad-operaciones.md) y
+  [`revisión de promoción M10`](../reviews/007-m10-arrays-promotion.md)
+- **Autoridad vigente:** las secciones 1–10 conservan la conducta Accepted de
+  M1–M9; la sección 11 queda Accepted para diseño normativo M10 sin activar
+  comportamiento ni implementación
+- **Revisión completa:** ciclo 3 pasó las nueve áreas sin hallazgos y Ricard
+  aceptó formalmente revision 2
 
 ## 1. Contexto y problema
 
@@ -386,3 +395,281 @@ ni autorizó publicación. Los checkpoints 1–6 posteriores implementaron los
 contratos/helpers neutrales, compiler recursivo descriptor-safe, operaciones y
 runtime profundos, proyección Angular y migración de paquetes/consumidores. El
 checkpoint 7 completó después la revisión y verificación final sin hallazgos.
+
+## 11. Revisión 2 aceptada — arrays homogéneos de objetos inline
+
+> Esta sección es Accepted para diseño normativo M10. No modifica la autoridad
+> de revision 1 sobre el comportamiento M9 implementado y no activa arrays en
+> SPEC-001/SPEC-002, PLAN-010 ni implementación.
+
+### 11.1 Motivo, autoridad y frontera
+
+La aceptación de ADR-015 activa el criterio de revisión de la sección 7 para el
+subconjunto M10 promovido. Revision 2 conserva Draft 2020-12, su URI canónica
+única, la política de dialecto ausente, la clasificación de keywords
+conocidas/desconocidas, la validación externa y todas las reglas M9 que no se
+sustituyen expresamente aquí.
+
+La única ampliación propuesta es una propiedad `type: "array"` en cualquier
+objeto soportado fuera de otro item template, con un único `items` object inline
+homogéneo. Ese item puede contener los objetos inline y hojas primitive
+actuales, pero ninguna propiedad array. La identidad se declara exclusivamente
+mediante `CollectionPolicy` conforme a ADR-015; no se introduce una keyword JSON
+Schema ni una opción UI para identidad.
+
+Siguen fuera arrays primitive, nested arrays, tuples, `prefixItems`, refs,
+recursos, composición, condicionales, dialectos adicionales, defaults
+aplicados, factories y cualquier keyword de colección no listada como
+soportada.
+
+### 11.2 Ubicaciones y catálogo cerrado
+
+La raíz continúa siendo el object de SPEC-001/SPEC-002; `type: "array"` en raíz
+permanece bloqueante. Un array es válido solo como propiedad directa de un
+object raíz/nested soportado que no forme parte de un item template.
+
+Un nodo array soporta exactamente:
+
+- `type`, con valor exacto `"array"`;
+- `items`, obligatorio y con la forma cerrada de la sección 11.3;
+- `title` y `description`, con las reglas de texto actuales para nodos; y
+- `default` como metadata reconocida que no se aplica ni se copia.
+
+El object raíz de `items` soporta exactamente `type`, `properties` y `required`.
+No representa un nodo de datos con texto propio: `title`, `description`,
+`default` y metadatos de presentación son incompatibles allí. Sus propiedades,
+salvo la identidad, vuelven a usar el catálogo object/primitive de revision 1.
+Objetos nested dentro del item conservan `title`, `description` y `default`
+porque sí son nodos normalizados ordinarios.
+
+La propiedad de identidad declarada por `CollectionPolicy` debe resolver una
+propiedad directa propia de `items.properties`, aparecer exactamente una vez en
+el `items.required` propio y declarar exclusivamente `type: "string"`, salvo las
+anotaciones conocidas ignorables que conservan su warning. No admite `title`,
+`description`, `default`, constraints, `enum` ni metadata UI porque ADR-015 la
+normaliza como metadata de instancia no editable.
+
+| Ubicación                           | Soportadas                                         | Incompatibles/no soportadas                                            |
+| ----------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------- |
+| array property fuera de item        | `type`, `items`, `title`, `description`, `default` | `properties`, `required`, constraints primitive y demás keywords array |
+| raíz object de `items`              | `type`, `properties`, `required`                   | textos/default, constraints, `items` y keywords de array               |
+| identidad directa                   | `type: "string"`                                   | textos/default, constraints, `enum`, `properties`, `required`, `items` |
+| descendant object/primitive de item | catálogo Accepted M9, salvo arrays                 | cualquier `type: "array"` y exclusiones existentes                     |
+
+`minItems`, `maxItems`, `uniqueItems`, `contains`, `minContains`, `maxContains`,
+`prefixItems` y `unevaluatedItems` son keywords Draft 2020-12 conocidas pero no
+soportadas y producen `UNSUPPORTED_SCHEMA_KEYWORD`. `items` en raíz, object o
+hoja no array es `INCOMPATIBLE_SCHEMA_KEYWORD`; una keyword de object/primitive
+en un array también es incompatible. Ninguna rama incompatible se recorre como
+subschema.
+
+Cada keyword listada como incompatible en la tabla produce exactamente
+`INCOMPATIBLE_SCHEMA_KEYWORD` en su ubicación, con los parámetros Accepted
+`{ keyword, fieldType }`. `fieldType` es exactamente `'array'` en el nodo
+collection, `'object'` en item root y `'string'` en identity. `dataPath`,
+`documentPath` y `templatePath` aportan la ubicación sin ampliar los parámetros.
+Una forma propia malformed conserva el diagnóstico de valor/shape
+correspondiente y no añade además incompatibilidad.
+
+Las anotaciones ignorables de revision 1 conservan
+`IGNORED_SCHEMA_KEYWORD` en arrays, item root y descendientes. Una keyword
+desconocida continúa siendo opaca, genera `UNKNOWN_SCHEMA_KEYWORD` y nunca se
+recorre buscando items o subschemas. `$schema` continúa interpretándose solo en
+la raíz del documento.
+
+### 11.3 Forma exacta de `items`
+
+`items` debe ser una data property propia. Su ausencia, herencia o descriptor
+accessor produce `INVALID_SCHEMA_KEYWORD_VALUE` en la ruta de `items` con
+`expected: 'inline object item schema'` y `actualType: 'missing'` o
+`'accessor'`. Un boolean, array, null, primitive, class instance u object con
+prototype distinto de `Object.prototype`/null produce el mismo código y
+`expected` con su descripción segura.
+
+El object `items` debe declarar data properties propias `type`, con valor exacto
+`"object"`, y `properties`, como object ordinario no array con prototype
+`Object.prototype` o null. `required` es opcional y usa la forma Accepted. La
+policy de identidad añade el requisito de que su nombre aparezca exactamente
+una vez.
+
+Un `items.type` ausente/no string/otro tipo usa los diagnósticos de tipo
+existentes en la ruta exacta; un tipo primitive no activa arrays primitive.
+`properties` puede estar vacío estructuralmente, pero entonces no satisface la
+identidad obligatoria y la compilación falla por policy.
+
+Un array schema descubierto dentro de cualquier descendant del item template
+produce `UNSUPPORTED_FIELD_TYPE` en su keyword `type`, con reason cerrado
+`nested-array-not-supported`; no se inspecciona su `items`. Fuera de un item
+template, varias propiedades array hermanas o en ramas object independientes son
+válidas y cada una exige su propia policy.
+
+### 11.4 Integración de `CollectionPolicy`
+
+Revision 2 no convierte la policy en JSON Schema. La inspección de
+`collectionPolicies` ocurre después de conocer de forma segura los array paths
+candidatos y antes de normalizar templates.
+
+Para cada array candidato debe existir exactamente una policy own válida con
+path absoluto string-only igual al path del array y
+`itemIdentityProperty` string exacta. Policies duplicadas, accessors, paths
+malformed/numeric, una policy sin array correspondiente y un array sin policy
+son errores de configuración bloqueantes. La inspección no ejecuta accessors ni
+retiene objetos caller en diagnósticos.
+
+SPEC-003 cerrará los códigos y parámetros de configuración de policy. Esta ADR
+fija que los errores de forma exterior de `collectionPolicies` preceden al
+schema traversal, mientras los errores semánticos path/identity se ordenan tras
+los diagnósticos schema independientes del primer array dependiente. No se
+confunden con validator issues y cualquier error impide devolver una definición
+parcial.
+
+Una policy exterior estructuralmente inválida bloquea la normalización y toda
+clasificación dependiente de identity, pero no suprime el traversal schema/UI
+independiente de `items`. Una policy exterior válida pero semánticamente no
+resoluble tiene el mismo branch stopping: permite recopilar los diagnósticos
+independientes del array/item y bloquea solo la normalización final del
+template. Diagnósticos que requieran saber cuál propiedad es identity se
+suprimen cuando esa relación no puede resolverse de forma única.
+
+### 11.5 Traversal descriptor-safe, sharing y ciclos
+
+El recorrido sigue siendo iterativo y descriptor-safe:
+
+1. inspecciona el nodo array y sus keywords propias;
+2. inspecciona la forma exterior de `items`;
+3. incorpora el object `items` a la cadena activa de identidades de schema;
+4. inspecciona forma/keywords propias del item root; y
+5. recorre `items.properties` en `Object.keys()` order, depth-first pre-order.
+
+El mismo object de schema puede reutilizarse en arrays/ramas hermanas y se
+compila por cada ubicación. Reencontrarlo en su cadena activa, incluido a través
+de `items` y después `properties`, produce el `CYCLIC_SCHEMA_OBJECT` Accepted
+con `firstDocumentPath`; no se añade un diagnóstico competidor. El array node y
+el `items` object permanecen activos hasta terminar el template.
+
+Una rama `type: "array"` prohibida dentro de un item se detiene antes de leer
+`items`, incluso si ese miembro cerraría un ciclo. Un error exterior de `items`
+detiene solo ese template; arrays y ramas object independientes continúan. No se
+establece límite público de profundidad y la implementación no puede depender
+de recursión JS no acotada.
+
+### 11.6 Paths y orden de diagnósticos schema
+
+`documentPath` conserva la ubicación exacta, por ejemplo:
+
+```text
+['properties', 'orders', 'items']
+['properties', 'orders', 'items', 'properties', 'sku', 'minLength']
+```
+
+Un diagnóstico del nodo array usa su `dataPath` absoluto string-only. Un
+diagnóstico dentro del item template no inventa un índice runtime: usa el
+`dataPath` del array y añade `parameters.templatePath` como copia inmutable de
+la ruta relativa string-only; para item root es `[]`. Los parámetros existentes
+permanecen y `templatePath` aparece solo en contexto template.
+
+El orden global propuesto es:
+
+1. input, dialecto y policies exteriores estructuralmente inválidas;
+2. schema depth-first pre-order según properties;
+3. en un array: forma/keywords propias, `items` exterior, item root y después
+   descendants en properties order;
+4. en cada nodo: shape/type antes de compatibilidad y annotations;
+5. errores de policy semántica en el primer array dependiente, después de sus
+   diagnósticos schema independientes; y
+6. UI Schema completo después de terminar los diagnósticos schema
+   independientemente recopilables.
+
+Dentro del template, identity property se inspecciona en su posición de schema
+properties y no se adelanta. Un error que impide conocer la clase de una rama
+suprime solo diagnósticos derivados; no suprime siblings inspeccionables ni una
+forma exterior UI independiente.
+
+### 11.7 UI Schema estructural mínimo
+
+UI Schema añade únicamente una forma estructural de array:
+
+```ts
+export interface ArrayUiSchema {
+  readonly label?: string;
+  readonly description?: string;
+  readonly hint?: string;
+  readonly tooltip?: string;
+  readonly item?: ItemUiSchema;
+}
+
+export interface ItemUiSchema {
+  readonly order?: readonly string[];
+  readonly fields?: Readonly<Record<string, UiNodeSchema>>;
+}
+```
+
+`UiNodeSchema` añade `ArrayUiSchema`. `item` refleja el único object template;
+no declara layout ni cardinalidad. Su `order`/`fields` aplican solo a children
+editables directos y reutilizan las reglas descriptor-safe, paths, warnings y
+precedencia M9. Omitir `item` equivale a metadata item vacía.
+
+`item`, cuando está presente, debe ser una data property propia con object
+ordinario no array; ausencia equivale a vacío, mientras accessor o valor
+malformed produce `INVALID_UI_SCHEMA_VALUE` con
+`expected: 'item UI object'`. Su identidad se incorpora a la cadena UI activa:
+sharing en ramas independientes se inspecciona por path y un reencuentro activo
+produce el `CYCLIC_UI_SCHEMA_OBJECT` Accepted, deteniendo solo ese item UI.
+
+Un array UI node no admite `placeholder`, `enumLabels`, numeric options,
+`order`, `fields`, actions ni textos de item. `item` en object/primitive nodes
+es incompatible. Una entrada `item.fields` para la identity property emite
+`INCOMPATIBLE_UI_OPTION` con
+`{ field, fieldType: 'string', option: 'identity', reason: 'identity-property' }`
+y no se recorre como `FieldUiSchema`.
+
+Las fuentes `identity-error`, item label y acciones pertenecen al
+`TextResolver` de ADR-015. UI Schema no puede redefinirlas. Valores/accessors
+malformed producen `INVALID_UI_SCHEMA_VALUE` en el miembro exacto y no además
+su warning de incompatibilidad. El UI traversal sigue al schema traversal y
+recorre arrays/items en el mismo orden estructural.
+
+Los paths UI son exactos. Por ejemplo, un error de `sku` usa
+`documentPath: ['fields', 'orders', 'item', 'fields', 'sku', ...]`,
+`dataPath: ['orders']` y `parameters.templatePath: ['sku']`; item root usa
+`templatePath: []`. En un array UI node, el orden es shape/textos propios,
+miembros incompatibles, `item` exterior, `item.order`, entries de
+`item.fields` en orden de children normalizado y después descendants. Si
+identity no puede resolverse por policy, solo se suprime su diagnóstico UI
+derivado; shape/cycle/unknown/order independientes continúan.
+
+### 11.8 Compatibilidad y validación externa
+
+Aceptar `items` inline no significa implementar el vocabulario completo de
+arrays Draft 2020-12. El compilador decide si puede crear el template neutral;
+el `SchemaValidator` conserva autoridad sobre `type: array`, required, tipos de
+items, constraints de descendientes y validez del dato externo.
+
+El schema fuente se entrega sin modificación. Core no añade `minItems`,
+unicidad JSON Schema, defaults, factories ni identidad como assertion. La
+unicidad/no-blank identity pertenece al runtime de ADR-015 y no se presenta como
+resultado del validator.
+
+### 11.9 Criterios de aceptación de revision 2
+
+Revision 2 podrá aceptarse solo cuando una revisión completa repetida confirme:
+
+1. conservación exacta de dialecto, unknowns, annotations y M9 revision 1;
+2. catálogo cerrado para array, item root, identity y descendants;
+3. `items` homogéneo object obligatorio y exclusión de primitive/nested arrays,
+   tuples y otras keywords array;
+4. integración determinista y descriptor-safe de `CollectionPolicy`;
+5. traversal iterativo, sharing, ciclos y branch stopping;
+6. `documentPath`, template-relative parameters y orden deterministas;
+7. UI Schema estructural mínimo sin identidad editable ni layout;
+8. coherencia completa con ADR-015 y la futura SPEC-003; y
+9. ausencia de autorización de implementación, publicación o Stable API.
+
+Tras cada corrección deberá repetirse la revisión completa hasta obtener cero
+hallazgos. La aceptación de revision 2 autorizará preparar SPEC-003 como tarea
+separada; no autorizará PLAN-010, implementación ni publicación.
+
+La revisión completa se repitió tras cada corrección. El ciclo 3 pasó las nueve
+áreas sin hallazgos ni conflictos documentales y Ricard aceptó formalmente
+revision 2 el 14 de julio de 2026. La aceptación autoriza preparar SPEC-003 como
+tarea separada, no PLAN-010, implementación ni publicación.

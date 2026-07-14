@@ -7,23 +7,28 @@
 
 - **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `a667bd9`, PLAN-009 checkpoints 5–6 Angular/package
-  migration (`develop` is ten commits ahead of `origin/develop`; no push
+- **Committed revision:** `3183709`, M9 completion and accepted D-006/M10
+  promotion (`develop` is eleven commits ahead of `origin/develop`; no push
   performed)
-- **Accepted specifications:** SPEC-001 v0.1.15 and SPEC-002 v0.1.2
-- **Last implementation plan:** PLAN-009 revision 1, Completed
-- **Active implementation plan:** None
-- **Last accepted ADR:** ADR-014 revision 2
-- **Promoted capabilities:** D-005/M9 implemented; D-006/M10 design only
-- **Phase:** M1–M9 and G0 completed
+- **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2 and SPEC-003
+  v0.1.2
+- **Last implementation plan:** PLAN-010 revision 0, Approved; checkpoint 1
+  completed, checkpoints 2–7 pending
+- **Last completed implementation plan:** PLAN-009 revision 1
+- **Active implementation plan:** None; checkpoint 2 is the next authorized task
+- **Last accepted ADR:** ADR-015 revision 4
+- **Promoted capabilities:** D-005/M9 implemented; D-006/M10 checkpoint 1
+  implemented under PLAN-010
+- **Phase:** M1–M9 and G0 completed; M10 checkpoint 1 of 7 completed
 - **Package candidates:** private independent `0.1.0` artifacts; unpublished
-- **Working tree:** uncommitted PLAN-009 checkpoint 7 closure plus accepted
-  D-006/M10 promotion review; no active task
+- **Working tree:** uncommitted accepted M10 normative/review documentation plus
+  PLAN-010 checkpoint 1 contracts, Internal helpers, validation, tests and
+  package allowlist; no active implementation task
 
 ## Current objective
 
-Prepare the first normative M10 decision without implementing arrays or
-broadening the accepted promotion boundary.
+Complete M10 incrementally under approved PLAN-010 without activating a later
+checkpoint before its dependencies and verification are green.
 
 ## In progress
 
@@ -31,60 +36,53 @@ broadening the accepted promotion boundary.
 
 ## Latest completed work
 
-- Accepted the D-006/M10 promotion review and promoted arrays only for normative
-  design under the homogeneous inline-object/stable application identity
-  boundary.
-- Completed the promotion review with no boundary findings and retained every
-  implementation and publication gate.
-- Defined the required ADR-015 → ADR-005 revision 2 → SPEC-003 → PLAN-010 gate
-  sequence while leaving D-006 Deferred and implementation unauthorized.
-- Completed PLAN-009 checkpoint 7 after repeated full reviews converged on a
-  zero-finding pass and the complete verification matrix remained green.
-- Corrected stale recovery, ROADMAP and ADR-index statements that still
-  described nested objects as prohibited or M9 as inactive.
-- Closed conformance evidence gaps for nested primitive kinds, zero-leaf object
-  state, class ancestors, cross-field sharing, lookup and recursive Angular
-  lifecycle.
-- Preserved primitive/nested arrays, tuples, refs/composition, batches, layouts,
-  publication and every other deferred boundary.
+- Completed PLAN-010 checkpoint 1 with the accepted neutral Public contract
+  shapes/root exports and shared descriptor-safe collection address/key helpers.
+- Extended iterative manual-definition validation over array exteriors and item
+  templates behind a separate Internal entry, with exact defect reasons, frozen
+  locators and hostile-object tests.
+- Migrated only declaration consumers and the exact artifact allowlist; compiler,
+  operations, runtime and Angular collection hosts remain inactive, and M9
+  consumers retain their prior validator.
+- Kept 177 core and 59 Angular tests, package/consumer/artifact checks and clean
+  Angular 22 consumers green without manifest, lockfile or publication drift.
+- Previously approved PLAN-010 revision 0 after a zero-finding complete review.
 
 ## Exact next action
 
-Draft ADR-015 for the collection template/instance model, stable identity,
-paths, structural operations, snapshots/scopes and Angular ownership; do not
-draft PLAN-010 or implement arrays yet.
+Execute PLAN-010 checkpoint 2: implement collection policies, array/item and
+structural-UI compilation, immutable templates, and compiler/manual-definition
+conformance fixtures; verify it before checkpoint 3.
 
 ## Blockers and conflicts
 
-- No review finding, implementation blocker or documentation conflict.
+- No open review finding, implementation blocker or documentation conflict.
 - SPEC-001 v0.1.15 remains the behavioral baseline and SPEC-002 v0.1.2 is
   authoritative only for the completed nested-object extension.
-- D-006/M10 is Promoted for normative design only; array behavior and all other
-  deferred capabilities remain inactive.
-- Implementation remains blocked by the required accepted ADR-015, ADR-005
-  revision 2, SPEC-003 and explicitly approved PLAN-010.
-- Checkpoint 7 changes are uncommitted and unpushed; checkpoints 5–6 are
-  committed in `a667bd9`.
+- D-006/M10 remains registrally Promoted; checkpoint 1 is complete and only the
+  narrow PLAN-010 sequence is authorized. All other array/deferred capabilities
+  remain inactive.
+- ADR-005 revision 2, ADR-015 revision 4, SPEC-003 v0.1.2 and PLAN-010 revision
+  0 are accepted/approved in the required order.
+- M9 completion and D-006 promotion are committed in `3183709` and unpushed;
+  later M10 normative/review documents and checkpoint 1 are uncommitted.
 
 ## Open questions
 
-- The exact application-owned stable identity declaration and failure semantics
-  must be resolved by ADR-015 rather than assumed by implementation.
-- Whether ADR-015 and ADR-005 revision 2 should be drafted together or in
-  sequence; the accepted gate requires both before SPEC-003.
+- None.
 
 ## Latest verification
 
-- `CI=true pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm lint`,
-  `pnpm typecheck`, both builds and `git diff --check` pass.
-- All 171 core and 59 Angular tests pass (230 total).
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, both builds and
+  `git diff --check` pass.
+- All 177 core and 59 Angular tests pass (236 total).
 - `pnpm test:package`, `pnpm test:consumer`, exact-inventory
   `pnpm test:artifacts` and `pnpm test:consumer:clean` pass.
 - Clean core plus Angular 22.0.6 lower/upper consumers pass against local
   private `0.1.0` tarballs.
-- All 48 Markdown files have valid local link targets.
-- Root declarations match the accepted Public migration; Angular adds no root
-  export and Internal object-host/text helpers remain unavailable there.
+- Root declarations contain the checkpoint 1 Public types; Angular adds no new
+  root export and collection compiler/operation/runtime/host behavior remains
+  inactive.
 - No manifest, version, dependency, peer/export, lockfile, publication or
   Stable classification changed.
 
@@ -94,6 +92,24 @@ draft PLAN-010 or implement arrays yet.
   `.ai-docs/reviews/006-plan-009-implementation-review.md`
 - Accepted M10 promotion review:
   `.ai-docs/reviews/007-m10-arrays-promotion.md`
+- Accepted M10 architecture:
+  `.ai-docs/adrs/015-modelo-colecciones-identidad-operaciones.md`
+- ADR-015 complete review:
+  `.ai-docs/reviews/008-adr-015-review.md`
+- ADR-015 revision 2 review:
+  `.ai-docs/reviews/009-adr-015-revision-2-review.md`
+- ADR-005 revision 2 review:
+  `.ai-docs/reviews/010-adr-005-revision-2-review.md`
+- SPEC-003 complete review:
+  `.ai-docs/reviews/011-spec-003-review.md`
+- ADR-015 revision 3 review:
+  `.ai-docs/reviews/012-adr-015-revision-3-review.md`
+- ADR-015 revision 4 review:
+  `.ai-docs/reviews/013-adr-015-revision-4-review.md`
+- PLAN-010 complete review:
+  `.ai-docs/reviews/014-plan-010-review.md`
+- Approved M10 delivery contract:
+  `.ai-docs/plans/010-homogeneous-object-collections.md`
 - Approved and completed delivery contract:
   `.ai-docs/plans/009-nested-object-runtime.md`
 - Accepted runtime/model decision:
@@ -101,8 +117,13 @@ draft PLAN-010 or implement arrays yet.
 - Accepted dialect decision:
   `.ai-docs/adrs/005-politica-dialecto-json-schema.md`
 - Accepted M9 behavior: `.ai-docs/specs/002-nested-object-runtime.md`
+- Accepted M10 behavior: `.ai-docs/specs/003-collection-runtime.md`
 - Accepted baseline behavior: `.ai-docs/specs/001-controlled-form-runtime.md`
 - Promoted/deferred boundaries: `.ai-docs/roadmap/deferred-decisions.md`
+- M10 checkpoint 1 contract/helper evidence:
+  `packages/core/test/collection-contracts.test.ts`,
+  `packages/core/src/internal/collection-address.ts` and
+  `packages/core/src/internal/nested-definition.ts`
 - Recursive compiler evidence: `packages/core/test/nested-compiler.test.ts`
 - Deep operation evidence: `packages/core/test/operations.test.ts`
 - Nested runtime evidence: `packages/core/test/runtime.test.ts`

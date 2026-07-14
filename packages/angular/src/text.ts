@@ -24,7 +24,7 @@ type FieldTextResolutionContext = Extract<
 >;
 type ObjectTextResolutionContext = Extract<
   TextResolutionContext,
-  { readonly node: ObjectFieldDefinition }
+  { readonly node: unknown }
 >;
 
 export interface AngularFieldTextSnapshot {
@@ -260,19 +260,22 @@ function textDiagnostic(
   reason: string,
 ): Diagnostic {
   if ('node' in context) {
+    const isArray = context.node.kind === 'array';
     return adapterDiagnostic(
       'TEXT_RESOLUTION_FAILED',
       'warning',
       {
         node: context.node.name,
-        nodeKind: 'object',
+        nodeKind: isArray ? 'array' : 'object',
         member: context.member,
         ...(context.member === 'issue'
           ? { issueCode: context.issue.code }
           : {}),
         reason,
       },
-      `Text resolution failed for object "${context.node.name}".`,
+      isArray
+        ? `Text resolution failed for collection "${context.node.name}".`
+        : `Text resolution failed for object "${context.node.name}".`,
       context.node.path,
     );
   }

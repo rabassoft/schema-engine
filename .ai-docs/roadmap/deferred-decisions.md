@@ -94,7 +94,13 @@ Cada decisión debe registrar:
   confirma que la condición de reanudación está satisfecha y acepta una
   frontera estrecha de listas homogéneas de objetos inline con identidad string
   estable propiedad de la aplicación. D-006 queda Promoted únicamente para
-  diseño normativo; no se autoriza implementación ni publicación.
+  diseño normativo en ese checkpoint; no autorizó implementación ni
+  publicación.
+- **Estado de entrega:** ADR-015 revisión 4, ADR-005 revisión 2 y SPEC-003
+  v0.1.2 están Accepted. PLAN-010 revisión 0 pasó su revisión completa y fue
+  aprobado explícitamente. Checkpoint 1 está completado; checkpoints 2–7
+  siguen pendientes. Publicación y todo alcance no listado siguen sin
+  autorización.
 
 ## D-007: Composición y condicionales de JSON Schema
 
@@ -428,9 +434,10 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-006 — Arrays:** preparar ADR-015 para el modelo template/instancia,
-   identidad, paths, operaciones, snapshots/scopes y ownership Angular bajo la
-   frontera M10 aceptada; no implementar.
+1. **D-006 — Arrays:** ejecutar PLAN-010 checkpoint 2: política, compilación de
+   arrays/items/UI estructural, templates inmutables y fixtures de conformidad.
+   No ampliar el alcance aprobado ni iniciar checkpoints dependientes antes de
+   verificarlo.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
@@ -438,13 +445,15 @@ Cada decisión debe registrar:
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
 de M8; D-040 conserva la publicación como Deferred, D-005 está implementado
 dentro del alcance de M9 aunque conserva su estado registral Promoted, D-006
-queda Promoted únicamente para diseño M10 y todas las demás entradas mantienen
-su estado hasta una promoción y aprobación explícitas.
+queda Promoted con implementación M10 autorizada por PLAN-010 y todas las demás
+entradas mantienen su estado hasta una promoción y aprobación explícitas.
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                              |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | PLAN-010 checkpoint 1 completa contratos Public, helpers Internal, validación de definición y paquetes/consumidores.                |
+| 14-07-2026 | PLAN-010 revisión 0 se aprueba tras revisión completa sin hallazgos; M10 queda autorizado, checkpoint 1 aún no iniciado.            |
 | 14-07-2026 | Se acepta la revisión de promoción M10; D-006 queda Promoted para diseño normativo, sin autorizar implementación.                   |
 | 14-07-2026 | Revisión de promoción M10 pasa sin hallazgos y recomienda D-006 para diseño estrecho; aceptación sigue pendiente.                   |
 | 14-07-2026 | PLAN-009 checkpoint 7 supera revisión integral repetida y matriz completa; M9 queda completado sin activar M10 ni publicación.      |

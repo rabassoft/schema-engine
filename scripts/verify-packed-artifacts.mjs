@@ -15,6 +15,7 @@ const CORE_MODULES = Object.freeze([
   'compiler',
   'contracts',
   'index',
+  'internal/collection-address',
   'internal/diagnostics',
   'internal/immutable',
   'internal/keywords',
@@ -104,9 +105,22 @@ try {
 
   const coreIndex = readTarballText(tarballs.core, 'package/dist/index.d.ts');
   for (const publicName of [
+    'ArrayNodeDefinition',
+    'ArrayRuntimeSnapshot',
+    'ArrayUiSchema',
     'BaseNodeDefinition',
+    'BaseNodeTemplate',
+    'CollectionItemAddress',
+    'CollectionNodeAddress',
+    'CollectionPolicy',
+    'CollectionTextResolutionContext',
+    'FieldTemplate',
     'FormNodeDefinition',
+    'FormNodeTemplate',
+    'FormScopeTarget',
+    'ItemRuntimeSnapshot',
     'ObjectFieldDefinition',
+    'ObjectItemTemplateDefinition',
     'ObjectPresence',
     'NodeRuntimeSnapshot',
     'ObjectRuntimeSnapshot',
@@ -121,6 +135,8 @@ try {
   }
   for (const internalName of [
     'compileObjectNode',
+    'canonicalTemplateKey',
+    'copyCollectionItemAddress',
     'normalizeDataPath',
     'readOwnValue',
   ]) {

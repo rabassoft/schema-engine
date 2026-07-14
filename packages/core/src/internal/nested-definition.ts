@@ -1,4 +1,5 @@
 import type { FieldDefinition } from '../contracts.js';
+import { canonicalTemplateKey } from './collection-address.js';
 import {
   canonicalDataPathKey,
   copyStringDataPath,
@@ -13,14 +14,26 @@ export type NestedDefinitionReason =
   | 'cyclic-node'
   | 'reused-node'
   | 'duplicate-node-path'
-  | 'inconsistent-leaf-projection';
+  | 'inconsistent-leaf-projection'
+  | 'invalid-array-node'
+  | 'invalid-item-identity'
+  | 'invalid-item-template'
+  | 'cyclic-template'
+  | 'reused-template'
+  | 'duplicate-template-path'
+  | 'inconsistent-template-leaf-projection'
+  | 'identity-template-overlap'
+  | 'nested-array-template';
 
 export interface NestedDefinitionDefect {
   readonly reason: NestedDefinitionReason;
   readonly nodeIndexPath?: readonly number[];
   readonly firstNodeIndexPath?: readonly number[];
+  readonly templateIndexPath?: readonly number[];
+  readonly firstTemplateIndexPath?: readonly number[];
   readonly fieldIndex?: number;
   readonly path?: readonly string[];
+  readonly relativePath?: readonly string[];
 }
 
 export type NestedDefinitionValidationResult =
@@ -49,7 +62,7 @@ type Frame = EnterFrame | ExitFrame;
 export function validateNestedFormDefinition(
   value: unknown,
 ): NestedDefinitionValidationResult {
-  const defects = collectNestedFormDefinitionDefects(value);
+  const defects = collectFormDefinitionDefects(value, false);
   const first = defects[0];
   return first === undefined
     ? Object.freeze({ success: true })
@@ -58,6 +71,29 @@ export function validateNestedFormDefinition(
 
 export function collectNestedFormDefinitionDefects(
   value: unknown,
+): readonly NestedDefinitionDefect[] {
+  return collectFormDefinitionDefects(value, false);
+}
+
+export function validateCollectionFormDefinition(
+  value: unknown,
+): NestedDefinitionValidationResult {
+  const defects = collectFormDefinitionDefects(value, true);
+  const first = defects[0];
+  return first === undefined
+    ? Object.freeze({ success: true })
+    : { success: false, defect: first };
+}
+
+export function collectCollectionFormDefinitionDefects(
+  value: unknown,
+): readonly NestedDefinitionDefect[] {
+  return collectFormDefinitionDefects(value, true);
+}
+
+function collectFormDefinitionDefects(
+  value: unknown,
+  allowCollections: boolean,
 ): readonly NestedDefinitionDefect[] {
   if (!isOrdinaryObject(value)) {
     return Object.freeze([makeDefect('nodes-not-array')]);
@@ -128,10 +164,10 @@ export function collectNestedFormDefinitionDefects(
       continue;
     }
 
-    const inspected = inspectNode(node, frame.parentPath);
+    const inspected = inspectNode(node, frame.parentPath, allowCollections);
     if (!inspected.success) {
       defects.push(
-        makeDefect('invalid-node', {
+        makeDefect(inspected.reason, {
           nodeIndexPath: frame.indexPath,
           ...(inspected.path === undefined ? {} : { path: inspected.path }),
         }),
@@ -157,6 +193,18 @@ export function collectNestedFormDefinitionDefects(
 
     if (inspected.kind === 'field') {
       leaves.push(node as FieldDefinition);
+      continue;
+    }
+
+    if (inspected.kind === 'array') {
+      defects.push(
+        ...collectTemplateDefects(
+          inspected.item.children,
+          inspected.item.fields,
+          inspected.path,
+          inspected.identityProperty,
+        ),
+      );
       continue;
     }
 
@@ -206,13 +254,26 @@ type InspectedNode =
       readonly children: readonly unknown[];
     }
   | {
+      readonly success: true;
+      readonly kind: 'array';
+      readonly key: string;
+      readonly path: readonly string[];
+      readonly identityProperty: string;
+      readonly item: {
+        readonly children: readonly unknown[];
+        readonly fields: readonly unknown[];
+      };
+    }
+  | {
       readonly success: false;
+      readonly reason: NestedDefinitionReason;
       readonly path?: readonly string[];
     };
 
 function inspectNode(
   node: object,
   parentPath: readonly string[] | undefined,
+  allowCollections: boolean,
 ): InspectedNode {
   const kind = readValue(node, 'kind');
   const name = readValue(node, 'name');
@@ -222,9 +283,17 @@ function inspectNode(
   const required = readValue(node, 'required');
   const label = readValue(node, 'label');
 
+  if (kind === 'array' && !allowCollections) {
+    return {
+      success: false,
+      reason: 'invalid-node',
+      ...(path === undefined ? {} : { path }),
+    };
+  }
+
   if (
     typeof kind !== 'string' ||
-    !['object', 'string', 'number', 'boolean'].includes(kind) ||
+    !['object', 'array', 'string', 'number', 'boolean'].includes(kind) ||
     typeof name !== 'string' ||
     typeof key !== 'string' ||
     path === undefined ||
@@ -238,25 +307,324 @@ function inspectNode(
     !validOptionalText(node, 'hint') ||
     !validOptionalText(node, 'tooltip')
   ) {
-    return { success: false, ...(path === undefined ? {} : { path }) };
+    return {
+      success: false,
+      reason: kind === 'array' ? 'invalid-array-node' : 'invalid-node',
+      ...(path === undefined ? {} : { path }),
+    };
   }
 
   if (kind === 'object') {
     const children = readValue(node, 'children');
-    if (!Array.isArray(children)) return { success: false, path };
+    if (!Array.isArray(children)) {
+      return { success: false, reason: 'invalid-node', path };
+    }
     return { success: true, kind: 'object', key, path, children };
   }
 
+  if (kind === 'array') {
+    const identity = readValue(node, 'identity');
+    if (!isOrdinaryObject(identity)) {
+      return { success: false, reason: 'invalid-array-node', path };
+    }
+    const identityProperty = readValue(identity, 'property');
+    if (typeof identityProperty !== 'string') {
+      return { success: false, reason: 'invalid-item-identity', path };
+    }
+    const item = readValue(node, 'item');
+    if (!isOrdinaryObject(item)) {
+      return { success: false, reason: 'invalid-array-node', path };
+    }
+    if (readValue(item, 'kind') !== 'item-template') {
+      return { success: false, reason: 'invalid-item-template', path };
+    }
+    const children = readValue(item, 'children');
+    const fields = readValue(item, 'fields');
+    if (!Array.isArray(children) || !Array.isArray(fields)) {
+      return { success: false, reason: 'invalid-item-template', path };
+    }
+    return {
+      success: true,
+      kind: 'array',
+      key,
+      path,
+      identityProperty,
+      item: { children, fields },
+    };
+  }
+
   if (!validOptionalText(node, 'placeholder')) {
-    return { success: false, path };
+    return { success: false, reason: 'invalid-node', path };
   }
   if (kind === 'string' && !validStringField(node)) {
-    return { success: false, path };
+    return { success: false, reason: 'invalid-node', path };
   }
   if (kind === 'number' && !validNumberField(node)) {
-    return { success: false, path };
+    return { success: false, reason: 'invalid-node', path };
   }
   return { success: true, kind: 'field', key, path };
+}
+
+interface TemplateEnterFrame {
+  readonly phase: 'enter';
+  readonly value: unknown;
+  readonly indexPath: readonly number[];
+  readonly parentPath?: readonly string[];
+}
+
+interface TemplateExitFrame {
+  readonly phase: 'exit';
+  readonly value: object;
+}
+
+type TemplateFrame = TemplateEnterFrame | TemplateExitFrame;
+
+function collectTemplateDefects(
+  children: readonly unknown[],
+  fields: readonly unknown[],
+  collectionPath: readonly string[],
+  identityProperty: string,
+): readonly NestedDefinitionDefect[] {
+  const leaves: object[] = [];
+  const leafIndexPaths: (readonly number[])[] = [];
+  const firstIdentity = new Map<object, readonly number[]>();
+  const active = new Map<object, readonly number[]>();
+  const firstPath = new Map<string, readonly number[]>();
+  const stack: TemplateFrame[] = [];
+  const defects: NestedDefinitionDefect[] = [];
+
+  for (let index = children.length - 1; index >= 0; index -= 1) {
+    const member = readOwnDataMember(children, String(index));
+    stack.push({
+      phase: 'enter',
+      value: member.kind === 'value' ? member.value : undefined,
+      indexPath: Object.freeze([index]),
+    });
+  }
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    if (frame.phase === 'exit') {
+      active.delete(frame.value);
+      continue;
+    }
+    if (!isOrdinaryObject(frame.value)) {
+      defects.push(
+        makeDefect('invalid-item-template', {
+          templateIndexPath: frame.indexPath,
+          path: collectionPath,
+        }),
+      );
+      continue;
+    }
+    const template = frame.value;
+    const activeIndex = active.get(template);
+    if (activeIndex !== undefined) {
+      defects.push(
+        makeDefect('cyclic-template', {
+          templateIndexPath: frame.indexPath,
+          firstTemplateIndexPath: activeIndex,
+          path: collectionPath,
+        }),
+      );
+      continue;
+    }
+    const firstIndex = firstIdentity.get(template);
+    if (firstIndex !== undefined) {
+      defects.push(
+        makeDefect('reused-template', {
+          templateIndexPath: frame.indexPath,
+          firstTemplateIndexPath: firstIndex,
+          path: collectionPath,
+        }),
+      );
+      continue;
+    }
+
+    const inspected = inspectTemplateNode(
+      template,
+      collectionPath,
+      frame.parentPath,
+    );
+    if (!inspected.success) {
+      defects.push(
+        makeDefect(inspected.reason, {
+          templateIndexPath: frame.indexPath,
+          path: collectionPath,
+          ...(inspected.relativePath === undefined
+            ? {}
+            : { relativePath: inspected.relativePath }),
+        }),
+      );
+      continue;
+    }
+
+    const duplicateIndex = firstPath.get(inspected.key);
+    if (duplicateIndex !== undefined) {
+      defects.push(
+        makeDefect('duplicate-template-path', {
+          templateIndexPath: frame.indexPath,
+          firstTemplateIndexPath: duplicateIndex,
+          path: collectionPath,
+          relativePath: inspected.relativePath,
+        }),
+      );
+      continue;
+    }
+
+    firstIdentity.set(template, frame.indexPath);
+    firstPath.set(inspected.key, frame.indexPath);
+    active.set(template, frame.indexPath);
+    stack.push({ phase: 'exit', value: template });
+
+    if (
+      inspected.relativePath.length === 1 &&
+      inspected.relativePath[0] === identityProperty
+    ) {
+      defects.push(
+        makeDefect('identity-template-overlap', {
+          templateIndexPath: frame.indexPath,
+          path: collectionPath,
+          relativePath: inspected.relativePath,
+        }),
+      );
+    }
+
+    if (inspected.kind === 'field') {
+      leaves.push(template);
+      leafIndexPaths.push(frame.indexPath);
+      continue;
+    }
+    for (let index = inspected.children.length - 1; index >= 0; index -= 1) {
+      const member = readOwnDataMember(inspected.children, String(index));
+      stack.push({
+        phase: 'enter',
+        value: member.kind === 'value' ? member.value : undefined,
+        indexPath: Object.freeze([...frame.indexPath, index]),
+        parentPath: inspected.relativePath,
+      });
+    }
+  }
+
+  if (fields.length !== leaves.length) {
+    const fieldIndex = Math.min(fields.length, leaves.length);
+    const templateIndexPath = leafIndexPaths[fieldIndex];
+    defects.push(
+      makeDefect('inconsistent-template-leaf-projection', {
+        fieldIndex,
+        path: collectionPath,
+        ...(templateIndexPath === undefined ? {} : { templateIndexPath }),
+      }),
+    );
+  }
+  const comparableLength = Math.min(fields.length, leaves.length);
+  for (let index = 0; index < comparableLength; index += 1) {
+    const member = readOwnDataMember(fields, String(index));
+    if (member.kind !== 'value' || member.value !== leaves[index]) {
+      const templateIndexPath = leafIndexPaths[index];
+      defects.push(
+        makeDefect('inconsistent-template-leaf-projection', {
+          fieldIndex: index,
+          path: collectionPath,
+          ...(templateIndexPath === undefined ? {} : { templateIndexPath }),
+        }),
+      );
+    }
+  }
+  return defects;
+}
+
+type InspectedTemplateNode =
+  | {
+      readonly success: true;
+      readonly kind: 'field';
+      readonly key: string;
+      readonly relativePath: readonly string[];
+    }
+  | {
+      readonly success: true;
+      readonly kind: 'object';
+      readonly key: string;
+      readonly relativePath: readonly string[];
+      readonly children: readonly unknown[];
+    }
+  | {
+      readonly success: false;
+      readonly reason: 'invalid-item-template' | 'nested-array-template';
+      readonly relativePath?: readonly string[];
+    };
+
+function inspectTemplateNode(
+  node: object,
+  collectionPath: readonly string[],
+  parentPath: readonly string[] | undefined,
+): InspectedTemplateNode {
+  const kind = readValue(node, 'kind');
+  const name = readValue(node, 'name');
+  const key = readValue(node, 'key');
+  const relativePath = copyStringDataPath(readValue(node, 'relativePath'));
+  const required = readValue(node, 'required');
+  const label = readValue(node, 'label');
+
+  if (kind === 'array') {
+    return {
+      success: false,
+      reason: 'nested-array-template',
+      ...(relativePath === undefined ? {} : { relativePath }),
+    };
+  }
+  if (
+    typeof kind !== 'string' ||
+    !['object', 'string', 'number', 'boolean'].includes(kind) ||
+    typeof name !== 'string' ||
+    typeof key !== 'string' ||
+    relativePath === undefined ||
+    typeof required !== 'boolean' ||
+    typeof label !== 'string' ||
+    relativePath.at(-1) !== name ||
+    key !== canonicalTemplateKey(collectionPath, relativePath) ||
+    (parentPath !== undefined &&
+      !sameDataPath(relativePath.slice(0, -1), parentPath)) ||
+    !validOptionalText(node, 'description') ||
+    !validOptionalText(node, 'hint') ||
+    !validOptionalText(node, 'tooltip')
+  ) {
+    return {
+      success: false,
+      reason: 'invalid-item-template',
+      ...(relativePath === undefined ? {} : { relativePath }),
+    };
+  }
+  if (kind === 'object') {
+    const nestedChildren = readValue(node, 'children');
+    if (!Array.isArray(nestedChildren)) {
+      return {
+        success: false,
+        reason: 'invalid-item-template',
+        relativePath,
+      };
+    }
+    return {
+      success: true,
+      kind: 'object',
+      key,
+      relativePath,
+      children: nestedChildren,
+    };
+  }
+  if (
+    !validOptionalText(node, 'placeholder') ||
+    (kind === 'string' && !validStringField(node)) ||
+    (kind === 'number' && !validNumberField(node))
+  ) {
+    return {
+      success: false,
+      reason: 'invalid-item-template',
+      relativePath,
+    };
+  }
+  return { success: true, kind: 'field', key, relativePath };
 }
 
 function validStringField(node: object): boolean {

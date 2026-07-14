@@ -7,13 +7,26 @@ export interface UiSchema {
   readonly fields?: Readonly<Record<string, UiNodeSchema>>;
 }
 
-export type UiNodeSchema = ObjectUiSchema | FieldUiSchema;
+export type UiNodeSchema = ObjectUiSchema | ArrayUiSchema | FieldUiSchema;
 
 export interface ObjectUiSchema {
   readonly label?: string;
   readonly description?: string;
   readonly hint?: string;
   readonly tooltip?: string;
+  readonly order?: readonly string[];
+  readonly fields?: Readonly<Record<string, UiNodeSchema>>;
+}
+
+export interface ArrayUiSchema {
+  readonly label?: string;
+  readonly description?: string;
+  readonly hint?: string;
+  readonly tooltip?: string;
+  readonly item?: ItemUiSchema;
+}
+
+export interface ItemUiSchema {
   readonly order?: readonly string[];
   readonly fields?: Readonly<Record<string, UiNodeSchema>>;
 }
@@ -94,6 +107,45 @@ export interface BooleanFieldDefinition extends BaseFieldDefinition {
 export type FieldDefinition =
   StringFieldDefinition | NumberFieldDefinition | BooleanFieldDefinition;
 
+export interface ItemIdentityDefinition {
+  readonly property: string;
+}
+
+export interface BaseNodeTemplate {
+  readonly key: string;
+  readonly name: string;
+  readonly relativePath: readonly string[];
+  readonly required: boolean;
+  readonly label: string;
+  readonly description?: string;
+  readonly hint?: string;
+  readonly tooltip?: string;
+}
+
+export interface ObjectNodeTemplate extends BaseNodeTemplate {
+  readonly kind: 'object';
+  readonly children: readonly FormNodeTemplate[];
+}
+
+export type FieldTemplate =
+  | (Omit<StringFieldDefinition, keyof BaseNodeDefinition> & BaseNodeTemplate)
+  | (Omit<NumberFieldDefinition, keyof BaseNodeDefinition> & BaseNodeTemplate)
+  | (Omit<BooleanFieldDefinition, keyof BaseNodeDefinition> & BaseNodeTemplate);
+
+export type FormNodeTemplate = ObjectNodeTemplate | FieldTemplate;
+
+export interface ObjectItemTemplateDefinition {
+  readonly kind: 'item-template';
+  readonly children: readonly FormNodeTemplate[];
+  readonly fields: readonly FieldTemplate[];
+}
+
+export interface ArrayNodeDefinition extends BaseNodeDefinition {
+  readonly kind: 'array';
+  readonly identity: ItemIdentityDefinition;
+  readonly item: ObjectItemTemplateDefinition;
+}
+
 export interface Diagnostic {
   readonly code: string;
   readonly severity: 'warning' | 'error';
@@ -118,6 +170,12 @@ export type CompileFormResult =
 export interface CompileFormDefinitionInput {
   readonly schema: unknown;
   readonly uiSchema?: unknown;
+  readonly collectionPolicies?: readonly CollectionPolicy[];
+}
+
+export interface CollectionPolicy {
+  readonly path: readonly string[];
+  readonly itemIdentityProperty: string;
 }
 
 export type OperationExpectation =
@@ -143,6 +201,70 @@ export interface RemoveValueOperation {
   readonly metadata: FormOperationMetadata;
   readonly path: DataPath;
   readonly expected: { readonly kind: 'value'; readonly value: unknown };
+  readonly source: 'user';
+}
+
+export interface CollectionItemAddress {
+  readonly collectionPath: readonly string[];
+  readonly itemId: string;
+}
+
+export interface CollectionNodeAddress extends CollectionItemAddress {
+  readonly relativePath: readonly string[];
+}
+
+export type CollectionPlacement =
+  | { readonly kind: 'start' }
+  | { readonly kind: 'end' }
+  | { readonly kind: 'before'; readonly itemId: string }
+  | { readonly kind: 'after'; readonly itemId: string };
+
+export interface SetItemValueOperation {
+  readonly type: 'set-item-value';
+  readonly metadata: FormOperationMetadata;
+  readonly target: CollectionNodeAddress;
+  readonly identityProperty: string;
+  readonly expected: OperationExpectation;
+  readonly value: unknown;
+  readonly source: 'user';
+}
+
+export interface RemoveItemValueOperation {
+  readonly type: 'remove-item-value';
+  readonly metadata: FormOperationMetadata;
+  readonly target: CollectionNodeAddress;
+  readonly identityProperty: string;
+  readonly expected: { readonly kind: 'value'; readonly value: unknown };
+  readonly source: 'user';
+}
+
+export interface InsertItemOperation {
+  readonly type: 'insert-item';
+  readonly metadata: FormOperationMetadata;
+  readonly collectionPath: readonly string[];
+  readonly identityProperty: string;
+  readonly itemId: string;
+  readonly item: unknown;
+  readonly placement: CollectionPlacement;
+  readonly source: 'user';
+}
+
+export interface RemoveItemOperation {
+  readonly type: 'remove-item';
+  readonly metadata: FormOperationMetadata;
+  readonly collectionPath: readonly string[];
+  readonly identityProperty: string;
+  readonly itemId: string;
+  readonly source: 'user';
+}
+
+export interface MoveItemOperation {
+  readonly type: 'move-item';
+  readonly metadata: FormOperationMetadata;
+  readonly collectionPath: readonly string[];
+  readonly identityProperty: string;
+  readonly itemId: string;
+  readonly placement: CollectionPlacement;
   readonly source: 'user';
 }
 
@@ -180,6 +302,13 @@ export type FieldTextMember =
   | 'issue';
 export type ObjectTextMember =
   'label' | 'description' | 'hint' | 'tooltip' | 'issue';
+export type CollectionTextMember =
+  | 'identity-error'
+  | 'item-label'
+  | 'remove-item'
+  | 'move-item-earlier'
+  | 'move-item-later'
+  | 'issue';
 export type FieldTextResolutionContext =
   | {
       readonly formId: string;
@@ -209,19 +338,49 @@ export type ObjectTextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
-      readonly node: ObjectFieldDefinition;
+      readonly node: ObjectFieldDefinition | ArrayNodeDefinition;
       readonly member: Exclude<ObjectTextMember, 'issue'>;
       readonly issue?: never;
     }
   | {
       readonly formId: string;
       readonly locale: string;
-      readonly node: ObjectFieldDefinition;
+      readonly node: ObjectFieldDefinition | ArrayNodeDefinition;
+      readonly member: 'issue';
+      readonly issue: ValidationIssue;
+    };
+export type CollectionTextResolutionContext =
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly collection: ArrayNodeDefinition;
+      readonly member: 'identity-error';
+      readonly item?: never;
+      readonly issue?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly collection: ArrayNodeDefinition;
+      readonly item: ItemRuntimeSnapshot;
+      readonly member: Exclude<
+        CollectionTextMember,
+        'identity-error' | 'issue'
+      >;
+      readonly issue?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly collection: ArrayNodeDefinition;
+      readonly item: ItemRuntimeSnapshot;
       readonly member: 'issue';
       readonly issue: ValidationIssue;
     };
 export type TextResolutionContext =
-  FieldTextResolutionContext | ObjectTextResolutionContext;
+  | FieldTextResolutionContext
+  | ObjectTextResolutionContext
+  | CollectionTextResolutionContext;
 export interface TextResolver {
   resolve(text: string, context: TextResolutionContext): string;
 }
@@ -277,6 +436,30 @@ export type FieldPresence =
       readonly reason: 'missing-ancestor' | 'incompatible-ancestor';
       readonly at: DataPath;
     };
+export type ArrayPresence =
+  | { readonly kind: 'missing' }
+  | { readonly kind: 'array' }
+  | { readonly kind: 'incompatible'; readonly value: unknown }
+  | {
+      readonly kind: 'blocked';
+      readonly reason: 'missing-ancestor' | 'incompatible-ancestor';
+      readonly at: DataPath;
+    };
+export type CollectionIdentityState =
+  | { readonly kind: 'valid' }
+  | {
+      readonly kind: 'invalid';
+      readonly reason:
+        | 'sparse-item'
+        | 'non-object-item'
+        | 'missing-identity'
+        | 'identity-accessor'
+        | 'non-string-identity'
+        | 'blank-identity'
+        | 'duplicate-identity';
+      readonly index: number;
+      readonly firstIndex?: number;
+    };
 export interface FieldRuntimeSnapshot {
   readonly nodeKind: 'field';
   readonly key: string;
@@ -302,6 +485,36 @@ export interface ObjectRuntimeSnapshot {
   readonly showIssues: boolean;
   readonly children: readonly NodeRuntimeSnapshot[];
 }
+export interface ArrayRuntimeSnapshot {
+  readonly nodeKind: 'array';
+  readonly key: string;
+  readonly path: readonly string[];
+  readonly presence: ArrayPresence;
+  readonly identityState: CollectionIdentityState;
+  readonly dirty: boolean;
+  readonly touched: boolean;
+  readonly focused: boolean;
+  readonly valid: boolean;
+  readonly issues: readonly ValidationIssue[];
+  readonly showIssues: boolean;
+  readonly items: readonly ItemRuntimeSnapshot[];
+}
+export interface ItemRuntimeSnapshot {
+  readonly nodeKind: 'item';
+  readonly key: string;
+  readonly address: CollectionItemAddress;
+  readonly index: number;
+  readonly dataPath: DataPath;
+  readonly dirty: boolean;
+  readonly touched: boolean;
+  readonly focused: boolean;
+  readonly valid: boolean;
+  readonly issues: readonly ValidationIssue[];
+  readonly showIssues: boolean;
+  readonly children: readonly NodeRuntimeSnapshot[];
+  readonly fields: readonly FieldRuntimeSnapshot[];
+}
+export type RuntimeTreeSnapshot = NodeRuntimeSnapshot | ItemRuntimeSnapshot;
 export type NodeRuntimeSnapshot = ObjectRuntimeSnapshot | FieldRuntimeSnapshot;
 export interface FormRuntimeSnapshot<TData extends object> {
   readonly value: Readonly<TData>;
@@ -318,6 +531,8 @@ export interface FormScope {
   readonly paths: readonly DataPath[];
   readonly includeGlobalIssues?: boolean;
 }
+export type FormScopeTarget =
+  DataPath | CollectionItemAddress | CollectionNodeAddress;
 export interface ValidationSnapshot {
   readonly valid: boolean;
   readonly issues: readonly ValidationIssue[];

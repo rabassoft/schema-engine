@@ -76,9 +76,9 @@ separado antes de repetir la revisión.
 - El gate normativo está completado. PLAN-009 revisión 1 corrigió cuatro
   hallazgos de entrega y superó la revisión completa repetida sin hallazgos.
   Ricard lo aprobó explícitamente el 14 de julio de 2026.
-- El requisito de revisar ADR-005 antes de implementar está satisfecho por su
-  revisión 1 Accepted; PLAN-009 revisión 1 satisface el último gate y el próximo
-  paso es completar su checkpoint 7.
+- El requisito de revisar ADR-005 antes de implementar quedó satisfecho por su
+  revisión 1 Accepted; PLAN-009 revisión 1 satisfizo el último gate y sus siete
+  checkpoints están completados.
 - Checkpoint 1 completado: contratos Public core, helpers Internal iterativos de
   paths/definiciones, bridge plano, fixtures migradas y matriz completa verde.
 - Checkpoint 2 completado: compilación iterativa recursiva de schema/UI,
@@ -99,9 +99,10 @@ separado antes de repetir la revisión.
 
 ### Orden de dependencias a más largo plazo
 
-1. **M10 — Arrays (D-006):** solo después de aceptar el modelo de objetos
-   anidados. La revisión de promoción está aceptada y autoriza únicamente el
-   diseño normativo empezando por ADR-015; implementación inactiva.
+1. **M10 — Arrays (D-006):** ADR-015 revisión 4, ADR-005 revisión 2 y SPEC-003
+   v0.1.2 están aceptadas. PLAN-010 revisión 0 superó su revisión completa sin
+   hallazgos y está aprobado; implementación autorizada, checkpoint 1 todavía
+   no iniciado.
 2. **M11 — Resolución y composición de schemas (D-014 + D-007):** establecer el
    modelo intermedio resuelto antes de `$ref` y applicators.
 3. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de

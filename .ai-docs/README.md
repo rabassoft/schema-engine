@@ -14,6 +14,10 @@
 - [SPEC-001: Controlled Form Runtime](./specs/001-controlled-form-runtime.md)
 - [SPEC-002: Nested Object Controlled Runtime Extension](./specs/002-nested-object-runtime.md)
   — Accepted v0.1.2; implemented by completed PLAN-009.
+- [SPEC-003: Homogeneous Object Collection Controlled Runtime Extension](./specs/003-collection-runtime.md)
+  — Accepted v0.1.2 after F-001 through F-007 were closed and complete review
+  cycle 3 passed with zero findings. PLAN-010 is approved and checkpoint 1 is
+  complete.
 
 ## Acceptance reviews
 
@@ -39,10 +43,38 @@
 - [M10 arrays promotion review](./reviews/007-m10-arrays-promotion.md) — Accepted;
   D-006 is Promoted for a narrow stable-identity object-list design boundary,
   without implementation authorization.
+- [M10 SPEC-003 complete review — Cycles 1–3](./reviews/011-spec-003-review.md)
+  — Seven findings closed; cycle 3 passed all six areas with zero findings and
+  Ricard formally accepted the SPEC.
+- [M10 PLAN-010 complete review](./reviews/014-plan-010-review.md) — Revision 0
+  passed all nine areas with zero findings and Ricard formally approved it;
+  checkpoint 1 is complete and checkpoint 2 is next.
 
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)
+- [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
+  — Accepted revision 2; preserves M1–M9 and adds M10 design after complete
+  review cycle 3 passed with zero findings, without authorizing implementation.
+- [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
+  — Four findings corrected; cycle 3 passed all nine areas with zero findings
+  and Ricard accepted the revision.
+- [ADR-015: Collection templates, stable item identity and controlled structural operations](./adrs/015-modelo-colecciones-identidad-operaciones.md)
+  — Accepted revision 4 after the ordinary node text context was widened to
+  array definitions and passed complete review with zero findings;
+  implementation is authorized only through approved PLAN-010 checkpoints.
+- [ADR-015 complete review — Cycles 1–4](./reviews/008-adr-015-review.md) — Eleven
+  findings corrected across three cycles; cycle 4 passed all nine areas with
+  zero findings and Ricard accepted the decision.
+- [ADR-015 revision 2 complete review](./reviews/009-adr-015-revision-2-review.md)
+  — Narrow structural UI inventory correction passed all six areas with zero
+  findings and was accepted.
+- [ADR-015 revision 3 complete review](./reviews/012-adr-015-revision-3-review.md)
+  — Item-root issue text-context correction passed all six areas with zero
+  findings and was formally accepted.
+- [ADR-015 revision 4 complete review](./reviews/013-adr-015-revision-4-review.md)
+  — Collection-node ordinary text-context correction passed all six areas with
+  zero findings and was formally accepted.
 
 ## Roadmap and deferred decisions
 
@@ -60,13 +92,15 @@
 - [PLAN-007: Explicit native field clearing](./plans/007-explicit-native-field-clearing.md) — Completed revision 2
 - [PLAN-008: Experimental 0.1 artifact preparation](./plans/008-experimental-0-1-artifact-preparation.md) — Completed revision 2
 - [PLAN-009: Nested-object controlled runtime](./plans/009-nested-object-runtime.md) — Completed revision 1
+- [PLAN-010: Homogeneous object collection runtime](./plans/010-homogeneous-object-collections.md) — Approved revision 0; checkpoint 1 completed
 
 M1-M7 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
 increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
 `0.1.0` candidates. M8 completed without publication; M9 has accepted normative
 contracts. PLAN-009 revision 1 passed its repeated complete review and is
-approved and completed after its final zero-finding review. M10-M12 remain
-unapproved delivery commitments.
+approved and completed after its final zero-finding review. M10 has accepted
+normative contracts and approved PLAN-010 revision 0; checkpoint 1 is complete
+and checkpoint 2 is next. M11-M12 remain proposed only.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.
