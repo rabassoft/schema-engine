@@ -30,9 +30,10 @@ when more detail about the current dirty checkpoint is needed; search historical
 entries by identifier, milestone, or date when investigating the past.
 
 `STATUS.md` is the canonical current state. SPEC-001 is the primary behavioral
-source of truth. Pre-SPEC ADRs are subject to review when they conflict with it.
-When authoritative documents conflict, stop and report the conflict rather than
-silently choosing one.
+baseline; an Accepted extension SPEC is authoritative only for the promoted
+scope it explicitly replaces. Pre-SPEC ADRs are subject to review when they
+conflict with an Accepted SPEC. When authoritative documents conflict, stop and
+report the conflict rather than silently choosing one.
 
 ## Architectural constraints
 
@@ -51,13 +52,14 @@ silently choosing one.
 
 ## Current prototype boundary
 
-Only root object schemas; primitive `string`, `number`, `integer`, and `boolean`
-fields; the SPEC-001 JSON/UI Schema subset; synchronous external validation;
+Only root object schemas whose properties may recursively contain inline object
+groups and primitive `string`, `number`, `integer`, and `boolean` leaves; the
+SPEC-001/SPEC-002 JSON/UI Schema subset; synchronous external validation;
 controlled state; and Angular native HTML controls are in scope.
 
-Do not add nested objects, arrays, composition, async validation, optimistic
-state, advanced layouts, visual builders, plugins, undo/redo, or commercial
-features to the initial increment.
+Do not add arrays, references, composition, async validation, optimistic state,
+advanced layouts, custom object-container renderers, visual builders, plugins,
+undo/redo, or commercial features to the initial increment.
 
 ## Delivery workflow
 

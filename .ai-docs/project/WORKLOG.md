@@ -6,6 +6,78 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — D-006/M10 promotion accepted
+
+### Decision
+
+- Ricard explicitly accepted the zero-finding M10 promotion review.
+- D-006 moves from Deferred to Promoted for normative design work under the
+  narrow homogeneous inline-object list and application-owned stable string
+  identity boundary.
+- Acceptance authorizes drafting ADR-015, ADR-005 revision 2 and SPEC-003 in
+  order; it does not approve PLAN-010, implementation or publication.
+
+### Next
+
+- Draft ADR-015 for collection templates/instances, identity, paths,
+  operations, snapshots/scopes and Angular ownership without changing code.
+
+## 2026-07-14 — D-006/M10 promotion boundary reviewed
+
+### Result
+
+- Confirmed that M9 completion satisfies D-006's resumption condition.
+- Passed the promotion review with a narrow recommendation: homogeneous arrays
+  of inline object items with mandatory stable string identity owned by the
+  application.
+- Kept primitive/nested arrays, tuples, positional/runtime-generated identity,
+  schema-default insertion, batches, advanced layouts and publication outside
+  the proposed M10 boundary.
+- Defined the mandatory sequence ADR-015, ADR-005 revision 2, SPEC-003 and
+  reviewed/approved PLAN-010 before any implementation.
+
+### State
+
+- D-006 remains Deferred pending Ricard's explicit acceptance of the promotion
+  review. No architecture, Public contract, code or package behavior changed.
+
+### Next
+
+- Accept or reject the M10 promotion review. Acceptance authorizes normative
+  drafting only, never implementation.
+
+## 2026-07-14 — PLAN-009 checkpoint 7 and M9 completed
+
+### Review and corrections
+
+- Reviewed the complete PLAN-009 implementation against SPEC-001/SPEC-002,
+  ADR-005/ADR-014, all 15 conformance scenarios, declarations, packages and
+  deferred boundaries through repeated full-review cycles.
+- Corrected stale nested-object prohibitions and inactive-M9 statements in
+  recovery guidance, ROADMAP and ADR indexes/state summaries.
+- Closed evidence gaps for every nested primitive kind, zero-leaf object
+  presence/dirty, class-instance ancestors, validation-driven sibling sharing,
+  complete lookup behavior and recursive Angular locale/replacement lifecycle.
+- The final complete review passed with zero findings; PLAN-009 and M9 are
+  completed without activating M10 or publication.
+
+### Verification
+
+- Frozen-lockfile installation, format, lint, typecheck, both builds and
+  `git diff --check` pass.
+- All 171 core and 59 Angular tests pass (230 total).
+- Package smoke, built consumer and exact private artifact inventory pass.
+- Clean core plus Angular 22.0.6 lower/upper consumers pass against local
+  tarballs.
+- Root declarations match the accepted migration; manifests, versions,
+  dependencies, peers/exports, lockfile, publication state and Stable
+  classification are unchanged.
+
+### Next
+
+- Decide whether to promote D-006/M10 through a separate review. Arrays remain
+  Deferred and no implementation task is active.
+
 ## 2026-07-14 — PLAN-009 checkpoint 6 completed
 
 ### Delivery

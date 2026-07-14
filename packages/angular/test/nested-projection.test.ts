@@ -290,6 +290,54 @@ describe('Angular nested projection', () => {
     );
   });
 
+  it('retains recursive renderer identity for locale and destroys descendants on replacement', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaEngineAngular({
+          id: 'fake',
+          renderer: FakeRenderer,
+          tester: () => 1,
+        }),
+      ],
+    });
+    const fixture = TestBed.createComponent(NestedHost);
+    fixture.detectChanges();
+    TestBed.tick();
+    const street = FakeRenderer.instances.find(
+      (renderer) => renderer.field().name === 'street',
+    );
+    expect(FakeRenderer.created).toBe(3);
+    expect(FakeRenderer.destroyed).toBe(0);
+
+    fixture.componentInstance.locale.set('ca');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(
+      FakeRenderer.instances.find(
+        (renderer) =>
+          renderer.field().name === 'street' && renderer.locale() === 'ca',
+      ),
+    ).toBe(street);
+    expect(FakeRenderer.created).toBe(3);
+    expect(FakeRenderer.destroyed).toBe(0);
+
+    fixture.componentInstance.formId.set('replacement');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(
+      FakeRenderer.instances.find(
+        (renderer) =>
+          renderer.field().name === 'street' &&
+          renderer.formId() === 'replacement',
+      ),
+    ).not.toBe(street);
+    expect(FakeRenderer.created).toBe(6);
+    expect(FakeRenderer.destroyed).toBe(3);
+
+    fixture.destroy();
+    expect(FakeRenderer.destroyed).toBe(6);
+  });
+
   it('projects object text failures once per identity with exact diagnostics', () => {
     const issueValidator: SchemaValidator = {
       validate: () => ({

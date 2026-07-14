@@ -59,14 +59,14 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7 y M8 están completados bajo sus ADR y planes aceptados. M9-M12 continúan
-> como propuestas de planificación. La publicación real permanece Deferred en
-> D-040 y requiere una solicitud y aprobación explícitas.
+> M7-M9 están completados bajo sus ADR, SPEC y planes aceptados. M10-M12
+> continúan como propuestas de planificación. La publicación real permanece
+> Deferred en D-040 y requiere una solicitud y aprobación explícitas.
 
-### M9 — Objetos anidados
+### M9 — Objetos anidados — completado
 
-- D-005 promovido para diseño el 14 de julio de 2026 tras aceptar su revisión
-  de promoción; implementación inactiva.
+- D-005 promovido el 14 de julio de 2026 tras aceptar su revisión de promoción;
+  implementación autorizada únicamente por SPEC-002 y PLAN-009.
 - La revisión conjunta 3 de ADR-014 revisión 1 y ADR-005 revisión 1 pasó sin
   hallazgos ni conflictos documentales; ambas decisiones fueron aceptadas
   coordinadamente para diseño normativo sin activar implementación.
@@ -78,7 +78,7 @@ separado antes de repetir la revisión.
   Ricard lo aprobó explícitamente el 14 de julio de 2026.
 - El requisito de revisar ADR-005 antes de implementar está satisfecho por su
   revisión 1 Accepted; PLAN-009 revisión 1 satisface el último gate y el próximo
-  paso es su checkpoint 4.
+  paso es completar su checkpoint 7.
 - Checkpoint 1 completado: contratos Public core, helpers Internal iterativos de
   paths/definiciones, bridge plano, fixtures migradas y matriz completa verde.
 - Checkpoint 2 completado: compilación iterativa recursiva de schema/UI,
@@ -87,11 +87,21 @@ separado antes de repetir la revisión.
 - Checkpoint 3 completado: operaciones estructurales/form profundas iterativas,
   validación compartida de definiciones, materialización/clonado por cadena y
   fixtures migradas con matriz completa verde.
+- Checkpoint 4 completado: runtime, snapshots, interacción, scopes y sharing
+  anidados con recorrido iterativo y matriz completa verde.
+- Checkpoint 5 completado: proyección Angular recursiva, grupos semánticos,
+  textos/IDs de objetos y bloqueo de intenciones incompatibles.
+- Checkpoint 6 completado: declaraciones, paquetes, documentación, artefactos y
+  consumidores construidos/limpios migrados a la frontera anidada.
+- Checkpoint 7 completado: corrigió conflictos documentales y huecos de
+  evidencia, y la revisión integral repetida más toda la matriz finalizaron sin
+  hallazgos.
 
 ### Orden de dependencias a más largo plazo
 
 1. **M10 — Arrays (D-006):** solo después de aceptar el modelo de objetos
-   anidados.
+   anidados. La revisión de promoción está aceptada y autoriza únicamente el
+   diseño normativo empezando por ADR-015; implementación inactiva.
 2. **M11 — Resolución y composición de schemas (D-014 + D-007):** establecer el
    modelo intermedio resuelto antes de `$ref` y applicators.
 3. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de

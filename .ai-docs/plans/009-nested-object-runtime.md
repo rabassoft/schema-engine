@@ -1,12 +1,14 @@
 # PLAN-009: Nested-object controlled runtime
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-14
 - **Approval date:** 2026-07-14
+- **Completion date:** 2026-07-14
 - **Review revision:** 1
-- **Review state:** First-review corrections applied; repeated complete review
-  passed with zero findings; explicitly approved
-- **Implementation state:** Checkpoints 1–6 completed; checkpoint 7 pending
+- **Review state:** Approved-plan review, seven implementation checkpoints,
+  correction cycles, complete matrix and final repeated zero-finding review
+  passed
+- **Implementation state:** Checkpoints 1–7 completed
 - **Requires:** accepted
   [`SPEC-001` v0.1.15](../specs/001-controlled-form-runtime.md),
   [`SPEC-002` v0.1.2](../specs/002-nested-object-runtime.md),

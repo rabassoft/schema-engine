@@ -18,6 +18,8 @@ describe('nested object compiler', () => {
             properties: {
               zip: { type: 'integer', minimum: 0 },
               street: { type: 'string', enum: ['main', 'side'] },
+              line2: { type: 'string' },
+              latitude: { type: 'number', minimum: -90, maximum: 90 },
             },
             required: ['street'],
           },
@@ -48,7 +50,12 @@ describe('nested object compiler', () => {
       label: 'Postal address',
     });
     if (address?.kind !== 'object') return;
-    expect(address.children.map(({ name }) => name)).toEqual(['street', 'zip']);
+    expect(address.children.map(({ name }) => name)).toEqual([
+      'street',
+      'zip',
+      'line2',
+      'latitude',
+    ]);
     expect(address.children[0]).toMatchObject({
       path: ['address', 'street'],
       required: true,
@@ -60,9 +67,20 @@ describe('nested object compiler', () => {
     expect(result.definition.fields).toEqual([
       address.children[0],
       address.children[1],
+      address.children[2],
+      address.children[3],
       active,
     ]);
     expect(result.definition.fields[0]).toBe(address.children[0]);
+    expect(address.children[2]).toMatchObject({
+      kind: 'string',
+      path: ['address', 'line2'],
+    });
+    expect(address.children[3]).toMatchObject({
+      kind: 'number',
+      numericType: 'number',
+      path: ['address', 'latitude'],
+    });
     expect(Object.isFrozen(address.children)).toBe(true);
   });
 

@@ -600,10 +600,53 @@ describe('controlled runtime', () => {
     expect(address.children[0]).toBe(snapshot.fields[0]);
     expect(rt.getNodeSnapshot(['profile'])).toBe(profile);
     expect(rt.getNodeSnapshot(['profile', 'address'])).toBe(address);
+    expect(rt.getNodeSnapshot(['profile', 'address', 'street'])).toBe(
+      snapshot.fields[0],
+    );
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])).toBe(
+      snapshot.fields[0],
+    );
     expect(rt.getFieldSnapshot(['profile'])).toBeUndefined();
+    expect(rt.getNodeSnapshot(['unmanaged'])).toBeUndefined();
+    expect(rt.getNodeSnapshot(null as never)).toBeUndefined();
+    expect(rt.getNodeSnapshot([0])).toBeUndefined();
+    expect(rt.getNodeSnapshot([])).toBeUndefined();
     expect(Object.isFrozen(profile.children)).toBe(true);
     expect(Object.isFrozen(address.presence)).toBe(true);
   });
+
+  it.each([
+    [{}, {}, 'missing', false],
+    [{ empty: {} }, {}, 'object', true],
+    [{}, { empty: {} }, 'missing', true],
+    [{ empty: {} }, { empty: {} }, 'object', false],
+  ] as const)(
+    'models zero-leaf object value %j against baseline %j',
+    (value, baselineValue, presence, dirty) => {
+      const empty: ObjectFieldDefinition = {
+        key: '["empty"]',
+        name: 'empty',
+        path: ['empty'],
+        required: false,
+        label: 'Empty',
+        kind: 'object',
+        children: [],
+      };
+      const rt = runtime({
+        definition: { nodes: [empty], fields: [] },
+        value,
+        baselineValue,
+      });
+
+      expect(rt.getNodeSnapshot(['empty'])).toMatchObject({
+        nodeKind: 'object',
+        presence: { kind: presence },
+        dirty,
+        children: [],
+      });
+      expect(rt.getSnapshot()).toMatchObject({ dirty, fields: [] });
+    },
+  );
 
   it('models missing ancestors while allowing deep set and interaction', () => {
     const rt = nestedRuntime({ value: { name: 'Ada' } });
@@ -672,6 +715,32 @@ describe('controlled runtime', () => {
         Object.isFrozen(result.diagnostics[0]?.parameters.blockingPath),
       ).toBe(true);
     }
+  });
+
+  it('rejects actions below a class-instance ancestor without retaining it', () => {
+    class ProfileModel {}
+    const profile = new ProfileModel();
+    const rt = nestedRuntime({ value: { profile, name: 'Ada' } });
+    const result = rt.requestSetValue(['profile', 'address', 'street'], 'New');
+
+    expect(result).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          code: 'INCOMPATIBLE_RUNTIME_ANCESTOR',
+          parameters: {
+            blockingPath: ['profile'],
+            actualType: 'object',
+          },
+        },
+      ],
+    });
+    expect(
+      result.diagnostics.some(
+        ({ parameters }) =>
+          parameters === profile || Object.values(parameters).includes(profile),
+      ),
+    ).toBe(false);
   });
 
   it('rejects managed accessors before validation and rolls updates back atomically', () => {
@@ -803,6 +872,48 @@ describe('controlled runtime', () => {
         presence: { reason: 'incompatible-ancestor' },
       },
     );
+  });
+
+  it('rebuilds a validated sibling while retaining an unchanged third subtree', () => {
+    const validator = {
+      validate: (_schema: unknown, value: unknown): ValidationResult => {
+        const street = (
+          value as { profile?: { address?: { street?: unknown } } }
+        ).profile?.address?.street;
+        return street === 'Side'
+          ? {
+              valid: false,
+              issues: [
+                {
+                  code: 'city-for-street',
+                  path: ['profile', 'address', 'city'],
+                  parameters: {},
+                },
+              ],
+            }
+          : { valid: true, issues: [] };
+      },
+    };
+    const rt = nestedRuntime({ validator });
+    const street = rt.getFieldSnapshot(['profile', 'address', 'street']);
+    const city = rt.getFieldSnapshot(['profile', 'address', 'city']);
+    const name = rt.getFieldSnapshot(['name']);
+
+    expect(
+      rt.updateExternalState({
+        value: { profile: { address: { street: 'Side' } }, name: 'Ada' },
+      }),
+    ).toMatchObject({ success: true });
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])).not.toBe(
+      street,
+    );
+    expect(rt.getFieldSnapshot(['profile', 'address', 'city'])).not.toBe(city);
+    expect(
+      rt
+        .getFieldSnapshot(['profile', 'address', 'city'])
+        ?.issues.map(({ code }) => code),
+    ).toEqual(['city-for-street']);
+    expect(rt.getFieldSnapshot(['name'])).toBe(name);
   });
 
   it('constructs and queries a finite deeply nested runtime iteratively', () => {

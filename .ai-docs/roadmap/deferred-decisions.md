@@ -72,23 +72,29 @@ Cada decisión debe registrar:
 - **Revisión de promoción:**
   [`M9 — Nested-object promotion review`](../reviews/002-m9-nested-object-promotion.md)
   fue aceptada el 14 de julio de 2026 y promueve una frontera estrecha de
-  objetos inline con hojas primitivas existentes para trabajo de diseño. No se
-  activa la implementación de M9.
+  objetos inline con hojas primitivas existentes para trabajo de diseño. En ese
+  checkpoint todavía no se activó la implementación de M9.
 - **Documentos requeridos:** ADR-014, ADR-005 revisión 1, SPEC-002 y PLAN-009,
   todos revisados y aceptados antes de implementar.
 - **Estado de diseño:** ADR-014 revisión 2, ADR-005 revisión 1 y SPEC-002 v0.1.2
   están Accepted tras revisiones completas sin hallazgos. PLAN-009 revisión 1
   también superó su revisión repetida y fue aprobado explícitamente. Todos los
-  gates de M9 están satisfechos; checkpoints 1–6 están completados y la matriz
-  completa con revisión final permanece pendiente de checkpoint 7.
+  gates de M9 están satisfechos; PLAN-009 y sus siete checkpoints están
+  completados tras una revisión final repetida y matriz sin hallazgos.
 
 ## D-006: Arrays
 
-- **Estado:** Deferred
+- **Estado:** Promoted
 - **Pregunta:** ¿Cómo modelar elementos, índices, identidad estable, inserción, borrado y movimiento?
 - **Motivo:** Requiere nuevas operaciones y una identidad diferente de la posición.
 - **Retomar cuando:** Se haya definido el modelo de objetos anidados.
 - **Documento esperado:** SPEC de colecciones y operaciones estructurales.
+- **Revisión de promoción aceptada:**
+  [`M10 — Arrays promotion review`](../reviews/007-m10-arrays-promotion.md)
+  confirma que la condición de reanudación está satisfecha y acepta una
+  frontera estrecha de listas homogéneas de objetos inline con identidad string
+  estable propiedad de la aplicación. D-006 queda Promoted únicamente para
+  diseño normativo; no se autoriza implementación ni publicación.
 
 ## D-007: Composición y condicionales de JSON Schema
 
@@ -422,21 +428,26 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-005 — Objetos anidados:** ejecutar únicamente el checkpoint 7 del
-   PLAN-009 revisión 1 aprobado y conservar todas sus fronteras.
+1. **D-006 — Arrays:** preparar ADR-015 para el modelo template/instancia,
+   identidad, paths, operaciones, snapshots/scopes y ownership Angular bajo la
+   frontera M10 aceptada; no implementar.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
-de M8; D-040 conserva la publicación como Deferred, D-005 está Promoted dentro
-del alcance aprobado de M9 y todas las demás entradas mantienen su estado hasta
-una promoción y aprobación explícitas.
+de M8; D-040 conserva la publicación como Deferred, D-005 está implementado
+dentro del alcance de M9 aunque conserva su estado registral Promoted, D-006
+queda Promoted únicamente para diseño M10 y todas las demás entradas mantienen
+su estado hasta una promoción y aprobación explícitas.
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                              |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | Se acepta la revisión de promoción M10; D-006 queda Promoted para diseño normativo, sin autorizar implementación.                   |
+| 14-07-2026 | Revisión de promoción M10 pasa sin hallazgos y recomienda D-006 para diseño estrecho; aceptación sigue pendiente.                   |
+| 14-07-2026 | PLAN-009 checkpoint 7 supera revisión integral repetida y matriz completa; M9 queda completado sin activar M10 ni publicación.      |
 | 14-07-2026 | PLAN-009 checkpoint 6 migra paquetes, declaraciones, artefactos y consumidores limpios; checkpoint 7 queda pendiente.               |
 | 14-07-2026 | PLAN-009 checkpoint 5 completa la proyección Angular recursiva y accesible; checkpoint 6 queda pendiente.                           |
 | 14-07-2026 | PLAN-009 checkpoint 4 completa runtime, snapshots, scopes y sharing anidados; checkpoint 5 queda pendiente.                         |

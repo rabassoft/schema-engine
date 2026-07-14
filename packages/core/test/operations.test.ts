@@ -611,6 +611,7 @@ describe('deep immutable operations', () => {
     [null, 'null'],
     [[], 'array'],
     [1, 'number'],
+    [new (class Model {})(), 'object'],
   ])(
     'rejects incompatible ancestor %j atomically',
     (ancestor, expectedType) => {

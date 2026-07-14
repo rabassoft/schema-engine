@@ -13,7 +13,7 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 
 The repository contains the completed M1-M8 controlled-form prototype and
 private local release candidates. Its G0 review passed, SPEC-001 v0.1.15 and
-SPEC-002 v0.1.2 are Accepted, and PLAN-009 is implementing the approved M9
+SPEC-002 v0.1.2 are Accepted, and completed PLAN-009 implements the M9
 nested-object extension. The remaining sequence is recorded in the
 [roadmap](./.ai-docs/project/ROADMAP.md).
 

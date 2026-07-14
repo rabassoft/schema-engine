@@ -49,18 +49,18 @@ runtime behavior.
 
 The active prototype remains limited to:
 
-- root object schemas;
-- primitive `string`, `number`, `integer`, and `boolean` fields;
-- the explicit JSON Schema and UI Schema subset in SPEC-001;
+- root object schemas with recursive inline object properties;
+- primitive `string`, `number`, `integer`, and `boolean` leaves;
+- the explicit JSON Schema and UI Schema subsets in SPEC-001 and SPEC-002;
 - synchronous validation through an external adapter;
 - application ownership of `value` and `baselineValue`;
 - immutable snapshots, subscriptions, and strict incremental operations;
 - Angular with native HTML controls as the first adapter.
 
-Do not introduce nested objects, arrays, composition, async validation,
-optimistic state, persistence, advanced layouts, visual builders, plugin
-systems, undo/redo, or another deferred capability without an approved SPEC,
-ADR, or plan.
+Do not introduce arrays, references, composition, async validation, optimistic
+state, persistence, advanced layouts, custom object-container renderers, visual
+builders, plugin systems, undo/redo, or another deferred capability without an
+approved SPEC, ADR, or plan.
 
 ## Task boundary and closure
 

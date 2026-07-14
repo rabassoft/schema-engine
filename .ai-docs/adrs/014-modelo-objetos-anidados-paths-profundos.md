@@ -14,8 +14,7 @@
 - **Accepted behavioral contract:**
   [`SPEC-002`](../specs/002-nested-object-runtime.md)
 - **Implementation plan:**
-  [`PLAN-009 revision 1`](../plans/009-nested-object-runtime.md), Approved;
-  checkpoints 1–6 completed
+  [`PLAN-009 revision 1`](../plans/009-nested-object-runtime.md), Completed
 
 ## 1. Context
 
@@ -37,8 +36,8 @@ normative design only; PLAN-009 revision 1 subsequently passed its separate
 review and approval gate, with implementation not yet started.
 Checkpoints 1–6 subsequently implemented the neutral contracts/helpers,
 recursive schema/UI compiler, deep controlled operations/runtime, Angular
-projection and package/consumer migration. Final complete verification and
-implementation review remain pending checkpoint 7.
+projection and package/consumer migration. Checkpoint 7 then passed the final
+complete verification and repeated zero-finding implementation review.
 
 ### 2.1 Normalized nodes and leaf projection
 
@@ -473,4 +472,5 @@ approved without starting implementation.
 Checkpoint 1 later completed the neutral contracts and iterative helper
 foundation without implementing recursive compiler behavior.
 Checkpoints 2–6 subsequently completed the compiler, operations, runtime,
-Angular and package/consumer slices; checkpoint 7 remains the final review gate.
+Angular and package/consumer slices; checkpoint 7 completed the final review
+and verification gate.
