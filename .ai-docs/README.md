@@ -12,12 +12,28 @@
 ## Specifications
 
 - [SPEC-001: Controlled Form Runtime](./specs/001-controlled-form-runtime.md)
+- [SPEC-002: Nested Object Controlled Runtime Extension](./specs/002-nested-object-runtime.md)
+  — Accepted v0.1.2; M9 behavior is normative but not implemented.
 
 ## Acceptance reviews
 
 - [G0: SPEC-001 acceptance evidence](./reviews/001-spec-001-acceptance.md) —
   Passed; 22/22 criteria, consumer, complete verification, and repeated
   end-to-end review passed. SPEC-001 v0.1.14 is Accepted.
+- [M9: Nested-object promotion review](./reviews/002-m9-nested-object-promotion.md)
+  — Accepted; D-005 is Promoted for normative design under the reviewed narrow
+  boundary, with implementation still inactive.
+- [M9 ADR joint review — Cycles 1–3](./reviews/003-m9-adr-review.md) — Repeated
+  review 3 passed with zero findings; ADR-014 revision 1 and ADR-005 revision 1
+  were accepted coordinately without authorizing implementation.
+- [M9 SPEC-002 complete review — Cycles 1–2](./reviews/004-m9-spec-002-review.md)
+  — Six corrections applied; repeated review 2 passed with zero findings.
+  ADR-014 revision 2 and SPEC-002 v0.1.2 were accepted in order without
+  authorizing implementation.
+- [M9 PLAN-009 complete review — Cycles 1–2](./reviews/005-plan-009-review.md)
+  — Four delivery corrections applied; repeated review 2 passed with zero
+  findings. PLAN-009 revision 1 was explicitly approved; implementation has not
+  started.
 
 ## Architecture Decision Records
 
@@ -38,11 +54,14 @@
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
 - [PLAN-007: Explicit native field clearing](./plans/007-explicit-native-field-clearing.md) — Completed revision 2
 - [PLAN-008: Experimental 0.1 artifact preparation](./plans/008-experimental-0-1-artifact-preparation.md) — Completed revision 2
+- [PLAN-009: Nested-object controlled runtime](./plans/009-nested-object-runtime.md) — Approved revision 1; implementation not started
 
 M1-M7 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
 increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
-`0.1.0` candidates. M8 completed without publication; M9-M12 remain unapproved
+`0.1.0` candidates. M8 completed without publication; M9 has accepted normative
+contracts. PLAN-009 revision 1 passed its repeated complete review and is
+approved; M9 implementation has not started and M10-M12 remain unapproved
 delivery commitments.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

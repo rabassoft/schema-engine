@@ -1,11 +1,16 @@
 # ADR 005: Política de dialecto y compatibilidad de JSON Schema
 
-- **Estado:** Accepted
+- **Estado:** Accepted revision 1
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
+- **Revisión aceptada:** 1 — 14 de julio de 2026
+- **Fecha de aceptación de revisión 1:** 14 de julio de 2026
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md)
 - **Revisado parcialmente por:**
   [`ADR-011`](./011-enum-string-normalizado-select-nativo.md)
+- **Revisión 1 coordinada con:**
+  [`ADR-014`](./014-modelo-objetos-anidados-paths-profundos.md) y
+  [`SPEC-002`](../specs/002-nested-object-runtime.md)
 
 ## 1. Contexto y problema
 
@@ -217,3 +222,164 @@ de keywords. Esta enmienda no sustituye la política de dialecto, keywords
 desconocidas, diagnósticos deterministas ni validación externa de esta ADR; solo
 retira `enum` de la categoría genérica de keyword conocida no soportada para el
 caso string definido por ADR-011.
+
+## 10. Revisión 1 aceptada — objetos inline recursivos
+
+> Esta sección amplía la decisión Accepted de las secciones 1–9 y es
+> autoritativa desde su aceptación coordinada con ADR-014. SPEC-002 v0.1.2 fue
+> aceptada posteriormente; ni esta revisión ni la SPEC autorizan por sí solas la
+> implementación de objetos anidados sin PLAN-009 aprobado.
+
+### 10.1 Motivo y frontera
+
+La promoción aceptada de D-005 activa el criterio de revisión de la sección 7.
+La revisión mantiene Draft 2020-12, una única URI canónica, la clasificación de
+keywords, los warnings deterministas y la validación externa. Amplía únicamente
+los objetos de schema inspeccionados desde raíz + campos directos a una
+estructura recursiva de propiedades object inline.
+
+Siguen sin soportarse arrays, `$ref`, `$defs`, recursos, anchors, resolución
+remota, composición, condicionales, vocabularios personalizados y dialectos
+adicionales.
+
+### 10.2 Ubicaciones de schema soportadas
+
+El compilador inspeccionará:
+
+1. el schema raíz object;
+2. cada schema propio contenido directamente en `properties` de un object
+   soportado; y
+3. recursivamente, los `properties` de un campo con `type: "object"` válido.
+
+La raíz conserva `$schema`, `type`, `properties`, `required`, `title` y
+`description`. Un object de campo soporta `type`, `properties`, `required`,
+`title`, `description` y `default`. `default` sigue siendo metadata y no se
+aplica ni se copia a la definición normalizada.
+
+Cada object, incluida una propiedad object vacía, debe declarar una data
+property propia `properties` cuyo valor sea un object ordinario con prototype
+`Object.prototype` o null. `required` continúa siendo opcional y solo puede
+nombrar propiedades hermanas. Una entrada requerida no gestionada produce
+`UNMANAGED_REQUIRED_PROPERTY` en el object que la declara.
+
+El `title` de un object, cuando esté presente, deberá ser una string no blank;
+un valor inválido produce `INVALID_SCHEMA_KEYWORD_VALUE` con
+`expected: 'non-blank string'`. Si está ausente, el nombre local será el
+fallback accesible cuando sea no blank; para un nombre vacío o compuesto solo
+por espacios se usará `JSON.stringify(name)`. Esta regla no cambia el
+tratamiento Accepted de `title` en hojas primitive.
+
+Los schemas primitive conservan el catálogo de SPEC-001 y la enmienda ADR-011,
+con una única ampliación de ubicación: el subconjunto `enum` string aceptado se
+soporta en cualquier hoja primitive alcanzada mediante una cadena válida de
+`properties` inline, no solo en una propiedad directa de la raíz. `enum` sobre
+number, integer, boolean u object de campo continúa siendo
+`INCOMPATIBLE_SCHEMA_KEYWORD`; `enum` en la raíz conserva el
+`UNSUPPORTED_SCHEMA_KEYWORD` aceptado por ADR-011.
+
+El catálogo cerrado por ubicación es:
+
+| Ubicación           | Soportadas                                                          | Incompatibles en esa ubicación                                                  |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| object de campo     | `type`, `properties`, `required`, `title`, `description`, `default` | `enum`, `minLength`, `maxLength`, `pattern`, `minimum`, `maximum`, `multipleOf` |
+| hoja string         | catálogo string Accepted, incluido `enum` ADR-011                   | `properties`, `required`, constraints numéricas                                 |
+| hoja number/integer | catálogo numérico Accepted                                          | `properties`, `required`, `enum`, constraints string                            |
+| hoja boolean        | catálogo boolean Accepted                                           | `properties`, `required`, `enum` y constraints string/numéricas                 |
+
+`$comment`, `deprecated`, `readOnly`, `writeOnly`, `examples`, `format`,
+`contentEncoding`, `contentMediaType` y `contentSchema` conservan
+`IGNORED_SCHEMA_KEYWORD` tanto en objects de campo como en hojas primitive.
+`$ref`, `$dynamicRef`, `$defs`, `$id`, `$anchor`, `$dynamicAnchor`,
+`$vocabulary`, applicators, condicionales, keywords de array y keywords de
+recursos conocidas permanecen `UNSUPPORTED_SCHEMA_KEYWORD` en cualquier nodo
+de campo. También permanecen no soportadas `const`, `additionalProperties`,
+`patternProperties`, `propertyNames`, `minProperties`, `maxProperties`,
+`dependentRequired`, `dependentSchemas` y `unevaluatedProperties`; ninguna de
+estas keywords se interpreta como editor de claves y su contenido no se
+recorre.
+
+`$schema` solo se interpreta en la raíz del documento. Una declaración nested
+no crea un recurso ni cambia dialecto y se diagnostica como keyword no
+soportada. El contenido de una keyword desconocida continúa siendo opaco y no
+se recorre buscando subschemas.
+
+### 10.3 Traversal descriptor-safe y ciclos
+
+- Toda propiedad estructural se obtiene mediante su descriptor propio; ningún
+  accessor se ejecuta.
+- Los nombres de propiedades se recorren mediante `Object.keys(properties)`.
+- Cada schema hijo debe ser un object ordinario no array con data properties
+  propias para los miembros inspeccionados.
+- La identidad de cada object de schema se registra solo en la cadena activa de
+  ancestros. Reutilizar el mismo object en ramas hermanas se compila por cada
+  ruta; reencontrarlo en su propia cadena produce `CYCLIC_SCHEMA_OBJECT`.
+- Una rama cíclica o estructuralmente inválida se detiene sin impedir recopilar
+  diagnósticos independientes de ramas hermanas.
+- La implementación deberá soportar profundidad finita sin depender de una
+  recursión JS no acotada; M9 no introduce un límite público arbitrario.
+
+### 10.4 Orden de diagnósticos
+
+El orden global será:
+
+1. entrada y dialecto raíz;
+2. schema en depth-first pre-order siguiendo el orden de propiedades;
+3. para cada object, forma exterior y keywords del propio nodo antes de sus
+   hijos;
+4. para cada primitive, diagnósticos de tipo/keywords antes de UI Schema; y
+5. UI Schema en el mismo recorrido estructural después de terminar los
+   diagnósticos de schema independientemente recopilables.
+
+Un error que impide conocer la clase de un nodo suprime solo diagnósticos
+derivados de esa rama. Un error de forma exterior independiente del UI node
+correspondiente puede seguir emitiéndose según SPEC-002.
+
+`documentPath` reproduce la ruta exacta del documento, por ejemplo
+`['properties', 'address', 'properties', 'street', 'minLength']`.
+`dataPath` reproduce la ruta de datos, por ejemplo `['address', 'street']`.
+Los diagnósticos de un object usan su propia ruta; los de raíz no incluyen
+`dataPath`.
+
+### 10.5 Diagnóstico de ciclo
+
+Se añade a la propuesta:
+
+| Código                 | Severidad | Fuente   | Comportamiento         |
+| ---------------------- | --------- | -------- | ---------------------- |
+| `CYCLIC_SCHEMA_OBJECT` | `error`   | `schema` | Bloquea la compilación |
+
+Sus parámetros serán `{ firstDocumentPath }`, con copia inmutable de la primera
+ubicación activa del mismo object. `documentPath` y `dataPath` señalarán la
+ubicación que cierra el ciclo. No se inspeccionará el contenido de la rama
+cíclica.
+
+### 10.6 Compatibilidad y validación externa
+
+Aceptar un object inline no implica validar por completo Draft 2020-12. El
+compilador sigue determinando si puede crear la definición neutral; el puerto
+`SchemaValidator` conserva autoridad sobre la validez del dato, incluida la
+obligatoriedad y los tipos object en el valor externo.
+
+La revisión no convierte unknown keywords en errores, no recorre extensiones
+opacas y no permite `additionalProperties` como editor de claves arbitrarias.
+
+### 10.7 Criterios de aceptación satisfechos
+
+La revisión deberá comprobar:
+
+1. conservación exacta de la política Accepted para dialecto y unknowns;
+2. catálogo object/primitive cerrado en cada ubicación;
+3. traversal descriptor-safe, ciclos y profundidad finita;
+4. `documentPath`, `dataPath`, orden y branch stopping deterministas;
+5. consistencia con el árbol normalizado y UI estructural de ADR-014;
+6. exclusión de arrays, refs, recursos, composición y dialectos adicionales;
+7. fixtures válidos y malformed a múltiples profundidades; y
+8. ausencia de autorización de implementación o publicación.
+
+Tras cada corrección se repitió la revisión completa. La revisión conjunta 3
+superó las ocho áreas sin hallazgos ni conflictos documentales y Ricard aceptó
+coordinadamente esta revisión y ADR-014 revisión 1 el 14 de julio de 2026.
+SPEC-002 v0.1.2 superó después su gate separado y extiende la conducta de
+SPEC-001 solo para M9. PLAN-009 revisión 1 superó posteriormente su revisión
+repetida y fue aprobado explícitamente; la aprobación no inició implementación
+ni autorizó publicación.

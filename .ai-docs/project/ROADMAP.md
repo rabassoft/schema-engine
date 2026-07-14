@@ -65,11 +65,21 @@ separado antes de repetir la revisión.
 
 ### M9 — Objetos anidados
 
-- Candidato de origen: D-005.
-- Promover la capacidad mediante una nueva SPEC y las ADR necesarias para
-  contenedores normalizados, paths profundos, operaciones inmutables, semántica
-  del runtime, scopes, diagnósticos, IDs y renderizado Angular recursivo.
-- Revisar ADR-005 antes de implementar, como exigen sus criterios de revisión.
+- D-005 promovido para diseño el 14 de julio de 2026 tras aceptar su revisión
+  de promoción; implementación inactiva.
+- La revisión conjunta 3 de ADR-014 revisión 1 y ADR-005 revisión 1 pasó sin
+  hallazgos ni conflictos documentales; ambas decisiones fueron aceptadas
+  coordinadamente para diseño normativo sin activar implementación.
+- ADR-014 revisión 2 y SPEC-002 v0.1.2 corrigieron los seis hallazgos de la
+  primera revisión, superaron la revisión completa repetida y fueron aceptadas
+  explícitamente en ese orden.
+- El gate normativo está completado. PLAN-009 revisión 1 corrigió cuatro
+  hallazgos de entrega y superó la revisión completa repetida sin hallazgos.
+  Ricard lo aprobó explícitamente el 14 de julio de 2026; la implementación aún
+  no ha comenzado.
+- El requisito de revisar ADR-005 antes de implementar está satisfecho por su
+  revisión 1 Accepted; PLAN-009 revisión 1 satisface el último gate y el próximo
+  paso es iniciar únicamente su checkpoint 1.
 
 ### Orden de dependencias a más largo plazo
 

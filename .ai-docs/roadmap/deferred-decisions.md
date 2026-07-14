@@ -65,10 +65,21 @@ Cada decisión debe registrar:
 
 ## D-005: Objetos anidados
 
-- **Estado:** Candidate
+- **Estado:** Promoted
 - **Pregunta:** ¿Cómo representar, compilar, renderizar y operar sobre objetos anidados?
 - **Motivo:** Requiere resolver contenedores, paths profundos, layouts y errores de ramas.
 - **Retomar cuando:** El walking skeleton de campos raíz esté cubierto por pruebas.
+- **Revisión de promoción:**
+  [`M9 — Nested-object promotion review`](../reviews/002-m9-nested-object-promotion.md)
+  fue aceptada el 14 de julio de 2026 y promueve una frontera estrecha de
+  objetos inline con hojas primitivas existentes para trabajo de diseño. No se
+  activa la implementación de M9.
+- **Documentos requeridos:** ADR-014, ADR-005 revisión 1, SPEC-002 y PLAN-009,
+  todos revisados y aceptados antes de implementar.
+- **Estado de diseño:** ADR-014 revisión 2, ADR-005 revisión 1 y SPEC-002 v0.1.2
+  están Accepted tras revisiones completas sin hallazgos. PLAN-009 revisión 1
+  también superó su revisión repetida y fue aprobado explícitamente. Todos los
+  gates de M9 están satisfechos; la implementación aún no ha comenzado.
 
 ## D-006: Arrays
 
@@ -152,6 +163,11 @@ Cada decisión debe registrar:
 - **Estado:** Research
 - **Pregunta:** ¿Se necesita un AST, un grafo de schema resuelto, un modelo normalizado y/o un render plan separados?
 - **Motivo:** No debe imponerse terminología de compiladores sin validar las responsabilidades reales.
+- **Resolución parcial aceptada:** ADR-014 revisión 2 selecciona para D-005 un
+  árbol normalizado de nodos con una proyección de hojas enlazada por identidad.
+- **Frontera restante:** El AST genérico, grafo resuelto, render plan separado,
+  pipeline multi-formato y versionado del modelo intermedio continúan en
+  Research.
 - **Retomar cuando:** Se implementen objetos, referencias o múltiples formatos de entrada.
 - **Documento esperado:** ADR sobre pipeline de compilación y compatibilidad del modelo intermedio.
 
@@ -403,42 +419,47 @@ Cada decisión debe registrar:
   con D-034, seguido de un plan aprobado para registry, access, provenance,
   credenciales, tags y rollback.
 
-## 4. Próximas decisiones a promover
+## 4. Próximo trabajo de decisión
 
-Las entradas más cercanas a convertirse en ADR son:
-
-1. **D-040 — Publicación real**, solo después de completar M8 y recibir una
+1. **D-005 — Objetos anidados:** iniciar únicamente el checkpoint 1 del
+   PLAN-009 revisión 1 aprobado y conservar todas sus fronteras.
+2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
-2. **D-005 — Objetos anidados.**
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
-de M8; D-040 conserva la publicación como Deferred, D-005 continúa Candidate y
-todas las demás entradas mantienen su estado hasta una promoción y aprobación
-explícitas.
+de M8; D-040 conserva la publicación como Deferred, D-005 está Promoted dentro
+del alcance aprobado de M9 y todas las demás entradas mantienen su estado hasta
+una promoción y aprobación explícitas.
 
 ## 5. Historial
 
-| Fecha      | Cambio                                                                                                                          |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| 14-07-2026 | PLAN-008 y M8 se completan con candidatos privados 0.1.0 verificados; D-040 y D-034 continúan Deferred.                         |
-| 14-07-2026 | PLAN-008 revision 2 supera la revisión formal repetida; M8 sigue inactivo y D-040 continúa Deferred.                            |
-| 14-07-2026 | Se acepta ADR-013 revision 1; D-040 sigue Deferred y PLAN-008 puede pasar a revisión sin activar M8.                            |
-| 14-07-2026 | ADR-013 revision 1 supera la revisión formal repetida; D-040 continúa Deferred y la aceptación sigue pendiente.                 |
-| 14-07-2026 | Se propone ADR-013 y PLAN-008 para preparar artefactos 0.1 locales; D-040 separa y difiere la publicación real.                 |
-| 14-07-2026 | Se acepta ADR-012 revision 1, D-010 queda Promoted y M7 avanza a sincronización de SPEC y preparación de PLAN-007.              |
-| 14-07-2026 | ADR-012 revision 1 supera sus ocho criterios tras precisar foco, accesibilidad y migración; D-010 sigue Candidate.              |
-| 14-07-2026 | Se propone ADR-012 para revisar la limpieza explícita nativa; D-010 permanece Candidate y M7 no está activo.                    |
-| 14-07-2026 | G0 se completa y SPEC-001 v0.1.14 queda Accepted sin promover ninguna decisión diferida ni API a Stable.                        |
-| 14-07-2026 | G0 difiere como D-038 y D-039 los helpers no implementados de baseline parcial y aplicación explícita de defaults.              |
-| 14-07-2026 | PLAN-006 y M6 se completan con enum string normalizado y select Angular controlado, manteniendo las exclusiones diferidas.      |
-| 13-07-2026 | M6 comienza y completa el paso 1 de contratos neutrales de PLAN-006 sin activar otra decisión aplazada.                         |
-| 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                            |
-| 13-07-2026 | Se acepta ADR-011, D-008 se promueve y `const`/`format` se separan como D-036 y D-037 sin activar su implementación.            |
-| 13-07-2026 | D-024 registra custom renderers como resueltos por ADR-007/009 y aplaza el bridge Angular hasta existir un consumidor concreto. |
-| 13-07-2026 | Se acepta ADR-010, ADR-002 queda Superseded y D-028 se promueve con versionado y compatibilidad explícitos.                     |
-| 13-07-2026 | Se propone ADR-010 para resolver D-028 y sustituir el lockstep Angular del ADR-002 pre-SPEC.                                    |
-| 13-07-2026 | Se acepta ADR-009 y D-029 se promueve con la frontera pública y la política de estabilidad iniciales.                           |
-| 13-07-2026 | Se propone ADR-009 para delimitar la API pública y su política de estabilidad; D-029 permanece Candidate hasta su aceptación.   |
-| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes.              |
-| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                                           |
+| Fecha      | Cambio                                                                                                                              |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | Se aprueba PLAN-009 revisión 1 tras la revisión repetida sin hallazgos; la implementación de M9 aún no ha comenzado.                |
+| 14-07-2026 | PLAN-009 revisión 1 corrige cuatro hallazgos y supera la revisión completa repetida; aprobación e implementación siguen pendientes. |
+| 14-07-2026 | Se aceptan ADR-014 revision 2 y SPEC-002 v0.1.2 tras revisión sin hallazgos; PLAN-009 sigue pendiente y M9 inactivo.                |
+| 14-07-2026 | ADR-014 revision 2 propuesta y SPEC-002 v0.1.2 corrigen seis hallazgos; la revisión repetida pasa y la aceptación queda pendiente.  |
+| 14-07-2026 | Se aceptan coordinadamente ADR-014 revision 1 y ADR-005 revision 1; SPEC-002 y la implementación de M9 siguen pendientes.           |
+| 14-07-2026 | Se acepta la revisión de promoción, D-005 pasa a Promoted para diseño y se proponen ADR-014, ADR-005 revisión 1 y SPEC-002.         |
+| 14-07-2026 | PLAN-008 y M8 se completan con candidatos privados 0.1.0 verificados; D-040 y D-034 continúan Deferred.                             |
+| 14-07-2026 | PLAN-008 revision 2 supera la revisión formal repetida; M8 sigue inactivo y D-040 continúa Deferred.                                |
+| 14-07-2026 | Se acepta ADR-013 revision 1; D-040 sigue Deferred y PLAN-008 puede pasar a revisión sin activar M8.                                |
+| 14-07-2026 | ADR-013 revision 1 supera la revisión formal repetida; D-040 continúa Deferred y la aceptación sigue pendiente.                     |
+| 14-07-2026 | Se propone ADR-013 y PLAN-008 para preparar artefactos 0.1 locales; D-040 separa y difiere la publicación real.                     |
+| 14-07-2026 | Se acepta ADR-012 revision 1, D-010 queda Promoted y M7 avanza a sincronización de SPEC y preparación de PLAN-007.                  |
+| 14-07-2026 | ADR-012 revision 1 supera sus ocho criterios tras precisar foco, accesibilidad y migración; D-010 sigue Candidate.                  |
+| 14-07-2026 | Se propone ADR-012 para revisar la limpieza explícita nativa; D-010 permanece Candidate y M7 no está activo.                        |
+| 14-07-2026 | G0 se completa y SPEC-001 v0.1.14 queda Accepted sin promover ninguna decisión diferida ni API a Stable.                            |
+| 14-07-2026 | G0 difiere como D-038 y D-039 los helpers no implementados de baseline parcial y aplicación explícita de defaults.                  |
+| 14-07-2026 | PLAN-006 y M6 se completan con enum string normalizado y select Angular controlado, manteniendo las exclusiones diferidas.          |
+| 13-07-2026 | M6 comienza y completa el paso 1 de contratos neutrales de PLAN-006 sin activar otra decisión aplazada.                             |
+| 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                                |
+| 13-07-2026 | Se acepta ADR-011, D-008 se promueve y `const`/`format` se separan como D-036 y D-037 sin activar su implementación.                |
+| 13-07-2026 | D-024 registra custom renderers como resueltos por ADR-007/009 y aplaza el bridge Angular hasta existir un consumidor concreto.     |
+| 13-07-2026 | Se acepta ADR-010, ADR-002 queda Superseded y D-028 se promueve con versionado y compatibilidad explícitos.                         |
+| 13-07-2026 | Se propone ADR-010 para resolver D-028 y sustituir el lockstep Angular del ADR-002 pre-SPEC.                                        |
+| 13-07-2026 | Se acepta ADR-009 y D-029 se promueve con la frontera pública y la política de estabilidad iniciales.                               |
+| 13-07-2026 | Se propone ADR-009 para delimitar la API pública y su política de estabilidad; D-029 permanece Candidate hasta su aceptación.       |
+| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes.                  |
+| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                                               |

@@ -6,6 +6,416 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-009 revision 1 approved
+
+### Approval
+
+- Ricard explicitly approved PLAN-009 revision 1 after repeated complete review
+  2 passed all 12 delivery areas and nine acceptance criteria with zero
+  findings.
+- The approval satisfies the final M9 implementation gate and authorizes only
+  the seven ordered checkpoints and boundaries recorded by the plan.
+
+### State and boundaries
+
+- No checkpoint started during this approval task; the active implementation
+  plan remains None until checkpoint 1 begins.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed.
+- Arrays, refs/composition, advanced layout, batches, dynamic definitions,
+  custom object containers, publication and Stable promotion remain inactive.
+
+### Pending
+
+- Start only PLAN-009 checkpoint 1 in a separate task: activate M9, add the
+  Public core contracts and shared nested-definition/path helpers, and keep the
+  focused build/typecheck baseline green.
+
+## 2026-07-14 — PLAN-009 revision 1 passed repeated complete review
+
+### Plan and first review
+
+- Drafted PLAN-009 as the implementation, migration and verification contract
+  for the accepted M9 nested-object boundary.
+- Complete review 1 found four delivery gaps: rejected Angular input could split
+  definition/snapshot projection, not every neutral tree walk prohibited
+  unbounded recursion, the directive-to-component metadata migration lacked
+  exact declaration evidence, and ID/object-host assertions were incomplete.
+- Advanced the proposal to revision 1 with all four corrections; no accepted
+  behavior or public symbol changed.
+
+### Repeated review and boundary
+
+- Restarted the complete review against accepted SPEC-001 v0.1.15, SPEC-002
+  v0.1.2, ADR-005 revision 1, ADR-014 revision 2, renderer/API ADRs and deferred
+  decisions.
+- All 12 delivery areas and nine plan acceptance criteria passed with zero
+  findings, requested corrections or documentation conflicts.
+- PLAN-009 remains Proposed pending Ricard's explicit approval. M9
+  implementation, publication, Stable promotion and every external deferred
+  capability remain inactive.
+
+### Verification and pending
+
+- Documentation was formatted and checked for links, authority/state
+  consistency and whitespace; no product source, declaration, manifest,
+  dependency or lockfile changed.
+- Explicitly approve PLAN-009 revision 1 or return it for correction. If
+  approved, start only checkpoint 1 in a separate task.
+
+## 2026-07-14 — ADR-014 revision 2 and SPEC-002 v0.1.2 accepted
+
+### Acceptance
+
+- Ricard explicitly accepted ADR-014 revision 2 after its complete ten-area
+  review passed with zero findings.
+- Ricard then explicitly accepted SPEC-002 v0.1.2 after its repeated 16-area
+  review passed with zero findings.
+- The ordered acceptance makes the clarified nested-object architecture and
+  observable M9 extension authoritative.
+
+### Authorization and boundaries
+
+- The M9 normative gate is complete and PLAN-009 may now be prepared.
+- No implementation plan is approved and M9 implementation remains inactive.
+- Public changes remain Experimental + Active; no package publication, Stable
+  promotion, array/ref/composition/layout/batch/dynamic-definition capability
+  or other deferred work was activated.
+- Unchanged SPEC-001 v0.1.15 behavior and ADR-005 revision 1 remain
+  authoritative alongside the accepted M9 extension.
+
+### Verification
+
+- Formatting, all 44 Markdown files and 196 local links, acceptance/state
+  consistency and `git diff --check` pass.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed; PLAN-009 remains absent and implementation inactive.
+
+### Pending
+
+- Draft PLAN-009 as the exact implementation and verification contract.
+- Repeat its complete review after every correction and do not implement M9
+  before explicit plan approval.
+
+## 2026-07-14 — SPEC-002 corrections applied; repeated review 2 passed
+
+### Corrections
+
+- Ricard approved all six findings from complete SPEC review 1.
+- Proposed ADR-014 revision 2 as a narrow clarification: missing-ancestor
+  branches allow set/focus/blur and no-effect remove, while incompatible-ancestor
+  branches suppress every mutation and interaction intention.
+- Advanced SPEC-002 to Draft v0.1.2 with closed runtime-action diagnostics,
+  recursive UI incompatibility diagnostics, object text failure diagnostics,
+  the exact `getNodeSnapshot()` signature, cross-field structural sharing and
+  native/custom renderer behavior.
+- Expanded required conformance coverage from 12 to 15 scenarios.
+
+### Repeated review
+
+- Reviewed all ten ADR-014 areas for proposed revision 2 and all 16 SPEC-002
+  areas after correction.
+- Both complete reviews passed with zero findings, requested corrections or
+  documentation conflicts.
+- ADR-014 revision 2 remains Proposed and SPEC-002 remains Draft; neither was
+  silently accepted.
+
+### Verification
+
+- Formatting, all 44 Markdown files and 196 local links, authority/state
+  consistency and `git diff --check` pass.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed.
+
+### Boundaries and pending
+
+- SPEC-001 v0.1.15 remains authoritative behavior. PLAN-009 is not drafted and
+  M9 implementation remains inactive.
+- Arrays, refs/composition, layout, batches, dynamic definitions, custom object
+  containers, Stable promotion and publication remain inactive.
+- The exact next action is explicit acceptance or rejection of ADR-014 revision
+  2, followed—if accepted—by explicit acceptance or rejection of SPEC-002 Draft
+  v0.1.2.
+
+## 2026-07-14 — SPEC-002 complete review 1 found six issues
+
+### Review result
+
+- Completed the separate full review of SPEC-002 Draft v0.1.1 against accepted
+  SPEC-001 v0.1.15, ADR-014 revision 1, ADR-005 revision 1, applicable renderer,
+  Angular/API decisions and deferred boundaries.
+- Review 1 does not pass. SPEC-002 remains Draft and cannot be accepted until a
+  repeated complete review reaches zero findings.
+- Recorded six findings covering blocked runtime-action diagnostics, recursive
+  UI incompatibility diagnostics, object text failure diagnostics, the exact
+  `getNodeSnapshot()` signature, cross-field validation structural sharing and
+  blocked-presence custom-renderer behavior.
+
+### Conflict and boundaries
+
+- Missing-ancestor leaves are explicitly allowed to emit set/focus/blur, while
+  the ADR-014/SPEC-002 migration wording can suppress intentions for all blocked
+  presence. Because ADR-014 is Accepted, the clarification requires explicit
+  approval and a reviewed ADR revision rather than a silent SPEC edit.
+- The promoted nested-object boundary otherwise remains coherent. Arrays,
+  refs/composition, layout, batches, dynamic definitions, custom object
+  containers, Stable promotion and publication remain inactive.
+- No product source, public declaration, package manifest, dependency, lockfile
+  or accepted behavior changed during the review.
+
+### Verification
+
+- Formatting, all 44 Markdown files and 195 local links, authority/state
+  consistency and `git diff --check` pass.
+- SPEC-002 remains Draft v0.1.1, PLAN-009 is not drafted and no M9
+  implementation task is active.
+
+### Pending
+
+- Ricard must approve, revise or reject the six recommended corrections.
+- If approved, clarify ADR-014, advance SPEC-002 to Draft v0.1.2 and repeat the
+  full review after correction. Do not draft PLAN-009 or implement M9 yet.
+
+## 2026-07-14 — ADR-014 revision 1 and ADR-005 revision 1 accepted
+
+### Decision
+
+- Ricard followed the zero-finding joint review 3 recommendation and explicitly
+  accepted ADR-014 revision 1 and ADR-005 revision 1 coordinately.
+- The normalized nested-object/deep-path architecture and recursive inline
+  Draft 2020-12 policy are now authoritative M9 design decisions.
+- Acceptance provides normative alignment only: it does not accept SPEC-002,
+  approve PLAN-009, authorize code changes or activate publication.
+
+### Authority and boundaries
+
+- SPEC-001 v0.1.15 remains the behavioral source of truth and nested objects
+  remain unsupported until SPEC-002 passes its separate review and acceptance.
+- D-014 now records the accepted narrow tree/projection choice while retaining
+  all broader intermediate-model questions as Research.
+- Arrays, refs/composition, layout, batches, dynamic definitions and all other
+  deferred capabilities remain inactive.
+
+### Verification
+
+- Formatting, all 43 Markdown files and 190 local links, accepted-state and
+  authority consistency, and `git diff --check` pass.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed.
+- SPEC-002 remains Draft; PLAN-009 and M9 implementation remain inactive.
+
+### Pending
+
+- Perform the separate complete review of SPEC-002 Draft v0.1.1 and repeat
+  after every correction until zero findings.
+- Do not draft PLAN-009 or implement M9 before SPEC-002 is explicitly accepted.
+
+## 2026-07-14 — M9 acceptance sequence corrected; joint review 3 passed
+
+### Correction
+
+- The formal acceptance audit found a circular process sentence: proposed
+  ADR-005 tied its authority to SPEC-002, while SPEC-002 requires both ADRs to
+  be accepted before its separate review.
+- Ricard approved the minimal correction. ADR-005 now coordinates its explicit
+  acceptance with ADR-014 and places SPEC-002 review/acceptance afterward.
+- No architectural decision, observable behavior, API, deferred boundary or
+  implementation authorization changed.
+
+### Repeated review
+
+- Repeated the complete joint review across all ten ADR-014 and eight ADR-005
+  acceptance areas after the process correction.
+- Review 3 passed with zero findings, requested corrections or documentation
+  conflicts.
+- ADR-014 revision 1 and ADR-005 revision 1 remain Proposed and are technically
+  ready for coordinated explicit acceptance.
+
+### Verification
+
+- Formatting, all 43 Markdown files and 190 local links, active-state and
+  acceptance-sequence consistency, and `git diff --check` pass.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed.
+- Neither ADR, SPEC-002, PLAN-009 nor M9 implementation was activated.
+
+### Boundaries and pending
+
+- SPEC-002 remains Draft v0.1.1; PLAN-009 and M9 implementation remain
+  inactive.
+- The exact next action is explicit acceptance or rejection of both ADRs,
+  followed—if accepted—by the separate complete SPEC-002 review.
+
+## 2026-07-14 — M9 ADR corrections applied; repeated review 2 passed
+
+### Decision and corrections
+
+- Ricard approved all ten corrections from joint review 1, including blocked
+  presence for descendant objects and bounded Angular creation/binding failure
+  isolation.
+- Advanced ADR-014 to revision 1 and SPEC-002 to Draft v0.1.1; corrected only
+  the Proposed revision 1 section of ADR-005 and preserved accepted sections
+  1–9.
+- Closed total DOM identity, on-path descriptors, dirty/focus behavior, the
+  Internal Angular host mechanism, exact API migration, nested keyword
+  classification, diagnostic contracts, D-014 traceability and terminal-only
+  concurrency consequences.
+
+### Repeated review
+
+- The first correction check repaired root-enum classification, directive
+  creation wording, transitive API inventory and the reused-node diagnostic
+  reason without changing scope.
+- Repeated the complete joint review after those repairs.
+- Review 2 passed all ten ADR-014 and eight ADR-005 acceptance areas with zero
+  findings or requested corrections.
+
+### Boundaries
+
+- ADR-014 revision 1 and ADR-005 revision 1 remain Proposed pending explicit
+  acceptance; SPEC-002 remains Draft and M9 implementation remains inactive.
+- Arrays, refs/composition, layout, batches, dynamic definitions, publication
+  and all unrelated deferred capabilities remain inactive.
+
+### Verification
+
+- Formatting, all 43 Markdown files and 190 local links, active-state
+  consistency and `git diff --check` pass.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed.
+- The final repeated joint review has zero findings; neither ADR was silently
+  accepted.
+
+### Pending
+
+- Explicitly accept or reject both ADR proposals.
+- If accepted, review SPEC-002 Draft v0.1.1 separately and completely before
+  preparing PLAN-009.
+
+## 2026-07-14 — M9 joint ADR formal review 1 completed
+
+### Review result
+
+- Formally reviewed ADR-014 revision 0 and proposed ADR-005 revision 1 against
+  their acceptance matrices, SPEC-001/SPEC-002, ADR-007/008/009 and deferred
+  boundaries.
+- Review 1 does not pass and neither proposal is accepted.
+- Recorded ten findings covering DOM identity totality, descriptors, blocked
+  dirty, focus reconciliation, Angular isolation, public API inventory, nested
+  keyword classification, diagnostics, D-014 traceability and concurrency
+  trade-offs.
+
+### Passed boundaries
+
+- The promoted inline-object/current-leaf boundary remains coherent.
+- Framework neutrality, controlled state, structural UI grouping and
+  terminal-only operation direction remain viable.
+- Arrays, refs/composition, layouts, scopes metadata, batches, dynamic
+  definitions, custom object renderers, publication and licensing remain
+  inactive.
+
+### Verification
+
+- Formatting, all 43 Markdown files and 190 local links, active-state
+  consistency and `git diff --check` pass.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed.
+- No proposed decision text was changed; all ten review findings remain open.
+
+### Pending
+
+- Ricard must approve or revise the ten recommended corrections.
+- After correction, increment ADR-014 to revision 1 and SPEC-002 to Draft
+  v0.1.1, then repeat the complete joint review until zero findings.
+
+## 2026-07-14 — D-005 promoted and M9 normative drafts prepared
+
+### Decision
+
+- Ricard explicitly accepted the M9 promotion review.
+- D-005 is Promoted for design under the reviewed inline-object/current-leaf
+  boundary; M9 implementation remains inactive.
+- The acceptance authorizes normative drafting only, not PLAN-009, code changes
+  or publication.
+
+### Drafted
+
+- Proposed ADR-014 revision 0 for the normalized node tree, identity-linked
+  leaf projection, canonical keys, deep operations, branch state, scopes and
+  fixed Angular object hosts.
+- Proposed ADR-005 revision 1 while preserving sections 1–9 as the Accepted
+  baseline; the proposal adds recursive inline traversal, cycle handling and
+  deterministic deep diagnostics.
+- Drafted SPEC-002 v0.1.0 as the non-authoritative observable M9 extension to
+  SPEC-001.
+
+### Drafting corrections
+
+- Distinguished focus/touched behavior below missing versus incompatible
+  ancestors and disabled incompatible Angular branches.
+- Required deterministic non-blank object labels, including blank property-name
+  fallback.
+- Added active-ancestry cycle handling for recursive UI Schema.
+- Reused existing definition and accessor diagnostic envelopes instead of
+  introducing overlapping codes.
+- Rejected managed accessors in external value/baseline trees before validation
+  while retaining incompatible data properties as business state.
+
+### Verification
+
+- Formatting, all 42 Markdown files and 187 local links, state consistency and
+  `git diff --check` pass.
+- No product source, public declaration, package manifest, dependency or
+  lockfile changed.
+- The cross-document drafting review was repeated after corrections without a
+  remaining drafting inconsistency; formal ADR review 1 is still pending.
+
+### Pending
+
+- Formally review ADR-014 revision 0 and ADR-005 revision 1 together, repeat
+  after every correction until zero findings, then review SPEC-002.
+- Do not draft PLAN-009 or implement M9 before all three normative documents are
+  accepted.
+
+## 2026-07-14 — D-005/M9 promotion boundary reviewed
+
+### Completed
+
+- Reviewed full SPEC-001 v0.1.15, ADR-005 and applicable accepted ADRs against
+  the root-only compiler, operations, runtime and Angular adapter.
+- Confirmed that D-005's resumption condition is satisfied and that nested
+  objects are eligible for explicit promotion, but did not promote or activate
+  M9.
+- Defined the smallest coherent boundary as recursive inline objects with the
+  current primitive leaves and string-only deep paths.
+- Kept arrays, references/composition, advanced layouts, declarative scopes,
+  batches, dynamic definitions, plugins and publication outside M9.
+- Identified nine required decision areas and the document sequence ADR-014,
+  ADR-005 revision 1, SPEC-002 and PLAN-009.
+
+### Findings
+
+- Implementation is normatively blocked until SPEC-002 is accepted because
+  SPEC-001 explicitly excludes nested objects and deep operations.
+- ADR-005 requires review when objects are promoted; its recursive inspection
+  and diagnostic policy must be resolved before implementation.
+- No documentation conflict exists while D-005 remains Candidate and M9 stays
+  inactive.
+
+### Verification
+
+- Repeated the complete promotion review after corrections; the final pass has
+  zero findings or requested changes.
+- Formatting, all 40 Markdown files and 172 local links, state consistency and
+  `git diff --check` pass.
+- No product source, public API, manifest, dependency, lockfile or accepted
+  decision changed.
+
+### Pending
+
+- Ricard must accept or reject the reviewed promotion boundary. Acceptance may
+  promote D-005 for design work but will not authorize implementation.
+
 ## 2026-07-14 — PLAN-008 and M8 completed
 
 ### Completed
