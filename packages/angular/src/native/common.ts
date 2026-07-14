@@ -1,4 +1,5 @@
 import type {
+  DataPath,
   FieldDefinition,
   FieldRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
@@ -14,8 +15,12 @@ export interface FieldIds {
   readonly errors: string;
 }
 
+export function nodeIdBase(formId: string, path: DataPath): string {
+  return `se-${encodeURIComponent(JSON.stringify([formId, path]))}`;
+}
+
 export function fieldIds(formId: string, field: FieldDefinition): FieldIds {
-  const base = `se-${encodeURIComponent(formId)}-${encodeURIComponent(field.name)}`;
+  const base = nodeIdBase(formId, field.path);
   return Object.freeze({
     control: base,
     label: `${base}-label`,
@@ -25,6 +30,13 @@ export function fieldIds(formId: string, field: FieldDefinition): FieldIds {
     tooltip: `${base}-tooltip`,
     errors: `${base}-errors`,
   });
+}
+
+export function fieldDisabled(snapshot: FieldRuntimeSnapshot): boolean {
+  return (
+    snapshot.presence.kind === 'blocked' &&
+    snapshot.presence.reason === 'incompatible-ancestor'
+  );
 }
 
 export function describedBy(

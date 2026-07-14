@@ -7,7 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { FormField, form } from '@angular/forms/signals';
+import { FormField, disabled, form } from '@angular/forms/signals';
 import type {
   Diagnostic,
   FieldDefinition,
@@ -16,7 +16,7 @@ import type {
 } from '@rabassoft/schema-engine';
 import type { AngularFieldRenderer } from '../renderer.js';
 import type { AngularFieldTextSnapshot } from '../text.js';
-import { describedBy, fieldIds } from './common.js';
+import { describedBy, fieldDisabled, fieldIds } from './common.js';
 
 const sentinelToken = '';
 const choiceTokenPrefix = 'choice:';
@@ -95,7 +95,9 @@ export class SchemaStringEnumRendererComponent implements AngularFieldRenderer {
   readonly rendererDiagnostics = output<readonly Diagnostic[]>();
 
   private readonly controlModel = signal(sentinelToken);
-  protected readonly controlField = form(this.controlModel);
+  protected readonly controlField = form(this.controlModel, (path) =>
+    disabled(path, { when: () => fieldDisabled(this.snapshot()) }),
+  );
   protected readonly choices = computed(() => ownChoices(this.field()));
   protected readonly ids = computed(() =>
     fieldIds(this.formId(), this.field()),

@@ -7,7 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { FormField, form } from '@angular/forms/signals';
+import { FormField, disabled, form } from '@angular/forms/signals';
 import type {
   Diagnostic,
   FieldDefinition,
@@ -15,7 +15,7 @@ import type {
 } from '@rabassoft/schema-engine';
 import type { AngularFieldRenderer } from '../renderer.js';
 import type { AngularFieldTextSnapshot } from '../text.js';
-import { describedBy, fieldIds } from './common.js';
+import { describedBy, fieldDisabled, fieldIds } from './common.js';
 import { createNumberCodec } from './number-codec.js';
 
 @Component({
@@ -86,7 +86,9 @@ export class SchemaNumberRendererComponent implements AngularFieldRenderer {
   readonly rendererDiagnostics = output<readonly Diagnostic[]>();
 
   private readonly controlModel = signal('');
-  protected readonly controlField = form(this.controlModel);
+  protected readonly controlField = form(this.controlModel, (path) =>
+    disabled(path, { when: () => fieldDisabled(this.snapshot()) }),
+  );
   protected readonly ids = computed(() =>
     fieldIds(this.formId(), this.field()),
   );

@@ -141,28 +141,32 @@ export class SchemaFieldOutletDirective {
               outputBinding<unknown>('setValue', (value) => {
                 if (
                   binding.active &&
-                  readRuntimeContext(this.form) === boundRuntimeContext
+                  readRuntimeContext(this.form) === boundRuntimeContext &&
+                  this.allowsIntent(boundPath)
                 )
                   this.form.requestSetValue(boundPath, value);
               }),
               outputBinding<void>('removeValue', () => {
                 if (
                   binding.active &&
-                  readRuntimeContext(this.form) === boundRuntimeContext
+                  readRuntimeContext(this.form) === boundRuntimeContext &&
+                  this.allowsIntent(boundPath)
                 )
                   this.form.requestRemoveValue(boundPath);
               }),
               outputBinding<void>('fieldFocus', () => {
                 if (
                   binding.active &&
-                  readRuntimeContext(this.form) === boundRuntimeContext
+                  readRuntimeContext(this.form) === boundRuntimeContext &&
+                  this.allowsIntent(boundPath)
                 )
                   this.form.focus(boundPath);
               }),
               outputBinding<void>('fieldBlur', () => {
                 if (
                   binding.active &&
-                  readRuntimeContext(this.form) === boundRuntimeContext
+                  readRuntimeContext(this.form) === boundRuntimeContext &&
+                  this.allowsIntent(boundPath)
                 )
                   this.form.blur(boundPath);
               }),
@@ -212,6 +216,17 @@ export class SchemaFieldOutletDirective {
       this.form.blur(binding.path);
     if (index >= 0) this.viewContainer.remove(index);
     else if (!ref.hostView.destroyed) ref.destroy();
+  }
+
+  private allowsIntent(path: DataPath): boolean {
+    const presence = findFieldSnapshotByPath(
+      this.form.snapshot()?.fields ?? [],
+      path,
+    )?.presence;
+    return !(
+      presence?.kind === 'blocked' &&
+      presence.reason === 'incompatible-ancestor'
+    );
   }
 }
 

@@ -10,6 +10,7 @@ import {
   type ControlledFormRuntimeOptions,
   type Diagnostic,
   type FieldDefinition,
+  type FormDefinition,
   type FormOperation,
 } from '@rabassoft/schema-engine';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -37,7 +38,13 @@ if (!compiled.success || compiled.definition.fields[0] === undefined)
 const definition = compiled.definition;
 const field = definition.fields[0];
 const ageField = definition.fields[1];
-if (ageField === undefined) throw new Error('age fixture compilation failed');
+if (field === undefined || ageField === undefined)
+  throw new Error('field fixture compilation failed');
+const nameDefinition: FormDefinition = { nodes: [field], fields: [field] };
+const ageDefinition: FormDefinition = {
+  nodes: [ageField],
+  fields: [ageField],
+};
 const alienField = compileAlienField();
 const schema = Object.freeze({});
 const validator = Object.freeze({
@@ -64,18 +71,15 @@ class FormHost {
 
 @Component({
   standalone: true,
-  imports: [SchemaFormDirective, SchemaFieldOutletDirective],
+  imports: [SchemaFormDirective],
   template: `<div
     [schemaForm]="config()"
     (schemaOperation)="operations.push($event)"
     (schemaDiagnostics)="diagnostics.push($event)"
-  >
-    <ng-container [schemaFieldOutlet]="field()" />
-  </div>`,
+  ></div>`,
 })
 class OutletHost {
-  readonly config = signal(createConfig());
-  readonly field = signal(field);
+  readonly config = signal(createOutletConfig());
   readonly operations: FormOperation[] = [];
   readonly diagnostics: (readonly Diagnostic[])[] = [];
   @ViewChild(SchemaFormDirective) form?: SchemaFormDirective<
@@ -83,10 +87,27 @@ class OutletHost {
   >;
 }
 
+@Component({
+  standalone: true,
+  imports: [SchemaFormDirective, SchemaFieldOutletDirective],
+  template: `<div
+    [schemaForm]="config()"
+    (schemaDiagnostics)="diagnostics.push($event)"
+  >
+    <ng-container [schemaFieldOutlet]="alienField" />
+  </div>`,
+})
+class MissingOutletHost {
+  readonly config = signal(createOutletConfig());
+  readonly alienField = alienField;
+  readonly diagnostics: (readonly Diagnostic[])[] = [];
+}
+
 describe('Angular adapter directives', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     FakeRenderer.latest = undefined;
+    FakeRenderer.instances = [];
     FakeRenderer.created = 0;
     FakeRenderer.destroyed = 0;
     FakeRenderer.emitOnDestroy = false;
@@ -171,7 +192,7 @@ describe('Angular adapter directives', () => {
     });
 
     fixture.componentInstance.config.set(
-      createConfig({
+      createOutletConfig({
         value: { name: 'Grace' },
         locale: 'ca',
       }),
@@ -219,12 +240,12 @@ describe('Angular adapter directives', () => {
         .filter(({ code }) => code === 'TEXT_RESOLUTION_FAILED'),
     ).toHaveLength(1);
 
-    fixture.componentInstance.form?.focus(['age']);
+    fixture.componentInstance.form?.focus(['name']);
     TestBed.tick();
     expect(choiceCalls).toBe(2);
     expect(fixture.componentInstance.diagnostics).toHaveLength(1);
 
-    fixture.componentInstance.config.set(createConfig({ locale: 'ca' }));
+    fixture.componentInstance.config.set(createOutletConfig({ locale: 'ca' }));
     fixture.detectChanges();
     TestBed.tick();
     expect(FakeRenderer.latest).toBe(renderer);
@@ -258,7 +279,7 @@ describe('Angular adapter directives', () => {
     }).toEqual({ created: 1, destroyed: 0 });
 
     fixture.componentInstance.config.set(
-      createConfig({ formId: 'replacement' }),
+      createOutletConfig({ formId: 'replacement' }),
     );
     fixture.detectChanges();
     TestBed.tick();
@@ -288,7 +309,7 @@ describe('Angular adapter directives', () => {
     FakeRenderer.emitOnDestroy = true;
 
     fixture.componentInstance.config.set(
-      createConfig({ formId: 'replacement' }),
+      createOutletConfig({ formId: 'replacement' }),
     );
     fixture.detectChanges();
     TestBed.tick();
@@ -296,11 +317,10 @@ describe('Angular adapter directives', () => {
     expect(fixture.componentInstance.operations).toEqual([]);
     expect(fixture.componentInstance.form?.snapshot()?.fields).toMatchObject([
       { path: ['name'], focused: false, touched: false },
-      { path: ['age'], focused: false, touched: false },
     ]);
   });
 
-  it('replaces the renderer when its normalized field definition changes', () => {
+  it('replaces the renderer when its accepted definition changes', () => {
     TestBed.configureTestingModule({
       providers: [
         provideSchemaEngineAngular({
@@ -323,31 +343,25 @@ describe('Angular adapter directives', () => {
         ?.fields.find(({ path }) => path[0] === 'name'),
     ).toMatchObject({ focused: true, touched: false });
 
-    fixture.componentInstance.field.set(ageField);
     first?.setValue.emit('Before replacement');
     first?.removeValue.emit();
-    first?.fieldBlur.emit();
-    first?.fieldFocus.emit();
     expect(fixture.componentInstance.operations.slice(-2)).toMatchObject([
       { type: 'set-value', path: ['name'], value: 'Before replacement' },
       { type: 'remove-value', path: ['name'] },
     ]);
-    expect(
-      fixture.componentInstance.form
-        ?.snapshot()
-        ?.fields.find(({ path }) => path[0] === 'name'),
-    ).toMatchObject({ focused: true, touched: true });
+    fixture.componentInstance.config.set(
+      createOutletConfig({
+        definition: ageDefinition,
+        value: { age: 36 },
+        baselineValue: { age: 36 },
+      }),
+    );
     fixture.detectChanges();
     TestBed.tick();
 
     expect(FakeRenderer.latest).not.toBe(first);
     expect(FakeRenderer.latest?.field()).toBe(ageField);
     expect(FakeRenderer.destroyed).toBe(1);
-    expect(
-      fixture.componentInstance.form
-        ?.snapshot()
-        ?.fields.find(({ path }) => path[0] === 'name'),
-    ).toMatchObject({ focused: false, touched: true });
     expect(
       fixture.componentInstance.form
         ?.snapshot()
@@ -365,8 +379,7 @@ describe('Angular adapter directives', () => {
         }),
       ],
     });
-    const missingFixture = TestBed.createComponent(OutletHost);
-    missingFixture.componentInstance.field.set(alienField);
+    const missingFixture = TestBed.createComponent(MissingOutletHost);
     missingFixture.detectChanges();
     TestBed.tick();
     expect(
@@ -458,6 +471,19 @@ function createConfig(
     validator,
     ...overrides,
   };
+}
+
+function createOutletConfig(
+  overrides: Partial<
+    ControlledFormRuntimeOptions<Record<string, unknown>>
+  > = {},
+): ControlledFormRuntimeOptions<Record<string, unknown>> {
+  return createConfig({
+    definition: nameDefinition,
+    value: { name: 'Ada' },
+    baselineValue: { name: 'Ada' },
+    ...overrides,
+  });
 }
 
 function compileAlienField(): FieldDefinition {

@@ -18,6 +18,8 @@ import {
 
 assert.equal(typeof AngularRendererResolver, 'function');
 assert.equal(typeof SchemaFormDirective, 'function');
+assert.equal(typeof SchemaFormDirective.ɵcmp, 'object');
+assert.equal(SchemaFormDirective.ɵdir, undefined);
 assert.equal(typeof SchemaFieldOutletDirective, 'function');
 assert.equal(typeof provideSchemaEngineAngular, 'function');
 assert.equal(typeof provideSchemaRenderer, 'function');
@@ -31,6 +33,9 @@ assert.equal('SCHEMA_RENDERER_REGISTRATIONS' in angularApi, false);
 assert.equal('nativeRegistrations' in angularApi, false);
 assert.equal('sentinelToken' in angularApi, false);
 assert.equal('choiceToken' in angularApi, false);
+assert.equal('SchemaNodeOutletComponent' in angularApi, false);
+assert.equal('ObjectHostFactory' in angularApi, false);
+assert.equal('AngularObjectTextSnapshot' in angularApi, false);
 
 const injector = createEnvironmentInjector(
   [provideSchemaEngineAngular()],

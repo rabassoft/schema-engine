@@ -6,6 +6,77 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-009 checkpoint 6 completed
+
+### Delivery
+
+- Migrated core package smoke to nested declarations, both node/field lookup
+  methods and controlled deep set/remove operations through the package root.
+- Migrated the built Angular consumer and clean core/Angular consumers to a
+  two-object-depth form, automatic `SchemaFormDirective` projection, localized
+  object text, canonical accessible IDs and deep controlled operations.
+- Updated root/package READMEs and private `0.1.0` candidate notes to describe
+  the accepted SPEC-002 boundary and its Experimental source migration.
+- Replaced permissive artifact matching with exact per-package file inventories
+  and declaration checks for accepted Public exports, retained Angular
+  component metadata and absence of Internal root exports.
+
+### Verification
+
+- Format, lint, typecheck, both builds and `git diff --check` pass.
+- All 46 Markdown files have valid local link targets.
+- All 164 core and 58 Angular tests pass (222 total).
+- Package smoke, built consumer and exact private artifact checks pass.
+- Clean core plus Angular 22.0.6 lower/upper consumers pass after the expected
+  restricted-network failure and authorized npm-connected rerun.
+- Manifests, dependency/peer/export policy, versions, lockfile, publication
+  state and Stable classification remain unchanged.
+
+### Pending
+
+- Start only PLAN-009 checkpoint 7: rerun the complete matrix, inspect the
+  whole implementation diff and declarations, correct every finding and repeat
+  review/checks until zero findings.
+
+## 2026-07-14 — PLAN-009 checkpoint 5 completed
+
+### Delivery
+
+- Converted `SchemaFormDirective` from a standalone directive to the accepted
+  standalone attribute component while retaining its selector, class, inputs,
+  outputs, injection role and root export.
+- Added Internal node outlets and fixed semantic object hosts that project the
+  last accepted definition/snapshot tree atomically, recurse in normalized
+  order and isolate synchronous object-host creation/binding failures.
+- Added immutable object text projection, full canonical node IDs and
+  accessible fieldset/legend/description/hint/tooltip/issues structure.
+- Delegated leaves to the existing renderer lifecycle; incompatible ancestors
+  now disable native Signal Forms controls and suppress every native/custom
+  intention while missing ancestors remain interactive.
+
+### Tests and consumer migration
+
+- Removed manual leaf loops from repository consumers and migrated existing
+  directive/native expectations to automatic projection and canonical IDs.
+- Added nested Angular coverage for semantic order, deep controlled operations,
+  missing/incompatible branches, custom-output suppression, object text
+  diagnostics, hostile/lone-surrogate IDs, simultaneous forms, lifecycle
+  isolation and rejected replacement atomicity.
+- Locked component metadata and absence of Internal object/node symbols from
+  the package root.
+
+### Verification
+
+- Format, lint, typecheck, both builds and `git diff --check` pass.
+- All 164 core and 58 Angular tests pass (222 total).
+- Package smoke and built-consumer checks pass; root exports, manifests,
+  dependencies, peer ranges and lockfile are unchanged.
+
+### Pending
+
+- Start only PLAN-009 checkpoint 6 with the complete package declaration/docs,
+  release-note, artifact and clean-consumer migration.
+
 ## 2026-07-14 — PLAN-009 checkpoint 4 completed
 
 ### Delivery

@@ -1,6 +1,6 @@
 import {
   DestroyRef,
-  Directive,
+  Component,
   LOCALE_ID,
   computed,
   effect,
@@ -16,13 +16,16 @@ import {
   type DataPath,
   type Diagnostic,
   type FormOperation,
+  type FormNodeDefinition,
   type FormRuntime,
   type FormRuntimeSnapshot,
   type FormScope,
+  type NodeRuntimeSnapshot,
   type RuntimeActionResult,
   type ValidationSnapshot,
   type ValidationVisibility,
 } from '@rabassoft/schema-engine';
+import { SchemaNodeOutletComponent } from './node-outlet.js';
 
 export type AngularControlledFormConfig<TData extends object> = Omit<
   ControlledFormRuntimeOptions<TData>,
@@ -30,6 +33,10 @@ export type AngularControlledFormConfig<TData extends object> = Omit<
 > & { readonly locale?: string };
 
 type RuntimeContext = Readonly<{ formId: string }>;
+interface ProjectedNode {
+  readonly definition: FormNodeDefinition;
+  readonly snapshot: NodeRuntimeSnapshot;
+}
 const runtimeContexts = new WeakMap<
   object,
   Signal<RuntimeContext | undefined>
@@ -40,10 +47,20 @@ export function readRuntimeContext(form: object): RuntimeContext | undefined {
   return runtimeContexts.get(form)?.();
 }
 
-@Directive({
+@Component({
   selector: '[schemaForm]',
   exportAs: 'schemaForm',
   standalone: true,
+  imports: [SchemaNodeOutletComponent],
+  template: `
+    @for (node of projectedNodes(); track node.definition.key) {
+      <schema-node-outlet
+        [definition]="node.definition"
+        [snapshot]="node.snapshot"
+      />
+    }
+    <ng-content />
+  `,
 })
 export class SchemaFormDirective<TData extends object> {
   readonly schemaForm = input.required<AngularControlledFormConfig<TData>>();
@@ -56,9 +73,25 @@ export class SchemaFormDirective<TData extends object> {
   private readonly runtimeContextState = signal<RuntimeContext | undefined>(
     undefined,
   );
+  private readonly acceptedDefinitionState = signal<
+    AngularControlledFormConfig<TData>['definition'] | undefined
+  >(undefined);
   readonly snapshot: Signal<FormRuntimeSnapshot<TData> | undefined> =
     this.snapshotState.asReadonly();
   readonly ready = computed(() => this.snapshotState() !== undefined);
+  protected readonly projectedNodes = computed<readonly ProjectedNode[]>(() => {
+    const definition = this.acceptedDefinitionState();
+    const snapshot = this.snapshotState();
+    if (definition === undefined || snapshot === undefined) return [];
+    return Object.freeze(
+      definition.nodes.flatMap((node, index) => {
+        const nodeSnapshot = snapshot.nodes[index];
+        return nodeSnapshot === undefined
+          ? []
+          : [Object.freeze({ definition: node, snapshot: nodeSnapshot })];
+      }),
+    );
+  });
 
   private runtime: FormRuntime<TData> | undefined;
   private lastConfig: AngularControlledFormConfig<TData> | undefined;
@@ -182,6 +215,7 @@ export class SchemaFormDirective<TData extends object> {
     this.unsubscribeSnapshot = snapshotSubscription.unsubscribe;
     this.unsubscribeOperations = operationSubscription.unsubscribe;
     this.lastConfig = config;
+    this.acceptedDefinitionState.set(config.definition);
     this.snapshotState.set(creation.runtime.getSnapshot());
     this.runtimeContextState.set(Object.freeze({ formId: config.formId }));
   }
@@ -245,6 +279,8 @@ export class SchemaFormDirective<TData extends object> {
     this.unsubscribeOperations = undefined;
     this.runtime = undefined;
     this.lastConfig = undefined;
+    this.acceptedDefinitionState.set(undefined);
+    this.snapshotState.set(undefined);
     this.runtimeContextState.set(undefined);
   }
 }

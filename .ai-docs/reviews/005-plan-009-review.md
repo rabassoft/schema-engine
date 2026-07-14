@@ -13,7 +13,7 @@
   [`ADR-009`](../adrs/009-politica-api-publica-estabilidad.md),
   [`ADR-014 revision 2`](../adrs/014-modelo-objetos-anidados-paths-profundos.md)
   and the deferred-decision register
-- **Authorization:** PLAN-009 revision 1 approved; checkpoints 1–4 subsequently
+- **Authorization:** PLAN-009 revision 1 approved; checkpoints 1–6 subsequently
   completed
 
 ## 1. Result

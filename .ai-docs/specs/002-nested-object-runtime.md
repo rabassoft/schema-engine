@@ -14,7 +14,7 @@
   [`ADR-005 revision 1`](../adrs/005-politica-dialecto-json-schema.md)
 - **Implementation plan:**
   [`PLAN-009 revision 1`](../plans/009-nested-object-runtime.md), Approved
-- **Implementation state:** PLAN-009 checkpoints 1–4 completed; checkpoint 5 pending
+- **Implementation state:** PLAN-009 checkpoints 1–6 completed; checkpoint 7 pending
 
 ## 1. Status and authority
 
@@ -37,8 +37,11 @@ compilation. Checkpoint 2 then implemented the iterative descriptor-safe
 schema/UI compiler, normalized recursive definition and focused conformance
 coverage. Checkpoint 3 implemented descriptor-safe deep structural/form
 operations and their fixtures. Checkpoint 4 then implemented nested runtime
-validation, snapshots, actions, scopes and structural sharing; Angular
-recursive projection remains pending.
+validation, snapshots, actions, scopes and structural sharing. Checkpoint 5
+implemented Angular recursive projection, object hosts/text, canonical IDs and
+blocked renderer behavior. Checkpoint 6 migrated declarations, package smoke,
+package documentation, release notes, exact artifact checks and built/clean
+consumers; the final complete matrix and implementation review remain pending.
 
 ## 2. Goals
 
@@ -713,6 +716,8 @@ unsupported. PLAN-009 must verify declaration output, repository consumers and
 both clean candidate consumers against this table.
 
 No migration is implemented or promised until PLAN-009 is approved.
+Approved PLAN-009 checkpoints 1–6 subsequently implemented and verified this
+migration; final checkpoint 7 review remains pending.
 
 ## 19. Conformance scenarios
 

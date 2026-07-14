@@ -16,7 +16,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   AngularRendererResolver,
   SchemaBooleanRendererComponent,
-  SchemaFieldOutletDirective,
   SchemaFormDirective,
   SchemaNumberRendererComponent,
   SchemaStringEnumRendererComponent,
@@ -75,14 +74,12 @@ const validValidator: SchemaValidator = Object.freeze({
 
 @Component({
   standalone: true,
-  imports: [SchemaFormDirective, SchemaFieldOutletDirective],
+  imports: [SchemaFormDirective],
   template: `<div
     [schemaForm]="config()"
     (schemaOperation)="recordOperation($event)"
     (schemaDiagnostics)="diagnostics.push($event)"
-  >
-    <ng-container [schemaFieldOutlet]="field()" />
-  </div>`,
+  ></div>`,
 })
 class NativeHost {
   readonly config = signal(createConfig());
@@ -259,12 +256,17 @@ describe('native Signal Forms renderers', () => {
     fixture.detectChanges();
     TestBed.tick();
     const root = fixture.nativeElement as HTMLElement;
-    const select = root.querySelector('select') as HTMLSelectElement;
-    const label = root.querySelector('label') as HTMLLabelElement;
-    const summary = root.querySelector('summary') as HTMLElement;
+    const base = nodeBase('native form', ['status']);
+    const select = controlByBase(root, base) as HTMLSelectElement;
+    const label = root.querySelector(
+      `[id="${base}-label"]`,
+    ) as HTMLLabelElement;
+    const summary = select.parentElement?.querySelector(
+      'summary',
+    ) as HTMLElement;
 
     expect(fixture.componentInstance.operations).toEqual([]);
-    expect(select.id).toBe('se-native%20form-status');
+    expect(select.id).toBe(base);
     expect(label.htmlFor).toBe(select.id);
     expect(select.value).toBe('');
     expect(select.options[0]?.disabled).toBe(true);
@@ -290,7 +292,7 @@ describe('native Signal Forms renderers', () => {
     expect(select.getAttribute('aria-required')).toBe('true');
     expect(select.getAttribute('aria-invalid')).toBe('true');
     expect(select.getAttribute('aria-describedby')).toBe(
-      'se-native%20form-status-description se-native%20form-status-hint se-native%20form-status-errors',
+      `${base}-description ${base}-hint ${base}-errors`,
     );
     expect(summary.getAttribute('aria-label')).toBe('en:status.tooltip');
     expect(root.textContent).toContain('en:status.description');
@@ -473,10 +475,14 @@ describe('native Signal Forms renderers', () => {
       fixture.detectChanges();
       TestBed.tick();
       const root = fixture.nativeElement as HTMLElement;
-      const control = root.querySelector('input, select') as HTMLElement;
-      const label = root.querySelector('label') as HTMLLabelElement;
-      const button = root.querySelector('button') as HTMLButtonElement;
-      const base = `se-native%20form-${current.key}`;
+      const base = nodeBase('native form', [current.key]);
+      const control = controlByBase(root, base);
+      const label = root.querySelector(
+        `[id="${base}-label"]`,
+      ) as HTMLLabelElement;
+      const button = root.querySelector(
+        `[id="${base}-clear"]`,
+      ) as HTMLButtonElement;
 
       expect(button).not.toBeNull();
       expect(button.type).toBe('button');
@@ -511,7 +517,7 @@ describe('native Signal Forms renderers', () => {
         throw new Error('clear must emit remove-value');
       expect(Object.is(operation.expected.value, current.expected)).toBe(true);
       expect(fixture.componentInstance.operationFocusStates.at(-1)).toBe(true);
-      expect(root.querySelector('button')).toBe(button);
+      expect(root.querySelector(`[id="${base}-clear"]`)).toBe(button);
 
       if (current.key === 'name' && current.expected === '') {
         const count = fixture.componentInstance.operations.length;
@@ -533,7 +539,7 @@ describe('native Signal Forms renderers', () => {
       );
       fixture.detectChanges();
       TestBed.tick();
-      expect(root.querySelector('button')).toBeNull();
+      expect(root.querySelector(`[id="${base}-clear"]`)).toBeNull();
       expect(fixture.componentInstance.operations).toHaveLength(operationCount);
       fixture.destroy();
     }
@@ -553,10 +559,11 @@ describe('native Signal Forms renderers', () => {
     fixture.detectChanges();
     TestBed.tick();
     const root = fixture.nativeElement as HTMLElement;
-    const input = root.querySelector('input') as HTMLInputElement;
+    const base = nodeBase('native form', ['name']);
+    const input = controlByBase(root, base) as HTMLInputElement;
     expect(fixture.componentInstance.form?.snapshot()?.locale).toBe('es-ES');
     expect(input.value).toBe('Ada');
-    expect(input.id).toBe('se-native%20form-name');
+    expect(input.id).toBe(base);
     expect(input.getAttribute('aria-describedby')).toContain('-description');
     expect(root.textContent).toContain('es-ES:name.label');
 
@@ -596,7 +603,10 @@ describe('native Signal Forms renderers', () => {
     fixture.detectChanges();
     TestBed.tick();
     const root = fixture.nativeElement as HTMLElement;
-    const input = root.querySelector('input') as HTMLInputElement;
+    const input = controlByBase(
+      root,
+      nodeBase('native form', ['amount']),
+    ) as HTMLInputElement;
     expect(input.value).toBe('1.234,50');
 
     input.dispatchEvent(new Event('focus', { bubbles: true }));
@@ -638,10 +648,11 @@ describe('native Signal Forms renderers', () => {
     fixture.detectChanges();
     TestBed.tick();
     const root = fixture.nativeElement as HTMLElement;
-    const input = root.querySelector('input') as HTMLInputElement;
+    const base = nodeBase('native form', ['active']);
+    const input = controlByBase(root, base) as HTMLInputElement;
     expect(input.checked).toBe(false);
     expect(input.hasAttribute('aria-required')).toBe(false);
-    expect(root.querySelector('button')).toBeNull();
+    expect(root.querySelector(`[id="${base}-clear"]`)).toBeNull();
 
     input.checked = true;
     input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -683,7 +694,10 @@ describe('native Signal Forms renderers', () => {
     fixture.detectChanges();
     TestBed.tick();
     const root = fixture.nativeElement as HTMLElement;
-    const input = root.querySelector('input') as HTMLInputElement;
+    const input = controlByBase(
+      root,
+      nodeBase('native form', ['name']),
+    ) as HTMLInputElement;
     expect(input.getAttribute('aria-invalid')).toBe('true');
     expect(root.querySelector('[aria-live="polite"]')?.textContent).toContain(
       'Required name',
@@ -726,4 +740,14 @@ function createConfig(
     validator: validValidator,
     ...overrides,
   };
+}
+
+function nodeBase(formId: string, path: readonly string[]): string {
+  return `se-${encodeURIComponent(JSON.stringify([formId, path]))}`;
+}
+
+function controlByBase(root: HTMLElement, base: string): HTMLElement {
+  const control = root.querySelector(`[id="${base}"]`);
+  if (!(control instanceof HTMLElement)) throw new Error('control is missing');
+  return control;
 }

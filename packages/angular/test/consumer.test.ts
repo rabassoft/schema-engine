@@ -13,17 +13,19 @@ import {
   type SchemaValidator,
 } from '@rabassoft/schema-engine';
 import {
-  SchemaFieldOutletDirective,
   SchemaFormDirective,
   provideSchemaEngineAngularNative,
+  provideSchemaTextResolver,
   type AngularControlledFormConfig,
 } from '@rabassoft/schema-engine-angular';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 interface ConsumerValue {
-  readonly name?: string;
-  readonly amount?: number;
-  readonly age?: number;
+  readonly profile?: {
+    readonly address?: {
+      readonly street?: string;
+    };
+  };
   readonly active?: boolean;
 }
 
@@ -31,53 +33,45 @@ const schema = Object.freeze({
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   type: 'object',
   properties: Object.freeze({
-    name: Object.freeze({ type: 'string', title: 'Name' }),
-    amount: Object.freeze({ type: 'number', title: 'Amount' }),
-    age: Object.freeze({ type: 'integer', title: 'Age' }),
+    profile: Object.freeze({
+      type: 'object',
+      title: 'Profile',
+      description: 'Profile details',
+      properties: Object.freeze({
+        address: Object.freeze({
+          type: 'object',
+          title: 'Address',
+          properties: Object.freeze({
+            street: Object.freeze({ type: 'string', title: 'Street' }),
+          }),
+        }),
+      }),
+    }),
     active: Object.freeze({ type: 'boolean', title: 'Active' }),
   }),
-  required: Object.freeze(['name']),
 });
 const compilation = compileFormDefinition({ schema });
 if (!compilation.success)
   throw new Error('The consumer schema must compile successfully.');
 const definition = compilation.definition;
 const initialValue: Readonly<ConsumerValue> = Object.freeze({
-  name: 'Ada',
-  amount: 12.5,
-  age: 36,
+  profile: Object.freeze({
+    address: Object.freeze({ street: 'Main' }),
+  }),
   active: false,
 });
 const validator: SchemaValidator = Object.freeze({
-  validate: (_schema: unknown, value: unknown) =>
-    Object.hasOwn(value as object, 'name')
-      ? { valid: true, issues: [] }
-      : {
-          valid: false,
-          issues: [
-            {
-              code: 'required',
-              path: ['name'],
-              parameters: {},
-              fallbackMessage: 'Name is required.',
-            },
-          ],
-        },
+  validate: () => ({ valid: true, issues: [] }),
 });
 
 @Component({
   standalone: true,
-  imports: [SchemaFormDirective, SchemaFieldOutletDirective],
+  imports: [SchemaFormDirective],
   template: `
-    <form [schemaForm]="config()" (schemaOperation)="apply($event)">
-      @for (field of definition.fields; track field.key) {
-        <ng-container [schemaFieldOutlet]="field" />
-      }
-    </form>
+    <form [schemaForm]="config()" (schemaOperation)="apply($event)"></form>
   `,
 })
 class ConsumerHost {
-  readonly definition = definition;
   readonly value = signal<Readonly<ConsumerValue>>(initialValue);
   readonly operations: FormOperation[] = [];
   readonly config = computed<AngularControlledFormConfig<ConsumerValue>>(
@@ -107,10 +101,13 @@ class ConsumerHost {
 describe('minimal built-package Angular consumer', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('renders every root primitive kind and confirms a controlled operation', () => {
+  it('renders a localized two-depth form and confirms deep set/remove operations', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
+        provideSchemaTextResolver({
+          resolve: (text, context) => `${context.locale}:${text}`,
+        }),
         provideSchemaEngineAngularNative(),
       ],
     });
@@ -119,72 +116,60 @@ describe('minimal built-package Angular consumer', () => {
     TestBed.tick();
 
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.querySelectorAll('input[type="text"]')).toHaveLength(3);
-    expect(root.querySelectorAll('input[type="checkbox"]')).toHaveLength(1);
-    expect(root.querySelectorAll('button[type="button"]')).toHaveLength(4);
     expect(
-      new Set(
-        Array.from(root.querySelectorAll('[id]'), ({ id }) => id).filter(
-          Boolean,
-        ),
-      ).size,
-    ).toBe(root.querySelectorAll('[id]').length);
-    expect(fixture.componentInstance.form?.snapshot()?.value).toEqual(
-      initialValue,
-    );
+      Array.from(root.querySelectorAll('legend'), ({ textContent }) =>
+        textContent?.trim(),
+      ),
+    ).toEqual(['en:Profile', 'en:Address']);
+    expect(root.querySelectorAll('input[type="text"]')).toHaveLength(1);
+    expect(root.querySelectorAll('input[type="checkbox"]')).toHaveLength(1);
+    const ids = Array.from(root.querySelectorAll('[id]'), ({ id }) => id);
+    expect(new Set(ids).size).toBe(ids.length);
 
-    const nameInput = root.querySelector(
-      '#se-g0-consumer-name',
-    ) as HTMLInputElement;
-    nameInput.value = 'Grace';
-    nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-    expect(fixture.componentInstance.operations).toMatchObject([
-      { type: 'set-value', path: ['name'], value: 'Grace' },
-    ]);
-    expect(fixture.componentInstance.value()).toEqual({
-      ...initialValue,
-      name: 'Grace',
+    const streetId = nodeBase('g0-consumer', ['profile', 'address', 'street']);
+    const street = byId(root, streetId) as HTMLInputElement;
+    expect(street.value).toBe('Main');
+    street.value = 'Broadway';
+    street.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'set-value',
+      path: ['profile', 'address', 'street'],
+      value: 'Broadway',
     });
-
     fixture.detectChanges();
     TestBed.tick();
-    expect(fixture.componentInstance.form?.snapshot()?.value).toEqual({
-      ...initialValue,
-      name: 'Grace',
-    });
-    expect(nameInput.value).toBe('Grace');
+    expect(street.value).toBe('Broadway');
 
-    const clear = root.querySelector(
-      '#se-g0-consumer-name-clear',
-    ) as HTMLButtonElement;
-    expect(clear.getAttribute('aria-labelledby')).toBe(
-      'se-g0-consumer-name-clear se-g0-consumer-name-label',
-    );
+    const clear = byId(root, `${streetId}-clear`) as HTMLButtonElement;
     clear.click();
     expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
       type: 'remove-value',
-      path: ['name'],
+      path: ['profile', 'address', 'street'],
     });
     fixture.detectChanges();
     TestBed.tick();
     expect(fixture.componentInstance.value()).toEqual({
-      amount: 12.5,
-      age: 36,
+      profile: { address: {} },
       active: false,
     });
-    expect(root.querySelector('#se-g0-consumer-name-clear')).toBeNull();
-    expect(document.activeElement).toBe(nameInput);
-    expect(
-      fixture.componentInstance.form
-        ?.snapshot()
-        ?.fields.find(({ path }) => path[0] === 'name'),
-    ).toMatchObject({
-      presence: { kind: 'missing' },
-      focused: true,
-      valid: false,
-      showIssues: true,
-    });
-    expect(root.textContent).toContain('Name is required.');
+    expect(root.querySelector(`[id="${streetId}-clear"]`)).toBeNull();
+    expect(document.activeElement).toBe(street);
+    expect(fixture.componentInstance.form?.snapshot()?.fields[0]).toMatchObject(
+      {
+        path: ['profile', 'address', 'street'],
+        presence: { kind: 'missing' },
+        focused: true,
+      },
+    );
   });
 });
+
+function nodeBase(formId: string, path: readonly string[]): string {
+  return `se-${encodeURIComponent(JSON.stringify([formId, path]))}`;
+}
+
+function byId(root: HTMLElement, id: string): HTMLElement {
+  const element = root.querySelector(`[id="${id}"]`);
+  if (!(element instanceof HTMLElement)) throw new Error(`Missing ${id}`);
+  return element;
+}

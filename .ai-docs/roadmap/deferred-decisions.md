@@ -79,8 +79,8 @@ Cada decisión debe registrar:
 - **Estado de diseño:** ADR-014 revisión 2, ADR-005 revisión 1 y SPEC-002 v0.1.2
   están Accepted tras revisiones completas sin hallazgos. PLAN-009 revisión 1
   también superó su revisión repetida y fue aprobado explícitamente. Todos los
-  gates de M9 están satisfechos; checkpoints 1–4 están completados y la
-  proyección Angular recursiva permanece pendiente de checkpoint 5.
+  gates de M9 están satisfechos; checkpoints 1–6 están completados y la matriz
+  completa con revisión final permanece pendiente de checkpoint 7.
 
 ## D-006: Arrays
 
@@ -422,7 +422,7 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-005 — Objetos anidados:** ejecutar únicamente el checkpoint 4 del
+1. **D-005 — Objetos anidados:** ejecutar únicamente el checkpoint 7 del
    PLAN-009 revisión 1 aprobado y conservar todas sus fronteras.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
@@ -437,6 +437,9 @@ una promoción y aprobación explícitas.
 
 | Fecha      | Cambio                                                                                                                              |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | PLAN-009 checkpoint 6 migra paquetes, declaraciones, artefactos y consumidores limpios; checkpoint 7 queda pendiente.               |
+| 14-07-2026 | PLAN-009 checkpoint 5 completa la proyección Angular recursiva y accesible; checkpoint 6 queda pendiente.                           |
+| 14-07-2026 | PLAN-009 checkpoint 4 completa runtime, snapshots, scopes y sharing anidados; checkpoint 5 queda pendiente.                         |
 | 14-07-2026 | PLAN-009 checkpoint 3 completa operaciones profundas y fixtures con matriz verde; checkpoint 4 queda pendiente.                     |
 | 14-07-2026 | PLAN-009 checkpoint 2 completa el compiler schema/UI recursivo y sus fixtures con matriz verde; checkpoint 3 queda pendiente.       |
 | 14-07-2026 | PLAN-009 checkpoint 1 completa contratos/helpers neutrales y migración plana con matriz verde; checkpoint 2 queda pendiente.        |

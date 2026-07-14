@@ -10,6 +10,7 @@ import type { AngularFieldTextSnapshot } from '../text.js';
 @Component({ selector: 'schema-test-renderer', standalone: true, template: '' })
 export class FakeRenderer implements AngularFieldRenderer, OnDestroy {
   static latest: FakeRenderer | undefined;
+  static instances: FakeRenderer[] = [];
   static created = 0;
   static destroyed = 0;
   static emitOnDestroy = false;
@@ -27,6 +28,7 @@ export class FakeRenderer implements AngularFieldRenderer, OnDestroy {
 
   constructor() {
     FakeRenderer.latest = this;
+    FakeRenderer.instances.push(this);
     FakeRenderer.created += 1;
   }
 

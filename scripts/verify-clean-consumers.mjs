@@ -184,27 +184,46 @@ function createCoreConsumer(tarball, packageManager, typescriptVersion) {
   });
   writeFileSync(
     join(directory, 'src/main.ts'),
-    `import { compileFormDefinition, createControlledFormRuntime } from '@rabassoft/schema-engine';
+    `import { applyFormOperation, compileFormDefinition, createControlledFormRuntime } from '@rabassoft/schema-engine';
 
-const compiled = compileFormDefinition({
-  schema: {
-    $schema: 'https://json-schema.org/draft/2020-12/schema',
-    type: 'object',
-    properties: { name: { type: 'string' } },
+const schema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    profile: {
+      type: 'object',
+      properties: { address: { type: 'string' } },
+    },
   },
+};
+const compiled = compileFormDefinition({
+  schema,
 });
 if (!compiled.success) throw new Error('Compilation failed');
+const source: { profile?: { address?: string } } = {};
 const created = createControlledFormRuntime({
   formId: 'clean-core',
   definition: compiled.definition,
-  schema: { type: 'object', properties: { name: { type: 'string' } } },
-  value: { name: 'Rabassoft' },
-  baselineValue: { name: 'Rabassoft' },
+  schema,
+  value: source,
+  baselineValue: source,
   locale: 'en',
   validator: { validate: () => ({ valid: true, issues: [] }) },
 });
 if (!created.success) throw new Error('Runtime creation failed');
-if (!created.runtime.getSnapshot().valid) throw new Error('Unexpected invalid snapshot');
+const profile = created.runtime.getNodeSnapshot(['profile']);
+const address = created.runtime.getFieldSnapshot(['profile', 'address']);
+if (profile?.nodeKind !== 'object' || address?.nodeKind !== 'field') {
+  throw new Error('Nested declarations are unavailable');
+}
+let operation;
+created.runtime.subscribeOperations((candidate) => { operation = candidate; });
+created.runtime.requestSetValue(['profile', 'address'], 'Rabassoft');
+if (operation === undefined) throw new Error('Deep operation was not emitted');
+const applied = applyFormOperation(compiled.definition, source, operation);
+if (!applied.success || applied.value.profile?.address !== 'Rabassoft') {
+  throw new Error('Deep operation failed');
+}
 created.runtime.dispose();
 `,
   );
@@ -275,33 +294,96 @@ function createAngularConsumer(
     join(directory, 'src/main.ts'),
     `import '@angular/compiler';
 import {
+  Component,
   Injector,
   createEnvironmentInjector,
   type EnvironmentInjector,
 } from '@angular/core';
-import { compileFormDefinition } from '@rabassoft/schema-engine';
+import {
+  applyFormOperation,
+  compileFormDefinition,
+  type FormOperation,
+  type SchemaValidator,
+} from '@rabassoft/schema-engine';
 import {
   AngularRendererResolver,
+  SchemaFormDirective,
   SchemaStringRendererComponent,
   provideSchemaEngineAngularNative,
+  provideSchemaTextResolver,
+  type AngularControlledFormConfig,
 } from '@rabassoft/schema-engine-angular';
 
-const compiled = compileFormDefinition({
-  schema: {
-    $schema: 'https://json-schema.org/draft/2020-12/schema',
-    type: 'object',
-    properties: { name: { type: 'string' } },
+interface ConsumerValue {
+  profile?: { address?: { street?: string } };
+}
+
+const schema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    profile: {
+      type: 'object',
+      title: 'Profile',
+      properties: {
+        address: {
+          type: 'object',
+          title: 'Address',
+          properties: { street: { type: 'string', title: 'Street' } },
+        },
+      },
+    },
   },
+};
+const compiled = compileFormDefinition({
+  schema,
 });
 if (!compiled.success) throw new Error('Compilation failed');
+const definition = compiled.definition;
+const validator: SchemaValidator = {
+  validate: () => ({ valid: true, issues: [] }),
+};
+
+@Component({
+  selector: 'clean-consumer',
+  standalone: true,
+  imports: [SchemaFormDirective],
+  template: '<form [schemaForm]="config" (schemaOperation)="apply($event)"></form>',
+})
+class CleanConsumerComponent {
+  value: ConsumerValue = {};
+  config: AngularControlledFormConfig<ConsumerValue> = {
+    formId: 'clean-angular',
+    definition,
+    schema,
+    value: this.value,
+    baselineValue: {},
+    validator,
+    locale: 'en',
+  };
+
+  apply(operation: FormOperation): void {
+    const applied = applyFormOperation(definition, this.value, operation);
+    if (applied.success) this.value = applied.value;
+  }
+}
+
 const injector = createEnvironmentInjector(
-  [provideSchemaEngineAngularNative()],
+  [
+    provideSchemaEngineAngularNative(),
+    provideSchemaTextResolver({
+      resolve: (text, context) => context.member === 'label' ? \`en:\${text}\` : text,
+    }),
+  ],
   Injector.NULL as EnvironmentInjector,
 );
 const resolver = injector.get(AngularRendererResolver);
 if (!resolver.ready) throw new Error('Renderer resolver is not ready');
-if (typeof SchemaStringRendererComponent !== 'function') {
-  throw new Error('Native renderer export is unavailable');
+if (
+  typeof SchemaStringRendererComponent !== 'function' ||
+  typeof CleanConsumerComponent !== 'function'
+) {
+  throw new Error('Angular root exports are unavailable');
 }
 injector.destroy();
 `,

@@ -13,7 +13,7 @@
 
 - [SPEC-001: Controlled Form Runtime](./specs/001-controlled-form-runtime.md)
 - [SPEC-002: Nested Object Controlled Runtime Extension](./specs/002-nested-object-runtime.md)
-  — Accepted v0.1.2; M9 behavior is normative but not implemented.
+  — Accepted v0.1.2; PLAN-009 checkpoints 1–6 are implemented.
 
 ## Acceptance reviews
 
@@ -32,7 +32,7 @@
   authorizing implementation.
 - [M9 PLAN-009 complete review — Cycles 1–2](./reviews/005-plan-009-review.md)
   — Four delivery corrections applied; repeated review 2 passed with zero
-  findings. PLAN-009 revision 1 was explicitly approved; checkpoints 1–4 are
+  findings. PLAN-009 revision 1 was explicitly approved; checkpoints 1–6 are
   completed.
 
 ## Architecture Decision Records
@@ -54,14 +54,14 @@
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
 - [PLAN-007: Explicit native field clearing](./plans/007-explicit-native-field-clearing.md) — Completed revision 2
 - [PLAN-008: Experimental 0.1 artifact preparation](./plans/008-experimental-0-1-artifact-preparation.md) — Completed revision 2
-- [PLAN-009: Nested-object controlled runtime](./plans/009-nested-object-runtime.md) — Approved revision 1; checkpoints 1–4 completed
+- [PLAN-009: Nested-object controlled runtime](./plans/009-nested-object-runtime.md) — Approved revision 1; checkpoints 1–6 completed
 
 M1-M7 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
 increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
 `0.1.0` candidates. M8 completed without publication; M9 has accepted normative
 contracts. PLAN-009 revision 1 passed its repeated complete review and is
-approved; M9 checkpoints 1–4 are completed and M10-M12 remain unapproved delivery
+approved; M9 checkpoints 1–6 are completed and M10-M12 remain unapproved delivery
 commitments.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

@@ -17,6 +17,7 @@ Import only from the package root:
 
 ```ts
 import {
+  applyFormOperation,
   compileFormDefinition,
   createControlledFormRuntime,
 } from '@rabassoft/schema-engine';
@@ -27,13 +28,17 @@ supported.
 
 ## Prototype boundary
 
-The current runtime supports root object schemas, primitive `string`, `number`,
-`integer`, and `boolean` fields, the documented string-enum subset, synchronous
-external validation, controlled application-owned state, and strict incremental
-operations.
+The current runtime supports a root object whose properties may recursively
+contain inline objects and primitive `string`, `number`, `integer`, and
+`boolean` leaves, including the documented string-enum subset. It provides
+normalized immutable definitions and snapshots, string-only deep paths,
+synchronous external validation, controlled application-owned state, and strict
+incremental deep operations. Object nesting is iterative and finite-depth
+guarded; the application remains the only source of truth for values.
 
-Nested objects, arrays, composition, async validation, persistence, advanced
-layouts, and other deferred capabilities are not included.
+Arrays, references, composition, async validation, persistence, advanced
+layouts, custom object containers, and other deferred capabilities are not
+included.
 
 See the [Schema Engine repository](https://github.com/rabassoft/schema-engine)
-for SPEC-001, ADRs, plans, and current project status.
+for SPEC-001, SPEC-002, ADRs, plans, and current project status.

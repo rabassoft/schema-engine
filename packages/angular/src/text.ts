@@ -9,6 +9,9 @@ import type {
   FieldDefinition,
   FieldRuntimeSnapshot,
   FieldTextMember,
+  ObjectFieldDefinition,
+  ObjectRuntimeSnapshot,
+  ObjectTextMember,
   StringChoiceDefinition,
   TextResolutionContext,
   TextResolver,
@@ -19,6 +22,10 @@ type FieldTextResolutionContext = Extract<
   TextResolutionContext,
   { readonly field: FieldDefinition }
 >;
+type ObjectTextResolutionContext = Extract<
+  TextResolutionContext,
+  { readonly node: ObjectFieldDefinition }
+>;
 
 export interface AngularFieldTextSnapshot {
   readonly label: string;
@@ -28,6 +35,15 @@ export interface AngularFieldTextSnapshot {
   readonly placeholder?: string;
   readonly clearLabel: string;
   readonly choiceLabels: readonly string[];
+  readonly issueMessages: readonly string[];
+}
+
+/** @internal */
+export interface AngularObjectTextSnapshot {
+  readonly label: string;
+  readonly description?: string;
+  readonly hint?: string;
+  readonly tooltip?: string;
   readonly issueMessages: readonly string[];
 }
 
@@ -46,6 +62,12 @@ export function provideSchemaTextResolver(resolver: TextResolver): Provider {
 
 export interface TextProjectionResult {
   readonly texts: AngularFieldTextSnapshot;
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+/** @internal */
+export interface ObjectTextProjectionResult {
+  readonly texts: AngularObjectTextSnapshot;
   readonly diagnostics: readonly Diagnostic[];
 }
 
@@ -121,6 +143,55 @@ export class AngularTextProjector {
       diagnostics: Object.freeze(diagnostics),
     });
   }
+
+  projectObject(
+    node: ObjectFieldDefinition,
+    snapshot: ObjectRuntimeSnapshot,
+    formId: string,
+    locale: string,
+  ): ObjectTextProjectionResult {
+    const diagnostics: Diagnostic[] = [...this.parsed.diagnostics];
+    const common = { formId, locale, node } as const;
+    const resolve = (
+      source: string,
+      member: Exclude<ObjectTextMember, 'issue'>,
+      rejectBlank = false,
+    ): string =>
+      resolveText(
+        this.parsed.resolver,
+        source,
+        { ...common, member },
+        diagnostics,
+        rejectBlank,
+      );
+    const label = resolve(node.label, 'label', true);
+    const description =
+      node.description === undefined
+        ? undefined
+        : resolve(node.description, 'description');
+    const hint =
+      node.hint === undefined ? undefined : resolve(node.hint, 'hint');
+    const tooltip =
+      node.tooltip === undefined ? undefined : resolve(node.tooltip, 'tooltip');
+    const issueMessages = snapshot.issues.map((issue) =>
+      resolveText(
+        this.parsed.resolver,
+        issue.fallbackMessage ?? issue.code,
+        { ...common, member: 'issue', issue },
+        diagnostics,
+      ),
+    );
+    return Object.freeze({
+      texts: Object.freeze({
+        label,
+        ...(description === undefined ? {} : { description }),
+        ...(hint === undefined ? {} : { hint }),
+        ...(tooltip === undefined ? {} : { tooltip }),
+        issueMessages: Object.freeze(issueMessages),
+      }),
+      diagnostics: Object.freeze(diagnostics),
+    });
+  }
 }
 
 function parseResolver(candidate: unknown): {
@@ -162,7 +233,7 @@ function invalidResolver(reason: string, actualType: string) {
 function resolveText(
   resolver: (text: string, context: TextResolutionContext) => unknown,
   source: string,
-  context: FieldTextResolutionContext,
+  context: FieldTextResolutionContext | ObjectTextResolutionContext,
   diagnostics: Diagnostic[],
   rejectBlank = false,
 ): string {
@@ -185,9 +256,26 @@ function resolveText(
 }
 
 function textDiagnostic(
-  context: FieldTextResolutionContext,
+  context: FieldTextResolutionContext | ObjectTextResolutionContext,
   reason: string,
 ): Diagnostic {
+  if ('node' in context) {
+    return adapterDiagnostic(
+      'TEXT_RESOLUTION_FAILED',
+      'warning',
+      {
+        node: context.node.name,
+        nodeKind: 'object',
+        member: context.member,
+        ...(context.member === 'issue'
+          ? { issueCode: context.issue.code }
+          : {}),
+        reason,
+      },
+      `Text resolution failed for object "${context.node.name}".`,
+      context.node.path,
+    );
+  }
   return adapterDiagnostic(
     'TEXT_RESOLUTION_FAILED',
     'warning',
@@ -247,6 +335,14 @@ export function emptyTextSnapshot(): AngularFieldTextSnapshot {
     label: '',
     clearLabel: 'Clear',
     choiceLabels: Object.freeze([]),
+    issueMessages: Object.freeze([]),
+  });
+}
+
+/** @internal */
+export function emptyObjectTextSnapshot(): AngularObjectTextSnapshot {
+  return Object.freeze({
+    label: '',
     issueMessages: Object.freeze([]),
   });
 }
