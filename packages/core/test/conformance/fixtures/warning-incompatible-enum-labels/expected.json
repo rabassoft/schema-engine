@@ -1,9 +1,20 @@
 {
   "success": true,
   "definition": {
+    "nodes": [
+      {
+        "key": "[\"status\"]",
+        "name": "status",
+        "path": ["status"],
+        "required": false,
+        "label": "status",
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
     "fields": [
       {
-        "key": "status",
+        "key": "[\"status\"]",
         "name": "status",
         "path": ["status"],
         "required": false,

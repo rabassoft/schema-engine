@@ -1,0 +1,20 @@
+{
+  "success": false,
+  "value": {
+    "a": null
+  },
+  "changed": false,
+  "diagnostics": [
+    {
+      "code": "INCOMPATIBLE_OPERATION_ANCESTOR",
+      "severity": "error",
+      "source": "runtime",
+      "dataPath": ["a"],
+      "parameters": {
+        "reason": "non-object-ancestor",
+        "actualType": "null"
+      },
+      "fallbackMessage": "Operation ancestor is not an ordinary object."
+    }
+  ]
+}

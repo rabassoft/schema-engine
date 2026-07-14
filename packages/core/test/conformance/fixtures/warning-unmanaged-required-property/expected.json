@@ -1,9 +1,20 @@
 {
   "success": true,
   "definition": {
+    "nodes": [
+      {
+        "key": "[\"name\"]",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
     "fields": [
       {
-        "key": "name",
+        "key": "[\"name\"]",
         "name": "name",
         "path": ["name"],
         "required": false,

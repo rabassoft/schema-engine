@@ -1,0 +1,40 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["address", "street"],
+      "documentPath": [
+        "properties",
+        "address",
+        "properties",
+        "street",
+        "minLength"
+      ],
+      "parameters": {
+        "keyword": "minLength",
+        "expected": "non-negative integer",
+        "actualType": "number",
+        "actualValue": -1
+      },
+      "fallbackMessage": "Schema keyword \"minLength\" has an invalid value."
+    },
+    {
+      "code": "MISSING_SCHEMA_PROPERTIES",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["address", "location"],
+      "documentPath": [
+        "properties",
+        "address",
+        "properties",
+        "location",
+        "properties"
+      ],
+      "parameters": {},
+      "fallbackMessage": "Object schema must declare properties."
+    }
+  ]
+}

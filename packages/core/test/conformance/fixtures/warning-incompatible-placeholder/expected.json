@@ -1,9 +1,19 @@
 {
   "success": true,
   "definition": {
+    "nodes": [
+      {
+        "key": "[\"active\"]",
+        "name": "active",
+        "path": ["active"],
+        "required": false,
+        "label": "active",
+        "kind": "boolean"
+      }
+    ],
     "fields": [
       {
-        "key": "active",
+        "key": "[\"active\"]",
         "name": "active",
         "path": ["active"],
         "required": false,

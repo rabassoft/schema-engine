@@ -7,48 +7,50 @@ import {
 } from '../src/index.js';
 
 const metadata = { id: 1, formId: 'form' } as const;
+const definitionFields: FormDefinition['fields'] = [
+  {
+    key: '["name"]',
+    name: 'name',
+    path: ['name'],
+    required: true,
+    label: 'Name',
+    kind: 'string',
+    constraints: {},
+  },
+  {
+    key: '["amount"]',
+    name: 'amount',
+    path: ['amount'],
+    required: false,
+    label: 'Amount',
+    kind: 'number',
+    numericType: 'number',
+    constraints: {},
+    ui: {},
+  },
+  {
+    key: '["count"]',
+    name: 'count',
+    path: ['count'],
+    required: false,
+    label: 'Count',
+    kind: 'number',
+    numericType: 'integer',
+    constraints: {},
+    ui: {},
+  },
+  {
+    key: '["active"]',
+    name: 'active',
+    path: ['active'],
+    required: false,
+    label: 'Active',
+    kind: 'boolean',
+  },
+];
 const definition: FormDefinition = {
-  fields: [
-    {
-      key: 'name',
-      name: 'name',
-      path: ['name'],
-      required: true,
-      label: 'Name',
-      kind: 'string',
-      constraints: {},
-    },
-    {
-      key: 'amount',
-      name: 'amount',
-      path: ['amount'],
-      required: false,
-      label: 'Amount',
-      kind: 'number',
-      numericType: 'number',
-      constraints: {},
-      ui: {},
-    },
-    {
-      key: 'count',
-      name: 'count',
-      path: ['count'],
-      required: false,
-      label: 'Count',
-      kind: 'number',
-      numericType: 'integer',
-      constraints: {},
-      ui: {},
-    },
-    {
-      key: 'active',
-      name: 'active',
-      path: ['active'],
-      required: false,
-      label: 'Active',
-      kind: 'boolean',
-    },
-  ],
+  nodes: definitionFields,
+  fields: definitionFields,
 };
 
 function set(
@@ -138,7 +140,6 @@ describe('root immutable operations', () => {
 
   it.each([
     [[], 'root-not-supported'],
-    [['a', 'b'], 'deep-path-not-supported'],
     [[0], 'non-string-segment'],
   ])('rejects path %j', (path, reason) => {
     const original = {};
@@ -248,9 +249,12 @@ describe('root immutable operations', () => {
 
     expect(applyOperation(current, operation).success).toBe(true);
     expect(
-      applyFormOperation({ fields: [field] } as never, current, operation)
-        .success,
-    ).toBe(true);
+      applyFormOperation(
+        { nodes: [field], fields: [field] } as never,
+        current,
+        operation,
+      ).success,
+    ).toBe(false);
     expect(getterCalls).toBe(0);
   });
 
@@ -283,8 +287,10 @@ describe('root immutable operations', () => {
         },
       ],
     });
+    const duplicateFields = [definition.fields[0], definition.fields[0]];
     const duplicate = {
-      fields: [definition.fields[0], definition.fields[0]],
+      nodes: duplicateFields,
+      fields: duplicateFields,
     } as FormDefinition;
     expect(
       applyFormOperation(
@@ -411,5 +417,282 @@ describe('root immutable operations', () => {
     expect(Object.isFrozen(result.diagnostics)).toBe(true);
     expect(Object.isFrozen(result.value)).toBe(false);
     expect(Object.isFrozen(branch)).toBe(false);
+  });
+});
+
+describe('deep immutable operations', () => {
+  const street = {
+    key: '["profile","address","street"]',
+    name: 'street',
+    path: ['profile', 'address', 'street'],
+    required: true,
+    label: 'Street',
+    kind: 'string',
+    constraints: {},
+  } as const;
+  const address = {
+    key: '["profile","address"]',
+    name: 'address',
+    path: ['profile', 'address'],
+    required: false,
+    label: 'Address',
+    kind: 'object',
+    children: [street],
+  } as const;
+  const profile = {
+    key: '["profile"]',
+    name: 'profile',
+    path: ['profile'],
+    required: false,
+    label: 'Profile',
+    kind: 'object',
+    children: [address],
+  } as const;
+  const nestedDefinition: FormDefinition = {
+    nodes: [profile],
+    fields: [street],
+  };
+
+  it('materializes missing ancestors and resolves exact managed leaves', () => {
+    const result = applyFormOperation(
+      nestedDefinition,
+      {},
+      set(['profile', 'address', 'street'], { kind: 'missing' }, 'Main'),
+    );
+    expect(result).toMatchObject({
+      success: true,
+      changed: true,
+      value: { profile: { address: { street: 'Main' } } },
+    });
+    expect(
+      Object.getOwnPropertyDescriptor(
+        (result.value as { profile: { address: object } }).profile,
+        'address',
+      ),
+    ).toMatchObject({ writable: true, enumerable: true, configurable: true });
+
+    expect(
+      applyFormOperation(
+        nestedDefinition,
+        {},
+        set(['profile', 'address'], { kind: 'missing' }, {}),
+      ),
+    ).toMatchObject({
+      diagnostics: [
+        {
+          code: 'INVALID_OPERATION_PATH',
+          parameters: { reason: 'object-target-not-supported', pathLength: 2 },
+        },
+      ],
+    });
+  });
+
+  it('reports nested-definition defects before membership or data inspection', () => {
+    const cyclic = { ...profile, children: [] as unknown[] };
+    cyclic.children.push(cyclic);
+    const result = applyFormOperation(
+      { nodes: [cyclic], fields: [] } as never,
+      Object.defineProperty({}, 'profile', {
+        get() {
+          throw new Error('must not inspect data after definition failure');
+        },
+      }),
+      set(['profile', 'address', 'street'], { kind: 'missing' }, 'Main'),
+    );
+    expect(result).toMatchObject({
+      diagnostics: [
+        {
+          code: 'INVALID_FORM_DEFINITION',
+          dataPath: ['profile', 'address', 'street'],
+          parameters: {
+            reason: 'cyclic-node',
+            nodeIndexPath: [0, 0],
+            firstNodeIndexPath: [0],
+          },
+          fallbackMessage: 'Form definition is invalid.',
+        },
+      ],
+    });
+
+    const independent = applyFormOperation(
+      { nodes: [null, 1], fields: [] } as never,
+      {},
+      set(['profile', 'address', 'street'], { kind: 'missing' }, 'Main'),
+    );
+    expect(
+      independent.diagnostics.map(({ parameters }) => parameters),
+    ).toMatchObject([
+      { reason: 'invalid-node', nodeIndexPath: [0] },
+      { reason: 'invalid-node', nodeIndexPath: [1] },
+    ]);
+  });
+
+  it('reports the exact invalid deep segment without retaining its value', () => {
+    const opaque = {};
+    const result = applyOperation(
+      {},
+      set(['profile', opaque as never], { kind: 'missing' }, 'Main'),
+    );
+    expect(result).toMatchObject({
+      diagnostics: [
+        {
+          code: 'INVALID_OPERATION_PATH',
+          parameters: {
+            reason: 'non-string-segment',
+            pathLength: 2,
+            segmentIndex: 1,
+            actualType: 'object',
+          },
+        },
+      ],
+    });
+    expect(
+      result.diagnostics[0]?.parameters === opaque ||
+        Object.values(result.diagnostics[0]?.parameters ?? {}).includes(opaque),
+    ).toBe(false);
+  });
+
+  it('clones only the changed chain and preserves compatible concurrent branches', () => {
+    const untouched = { identity: true };
+    const addressValue = Object.create(null) as Record<string, unknown>;
+    Object.defineProperty(addressValue, 'street', {
+      value: 'Main',
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+    addressValue.concurrent = untouched;
+    const profileValue = { address: addressValue, sibling: untouched };
+    const original = { profile: profileValue, rootSibling: untouched };
+    const result = applyOperation(
+      original,
+      set(
+        ['profile', 'address', 'street'],
+        { kind: 'value', value: 'Main' },
+        'Side',
+      ),
+    );
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    const nextProfile = result.value.profile;
+    const nextAddress = nextProfile.address;
+    expect(result.value).not.toBe(original);
+    expect(nextProfile).not.toBe(profileValue);
+    expect(nextAddress).not.toBe(addressValue);
+    expect(Object.getPrototypeOf(nextAddress)).toBe(null);
+    expect(nextAddress.concurrent).toBe(untouched);
+    expect(nextProfile.sibling).toBe(untouched);
+    expect(result.value.rootSibling).toBe(untouched);
+    expect(Object.getOwnPropertyDescriptor(nextAddress, 'street')).toEqual({
+      value: 'Side',
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it('removes a terminal without pruning ancestors', () => {
+    const original = {
+      profile: { address: { street: 'Main' }, sibling: { retained: true } },
+    };
+    const result = applyOperation(
+      original,
+      remove(['profile', 'address', 'street'], 'Main'),
+    );
+    expect(result).toMatchObject({
+      success: true,
+      changed: true,
+      value: { profile: { address: {}, sibling: { retained: true } } },
+    });
+    expect(result.value.profile.sibling).toBe(original.profile.sibling);
+  });
+
+  it.each([
+    [null, 'null'],
+    [[], 'array'],
+    [1, 'number'],
+  ])(
+    'rejects incompatible ancestor %j atomically',
+    (ancestor, expectedType) => {
+      const original = { profile: ancestor };
+      const result = applyOperation(
+        original,
+        set(['profile', 'street'], { kind: 'missing' }, 'Main'),
+      );
+      expect(result).toMatchObject({
+        success: false,
+        value: original,
+        diagnostics: [
+          {
+            code: 'INCOMPATIBLE_OPERATION_ANCESTOR',
+            dataPath: ['profile'],
+            parameters: {
+              reason: 'non-object-ancestor',
+              actualType: expectedType,
+            },
+          },
+        ],
+      });
+      expect(result.value).toBe(original);
+    },
+  );
+
+  it('rejects ancestor and terminal accessors without invoking them', () => {
+    let calls = 0;
+    const ancestor = Object.defineProperty({}, 'profile', {
+      enumerable: true,
+      get() {
+        calls += 1;
+        return {};
+      },
+    });
+    const terminal = {
+      profile: Object.defineProperty({}, 'street', {
+        enumerable: true,
+        get() {
+          calls += 1;
+          return 'Main';
+        },
+      }),
+    };
+    expect(
+      applyOperation(
+        ancestor,
+        set(['profile', 'street'], { kind: 'missing' }, 'Main'),
+      ),
+    ).toMatchObject({
+      diagnostics: [
+        { code: 'UNSUPPORTED_OPERATION_PROPERTY', dataPath: ['profile'] },
+      ],
+    });
+    expect(
+      applyOperation(
+        terminal,
+        set(['profile', 'street'], { kind: 'value', value: 'Main' }, 'Side'),
+      ),
+    ).toMatchObject({
+      diagnostics: [
+        {
+          code: 'UNSUPPORTED_OPERATION_PROPERTY',
+          dataPath: ['profile', 'street'],
+        },
+      ],
+    });
+    expect(calls).toBe(0);
+  });
+
+  it('supports finite deep paths without recursion', () => {
+    const path = Array.from({ length: 1_500 }, (_, index) => `p${index}`);
+    const result = applyOperation(
+      {},
+      set(path, { kind: 'missing' }, 'terminal'),
+    );
+    expect(result.success).toBe(true);
+    let current: unknown = result.value;
+    for (const segment of path) {
+      expect(typeof current).toBe('object');
+      current = (current as Record<string, unknown>)[segment];
+    }
+    expect(current).toBe('terminal');
   });
 });

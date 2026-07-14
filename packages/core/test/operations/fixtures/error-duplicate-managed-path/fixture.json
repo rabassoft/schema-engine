@@ -1,14 +1,25 @@
 {
   "mode": "form",
   "definition": {
+    "nodes": [],
     "fields": [
       {
+        "key": "[\"name\"]",
+        "name": "name",
         "path": ["name"],
-        "kind": "string"
+        "required": true,
+        "label": "Name",
+        "kind": "string",
+        "constraints": {}
       },
       {
+        "key": "[\"name\"]",
+        "name": "name",
         "path": ["name"],
-        "kind": "string"
+        "required": true,
+        "label": "Name",
+        "kind": "string",
+        "constraints": {}
       }
     ]
   },

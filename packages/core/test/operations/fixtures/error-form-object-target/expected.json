@@ -7,8 +7,9 @@
       "code": "INVALID_OPERATION_PATH",
       "severity": "error",
       "source": "runtime",
+      "dataPath": ["profile", "address"],
       "parameters": {
-        "reason": "deep-path-not-supported",
+        "reason": "object-target-not-supported",
         "pathLength": 2
       },
       "fallbackMessage": "Operation path is outside the supported root-property scope."

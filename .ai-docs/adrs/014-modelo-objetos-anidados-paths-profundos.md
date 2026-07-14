@@ -15,7 +15,7 @@
   [`SPEC-002`](../specs/002-nested-object-runtime.md)
 - **Implementation plan:**
   [`PLAN-009 revision 1`](../plans/009-nested-object-runtime.md), Approved;
-  implementation not started
+  checkpoints 1–4 completed
 
 ## 1. Context
 
@@ -35,6 +35,9 @@ Accepted revision 2 is authoritative for M9 architecture. It consists of the
 revision 1 decision plus the section 7 clarification. ADR acceptance aligned
 normative design only; PLAN-009 revision 1 subsequently passed its separate
 review and approval gate, with implementation not yet started.
+Checkpoints 1–3 subsequently established the neutral contract/helper foundation,
+recursive schema/UI compiler and deep controlled operations; nested runtime
+remains pending checkpoint 4.
 
 ### 2.1 Normalized nodes and leaf projection
 
@@ -466,3 +469,5 @@ custom leaf renderers. Its complete review passed with zero findings before
 acceptance; SPEC-002 v0.1.2 was accepted afterward in the required order.
 PLAN-009 revision 1 later passed its separate repeated review and was explicitly
 approved without starting implementation.
+Checkpoint 1 later completed the neutral contracts and iterative helper
+foundation without implementing recursive compiler behavior.

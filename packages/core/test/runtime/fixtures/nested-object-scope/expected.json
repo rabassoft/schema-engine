@@ -1,0 +1,224 @@
+{
+  "success": true,
+  "initialSnapshot": {
+    "value": {
+      "profile": {}
+    },
+    "locale": "en",
+    "valid": false,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "nodes": [
+      {
+        "nodeKind": "object",
+        "key": "[\"profile\"]",
+        "path": ["profile"],
+        "presence": {
+          "kind": "object"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": false,
+        "issues": [
+          {
+            "code": "profile",
+            "path": ["profile"],
+            "parameters": {}
+          },
+          {
+            "code": "deep",
+            "path": ["profile", "unknown"],
+            "parameters": {}
+          }
+        ],
+        "showIssues": false,
+        "children": [
+          {
+            "nodeKind": "field",
+            "key": "[\"profile\",\"street\"]",
+            "path": ["profile", "street"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "nodeKind": "field",
+        "key": "[\"profile\",\"street\"]",
+        "path": ["profile", "street"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  },
+  "actions": [
+    {
+      "result": {
+        "success": true,
+        "effects": {
+          "snapshotChanged": true,
+          "operationEmitted": false
+        },
+        "diagnostics": []
+      },
+      "snapshot": {
+        "value": {
+          "profile": {}
+        },
+        "locale": "en",
+        "valid": false,
+        "dirty": false,
+        "validationVisibility": "touched",
+        "nodes": [
+          {
+            "nodeKind": "object",
+            "key": "[\"profile\"]",
+            "path": ["profile"],
+            "presence": {
+              "kind": "object"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": false,
+            "issues": [
+              {
+                "code": "profile",
+                "path": ["profile"],
+                "parameters": {}
+              },
+              {
+                "code": "deep",
+                "path": ["profile", "unknown"],
+                "parameters": {}
+              }
+            ],
+            "showIssues": true,
+            "children": [
+              {
+                "nodeKind": "field",
+                "key": "[\"profile\",\"street\"]",
+                "path": ["profile", "street"],
+                "presence": {
+                  "kind": "missing"
+                },
+                "dirty": false,
+                "touched": false,
+                "focused": false,
+                "valid": true,
+                "issues": [],
+                "showIssues": false
+              }
+            ]
+          }
+        ],
+        "fields": [
+          {
+            "nodeKind": "field",
+            "key": "[\"profile\",\"street\"]",
+            "path": ["profile", "street"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    }
+  ],
+  "operations": [],
+  "snapshotEmissions": 1,
+  "finalSnapshot": {
+    "value": {
+      "profile": {}
+    },
+    "locale": "en",
+    "valid": false,
+    "dirty": false,
+    "validationVisibility": "touched",
+    "nodes": [
+      {
+        "nodeKind": "object",
+        "key": "[\"profile\"]",
+        "path": ["profile"],
+        "presence": {
+          "kind": "object"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": false,
+        "issues": [
+          {
+            "code": "profile",
+            "path": ["profile"],
+            "parameters": {}
+          },
+          {
+            "code": "deep",
+            "path": ["profile", "unknown"],
+            "parameters": {}
+          }
+        ],
+        "showIssues": true,
+        "children": [
+          {
+            "nodeKind": "field",
+            "key": "[\"profile\",\"street\"]",
+            "path": ["profile", "street"],
+            "presence": {
+              "kind": "missing"
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "nodeKind": "field",
+        "key": "[\"profile\",\"street\"]",
+        "path": ["profile", "street"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  }
+}

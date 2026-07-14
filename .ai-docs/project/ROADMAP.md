@@ -75,11 +75,18 @@ separado antes de repetir la revisión.
   explícitamente en ese orden.
 - El gate normativo está completado. PLAN-009 revisión 1 corrigió cuatro
   hallazgos de entrega y superó la revisión completa repetida sin hallazgos.
-  Ricard lo aprobó explícitamente el 14 de julio de 2026; la implementación aún
-  no ha comenzado.
+  Ricard lo aprobó explícitamente el 14 de julio de 2026.
 - El requisito de revisar ADR-005 antes de implementar está satisfecho por su
   revisión 1 Accepted; PLAN-009 revisión 1 satisface el último gate y el próximo
-  paso es iniciar únicamente su checkpoint 1.
+  paso es su checkpoint 4.
+- Checkpoint 1 completado: contratos Public core, helpers Internal iterativos de
+  paths/definiciones, bridge plano, fixtures migradas y matriz completa verde.
+- Checkpoint 2 completado: compilación iterativa recursiva de schema/UI,
+  diagnósticos profundos, ciclos de ascendencia, definición normalizada y
+  fixtures focalizadas con matriz completa verde.
+- Checkpoint 3 completado: operaciones estructurales/form profundas iterativas,
+  validación compartida de definiciones, materialización/clonado por cadena y
+  fixtures migradas con matriz completa verde.
 
 ### Orden de dependencias a más largo plazo
 

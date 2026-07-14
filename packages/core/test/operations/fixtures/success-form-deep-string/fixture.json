@@ -1,0 +1,61 @@
+{
+  "mode": "form",
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"profile\"]",
+        "name": "profile",
+        "path": ["profile"],
+        "required": false,
+        "label": "Profile",
+        "kind": "object",
+        "children": [
+          {
+            "key": "[\"profile\",\"address\"]",
+            "name": "address",
+            "path": ["profile", "address"],
+            "required": false,
+            "label": "Address",
+            "kind": "object",
+            "children": [
+              {
+                "key": "[\"profile\",\"address\",\"street\"]",
+                "name": "street",
+                "path": ["profile", "address", "street"],
+                "required": true,
+                "label": "Street",
+                "kind": "string",
+                "constraints": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"profile\",\"address\",\"street\"]",
+        "name": "street",
+        "path": ["profile", "address", "street"],
+        "required": true,
+        "label": "Street",
+        "kind": "string",
+        "constraints": {}
+      }
+    ]
+  },
+  "currentValue": {},
+  "operation": {
+    "type": "set-value",
+    "metadata": {
+      "id": 1,
+      "formId": "form"
+    },
+    "path": ["profile", "address", "street"],
+    "expected": {
+      "kind": "missing"
+    },
+    "value": "Main",
+    "source": "user"
+  }
+}

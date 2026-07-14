@@ -4,7 +4,18 @@ export type DocumentPath = readonly (string | number)[];
 
 export interface UiSchema {
   readonly order?: readonly string[];
-  readonly fields?: Readonly<Record<string, FieldUiSchema>>;
+  readonly fields?: Readonly<Record<string, UiNodeSchema>>;
+}
+
+export type UiNodeSchema = ObjectUiSchema | FieldUiSchema;
+
+export interface ObjectUiSchema {
+  readonly label?: string;
+  readonly description?: string;
+  readonly hint?: string;
+  readonly tooltip?: string;
+  readonly order?: readonly string[];
+  readonly fields?: Readonly<Record<string, UiNodeSchema>>;
 }
 
 export interface FieldUiSchema {
@@ -21,10 +32,11 @@ export interface FieldUiSchema {
 }
 
 export interface FormDefinition {
+  readonly nodes: readonly FormNodeDefinition[];
   readonly fields: readonly FieldDefinition[];
 }
 
-export interface BaseFieldDefinition {
+export interface BaseNodeDefinition {
   readonly key: string;
   readonly name: string;
   readonly path: DataPath;
@@ -33,6 +45,16 @@ export interface BaseFieldDefinition {
   readonly description?: string;
   readonly hint?: string;
   readonly tooltip?: string;
+}
+
+export interface ObjectFieldDefinition extends BaseNodeDefinition {
+  readonly kind: 'object';
+  readonly children: readonly FormNodeDefinition[];
+}
+
+export type FormNodeDefinition = ObjectFieldDefinition | FieldDefinition;
+
+export interface BaseFieldDefinition extends BaseNodeDefinition {
   readonly placeholder?: string;
 }
 
@@ -156,7 +178,9 @@ export type FieldTextMember =
   | 'clear'
   | 'choice'
   | 'issue';
-export type TextResolutionContext =
+export type ObjectTextMember =
+  'label' | 'description' | 'hint' | 'tooltip' | 'issue';
+export type FieldTextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
@@ -181,6 +205,23 @@ export type TextResolutionContext =
       readonly choice?: never;
       readonly issue: ValidationIssue;
     };
+export type ObjectTextResolutionContext =
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly node: ObjectFieldDefinition;
+      readonly member: Exclude<ObjectTextMember, 'issue'>;
+      readonly issue?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly node: ObjectFieldDefinition;
+      readonly member: 'issue';
+      readonly issue: ValidationIssue;
+    };
+export type TextResolutionContext =
+  FieldTextResolutionContext | ObjectTextResolutionContext;
 export interface TextResolver {
   resolve(text: string, context: TextResolutionContext): string;
 }
@@ -219,12 +260,28 @@ export interface RuntimeActionResult {
   };
   readonly diagnostics: readonly Diagnostic[];
 }
+export type ObjectPresence =
+  | { readonly kind: 'missing' }
+  | { readonly kind: 'object' }
+  | { readonly kind: 'incompatible'; readonly value: unknown }
+  | {
+      readonly kind: 'blocked';
+      readonly reason: 'missing-ancestor' | 'incompatible-ancestor';
+      readonly at: DataPath;
+    };
+export type FieldPresence =
+  | { readonly kind: 'missing' }
+  | { readonly kind: 'value'; readonly value: unknown }
+  | {
+      readonly kind: 'blocked';
+      readonly reason: 'missing-ancestor' | 'incompatible-ancestor';
+      readonly at: DataPath;
+    };
 export interface FieldRuntimeSnapshot {
+  readonly nodeKind: 'field';
   readonly key: string;
   readonly path: DataPath;
-  readonly presence:
-    | { readonly kind: 'missing' }
-    | { readonly kind: 'value'; readonly value: unknown };
+  readonly presence: FieldPresence;
   readonly dirty: boolean;
   readonly touched: boolean;
   readonly focused: boolean;
@@ -232,12 +289,27 @@ export interface FieldRuntimeSnapshot {
   readonly issues: readonly ValidationIssue[];
   readonly showIssues: boolean;
 }
+export interface ObjectRuntimeSnapshot {
+  readonly nodeKind: 'object';
+  readonly key: string;
+  readonly path: DataPath;
+  readonly presence: ObjectPresence;
+  readonly dirty: boolean;
+  readonly touched: boolean;
+  readonly focused: boolean;
+  readonly valid: boolean;
+  readonly issues: readonly ValidationIssue[];
+  readonly showIssues: boolean;
+  readonly children: readonly NodeRuntimeSnapshot[];
+}
+export type NodeRuntimeSnapshot = ObjectRuntimeSnapshot | FieldRuntimeSnapshot;
 export interface FormRuntimeSnapshot<TData extends object> {
   readonly value: Readonly<TData>;
   readonly locale: string;
   readonly valid: boolean;
   readonly dirty: boolean;
   readonly validationVisibility: ValidationVisibility;
+  readonly nodes: readonly NodeRuntimeSnapshot[];
   readonly fields: readonly FieldRuntimeSnapshot[];
   readonly globalIssues: readonly ValidationIssue[];
 }
@@ -266,6 +338,7 @@ export type SubscribeResult =
 export interface FormRuntime<TData extends object> {
   getSnapshot(): FormRuntimeSnapshot<TData>;
   getFieldSnapshot(path: DataPath): FieldRuntimeSnapshot | undefined;
+  getNodeSnapshot(path: DataPath): NodeRuntimeSnapshot | undefined;
   subscribe(listener: SnapshotListener<TData>): SubscribeResult;
   subscribeOperations(listener: OperationListener): SubscribeResult;
   updateExternalState(update: ExternalStateUpdate<TData>): RuntimeActionResult;

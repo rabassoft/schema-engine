@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "value": {
+    "profile": {
+      "address": {
+        "street": "Main"
+      }
+    }
+  },
+  "changed": true,
+  "diagnostics": []
+}

@@ -1,23 +1,85 @@
 {
   "mode": "form",
   "definition": {
+    "nodes": [
+      {
+        "key": "[\"name\"]",
+        "name": "name",
+        "path": ["name"],
+        "required": true,
+        "label": "Name",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"amount\"]",
+        "name": "amount",
+        "path": ["amount"],
+        "required": false,
+        "label": "Amount",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"count\"]",
+        "name": "count",
+        "path": ["count"],
+        "required": false,
+        "label": "Count",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"active\"]",
+        "name": "active",
+        "path": ["active"],
+        "required": false,
+        "label": "Active",
+        "kind": "boolean"
+      }
+    ],
     "fields": [
       {
+        "key": "[\"name\"]",
+        "name": "name",
         "path": ["name"],
-        "kind": "string"
+        "required": true,
+        "label": "Name",
+        "kind": "string",
+        "constraints": {}
       },
       {
+        "key": "[\"amount\"]",
+        "name": "amount",
         "path": ["amount"],
+        "required": false,
+        "label": "Amount",
         "kind": "number",
-        "numericType": "number"
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
       },
       {
+        "key": "[\"count\"]",
+        "name": "count",
         "path": ["count"],
+        "required": false,
+        "label": "Count",
         "kind": "number",
-        "numericType": "integer"
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
       },
       {
+        "key": "[\"active\"]",
+        "name": "active",
         "path": ["active"],
+        "required": false,
+        "label": "Active",
         "kind": "boolean"
       }
     ]

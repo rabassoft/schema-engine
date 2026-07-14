@@ -6,7 +6,7 @@
 - **Review revision:** 1
 - **Review state:** First-review corrections applied; repeated complete review
   passed with zero findings; explicitly approved
-- **Implementation authorization:** Approved scope; implementation not started
+- **Implementation state:** Checkpoints 1–4 completed; checkpoint 5 pending
 - **Requires:** accepted
   [`SPEC-001` v0.1.15](../specs/001-controlled-form-runtime.md),
   [`SPEC-002` v0.1.2](../specs/002-nested-object-runtime.md),

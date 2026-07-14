@@ -13,7 +13,7 @@
         "fieldIndex": 1,
         "path": ["name"]
       },
-      "fallbackMessage": "Form definition is invalid for operation application."
+      "fallbackMessage": "Form definition is invalid."
     }
   ]
 }

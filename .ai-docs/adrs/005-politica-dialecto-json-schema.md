@@ -382,4 +382,7 @@ coordinadamente esta revisión y ADR-014 revisión 1 el 14 de julio de 2026.
 SPEC-002 v0.1.2 superó después su gate separado y extiende la conducta de
 SPEC-001 solo para M9. PLAN-009 revisión 1 superó posteriormente su revisión
 repetida y fue aprobado explícitamente; la aprobación no inició implementación
-ni autorizó publicación.
+ni autorizó publicación. El checkpoint 1 posterior añadió contratos/helpers
+neutrales, el checkpoint 2 implementó el compiler recursivo descriptor-safe y
+el checkpoint 3 las operaciones profundas; el runtime anidado sigue pendiente
+del checkpoint 4.

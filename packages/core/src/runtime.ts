@@ -5,12 +5,18 @@ import type {
   Diagnostic,
   ExternalStateUpdate,
   FieldDefinition,
+  FieldPresence,
   FieldRuntimeSnapshot,
+  FormNodeDefinition,
   FormOperation,
   FormRuntime,
   FormRuntimeSnapshot,
   FormScope,
   OperationListener,
+  NodeRuntimeSnapshot,
+  ObjectFieldDefinition,
+  ObjectPresence,
+  ObjectRuntimeSnapshot,
   RuntimeActionResult,
   SnapshotListener,
   SubscribeResult,
@@ -19,6 +25,16 @@ import type {
   ValidationVisibility,
 } from './contracts.js';
 import { diagnostic } from './internal/diagnostics.js';
+import {
+  type NestedDefinitionDefect,
+  validateNestedFormDefinition,
+} from './internal/nested-definition.js';
+import {
+  canonicalDataPathKey,
+  copyStringDataPath,
+  isOrdinaryObject,
+  readOwnDataMember,
+} from './internal/path.js';
 import { actualType, describeActualValue } from './internal/value.js';
 
 const EMPTY: readonly [] = Object.freeze([]);
@@ -33,7 +49,7 @@ export function createControlledFormRuntime<TData extends object>(
     checked.options.schema,
     checked.options.value,
     'creation',
-    checked.options.definition.fields,
+    checked.options.definition.nodes,
   );
   if (!validation.success) return failedCreation(validation.diagnostics);
   const runtime = new ControlledRuntime(checked.options, validation);
@@ -57,6 +73,14 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   private readonly forcedScopes = new Map<string, ReadonlySet<string>>();
   private readonly snapshotListeners = new Set<SnapshotListener<TData>>();
   private readonly operationListeners = new Set<OperationListener>();
+  private readonly nodeByKey: ReadonlyMap<string, FormNodeDefinition>;
+  private readonly fieldByKey: ReadonlyMap<string, FieldDefinition>;
+  private readonly descendantNodeKeys: ReadonlyMap<string, ReadonlySet<string>>;
+  private readonly descendantFieldKeys: ReadonlyMap<
+    string,
+    ReadonlySet<string>
+  >;
+  private snapshotByKey = new Map<string, NodeRuntimeSnapshot>();
   private nextOperationId = 1;
   private disposed = false;
 
@@ -64,6 +88,11 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     private readonly options: ControlledFormRuntimeOptions<TData>,
     validation: ValidValidation,
   ) {
+    const indexes = buildDefinitionIndexes(options.definition.nodes);
+    this.nodeByKey = indexes.nodes;
+    this.fieldByKey = indexes.fields;
+    this.descendantNodeKeys = indexes.descendantNodes;
+    this.descendantFieldKeys = indexes.descendantFields;
     this.value = options.value;
     this.baseline = options.baselineValue;
     this.locale = options.locale;
@@ -78,10 +107,15 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   }
 
   getFieldSnapshot(path: DataPath): FieldRuntimeSnapshot | undefined {
-    const name = canonicalPath(path);
-    return name === undefined
-      ? undefined
-      : this.snapshot.fields.find((field) => field.path[0] === name);
+    const key = managedPathKey(path);
+    const snapshot =
+      key === undefined ? undefined : this.snapshotByKey.get(key);
+    return snapshot?.nodeKind === 'field' ? snapshot : undefined;
+  }
+
+  getNodeSnapshot(path: DataPath): NodeRuntimeSnapshot | undefined {
+    const key = managedPathKey(path);
+    return key === undefined ? undefined : this.snapshotByKey.get(key);
   }
 
   subscribe(listener: SnapshotListener<TData>): SubscribeResult {
@@ -142,14 +176,21 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       baselineEntry.kind === 'value' ? baselineEntry.value : this.baseline;
     const nextLocale =
       localeEntry.kind === 'value' ? localeEntry.value : this.locale;
-    if (!validRoot(nextValue, this.options.definition.fields))
-      return actionFailure([
-        invalidExternal('value', 'ordinary root object', nextValue),
-      ]);
-    if (!validRoot(nextBaseline, this.options.definition.fields))
-      return actionFailure([
-        invalidExternal('baselineValue', 'ordinary root object', nextBaseline),
-      ]);
+    const valueDiagnostic = validateManagedExternalData(
+      nextValue,
+      this.options.definition.nodes,
+      'value',
+      'update',
+    );
+    if (valueDiagnostic !== undefined) return actionFailure([valueDiagnostic]);
+    const baselineDiagnostic = validateManagedExternalData(
+      nextBaseline,
+      this.options.definition.nodes,
+      'baselineValue',
+      'update',
+    );
+    if (baselineDiagnostic !== undefined)
+      return actionFailure([baselineDiagnostic]);
     if (typeof nextLocale !== 'string' || nextLocale.length === 0)
       return actionFailure([
         invalidExternal('locale', 'non-empty string', nextLocale),
@@ -172,7 +213,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         this.options.schema,
         nextValue,
         'update',
-        this.options.definition.fields,
+        this.options.definition.nodes,
       );
       if (!result.success) return actionFailure(result.diagnostics);
       validation = result;
@@ -182,6 +223,19 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     this.locale = nextLocale;
     this.validationValid = validation.valid;
     this.issues = validation.issues;
+    if (valueChanged && this.focused !== undefined) {
+      const focusedField = this.fieldByKey.get(this.focused);
+      const presence =
+        focusedField === undefined
+          ? undefined
+          : resolveFieldPresence(this.value, focusedField.path);
+      if (
+        presence?.kind === 'blocked' &&
+        presence.reason === 'incompatible-ancestor'
+      ) {
+        this.focused = undefined;
+      }
+    }
     this.snapshot = this.buildSnapshot(this.snapshot);
     return actionSuccess(true, false, [
       ...validation.diagnostics,
@@ -208,10 +262,9 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   resetTouched(scope?: FormScope): RuntimeActionResult {
     const disposed = this.disposedResult('resetTouched');
     if (disposed) return disposed;
-    const parsed =
-      scope === undefined ? undefined : parseScope(scope, this.fieldNames());
+    const parsed = scope === undefined ? undefined : this.parseScope(scope);
     if (parsed && !parsed.success) return actionFailure(parsed.diagnostics);
-    const names = parsed?.names ?? this.fieldNames();
+    const names = parsed?.fieldKeys ?? this.fieldNames();
     let changed = false;
     for (const name of names) changed = this.touched.delete(name) || changed;
     return this.commitInteraction(changed, parsed?.diagnostics ?? EMPTY);
@@ -244,7 +297,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         diagnostics: EMPTY,
       });
     }
-    const parsed = parseScope(scope, this.fieldNames());
+    const parsed = this.parseScope(scope);
     if (!parsed.success)
       return Object.freeze({
         valid: false,
@@ -254,9 +307,10 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     const issues = this.issues.filter(
       (issue) =>
         (issue.path.length === 0 && parsed.includeGlobal) ||
-        (issue.path.length === 1 &&
-          typeof issue.path[0] === 'string' &&
-          parsed.names.has(issue.path[0])),
+        (() => {
+          const key = assignedIssueKey(issue.path, this.nodeByKey);
+          return key !== undefined && parsed.nodeKeys.has(key);
+        })(),
     );
     return Object.freeze({
       valid: issues.length === 0,
@@ -268,11 +322,12 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   showValidationErrors(scope: FormScope): RuntimeActionResult {
     const disposed = this.disposedResult('showValidationErrors');
     if (disposed) return disposed;
-    const parsed = parseScope(scope, this.fieldNames());
+    const parsed = this.parseScope(scope);
     if (!parsed.success) return actionFailure(parsed.diagnostics);
     const previous = this.forcedScopes.get(parsed.id);
-    const changed = previous === undefined || !sameSet(previous, parsed.names);
-    if (changed) this.forcedScopes.set(parsed.id, parsed.names);
+    const changed =
+      previous === undefined || !sameSet(previous, parsed.nodeKeys);
+    if (changed) this.forcedScopes.set(parsed.id, parsed.nodeKeys);
     return this.commitInteraction(changed, parsed.diagnostics);
   }
 
@@ -356,8 +411,8 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       type === 'set-value' ? 'requestSetValue' : 'requestRemoveValue',
     );
     if (disposed) return disposed;
-    const name = canonicalPath(path);
-    if (name === undefined)
+    const key = managedPathKey(path);
+    if (key === undefined)
       return actionFailure([
         runtimeDiagnostic(
           'UNKNOWN_RUNTIME_PATH',
@@ -365,9 +420,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
           'Runtime path is not managed.',
         ),
       ]);
-    const field = this.options.definition.fields.find(
-      (candidate) => candidate.path[0] === name,
-    );
+    const field = this.fieldByKey.get(key);
     if (field === undefined)
       return actionFailure([
         runtimeDiagnostic(
@@ -381,27 +434,48 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         runtimeDiagnostic(
           'INCOMPATIBLE_OPERATION_VALUE',
           {
-            field: name,
+            field: field.name,
             fieldType: fieldType(field),
             ...describeActualValue(nextValue),
           },
           'Operation value is incompatible with the field.',
-          [name],
+          field.path as readonly string[],
         ),
       ]);
-    const descriptor = Object.getOwnPropertyDescriptor(this.value, name);
-    if (descriptor !== undefined && !('value' in descriptor))
+    const snapshot = this.snapshotByKey.get(key) as
+      FieldRuntimeSnapshot | undefined;
+    if (snapshot === undefined) {
       return actionFailure([
         runtimeDiagnostic(
-          'UNSUPPORTED_OPERATION_PROPERTY',
-          { property: name, reason: 'accessor-property' },
-          'Accessor properties cannot be operation targets.',
-          [name],
+          'UNKNOWN_RUNTIME_PATH',
+          { path: copyPath(path) },
+          'Runtime path is not managed.',
         ),
       ]);
-    const present = descriptor !== undefined;
+    }
+    if (
+      snapshot.presence.kind === 'blocked' &&
+      snapshot.presence.reason === 'incompatible-ancestor'
+    ) {
+      return actionFailure([
+        incompatibleRuntimeAncestor(
+          type === 'set-value' ? 'requestSetValue' : 'requestRemoveValue',
+          field.path as readonly string[],
+          snapshot.presence.at as readonly string[],
+          this.value,
+        ),
+      ]);
+    }
+    if (
+      type === 'remove-value' &&
+      (snapshot.presence.kind === 'missing' ||
+        snapshot.presence.kind === 'blocked')
+    ) {
+      return actionSuccess(false, false);
+    }
+    const present = snapshot.presence.kind === 'value';
     const actual: unknown =
-      descriptor && 'value' in descriptor ? descriptor.value : undefined;
+      snapshot.presence.kind === 'value' ? snapshot.presence.value : undefined;
     if (
       (type === 'set-value' && present && Object.is(actual, nextValue)) ||
       (type === 'remove-value' && !present)
@@ -416,7 +490,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         id: this.nextOperationId,
         formId: this.options.formId,
       }),
-      path: Object.freeze([name]),
+      path: Object.freeze([...field.path]),
       expected: expectation,
       ...(type === 'set-value' ? { value: nextValue } : {}),
       source: 'user' as const,
@@ -431,8 +505,9 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   ): RuntimeActionResult {
     const disposed = this.disposedResult(action);
     if (disposed) return disposed;
-    const name = canonicalPath(path);
-    if (name === undefined || !this.fieldNames().has(name))
+    const key = managedPathKey(path);
+    const field = key === undefined ? undefined : this.fieldByKey.get(key);
+    if (key === undefined || field === undefined)
       return actionFailure([
         runtimeDiagnostic(
           'UNKNOWN_RUNTIME_PATH',
@@ -440,16 +515,31 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
           'Runtime path is not managed.',
         ),
       ]);
+    const snapshot = this.snapshotByKey.get(key) as
+      FieldRuntimeSnapshot | undefined;
+    if (
+      snapshot?.presence.kind === 'blocked' &&
+      snapshot.presence.reason === 'incompatible-ancestor'
+    ) {
+      return actionFailure([
+        incompatibleRuntimeAncestor(
+          action,
+          field.path as readonly string[],
+          snapshot.presence.at as readonly string[],
+          this.value,
+        ),
+      ]);
+    }
     let changed = false;
     if (action === 'focus') {
-      if (this.focused !== name) {
-        this.focused = name;
+      if (this.focused !== key) {
+        this.focused = key;
         changed = true;
       }
-    } else if (this.focused === name) {
+    } else if (this.focused === key) {
       this.focused = undefined;
-      changed = !this.touched.has(name) || true;
-      this.touched.add(name);
+      changed = true;
+      this.touched.add(key);
     }
     return this.commitInteraction(changed);
   }
@@ -469,58 +559,44 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   private buildSnapshot(
     previous?: FormRuntimeSnapshot<TData>,
   ): FormRuntimeSnapshot<TData> {
-    const fields = this.options.definition.fields.map((definition, index) => {
-      const name = definition.path[0] as string;
-      const valuePresence = presence(this.value, name);
-      const baselinePresence = presence(this.baseline, name);
-      const issues = Object.freeze(
-        this.issues.filter(
-          (issue) => issue.path.length === 1 && issue.path[0] === name,
-        ),
-      );
-      const touched = this.touched.has(name);
-      const focused = this.focused === name;
-      const forced = [...this.forcedScopes.values()].some((scope) =>
-        scope.has(name),
-      );
-      const showIssues =
-        issues.length > 0 && (this.visibility === 'all' || touched || forced);
-      const dirty =
-        valuePresence.kind !== baselinePresence.kind ||
-        (valuePresence.kind === 'value' &&
-          baselinePresence.kind === 'value' &&
-          !Object.is(valuePresence.value, baselinePresence.value));
-      const candidate = freezeField({
-        key: definition.key,
-        path: [name],
-        presence: valuePresence,
-        dirty,
-        touched,
-        focused,
-        valid: issues.length === 0,
-        issues,
-        showIssues,
-      });
-      const old = previous?.fields[index];
-      return old !== undefined && sameField(old, candidate) ? old : candidate;
+    const built = buildNestedSnapshots({
+      definitions: this.options.definition.nodes,
+      value: this.value,
+      baseline: this.baseline,
+      issues: this.issues,
+      touched: this.touched,
+      focused: this.focused,
+      forcedScopes: this.forcedScopes,
+      visibility: this.visibility,
+      ...(previous === undefined ? {} : { previous }),
+      nodeByKey: this.nodeByKey,
     });
-    const globalIssues = Object.freeze(
-      this.issues.filter((issue) => issue.path.length === 0),
-    );
+    this.snapshotByKey = built.byKey;
     return Object.freeze({
       value: this.value,
       locale: this.locale,
-      valid: this.validationValid,
-      dirty: fields.some((field) => field.dirty),
+      valid:
+        this.validationValid &&
+        built.globalIssues.length === 0 &&
+        built.nodes.every((node) => node.valid),
+      dirty: built.nodes.some((node) => node.dirty),
       validationVisibility: this.visibility,
-      fields: Object.freeze(fields),
-      globalIssues,
+      nodes: built.nodes,
+      fields: built.fields,
+      globalIssues: built.globalIssues,
     });
   }
 
   private fieldNames(): ReadonlySet<string> {
-    return new Set(
-      this.options.definition.fields.map((field) => field.path[0] as string),
+    return new Set(this.fieldByKey.keys());
+  }
+
+  private parseScope(scope: unknown): ParsedScope {
+    return parseScope(
+      scope,
+      this.nodeByKey,
+      this.descendantNodeKeys,
+      this.descendantFieldKeys,
     );
   }
 
@@ -600,46 +676,38 @@ function validateOptions<TData extends object>(
         invalidOption('formId', 'non-empty string', options.formId),
       ]),
     };
-  const definitionValidation = validateDefinition(options.definition);
-  if (definitionValidation === 'invalid-base')
+  const definitionValidation = validateNestedFormDefinition(options.definition);
+  if (!definitionValidation.success)
     return {
       success: false,
       diagnostics: freezeDiagnostics([
-        invalidOption(
-          'definition',
-          'valid root FormDefinition',
+        invalidDefinitionOption(
           options.definition,
+          definitionValidation.defect,
         ),
       ]),
     };
-  if (definitionValidation === 'invalid-choices')
+  const valueDiagnostic = validateManagedExternalData(
+    options.value,
+    options.definition.nodes,
+    'value',
+    'creation',
+  );
+  if (valueDiagnostic !== undefined)
     return {
       success: false,
-      diagnostics: freezeDiagnostics([
-        invalidOption(
-          'definition',
-          'valid FormDefinition with string choices',
-          options.definition,
-        ),
-      ]),
+      diagnostics: freezeDiagnostics([valueDiagnostic]),
     };
-  if (!validRoot(options.value, options.definition.fields))
+  const baselineDiagnostic = validateManagedExternalData(
+    options.baselineValue,
+    options.definition.nodes,
+    'baselineValue',
+    'creation',
+  );
+  if (baselineDiagnostic !== undefined)
     return {
       success: false,
-      diagnostics: freezeDiagnostics([
-        invalidOption('value', 'ordinary root object', options.value),
-      ]),
-    };
-  if (!validRoot(options.baselineValue, options.definition.fields))
-    return {
-      success: false,
-      diagnostics: freezeDiagnostics([
-        invalidOption(
-          'baselineValue',
-          'ordinary root object',
-          options.baselineValue,
-        ),
-      ]),
+      diagnostics: freezeDiagnostics([baselineDiagnostic]),
     };
   if (typeof options.locale !== 'string' || options.locale.length === 0)
     return {
@@ -698,7 +766,7 @@ function runValidator(
   schema: unknown,
   value: unknown,
   phase: 'creation' | 'update',
-  fields: readonly FieldDefinition[],
+  definitions: readonly FormNodeDefinition[],
 ): ValidValidation | InvalidResult {
   let raw: unknown;
   try {
@@ -725,16 +793,18 @@ function runValidator(
   const rawIssues: readonly unknown[] = issuesEntry.value;
   const issues: ValidationIssue[] = [];
   const diagnostics: Diagnostic[] = [];
-  const names = new Set(fields.map((field) => field.path[0] as string));
+  const nodes = buildDefinitionIndexes(definitions).nodes;
   for (let index = 0; index < rawIssues.length; index += 1) {
     const issue: unknown = rawIssues[index];
     const normalized = normalizeIssue(issue, index);
     if (!normalized.success) return normalized;
     issues.push(normalized.issue);
     const path = normalized.issue.path;
+    const stringPath = copyStringDataPath(path, true);
     if (
       path.length !== 0 &&
-      !(path.length === 1 && typeof path[0] === 'string' && names.has(path[0]))
+      (stringPath === undefined ||
+        assignedIssueKey(stringPath, nodes) === undefined)
     )
       diagnostics.push(
         runtimeDiagnostic(
@@ -801,103 +871,225 @@ function normalizeIssue(
   return { success: true, issue };
 }
 
-type DefinitionValidation = 'valid' | 'invalid-base' | 'invalid-choices';
+interface DefinitionIndexes {
+  readonly nodes: ReadonlyMap<string, FormNodeDefinition>;
+  readonly fields: ReadonlyMap<string, FieldDefinition>;
+  readonly descendantNodes: ReadonlyMap<string, ReadonlySet<string>>;
+  readonly descendantFields: ReadonlyMap<string, ReadonlySet<string>>;
+}
 
-function validateDefinition(value: unknown): DefinitionValidation {
-  if (!isRecord(value)) return 'invalid-base';
-  const fieldsEntry = read(value, 'fields');
-  if (fieldsEntry.kind !== 'value' || !Array.isArray(fieldsEntry.value))
-    return 'invalid-base';
-  const fields: readonly unknown[] = fieldsEntry.value;
-  const paths = new Set<string>();
-  for (const field of fields) {
-    if (!isRecord(field)) return 'invalid-base';
-    const pathEntry = read(field, 'path');
-    const path =
-      pathEntry.kind === 'value' ? safePath(pathEntry.value) : undefined;
-    const key = read(field, 'key');
-    const kind = read(field, 'kind');
-    if (path === undefined || path.length !== 1 || typeof path[0] !== 'string')
-      return 'invalid-base';
-    if (
-      key.kind !== 'value' ||
-      typeof key.value !== 'string' ||
-      paths.has(path[0])
-    )
-      return 'invalid-base';
-    let supported =
-      kind.kind === 'value' &&
-      (kind.value === 'string' || kind.value === 'boolean');
-    if (kind.kind === 'value' && kind.value === 'number') {
-      const numeric = read(field, 'numericType');
-      supported =
-        numeric.kind === 'value' &&
-        (numeric.value === 'number' || numeric.value === 'integer');
+function buildDefinitionIndexes(
+  definitions: readonly FormNodeDefinition[],
+): DefinitionIndexes {
+  const nodes = new Map<string, FormNodeDefinition>();
+  const fields = new Map<string, FieldDefinition>();
+  const descendantNodes = new Map<string, ReadonlySet<string>>();
+  const descendantFields = new Map<string, ReadonlySet<string>>();
+  type Frame =
+    | { readonly phase: 'enter'; readonly node: FormNodeDefinition }
+    | { readonly phase: 'exit'; readonly node: ObjectFieldDefinition };
+  const stack: Frame[] = [];
+  for (let index = definitions.length - 1; index >= 0; index -= 1) {
+    stack.push({
+      phase: 'enter',
+      node: definitions[index] as FormNodeDefinition,
+    });
+  }
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    if (frame.phase === 'exit') {
+      const nodeKeys = new Set<string>([frame.node.key]);
+      const fieldKeys = new Set<string>();
+      for (const child of frame.node.children) {
+        for (const key of descendantNodes.get(child.key) ?? EMPTY) {
+          nodeKeys.add(key);
+        }
+        for (const key of descendantFields.get(child.key) ?? EMPTY) {
+          fieldKeys.add(key);
+        }
+      }
+      descendantNodes.set(frame.node.key, nodeKeys);
+      descendantFields.set(frame.node.key, fieldKeys);
+      continue;
     }
-    if (!supported) return 'invalid-base';
-    paths.add(path[0]);
+    nodes.set(frame.node.key, frame.node);
+    if (frame.node.kind !== 'object') {
+      fields.set(frame.node.key, frame.node);
+      descendantNodes.set(frame.node.key, new Set([frame.node.key]));
+      descendantFields.set(frame.node.key, new Set([frame.node.key]));
+      continue;
+    }
+    stack.push({ phase: 'exit', node: frame.node });
+    for (let index = frame.node.children.length - 1; index >= 0; index -= 1) {
+      stack.push({
+        phase: 'enter',
+        node: frame.node.children[index] as FormNodeDefinition,
+      });
+    }
   }
-
-  for (const field of fields) {
-    if (!isRecord(field)) return 'invalid-base';
-    const kind = read(field, 'kind');
-    if (
-      kind.kind === 'value' &&
-      kind.value === 'string' &&
-      !validStringChoices(field)
-    )
-      return 'invalid-choices';
-  }
-  return 'valid';
+  return { nodes, fields, descendantNodes, descendantFields };
 }
 
-function validStringChoices(field: Record<string, unknown>): boolean {
-  const choicesEntry = read(field, 'choices');
-  if (choicesEntry.kind === 'missing') return true;
-  if (
-    choicesEntry.kind !== 'value' ||
-    !Array.isArray(choicesEntry.value) ||
-    choicesEntry.value.length === 0
-  )
-    return false;
-
-  const values = new Set<string>();
-  const choices: readonly unknown[] = choicesEntry.value;
-  for (let index = 0; index < choices.length; index += 1) {
-    const choiceEntry = read(choices, String(index));
-    if (choiceEntry.kind !== 'value' || !isRecord(choiceEntry.value))
-      return false;
-    const valueEntry = read(choiceEntry.value, 'value');
-    const labelEntry = read(choiceEntry.value, 'label');
-    if (
-      valueEntry.kind !== 'value' ||
-      typeof valueEntry.value !== 'string' ||
-      values.has(valueEntry.value) ||
-      labelEntry.kind !== 'value' ||
-      typeof labelEntry.value !== 'string' ||
-      labelEntry.value.trim().length === 0
-    )
-      return false;
-    values.add(valueEntry.value);
-  }
-  return true;
+function managedPathKey(path: unknown): string | undefined {
+  const copied = copyStringDataPath(path);
+  return copied === undefined ? undefined : canonicalDataPathKey(copied);
 }
 
-function validRoot(
+function validateManagedExternalData(
   value: unknown,
-  fields: readonly FieldDefinition[],
-): value is object {
-  if (typeof value !== 'object' || value === null || Array.isArray(value))
-    return false;
-  const prototype = Reflect.getPrototypeOf(value);
-  if (prototype !== Object.prototype && prototype !== null) return false;
-  return fields.every((field) => {
-    const descriptor = Object.getOwnPropertyDescriptor(
-      value,
-      field.path[0] as string,
+  definitions: readonly FormNodeDefinition[],
+  member: 'value' | 'baselineValue',
+  phase: 'creation' | 'update',
+): Diagnostic | undefined {
+  if (!isOrdinaryObject(value)) {
+    return runtimeDiagnostic(
+      phase === 'creation'
+        ? 'INVALID_RUNTIME_OPTIONS'
+        : 'INVALID_EXTERNAL_STATE_UPDATE',
+      {
+        member,
+        expected: 'ordinary data tree at managed paths',
+        reason: 'invalid-value',
+        ...describeActualValue(value),
+      },
+      phase === 'creation'
+        ? `Runtime option "${member}" is invalid.`
+        : `External state member "${member}" is invalid.`,
     );
-    return descriptor === undefined || 'value' in descriptor;
-  });
+  }
+  const stack: Array<{
+    readonly parent: object;
+    readonly node: FormNodeDefinition;
+  }> = [];
+  for (let index = definitions.length - 1; index >= 0; index -= 1) {
+    stack.push({
+      parent: value,
+      node: definitions[index] as FormNodeDefinition,
+    });
+  }
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    const entry = readOwnDataMember(frame.parent, frame.node.name);
+    if (entry.kind === 'accessor') {
+      return runtimeDiagnostic(
+        phase === 'creation'
+          ? 'INVALID_RUNTIME_OPTIONS'
+          : 'INVALID_EXTERNAL_STATE_UPDATE',
+        {
+          member,
+          expected: 'ordinary data tree at managed paths',
+          reason: 'invalid-value',
+          actualType: 'object',
+          propertyReason: 'accessor',
+        },
+        phase === 'creation'
+          ? `Runtime option "${member}" is invalid.`
+          : `External state member "${member}" is invalid.`,
+        frame.node.path as readonly string[],
+      );
+    }
+    if (
+      frame.node.kind === 'object' &&
+      entry.kind === 'value' &&
+      isOrdinaryObject(entry.value)
+    ) {
+      for (let index = frame.node.children.length - 1; index >= 0; index -= 1) {
+        stack.push({
+          parent: entry.value,
+          node: frame.node.children[index] as FormNodeDefinition,
+        });
+      }
+    }
+  }
+  return undefined;
+}
+
+function invalidDefinitionOption(
+  value: unknown,
+  defect: NestedDefinitionDefect,
+): Diagnostic {
+  return runtimeDiagnostic(
+    'INVALID_RUNTIME_OPTIONS',
+    {
+      member: 'definition',
+      expected: 'valid nested FormDefinition',
+      reason: 'invalid-value',
+      ...describeActualValue(value),
+      definitionReason: defect.reason,
+      ...(defect.nodeIndexPath === undefined
+        ? {}
+        : { nodeIndexPath: Object.freeze([...defect.nodeIndexPath]) }),
+      ...(defect.firstNodeIndexPath === undefined
+        ? {}
+        : {
+            firstNodeIndexPath: Object.freeze([...defect.firstNodeIndexPath]),
+          }),
+      ...(defect.fieldIndex === undefined
+        ? {}
+        : { fieldIndex: defect.fieldIndex }),
+      ...(defect.path === undefined
+        ? {}
+        : { path: Object.freeze([...defect.path]) }),
+    },
+    'Runtime option "definition" is invalid.',
+  );
+}
+
+function resolveFieldPresence(root: object, path: DataPath): FieldPresence {
+  let current: object = root;
+  for (let index = 0; index < path.length; index += 1) {
+    const name = path[index] as string;
+    const entry = readOwnDataMember(current, name);
+    if (index === path.length - 1) {
+      return entry.kind === 'value'
+        ? Object.freeze({ kind: 'value', value: entry.value })
+        : Object.freeze({ kind: 'missing' });
+    }
+    const at = Object.freeze(path.slice(0, index + 1) as string[]);
+    if (entry.kind === 'missing') {
+      return Object.freeze({
+        kind: 'blocked',
+        reason: 'missing-ancestor',
+        at,
+      });
+    }
+    if (entry.kind !== 'value' || !isOrdinaryObject(entry.value)) {
+      return Object.freeze({
+        kind: 'blocked',
+        reason: 'incompatible-ancestor',
+        at,
+      });
+    }
+    current = entry.value;
+  }
+  return Object.freeze({ kind: 'missing' });
+}
+
+function incompatibleRuntimeAncestor(
+  action: string,
+  path: readonly string[],
+  blockingPath: readonly string[],
+  root: object,
+): Diagnostic {
+  let current: unknown = root;
+  for (const name of blockingPath) {
+    if (!isOrdinaryObject(current)) break;
+    const entry = readOwnDataMember(current, name);
+    current = entry.kind === 'value' ? entry.value : undefined;
+  }
+  return runtimeDiagnostic(
+    'INCOMPATIBLE_RUNTIME_ANCESTOR',
+    {
+      action,
+      reason: 'incompatible-ancestor',
+      blockingPath: Object.freeze([...blockingPath]),
+      actualType: actualType(current),
+    },
+    'Runtime action is blocked by an incompatible ancestor.',
+    path,
+  );
 }
 
 type Entry =
@@ -913,13 +1105,6 @@ function read(object: object, key: PropertyKey): Entry {
 }
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-function canonicalPath(path: unknown): string | undefined {
-  if (!Array.isArray(path) || path.length !== 1) return undefined;
-  const entry = read(path, '0');
-  return entry.kind === 'value' && typeof entry.value === 'string'
-    ? entry.value
-    : undefined;
 }
 function copyPath(path: unknown): readonly unknown[] {
   if (!Array.isArray(path)) return EMPTY;
@@ -970,18 +1155,323 @@ function scalar(value: unknown): unknown {
     ? value
     : { type: actualType(value) };
 }
-function presence(
-  value: object,
-  name: string,
-): FieldRuntimeSnapshot['presence'] {
-  const descriptor = Object.getOwnPropertyDescriptor(value, name);
-  const descriptorValue: unknown =
-    descriptor !== undefined && 'value' in descriptor
-      ? descriptor.value
-      : undefined;
-  return descriptor === undefined || !('value' in descriptor)
-    ? Object.freeze({ kind: 'missing' })
-    : Object.freeze({ kind: 'value', value: descriptorValue });
+type BranchContext =
+  | { readonly kind: 'object'; readonly value: object }
+  | {
+      readonly kind: 'blocked';
+      readonly reason: 'missing-ancestor' | 'incompatible-ancestor';
+      readonly at: readonly string[];
+    };
+
+interface SnapshotBuildInput<TData extends object> {
+  readonly definitions: readonly FormNodeDefinition[];
+  readonly value: Readonly<TData>;
+  readonly baseline: Readonly<TData>;
+  readonly issues: readonly ValidationIssue[];
+  readonly touched: ReadonlySet<string>;
+  readonly focused: string | undefined;
+  readonly forcedScopes: ReadonlyMap<string, ReadonlySet<string>>;
+  readonly visibility: ValidationVisibility;
+  readonly previous?: FormRuntimeSnapshot<TData>;
+  readonly nodeByKey: ReadonlyMap<string, FormNodeDefinition>;
+}
+
+interface SnapshotBuildResult {
+  readonly nodes: readonly NodeRuntimeSnapshot[];
+  readonly fields: readonly FieldRuntimeSnapshot[];
+  readonly globalIssues: readonly ValidationIssue[];
+  readonly byKey: Map<string, NodeRuntimeSnapshot>;
+}
+
+function buildNestedSnapshots<TData extends object>(
+  input: SnapshotBuildInput<TData>,
+): SnapshotBuildResult {
+  const assigned = assignIssues(input.issues, input.nodeByKey);
+  const previousByKey = indexSnapshots(input.previous?.nodes ?? EMPTY);
+  const nodes = new Array<NodeRuntimeSnapshot>(input.definitions.length);
+  const fields: FieldRuntimeSnapshot[] = [];
+  const byKey = new Map<string, NodeRuntimeSnapshot>();
+  type Frame =
+    | {
+        readonly phase: 'enter';
+        readonly definition: FormNodeDefinition;
+        readonly current: BranchContext;
+        readonly baseline: BranchContext;
+        readonly output: NodeRuntimeSnapshot[];
+        readonly index: number;
+      }
+    | {
+        readonly phase: 'exit';
+        readonly definition: ObjectFieldDefinition;
+        readonly currentPresence: ObjectPresence;
+        readonly baselinePresence: ObjectPresence;
+        readonly children: NodeRuntimeSnapshot[];
+        readonly output: NodeRuntimeSnapshot[];
+        readonly index: number;
+      };
+  const stack: Frame[] = [];
+  const currentRoot: BranchContext = { kind: 'object', value: input.value };
+  const baselineRoot: BranchContext = {
+    kind: 'object',
+    value: input.baseline,
+  };
+  for (let index = input.definitions.length - 1; index >= 0; index -= 1) {
+    stack.push({
+      phase: 'enter',
+      definition: input.definitions[index] as FormNodeDefinition,
+      current: currentRoot,
+      baseline: baselineRoot,
+      output: nodes,
+      index,
+    });
+  }
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    if (frame.phase === 'exit') {
+      const ownIssues = assigned.byKey.get(frame.definition.key) ?? EMPTY;
+      const touched = frame.children.some((child) => child.touched);
+      const focused = frame.children.some((child) => child.focused);
+      const forced = isForced(frame.definition.key, input.forcedScopes);
+      const candidate = freezeObjectSnapshot({
+        nodeKind: 'object',
+        key: frame.definition.key,
+        path: [...frame.definition.path],
+        presence: frame.currentPresence,
+        dirty: objectDirty(
+          frame.currentPresence,
+          frame.baselinePresence,
+          frame.children,
+        ),
+        touched,
+        focused,
+        valid:
+          ownIssues.length === 0 &&
+          frame.children.every((child) => child.valid),
+        issues: ownIssues,
+        showIssues:
+          ownIssues.length > 0 &&
+          (input.visibility === 'all' || touched || forced),
+        children: frame.children,
+      });
+      const previous = previousByKey.get(frame.definition.key);
+      const snapshot =
+        previous?.nodeKind === 'object' && sameObject(previous, candidate)
+          ? previous
+          : candidate;
+      frame.output[frame.index] = snapshot;
+      byKey.set(snapshot.key, snapshot);
+      continue;
+    }
+
+    const current = inspectNodeState(frame.current, frame.definition);
+    const baseline = inspectNodeState(frame.baseline, frame.definition);
+    if (frame.definition.kind === 'object') {
+      const children = new Array<NodeRuntimeSnapshot>(
+        frame.definition.children.length,
+      );
+      stack.push({
+        phase: 'exit',
+        definition: frame.definition,
+        currentPresence: current.presence as ObjectPresence,
+        baselinePresence: baseline.presence as ObjectPresence,
+        children,
+        output: frame.output,
+        index: frame.index,
+      });
+      for (
+        let index = frame.definition.children.length - 1;
+        index >= 0;
+        index -= 1
+      ) {
+        stack.push({
+          phase: 'enter',
+          definition: frame.definition.children[index] as FormNodeDefinition,
+          current: current.children,
+          baseline: baseline.children,
+          output: children,
+          index,
+        });
+      }
+      continue;
+    }
+
+    const ownIssues = assigned.byKey.get(frame.definition.key) ?? EMPTY;
+    const touched = input.touched.has(frame.definition.key);
+    const focused = input.focused === frame.definition.key;
+    const forced = isForced(frame.definition.key, input.forcedScopes);
+    const candidate = freezeField({
+      nodeKind: 'field',
+      key: frame.definition.key,
+      path: [...frame.definition.path],
+      presence: current.presence as FieldPresence,
+      dirty: fieldDirty(
+        current.presence as FieldPresence,
+        baseline.presence as FieldPresence,
+      ),
+      touched,
+      focused,
+      valid: ownIssues.length === 0,
+      issues: ownIssues,
+      showIssues:
+        ownIssues.length > 0 &&
+        (input.visibility === 'all' || touched || forced),
+    });
+    const previous = previousByKey.get(frame.definition.key);
+    const snapshot =
+      previous?.nodeKind === 'field' && sameField(previous, candidate)
+        ? previous
+        : candidate;
+    frame.output[frame.index] = snapshot;
+    fields.push(snapshot);
+    byKey.set(snapshot.key, snapshot);
+  }
+
+  return {
+    nodes: Object.freeze(nodes),
+    fields: Object.freeze(fields),
+    globalIssues: assigned.global,
+    byKey,
+  };
+}
+
+function inspectNodeState(
+  parent: BranchContext,
+  definition: FormNodeDefinition,
+): {
+  readonly presence: ObjectPresence | FieldPresence;
+  readonly children: BranchContext;
+} {
+  if (parent.kind === 'blocked') {
+    const presence = Object.freeze({
+      kind: 'blocked' as const,
+      reason: parent.reason,
+      at: Object.freeze([...parent.at]),
+    });
+    return { presence, children: parent };
+  }
+  const member = readOwnDataMember(parent.value, definition.name);
+  if (definition.kind !== 'object') {
+    const presence: FieldPresence =
+      member.kind === 'value'
+        ? Object.freeze({ kind: 'value', value: member.value })
+        : Object.freeze({ kind: 'missing' });
+    return { presence, children: parent };
+  }
+  const path = definition.path as readonly string[];
+  if (member.kind === 'missing') {
+    return {
+      presence: Object.freeze({ kind: 'missing' }),
+      children: {
+        kind: 'blocked',
+        reason: 'missing-ancestor',
+        at: path,
+      },
+    };
+  }
+  if (member.kind === 'value' && isOrdinaryObject(member.value)) {
+    return {
+      presence: Object.freeze({ kind: 'object' }),
+      children: { kind: 'object', value: member.value },
+    };
+  }
+  const incompatible = member.kind === 'value' ? member.value : undefined;
+  return {
+    presence: Object.freeze({ kind: 'incompatible', value: incompatible }),
+    children: {
+      kind: 'blocked',
+      reason: 'incompatible-ancestor',
+      at: path,
+    },
+  };
+}
+
+function fieldDirty(current: FieldPresence, baseline: FieldPresence): boolean {
+  if (current.kind === 'blocked' || baseline.kind === 'blocked') return false;
+  if (current.kind !== baseline.kind) return true;
+  return (
+    current.kind === 'value' &&
+    baseline.kind === 'value' &&
+    !Object.is(current.value, baseline.value)
+  );
+}
+
+function objectDirty(
+  current: ObjectPresence,
+  baseline: ObjectPresence,
+  children: readonly NodeRuntimeSnapshot[],
+): boolean {
+  if (current.kind === 'blocked' || baseline.kind === 'blocked') return false;
+  if (current.kind !== baseline.kind) return true;
+  if (current.kind === 'incompatible' && baseline.kind === 'incompatible') {
+    return !Object.is(current.value, baseline.value);
+  }
+  return current.kind === 'object' && children.some((child) => child.dirty);
+}
+
+function isForced(
+  key: string,
+  scopes: ReadonlyMap<string, ReadonlySet<string>>,
+): boolean {
+  return [...scopes.values()].some((scope) => scope.has(key));
+}
+
+function indexSnapshots(
+  nodes: readonly NodeRuntimeSnapshot[],
+): ReadonlyMap<string, NodeRuntimeSnapshot> {
+  const result = new Map<string, NodeRuntimeSnapshot>();
+  const stack = [...nodes].reverse();
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (node === undefined) continue;
+    result.set(node.key, node);
+    if (node.nodeKind === 'object') {
+      for (let index = node.children.length - 1; index >= 0; index -= 1) {
+        stack.push(node.children[index] as NodeRuntimeSnapshot);
+      }
+    }
+  }
+  return result;
+}
+
+function assignIssues(
+  issues: readonly ValidationIssue[],
+  nodes: ReadonlyMap<string, FormNodeDefinition>,
+): {
+  readonly byKey: ReadonlyMap<string, readonly ValidationIssue[]>;
+  readonly global: readonly ValidationIssue[];
+} {
+  const mutable = new Map<string, ValidationIssue[]>();
+  const global: ValidationIssue[] = [];
+  for (const issue of issues) {
+    const key = assignedIssueKey(issue.path, nodes);
+    if (key === undefined) {
+      global.push(issue);
+    } else {
+      const entries = mutable.get(key) ?? [];
+      entries.push(issue);
+      mutable.set(key, entries);
+    }
+  }
+  const byKey = new Map<string, readonly ValidationIssue[]>();
+  for (const [key, entries] of mutable) byKey.set(key, Object.freeze(entries));
+  return { byKey, global: Object.freeze(global) };
+}
+
+function assignedIssueKey(
+  path: DataPath,
+  nodes: ReadonlyMap<string, FormNodeDefinition>,
+): string | undefined {
+  const copied = copyStringDataPath(path, true);
+  if (copied === undefined || copied.length === 0) return undefined;
+  const exact = canonicalDataPathKey(copied);
+  if (nodes.has(exact)) return exact;
+  for (let length = copied.length - 1; length > 0; length -= 1) {
+    const key = canonicalDataPathKey(copied.slice(0, length));
+    if (nodes.get(key)?.kind === 'object') return key;
+  }
+  return undefined;
 }
 function fieldType(
   field: FieldDefinition,
@@ -1008,13 +1498,42 @@ function freezeField(field: FieldRuntimeSnapshot): FieldRuntimeSnapshot {
   Object.freeze(field.presence);
   return Object.freeze(field);
 }
+function freezeObjectSnapshot(
+  node: ObjectRuntimeSnapshot,
+): ObjectRuntimeSnapshot {
+  Object.freeze(node.path);
+  Object.freeze(node.presence);
+  Object.freeze(node.children);
+  return Object.freeze(node);
+}
+function sameObject(
+  a: ObjectRuntimeSnapshot,
+  b: ObjectRuntimeSnapshot,
+): boolean {
+  return (
+    a.key === b.key &&
+    sameObjectPresence(a.presence, b.presence) &&
+    a.dirty === b.dirty &&
+    a.touched === b.touched &&
+    a.focused === b.focused &&
+    a.valid === b.valid &&
+    a.showIssues === b.showIssues &&
+    sameArray(a.issues, b.issues) &&
+    sameArray(a.children, b.children)
+  );
+}
+function sameObjectPresence(a: ObjectPresence, b: ObjectPresence): boolean {
+  if (a.kind !== b.kind) return false;
+  if (a.kind === 'missing' || a.kind === 'object') return true;
+  if (a.kind === 'incompatible') {
+    return b.kind === 'incompatible' && Object.is(a.value, b.value);
+  }
+  return b.kind === 'blocked' && a.reason === b.reason && sameArray(a.at, b.at);
+}
 function sameField(a: FieldRuntimeSnapshot, b: FieldRuntimeSnapshot): boolean {
   return (
     a.key === b.key &&
-    a.presence.kind === b.presence.kind &&
-    (a.presence.kind === 'missing' ||
-      (b.presence.kind === 'value' &&
-        Object.is(a.presence.value, b.presence.value))) &&
+    sameFieldPresence(a.presence, b.presence) &&
     a.dirty === b.dirty &&
     a.touched === b.touched &&
     a.focused === b.focused &&
@@ -1022,6 +1541,16 @@ function sameField(a: FieldRuntimeSnapshot, b: FieldRuntimeSnapshot): boolean {
     a.showIssues === b.showIssues &&
     sameArray(a.issues, b.issues)
   );
+}
+function sameFieldPresence(
+  a: FieldRuntimeSnapshot['presence'],
+  b: FieldRuntimeSnapshot['presence'],
+): boolean {
+  if (a.kind !== b.kind) return false;
+  if (a.kind === 'missing') return true;
+  if (a.kind === 'value')
+    return b.kind === 'value' && Object.is(a.value, b.value);
+  return b.kind === 'blocked' && a.reason === b.reason && sameArray(a.at, b.at);
 }
 function sameArray(a: readonly unknown[], b: readonly unknown[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
@@ -1034,12 +1563,18 @@ type ParsedScope =
   | {
       readonly success: true;
       readonly id: string;
-      readonly names: ReadonlySet<string>;
+      readonly nodeKeys: ReadonlySet<string>;
+      readonly fieldKeys: ReadonlySet<string>;
       readonly includeGlobal: boolean;
       readonly diagnostics: readonly Diagnostic[];
     }
   | InvalidResult;
-function parseScope(scope: unknown, managed: ReadonlySet<string>): ParsedScope {
+function parseScope(
+  scope: unknown,
+  nodes: ReadonlyMap<string, FormNodeDefinition>,
+  descendantNodes: ReadonlyMap<string, ReadonlySet<string>>,
+  descendantFields: ReadonlyMap<string, ReadonlySet<string>>,
+): ParsedScope {
   if (!isRecord(scope))
     return {
       success: false,
@@ -1081,14 +1616,15 @@ function parseScope(scope: unknown, managed: ReadonlySet<string>): ParsedScope {
         ),
       ]),
     };
-  const names = new Set<string>();
+  const nodeKeys = new Set<string>();
+  const fieldKeys = new Set<string>();
   const diagnostics: Diagnostic[] = [];
   const paths: readonly unknown[] = pathsEntry.value;
   for (let index = 0; index < paths.length; index += 1) {
     const pathEntry = read(paths, String(index));
     const path = pathEntry.kind === 'value' ? pathEntry.value : undefined;
-    const name = canonicalPath(path);
-    if (name === undefined || !managed.has(name))
+    const key = managedPathKey(path);
+    if (key === undefined || !nodes.has(key))
       diagnostics.push(
         runtimeDiagnostic(
           'UNKNOWN_SCOPE_PATH',
@@ -1098,12 +1634,20 @@ function parseScope(scope: unknown, managed: ReadonlySet<string>): ParsedScope {
           'warning',
         ),
       );
-    else names.add(name);
+    else {
+      for (const descendant of descendantNodes.get(key) ?? EMPTY) {
+        nodeKeys.add(descendant);
+      }
+      for (const descendant of descendantFields.get(key) ?? EMPTY) {
+        fieldKeys.add(descendant);
+      }
+    }
   }
   return {
     success: true,
     id: id.value,
-    names,
+    nodeKeys,
+    fieldKeys,
     includeGlobal:
       includeGlobal.kind === 'value' && includeGlobal.value === true,
     diagnostics: freezeDiagnostics(diagnostics),

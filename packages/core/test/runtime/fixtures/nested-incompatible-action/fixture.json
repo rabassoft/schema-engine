@@ -1,0 +1,17 @@
+{
+  "definitionMode": "nested",
+  "value": {
+    "profile": 42
+  },
+  "baselineValue": {
+    "profile": {
+      "street": "Main"
+    }
+  },
+  "actions": [
+    {
+      "type": "focus",
+      "path": ["profile", "street"]
+    }
+  ]
+}

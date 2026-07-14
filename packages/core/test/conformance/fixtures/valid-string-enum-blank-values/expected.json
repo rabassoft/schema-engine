@@ -1,9 +1,34 @@
 {
   "success": true,
   "definition": {
+    "nodes": [
+      {
+        "key": "[\"value\"]",
+        "name": "value",
+        "path": ["value"],
+        "required": false,
+        "label": "value",
+        "kind": "string",
+        "constraints": {},
+        "choices": [
+          {
+            "value": "",
+            "label": "\"\""
+          },
+          {
+            "value": "   ",
+            "label": "\"   \""
+          },
+          {
+            "value": "visible",
+            "label": "visible"
+          }
+        ]
+      }
+    ],
     "fields": [
       {
-        "key": "value",
+        "key": "[\"value\"]",
         "name": "value",
         "path": ["value"],
         "required": false,

@@ -1,9 +1,34 @@
 {
   "success": true,
   "definition": {
+    "nodes": [
+      {
+        "key": "[\"status\"]",
+        "name": "status",
+        "path": ["status"],
+        "required": false,
+        "label": "status",
+        "kind": "string",
+        "constraints": {},
+        "choices": [
+          {
+            "value": "draft",
+            "label": "draft"
+          },
+          {
+            "value": "published",
+            "label": "published"
+          },
+          {
+            "value": "archived",
+            "label": "archived"
+          }
+        ]
+      }
+    ],
     "fields": [
       {
-        "key": "status",
+        "key": "[\"status\"]",
         "name": "status",
         "path": ["status"],
         "required": false,

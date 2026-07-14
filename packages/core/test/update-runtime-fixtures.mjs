@@ -2,29 +2,53 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { URL } from 'node:url';
 import { createControlledFormRuntime } from '../dist/index.js';
 
+const fields = [
+  {
+    key: '["name"]',
+    name: 'name',
+    path: ['name'],
+    required: true,
+    label: 'Name',
+    kind: 'string',
+    constraints: {},
+  },
+  {
+    key: '["age"]',
+    name: 'age',
+    path: ['age'],
+    required: false,
+    label: 'Age',
+    kind: 'number',
+    numericType: 'integer',
+    constraints: {},
+    ui: {},
+  },
+];
 const definition = {
-  fields: [
-    {
-      key: 'name',
-      name: 'name',
-      path: ['name'],
-      required: true,
-      label: 'Name',
-      kind: 'string',
-      constraints: {},
-    },
-    {
-      key: 'age',
-      name: 'age',
-      path: ['age'],
-      required: false,
-      label: 'Age',
-      kind: 'number',
-      numericType: 'integer',
-      constraints: {},
-      ui: {},
-    },
-  ],
+  nodes: fields,
+  fields,
+};
+const nestedStreet = {
+  key: '["profile","street"]',
+  name: 'street',
+  path: ['profile', 'street'],
+  required: true,
+  label: 'Street',
+  kind: 'string',
+  constraints: {},
+};
+const nestedProfile = {
+  key: '["profile"]',
+  name: 'profile',
+  path: ['profile'],
+  required: true,
+  label: 'Profile',
+  kind: 'object',
+  children: [nestedStreet],
+};
+const nestedDefinition = {
+  nodes: [nestedProfile],
+  fields: [nestedStreet],
 };
 const cases = {
   'valid-creation': {
@@ -91,11 +115,42 @@ const cases = {
     baselineValue: {},
     actions: [{ type: 'dispose' }, { type: 'focus', path: ['name'] }],
   },
+  'nested-missing-operation': {
+    definitionMode: 'nested',
+    value: {},
+    baselineValue: { profile: { street: 'Main' } },
+    actions: [
+      { type: 'set', path: ['profile', 'street'], value: 'New' },
+      { type: 'remove', path: ['profile', 'street'] },
+    ],
+  },
+  'nested-incompatible-action': {
+    definitionMode: 'nested',
+    value: { profile: 42 },
+    baselineValue: { profile: { street: 'Main' } },
+    actions: [{ type: 'focus', path: ['profile', 'street'] }],
+  },
+  'nested-object-scope': {
+    definitionMode: 'nested',
+    value: { profile: {} },
+    baselineValue: { profile: {} },
+    validatorMode: 'nested-issues',
+    actions: [{ type: 'show', scope: { id: 'profile', paths: [['profile']] } }],
+  },
 };
 
 function validator(mode) {
   return {
     validate(_schema, value) {
+      if (mode === 'nested-issues') {
+        return {
+          valid: false,
+          issues: [
+            { code: 'profile', path: ['profile'], parameters: {} },
+            { code: 'deep', path: ['profile', 'unknown'], parameters: {} },
+          ],
+        };
+      }
       const missing = !Object.hasOwn(value, 'name');
       return mode === 'required-name' && missing
         ? {
@@ -109,7 +164,8 @@ function validator(mode) {
 function replay(fixture) {
   const created = createControlledFormRuntime({
     formId: 'fixture',
-    definition,
+    definition:
+      fixture.definitionMode === 'nested' ? nestedDefinition : definition,
     schema: {},
     value: fixture.value,
     baselineValue: fixture.baselineValue,

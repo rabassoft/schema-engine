@@ -3,13 +3,81 @@ import { URL } from 'node:url';
 import { applyFormOperation, applyOperation } from '../dist/index.js';
 
 const metadata = { id: 1, formId: 'form' };
+const definitionFields = [
+  {
+    key: '["name"]',
+    name: 'name',
+    path: ['name'],
+    required: true,
+    label: 'Name',
+    kind: 'string',
+    constraints: {},
+  },
+  {
+    key: '["amount"]',
+    name: 'amount',
+    path: ['amount'],
+    required: false,
+    label: 'Amount',
+    kind: 'number',
+    numericType: 'number',
+    constraints: {},
+    ui: {},
+  },
+  {
+    key: '["count"]',
+    name: 'count',
+    path: ['count'],
+    required: false,
+    label: 'Count',
+    kind: 'number',
+    numericType: 'integer',
+    constraints: {},
+    ui: {},
+  },
+  {
+    key: '["active"]',
+    name: 'active',
+    path: ['active'],
+    required: false,
+    label: 'Active',
+    kind: 'boolean',
+  },
+];
 const definition = {
-  fields: [
-    { path: ['name'], kind: 'string' },
-    { path: ['amount'], kind: 'number', numericType: 'number' },
-    { path: ['count'], kind: 'number', numericType: 'integer' },
-    { path: ['active'], kind: 'boolean' },
-  ],
+  nodes: definitionFields,
+  fields: definitionFields,
+};
+const nestedStreet = {
+  key: '["profile","address","street"]',
+  name: 'street',
+  path: ['profile', 'address', 'street'],
+  required: true,
+  label: 'Street',
+  kind: 'string',
+  constraints: {},
+};
+const nestedAddress = {
+  key: '["profile","address"]',
+  name: 'address',
+  path: ['profile', 'address'],
+  required: false,
+  label: 'Address',
+  kind: 'object',
+  children: [nestedStreet],
+};
+const nestedProfile = {
+  key: '["profile"]',
+  name: 'profile',
+  path: ['profile'],
+  required: false,
+  label: 'Profile',
+  kind: 'object',
+  children: [nestedAddress],
+};
+const nestedDefinition = {
+  nodes: [nestedProfile],
+  fields: [nestedStreet],
 };
 const set = (path, expected, value) => ({
   type: 'set-value',
@@ -95,9 +163,19 @@ const cases = {
     currentValue: {},
     operation: set([], { kind: 'missing' }, 'Ada'),
   },
-  'error-deep-path': {
+  'success-deep-set': {
     mode: 'structural',
     currentValue: {},
+    operation: set(['a', 'b'], { kind: 'missing' }, 'Ada'),
+  },
+  'success-deep-remove': {
+    mode: 'structural',
+    currentValue: { a: { b: 'Ada' } },
+    operation: remove(['a', 'b'], 'Ada'),
+  },
+  'error-incompatible-ancestor': {
+    mode: 'structural',
+    currentValue: { a: null },
     operation: set(['a', 'b'], { kind: 'missing' }, 'Ada'),
   },
   'error-numeric-segment': {
@@ -150,6 +228,22 @@ const cases = {
     currentValue: { name: 'Ada' },
     operation: remove(['name'], 'Ada'),
   },
+  'success-form-deep-string': {
+    mode: 'form',
+    definition: nestedDefinition,
+    currentValue: {},
+    operation: set(
+      ['profile', 'address', 'street'],
+      { kind: 'missing' },
+      'Main',
+    ),
+  },
+  'error-form-object-target': {
+    mode: 'form',
+    definition: nestedDefinition,
+    currentValue: {},
+    operation: set(['profile', 'address'], { kind: 'missing' }, {}),
+  },
   'error-malformed-definition': {
     mode: 'form',
     definition: { fields: null },
@@ -159,10 +253,8 @@ const cases = {
   'error-duplicate-managed-path': {
     mode: 'form',
     definition: {
-      fields: [
-        { path: ['name'], kind: 'string' },
-        { path: ['name'], kind: 'string' },
-      ],
+      nodes: [],
+      fields: [definitionFields[0], definitionFields[0]],
     },
     currentValue: {},
     operation: set(['name'], { kind: 'missing' }, 'Ada'),

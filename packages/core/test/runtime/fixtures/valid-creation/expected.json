@@ -8,9 +8,10 @@
     "valid": true,
     "dirty": false,
     "validationVisibility": "touched",
-    "fields": [
+    "nodes": [
       {
-        "key": "name",
+        "nodeKind": "field",
+        "key": "[\"name\"]",
         "path": ["name"],
         "presence": {
           "kind": "value",
@@ -24,7 +25,39 @@
         "showIssues": false
       },
       {
-        "key": "age",
+        "nodeKind": "field",
+        "key": "[\"age\"]",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "fields": [
+      {
+        "nodeKind": "field",
+        "key": "[\"name\"]",
+        "path": ["name"],
+        "presence": {
+          "kind": "value",
+          "value": "Ada"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "nodeKind": "field",
+        "key": "[\"age\"]",
         "path": ["age"],
         "presence": {
           "kind": "missing"
@@ -50,9 +83,10 @@
     "valid": true,
     "dirty": false,
     "validationVisibility": "touched",
-    "fields": [
+    "nodes": [
       {
-        "key": "name",
+        "nodeKind": "field",
+        "key": "[\"name\"]",
         "path": ["name"],
         "presence": {
           "kind": "value",
@@ -66,7 +100,39 @@
         "showIssues": false
       },
       {
-        "key": "age",
+        "nodeKind": "field",
+        "key": "[\"age\"]",
+        "path": ["age"],
+        "presence": {
+          "kind": "missing"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "fields": [
+      {
+        "nodeKind": "field",
+        "key": "[\"name\"]",
+        "path": ["name"],
+        "presence": {
+          "kind": "value",
+          "value": "Ada"
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      },
+      {
+        "nodeKind": "field",
+        "key": "[\"age\"]",
         "path": ["age"],
         "presence": {
           "kind": "missing"

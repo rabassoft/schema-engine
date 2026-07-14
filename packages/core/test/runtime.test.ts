@@ -2,35 +2,96 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   createControlledFormRuntime,
   type ControlledFormRuntimeOptions,
+  type FieldDefinition,
   type FormDefinition,
   type FormOperation,
+  type ObjectFieldDefinition,
   type ValidationResult,
 } from '../src/index.js';
 
+const definitionFields: FormDefinition['fields'] = [
+  {
+    key: '["name"]',
+    name: 'name',
+    path: ['name'],
+    required: true,
+    label: 'Name',
+    kind: 'string',
+    constraints: {},
+  },
+  {
+    key: '["age"]',
+    name: 'age',
+    path: ['age'],
+    required: false,
+    label: 'Age',
+    kind: 'number',
+    numericType: 'integer',
+    constraints: {},
+    ui: {},
+  },
+];
 const definition: FormDefinition = {
-  fields: [
-    {
-      key: 'name',
-      name: 'name',
-      path: ['name'],
-      required: true,
-      label: 'Name',
-      kind: 'string',
-      constraints: {},
-    },
-    {
-      key: 'age',
-      name: 'age',
-      path: ['age'],
-      required: false,
-      label: 'Age',
-      kind: 'number',
-      numericType: 'integer',
-      constraints: {},
-      ui: {},
-    },
-  ],
+  nodes: definitionFields,
+  fields: definitionFields,
 };
+
+const streetField: FieldDefinition = {
+  key: '["profile","address","street"]',
+  name: 'street',
+  path: ['profile', 'address', 'street'],
+  required: true,
+  label: 'Street',
+  kind: 'string',
+  constraints: {},
+};
+const cityField: FieldDefinition = {
+  key: '["profile","address","city"]',
+  name: 'city',
+  path: ['profile', 'address', 'city'],
+  required: false,
+  label: 'City',
+  kind: 'string',
+  constraints: {},
+};
+const addressNode: ObjectFieldDefinition = {
+  key: '["profile","address"]',
+  name: 'address',
+  path: ['profile', 'address'],
+  required: true,
+  label: 'Address',
+  kind: 'object',
+  children: [streetField, cityField],
+};
+const profileNode: ObjectFieldDefinition = {
+  key: '["profile"]',
+  name: 'profile',
+  path: ['profile'],
+  required: true,
+  label: 'Profile',
+  kind: 'object',
+  children: [addressNode],
+};
+const nestedDefinition: FormDefinition = {
+  nodes: [profileNode, definitionFields[0] as FieldDefinition],
+  fields: [streetField, cityField, definitionFields[0] as FieldDefinition],
+};
+
+function nestedRuntime(
+  overrides: Partial<
+    ControlledFormRuntimeOptions<Record<string, unknown>>
+  > = {},
+) {
+  return runtime({
+    definition: nestedDefinition,
+    value: { profile: { address: { street: 'Main' } }, name: 'Ada' },
+    baselineValue: {
+      profile: { address: { street: 'Main' } },
+      name: 'Ada',
+    },
+    ...overrides,
+  });
+}
 
 function options(
   overrides: Partial<
@@ -76,6 +137,10 @@ describe('controlled runtime', () => {
     });
     expect(Object.isFrozen(snapshot)).toBe(true);
     expect(Object.isFrozen(snapshot.fields[0])).toBe(true);
+    expect(snapshot.nodes[0]).toBe(snapshot.fields[0]);
+    expect(rt.getNodeSnapshot(['name'])).toBe(rt.getFieldSnapshot(['name']));
+    expect(rt.getNodeSnapshot([])).toBeUndefined();
+    expect(rt.getNodeSnapshot([0])).toBeUndefined();
   });
 
   it('returns diagnostics for invalid creation and validator results', () => {
@@ -110,9 +175,8 @@ describe('controlled runtime', () => {
   it('accepts valid frozen choices and out-of-enum controlled strings', () => {
     const choice = Object.freeze({ value: 'draft', label: 'Draft' });
     const choices = Object.freeze([choice]);
-    const manualDefinition = {
-      fields: [{ ...definition.fields[0], choices }],
-    } as FormDefinition;
+    const fields = [{ ...definition.fields[0], choices }];
+    const manualDefinition = { nodes: fields, fields } as FormDefinition;
     const validate = vi.fn((): ValidationResult => ({
       valid: true,
       issues: [],
@@ -142,15 +206,23 @@ describe('controlled runtime', () => {
     expect(result.runtime.getSnapshot().value).toEqual({ name: 'confirmed' });
   });
 
-  it('treats inherited choices as absent', () => {
+  it('rejects a non-ordinary manual field without reading inherited choices', () => {
     const field = Object.assign(Object.create({ choices: [] }) as object, {
       ...definition.fields[0],
     });
     const result = createControlledFormRuntime(
-      options({ definition: { fields: [field] } as never }),
+      options({ definition: { nodes: [field], fields: [field] } as never }),
     );
 
-    expect(result.success).toBe(true);
+    expect(result).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          code: 'INVALID_RUNTIME_OPTIONS',
+          parameters: { definitionReason: 'invalid-node' },
+        },
+      ],
+    });
   });
 
   it('rejects malformed manual choices before invoking the validator', () => {
@@ -219,7 +291,7 @@ describe('controlled runtime', () => {
       const validate = vi.fn(() => ({ valid: true, issues: [] }));
       const result = createControlledFormRuntime(
         options({
-          definition: { fields: [field] } as never,
+          definition: { nodes: [field], fields: [field] } as never,
           validator: { validate },
         }),
       );
@@ -233,9 +305,10 @@ describe('controlled runtime', () => {
             source: 'runtime',
             parameters: {
               member: 'definition',
-              expected: 'valid FormDefinition with string choices',
+              expected: 'valid nested FormDefinition',
               reason: 'invalid-value',
               actualType: 'object',
+              definitionReason: 'invalid-node',
             },
           },
         ],
@@ -261,9 +334,10 @@ describe('controlled runtime', () => {
           code: 'INVALID_RUNTIME_OPTIONS',
           parameters: {
             member: 'definition',
-            expected: 'valid root FormDefinition',
+            expected: 'valid nested FormDefinition',
             reason: 'invalid-value',
             actualType: 'object',
+            definitionReason: 'nodes-not-array',
           },
         },
       ],
@@ -285,7 +359,10 @@ describe('controlled runtime', () => {
     );
     const result = createControlledFormRuntime(
       options({
-        definition: { fields: [choicesAccessor, null] } as never,
+        definition: {
+          nodes: [choicesAccessor, null],
+          fields: [choicesAccessor, null],
+        } as never,
       }),
     );
 
@@ -293,7 +370,7 @@ describe('controlled runtime', () => {
       success: false,
       diagnostics: [
         {
-          parameters: { expected: 'valid root FormDefinition' },
+          parameters: { expected: 'valid nested FormDefinition' },
         },
       ],
     });
@@ -505,6 +582,269 @@ describe('controlled runtime', () => {
     expect(rt.subscribe(() => undefined)).toMatchObject({
       success: false,
       diagnostics: [{ code: 'RUNTIME_DISPOSED' }],
+    });
+  });
+
+  it('builds one immutable nested tree with an identity-preserving leaf projection', () => {
+    const rt = nestedRuntime();
+    const snapshot = rt.getSnapshot();
+    const profile = snapshot.nodes[0];
+    expect(profile).toMatchObject({
+      nodeKind: 'object',
+      presence: { kind: 'object' },
+      dirty: false,
+    });
+    if (profile?.nodeKind !== 'object') throw new Error('expected profile');
+    const address = profile.children[0];
+    if (address?.nodeKind !== 'object') throw new Error('expected address');
+    expect(address.children[0]).toBe(snapshot.fields[0]);
+    expect(rt.getNodeSnapshot(['profile'])).toBe(profile);
+    expect(rt.getNodeSnapshot(['profile', 'address'])).toBe(address);
+    expect(rt.getFieldSnapshot(['profile'])).toBeUndefined();
+    expect(Object.isFrozen(profile.children)).toBe(true);
+    expect(Object.isFrozen(address.presence)).toBe(true);
+  });
+
+  it('models missing ancestors while allowing deep set and interaction', () => {
+    const rt = nestedRuntime({ value: { name: 'Ada' } });
+    const emitted: FormOperation[] = [];
+    rt.subscribeOperations((operation) => emitted.push(operation));
+    expect(rt.getNodeSnapshot(['profile'])).toMatchObject({
+      presence: { kind: 'missing' },
+      dirty: true,
+    });
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])).toMatchObject(
+      {
+        presence: {
+          kind: 'blocked',
+          reason: 'missing-ancestor',
+          at: ['profile'],
+        },
+        dirty: false,
+      },
+    );
+    expect(
+      rt.requestSetValue(['profile', 'address', 'street'], 'New'),
+    ).toMatchObject({ success: true, effects: { operationEmitted: true } });
+    expect(emitted[0]).toMatchObject({
+      path: ['profile', 'address', 'street'],
+      expected: { kind: 'missing' },
+    });
+    expect(
+      rt.requestRemoveValue(['profile', 'address', 'street']),
+    ).toMatchObject({ success: true, effects: { operationEmitted: false } });
+    expect(rt.focus(['profile', 'address', 'street']).success).toBe(true);
+    expect(rt.blur(['profile', 'address', 'street']).success).toBe(true);
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])?.touched).toBe(
+      true,
+    );
+  });
+
+  it('rejects every leaf action below an incompatible ancestor', () => {
+    const rt = nestedRuntime({ value: { profile: 42, name: 'Ada' } });
+    const actions = [
+      rt.requestSetValue(['profile', 'address', 'street'], 'New'),
+      rt.requestRemoveValue(['profile', 'address', 'street']),
+      rt.focus(['profile', 'address', 'street']),
+      rt.blur(['profile', 'address', 'street']),
+    ];
+    expect(rt.getNodeSnapshot(['profile'])).toMatchObject({
+      presence: { kind: 'incompatible', value: 42 },
+    });
+    for (const result of actions) {
+      expect(result).toMatchObject({
+        success: false,
+        effects: { snapshotChanged: false, operationEmitted: false },
+        diagnostics: [
+          {
+            code: 'INCOMPATIBLE_RUNTIME_ANCESTOR',
+            dataPath: ['profile', 'address', 'street'],
+            parameters: {
+              reason: 'incompatible-ancestor',
+              blockingPath: ['profile'],
+              actualType: 'number',
+            },
+          },
+        ],
+      });
+      expect(Object.isFrozen(result.diagnostics[0]?.dataPath)).toBe(true);
+      expect(
+        Object.isFrozen(result.diagnostics[0]?.parameters.blockingPath),
+      ).toBe(true);
+    }
+  });
+
+  it('rejects managed accessors before validation and rolls updates back atomically', () => {
+    let getterCalls = 0;
+    const validate = vi.fn(() => ({ valid: true, issues: [] }));
+    const initial = Object.defineProperty({ name: 'Ada' }, 'profile', {
+      get() {
+        getterCalls += 1;
+        return {};
+      },
+    });
+    const failed = createControlledFormRuntime(
+      options({
+        definition: nestedDefinition,
+        value: initial,
+        baselineValue: {},
+        validator: { validate },
+      }),
+    );
+    expect(failed).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          code: 'INVALID_RUNTIME_OPTIONS',
+          dataPath: ['profile'],
+          parameters: {
+            member: 'value',
+            expected: 'ordinary data tree at managed paths',
+            propertyReason: 'accessor',
+          },
+        },
+      ],
+    });
+    expect(validate).not.toHaveBeenCalled();
+    expect(getterCalls).toBe(0);
+
+    const rt = nestedRuntime({ validator: { validate } });
+    const before = rt.getSnapshot();
+    const address = Object.defineProperty({}, 'street', {
+      get() {
+        getterCalls += 1;
+        return 'Hidden';
+      },
+    });
+    expect(
+      rt.updateExternalState({ value: { profile: { address }, name: 'Ada' } }),
+    ).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          code: 'INVALID_EXTERNAL_STATE_UPDATE',
+          dataPath: ['profile', 'address', 'street'],
+        },
+      ],
+    });
+    expect(rt.getSnapshot()).toBe(before);
+    expect(validate).toHaveBeenCalledTimes(1);
+    expect(getterCalls).toBe(0);
+  });
+
+  it('assigns nested issues and expands object scopes', () => {
+    const issues = [
+      { code: 'profile', path: ['profile'], parameters: {} },
+      {
+        code: 'address-child',
+        path: ['profile', 'address', 'postalCode'],
+        parameters: {},
+      },
+      {
+        code: 'street',
+        path: ['profile', 'address', 'street'],
+        parameters: {},
+      },
+      { code: 'unmanaged', path: ['other'], parameters: {} },
+    ];
+    const rt = nestedRuntime({
+      validator: { validate: () => ({ valid: false, issues }) },
+    });
+    expect(
+      rt.getNodeSnapshot(['profile'])?.issues.map((issue) => issue.code),
+    ).toEqual(['profile']);
+    expect(
+      rt
+        .getNodeSnapshot(['profile', 'address'])
+        ?.issues.map((issue) => issue.code),
+    ).toEqual(['address-child']);
+    expect(rt.getSnapshot().globalIssues.map((issue) => issue.code)).toEqual([
+      'unmanaged',
+    ]);
+    const scope = { id: 'profile', paths: [['profile']] as const };
+    expect(
+      rt.getValidationSnapshot(scope).issues.map((issue) => issue.code),
+    ).toEqual(['profile', 'address-child', 'street']);
+    expect(rt.showValidationErrors(scope).success).toBe(true);
+    expect(rt.getNodeSnapshot(['profile'])?.showIssues).toBe(true);
+    expect(
+      rt.getFieldSnapshot(['profile', 'address', 'street'])?.showIssues,
+    ).toBe(true);
+    rt.focus(['profile', 'address', 'street']);
+    rt.blur(['profile', 'address', 'street']);
+    expect(rt.resetTouched(scope).success).toBe(true);
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])?.touched).toBe(
+      false,
+    );
+  });
+
+  it('reuses unaffected nested snapshots and clears incompatible focus without touching', () => {
+    const rt = nestedRuntime();
+    const profile = rt.getNodeSnapshot(['profile']);
+    const street = rt.getFieldSnapshot(['profile', 'address', 'street']);
+    rt.updateExternalState({
+      value: { profile: { address: { street: 'Main' } }, name: 'Grace' },
+    });
+    expect(rt.getNodeSnapshot(['profile'])).toBe(profile);
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])).toBe(street);
+
+    rt.focus(['profile', 'address', 'street']);
+    rt.updateExternalState({ baselineValue: { profile: null, name: 'Ada' } });
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])?.focused).toBe(
+      true,
+    );
+    expect(
+      rt.updateExternalState({ value: { profile: null, name: 'Grace' } }),
+    ).toMatchObject({ success: true });
+    expect(rt.getFieldSnapshot(['profile', 'address', 'street'])).toMatchObject(
+      {
+        focused: false,
+        touched: false,
+        presence: { reason: 'incompatible-ancestor' },
+      },
+    );
+  });
+
+  it('constructs and queries a finite deeply nested runtime iteratively', () => {
+    const depth = 1_000;
+    const path = Array.from({ length: depth }, (_, index) => `n${index}`);
+    const leaf: FieldDefinition = {
+      key: JSON.stringify([...path, 'value']),
+      name: 'value',
+      path: [...path, 'value'],
+      required: false,
+      label: 'Value',
+      kind: 'string',
+      constraints: {},
+    };
+    let node: ObjectFieldDefinition | FieldDefinition = leaf;
+    for (let index = depth - 1; index >= 0; index -= 1) {
+      const nodePath = path.slice(0, index + 1);
+      node = {
+        key: JSON.stringify(nodePath),
+        name: nodePath[index] as string,
+        path: nodePath,
+        required: false,
+        label: `Node ${index}`,
+        kind: 'object',
+        children: [node],
+      };
+    }
+    const result = createControlledFormRuntime(
+      options({
+        definition: { nodes: [node], fields: [leaf] },
+        value: {},
+        baselineValue: {},
+      }),
+    );
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.runtime.getFieldSnapshot([...path, 'value'])).toMatchObject({
+      presence: {
+        kind: 'blocked',
+        reason: 'missing-ancestor',
+        at: ['n0'],
+      },
     });
   });
 });

@@ -1,0 +1,15 @@
+{
+  "fields": {
+    "address": {
+      "label": "Postal address",
+      "fields": {
+        "location": {
+          "hint": "Primary location",
+          "fields": {
+            "street": { "label": "Street name", "placeholder": "Main St" }
+          }
+        }
+      }
+    }
+  }
+}

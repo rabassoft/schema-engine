@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "value": {
+    "a": {
+      "b": "Ada"
+    }
+  },
+  "changed": true,
+  "diagnostics": []
+}

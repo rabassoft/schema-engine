@@ -10,7 +10,7 @@
       "parameters": {
         "field": "address",
         "actualType": "string",
-        "actualValue": "object"
+        "actualValue": "array"
       },
       "fallbackMessage": "Field \"address\" has an unsupported type."
     }

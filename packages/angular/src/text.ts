@@ -15,6 +15,11 @@ import type {
 } from '@rabassoft/schema-engine';
 import { adapterDiagnostic } from './renderer.js';
 
+type FieldTextResolutionContext = Extract<
+  TextResolutionContext,
+  { readonly field: FieldDefinition }
+>;
+
 export interface AngularFieldTextSnapshot {
   readonly label: string;
   readonly description?: string;
@@ -157,7 +162,7 @@ function invalidResolver(reason: string, actualType: string) {
 function resolveText(
   resolver: (text: string, context: TextResolutionContext) => unknown,
   source: string,
-  context: TextResolutionContext,
+  context: FieldTextResolutionContext,
   diagnostics: Diagnostic[],
   rejectBlank = false,
 ): string {
@@ -180,7 +185,7 @@ function resolveText(
 }
 
 function textDiagnostic(
-  context: TextResolutionContext,
+  context: FieldTextResolutionContext,
   reason: string,
 ): Diagnostic {
   return adapterDiagnostic(

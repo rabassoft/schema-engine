@@ -15,7 +15,7 @@ export interface FieldIds {
 }
 
 export function fieldIds(formId: string, field: FieldDefinition): FieldIds {
-  const base = `se-${encodeURIComponent(formId)}-${encodeURIComponent(field.key)}`;
+  const base = `se-${encodeURIComponent(formId)}-${encodeURIComponent(field.name)}`;
   return Object.freeze({
     control: base,
     label: `${base}-label`,

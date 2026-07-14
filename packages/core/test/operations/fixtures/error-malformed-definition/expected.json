@@ -11,7 +11,7 @@
       "parameters": {
         "reason": "fields-not-array"
       },
-      "fallbackMessage": "Form definition is invalid for operation application."
+      "fallbackMessage": "Form definition is invalid."
     }
   ]
 }

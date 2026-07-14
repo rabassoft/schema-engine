@@ -1,0 +1,21 @@
+{
+  "mode": "structural",
+  "currentValue": {
+    "a": {
+      "b": "Ada"
+    }
+  },
+  "operation": {
+    "type": "remove-value",
+    "metadata": {
+      "id": 1,
+      "formId": "form"
+    },
+    "path": ["a", "b"],
+    "expected": {
+      "kind": "value",
+      "value": "Ada"
+    },
+    "source": "user"
+  }
+}

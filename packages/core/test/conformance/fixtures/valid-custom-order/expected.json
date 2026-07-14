@@ -1,9 +1,9 @@
 {
   "success": true,
   "definition": {
-    "fields": [
+    "nodes": [
       {
-        "key": "active",
+        "key": "[\"active\"]",
         "name": "active",
         "path": ["active"],
         "required": false,
@@ -11,7 +11,7 @@
         "kind": "boolean"
       },
       {
-        "key": "name",
+        "key": "[\"name\"]",
         "name": "name",
         "path": ["name"],
         "required": false,
@@ -20,7 +20,37 @@
         "constraints": {}
       },
       {
-        "key": "age",
+        "key": "[\"age\"]",
+        "name": "age",
+        "path": ["age"],
+        "required": false,
+        "label": "age",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"active\"]",
+        "name": "active",
+        "path": ["active"],
+        "required": false,
+        "label": "active",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"name\"]",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"age\"]",
         "name": "age",
         "path": ["age"],
         "required": false,

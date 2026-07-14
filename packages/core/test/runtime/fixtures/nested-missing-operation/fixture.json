@@ -1,0 +1,20 @@
+{
+  "definitionMode": "nested",
+  "value": {},
+  "baselineValue": {
+    "profile": {
+      "street": "Main"
+    }
+  },
+  "actions": [
+    {
+      "type": "set",
+      "path": ["profile", "street"],
+      "value": "New"
+    },
+    {
+      "type": "remove",
+      "path": ["profile", "street"]
+    }
+  ]
+}

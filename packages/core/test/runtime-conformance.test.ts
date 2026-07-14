@@ -6,29 +6,53 @@ import {
 } from '../src/index.js';
 
 const directory = new URL('./runtime/fixtures/', import.meta.url);
+const definitionFields = [
+  {
+    key: '["name"]',
+    name: 'name',
+    path: ['name'],
+    required: true,
+    label: 'Name',
+    kind: 'string',
+    constraints: {},
+  },
+  {
+    key: '["age"]',
+    name: 'age',
+    path: ['age'],
+    required: false,
+    label: 'Age',
+    kind: 'number',
+    numericType: 'integer',
+    constraints: {},
+    ui: {},
+  },
+] as const;
 const definition = {
-  fields: [
-    {
-      key: 'name',
-      name: 'name',
-      path: ['name'],
-      required: true,
-      label: 'Name',
-      kind: 'string',
-      constraints: {},
-    },
-    {
-      key: 'age',
-      name: 'age',
-      path: ['age'],
-      required: false,
-      label: 'Age',
-      kind: 'number',
-      numericType: 'integer',
-      constraints: {},
-      ui: {},
-    },
-  ],
+  nodes: definitionFields,
+  fields: definitionFields,
+} as const;
+const nestedStreet = {
+  key: '["profile","street"]',
+  name: 'street',
+  path: ['profile', 'street'],
+  required: true,
+  label: 'Street',
+  kind: 'string',
+  constraints: {},
+} as const;
+const nestedProfile = {
+  key: '["profile"]',
+  name: 'profile',
+  path: ['profile'],
+  required: true,
+  label: 'Profile',
+  kind: 'object',
+  children: [nestedStreet],
+} as const;
+const nestedDefinition = {
+  nodes: [nestedProfile],
+  fields: [nestedStreet],
 } as const;
 type Action = {
   type: string;
@@ -41,6 +65,7 @@ type Action = {
 type Fixture = {
   value: object;
   baselineValue: object;
+  definitionMode?: 'nested';
   validatorMode?: string;
   actions: readonly Action[];
 };
@@ -61,7 +86,8 @@ describe('runtime conformance fixtures', async () => {
 function replay(fixture: Fixture): unknown {
   const created = createControlledFormRuntime({
     formId: 'fixture',
-    definition,
+    definition:
+      fixture.definitionMode === 'nested' ? nestedDefinition : definition,
     schema: {},
     value: fixture.value,
     baselineValue: fixture.baselineValue,
@@ -72,6 +98,19 @@ function replay(fixture: Fixture): unknown {
           typeof value === 'object' &&
           value !== null &&
           !Object.hasOwn(value, 'name');
+        if (fixture.validatorMode === 'nested-issues') {
+          return {
+            valid: false,
+            issues: [
+              { code: 'profile', path: ['profile'], parameters: {} },
+              {
+                code: 'deep',
+                path: ['profile', 'unknown'],
+                parameters: {},
+              },
+            ],
+          };
+        }
         return fixture.validatorMode === 'required-name' && missing
           ? {
               valid: false,

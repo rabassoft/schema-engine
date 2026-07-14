@@ -14,7 +14,7 @@
   [`ADR-005 revision 1`](../adrs/005-politica-dialecto-json-schema.md)
 - **Implementation plan:**
   [`PLAN-009 revision 1`](../plans/009-nested-object-runtime.md), Approved
-- **Implementation state:** Authorized by PLAN-009; not started
+- **Implementation state:** PLAN-009 checkpoints 1–4 completed; checkpoint 5 pending
 
 ## 1. Status and authority
 
@@ -29,7 +29,16 @@ continue unchanged.
 
 Acceptance of this SPEC authorized preparation of PLAN-009, not implementation
 or publication. PLAN-009 revision 1 subsequently passed its repeated complete
-review and was explicitly approved; implementation remains not started.
+review and was explicitly approved; at that approval checkpoint implementation
+had not started.
+Checkpoint 1 subsequently established the Public core contract surface and
+shared iterative definition/path helpers without implementing recursive schema
+compilation. Checkpoint 2 then implemented the iterative descriptor-safe
+schema/UI compiler, normalized recursive definition and focused conformance
+coverage. Checkpoint 3 implemented descriptor-safe deep structural/form
+operations and their fixtures. Checkpoint 4 then implemented nested runtime
+validation, snapshots, actions, scopes and structural sharing; Angular
+recursive projection remains pending.
 
 ## 2. Goals
 

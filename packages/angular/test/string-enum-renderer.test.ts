@@ -157,6 +157,7 @@ function snapshot(
   presence: FieldRuntimeSnapshot['presence'],
 ): FieldRuntimeSnapshot {
   return Object.freeze({
+    nodeKind: 'field',
     key: 'status',
     path: Object.freeze(['status']),
     presence: Object.freeze(presence),

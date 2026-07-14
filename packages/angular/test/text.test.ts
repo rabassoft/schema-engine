@@ -37,6 +37,7 @@ const issue: ValidationIssue = Object.freeze({
   fallbackMessage: 'status.required',
 });
 const snapshot: FieldRuntimeSnapshot = Object.freeze({
+  nodeKind: 'field',
   key: 'status',
   path: Object.freeze(['status']),
   presence: Object.freeze({ kind: 'missing' }),

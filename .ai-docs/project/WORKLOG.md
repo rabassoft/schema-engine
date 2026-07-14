@@ -6,6 +6,163 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — PLAN-009 checkpoint 4 completed
+
+### Delivery
+
+- Replaced flat runtime lookup and snapshot construction with iterative nested
+  definition indexes, full canonical paths and one immutable node tree whose
+  primitive projection preserves exact leaf identity.
+- Added shared manual-definition validation and descriptor-safe managed data
+  inspection; accessors fail creation/update before validation while missing
+  and incompatible business data retain their accepted presence semantics.
+- Implemented deep operations and interaction under missing/incompatible
+  ancestors, external focus reconciliation, recursive dirty/valid/touched/
+  focused state, nearest-object issue assignment and expanding object scopes.
+- Preserved controlled-state behavior, listener isolation, unrelated subtree
+  sharing and the inactive Angular projection boundary.
+
+### Tests and fixtures
+
+- Migrated the runtime tests to the recursive definition contract and added
+  nested tree/projection, presence, action, accessor, issue, scope, focus and
+  structural-sharing coverage.
+- Added nested missing-operation, incompatible-action and object-scope JSON
+  conformance fixtures plus a 1,000-level finite runtime construction/query.
+
+### Verification
+
+- Format, lint, typecheck, both builds and `git diff --check` pass.
+- All 164 core and 50 Angular tests pass (214 total).
+- Package smoke, built-consumer and exact private artifact allowlist checks
+  pass.
+- No dependency, manifest, lockfile, publication, deferred boundary or Angular
+  projection behavior changed.
+
+### Pending
+
+- Start only PLAN-009 checkpoint 5 with recursive Angular 22 projection and
+  consumer migration over the accepted nested runtime.
+
+## 2026-07-14 — PLAN-009 checkpoint 3 completed
+
+### Delivery
+
+- Generalized operation paths to non-empty immutable string-only deep paths and
+  retained exact validation ordering for malformed envelopes and expectations.
+- Added iterative descriptor-safe ancestor/terminal traversal, missing-branch
+  materialization for set, incompatible-ancestor diagnostics and accessor
+  rejection without getter execution.
+- Added bottom-up root-to-leaf cloning that preserves source prototypes,
+  off-path descriptors/references and concurrent compatible branch state;
+  removal does not create or prune ancestors.
+- Integrated the shared nested-definition validator with first-defect runtime
+  behavior plus ordered independent-defect collection for form operations,
+  exact leaf membership, object-target rejection and primitive compatibility.
+
+### Tests and fixtures
+
+- Migrated all form-operation fixtures to the recursive definition contract and
+  made the JSON harness restore only the tree/projection identity that JSON
+  cannot encode.
+- Replaced the former deep-path rejection fixture with deep set/remove success
+  cases and added nested form, object-target and incompatible-ancestor fixtures.
+- Added programmatic coverage for materialization, no pruning, accessors,
+  arrays/null/primitives, descriptor/prototype preservation, sharing, invalid
+  definitions, safe diagnostics and a 1,500-segment path.
+
+### Verification
+
+- Format, lint, typecheck, both builds and `git diff --check` pass.
+- All 154 core and 50 Angular tests pass (204 total).
+- Package smoke, built consumer and exact private artifact allowlist checks
+  pass; manifests, dependencies and lockfile are unchanged.
+
+### Pending
+
+- Start only PLAN-009 checkpoint 4 with nested runtime validation, snapshots,
+  actions, scopes and structural sharing. Do not start Angular projection.
+
+## 2026-07-14 — PLAN-009 checkpoint 2 completed
+
+### Delivery
+
+- Replaced the flat-only schema pass with an explicit work-stack traversal for
+  recursive inline object schemas, complete deep paths and sibling-local
+  required sets.
+- Added descriptor-safe structural inspection, ordinary-object enforcement,
+  active-ancestry schema/UI cycle diagnostics and sibling identity reuse.
+- Added iterative structural UI traversal with recursive text precedence,
+  incompatibility diagnostics, local order and normalized object nodes.
+- Built the recursive immutable definition and its depth-first primitive leaf
+  projection with exact shared leaf references; made deep freezing iterative
+  and descriptor-safe.
+
+### Tests and fixtures
+
+- Added valid two-depth and malformed nested compiler conformance fixtures and
+  migrated the former object-as-unsupported fixture to the still-deferred array
+  type.
+- Added focused tests for every current leaf family, nested UI order/text/enum,
+  schema and UI cycles, sibling reuse, accessor non-execution, frozen identity
+  and a 1,500-level finite schema.
+- Preserved the complete flat compiler suite and delayed deep operations,
+  nested runtime and Angular recursive projection to checkpoints 3–5.
+
+### Verification
+
+- Format, lint, typecheck, both builds and `git diff --check` pass.
+- All 141 core and 50 Angular tests pass (191 total).
+- Package smoke, built consumer and exact private artifact allowlist checks
+  pass; manifests, dependencies and lockfile are unchanged.
+
+### Pending
+
+- Start only PLAN-009 checkpoint 3 with descriptor-safe iterative deep
+  structural operations and focused operation fixtures. Do not start nested
+  runtime or Angular recursive projection.
+
+## 2026-07-14 — PLAN-009 checkpoint 1 completed
+
+### Delivery
+
+- Added and root-exported the accepted Public core recursive definition/UI,
+  object/blocked presence, node snapshot, object text and node lookup contracts.
+- Added Internal descriptor-safe path helpers and an iterative nested-definition
+  validator for cycles, reused identity, duplicate paths, node invariants and
+  exact leaf projection identity without retaining caller containers.
+- Added the minimal flat compiler/runtime bridge required by the new surface:
+  canonical JSON path keys, identity-linked `nodes`/`fields`, leaf `nodeKind`
+  and `getNodeSnapshot()` behavior. Recursive compilation remains checkpoint 2.
+- Kept the current flat Angular DOM ID behavior through local names; the
+  accepted collision-safe nested ID migration remains checkpoint 5.
+
+### Tests and fixture review
+
+- Added five focused contract/helper tests, including accessor non-execution,
+  cycles, reuse, projection mismatch and a 1,500-level iterative tree.
+- Migrated only serializable flat compiler/runtime expected fixtures to the new
+  contract after focused assertions passed, formatted them and reviewed that no
+  input fixture changed.
+- Updated core and Angular typed test snapshots plus package smoke coverage for
+  identity-linked nodes and `getNodeSnapshot()`.
+
+### Verification
+
+- Format, lint, typecheck, both builds and `git diff --check` pass.
+- All 134 core and 50 Angular tests pass (184 total).
+- Package smoke, built consumer and private artifact allowlist checks pass.
+- The first clean-consumer attempt lacked npm DNS in the restricted sandbox;
+  the authorized rerun passed core plus Angular 22.0.6 lower/upper consumers.
+- No manifest, dependency, lockfile, publication or Stable API classification
+  changed.
+
+### Pending
+
+- Start only PLAN-009 checkpoint 2 with iterative recursive schema compilation
+  and focused schema fixtures before structural UI traversal. Do not start deep
+  operations, nested runtime or Angular recursive projection.
+
 ## 2026-07-14 — PLAN-009 revision 1 approved
 
 ### Approval

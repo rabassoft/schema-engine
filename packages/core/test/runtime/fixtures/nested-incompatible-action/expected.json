@@ -1,0 +1,220 @@
+{
+  "success": true,
+  "initialSnapshot": {
+    "value": {
+      "profile": 42
+    },
+    "locale": "en",
+    "valid": true,
+    "dirty": true,
+    "validationVisibility": "touched",
+    "nodes": [
+      {
+        "nodeKind": "object",
+        "key": "[\"profile\"]",
+        "path": ["profile"],
+        "presence": {
+          "kind": "incompatible",
+          "value": 42
+        },
+        "dirty": true,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false,
+        "children": [
+          {
+            "nodeKind": "field",
+            "key": "[\"profile\",\"street\"]",
+            "path": ["profile", "street"],
+            "presence": {
+              "kind": "blocked",
+              "reason": "incompatible-ancestor",
+              "at": ["profile"]
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "nodeKind": "field",
+        "key": "[\"profile\",\"street\"]",
+        "path": ["profile", "street"],
+        "presence": {
+          "kind": "blocked",
+          "reason": "incompatible-ancestor",
+          "at": ["profile"]
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  },
+  "actions": [
+    {
+      "result": {
+        "success": false,
+        "effects": {
+          "snapshotChanged": false,
+          "operationEmitted": false
+        },
+        "diagnostics": [
+          {
+            "code": "INCOMPATIBLE_RUNTIME_ANCESTOR",
+            "severity": "error",
+            "source": "runtime",
+            "dataPath": ["profile", "street"],
+            "parameters": {
+              "action": "focus",
+              "reason": "incompatible-ancestor",
+              "blockingPath": ["profile"],
+              "actualType": "number"
+            },
+            "fallbackMessage": "Runtime action is blocked by an incompatible ancestor."
+          }
+        ]
+      },
+      "snapshot": {
+        "value": {
+          "profile": 42
+        },
+        "locale": "en",
+        "valid": true,
+        "dirty": true,
+        "validationVisibility": "touched",
+        "nodes": [
+          {
+            "nodeKind": "object",
+            "key": "[\"profile\"]",
+            "path": ["profile"],
+            "presence": {
+              "kind": "incompatible",
+              "value": 42
+            },
+            "dirty": true,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false,
+            "children": [
+              {
+                "nodeKind": "field",
+                "key": "[\"profile\",\"street\"]",
+                "path": ["profile", "street"],
+                "presence": {
+                  "kind": "blocked",
+                  "reason": "incompatible-ancestor",
+                  "at": ["profile"]
+                },
+                "dirty": false,
+                "touched": false,
+                "focused": false,
+                "valid": true,
+                "issues": [],
+                "showIssues": false
+              }
+            ]
+          }
+        ],
+        "fields": [
+          {
+            "nodeKind": "field",
+            "key": "[\"profile\",\"street\"]",
+            "path": ["profile", "street"],
+            "presence": {
+              "kind": "blocked",
+              "reason": "incompatible-ancestor",
+              "at": ["profile"]
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ],
+        "globalIssues": []
+      }
+    }
+  ],
+  "operations": [],
+  "snapshotEmissions": 0,
+  "finalSnapshot": {
+    "value": {
+      "profile": 42
+    },
+    "locale": "en",
+    "valid": true,
+    "dirty": true,
+    "validationVisibility": "touched",
+    "nodes": [
+      {
+        "nodeKind": "object",
+        "key": "[\"profile\"]",
+        "path": ["profile"],
+        "presence": {
+          "kind": "incompatible",
+          "value": 42
+        },
+        "dirty": true,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false,
+        "children": [
+          {
+            "nodeKind": "field",
+            "key": "[\"profile\",\"street\"]",
+            "path": ["profile", "street"],
+            "presence": {
+              "kind": "blocked",
+              "reason": "incompatible-ancestor",
+              "at": ["profile"]
+            },
+            "dirty": false,
+            "touched": false,
+            "focused": false,
+            "valid": true,
+            "issues": [],
+            "showIssues": false
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "nodeKind": "field",
+        "key": "[\"profile\",\"street\"]",
+        "path": ["profile", "street"],
+        "presence": {
+          "kind": "blocked",
+          "reason": "incompatible-ancestor",
+          "at": ["profile"]
+        },
+        "dirty": false,
+        "touched": false,
+        "focused": false,
+        "valid": true,
+        "issues": [],
+        "showIssues": false
+      }
+    ],
+    "globalIssues": []
+  }
+}

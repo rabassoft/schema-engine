@@ -33,7 +33,7 @@ describe('compileFormDefinition', () => {
     if (!result.success) return;
     expect(result.definition.fields).toEqual([
       {
-        key: 'text',
+        key: '["text"]',
         name: 'text',
         path: ['text'],
         required: true,
@@ -42,7 +42,7 @@ describe('compileFormDefinition', () => {
         constraints: { minLength: 1, maxLength: 5, pattern: '^a' },
       },
       {
-        key: 'amount',
+        key: '["amount"]',
         name: 'amount',
         path: ['amount'],
         required: false,
@@ -53,7 +53,7 @@ describe('compileFormDefinition', () => {
         ui: {},
       },
       {
-        key: 'count',
+        key: '["count"]',
         name: 'count',
         path: ['count'],
         required: false,
@@ -64,7 +64,7 @@ describe('compileFormDefinition', () => {
         ui: {},
       },
       {
-        key: 'active',
+        key: '["active"]',
         name: 'active',
         path: ['active'],
         required: false,
@@ -72,6 +72,8 @@ describe('compileFormDefinition', () => {
         kind: 'boolean',
       },
     ]);
+    expect(result.definition.nodes).toEqual(result.definition.fields);
+    expect(result.definition.nodes[0]).toBe(result.definition.fields[0]);
   });
 
   it('uses explicit empty UI text values without falling back', () => {

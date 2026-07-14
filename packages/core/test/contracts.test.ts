@@ -15,7 +15,7 @@ describe('public string choice contracts', () => {
       label: 'status.draft',
     } satisfies StringChoiceDefinition;
     const field = {
-      key: 'status',
+      key: '["status"]',
       name: 'status',
       path: ['status'],
       required: true,

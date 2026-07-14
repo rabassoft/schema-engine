@@ -1,0 +1,19 @@
+{
+  "definitionMode": "nested",
+  "value": {
+    "profile": {}
+  },
+  "baselineValue": {
+    "profile": {}
+  },
+  "validatorMode": "nested-issues",
+  "actions": [
+    {
+      "type": "show",
+      "scope": {
+        "id": "profile",
+        "paths": [["profile"]]
+      }
+    }
+  ]
+}

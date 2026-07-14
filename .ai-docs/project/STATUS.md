@@ -7,26 +7,27 @@
 
 - **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `bdfc515`, ADR-013/PLAN-008/M8 completion
-  (`develop` is seven commits ahead of `origin/develop`; no push performed)
+- **Committed revision:** `14202b5`, approved M9 normative/PLAN documentation
+  (`develop` is eight commits ahead of `origin/develop`; no push performed)
 - **Accepted specifications:** SPEC-001 v0.1.15 and SPEC-002 v0.1.2
 - **Last implementation plan:** PLAN-008 revision 2, Completed
-- **Approved implementation plan:** PLAN-009 revision 1; implementation not
-  started
-- **Active implementation plan:** None
+- **Active implementation plan:** PLAN-009 revision 1; checkpoints 1–4 of 7
+  completed, checkpoint 5 pending
 - **Last accepted ADR:** ADR-014 revision 2
 - **Promoted capability:** D-005/M9, approved implementation scope
 - **Accepted M9 decisions:** ADR-014 revision 2, ADR-005 revision 1 and SPEC-002
   v0.1.2
-- **Phase:** M1–M8 and G0 completed; all M9 gates completed, checkpoint 1 ready
+- **Phase:** M1–M8 and G0 completed; M9 implementation in progress between
+  checkpoints 4 and 5
 - **Package candidates:** private independent `0.1.0` artifacts; unpublished
-- **Working tree:** uncommitted M9 promotion, normative and PLAN-009 review
-  documentation; no active implementation task
+- **Working tree:** uncommitted PLAN-009 checkpoints 1–4 contracts, helpers,
+  recursive compiler, deep operations/runtime, migrated fixtures/tests and
+  state documentation; no active task
 
 ## Current objective
 
-Begin PLAN-009 revision 1 at implementation checkpoint 1 while preserving its
-strict scope and verification boundaries.
+Implement PLAN-009 checkpoint 5: recursive Angular 22 projection and consumer
+migration over the accepted nested core runtime.
 
 ## In progress
 
@@ -34,57 +35,54 @@ strict scope and verification boundaries.
 
 ## Latest completed work
 
-- Explicitly approved PLAN-009 revision 1 after its repeated complete review
-  passed all 12 delivery areas and nine acceptance criteria with zero findings.
-- Synchronized SPEC-002, ADR-014, ADR-005, ROADMAP, deferred decisions and
-  documentation indexes with the satisfied implementation gate.
-- Authorized only the seven ordered PLAN-009 checkpoints; no implementation
-  checkpoint, product source or package change started during approval.
-- Preserved every M9-external deferred, publication, dependency and Stable API
-  boundary.
+- Completed PLAN-009 checkpoint 4 with iterative nested runtime indexes,
+  descriptor-safe external-state validation and recursive immutable snapshots.
+- Added deep actions, missing/incompatible ancestor semantics, focus
+  reconciliation, issue assignment, object scopes and node-level structural
+  sharing without activating Angular projection.
+- Migrated runtime conformance fixtures and added focused evidence for manual
+  definitions, accessors, presence/dirty, scopes, sharing and depth 1,000.
+- Completed checkpoint 3 deep operations and checkpoints 1–2 contracts,
+  helpers and recursive schema/UI compiler.
+- Preserved Angular projection until checkpoint 5 and every deferred,
+  publication, dependency, manifest and Stable API boundary.
 
 ## Exact next action
 
-Start PLAN-009 revision 1 checkpoint 1: mark M9 implementation active, add the
-Public core contracts and shared nested-definition/path helpers, and keep the
-focused build/typecheck baseline green.
+Start PLAN-009 checkpoint 5 by updating only `In progress`, then migrate the
+Angular form directive to recursively project accepted object/leaf snapshots.
 
 ## Blockers and conflicts
 
 - No review finding, implementation blocker or documentation conflict.
 - ADR-014 revision 2, ADR-005 revision 1 and SPEC-002 v0.1.2 are authoritative
   for M9; unchanged SPEC-001 v0.1.15 behavior remains authoritative.
-- All normative, review and approval gates required to start M9 are satisfied.
+- PLAN-009 checkpoints 1–4 are complete; checkpoint 5 is authorized and not
+  started.
 - D-014 remains Research outside the narrow model choice accepted by ADR-014.
 - Arrays, refs/composition, layouts, batches, dynamic definitions, publication
   and all other deferred capabilities remain inactive.
-- All current M9 documentation changes are uncommitted and unpushed.
+- Checkpoints 1–4 changes are uncommitted and unpushed.
 
 ## Open questions
 
-- None before checkpoint 1. Any need to change an accepted contract or scope
+- None before checkpoint 5. Any need to change an accepted contract or scope
   must return to review.
 
 ## Latest verification
 
-- The committed M8 checkpoint passed frozen install, format, lint, typecheck,
-  179 tests, builds and all package/consumer/artifact checks.
-- The M9 drafting task changed documentation only; no product source, public
-  declaration, package manifest, dependency or lockfile changed.
-- Joint ADR review 3 inspected all ten ADR-014 areas and all eight ADR-005
-  revision 1 areas after the sequence correction and passed with zero findings
-  or documentation conflicts.
-- Formatting, all 46 Markdown files and 216 local links, active-state
-  consistency and `git diff --check` pass.
-- Authority checks confirm ADR-014 revision 2, ADR-005 revision 1 and SPEC-002
-  v0.1.2 are Accepted and PLAN-009 revision 1 is Approved; implementation has
-  not started.
-- Repeated review 2 inspected all ten ADR-014 and 16 SPEC-002 areas after the
-  corrections and passed with zero findings; no product source or package was
-  changed.
-- PLAN-009 repeated review 2 passed all 12 delivery areas and nine acceptance
-  criteria after four corrections; no product source, public declaration,
-  manifest, dependency or lockfile changed.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, both builds and
+  `git diff --check` pass.
+- All 164 core and 50 Angular tests pass (214 total), including nested runtime
+  conformance, descriptor safety, scopes, branch sharing and 1,000-level finite
+  runtime depth.
+- `pnpm test:package`, `pnpm test:consumer` and `pnpm test:artifacts` pass with
+  exact private `0.1.0` allowlists and unchanged manifests.
+- `pnpm test:consumer:clean` initially could not resolve npm under restricted
+  network; the authorized rerun passed core plus Angular 22.0.6 lower/upper
+  consumers.
+- Emitted root declarations contain exactly the accepted new core symbols; no
+  manifest, dependency, lockfile, publication or Stable classification changed.
 
 ## Task document map
 
@@ -102,6 +100,15 @@ focused build/typecheck baseline green.
 - Accepted M9 behavior: `.ai-docs/specs/002-nested-object-runtime.md`
 - Accepted baseline behavior: `.ai-docs/specs/001-controlled-form-runtime.md`
 - Promoted/deferred boundaries: `.ai-docs/roadmap/deferred-decisions.md`
+- Checkpoint 1 contracts: `packages/core/src/contracts.ts`
+- Checkpoint 1 helpers: `packages/core/src/internal/path.ts` and
+  `packages/core/src/internal/nested-definition.ts`
+- Checkpoint 2 compiler: `packages/core/src/compiler.ts` and
+  `packages/core/test/nested-compiler.test.ts`
+- Checkpoint 3 operations: `packages/core/src/operations.ts`,
+  `packages/core/test/operations.test.ts` and operation fixtures
+- Checkpoint 4 runtime: `packages/core/src/runtime.ts`,
+  `packages/core/test/runtime.test.ts` and runtime fixtures
 - Milestone sequence: `.ai-docs/project/ROADMAP.md`
 - ADR status index: `.ai-docs/adrs/000-index.md`
 - Append-only history: `.ai-docs/project/WORKLOG.md`
