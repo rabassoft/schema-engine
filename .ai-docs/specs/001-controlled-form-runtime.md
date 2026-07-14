@@ -1,8 +1,9 @@
 # SPEC-001: Controlled Form Runtime
 
-- **Estado:** Draft
-- **Versión:** 0.1.13
-- **Fecha:** 13 de julio de 2026
+- **Estado:** Accepted
+- **Versión:** 0.1.14
+- **Fecha:** 14 de julio de 2026
+- **Fecha de aceptación:** 14 de julio de 2026
 - **Ámbito:** Primer prototipo de `@rabassoft/schema-engine`
 - **Documento relacionado:** [`../roadmap/deferred-decisions.md`](../roadmap/deferred-decisions.md)
 - **Plan de implementación aprobado:** [`PLAN-001`](../plans/001-compiler-only-implementation.md)
@@ -729,13 +730,14 @@ Reglas:
 
 ### 16.1 Persistencia incremental y baseline
 
-El core ofrecerá una utilidad pura:
+La aplicación es responsable de construir de forma inmutable el nuevo baseline
+cuando persiste un scope y de proporcionarlo mediante `updateExternalState()`.
+Guardar un scope no afectará al baseline ni al estado dirty de los campos que la
+aplicación no haya confirmado.
 
-```ts
-commitScopeToBaseline(baselineValue, currentValue, scope);
-```
-
-Esta utilidad copiará al baseline únicamente las rutas válidas del scope. Guardar un scope no afectará al estado dirty del resto del formulario.
+El primer prototipo no expone `commitScopeToBaseline()`. Una utilidad reutilizable
+para copiar al baseline únicamente las rutas válidas de un scope queda aplazada
+como [D-038](../roadmap/deferred-decisions.md#d-038-utilidad-para-confirmar-un-scope-en-el-baseline).
 
 ## 17. Campos ausentes y valores vacíos
 
@@ -769,13 +771,13 @@ Los booleanos iniciales serán binarios. Un booleano ausente se mostrará desmar
 
 Los defaults no se aplicarán silenciosamente al renderizar.
 
-El core proporcionará una utilidad explícita y pura:
+El compilador reconoce `default` como metadata soportada, pero no la copia a
+`FormDefinition`, no modifica el valor y no selecciona defaults por la
+aplicación. El primer prototipo tampoco expone `applySchemaDefaults()`.
 
-```ts
-applySchemaDefaults(schema, value);
-```
-
-La aplicación decidirá cuándo utilizarla, por ejemplo al crear una entidad nueva.
+La semántica y una posible utilidad explícita para aplicar defaults, por ejemplo
+al crear una entidad, quedan aplazadas como
+[D-039](../roadmap/deferred-decisions.md#d-039-aplicación-explícita-de-defaults-del-schema).
 
 ## 19. Localización e internacionalización
 
@@ -1045,15 +1047,30 @@ Los snapshots usarán arrays ordenados conforme a `FormDefinition`. El runtime o
 ### 21.3 Reactividad neutral
 
 ```ts
+export type Unsubscribe = () => void;
+
+export type SubscribeResult =
+  | {
+      readonly success: true;
+      readonly unsubscribe: Unsubscribe;
+      readonly diagnostics: readonly [];
+    }
+  | {
+      readonly success: false;
+      readonly diagnostics: readonly Diagnostic[];
+    };
+
 export interface FormRuntime<TData extends object> {
   getSnapshot(): FormRuntimeSnapshot<TData>;
-  subscribe(listener: SnapshotListener<TData>): Unsubscribe;
-  subscribeOperations(listener: OperationListener): Unsubscribe;
+  subscribe(listener: SnapshotListener<TData>): SubscribeResult;
+  subscribeOperations(listener: OperationListener): SubscribeResult;
 }
 ```
 
 - `getSnapshot()` devolverá el estado actual de forma síncrona.
 - `subscribe()` solo notificará cambios futuros.
+- Una suscripción válida devolverá su `unsubscribe` idempotente; un listener no
+  callable devolverá diagnósticos sin registrarlo.
 - Las operaciones utilizarán un canal separado.
 - La emisión de operaciones será síncrona y ordenada.
 - El fallo de un listener no impedirá notificar a los demás.
@@ -1345,16 +1362,17 @@ choices, labels resolubles, validación estructural de definiciones manuales y
 renderer select nativo. PLAN-006 quedó completado el 14 de julio de 2026 sin
 modificar el alcance completado de M1-M5 ni activar capacidades adicionales.
 
-M1-M6 implementan el walking skeleton descrito por esta SPEC. La especificación
-permanece Draft v0.1.13 hasta superar una revisión formal de aceptación; la
-finalización de M6 no la acepta ni promociona automáticamente APIs públicas a
-Stable. D-010, el bridge de validación de D-024, D-036, D-037 y las demás
+M1-M6 implementan el walking skeleton descrito por esta SPEC. SPEC-001 v0.1.14
+fue aceptada tras superar G0 y repetir la revisión después de resolver sus tres
+hallazgos normativos. La aceptación no promociona automáticamente APIs públicas
+a Stable. D-010, el bridge de validación de D-024, D-036, D-037 y las demás
 decisiones aplazadas conservan su estado.
 
 ## 30. Historial
 
 | Versión | Fecha      | Cambio                                                                                                                 |
 | ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.1.14  | 14-07-2026 | G0 difiere los helpers no implementados, alinea `SubscribeResult` y acepta la SPEC tras repetir la revisión.           |
 | 0.1.13  | 13-07-2026 | Se incorpora PLAN-006 aprobado: contratos exactos de enum string, choices, textos y select nativo, aún sin iniciar M6. |
 | 0.1.12  | 13-07-2026 | Se registra ADR-011 como próximo incremento aceptado de enum string, aún pendiente de plan e implementación.           |
 | 0.1.11  | 13-07-2026 | Se incorpora PLAN-005, Signal Forms como buffer visual privado y los renderers HTML nativos.                           |

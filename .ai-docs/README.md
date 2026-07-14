@@ -15,9 +15,9 @@
 
 ## Acceptance reviews
 
-- [G0: SPEC-001 acceptance evidence](./reviews/001-spec-001-acceptance.md) — In
-  progress; 22/22 criteria mapped and consumer passed, with final verification
-  and end-to-end review pending.
+- [G0: SPEC-001 acceptance evidence](./reviews/001-spec-001-acceptance.md) —
+  Passed; 22/22 criteria, consumer, complete verification, and repeated
+  end-to-end review passed. SPEC-001 v0.1.14 is Accepted.
 
 ## Architecture Decision Records
 
@@ -37,8 +37,8 @@
 - [PLAN-005: Native HTML renderers](./plans/005-native-html-renderers.md) — Completed
 - [PLAN-006: String enum normalization and native select](./plans/006-string-enum-native-select.md) — Completed
 
-M1-M6 are completed. G0 formal prototype closure is the active review-only gate;
-M7-M12 remain a proposal rather than an approved delivery commitment. No
-deferred decision becomes active merely by appearing in the roadmap.
+M1-M6 and G0 are completed, and SPEC-001 v0.1.14 is Accepted. M7-M12 remain a
+proposal rather than an approved delivery commitment. No deferred decision
+becomes active merely by appearing in the roadmap.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

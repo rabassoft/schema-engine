@@ -350,6 +350,38 @@ Cada decisión debe registrar:
   defina su vocabulario, validación y fallback visual.
 - **Documento esperado:** ADR que revise explícitamente ADR-005.
 
+## D-038: Utilidad para confirmar un scope en el baseline
+
+- **Estado:** Deferred
+- **Pregunta:** ¿Debe el core exponer una utilidad pura
+  `commitScopeToBaseline(baselineValue, currentValue, scope)` para construir una
+  actualización parcial del baseline?
+- **Motivo:** SPEC-001 llegó a prometer el helper, pero PLAN-003, la API pública
+  y la implementación no lo promovieron. El prototipo mantiene a la aplicación
+  como única propietaria del baseline y permite que lo actualice de forma
+  inmutable mediante `updateExternalState()`.
+- **Retomar cuando:** Dos o más consumidores necesiten compartir semántica de
+  confirmación parcial, incluidos paths válidos, propiedades ausentes,
+  structural sharing y diagnósticos.
+- **Documento esperado:** SPEC o plan que defina el contrato puro, su relación
+  con scopes y su frontera de API pública.
+
+## D-039: Aplicación explícita de defaults del schema
+
+- **Estado:** Deferred
+- **Pregunta:** ¿Debe el core exponer
+  `applySchemaDefaults(schema, value)` u otra operación explícita de
+  inicialización?
+- **Motivo:** PLAN-001 reconoce `default` como metadata pero excluye su
+  aplicación y no lo copia a `FormDefinition`; ningún plan posterior promovió
+  semántica de evaluación o una API pública. Aplicar defaults correctamente se
+  complica con objetos, arrays, composición y dialectos futuros.
+- **Retomar cuando:** Exista un caso consumidor de creación de entidades y se
+  haya definido si la operación usa schema crudo, modelo resuelto o definición
+  normalizada, además de presencia, recursividad y diagnósticos.
+- **Documento esperado:** SPEC de inicialización explícita y, si afecta a la
+  arquitectura o API pública, ADR y plan aprobados.
+
 ## 4. Próximas decisiones a promover
 
 Las entradas más cercanas a convertirse en ADR son:
@@ -357,15 +389,17 @@ Las entradas más cercanas a convertirse en ADR son:
 1. **D-010 — Acción explícita para limpiar un campo.**
 2. **D-005 — Objetos anidados.**
 
-[`ROADMAP.md`](../project/ROADMAP.md) distingue el gate de revisión G0, aprobado,
-de la secuencia M7-M12 todavía propuesta. G0 no promueve decisiones diferidas:
-D-010 y D-005 continúan como Candidate y todas las demás conservan el estado
+[`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
+secuencia M7-M12 todavía propuesta. G0 no promueve decisiones diferidas: D-010
+y D-005 continúan como Candidate y todas las demás conservan el estado
 registrado aquí hasta una promoción y aprobación explícitas.
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | G0 se completa y SPEC-001 v0.1.14 queda Accepted sin promover ninguna decisión diferida ni API a Stable.                        |
+| 14-07-2026 | G0 difiere como D-038 y D-039 los helpers no implementados de baseline parcial y aplicación explícita de defaults.              |
 | 14-07-2026 | PLAN-006 y M6 se completan con enum string normalizado y select Angular controlado, manteniendo las exclusiones diferidas.      |
 | 13-07-2026 | M6 comienza y completa el paso 1 de contratos neutrales de PLAN-006 sin activar otra decisión aplazada.                         |
 | 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                            |

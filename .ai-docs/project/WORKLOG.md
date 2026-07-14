@@ -6,6 +6,93 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — G0 passed and SPEC-001 v0.1.14 accepted
+
+### Completed
+
+- Repeated the complete end-to-end review of corrected SPEC-001 v0.1.14 against
+  accepted plans, applicable ADRs, public contracts, implementation,
+  declarations, deferred boundaries, and executable evidence.
+- Confirmed that D-038/D-039 resolve the two unimplemented helper promises
+  without promoting them and that `SubscribeResult` matches PLAN-003 and every
+  executable public surface.
+- Found no new or remaining normative, evidence, implementation, declaration,
+  ADR, plan, or deferred-boundary issue.
+- Completed G0 and marked SPEC-001 v0.1.14 Accepted without promoting any API to
+  Stable or activating a post-G0 milestone.
+
+### Verification
+
+- `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
+- `pnpm test` passed: 14 files and 176 tests (129 core, 47 Angular).
+- Both builds, `pnpm test:package`, and `pnpm test:consumer` passed.
+- Declaration, package-boundary, framework-boundary, local-link, and diff checks
+  passed; no product, package, dependency, or lockfile change was introduced.
+
+### Pending
+
+- Decide whether to promote D-010 as M7 or explicitly select another proposed
+  post-G0 milestone before preparing any ADR or implementation plan.
+
+## 2026-07-14 — G0 normative findings resolved in documentation
+
+### Completed
+
+- Applied Ricard's approved disposition of G0-F001 and removed the unimplemented
+  `commitScopeToBaseline()` promise from the prototype contract while keeping
+  baseline ownership in the application; recorded the future helper as D-038.
+- Applied the approved disposition of G0-F002 and documented the implemented
+  metadata-only treatment of `default`; recorded explicit default application
+  as D-039 without introducing `applySchemaDefaults()`.
+- Applied the approved disposition of G0-F003 by aligning SPEC-001 subscriptions
+  with PLAN-003 and the executable `SubscribeResult` public contract.
+- Advanced SPEC-001 and its index to Draft v0.1.14. No product code, public API,
+  dependency, package, lockfile, or deferred implementation changed.
+
+### Verification
+
+- Formatting and `git diff --check` pass.
+- All 32 Markdown documents and 143 local links resolve.
+- Targeted searches confirm the prototype no longer promises either deferred
+  helper and the runtime subscription signature matches `SubscribeResult`.
+
+### Pending
+
+- Repeat the G0 end-to-end acceptance review against corrected SPEC-001 Draft
+  v0.1.14 and mark it Accepted only if no finding remains.
+
+## 2026-07-14 — G0 verification passed; acceptance blocked
+
+### Completed
+
+- Repeated the full G0 verification successfully: frozen install, format, lint,
+  typecheck, 176 tests, package builds and smoke tests, consumer test,
+  declarations, public surfaces, architectural boundaries, links, and diff
+  integrity.
+- Reviewed SPEC-001 Draft v0.1.13 end to end against accepted plans, public
+  contracts, implementation, declarations, and evidence.
+- Recorded three blocking normative findings in the G0 evidence document:
+  G0-F001 for missing `commitScopeToBaseline()`, G0-F002 for missing
+  `applySchemaDefaults()`, and G0-F003 for the `Unsubscribe`/`SubscribeResult`
+  conflict.
+
+### Verification
+
+- `CI=true pnpm install --frozen-lockfile` passed with the lockfile unchanged;
+  198 packages were reused and none downloaded.
+- Formatting, linting, typecheck, 14 test files and 176 tests passed (129 core,
+  47 Angular).
+- Both package builds, package smoke tests, and the built-package consumer
+  passed; declarations and package boundaries remained intact.
+- All 32 Markdown documents and 141 local links passed; `git diff --check`
+  passed before recording this documentation checkpoint.
+
+### Pending
+
+- Decide and approve the separate disposition of G0-F001, G0-F002, and G0-F003
+  before changing SPEC-001 or implementation behavior.
+- Repeat G0 after those conflicts are resolved; SPEC-001 remains Draft v0.1.13.
+
 ## 2026-07-14 — G0 minimal Angular consumer passed
 
 ### Completed

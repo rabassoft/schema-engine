@@ -1,23 +1,23 @@
 # G0 — SPEC-001 Acceptance Evidence
 
-- **State:** In progress
+- **State:** Passed; SPEC-001 v0.1.14 Accepted
 - **Started:** 14 July 2026
 - **Normative source:**
-  [`SPEC-001 Draft v0.1.13`](../specs/001-controlled-form-runtime.md)
+  [`SPEC-001 v0.1.14`](../specs/001-controlled-form-runtime.md)
 - **Gate:** G0 formal prototype closure
 - **Behavior changes authorized:** None
 
 ## Purpose
 
 This document maps every walking-skeleton acceptance criterion in SPEC-001 to
-committed executable evidence. It is an inventory, not an acceptance result.
-Mapped evidence must still be executed during G0, and SPEC-001 remains Draft
-until the consumer check, full verification, and end-to-end review all pass.
+committed executable evidence and records the G0 execution result. The repeated
+review passed after resolving the initial normative findings, so this document
+records the completed acceptance result.
 
 ## Assessment legend
 
 - **Mapped:** direct automated evidence exists and is identified below; its G0
-  execution result is still pending.
+  execution result is recorded in the execution log.
 - **Pending:** G0-specific evidence or review has not been completed.
 - **Gap:** no direct evidence has been identified; acceptance must stop until
   separate corrective work is approved and completed.
@@ -55,8 +55,8 @@ until the consumer check, full verification, and end-to-end review all pass.
 | -------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Map all 22 SPEC-001 criteria.                            | Mapped             | This matrix identifies direct evidence for 22/22 criteria and no evidence gap.                                                                                                                                                      |
 | Exercise built packages from a minimal Angular consumer. | Passed             | [`consumer.test.ts`](../../packages/angular/test/consumer.test.ts) imports both package roots, compiles and renders all four primitive kinds, applies `set-value`, and confirms the external value without workspace `src` imports. |
-| Repeat full verification.                                | Pending            | Frozen install, format, lint, typecheck, 175-test baseline or higher, builds, package smoke, declarations, architectural boundaries, Markdown links, and diff integrity.                                                            |
-| Review SPEC-001 end to end.                              | Pending            | Every normative section must be checked against implementation and evidence; any finding blocks acceptance and becomes separate work.                                                                                               |
+| Repeat full verification.                                | Passed             | Frozen install; format, lint, typecheck; 176 tests; builds; package smoke; consumer; declarations; architectural boundaries; Markdown links; and diff integrity passed.                                                             |
+| Review SPEC-001 end to end.                              | Passed             | The repeated review checked corrected v0.1.14 against accepted plans, public contracts, implementation, declarations, deferred boundaries, and executable evidence without a remaining finding.                                     |
 
 ## G0 execution log
 
@@ -73,12 +73,86 @@ until the consumer check, full verification, and end-to-end review all pass.
 - **Additional checks:** workspace lint and typecheck passed; no dependency or
   lockfile changed.
 
+### Complete verification — Passed
+
+- `CI=true pnpm install --frozen-lockfile` passed after retrying outside the
+  restricted network sandbox; the lockfile remained unchanged, 198 packages
+  were reused, and none was downloaded.
+- `pnpm format:check`, `pnpm lint`, and `pnpm typecheck` passed.
+- `pnpm test` passed: 14 files and 176 tests, comprising 129 core tests and 47
+  Angular tests.
+- Both packages built; `pnpm test:package` and `pnpm test:consumer` passed.
+- Declaration and public-surface inspection found the expected compiler,
+  runtime, enum, renderer, and Angular controlled-form exports and no unintended
+  manifest, package-entry, or lockfile change.
+- Core remains free of Angular, RxJS, DOM, browser, and Node runtime imports;
+  Angular Forms imports remain limited to `@angular/forms/signals`; package and
+  consumer tests use public package boundaries without workspace `src` imports.
+- All 32 Markdown documents and 141 local links passed; `git diff --check`
+  passed.
+
+### Repeated end-to-end review — Passed
+
+- Read every normative section of corrected SPEC-001 v0.1.14 and checked its
+  responsibilities, contracts, exclusions, criteria, and conformance scenarios
+  against the accepted plans and applicable ADRs.
+- Confirmed D-038 and D-039 preserve application ownership and do not expose or
+  promote either deferred helper.
+- Confirmed `SubscribeResult` matches PLAN-003, source contracts, runtime,
+  package exports, generated declarations, and tests.
+- Repeated format, lint, typecheck, 176 tests, both builds, package smoke, and
+  the built-package consumer successfully. Boundary and diff checks found no
+  product or package change.
+- No new or remaining normative, evidence, implementation, declaration, ADR,
+  plan, or deferred-boundary finding was identified.
+
+## Findings and approved resolutions
+
+### G0-F001 — Missing `commitScopeToBaseline()` contract
+
+- **Initial finding in Draft v0.1.13:** section 16.1 promised the pure helper
+  `commitScopeToBaseline(baselineValue, currentValue, scope)`.
+- **Observed state:** the helper is absent from core source, public contracts,
+  exports, declarations, tests, and PLAN-003's approved delivery boundary.
+- **Impact:** the normative SPEC promises a core capability that the accepted
+  plans and implementation do not deliver.
+- **Resolution applied:** SPEC-001 no longer promises the helper in the first
+  prototype, keeps baseline ownership in the application, and records a future
+  reusable helper as D-038.
+
+### G0-F002 — Missing `applySchemaDefaults()` contract
+
+- **Initial finding in Draft v0.1.13:** section 18 promised the pure helper
+  `applySchemaDefaults(schema, value)`.
+- **Observed state:** the helper is absent from core source, public contracts,
+  exports, declarations, and tests. PLAN-001 explicitly kept default
+  application outside its increment, and no later approved plan promoted it.
+- **Impact:** the normative SPEC promises a capability that was intentionally
+  excluded from implementation planning.
+- **Resolution applied:** SPEC-001 documents the implemented metadata-only
+  treatment of `default`, removes the unimplemented helper promise, and records
+  explicit default application as D-039.
+
+### G0-F003 — Subscription return-type conflict
+
+- **Initial finding in Draft v0.1.13:** section 21.3 declared that `subscribe()`
+  and `subscribeOperations()` return `Unsubscribe`.
+- **Observed state:** accepted PLAN-003, public contracts, declarations,
+  runtime, and tests consistently use `SubscribeResult`.
+- **Impact:** the normative SPEC and the accepted, executable public contract
+  disagree.
+- **Resolution applied:** SPEC-001 now defines `SubscribeResult` and aligns both
+  subscription methods with accepted PLAN-003 and the executable public API.
+
 ## Current conclusion
 
 - Direct automated evidence is mapped for all 22 walking-skeleton criteria.
 - No acceptance-criterion evidence gap was found during the inventory.
 - The minimal built-package Angular consumer gate passed.
-- G0 is not complete and SPEC-001 remains Draft v0.1.13.
-- The exact next action is to repeat the full frozen-install, format, lint,
-  typecheck, test, build, package, declaration, boundary, link, and diff
-  verification required by G0.
+- Complete G0 verification passed with 176 tests and all required package,
+  declaration, boundary, link, and diff checks.
+- The three normative findings have approved documentation-only resolutions in
+  SPEC-001 v0.1.14 and deferred entries D-038 and D-039; no product API or
+  behavior changed.
+- The repeated end-to-end review passed without findings. G0 is complete and
+  SPEC-001 v0.1.14 is Accepted.

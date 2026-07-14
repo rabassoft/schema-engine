@@ -22,11 +22,11 @@
   - Enum string y `enumLabels` normalizados, choices y textos resolubles,
     validación estructural segura y select Angular controlado según ADR-011.
 
-## Gate de revisión activo
+## Gate de revisión completado
 
 ### G0 — Cierre formal del prototipo
 
-- **Estado:** Approved y activo desde el 14 de julio de 2026.
+- **Estado:** completado el 14 de julio de 2026; SPEC-001 v0.1.14 Accepted.
 - **Frontera:** revisión y evidencia sobre el comportamiento ya implementado;
   no autoriza cambios funcionales, promoción de APIs ni capacidades diferidas.
 
@@ -38,10 +38,11 @@
 - Mantener todas las APIs públicas como Experimental salvo que una ADR separada
   las promueva.
 
-**Progreso:** la matriz de evidencia relaciona los 22 criterios con pruebas
-automatizadas y no identifica gaps. El consumidor Angular mínimo contra los
-paquetes construidos ha superado su prueba. Continúan pendientes la verificación
-completa y la revisión integral de SPEC-001.
+**Progreso:** la matriz relaciona los 22 criterios con evidencia automatizada;
+el consumidor Angular mínimo y la verificación completa con 176 tests han
+pasado. Las resoluciones aprobadas de G0-F001 a G0-F003 se incorporaron en
+SPEC-001 v0.1.14 y D-038/D-039 sin cambiar producto. La revisión integral
+repetida pasó sin hallazgos y cerró G0 con la SPEC Accepted.
 
 G0 solo podrá cerrarse y marcar SPEC-001 como Accepted si toda la evidencia
 pasa. Cualquier hallazgo mantendrá la SPEC en Draft y se trasladará a trabajo

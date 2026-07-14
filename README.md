@@ -11,9 +11,9 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository contains the completed M1-M6 controlled-form prototype. G0, its
-formal acceptance review, is the only active post-M6 gate. No implementation
-milestone is active; the proposed M7-M12 sequence is recorded in the
+The repository contains the completed M1-M6 controlled-form prototype. Its G0
+review passed and SPEC-001 v0.1.14 is Accepted. No implementation milestone is
+active; the proposed M7-M12 sequence is recorded in the
 [roadmap](./.ai-docs/project/ROADMAP.md) and requires separate approval.
 
 ## Current implementation
@@ -28,7 +28,7 @@ private control buffers use Angular Signal Forms without moving controlled
 state, validation, or operations out of the core/application boundary.
 
 The implemented boundary remains the root-object and primitive-field subset in
-SPEC-001 Draft v0.1.13. Nested objects, arrays, composition, async validation,
+SPEC-001 v0.1.14. Nested objects, arrays, composition, async validation,
 persistence, advanced layouts, and other registered deferred decisions are not
 active.
 
