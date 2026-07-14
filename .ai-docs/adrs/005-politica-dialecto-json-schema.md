@@ -1,9 +1,9 @@
 # ADR 005: Política de dialecto y compatibilidad de JSON Schema
 
-- **Estado:** Accepted revision 2
+- **Estado:** Accepted revision 3
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
-- **Revisión aceptada:** 2 — arrays homogéneos de objetos inline
+- **Revisión aceptada:** 3 — referencias estáticas locales `$defs`/`$ref`
 - **Fecha de aceptación de revisión 1:** 14 de julio de 2026
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md)
 - **Revisado parcialmente por:**
@@ -15,11 +15,17 @@
 - **Revisión 2 coordinada con:**
   [`ADR-015`](./015-modelo-colecciones-identidad-operaciones.md) y
   [`revisión de promoción M10`](../reviews/007-m10-arrays-promotion.md)
-- **Autoridad vigente:** las secciones 1–10 conservan la conducta Accepted de
-  M1–M9; la sección 11 queda Accepted para diseño normativo M10 sin activar
-  comportamiento ni implementación
+- **Revisión 3 coordinada con:**
+  [`ADR-016`](./016-resolucion-referencias-locales.md) Accepted
+- **Fecha de aceptación de revisión 3:** 14 de julio de 2026
+- **Autoridad vigente:** las secciones 1–11 conservan la conducta Accepted de
+  M1–M10; la sección 12 queda Accepted para diseño normativo M11 y no activa
+  comportamiento ni implementación sin SPEC-004 aceptada y plan aprobado
 - **Revisión completa:** ciclo 3 pasó las nueve áreas sin hallazgos y Ricard
   aceptó formalmente revision 2
+- **Revisión 3 completa y aceptada:**
+  [`review 018`](../reviews/018-adr-005-revision-3-review.md) ciclo 2 pasó las
+  diez áreas sin hallazgos; Ricard aceptó formalmente revision 3
 
 ## 1. Contexto y problema
 
@@ -223,6 +229,8 @@ Esta decisión deberá revisarse cuando se promueva alguno de estos trabajos:
 
 - [JSON Schema Core Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core)
 - [Dialect and vocabulary declaration](https://json-schema.org/understanding-json-schema/reference/schema)
+- [RFC 3986: URI Generic Syntax](https://www.rfc-editor.org/rfc/rfc3986)
+- [RFC 6901: JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901)
 
 ## 9. Enmienda aceptada por ADR-011
 
@@ -673,3 +681,279 @@ La revisión completa se repitió tras cada corrección. El ciclo 3 pasó las nu
 áreas sin hallazgos ni conflictos documentales y Ricard aceptó formalmente
 revision 2 el 14 de julio de 2026. La aceptación autoriza preparar SPEC-003 como
 tarea separada, no PLAN-010, implementación ni publicación.
+
+## 12. Revisión 3 aceptada — referencias estáticas locales
+
+> Esta sección es la ampliación normativa M11 autorizada por ADR-016 Accepted.
+> No modifica la autoridad Accepted de las secciones 1–11 y no activa
+> `$defs`/`$ref` en ninguna SPEC, plan o implementación. Su aceptación autoriza
+> únicamente la redacción y revisión de SPEC-004.
+
+### 12.1 Motivo, autoridad y frontera
+
+La aceptación de ADR-016 activa el criterio de revisión de la sección 7 solo
+para D-041. Revision 3 conserva Draft 2020-12, su URI canónica única, la
+política de dialecto ausente, unknown keywords, anotaciones ignorables,
+validación externa y todo el subconjunto M1–M10 que no se sustituye
+expresamente aquí.
+
+La única ampliación aceptada es un registry raíz `$defs` y objetos `$ref`
+fragment-only que resuelven por JSON Pointer dentro del mismo documento. La
+representación resuelta sigue siendo Internal; `compileFormDefinition()`,
+`FormDefinition`, runtime, operaciones, Angular y `SchemaValidator` no cambian
+de firma.
+
+Siguen fuera `$id`, `$anchor`, `$dynamicAnchor`, `$dynamicRef`, plain-name
+fragments, otros documentos/recursos, red, callbacks/registries públicos,
+applicators, condicionales, unevaluated semantics, vocabularios, dialectos
+adicionales y root `$ref`.
+
+### 12.2 `$defs` raíz e indexación
+
+La raíz object añade `$defs` a su catálogo soportado. Es opcional; cuando está
+presente debe ser una data property propia enumerable cuyo valor sea un object
+ordinario no array con prototype `Object.prototype` o null.
+
+Un descriptor accessor, una data property no enumerable o un valor exterior
+malformed produce `INVALID_SCHEMA_KEYWORD_VALUE` en `['$defs']` con
+`{ keyword: '$defs', expected: 'own enumerable ordinary definition object',
+actualType }`. `actualType` usa el vocabulario seguro existente; para una data
+property no enumerable describe su valor sin ejecutarlo y `expected` conserva
+la causa normativa. El error bloquea la compilación, pero no impide recopilar
+diagnósticos independientes de la raíz. Produce exactamente ese diagnóstico
+exterior: no inspecciona entries, el traversal raíz no vuelve a clasificar
+`$defs` y los reference objects solo conservan sus diagnósticos independientes
+de shape/siblings, sin intentar target resolution ni añadir unresolved
+diagnostics derivados.
+
+Después se recorren `Object.keys($defs)` en orden. Cada descriptor debe seguir
+existiendo, ser data property y contener un schema object ordinario no array.
+Un miembro ausente o accessor usa `INVALID_SCHEMA_KEYWORD_VALUE` en
+`['$defs', definitionName]` con
+`{ keyword: '$defs', definition: definitionName, expected: 'ordinary schema
+object', actualType: 'missing' | 'accessor' }`; un valor incompatible usa el
+mismo código/expected con su tipo seguro. Los miembros heredados y no
+enumerables no forman parte del registry indexado.
+
+La forma exterior completa de `$defs` se valida antes del schema raíz. El
+contenido de cada schema definition permanece lazy: no se clasifican sus
+keywords ni se recorren sus subschemas hasta que un `$ref` válido lo alcanza.
+Una definition no referenciada nunca crea `FormNodeDefinition`, `DataPath`, UI
+ni diagnósticos de contenido. Los diagnósticos de exterior/index `$defs` no
+tienen `dataPath` ni `referenceChain` porque todavía no existe un use site.
+
+### 12.3 Objetos de referencia y siblings
+
+En cualquier posición no raíz donde el subconjunto M10 espere un schema de
+campo, object, array o item, la presencia de un descriptor propio `$ref`
+clasifica el schema object como reference object. El descriptor `$ref` se
+inspecciona antes de cualquier sibling y debe ser data property con string.
+
+El catálogo del reference object queda cerrado:
+
+- `$ref` es la única keyword semántica soportada;
+- las anotaciones ignorables Accepted conservan `IGNORED_SCHEMA_KEYWORD`;
+- las keywords desconocidas conservan `UNKNOWN_SCHEMA_KEYWORD` y su valor
+  opaco no se recorre; y
+- cualquier otra keyword Draft 2020-12 conocida, incluidos `type`, textos,
+  constraints, `properties`, `items` o `$defs`, produce
+  `INCOMPATIBLE_SCHEMA_KEYWORD` con `{ keyword, fieldType: 'reference' }` y
+  bloquea la rama.
+
+Tras `$ref`, los siblings propios enumerables se clasifican en `Object.keys()`
+order, omitiendo la propia key `$ref`. Un `$ref` malformed suprime solo
+resolución/normalización dependiente; los diagnósticos independientes de
+siblings continúan. Un sibling semántico incompatible impide resolver el
+target, aunque la sintaxis `$ref` sea válida, para no implementar conjunción o
+annotation merging implícitos.
+
+### 12.4 Sintaxis fragment-only y JSON Pointer
+
+Una referencia soportada es una URI-reference formada solo por `#` y su
+fragment. Tras percent-decoding una sola vez, ese fragment debe tener la forma
+`/<pointer tokens>` y producir un JSON Pointer cuyos tokens iniciales sean
+`$defs` más al menos un nombre de definition. Por tanto, los separators pueden
+aparecer raw o percent-encoded antes del único decoding. No se admite fragment
+vacío, plain-name fragment, URI no local ni root `$ref`.
+
+Antes de decodificar, la string completa debe cumplir RFC 3986. Tras el único
+`#`, el fragment admite exactamente `pchar / "/" / "?"`; `pchar` admite
+unreserved, pct-encoded, sub-delims, `:` y `@`. Un raw character fuera de esa
+gramática produce `invalid-uri-reference`. Cada `%` debe tener dos hex digits y
+la secuencia completa debe decodificar bytes UTF-8 válidos; cualquier fallo usa
+`invalid-percent-encoding`. No se acepta un segundo raw `#`.
+
+Después del percent-decoding, cada token aplica RFC 6901: `~1` se convierte en
+`/`, `~0` en `~` y cualquier otro escape `~` es inválido. Si el recorrido cruza
+un array, su token debe coincidir exactamente con `0|[1-9][0-9]*`; `-`, signo,
+leading zero, whitespace y cualquier otra forma son inválidos. La comparación
+del índice es textual y no exige convertir un entero arbitrariamente grande a
+`number` antes de comprobar el descriptor propio.
+
+`INVALID_SCHEMA_REFERENCE` tiene `severity: 'error'`, `source: 'schema'`,
+fallback `Schema reference is invalid.` y reason cerrado:
+
+- `accessor-reference`;
+- `non-string-reference`;
+- `root-reference-not-supported`;
+- `non-fragment-reference`;
+- `invalid-uri-reference`;
+- `plain-name-fragment-not-supported`;
+- `invalid-percent-encoding`;
+- `invalid-pointer-escape`;
+- `outside-definitions`; o
+- `non-canonical-array-index`.
+
+Sus parámetros son `{ reason, reference?, referenceChain }`. `reference`
+aparece solo cuando se leyó una string segura; nunca se conserva un valor
+accessor. `documentPath` apunta al `$ref` actual y `dataPath` al use site
+gestionado; root `$ref` no tiene `dataPath`.
+
+La precedencia cerrada es: ubicación root; descriptor accessor; tipo no string;
+gramática URI/percent encoding; presencia de `#`; percent-decoding; fragment
+plain-name; pointer escapes; scope `$defs`; y, durante traversal, índice array
+canónico. Un fragment decoded vacío, un primer token distinto de `$defs` o
+`$defs` sin definition-name token usa `outside-definitions`; un fragment
+decoded no vacío que no empieza por `/` usa
+`plain-name-fragment-not-supported`. Se emite un solo
+`INVALID_SCHEMA_REFERENCE` por `$ref`; el primer reason aplicable detiene
+únicamente su resolución dependiente.
+
+### 12.5 Resolución descriptor-safe y target failures
+
+El puntero se recorre mecánicamente desde la raíz mediante descriptors propios
+enumerables de objects ordinarios y arrays. Miembros heredados, no enumerables,
+ausentes, sparse o accessor no se evalúan. `__proto__` se trata como key
+ordinaria solo cuando existe como data property propia enumerable. El target
+final debe ser un schema object ordinario no array.
+
+`UNRESOLVED_SCHEMA_REFERENCE` tiene `severity: 'error'`, `source: 'schema'`,
+fallback `Schema reference target could not be resolved.` y reason cerrado:
+
+- `missing-target` para miembro ausente, heredado o sparse;
+- `non-enumerable-target`;
+- `accessor-target`; o
+- `non-schema-target` para un intermediate container/final target que no
+  permite continuar como object/array o no termina en schema object ordinario.
+
+Sus parámetros son
+`{ reason, reference, targetDocumentPath, referenceChain }`; paths y chain son
+copias profundamente inmutables. `targetDocumentPath` es exactamente el prefijo
+decodificado que termina en el primer token cuyo descriptor/valor falla, no el
+target completo no recorrido. Los tokens de object permanecen string; un token
+de array pasa a number solo después de resolver un índice existente, mientras
+el token array que falla conserva su string exacta. Si una entry `$defs`
+malformed ya produjo su diagnóstico exterior, cada `$ref` que la use emite
+además su propio unresolved diagnostic en el use site: ambos identifican
+defectos independientes de declaración y uso.
+
+La resolución y normalización son iterativas, no ejecutan accessors, no llaman
+consumer code, no leen globals de browser/Node, no imponen un límite público de
+profundidad y no retienen schema objects, containers, valores hostiles ni
+thrown values en diagnósticos.
+
+### 12.6 Sharing y dos dominios de ciclo
+
+La identidad de target de referencia es su `documentPath` canónico. Reentrar el
+mismo target path en la cadena activa produce `CYCLIC_SCHEMA_REFERENCE`; el
+mismo object JavaScript bajo document paths distintos sigue siendo sharing
+legal de documento. Un reference edge no convierte por sí solo esa identidad
+compartida en `CYCLIC_SCHEMA_OBJECT`.
+
+`CYCLIC_SCHEMA_REFERENCE` tiene `severity: 'error'`, `source: 'schema'`,
+fallback `Schema reference cycle detected.`, parámetros
+`{ firstDocumentPath, referenceChain }`, `documentPath` en el `$ref` que cierra
+el ciclo y el `dataPath` del use site. Detiene solo su rama dependiente.
+
+`CYCLIC_SCHEMA_OBJECT` conserva su identidad Accepted para reentrada del mismo
+object mediante containment estructural `properties`/`items` durante la
+normalización ordinaria. Referencias acíclicas repetidas al mismo target son
+válidas; pueden compartir metadata Internal resuelta, pero se normalizan por
+separado en cada use site.
+
+### 12.7 Provenance, parámetros y ownership
+
+`referenceChain` es un array outermost-to-innermost de `DocumentPath` copiados
+y frozen. En un diagnóstico de resolución incluye el `$ref` actual como último
+miembro. Un diagnóstico schema producido dentro de un target conserva el
+`documentPath` exacto de su keyword fuente, recibe la chain que alcanzó ese
+target y usa siempre el `dataPath` gestionado del use site.
+
+Los diagnósticos de siblings del reference object reciben la chain que incluye
+su `$ref` actual. Los diagnósticos semánticos
+`MISSING_COLLECTION_POLICY`/`INVALID_COLLECTION_POLICY` que dependen de un
+array alcanzado por referencia reciben su chain; los errores exteriores de
+policy y `UNUSED_COLLECTION_POLICY`, que no pertenecen a un use site schema
+único, no la reciben. Los diagnósticos UI conservan su `documentPath` de UI y
+nunca reciben schema `referenceChain`.
+
+Para un schema que no declara `$defs` ni `$ref`, todos los envelopes Accepted
+permanecen exactos. `Diagnostic` no cambia de firma: el nuevo miembro vive solo
+dentro del `Readonly<Record<string, unknown>>` existente. Todo path, chain,
+parameters, diagnostic, result wrapper y array emitido se copia y congela según
+la política Accepted.
+
+El `SchemaValidator` recibe siempre el schema original exacto y el valor
+controlado completo. Core no le entrega un bundle/dereference, no valida datos
+en el resolver y no expone el resolved graph a Angular ni a otro adapter.
+
+### 12.8 Orden global y branch stopping
+
+El orden normativo aceptado es:
+
+1. input y dialecto raíz;
+2. forma exterior de `collectionPolicies`;
+3. exterior/index de `$defs` en `Object.keys()` order;
+4. schema raíz depth-first pre-order según las reglas Accepted;
+5. en cada reference object: `$ref` shape/syntax, siblings en source order,
+   pointer traversal, cycle check y target normalization;
+6. policy semántica en su primer array dependiente y unused policies al final
+   del schema traversal; y
+7. UI Schema completo tras los diagnósticos schema independientemente
+   recopilables.
+
+Un fallo anterior detiene únicamente trabajo dependiente: dialecto incompatible
+bloquea schema; `$defs` exterior malformed impide resolución pero no los
+diagnósticos raíz independientes; `$ref` malformed/sibling incompatible impide
+su target; target/ciclo inválido detiene esa rama. Ramas hermanas, definitions
+alcanzadas independientemente y forma UI exterior independiente continúan en
+su orden aceptado. Cualquier error mantiene `success: false` sin definición
+parcial.
+
+### 12.9 Public/Internal y fronteras inalteradas
+
+La migración ADR-009 exacta es:
+
+| Clasificación                       | Efecto                                                                                                                                                                 |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Changed Public behavior             | `compileFormDefinition()` acepta el slice D-041 y puede emitir los tres nuevos códigos/provenance.                                                                     |
+| Changed Public diagnostic semantics | Se añaden los tres envelopes de referencia; un `$defs` entry inválido añade `definition` y diagnósticos schema mediados por referencia pueden añadir `referenceChain`. |
+| New/changed Public signatures       | Ninguna.                                                                                                                                                               |
+| Internal                            | Index de definitions, pointer decoder, resolved cursors, cache, cycle/provenance helpers.                                                                              |
+| Unchanged                           | `FormDefinition`, runtime, operaciones, Angular, validator port, packages, exports, dependencies, versions, publication y Public + Experimental + Active.              |
+
+D-007 conserva Deferred todo el resto de refs/recursos/composición/condicionales
+y vocabularios. D-014 conserva Research el AST público/versionado, render plan
+y pipeline multi-formato. D-013, D-040 y cada frontera no promovida mantienen su
+estado.
+
+### 12.10 Criterios de aceptación de revision 3
+
+Revision 3 se aceptó solo después de que una revisión completa repetida
+confirmara:
+
+1. conservación exacta de dialecto, unknowns, annotations y M1–M10;
+2. catálogo/shape/order cerrado de `$defs` y reference objects;
+3. sintaxis fragment-only, percent-decoding y JSON Pointer exactos;
+4. traversal descriptor-safe, sharing y ambos dominios de ciclo;
+5. códigos, reasons, parámetros, paths, fallbacks y branch stopping cerrados;
+6. provenance exacta para schema, UI y collection policy;
+7. Public/Internal inventory y schema original para `SchemaValidator`;
+8. coherencia con ADR-016 y todas las SPEC/ADR Accepted;
+9. preservación de D-007/D-014, packages, publicación y estabilidad; y
+10. gate objetivo: solo una revisión 3 aceptada autoriza redactar SPEC-004.
+
+Tras cada corrección se repitió la revisión completa. El ciclo 2 pasó las diez
+áreas con cero hallazgos y Ricard aceptó formalmente revision 3 el 14 de julio
+de 2026. La aceptación autoriza preparar SPEC-004 como tarea separada; no
+autoriza un plan, implementación, publicación ni Stable API.

@@ -1,11 +1,13 @@
 # M11 resolved-schema promotion-readiness review
 
-- **State:** Complete; recommendation pending formal acceptance
+- **State:** Accepted; recommendation formally approved by Ricard
 - **Date:** 14 July 2026
+- **Acceptance date:** 14 July 2026
 - **Reviewed:** D-014 and D-007 restart conditions, accepted SPEC-001/002/003,
   ADR-005 revision 2, ADR-009, ADR-014 revision 2, current compiler contracts
   and completed M9/M10 evidence
-- **Current register state:** D-014 remains Research; D-007 remains Deferred
+- **Current register state:** D-041 is Promoted for narrow normative design;
+  D-014 remains Research and D-007 remains Deferred outside that slice
 
 ## 1. Result
 
@@ -85,9 +87,9 @@ deferred identifier for “same-document static JSON Schema reference
 resolution” and promote that identifier together with the narrow remaining
 D-014 responsibility into M11 normative design.
 
-If accepted, the next document should be ADR-016. It should decide the
+Following acceptance, the next document is ADR-016. It must decide the
 resolution/provenance/Public-Internal model before any SPEC or implementation
-plan is drafted. D-007 should remain Deferred for composition, conditionals,
+plan is drafted. D-007 remains Deferred for composition, conditionals,
 dynamic/external references and vocabularies.
 
 ## 6. Primary standards checked
@@ -97,7 +99,8 @@ dynamic/external references and vocabularies.
 
 ## 7. Acceptance gate
 
-This review records a recommendation only. Ricard must explicitly accept,
-correct or reject the split before the deferred register changes state or
-ADR-016 is drafted. No implementation, Public contract, dependency, package or
-publication action is authorized.
+Ricard explicitly accepted the split on 14 July 2026. Acceptance creates and
+promotes only D-041 for narrow normative M11 design and authorizes drafting
+ADR-016. D-014 remains Research for its generic remainder and D-007 remains
+Deferred outside D-041. No implementation, Public contract, dependency,
+package or publication action is authorized.

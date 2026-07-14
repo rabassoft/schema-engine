@@ -111,9 +111,10 @@ Cada decisión debe registrar:
 - **Revisión de preparación M11:**
   [`review 016`](../reviews/016-m11-resolution-promotion-readiness.md)
   confirma que Draft 2020-12 está seleccionado, pero la capa de resolución aún
-  no existe. Recomienda no promover D-007 completo y separar primero un slice
-  estático local de `$defs` + `$ref` por JSON Pointer; la aceptación o rechazo
-  de esa separación sigue pendiente.
+  no existe. Ricard aceptó no promover D-007 completo y separar como D-041 un
+  slice estático local de `$defs` + `$ref` por JSON Pointer. Composición,
+  condicionales, referencias externas/dinámicas y vocabularios permanecen aquí
+  Deferred.
 
 ## D-008: Enum de strings y renderer select
 
@@ -192,10 +193,10 @@ Cada decisión debe registrar:
 - **Revisión de preparación M11:**
   [`review 016`](../reviews/016-m11-resolution-promotion-readiness.md)
   confirma que la condición se satisface por los objetos/colecciones ya
-  implementados. Recomienda una capa Internal de resolución estática local que
-  conserve `FormDefinition` y el schema original; el AST público, versionado,
-  render plan y pipeline multi-formato seguirían en Research. La promoción
-  formal sigue pendiente.
+  implementados. Ricard aceptó trasladar a D-041 solo la responsabilidad de una
+  capa Internal de resolución estática local que conserve `FormDefinition` y
+  el schema original. El AST público, versionado, render plan y pipeline
+  multi-formato permanecen en D-014 Research.
 
 ## D-015: Fuentes de metadatos adicionales
 
@@ -445,12 +446,45 @@ Cada decisión debe registrar:
   con D-034, seguido de un plan aprobado para registry, access, provenance,
   credenciales, tags y rollback.
 
+## D-041: Resolución estática de referencias locales JSON Schema
+
+- **Estado:** Promoted
+- **Pregunta:** ¿Cómo resolver `$defs` y `$ref` estático por JSON Pointer dentro
+  del mismo documento antes de normalizar `FormDefinition`?
+- **Motivo:** Las referencias requieren separar identidad/provenance de schema,
+  detección de ciclos y derivación UI sin activar composición ni resolución
+  externa.
+- **Promoción aceptada:** Ricard aceptó
+  [`review 016`](../reviews/016-m11-resolution-promotion-readiness.md) el 14 de
+  julio de 2026. Solo se promueve el slice local estático y la responsabilidad
+  estrecha de D-014 necesaria para su capa Internal de resolución.
+- **Incluye:** Draft 2020-12 existente, root `$defs`, fragment-only `$ref` por
+  JSON Pointer, resolución descriptor-safe/iterativa, provenance inmutable,
+  ciclos deterministas, schema original para `SchemaValidator` y
+  `FormDefinition` público sin cambios por defecto.
+- **Excluye:** `$id`, anchors, `$dynamicRef`, recursos/documentos externos,
+  red/callbacks, applicators, condicionales, vocabularios, AST público/versionado,
+  render plan, multi-formato, implementación, publicación y Stable.
+- **Documento actual:**
+  [`ADR-016` Accepted](../adrs/016-resolucion-referencias-locales.md).
+- **Revisión completa:** [`review 017`](../reviews/017-adr-016-review.md) corrigió
+  cinco hallazgos; el ciclo 2 pasó las ocho áreas sin hallazgos.
+- **Aceptación:** Ricard aceptó ADR-016 formalmente el 14 de julio de 2026.
+- **Documento normativo actual:**
+  [`ADR-005 revision 3` Accepted](../adrs/005-politica-dialecto-json-schema.md).
+- **Revisión normativa:**
+  [`review 018`](../reviews/018-adr-005-revision-3-review.md) corrigió seis
+  hallazgos; el ciclo 2 pasó las diez áreas sin hallazgos.
+- **Aceptación normativa:** Ricard aceptó ADR-005 revision 3 formalmente el 14
+  de julio de 2026.
+- **Siguiente gate:** redactar y revisar SPEC-004 antes de cualquier plan o
+  implementación.
+
 ## 4. Próximo trabajo de decisión
 
-1. **M11 — decisión de promoción:** aceptar, corregir o rechazar la recomendación
-   de [`review 016`](../reviews/016-m11-resolution-promotion-readiness.md):
-   separar una capacidad nueva de resolución local estática basada en D-014 y
-   un slice de D-007, manteniendo el resto de D-007 Deferred.
+1. **M11 — SPEC-004:** redactar el contrato observable de resolución estática
+   local conforme a ADR-016 y ADR-005 revision 3; revisar y aceptar la SPEC
+   antes de preparar cualquier plan.
 2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
@@ -465,6 +499,9 @@ mantienen su estado hasta una promoción y aprobación explícitas.
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 14-07-2026 | ADR-005 revision 3 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar SPEC-004, no plan ni implementación.        |
+| 14-07-2026 | ADR-016 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar ADR-005 revisión 3, no SPEC ni implementación.         |
+| 14-07-2026 | Ricard acepta review 016; D-041 queda Promoted para diseño local estático y se propone ADR-016 sin autorizar implementación.             |
 | 14-07-2026 | La revisión de preparación M11 recomienda separar resolución local estática de D-007 completo; aceptación pendiente.                     |
 | 14-07-2026 | PLAN-010 checkpoint 7 repite revisión y matriz completas sin hallazgos; PLAN-010 y M10 quedan completados sin publicar.                  |
 | 14-07-2026 | PLAN-010 checkpoint 6 migra docs, declaraciones, paquetes, artefactos y consumidores; checkpoint 7 queda pendiente.                      |

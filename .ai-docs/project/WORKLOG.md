@@ -6,6 +6,141 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-14 — ADR-005 revision 3 accepted
+
+### Decision
+
+- Ricard formally accepted ADR-005 revision 3 after review 018 cycle 2 passed
+  all ten areas with zero findings.
+- Recorded section 12 as Accepted normative M11 design and kept sections 1–11
+  as the implemented M1–M10 behavioral authority.
+- Authorized drafting and reviewing SPEC-004 only; no plan, implementation,
+  package, publication or Stable change is active.
+- Prepared the complete accumulated M11 documentation checkpoint for commit
+  with the configured Rabassoft author identity.
+
+### Verification
+
+- Documentation formatting, local links, active-state consistency and
+  `git diff --check` pass.
+- No code, test, manifest, dependency, peer/export, lockfile, package,
+  publication or Stable state changed.
+
+### Next
+
+- Draft SPEC-004 with the observable D-041 behavior required by accepted
+  ADR-016 and ADR-005 revision 3, then review it completely before acceptance
+  or any implementation plan.
+
+## 2026-07-14 — ADR-005 revision 3 complete review passed
+
+### Review and corrections
+
+- Reviewed proposed ADR-005 revision 3 completely against its ten acceptance
+  areas, accepted ADR-016, SPEC-001/002/003, applicable ADRs, primary URI/JSON
+  Pointer standards and deferred boundaries.
+- Cycle 1 found six insufficiently closed areas covering malformed `$defs`
+  stopping/provenance, URI grammar/precedence, decoded fragment form, reason
+  reachability and unresolved target/public-diagnostic semantics.
+- Corrected every finding without widening D-041 or changing accepted M1–M10
+  behavior.
+- Repeated the complete review; cycle 2 passed all ten areas with zero findings.
+  Added review 018 while revision 3 remains Proposed pending Ricard's formal
+  decision.
+
+### Verification
+
+- Documentation formatting, all 63 Markdown files/290 local links,
+  active-state consistency and `git diff --check` pass.
+- No code, test, manifest, dependency, peer/export, lockfile, package,
+  publication or Stable state changed.
+
+### Next
+
+- Decide formally whether to accept, correct or reject ADR-005 revision 3.
+  Acceptance would authorize drafting SPEC-004 only.
+
+## 2026-07-14 — ADR-016 accepted and ADR-005 revision 3 proposed
+
+### Decision and drafting
+
+- Ricard formally accepted ADR-016 after review 017 cycle 2 passed all eight
+  areas with zero findings.
+- Recorded ADR-016 as Accepted; its only authorized follow-up is preparation
+  and review of ADR-005 revision 3.
+- Drafted ADR-005 revision 3 as Proposed with the closed D-041 `$defs`/local
+  `$ref` catalog, pointer traversal, diagnostics, cycle identities, provenance,
+  ordering and Public/Internal inventory.
+- Preserved ADR-005 revision 2 as current behavioral authority and authorized
+  no SPEC-004, plan, implementation, package, publication or Stable change.
+
+### Verification
+
+- Documentation formatting, all 62 Markdown files/283 local links,
+  active-state consistency and `git diff --check` pass.
+- No code, test, manifest, dependency, peer/export, lockfile, package,
+  publication or Stable state changed.
+
+### Next
+
+- Review ADR-005 revision 3 completely across its ten acceptance areas, correct
+  every finding and repeat until a zero-finding cycle permits a separate formal
+  acceptance decision.
+
+## 2026-07-14 — ADR-016 complete review passed
+
+### Review and corrections
+
+- Reviewed proposed ADR-016 completely against its eight acceptance areas,
+  accepted SPEC-001/002/003, ADR-005/009/014, review 016 and the deferred
+  boundaries.
+- Cycle 1 found five insufficiently closed contract areas: `$defs`/`$ref`
+  inspection order, safe pointer traversal, reference-versus-object cycle
+  identity, provenance scope/order and the ADR-009 diagnostic inventory.
+- Corrected every finding without widening D-041, changing accepted authority
+  or authorizing implementation.
+- Repeated the complete review; cycle 2 passed all eight areas with zero
+  findings. Added review 017 as acceptance evidence while ADR-016 remains
+  Proposed pending Ricard's formal decision.
+
+### Verification
+
+- Documentation formatting, all 62 Markdown files/281 local links,
+  active-state consistency and `git diff --check` pass.
+- No code, test, manifest, dependency, peer/export, lockfile, package,
+  publication or Stable state changed.
+
+### Next
+
+- Decide formally whether to accept, correct or reject ADR-016. Acceptance
+  would authorize drafting ADR-005 revision 3 only.
+
+## 2026-07-14 — M11 promotion accepted and ADR-016 proposed
+
+### Decision and drafting
+
+- Ricard formally accepted review 016 and the split of same-document static
+  reference resolution from D-007.
+- Created D-041 as Promoted for narrow normative design; D-007 remains Deferred
+  and D-014 remains Research outside the transferred Internal responsibility.
+- Drafted ADR-016 Proposed for root `$defs`, fragment-only `$ref` by JSON
+  Pointer, Internal resolved cursors, exact provenance and deterministic
+  cycle/sharing behavior.
+- Kept Public compiler signatures and `FormDefinition` unchanged by default;
+  ADR-005 revision 2 remains authoritative until a later accepted revision 3.
+
+### Verification
+
+- Documentation formatting, local links, active-state consistency and
+  `git diff --check` pass.
+- No code, test, manifest, dependency, peer/export, lockfile, package,
+  publication or Stable state changed.
+
+### Next
+
+- Review ADR-016 completely across its eight acceptance areas, correct all
+  findings and repeat until a zero-finding cycle before formal acceptance.
+
 ## 2026-07-14 — M11 promotion-readiness review completed
 
 ### Review

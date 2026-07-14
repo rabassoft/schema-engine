@@ -7,8 +7,8 @@
 
 - **Updated:** 2026-07-14 by Ricard / Codex
 - **Branch:** `develop`
-- **Committed revision:** `8369a8c`, M10 final review and persistent-state
-  closure (`develop` is eighteen commits ahead of
+- **Committed revision:** current `HEAD`, accepted M11 reference architecture
+  and dialect contract (`develop` is twenty commits ahead of
   `origin/develop`; no push performed)
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2 and SPEC-003
   v0.1.2
@@ -16,17 +16,19 @@
   repeated review with zero findings
 - **Last completed implementation plan:** PLAN-010 revision 0
 - **Active implementation task:** None
-- **Last accepted ADR:** ADR-015 revision 4
-- **Promoted capabilities:** D-005/M9 and D-006/M10 implemented
+- **Last accepted ADR:** ADR-005 revision 3
+- **Last proposed ADR:** None
+- **Promoted capabilities:** D-005/M9 and D-006/M10 implemented; D-041 promoted
+  for normative M11 design only
 - **Phase:** M1–M10 and G0 completed
 - **Package candidates:** private independent `0.1.0` artifacts; unpublished
-- **Working tree:** uncommitted completed M11 promotion-readiness review and
-  persistent-state updates
+- **Working tree:** clean after the accepted M11 reference-architecture
+  documentation checkpoint
 
 ## Current objective
 
-Decide whether to accept the narrow M11 promotion recommendation without
-activating the rest of D-007 or any implementation work.
+Draft SPEC-004 without activating an implementation plan or code before its
+separate review and acceptance gates.
 
 ## In progress
 
@@ -34,21 +36,21 @@ activating the rest of D-007 or any implementation work.
 
 ## Latest completed work
 
-- Completed M11 promotion-readiness review 016 over D-014 and D-007.
-- Confirmed D-014's restart condition is satisfied by implemented objects and
-  collections, while D-007's resolution-layer condition is not yet satisfied.
-- Recommended a separate same-document `$defs` + static fragment `$ref` slice
-  with an Internal resolver and unchanged Public `FormDefinition` by default.
-- Kept D-014 Research and D-007 Deferred pending explicit acceptance; external,
-  dynamic and composition/vocabulary work remains inactive.
-- Preserved every implementation, package, publication and Stable boundary.
+- Formally accepted ADR-005 revision 3 after review 018 cycle 2 passed all ten
+  areas with zero findings.
+- Made section 12 the Accepted normative D-041 dialect/reference contract while
+  retaining sections 1–11 as M1–M10 authority.
+- Authorized only drafting and review of SPEC-004; no plan or implementation is
+  active.
+- Committed the accumulated review 016/D-041, ADR-016/review 017 and ADR-005
+  revision 3/review 018 documentation checkpoint.
+- Preserved D-007/D-014 and every package, publication and Stable boundary.
 
 ## Exact next action
 
-Decide whether to accept, correct or reject review 016. If accepted, create a
-separate deferred identifier for same-document static reference resolution,
-promote only that slice with the narrow D-014 responsibility, and draft ADR-016
-before any SPEC or implementation plan.
+Draft SPEC-004 with the exact observable `$defs`/local `$ref` compiler behavior,
+diagnostics and conformance scenarios required by accepted ADR-016 and ADR-005
+revision 3; do not prepare a plan or implementation before SPEC acceptance.
 
 ## Blockers and conflicts
 
@@ -57,27 +59,27 @@ before any SPEC or implementation plan.
   authoritative only for the completed nested-object extension.
 - D-006 remains registrally Promoted and its narrow M10 delivery is complete.
   All other array/deferred capabilities remain inactive.
-- D-014 remains Research and D-007 remains Deferred; review 016 is a pending
-  recommendation and grants no design or implementation authority.
-- ADR-005 revision 2, ADR-015 revision 4, SPEC-003 v0.1.2 and PLAN-010 revision
-  0 are accepted/approved in the required order.
-- M10 is committed through `8369a8c`; the completed M11 readiness review is
-  uncommitted and nothing was pushed.
+- D-014 remains Research outside its narrow D-041 responsibility and D-007
+  remains Deferred outside D-041.
+- Review 016 is accepted, D-041 is Promoted for normative design only and
+  ADR-016 is Accepted after a zero-finding repeated review.
+- ADR-005 revision 3 is Accepted for normative M11 design, but `$defs`/`$ref`
+  remain behaviorally inactive until SPEC-004 is accepted and an implementation
+  plan is approved.
+- ADR-016, ADR-005 revision 3, ADR-015 revision 4, SPEC-003 v0.1.2 and PLAN-010
+  revision 0 are accepted/approved in the required order.
+- The accepted M11 documentation checkpoint is committed locally; nothing was
+  pushed.
 
 ## Open questions
 
-- Whether the first slice rejects every semantic `$ref` sibling or permits a
-  closed annotation-only subset.
-- How reference site, resolved target and reference-chain provenance appear in
-  diagnostics without silently widening existing envelopes.
-- Whether to accept the recommended Internal resolved representation and create
-  a separate deferred identifier before drafting ADR-016.
+- None outside the required SPEC-004 drafting and review work.
 
 ## Latest verification
 
 - `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, both builds and
   `git diff --check` pass.
-- All 60 Markdown files and 267 local link targets resolve.
+- All 63 Markdown files and 290 local link targets resolve.
 - All 248 core and 68 Angular tests pass (316 total).
 - `pnpm test:package`, `pnpm test:consumer`, exact-inventory
   `pnpm test:artifacts` and `pnpm test:consumer:clean` pass.
@@ -90,6 +92,14 @@ before any SPEC or implementation plan.
 
 ## Task document map
 
+- ADR-005 revision 3 complete review:
+  `.ai-docs/reviews/018-adr-005-revision-3-review.md`
+- Accepted M11 dialect/reference contract:
+  `.ai-docs/adrs/005-politica-dialecto-json-schema.md`, section 12
+- ADR-016 complete review:
+  `.ai-docs/reviews/017-adr-016-review.md`
+- Accepted M11 architecture:
+  `.ai-docs/adrs/016-resolucion-referencias-locales.md`
 - M11 promotion-readiness recommendation:
   `.ai-docs/reviews/016-m11-resolution-promotion-readiness.md`
 - Final M10 implementation review:

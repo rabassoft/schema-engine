@@ -52,19 +52,28 @@
   — Current-state documentation conflicts were corrected; cycle 2 repeated the
   complete review and matrix with zero findings, completing M10.
 - [M11 resolved-schema promotion-readiness review](./reviews/016-m11-resolution-promotion-readiness.md)
-  — Recommends separating a same-document static `$defs`/`$ref` resolution
-  slice from D-007; formal acceptance remains pending and no implementation is
-  active.
+  — Accepted; separates and promotes D-041 for same-document static
+  `$defs`/`$ref` resolution while D-007 remains Deferred and no implementation
+  is active.
+- [M11 ADR-016 complete review — Cycles 1–2](./reviews/017-adr-016-review.md) —
+  Five findings corrected; cycle 2 passed all eight areas with zero findings.
+  Ricard then accepted ADR-016 formally.
+- [M11 ADR-005 revision 3 complete review — Cycles 1–2](./reviews/018-adr-005-revision-3-review.md)
+  — Six findings corrected; cycle 2 passed all ten areas with zero findings.
+  Ricard then accepted revision 3 formally.
 
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
-  — Accepted revision 2; preserves M1–M9 and adds M10 design after complete
-  review cycle 3 passed with zero findings, without authorizing implementation.
+  — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
+  normative contract and authorizes drafting SPEC-004, not implementation.
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
   and Ricard accepted the revision.
+- [ADR-005 revision 3 complete review — Cycles 1–2](./reviews/018-adr-005-revision-3-review.md)
+  — Six findings corrected and repeated cycle 2 passed all ten areas with zero
+  findings; Ricard then accepted revision 3 formally.
 - [ADR-015: Collection templates, stable item identity and controlled structural operations](./adrs/015-modelo-colecciones-identidad-operaciones.md)
   — Accepted revision 4 after the ordinary node text context was widened to
   array definitions and passed complete review with zero findings;
@@ -81,6 +90,9 @@
 - [ADR-015 revision 4 complete review](./reviews/013-adr-015-revision-4-review.md)
   — Collection-node ordinary text-context correction passed all six areas with
   zero findings and was formally accepted.
+- [ADR-016: Same-document static JSON Schema reference resolution](./adrs/016-resolucion-referencias-locales.md)
+  — Accepted after complete review cycle 2 passed all eight areas with zero
+  findings; authorizes drafting ADR-005 revision 3 only.
 
 ## Roadmap and deferred decisions
 
