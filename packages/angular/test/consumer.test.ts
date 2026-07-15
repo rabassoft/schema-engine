@@ -69,6 +69,17 @@ const schema = Object.freeze({
 const compilation = compileFormDefinition({
   schema,
   collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
+  uiSchema: {
+    presentation: [
+      {
+        kind: 'section',
+        id: 'details',
+        label: 'Details',
+        children: ['profile', 'active'],
+      },
+      'rows',
+    ],
+  },
 });
 if (!compilation.success)
   throw new Error('The consumer schema must compile successfully.');
@@ -144,6 +155,7 @@ describe('minimal built-package Angular consumer', () => {
         textContent?.trim(),
       ),
     ).toEqual([
+      'en:Details',
       'en:Profile',
       'en:Address',
       'en:People',

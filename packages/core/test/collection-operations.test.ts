@@ -5,6 +5,7 @@ import {
   type FormDefinition,
   type FormOperation,
 } from '../src/index.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 
 const metadata = { id: 1, formId: 'form' } as const;
 
@@ -18,7 +19,7 @@ function definition(): FormDefinition {
     kind: 'string',
     constraints: {},
   } as const;
-  return {
+  return withDefaultPresentation({
     nodes: [
       {
         key: '["rows"]',
@@ -32,7 +33,7 @@ function definition(): FormDefinition {
       },
     ],
     fields: [],
-  };
+  });
 }
 
 function base(type: FormOperation['type']) {
@@ -81,10 +82,10 @@ describe('M10 collection operations', () => {
       constraints: {},
     } as const;
     const collection = definition().nodes[0]!;
-    const mixed: FormDefinition = {
+    const mixed: FormDefinition = withDefaultPresentation({
       nodes: [title, collection],
       fields: [title],
-    };
+    });
     const result = applyFormOperation(
       mixed,
       { title: 'Before', rows: [] },

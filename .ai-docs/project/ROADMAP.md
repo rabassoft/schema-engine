@@ -59,10 +59,11 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7-M11 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-011
+> M7-M12 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-012
 > completó sus cinco checkpoints y la revisión final repetida pasó sin
-> hallazgos. M12 continúa como propuesta de planificación. La publicación real
-> permanece Deferred en D-040 y requiere una solicitud y aprobación explícitas.
+> hallazgos dentro del slice estrecho D-042; D-011/D-012 siguen Deferred. La
+> publicación real permanece
+> Deferred en D-040 y requiere una solicitud y aprobación explícitas.
 
 ### M9 — Objetos anidados — completado
 
@@ -124,10 +125,19 @@ separado antes de repetir la revisión.
 - M11 no activa referencias externas/dinámicas, anchors, applicators,
   composición, AST público, I/O, callbacks, publicación ni APIs Stable.
 
+### M12 — Grupos de presentación estáticos — completado
+
+- D-042 fue promovido para el slice estático neutral; ADR-017 revision 0 y
+  SPEC-005 v0.1.1 fijaron la arquitectura y el comportamiento aceptados.
+- PLAN-012 revision 1 completó contratos/defaults, inspección descriptor-safe,
+  proyección Angular fija, paquetes/consumidores y revisión final repetida.
+- M12 no activa D-011/D-012, agrupación anidada/item, tabs, wizards, grids,
+  estado/acciones de layout, scopes generados ni container renderers custom.
+
 ### Orden de dependencias a más largo plazo
 
-1. **M12 — UI Schema avanzado (D-011 + D-012):** solo después de disponer de
-   contenedores y un contrato neutral de layout.
+1. **D-040 — publicación real:** permanece Deferred y requiere una solicitud y
+   aprobación explícitas; completar M12 no la activa.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

@@ -19,18 +19,18 @@ import {
   type DataPath,
   type Diagnostic,
   type FormOperation,
-  type FormNodeDefinition,
+  type FormDefinition,
+  type PresentationEntryDefinition,
   type FormRuntime,
   type FormRuntimeSnapshot,
   type FormScope,
-  type NodeRuntimeSnapshot,
   type ItemRuntimeSnapshot,
   type RuntimeTreeSnapshot,
   type RuntimeActionResult,
   type ValidationSnapshot,
   type ValidationVisibility,
 } from '@rabassoft/schema-engine';
-import { SchemaNodeOutletComponent } from './node-outlet.js';
+import { SchemaPresentationOutletComponent } from './node-outlet.js';
 
 export type AngularControlledFormConfig<TData extends object> = Omit<
   ControlledFormRuntimeOptions<TData>,
@@ -38,9 +38,10 @@ export type AngularControlledFormConfig<TData extends object> = Omit<
 > & { readonly locale?: string };
 
 type RuntimeContext = Readonly<{ formId: string }>;
-interface ProjectedNode {
-  readonly definition: FormNodeDefinition;
-  readonly snapshot: NodeRuntimeSnapshot;
+interface ProjectedPresentation {
+  readonly entry: PresentationEntryDefinition;
+  readonly definition: FormDefinition;
+  readonly snapshot: FormRuntimeSnapshot<object>;
 }
 const runtimeContexts = new WeakMap<
   object,
@@ -56,12 +57,18 @@ export function readRuntimeContext(form: object): RuntimeContext | undefined {
   selector: '[schemaForm]',
   exportAs: 'schemaForm',
   standalone: true,
-  imports: [SchemaNodeOutletComponent],
+  imports: [SchemaPresentationOutletComponent],
   template: `
-    @for (node of projectedNodes(); track node.definition.key) {
-      <schema-node-outlet
-        [definition]="node.definition"
-        [snapshot]="node.snapshot"
+    @for (
+      projected of projectedPresentation();
+      track projected.entry.kind === 'section'
+        ? projected.entry.key
+        : projected.entry.node.key
+    ) {
+      <schema-presentation-outlet
+        [entry]="projected.entry"
+        [definition]="projected.definition"
+        [snapshot]="projected.snapshot"
       />
     }
     <ng-content />
@@ -84,17 +91,20 @@ export class SchemaFormDirective<TData extends object> {
   readonly snapshot: Signal<FormRuntimeSnapshot<TData> | undefined> =
     this.snapshotState.asReadonly();
   readonly ready = computed(() => this.snapshotState() !== undefined);
-  protected readonly projectedNodes = computed<readonly ProjectedNode[]>(() => {
+  protected readonly projectedPresentation = computed<
+    readonly ProjectedPresentation[]
+  >(() => {
     const definition = this.acceptedDefinitionState();
     const snapshot = this.snapshotState();
     if (definition === undefined || snapshot === undefined) return [];
     return Object.freeze(
-      definition.nodes.flatMap((node, index) => {
-        const nodeSnapshot = snapshot.nodes[index];
-        return nodeSnapshot === undefined
-          ? []
-          : [Object.freeze({ definition: node, snapshot: nodeSnapshot })];
-      }),
+      definition.presentation.map((entry) =>
+        Object.freeze({
+          entry,
+          definition,
+          snapshot,
+        }),
+      ),
     );
   });
 

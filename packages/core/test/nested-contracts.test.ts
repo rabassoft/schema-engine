@@ -13,6 +13,7 @@ import type {
   UiNodeSchema,
 } from '../src/index.js';
 import { validateNestedFormDefinition } from '../src/internal/nested-definition.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 import {
   appendDataPath,
   canonicalDataPathKey,
@@ -55,10 +56,10 @@ describe('M9 public contract foundations', () => {
     const uiNode: UiNodeSchema = ui;
     const street = leaf(Object.freeze(['address', 'street']));
     const address = objectNode(Object.freeze(['address']), [street]);
-    const definition = {
+    const definition = withDefaultPresentation({
       nodes: [address],
       fields: [street],
-    } satisfies FormDefinition;
+    }) satisfies FormDefinition;
     const objectPresence: ObjectPresence = { kind: 'object' };
     const fieldPresence: FieldPresence = {
       kind: 'blocked',
@@ -102,7 +103,10 @@ describe('nested definition and path helpers', () => {
   it('validates identity-linked trees without mutating caller containers', () => {
     const street = leaf(['address', 'street']);
     const address = objectNode(['address'], [street]);
-    const definition = { nodes: [address], fields: [street] };
+    const definition = withDefaultPresentation({
+      nodes: [address],
+      fields: [street],
+    });
 
     expect(validateNestedFormDefinition(definition)).toMatchObject({
       success: true,
@@ -117,7 +121,9 @@ describe('nested definition and path helpers', () => {
     };
     cyclic.children.push(cyclic);
     expect(
-      validateNestedFormDefinition({ nodes: [cyclic], fields: [] }),
+      validateNestedFormDefinition(
+        withDefaultPresentation({ nodes: [cyclic], fields: [] }),
+      ),
     ).toMatchObject({
       success: false,
       defect: { reason: 'cyclic-node', nodeIndexPath: [0, 0] },
@@ -125,17 +131,21 @@ describe('nested definition and path helpers', () => {
 
     const shared = leaf(['shared']);
     expect(
-      validateNestedFormDefinition({
-        nodes: [shared, shared],
-        fields: [shared, shared],
-      }),
+      validateNestedFormDefinition(
+        withDefaultPresentation({
+          nodes: [shared, shared],
+          fields: [shared, shared],
+        }),
+      ),
     ).toMatchObject({
       success: false,
       defect: { reason: 'reused-node', nodeIndexPath: [1] },
     });
 
     expect(
-      validateNestedFormDefinition({ nodes: [shared], fields: [] }),
+      validateNestedFormDefinition(
+        withDefaultPresentation({ nodes: [shared], fields: [] }),
+      ),
     ).toMatchObject({
       success: false,
       defect: { reason: 'inconsistent-leaf-projection', fieldIndex: 0 },
@@ -167,7 +177,9 @@ describe('nested definition and path helpers', () => {
       node = objectNode(terminalPath.slice(0, depth + 1), [node]);
     }
     expect(
-      validateNestedFormDefinition({ nodes: [node], fields: [terminal] }),
+      validateNestedFormDefinition(
+        withDefaultPresentation({ nodes: [node], fields: [terminal] }),
+      ),
     ).toMatchObject({ success: true });
   });
 

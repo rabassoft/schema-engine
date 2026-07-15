@@ -9,7 +9,9 @@
         "required": true,
         "label": "Referenced value",
         "kind": "string",
-        "constraints": { "minLength": 2 }
+        "constraints": {
+          "minLength": 2
+        }
       }
     ],
     "fields": [
@@ -20,7 +22,25 @@
         "required": true,
         "label": "Referenced value",
         "kind": "string",
-        "constraints": { "minLength": 2 }
+        "constraints": {
+          "minLength": 2
+        }
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"value\"]",
+          "name": "value",
+          "path": ["value"],
+          "required": true,
+          "label": "Referenced value",
+          "kind": "string",
+          "constraints": {
+            "minLength": 2
+          }
+        }
       }
     ]
   },

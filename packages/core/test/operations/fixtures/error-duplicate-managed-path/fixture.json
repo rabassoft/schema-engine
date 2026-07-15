@@ -21,7 +21,8 @@
         "kind": "string",
         "constraints": {}
       }
-    ]
+    ],
+    "presentation": []
   },
   "currentValue": {},
   "operation": {

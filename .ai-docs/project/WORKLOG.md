@@ -6,6 +6,355 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — PLAN-012 and M12 completed
+
+### Completed
+
+- Completed all five PLAN-012 checkpoints and the narrow D-042 static neutral
+  presentation-group slice under accepted ADR-017 and SPEC-005 v0.1.1.
+- Added the exact seven Public core presentation symbols, immutable compiler
+  normalization and manual-definition checks without changing runtime data,
+  validation, operations, scopes or controlled ownership.
+- Added fixed Internal Angular section projection with accessible markup,
+  deterministic IDs, locale-aware text, failure isolation and lifecycle
+  cleanup, without adding a Public Angular symbol.
+- Completed review 026 after correcting four stale current-state documentation
+  findings, two formatting findings and one closing evidence-count finding;
+  cycle 6 closed with zero findings after the full matrix passed in cycle 3.
+
+### Verification
+
+- Frozen-lockfile installation, 359 core and 76 Angular tests, full build and
+  type checks, package smoke, packed artifacts, repository consumer and clean
+  core/lower/upper Angular 22.0.6 consumers pass.
+- Documentation checks pass across 76 Markdown files and 360 local links;
+  lint, formatting and `git diff --check` pass.
+- Manifests, dependencies, versions, lockfile, publication state and Stable
+  classification are unchanged; D-011, D-012 and D-040 remain Deferred.
+
+### Next
+
+- Select a deferred capability for a new promotion-readiness assessment. No
+  implementation or publication task is active.
+
+## 2026-07-15 — PLAN-012 checkpoint 4 completed
+
+### Completed
+
+- Mapped and exercised all 18 SPEC-005 scenario areas across focused tests,
+  serializable fixtures, inherited regression suites and package consumers.
+- Extended packed-artifact inventory and declaration checks for the one new
+  Internal core module and exactly seven new Public core symbols.
+- Extended the repository Angular consumer with a real static section and the
+  clean Angular consumer source with presentation compilation.
+- Added explicit runtime/operation/scope/schema-identity invariance evidence and
+  package-smoke default-forest identity checks.
+- Kept Angular section helpers absent from the root declaration and confirmed
+  deep imports remain blocked.
+
+### Verification
+
+- 359 core and 76 Angular tests, full build/typecheck, package smoke, repository
+  consumer, packed artifacts, docs, lint, formatting and diff checks pass.
+- `CI=true pnpm install --frozen-lockfile` passes; clean core and Angular 22.0.6
+  lower/upper consumers build and execute successfully.
+- Manifests, dependencies, versions, publication state and lockfile are
+  unchanged.
+
+### Next
+
+- Execute PLAN-012 checkpoint 5 and repeat the complete implementation review
+  until one cycle passes with zero findings.
+
+## 2026-07-15 — PLAN-012 checkpoint 3 completed
+
+### Completed
+
+- Changed `SchemaFormDirective` to project the normalized presentation forest
+  while preserving the existing runtime snapshot and controlled-state model.
+- Added one fixed Internal recursive section outlet/host and factory with exact
+  `fieldset`/`legend` markup, collision-free IDs and no Public Angular export.
+- Added immutable locale-aware section text contexts and exact exception,
+  non-string and blank-result fallback diagnostics.
+- Added creation/binding failure isolation, partial-host destruction, sibling
+  continuation and accepted-definition replacement cleanup.
+- Corrected a review finding where locale context replacement recreated legacy
+  renderers; locale now reprojections text without changing renderer identity.
+
+### Verification
+
+- All 76 Angular tests pass (68 inherited plus 8 focused section tests); full
+  workspace typecheck, lint, formatting and diff checks pass.
+- Existing leaf/object/collection/item projection, focus and Signal Forms
+  ownership suites remain unchanged and green; Angular root exports are
+  unchanged.
+
+### Next
+
+- Execute PLAN-012 checkpoint 4: complete all scenario evidence and the full
+  declaration/package/artifact/repository/clean-consumer matrix.
+
+## 2026-07-15 — PLAN-012 checkpoint 2 completed
+
+### Completed
+
+- Added iterative descriptor-safe inspection of root UI `presentation` with
+  the complete `INVALID_UI_PRESENTATION` family, deterministic paths/order and
+  no accessor execution or caller-value retention.
+- Added exact-node immutable normalization for flat/nested sections, canonical
+  keys and order independent from `nodes`/`fields`.
+- Implemented atomic default fallback and kept independent unknown UI warnings
+  and nested object/array/item rejection from corrupting valid root grouping.
+- Covered every accepted reason plus sparse/accessor/cyclic/reused/deep input,
+  hostile names/IDs, root object/collection atomicity and nested locations.
+- Added serializable valid/fallback conformance fixtures and corrected the
+  normalization builder to remain iterative and linear.
+
+### Verification
+
+- All 358 core tests pass; full workspace build/typecheck, lint, formatting and
+  diff checks pass.
+- Repeated inspection of SPEC-005 scenarios 1–10 and the scoped production/test
+  diff found zero remaining checkpoint-2 findings.
+
+### Next
+
+- Execute PLAN-012 checkpoint 3: fixed Internal Angular section projection,
+  text resolution, accessibility, lifecycle and failure isolation.
+
+## 2026-07-15 — PLAN-012 checkpoint 1 completed
+
+### Completed
+
+- Added the exact seven SPEC-005 Public core symbols, optional raw
+  `UiSchema.presentation`, required normalized `FormDefinition.presentation`
+  and the widened text-resolution union.
+- Made every successful compilation emit a deeply frozen default wrapper forest
+  with exact root-node identity, including the empty-root case.
+- Added iterative descriptor-safe manual-definition validation for all nine
+  accepted presentation reasons and propagated immutable presentation locators
+  through runtime and operation diagnostics.
+- Migrated repository manual definitions, compiler expectations and operation
+  fixtures without changing runtime/data expectations; corrected the fixture
+  generator to preserve collection-policy inputs.
+- Added focused default, identity, immutability, reason, cycle and fail-fast
+  evidence. Root UI presentation inspection remains intentionally inactive.
+
+### Verification
+
+- All 340 core tests pass; full workspace build/typecheck, lint, formatting and
+  diff checks pass.
+- Emitted root declarations contain exactly the seven accepted new symbols.
+  Package manifests, dependencies, versions and lockfile are unchanged.
+
+### Next
+
+- Execute PLAN-012 checkpoint 2: root descriptor-safe presentation inspection,
+  diagnostics, normalized sections and atomic fallback.
+
+## 2026-07-15 — PLAN-012 revision 1 approved
+
+### Completed
+
+- Approved PLAN-012 revision 1 under Ricard's standing authorization after
+  review 025 cycle 2 passed all ten areas with zero findings.
+- Authorized checkpoints 1–5 in order and activated checkpoint 1 only.
+- Reconciled PLAN/review status, ROADMAP, deferred register and canonical state
+  without changing code or Public contracts yet.
+
+### Verification
+
+- Documentation checks pass for 75 Markdown files and 358 local links; full
+  formatting and diff checks pass.
+
+### Next
+
+- Implement checkpoint 1 contracts, default compiler forest, manual validation
+  and repository migration; keep UI presentation inspection inactive.
+
+## 2026-07-15 — PLAN-012 revision 1 prepared and reviewed
+
+### Completed
+
+- Prepared five fail-closed delivery checkpoints covering contracts/defaults,
+  compiler normalization, Angular projection, evidence/packages and final
+  repeated review.
+- Mapped all 18 SPEC-005 scenario groups to focused and full evidence.
+- Corrected review 025 cycle 1's two findings by moving default compiler output
+  into checkpoint 1 and prohibiting Angular root-export changes.
+- Repeated all ten plan-review areas in cycle 2 with zero findings.
+
+### Verification
+
+- Plan links, authority, checkpoint dependencies, Public inventory, commands,
+  diff boundaries, formatting and documentation consistency were checked.
+- No code, Public contract, dependency, package or publication changed.
+
+### Next
+
+- Approve PLAN-012 revision 1 under the standing authorization, then execute
+  checkpoints 1–5 consecutively to zero findings.
+
+## 2026-07-15 — SPEC-005 v0.1.1 accepted
+
+### Completed
+
+- Corrected four cycle 1 findings covering the root accessor case, unknown-key
+  fallback, item UI paths and manual frozen-input ambiguity.
+- Repeated all ten SPEC review areas in review 024 cycle 2 with zero findings.
+- Accepted SPEC-005 v0.1.1 under Ricard's standing authorization without
+  widening ADR-017 or D-042.
+- Reconciled the SPEC index, guides, deferred register, ROADMAP and canonical
+  state; authorized PLAN-012 preparation/review only.
+
+### Verification
+
+- Documentation checks pass for 73 Markdown files and 347 local links; full
+  formatting and diff checks pass.
+- No plan, code, Public contract, dependency, package, publication or Stable
+  classification changed.
+
+### Next
+
+- Prepare and repeatedly review PLAN-012 before approval or implementation.
+
+## 2026-07-15 — SPEC-005 v0.1.0 drafted
+
+### Completed
+
+- Drafted the exact observable D-042 contract under accepted ADR-017.
+- Closed root UI grammar, exact-once normalized identity, immutable default and
+  atomic fallback forests, section keys and deterministic inspection.
+- Defined `INVALID_UI_PRESENTATION`, manual-definition reasons, section text
+  projection, DOM/accessibility and fixed-host failure behavior.
+- Preserved runtime, scopes, operations, validation, renderer ownership and all
+  D-011/D-012 exclusions.
+- Added 18 mandatory conformance areas and an exact ADR-009 migration inventory.
+
+### Verification
+
+- SPEC links, index, Draft wording, architecture traceability, formatting and
+  scoped diff were checked after drafting.
+- No plan, code, Public contract, dependency, package or publication changed.
+
+### Next
+
+- Complete and repeat the SPEC-005 review to zero findings; accept it only if
+  it remains inside ADR-017/D-042.
+
+## 2026-07-15 — ADR-017 accepted
+
+### Completed
+
+- Applied Ricard's standing authorization after ADR-017 revision 0 completed a
+  full zero-finding review.
+- Marked ADR-017 Accepted and reconciled review 023, the ADR index, root guide,
+  D-042 register, ROADMAP and canonical current state.
+- Authorized drafting and reviewing the M12 SPEC only; no plan, Public contract
+  change or implementation is active.
+- Preserved D-011/D-012 and every nested/item grouping, advanced layout, state,
+  action, generated-scope, custom-container and publication exclusion.
+
+### Verification
+
+- Documentation consistency, links, accepted/proposed wording, global ADR
+  sequence, formatting and scoped diff were checked after acceptance.
+- No SPEC, plan, code, Public contract, dependency, package, publication or
+  Stable classification changed.
+
+### Next
+
+- Draft and repeatedly review the M12 SPEC for D-042 before accepting it or
+  preparing an implementation plan.
+
+## 2026-07-15 — ADR-017 drafted and reviewed
+
+### Completed
+
+- Drafted ADR-017 revision 0 for D-042's root-only static neutral presentation
+  groups.
+- Chose a required identity-consistent presentation forest that wraps every
+  root form node exactly once and permits nested static sections without
+  changing the managed data tree.
+- Closed root-only membership, section identity/order, descriptor-safe atomic
+  fallback, localized accessible labels, fixed Angular projection and the
+  ADR-009 Public/Internal migration inventory.
+- Kept nested/item grouping, layout state, advanced containers, actions,
+  generated scopes and all remaining D-011/D-012 capabilities Deferred.
+- Review 023 cycle 1 found stale ROADMAP/root-guide wording about ADR-017's
+  existence and next gate; corrected it and repeated the complete review.
+- Review 023 cycle 2 found that the active deferred-register summary omitted
+  D-041/D-042; corrected the summary/history and repeated the complete review.
+- Review 023 cycle 3 passed all eight required areas with zero findings;
+  ADR-017 remains Proposed pending formal acceptance.
+
+### Verification
+
+- ADR links, global sequence, formatting, deferred boundaries, Public inventory
+  and scoped diff were checked after the zero-finding review.
+- No SPEC, plan, code, Public contract, dependency, package, publication or
+  Stable classification changed.
+
+### Next
+
+- Decide formal acceptance of ADR-017 revision 0. Acceptance may authorize
+  drafting the M12 SPEC only.
+
+## 2026-07-15 — Review 022 accepted and D-042 promoted
+
+### Completed
+
+- Ricard formally accepted review 022's split recommendation.
+- Created D-042 and promoted only static neutral presentation groups to M12
+  normative design.
+- Kept grids, tabs, accordions, wizards, slots, actions, responsive behavior,
+  conditional visibility, custom container renderers, adapter capability
+  negotiation and declarative scopes outside D-042.
+- Kept D-011 and D-012 Deferred and reconciled the accepted review, deferred
+  register, ROADMAP, index and canonical current state.
+- Reserved ADR-017 as the next architecture document without drafting it or
+  activating a SPEC, plan, Public contract change or implementation.
+
+### Verification
+
+- Documentation formatting, links, accepted/promotion wording, global D/ADR
+  sequences and the scoped diff were checked after reconciliation.
+- No SPEC, ADR, plan, code, Public contract, dependency or package changed.
+
+### Next
+
+- Draft ADR-017 for D-042's normalized static presentation-group model and its
+  exact accepted decision questions before any SPEC or plan.
+
+## 2026-07-15 — M12/D-011/D-012 promotion readiness evaluated
+
+### Completed
+
+- Evaluated D-011 and D-012 against accepted SPEC-001/002/003, applicable ADRs,
+  Public contracts, compiler normalization, runtime scopes and Angular hosts.
+- Confirmed that nested structure, normalized node trees, stable targets,
+  application-owned scopes and fixed framework projection are available.
+- Identified that these foundations are not a neutral layout contract and that
+  D-012's dependency on advanced UI Schema remains unsatisfied.
+- Added review 022, recommending a new narrow static-presentation-group slice
+  while keeping the remainder of D-011 and all of D-012 Deferred.
+- Reconciled the review index, ROADMAP, deferred register and canonical current
+  state without promoting a capability or authorizing architecture,
+  specification, planning or implementation.
+
+### Verification
+
+- The scoped repeat audit found no contract conflict and confirmed D-042 is the
+  next available global identifier while D-011/D-012 remain Deferred.
+- Documentation checks pass across 69 Markdown files and 321 local links; full
+  repository formatting and the scoped diff check also pass.
+- No accepted SPEC, ADR, Public contract, dependency, package or code changed.
+
+### Next
+
+- Decide whether to accept review 022's split. Only acceptance may create and
+  promote D-042 and authorize drafting the M12 architecture ADR.
+
 ## 2026-07-15 — PLAN-011 and M11 completed
 
 ### Completed

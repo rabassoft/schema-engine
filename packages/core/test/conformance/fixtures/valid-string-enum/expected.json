@@ -50,6 +50,34 @@
           }
         ]
       }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"status\"]",
+          "name": "status",
+          "path": ["status"],
+          "required": false,
+          "label": "status",
+          "kind": "string",
+          "constraints": {},
+          "choices": [
+            {
+              "value": "draft",
+              "label": "draft"
+            },
+            {
+              "value": "published",
+              "label": "published"
+            },
+            {
+              "value": "archived",
+              "label": "archived"
+            }
+          ]
+        }
+      }
     ]
   },
   "diagnostics": []

@@ -17,6 +17,7 @@ import type {
   ObjectRuntimeSnapshot,
   ObjectTextMember,
   ItemRuntimeSnapshot,
+  PresentationSectionDefinition,
   StringChoiceDefinition,
   TextResolutionContext,
   TextResolver,
@@ -34,6 +35,10 @@ type ObjectTextResolutionContext = Extract<
 type CollectionTextResolutionContext = Extract<
   TextResolutionContext,
   { readonly collection: ArrayNodeDefinition }
+>;
+type SectionTextResolutionContext = Extract<
+  TextResolutionContext,
+  { readonly section: PresentationSectionDefinition }
 >;
 
 export interface AngularFieldTextSnapshot {
@@ -118,10 +123,62 @@ export interface ItemActionTextProjectionResult {
   readonly diagnostics: readonly Diagnostic[];
 }
 
+/** @internal */
+export interface SectionTextProjectionResult {
+  readonly text: string;
+  readonly diagnostics: readonly Diagnostic[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AngularTextProjector {
   private readonly candidate: unknown = inject(SCHEMA_TEXT_RESOLVER);
   private readonly parsed = parseResolver(this.candidate);
+
+  /** @internal */
+  projectSection(
+    section: PresentationSectionDefinition,
+    formId: string,
+    locale: string,
+  ): SectionTextProjectionResult {
+    const diagnostics: Diagnostic[] = [...this.parsed.diagnostics];
+    const context: SectionTextResolutionContext = Object.freeze({
+      formId,
+      locale,
+      section,
+      member: 'label',
+    });
+    let result: unknown;
+    let reason:
+      'exception' | 'non-string-result' | 'blank-string-result' | undefined;
+    try {
+      result = this.parsed.resolver(section.label, context);
+    } catch {
+      reason = 'exception';
+    }
+    if (reason === undefined && typeof result !== 'string')
+      reason = 'non-string-result';
+    if (
+      reason === undefined &&
+      typeof result === 'string' &&
+      result.trim().length === 0
+    )
+      reason = 'blank-string-result';
+    if (reason !== undefined) {
+      diagnostics.push(
+        adapterDiagnostic(
+          'TEXT_RESOLUTION_FAILED',
+          'warning',
+          { sectionId: section.id, member: 'label', reason },
+          'Section text resolution failed.',
+        ),
+      );
+      result = section.label;
+    }
+    return Object.freeze({
+      text: result as string,
+      diagnostics: Object.freeze(diagnostics),
+    });
+  }
 
   project(
     field: FieldDefinition | FieldTemplate,

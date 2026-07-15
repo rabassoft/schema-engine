@@ -219,6 +219,17 @@ const schema = {
 const compiled = compileFormDefinition({
   schema,
   collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
+  uiSchema: {
+    presentation: [
+      {
+        kind: 'section',
+        id: 'main',
+        label: 'Main',
+        children: ['profile'],
+      },
+      'rows',
+    ],
+  },
 });
 if (!compiled.success) throw new Error('Compilation failed');
 const source: {

@@ -2,7 +2,8 @@
   "success": true,
   "definition": {
     "nodes": [],
-    "fields": []
+    "fields": [],
+    "presentation": []
   },
   "diagnostics": [
     {

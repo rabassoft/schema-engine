@@ -1,0 +1,11 @@
+{
+  "presentation": [
+    {
+      "kind": "section",
+      "id": "main",
+      "label": "Main section",
+      "children": ["b"]
+    },
+    "a"
+  ]
+}

@@ -25,6 +25,15 @@ const referencedSchema = {
 const result = compileFormDefinition({ schema: referencedSchema });
 
 assert.equal(result.success, true);
+if (result.success) {
+  assert.equal(result.definition.presentation.length, 1);
+  assert.equal(result.definition.presentation[0]?.kind, 'form-node');
+  assert.equal(
+    result.definition.presentation[0]?.node,
+    result.definition.nodes[0],
+  );
+  assert.equal(Object.isFrozen(result.definition.presentation), true);
+}
 
 const runtimeResult = createControlledFormRuntime({
   formId: 'smoke',

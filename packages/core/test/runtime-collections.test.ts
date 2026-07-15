@@ -6,6 +6,7 @@ import {
   type FormNodeTemplate,
   type FormOperation,
 } from '../src/index.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 
 function definition(): FormDefinition {
   const name = {
@@ -27,7 +28,7 @@ function definition(): FormDefinition {
     identity: { property: 'id' },
     item: { kind: 'item-template', children: [name], fields: [name] },
   };
-  return { nodes: [rows], fields: [] };
+  return withDefaultPresentation({ nodes: [rows], fields: [] });
 }
 
 function create(value: object, baselineValue: object = value) {
@@ -67,7 +68,7 @@ function deepDefinition(depth: number): FormDefinition {
       children: [child],
     };
   }
-  return {
+  return withDefaultPresentation({
     nodes: [
       {
         kind: 'array',
@@ -81,7 +82,7 @@ function deepDefinition(depth: number): FormDefinition {
       },
     ],
     fields: [],
-  };
+  });
 }
 
 function nestedCollectionDefinition(): FormDefinition {
@@ -94,7 +95,7 @@ function nestedCollectionDefinition(): FormDefinition {
     label: 'Name',
     constraints: {},
   } as const;
-  return {
+  return withDefaultPresentation({
     nodes: [
       {
         kind: 'object',
@@ -122,7 +123,7 @@ function nestedCollectionDefinition(): FormDefinition {
       },
     ],
     fields: [],
-  };
+  });
 }
 
 function nestedItemDefinition(): FormDefinition {
@@ -144,7 +145,7 @@ function nestedItemDefinition(): FormDefinition {
     label: 'Address',
     children: [city],
   } as const;
-  return {
+  return withDefaultPresentation({
     nodes: [
       {
         kind: 'array',
@@ -162,7 +163,7 @@ function nestedItemDefinition(): FormDefinition {
       },
     ],
     fields: [],
-  };
+  });
 }
 
 function simpleCollectionNode(name: string): ArrayNodeDefinition {
@@ -397,7 +398,7 @@ describe('M10 controlled collection runtime integration', () => {
     const validator = vi.fn(() => ({ valid: true, issues: [] }));
     const created = createControlledFormRuntime({
       formId: 'form',
-      definition: { nodes: [rows], fields: [] },
+      definition: withDefaultPresentation({ nodes: [rows], fields: [] }),
       schema: {},
       value: { rows: [item] },
       baselineValue: { rows: [] },
@@ -427,10 +428,10 @@ describe('M10 controlled collection runtime integration', () => {
     const validator = vi.fn(() => ({ valid: true, issues: [] }));
     const created = createControlledFormRuntime({
       formId: 'form',
-      definition: {
+      definition: withDefaultPresentation({
         nodes: [simpleCollectionNode('first'), simpleCollectionNode('second')],
         fields: [],
-      },
+      }),
       schema: {},
       value,
       baselineValue: { first: [], second: [] },

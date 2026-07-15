@@ -1,0 +1,91 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "label": "b",
+        "kind": "boolean"
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "label": "b",
+        "kind": "boolean"
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"a\"]",
+          "name": "a",
+          "path": ["a"],
+          "required": false,
+          "label": "a",
+          "kind": "string",
+          "constraints": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"b\"]",
+          "name": "b",
+          "path": ["b"],
+          "required": false,
+          "label": "b",
+          "kind": "boolean"
+        }
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "INVALID_UI_PRESENTATION",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["presentation", 1],
+      "parameters": {
+        "reason": "duplicate-node",
+        "entryIndex": 1,
+        "node": "a",
+        "firstDocumentPath": ["presentation", 0]
+      },
+      "fallbackMessage": "UI presentation is invalid."
+    },
+    {
+      "code": "INVALID_UI_PRESENTATION",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["presentation"],
+      "parameters": { "reason": "missing-node", "node": "b" },
+      "fallbackMessage": "UI presentation is invalid."
+    }
+  ]
+}

@@ -47,6 +47,7 @@ const definitionFields = [
 const definition = {
   nodes: definitionFields,
   fields: definitionFields,
+  presentation: definitionFields.map((node) => ({ kind: 'form-node', node })),
 };
 const nestedStreet = {
   key: '["profile","address","street"]',
@@ -78,6 +79,7 @@ const nestedProfile = {
 const nestedDefinition = {
   nodes: [nestedProfile],
   fields: [nestedStreet],
+  presentation: [{ kind: 'form-node', node: nestedProfile }],
 };
 const set = (path, expected, value) => ({
   type: 'set-value',
@@ -255,6 +257,7 @@ const cases = {
     definition: {
       nodes: [],
       fields: [definitionFields[0], definitionFields[0]],
+      presentation: [],
     },
     currentValue: {},
     operation: set(['name'], { kind: 'missing' }, 'Ada'),

@@ -82,6 +82,59 @@
         "label": "Active",
         "kind": "boolean"
       }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"name\"]",
+          "name": "name",
+          "path": ["name"],
+          "required": true,
+          "label": "Name",
+          "kind": "string",
+          "constraints": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"amount\"]",
+          "name": "amount",
+          "path": ["amount"],
+          "required": false,
+          "label": "Amount",
+          "kind": "number",
+          "numericType": "number",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"count\"]",
+          "name": "count",
+          "path": ["count"],
+          "required": false,
+          "label": "Count",
+          "kind": "number",
+          "numericType": "integer",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"active\"]",
+          "name": "active",
+          "path": ["active"],
+          "required": false,
+          "label": "Active",
+          "kind": "boolean"
+        }
+      }
     ]
   },
   "currentValue": {},

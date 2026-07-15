@@ -74,6 +74,18 @@ describe('compileFormDefinition', () => {
     ]);
     expect(result.definition.nodes).toEqual(result.definition.fields);
     expect(result.definition.nodes[0]).toBe(result.definition.fields[0]);
+    expect(result.definition.presentation).toHaveLength(4);
+    expect(
+      result.definition.presentation.map((entry) =>
+        entry.kind === 'form-node' ? entry.node : undefined,
+      ),
+    ).toEqual(result.definition.nodes);
+    expect(result.definition.presentation[0]?.kind).toBe('form-node');
+    if (result.definition.presentation[0]?.kind === 'form-node') {
+      expect(result.definition.presentation[0].node).toBe(
+        result.definition.nodes[0],
+      );
+    }
   });
 
   it('uses explicit empty UI text values without falling back', () => {
@@ -136,8 +148,27 @@ describe('compileFormDefinition', () => {
     if (!result.success) return;
     expect(Object.isFrozen(result.definition)).toBe(true);
     expect(Object.isFrozen(result.definition.fields)).toBe(true);
+    expect(Object.isFrozen(result.definition.presentation)).toBe(true);
+    expect(result.definition.presentation.every(Object.isFrozen)).toBe(true);
     expect(Object.isFrozen(result.definition.fields[0])).toBe(true);
     expect(Object.isFrozen(result.definition.fields[0]?.path)).toBe(true);
+  });
+
+  it('normalizes an empty root to an empty required presentation forest', () => {
+    const result = compileFormDefinition({
+      schema: {
+        $schema: dialect,
+        type: 'object',
+        properties: {},
+      },
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+      definition: { nodes: [], fields: [], presentation: [] },
+    });
+    if (!result.success) return;
+    expect(Object.isFrozen(result.definition.presentation)).toBe(true);
   });
 
   it('normalizes exact string enums into deeply frozen ordered choices', () => {

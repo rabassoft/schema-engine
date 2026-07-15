@@ -20,6 +20,19 @@
         "label": "active",
         "kind": "boolean"
       }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"active\"]",
+          "name": "active",
+          "path": ["active"],
+          "required": false,
+          "label": "active",
+          "kind": "boolean"
+        }
+      }
     ]
   },
   "diagnostics": [

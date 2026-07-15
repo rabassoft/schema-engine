@@ -641,6 +641,9 @@ function nestedFormDiagnostic(
       ...(defect.relativePath === undefined
         ? {}
         : { relativePath: [...defect.relativePath] }),
+      ...(defect.presentationIndexPath === undefined
+        ? {}
+        : { presentationIndexPath: [...defect.presentationIndexPath] }),
     },
     'Form definition is invalid.',
     dataPath,

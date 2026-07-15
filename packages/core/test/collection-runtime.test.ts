@@ -10,6 +10,7 @@ import {
   inspectCollectionValue,
 } from '../src/internal/collection-runtime.js';
 import type { ArrayNodeDefinition, FormDefinition } from '../src/index.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 
 function collection(
   path: readonly string[],
@@ -156,7 +157,7 @@ describe('M10 defined collection inspection and diagnostics', () => {
   it('walks nested definitions in depth-first definition order', () => {
     const first = collection(['group', 'first']);
     const second = collection(['second']);
-    const definition: FormDefinition = {
+    const definition: FormDefinition = withDefaultPresentation({
       nodes: [
         {
           kind: 'object',
@@ -170,7 +171,7 @@ describe('M10 defined collection inspection and diagnostics', () => {
         second,
       ],
       fields: [],
-    };
+    });
     const inspected = inspectDefinedCollections(
       { group: { first: [] }, second: [] },
       definition.nodes,

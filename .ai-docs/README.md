@@ -21,6 +21,10 @@
 - [SPEC-004 v0.1.1: Same-document Static JSON Schema Reference Resolution](./specs/004-local-reference-resolution.md)
   — Accepted after nine findings were corrected across four cycles and
   repeated complete review cycle 5 passed with zero findings.
+- [SPEC-005 v0.1.1: Static Neutral Presentation Groups](./specs/005-static-presentation-groups.md)
+  — Accepted after four findings were corrected and review 024 cycle 2 passed
+  with zero findings; completed PLAN-012 implements it after a final repeated
+  review with zero findings.
 
 ## Acceptance reviews
 
@@ -73,6 +77,19 @@
 - [M11 PLAN-011 implementation review — Cycles 1–2](./reviews/021-plan-011-implementation-review.md)
   — One policy-provenance defect was corrected; the repeated complete review
   passed with zero findings and completed M11.
+- [M12 advanced UI Schema promotion-readiness review](./reviews/022-m12-advanced-ui-promotion-readiness.md)
+  — Accepted; creates and promotes D-042 only for a narrow static-presentation-
+  group design slice while D-011 and D-012 remain Deferred.
+- [M12 ADR-017 complete review — Cycles 1–3](./reviews/023-adr-017-review.md) —
+  Two current-state findings were corrected; cycle 3 passed all eight areas with
+  zero findings and ADR-017 revision 0 was then accepted.
+- [M12 SPEC-005 complete review — Cycles 1–2](./reviews/024-spec-005-review.md) —
+  Four findings were corrected; cycle 2 passed all ten areas with zero findings.
+- [M12 PLAN-012 complete review — Cycles 1–2](./reviews/025-plan-012-review.md) —
+  Two findings were corrected; cycle 2 passed all ten areas with zero findings.
+- [M12 PLAN-012 implementation review — Cycles 1–6](./reviews/026-plan-012-implementation-review.md) —
+  Seven findings were corrected across cycles 1–5; cycle 6 passed the closing
+  review with zero findings after the complete matrix passed in cycle 3.
 
 ## Architecture Decision Records
 
@@ -81,6 +98,9 @@
   — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
   normative contract; SPEC-004 v0.1.1 and completed PLAN-011 implement that
   narrow slice.
+- [ADR-017: Static neutral presentation groups](./adrs/017-grupos-presentacion-estaticos.md)
+  — Accepted revision 0 for D-042 after review 023 cycle 3 passed all eight
+  areas with zero findings; SPEC-005 and completed PLAN-012 implement it.
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
   and Ricard accepted the revision.
@@ -125,8 +145,9 @@
 - [PLAN-009: Nested-object controlled runtime](./plans/009-nested-object-runtime.md) — Completed revision 1
 - [PLAN-010: Homogeneous object collection runtime](./plans/010-homogeneous-object-collections.md) — Completed revision 0
 - [PLAN-011: Same-document static JSON Schema reference resolution](./plans/011-local-reference-resolution.md) — Completed revision 0 after final repeated review with zero findings
+- [PLAN-012: Static neutral presentation groups](./plans/012-static-presentation-groups.md) — Completed revision 1 after final repeated review with zero findings
 
-M1-M11 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
+M1-M12 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
 increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
 `0.1.0` candidates. M8 completed without publication; M9 has accepted normative
@@ -137,6 +158,8 @@ zero-finding review. M11 reference-resolution architecture and SPEC-004 v0.1.1
 are accepted after complete review passed with zero findings; PLAN-011 revision
 0 passed complete review, was approved and completed all five checkpoints after
 its final repeated implementation review passed with zero findings. M11 is
-complete. M12 remains a planning proposal only.
+complete. M12 implemented the narrow D-042 static-section slice under accepted
+ADR-017, SPEC-005 v0.1.1 and completed PLAN-012; D-011/D-012 remain Deferred
+outside it.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

@@ -12,10 +12,12 @@ import type {
   ObjectItemTemplateDefinition,
   ObjectFieldDefinition,
   ObjectNodeTemplate,
+  PresentationEntryDefinition,
   StringFieldDefinition,
 } from './contracts.js';
 import { diagnostic, hasErrors } from './internal/diagnostics.js';
 import { deepFreeze } from './internal/immutable.js';
+import { createDefaultPresentation } from './internal/presentation-definition.js';
 import {
   BOOLEAN_FIELD_KEYWORDS,
   COMPILER_SUPPORTED_KEYWORDS,
@@ -121,7 +123,17 @@ interface ParsedFieldUi {
 interface ParsedUiSchema {
   readonly order: readonly string[];
   readonly fields: ReadonlyMap<string, ParsedNodeUi>;
+  presentation?: readonly ParsedPresentationEntry[];
 }
+
+type ParsedPresentationEntry =
+  | { readonly kind: 'form-node'; readonly name: string }
+  | {
+      readonly kind: 'section';
+      readonly id: string;
+      readonly label: string;
+      readonly children: readonly ParsedPresentationEntry[];
+    };
 
 interface ParsedObjectUi extends ParsedFieldUi {
   readonly order: readonly string[];
@@ -196,7 +208,7 @@ const ARRAY_FIELD_KEYWORDS = new Set([
 ]);
 const ITEM_ROOT_KEYWORDS = new Set(['type', 'properties', 'required']);
 
-const UI_ROOT_KEYS = new Set(['order', 'fields']);
+const UI_ROOT_KEYS = new Set(['order', 'fields', 'presentation']);
 const UI_FIELD_KEYS = new Set([
   'label',
   'description',
@@ -2955,9 +2967,10 @@ function inspectUiSchema(
 ): ParsedUiSchema {
   const order: string[] = [];
   const fields = new Map<string, ParsedFieldUi>();
+  const result: ParsedUiSchema = { order, fields };
 
   if (rawUiSchema === undefined) {
-    return { order, fields };
+    return result;
   }
 
   if (!isRecord(rawUiSchema)) {
@@ -2970,7 +2983,7 @@ function inspectUiSchema(
         fallbackMessage: 'UI Schema must be an object.',
       }),
     );
-    return { order, fields };
+    return result;
   }
 
   const knownFields =
@@ -2982,7 +2995,9 @@ function inspectUiSchema(
       continue;
     }
 
-    if (key === 'order') {
+    if (key === 'presentation') {
+      continue;
+    } else if (key === 'order') {
       inspectUiOrder(rawUiSchema.order, knownFields, order, diagnostics);
     } else {
       inspectUiFields(
@@ -2995,7 +3010,418 @@ function inspectUiSchema(
     }
   }
 
-  return { order, fields };
+  const presentation = inspectRootPresentation(
+    rawUiSchema,
+    propertyNames ?? [],
+    diagnostics,
+  );
+  if (presentation !== undefined) result.presentation = presentation;
+  return result;
+}
+
+function inspectRootPresentation(
+  ui: Record<string, unknown>,
+  nodeNames: readonly string[],
+  diagnostics: Diagnostic[],
+): readonly ParsedPresentationEntry[] | undefined {
+  const presentation = ownDataValue(ui, 'presentation');
+  if (!presentation.present) return undefined;
+
+  let invalid = false;
+  if (ownDataValue(ui, 'order').present) {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation('order-conflict', ['presentation'], {
+        member: 'order',
+        expected: 'one root ordering authority',
+      }),
+    );
+  }
+  if (presentation.accessor) {
+    diagnostics.push(
+      invalidUiPresentation('presentation-accessor', ['presentation'], {
+        expected: 'dense array',
+      }),
+    );
+    return undefined;
+  }
+  if (!Array.isArray(presentation.value)) {
+    diagnostics.push(
+      invalidUiPresentation('presentation-not-array', ['presentation'], {
+        expected: 'dense array',
+        actualType: actualType(presentation.value),
+      }),
+    );
+    return undefined;
+  }
+
+  const known = new Set(nodeNames);
+  const normalizedNodeNames = presentationNodeOrder(ui, nodeNames);
+  const firstNodes = new Map<string, readonly (string | number)[]>();
+  const firstSections = new Map<string, readonly (string | number)[]>();
+  const active = new Map<object, readonly (string | number)[]>();
+  const result: ParsedPresentationEntry[] = [];
+  type Frame =
+    | {
+        readonly kind: 'entry';
+        readonly value: unknown;
+        readonly index: number;
+        readonly path: readonly (string | number)[];
+        readonly output: ParsedPresentationEntry[];
+      }
+    | { readonly kind: 'exit'; readonly section: object };
+  const stack: Frame[] = [];
+  pushPresentationEntries(presentation.value, ['presentation'], result, stack);
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    if (frame.kind === 'exit') {
+      active.delete(frame.section);
+      continue;
+    }
+    if (frame.value === SPARSE_PRESENTATION_ENTRY) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('sparse-entry', frame.path, {
+          entryIndex: frame.index,
+        }),
+      );
+      continue;
+    }
+    if (frame.value === ACCESSOR_PRESENTATION_ENTRY) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('entry-accessor', frame.path, {
+          entryIndex: frame.index,
+        }),
+      );
+      continue;
+    }
+    if (typeof frame.value === 'string') {
+      if (!known.has(frame.value)) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation('unknown-node', frame.path, {
+            entryIndex: frame.index,
+            node: frame.value,
+          }),
+        );
+        continue;
+      }
+      const firstDocumentPath = firstNodes.get(frame.value);
+      if (firstDocumentPath !== undefined) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation('duplicate-node', frame.path, {
+            entryIndex: frame.index,
+            node: frame.value,
+            firstDocumentPath: [...firstDocumentPath],
+          }),
+        );
+        continue;
+      }
+      firstNodes.set(frame.value, frame.path);
+      frame.output.push({ kind: 'form-node', name: frame.value });
+      continue;
+    }
+    if (!isOrdinaryRecord(frame.value)) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('invalid-entry', frame.path, {
+          entryIndex: frame.index,
+          expected: 'root node name or section object',
+          actualType: actualType(frame.value),
+        }),
+      );
+      continue;
+    }
+
+    const section = frame.value;
+    const firstActivePath = active.get(section);
+    if (firstActivePath !== undefined) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('cyclic-presentation', frame.path, {
+          firstDocumentPath: [...firstActivePath],
+        }),
+      );
+      continue;
+    }
+
+    const kind = presentationSectionMember(section, 'kind');
+    const id = presentationSectionMember(section, 'id');
+    const label = presentationSectionMember(section, 'label');
+    const children = presentationSectionMember(section, 'children');
+    invalid =
+      inspectPresentationSectionMember(
+        kind,
+        'kind',
+        'section',
+        frame.path,
+        diagnostics,
+        (value) => value === 'section',
+      ) || invalid;
+    invalid =
+      inspectPresentationSectionMember(
+        id,
+        'id',
+        'non-empty string',
+        frame.path,
+        diagnostics,
+        (value) => typeof value === 'string' && value.length > 0,
+      ) || invalid;
+    invalid =
+      inspectPresentationLabel(label, frame.path, diagnostics) || invalid;
+    invalid =
+      inspectPresentationSectionMember(
+        children,
+        'children',
+        'non-empty dense array',
+        frame.path,
+        diagnostics,
+        Array.isArray,
+      ) || invalid;
+
+    const sectionId =
+      id.kind === 'value' && typeof id.value === 'string' && id.value.length > 0
+        ? id.value
+        : undefined;
+    const sectionLabel =
+      label.kind === 'value' &&
+      typeof label.value === 'string' &&
+      label.value.trim().length > 0
+        ? label.value
+        : undefined;
+    if (sectionId !== undefined) {
+      const idPath = [...frame.path, 'id'];
+      const firstDocumentPath = firstSections.get(sectionId);
+      if (firstDocumentPath !== undefined) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation('duplicate-section-id', idPath, {
+            sectionId,
+            firstDocumentPath: [...firstDocumentPath],
+          }),
+        );
+      } else firstSections.set(sectionId, idPath);
+    }
+
+    for (const key of Object.keys(section)) {
+      if (!['kind', 'id', 'label', 'children'].includes(key)) {
+        diagnostics.push(unknownUiKey(key, [...frame.path, key]));
+      }
+    }
+
+    if (children.kind !== 'value' || !Array.isArray(children.value)) continue;
+    if (children.value.length === 0) {
+      if (sectionId !== undefined) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation('empty-section', [...frame.path, 'children'], {
+            sectionId,
+            expected: 'non-empty dense children array',
+          }),
+        );
+      }
+      continue;
+    }
+    const parsedChildren: ParsedPresentationEntry[] = [];
+    if (
+      kind.kind === 'value' &&
+      kind.value === 'section' &&
+      sectionId !== undefined &&
+      sectionLabel !== undefined
+    ) {
+      frame.output.push({
+        kind: 'section',
+        id: sectionId,
+        label: sectionLabel,
+        children: parsedChildren,
+      });
+    }
+    active.set(section, frame.path);
+    stack.push({ kind: 'exit', section });
+    pushPresentationEntries(
+      children.value,
+      [...frame.path, 'children'],
+      parsedChildren,
+      stack,
+    );
+  }
+
+  for (const name of normalizedNodeNames) {
+    if (!firstNodes.has(name)) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('missing-node', ['presentation'], { node: name }),
+      );
+    }
+  }
+  return invalid ? undefined : result;
+}
+
+function presentationNodeOrder(
+  ui: object,
+  nodeNames: readonly string[],
+): readonly string[] {
+  const known = new Set(nodeNames);
+  const seen = new Set<string>();
+  const result: string[] = [];
+  const order = ownDataValue(ui, 'order');
+  if (order.present && !order.accessor && Array.isArray(order.value)) {
+    for (let index = 0; index < order.value.length; index += 1) {
+      const descriptor = Object.getOwnPropertyDescriptor(
+        order.value,
+        String(index),
+      );
+      if (descriptor === undefined || !('value' in descriptor)) continue;
+      const name: unknown = descriptor.value;
+      if (typeof name !== 'string' || !known.has(name) || seen.has(name))
+        continue;
+      seen.add(name);
+      result.push(name);
+    }
+  }
+  for (const name of nodeNames) {
+    if (!seen.has(name)) result.push(name);
+  }
+  return result;
+}
+
+type PresentationInspectionFrame = {
+  readonly kind: 'entry';
+  readonly value: unknown;
+  readonly index: number;
+  readonly path: readonly (string | number)[];
+  readonly output: ParsedPresentationEntry[];
+};
+
+function pushPresentationEntries(
+  entries: readonly unknown[],
+  basePath: readonly (string | number)[],
+  output: ParsedPresentationEntry[],
+  stack: Array<
+    | PresentationInspectionFrame
+    | { readonly kind: 'exit'; readonly section: object }
+  >,
+): void {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(entries, String(index));
+    const path = [...basePath, index];
+    if (descriptor === undefined) {
+      stack.push({
+        kind: 'entry',
+        value: SPARSE_PRESENTATION_ENTRY,
+        index,
+        path,
+        output,
+      });
+    } else if (!('value' in descriptor)) {
+      stack.push({
+        kind: 'entry',
+        value: ACCESSOR_PRESENTATION_ENTRY,
+        index,
+        path,
+        output,
+      });
+    } else
+      stack.push({
+        kind: 'entry',
+        value: descriptor.value,
+        index,
+        path,
+        output,
+      });
+  }
+}
+
+const SPARSE_PRESENTATION_ENTRY = Symbol('sparse-presentation-entry');
+const ACCESSOR_PRESENTATION_ENTRY = Symbol('accessor-presentation-entry');
+
+type PresentationSectionMember =
+  | { readonly kind: 'missing' }
+  | { readonly kind: 'accessor' }
+  | { readonly kind: 'value'; readonly value: unknown };
+
+function presentationSectionMember(
+  section: object,
+  member: string,
+): PresentationSectionMember {
+  const descriptor = Object.getOwnPropertyDescriptor(section, member);
+  if (descriptor === undefined || descriptor.enumerable !== true)
+    return { kind: 'missing' };
+  return 'value' in descriptor
+    ? { kind: 'value', value: descriptor.value }
+    : { kind: 'accessor' };
+}
+
+function inspectPresentationSectionMember(
+  inspected: PresentationSectionMember,
+  member: string,
+  expected: string,
+  sectionPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+  valid: (value: unknown) => boolean,
+): boolean {
+  const documentPath = [...sectionPath, member];
+  if (inspected.kind === 'missing') {
+    diagnostics.push(
+      invalidUiPresentation('section-member-missing', documentPath, {
+        member,
+        expected,
+      }),
+    );
+    return true;
+  }
+  if (inspected.kind === 'accessor') {
+    diagnostics.push(
+      invalidUiPresentation('section-member-accessor', documentPath, {
+        member,
+        expected,
+      }),
+    );
+    return true;
+  }
+  if (!valid(inspected.value)) {
+    diagnostics.push(
+      invalidUiPresentation('section-member-invalid', documentPath, {
+        member,
+        expected,
+        actualType: actualType(inspected.value),
+      }),
+    );
+    return true;
+  }
+  return false;
+}
+
+function inspectPresentationLabel(
+  inspected: PresentationSectionMember,
+  sectionPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+): boolean {
+  if (
+    inspected.kind !== 'value' ||
+    typeof inspected.value !== 'string' ||
+    inspected.value.trim().length > 0
+  ) {
+    return inspectPresentationSectionMember(
+      inspected,
+      'label',
+      'non-blank string',
+      sectionPath,
+      diagnostics,
+      (value) => typeof value === 'string',
+    );
+  }
+  diagnostics.push(
+    invalidUiPresentation('section-member-blank', [...sectionPath, 'label'], {
+      member: 'label',
+      expected: 'non-blank string',
+    }),
+  );
+  return true;
 }
 
 function inspectUiOrder(
@@ -3366,7 +3792,10 @@ function inspectNestedUiSchema(
   templateArrayPath?: readonly string[],
 ): ParsedUiSchema {
   const diagnosticsStart = diagnostics.length;
-  const result = {
+  const result: ParsedUiSchema & {
+    readonly order: string[];
+    readonly fields: Map<string, ParsedNodeUi>;
+  } = {
     order: [] as string[],
     fields: new Map<string, ParsedNodeUi>(),
   };
@@ -3384,6 +3813,23 @@ function inspectNestedUiSchema(
       }),
     );
     return result;
+  }
+  if (templateArrayPath === undefined) {
+    const presentation = inspectRootPresentation(
+      rawUiSchema,
+      candidates.map(({ name }) => name),
+      diagnostics,
+    );
+    if (presentation !== undefined) result.presentation = presentation;
+  } else if (ownDataValue(rawUiSchema, 'presentation').present) {
+    diagnostics.push(
+      invalidUiPresentation(
+        'unsupported-location',
+        [...rootDocumentPath, 'presentation'],
+        { member: 'presentation', nodeKind: 'item' },
+        templateArrayPath,
+      ),
+    );
   }
 
   type ContainerFrame =
@@ -3686,6 +4132,7 @@ function inspectNestedUiSchema(
     for (let index = diagnosticsStart; index < diagnostics.length; index += 1) {
       const current = diagnostics[index];
       if (current === undefined) continue;
+      if (current.code === 'INVALID_UI_PRESENTATION') continue;
       const templatePath = (current.dataPath ?? []).filter(
         (segment): segment is string => typeof segment === 'string',
       );
@@ -3864,6 +4311,22 @@ function inspectNestedNodeUi(
   }
   if (value === undefined) {
     return parsed;
+  }
+  if (
+    (candidate.type === 'object' || candidate.type === 'array') &&
+    ownDataValue(value, 'presentation').present
+  ) {
+    diagnostics.push(
+      invalidUiPresentation(
+        'unsupported-location',
+        [...documentPath, 'presentation'],
+        {
+          member: 'presentation',
+          nodeKind: candidate.type === 'array' ? 'array' : 'object',
+        },
+        dataPath,
+      ),
+    );
   }
   const allowed = new Set(
     candidate.type === 'object'
@@ -4353,7 +4816,11 @@ function buildNestedDefinition(
       fields.push(field);
     }
   }
-  return { nodes, fields };
+  return {
+    nodes,
+    fields,
+    presentation: createPresentationDefinition(uiSchema.presentation, nodes),
+  };
 }
 
 function buildItemTemplate(
@@ -4565,7 +5032,54 @@ function buildDefinition(
     }
     return buildFieldDefinition(candidate, uiSchema.fields.get(name));
   });
-  return { nodes: fields, fields };
+  return {
+    nodes: fields,
+    fields,
+    presentation: createPresentationDefinition(uiSchema.presentation, fields),
+  };
+}
+
+function createPresentationDefinition(
+  parsed: readonly ParsedPresentationEntry[] | undefined,
+  nodes: readonly FormNodeDefinition[],
+): readonly PresentationEntryDefinition[] {
+  if (parsed === undefined) return createDefaultPresentation(nodes);
+  const byName = new Map(nodes.map((node) => [node.name, node] as const));
+  const result: PresentationEntryDefinition[] = [];
+  type Frame = {
+    readonly entries: readonly ParsedPresentationEntry[];
+    readonly output: PresentationEntryDefinition[];
+    index: number;
+  };
+  const stack: Frame[] = [{ entries: parsed, output: result, index: 0 }];
+  while (stack.length > 0) {
+    const frame = stack.at(-1);
+    if (frame === undefined) break;
+    if (frame.index >= frame.entries.length) {
+      stack.pop();
+      continue;
+    }
+    const entry = frame.entries[frame.index];
+    frame.index += 1;
+    if (entry === undefined) continue;
+    if (entry.kind === 'form-node') {
+      const node = byName.get(entry.name);
+      if (node === undefined)
+        throw new Error('Internal compiler error: missing presented node.');
+      frame.output.push({ kind: 'form-node', node });
+      continue;
+    }
+    const children: PresentationEntryDefinition[] = [];
+    frame.output.push({
+      kind: 'section',
+      id: entry.id,
+      key: JSON.stringify(['section', entry.id]),
+      label: entry.label,
+      children,
+    });
+    stack.push({ entries: entry.children, output: children, index: 0 });
+  }
+  return result;
 }
 
 function buildFieldDefinition(
@@ -4704,6 +5218,23 @@ function unknownUiKey(
     documentPath,
     parameters: { key },
     fallbackMessage: `Unknown UI Schema key "${key}" is ignored.`,
+  });
+}
+
+function invalidUiPresentation(
+  reason: string,
+  documentPath: readonly (string | number)[],
+  parameters: Readonly<Record<string, unknown>>,
+  dataPath?: readonly (string | number)[],
+): Diagnostic {
+  return diagnostic({
+    code: 'INVALID_UI_PRESENTATION',
+    severity: 'warning',
+    source: 'ui-schema',
+    ...(dataPath === undefined ? {} : { dataPath }),
+    documentPath,
+    parameters: { reason, ...parameters },
+    fallbackMessage: 'UI presentation is invalid.',
   });
 }
 

@@ -1512,6 +1512,13 @@ function invalidDefinitionOption(
       ...(defect.relativePath === undefined
         ? {}
         : { relativePath: Object.freeze([...defect.relativePath]) }),
+      ...(defect.presentationIndexPath === undefined
+        ? {}
+        : {
+            presentationIndexPath: Object.freeze([
+              ...defect.presentationIndexPath,
+            ]),
+          }),
     },
     'Runtime option "definition" is invalid.',
   );

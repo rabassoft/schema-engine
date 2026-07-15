@@ -35,6 +35,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 14. [ADR 014: Normalized nested-object model and deep controlled paths](./014-modelo-objetos-anidados-paths-profundos.md) — **Accepted revision 2; implemented by completed PLAN-009 after final zero-finding review.**
 15. [ADR 015: Collection templates, stable item identity and controlled structural operations](./015-modelo-colecciones-identidad-operaciones.md) — **Accepted revision 4; implemented by completed PLAN-010 after final repeated review with zero findings.**
 16. [ADR 016: Same-document static JSON Schema reference resolution](./016-resolucion-referencias-locales.md) — **Accepted; ADR-005 revision 3 and SPEC-004 v0.1.1 completed its normative follow-up gates after zero-finding reviews.**
+17. [ADR 017: Static neutral presentation groups](./017-grupos-presentacion-estaticos.md) — **Accepted revision 0 after review 023 cycle 3 passed all eight areas with zero findings; SPEC preparation only is authorized.**
 
 ## 4. ADRs específicos de Angular
 

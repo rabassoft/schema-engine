@@ -5,6 +5,16 @@ export type DocumentPath = readonly (string | number)[];
 export interface UiSchema {
   readonly order?: readonly string[];
   readonly fields?: Readonly<Record<string, UiNodeSchema>>;
+  readonly presentation?: readonly UiPresentationEntry[];
+}
+
+export type UiPresentationEntry = string | UiSectionSchema;
+
+export interface UiSectionSchema {
+  readonly kind: 'section';
+  readonly id: string;
+  readonly label: string;
+  readonly children: readonly UiPresentationEntry[];
 }
 
 export type UiNodeSchema = ObjectUiSchema | ArrayUiSchema | FieldUiSchema;
@@ -47,6 +57,23 @@ export interface FieldUiSchema {
 export interface FormDefinition {
   readonly nodes: readonly FormNodeDefinition[];
   readonly fields: readonly FieldDefinition[];
+  readonly presentation: readonly PresentationEntryDefinition[];
+}
+
+export type PresentationEntryDefinition =
+  PresentedFormNodeDefinition | PresentationSectionDefinition;
+
+export interface PresentedFormNodeDefinition {
+  readonly kind: 'form-node';
+  readonly node: FormNodeDefinition;
+}
+
+export interface PresentationSectionDefinition {
+  readonly kind: 'section';
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly children: readonly PresentationEntryDefinition[];
 }
 
 export interface BaseNodeDefinition {
@@ -317,6 +344,7 @@ export type CollectionTextMember =
   | 'move-item-earlier'
   | 'move-item-later'
   | 'issue';
+export type SectionTextMember = 'label';
 export type FieldTextResolutionContext =
   | {
       readonly formId: string;
@@ -385,10 +413,17 @@ export type CollectionTextResolutionContext =
       readonly member: 'issue';
       readonly issue: ValidationIssue;
     };
+export interface SectionTextResolutionContext {
+  readonly formId: string;
+  readonly locale: string;
+  readonly section: PresentationSectionDefinition;
+  readonly member: SectionTextMember;
+}
 export type TextResolutionContext =
   | FieldTextResolutionContext
   | ObjectTextResolutionContext
-  | CollectionTextResolutionContext;
+  | CollectionTextResolutionContext
+  | SectionTextResolutionContext;
 export interface TextResolver {
   resolve(text: string, context: TextResolutionContext): string;
 }

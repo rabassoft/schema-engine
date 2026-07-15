@@ -40,10 +40,15 @@ const field = definition.fields[0];
 const ageField = definition.fields[1];
 if (field === undefined || ageField === undefined)
   throw new Error('field fixture compilation failed');
-const nameDefinition: FormDefinition = { nodes: [field], fields: [field] };
+const nameDefinition: FormDefinition = {
+  nodes: [field],
+  fields: [field],
+  presentation: [{ kind: 'form-node', node: field }],
+};
 const ageDefinition: FormDefinition = {
   nodes: [ageField],
   fields: [ageField],
+  presentation: [{ kind: 'form-node', node: ageField }],
 };
 const alienField = compileAlienField();
 const schema = Object.freeze({});

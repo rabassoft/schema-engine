@@ -27,6 +27,7 @@ const fields = [
 const definition = {
   nodes: fields,
   fields,
+  presentation: fields.map((node) => ({ kind: 'form-node', node })),
 };
 const nestedStreet = {
   key: '["profile","street"]',
@@ -49,6 +50,7 @@ const nestedProfile = {
 const nestedDefinition = {
   nodes: [nestedProfile],
   fields: [nestedStreet],
+  presentation: [{ kind: 'form-node', node: nestedProfile }],
 };
 const cases = {
   'valid-creation': {

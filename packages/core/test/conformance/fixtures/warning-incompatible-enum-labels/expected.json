@@ -22,6 +22,20 @@
         "kind": "string",
         "constraints": {}
       }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"status\"]",
+          "name": "status",
+          "path": ["status"],
+          "required": false,
+          "label": "status",
+          "kind": "string",
+          "constraints": {}
+        }
+      }
     ]
   },
   "diagnostics": [

@@ -5,6 +5,7 @@ import {
   type FormDefinition,
   type FormOperation,
 } from '../src/index.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 
 const metadata = { id: 1, formId: 'form' } as const;
 const definitionFields: FormDefinition['fields'] = [
@@ -48,10 +49,10 @@ const definitionFields: FormDefinition['fields'] = [
     kind: 'boolean',
   },
 ];
-const definition: FormDefinition = {
+const definition: FormDefinition = withDefaultPresentation({
   nodes: definitionFields,
   fields: definitionFields,
-};
+});
 
 function set(
   path: readonly (string | number)[],
@@ -288,10 +289,10 @@ describe('root immutable operations', () => {
       ],
     });
     const duplicateFields = [definition.fields[0], definition.fields[0]];
-    const duplicate = {
+    const duplicate = withDefaultPresentation({
       nodes: duplicateFields,
       fields: duplicateFields,
-    } as FormDefinition;
+    }) as unknown as FormDefinition;
     expect(
       applyFormOperation(
         duplicate,
@@ -448,10 +449,10 @@ describe('deep immutable operations', () => {
     kind: 'object',
     children: [address],
   } as const;
-  const nestedDefinition: FormDefinition = {
+  const nestedDefinition: FormDefinition = withDefaultPresentation({
     nodes: [profile],
     fields: [street],
-  };
+  });
 
   it('materializes missing ancestors and resolves exact managed leaves', () => {
     const result = applyFormOperation(
@@ -491,7 +492,11 @@ describe('deep immutable operations', () => {
     const cyclic = { ...profile, children: [] as unknown[] };
     cyclic.children.push(cyclic);
     const result = applyFormOperation(
-      { nodes: [cyclic], fields: [] } as never,
+      {
+        nodes: [cyclic],
+        fields: [],
+        presentation: [{ kind: 'form-node', node: cyclic }],
+      } as never,
       Object.defineProperty({}, 'profile', {
         get() {
           throw new Error('must not inspect data after definition failure');
@@ -515,7 +520,7 @@ describe('deep immutable operations', () => {
     });
 
     const independent = applyFormOperation(
-      { nodes: [null, 1], fields: [] } as never,
+      { nodes: [null, 1], fields: [], presentation: [] } as never,
       {},
       set(['profile', 'address', 'street'], { kind: 'missing' }, 'Main'),
     );

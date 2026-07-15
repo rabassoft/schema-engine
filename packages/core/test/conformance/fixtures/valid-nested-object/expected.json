@@ -27,7 +27,9 @@
                 "label": "Street name",
                 "placeholder": "Main St",
                 "kind": "string",
-                "constraints": { "minLength": 1 }
+                "constraints": {
+                  "minLength": 1
+                }
               }
             ]
           }
@@ -43,7 +45,47 @@
         "label": "Street name",
         "placeholder": "Main St",
         "kind": "string",
-        "constraints": { "minLength": 1 }
+        "constraints": {
+          "minLength": 1
+        }
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"address\"]",
+          "name": "address",
+          "path": ["address"],
+          "required": true,
+          "label": "Postal address",
+          "kind": "object",
+          "children": [
+            {
+              "key": "[\"address\",\"location\"]",
+              "name": "location",
+              "path": ["address", "location"],
+              "required": false,
+              "label": "location",
+              "hint": "Primary location",
+              "kind": "object",
+              "children": [
+                {
+                  "key": "[\"address\",\"location\",\"street\"]",
+                  "name": "street",
+                  "path": ["address", "location", "street"],
+                  "required": true,
+                  "label": "Street name",
+                  "placeholder": "Main St",
+                  "kind": "string",
+                  "constraints": {
+                    "minLength": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
       }
     ]
   },

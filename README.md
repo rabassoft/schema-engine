@@ -11,12 +11,12 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository contains the completed M1-M11 controlled-form runtime and private
+The repository contains the completed M1-M12 controlled-form runtime and private
 local release candidates. Its G0 review passed; SPEC-001 v0.1.15, SPEC-002
-v0.1.2, SPEC-003 v0.1.2 and SPEC-004 v0.1.1 are Accepted. PLAN-011 revision 0
-implemented same-document local reference resolution; all five checkpoints and
-the repeated final review are complete with zero findings. The live checkpoint
-is recorded in
+v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1 and SPEC-005 v0.1.1 are Accepted.
+PLAN-012 revision 1 implemented static neutral presentation groups; all five
+checkpoints and the repeated final review are complete with zero findings. The
+live checkpoint is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
@@ -29,8 +29,9 @@ scopes, diagnostics, and text contracts.
 `packages/angular` exposes the Angular 22 headless adapter and accessible native
 HTML renderers for string, number/integer, boolean, and string enum fields. It
 recursively projects normalized inline object groups with semantic fieldsets,
-fixed homogeneous collection/item groups, canonical stable IDs and localized
-text. Its private primitive-leaf control buffers use Angular Signal Forms
+fixed homogeneous collection/item groups and static neutral presentation
+sections, with canonical stable IDs and localized text. Its private
+primitive-leaf control buffers use Angular Signal Forms
 without moving controlled state, validation, identity, or operations out of
 the core/application boundary.
 
@@ -40,7 +41,8 @@ application-owned stable string identity. The SPEC-004 subset resolves static
 same-document fragment-only `$ref` values into root `$defs` at supported
 non-root schema positions. External/dynamic references, anchors, arrays of
 primitives, arrays inside collection item templates, tuples, composition,
-generated identity, async validation, persistence, advanced layouts, custom
+generated identity, async validation, persistence, advanced layouts beyond the
+fixed static section primitive, custom
 collection renderers and other deferred decisions are not active.
 
 ## Branch workflow

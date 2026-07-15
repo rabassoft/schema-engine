@@ -60,6 +60,45 @@
         "constraints": {},
         "ui": {}
       }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"active\"]",
+          "name": "active",
+          "path": ["active"],
+          "required": false,
+          "label": "active",
+          "kind": "boolean"
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"name\"]",
+          "name": "name",
+          "path": ["name"],
+          "required": false,
+          "label": "name",
+          "kind": "string",
+          "constraints": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"age\"]",
+          "name": "age",
+          "path": ["age"],
+          "required": false,
+          "label": "age",
+          "kind": "number",
+          "numericType": "integer",
+          "constraints": {},
+          "ui": {}
+        }
+      }
     ]
   },
   "diagnostics": []

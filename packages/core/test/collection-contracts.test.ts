@@ -26,6 +26,7 @@ import {
   validateNestedFormDefinition,
 } from '../src/internal/nested-definition.js';
 import { canonicalDataPathKey } from '../src/internal/path.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 
 function templateLeaf(
   collectionPath: readonly string[],
@@ -216,7 +217,9 @@ describe('collection definition validation foundations', () => {
     });
 
     expect(
-      validateCollectionFormDefinition({ nodes: [collection], fields: [] }),
+      validateCollectionFormDefinition(
+        withDefaultPresentation({ nodes: [collection], fields: [] }),
+      ),
     ).toEqual({ success: true });
     expect(
       validateNestedFormDefinition({ nodes: [collection], fields: [] }),

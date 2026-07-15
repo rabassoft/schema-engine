@@ -4,6 +4,7 @@ import {
   createControlledFormRuntime,
   type FormOperation,
 } from '../src/index.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 
 const directory = new URL('./runtime/fixtures/', import.meta.url);
 const definitionFields = [
@@ -28,10 +29,10 @@ const definitionFields = [
     ui: {},
   },
 ] as const;
-const definition = {
+const definition = withDefaultPresentation({
   nodes: definitionFields,
   fields: definitionFields,
-} as const;
+} as const);
 const nestedStreet = {
   key: '["profile","street"]',
   name: 'street',
@@ -50,10 +51,10 @@ const nestedProfile = {
   kind: 'object',
   children: [nestedStreet],
 } as const;
-const nestedDefinition = {
+const nestedDefinition = withDefaultPresentation({
   nodes: [nestedProfile],
   fields: [nestedStreet],
-} as const;
+} as const);
 type Action = {
   type: string;
   path?: readonly string[];

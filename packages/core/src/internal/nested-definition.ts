@@ -23,7 +23,16 @@ export type NestedDefinitionReason =
   | 'duplicate-template-path'
   | 'inconsistent-template-leaf-projection'
   | 'identity-template-overlap'
-  | 'nested-array-template';
+  | 'nested-array-template'
+  | 'missing-presentation'
+  | 'invalid-presentation-entry'
+  | 'invalid-presentation-section'
+  | 'invalid-presentation-section-key'
+  | 'cyclic-presentation'
+  | 'duplicate-presentation-section-id'
+  | 'unknown-presented-node'
+  | 'duplicate-presented-node'
+  | 'missing-presented-node';
 
 export interface NestedDefinitionDefect {
   readonly reason: NestedDefinitionReason;
@@ -34,6 +43,7 @@ export interface NestedDefinitionDefect {
   readonly fieldIndex?: number;
   readonly path?: readonly string[];
   readonly relativePath?: readonly string[];
+  readonly presentationIndexPath?: readonly number[];
 }
 
 export type NestedDefinitionValidationResult =
@@ -236,7 +246,156 @@ function collectFormDefinitionDefects(
     }
   }
 
+  defects.push(...collectPresentationDefects(value, nodes));
+
   return Object.freeze(defects);
+}
+
+function collectPresentationDefects(
+  definition: object,
+  nodes: readonly unknown[],
+): readonly NestedDefinitionDefect[] {
+  const member = readOwnDataMember(definition, 'presentation');
+  if (member.kind !== 'value' || !Array.isArray(member.value)) {
+    return [makeDefect('missing-presentation')];
+  }
+  const expected = new Set<object>(
+    nodes.filter((node): node is object => isOrdinaryObject(node)),
+  );
+  const seen = new Set<object>();
+  const ids = new Set<string>();
+  const active = new Set<object>();
+  const defects: NestedDefinitionDefect[] = [];
+  type PresentationFrame =
+    | { phase: 'enter'; value: unknown; path: readonly number[] }
+    | { phase: 'exit'; value: object };
+  const stack: PresentationFrame[] = [];
+  for (let index = member.value.length - 1; index >= 0; index -= 1) {
+    const entry = readOwnDataMember(member.value, String(index));
+    stack.push({
+      phase: 'enter',
+      value: entry.kind === 'value' ? entry.value : undefined,
+      path: Object.freeze([index]),
+    });
+  }
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    if (frame.phase === 'exit') {
+      active.delete(frame.value);
+      continue;
+    }
+    if (!isOrdinaryObject(frame.value)) {
+      defects.push(
+        makeDefect('invalid-presentation-entry', {
+          presentationIndexPath: frame.path,
+        }),
+      );
+      continue;
+    }
+    const entry = frame.value;
+    const kind = readOwnDataMember(entry, 'kind');
+    if (kind.kind !== 'value') {
+      defects.push(
+        makeDefect('invalid-presentation-entry', {
+          presentationIndexPath: frame.path,
+        }),
+      );
+      continue;
+    }
+    if (kind.value === 'form-node') {
+      const node = readOwnDataMember(entry, 'node');
+      if (
+        node.kind !== 'value' ||
+        !isOrdinaryObject(node.value) ||
+        !expected.has(node.value)
+      ) {
+        defects.push(
+          makeDefect('unknown-presented-node', {
+            presentationIndexPath: frame.path,
+          }),
+        );
+      } else if (seen.has(node.value)) {
+        defects.push(
+          makeDefect('duplicate-presented-node', {
+            presentationIndexPath: frame.path,
+          }),
+        );
+      } else seen.add(node.value);
+      continue;
+    }
+    if (kind.value !== 'section') {
+      defects.push(
+        makeDefect('invalid-presentation-entry', {
+          presentationIndexPath: frame.path,
+        }),
+      );
+      continue;
+    }
+    if (active.has(entry)) {
+      defects.push(
+        makeDefect('cyclic-presentation', {
+          presentationIndexPath: frame.path,
+        }),
+      );
+      continue;
+    }
+    const id = readOwnDataMember(entry, 'id');
+    const key = readOwnDataMember(entry, 'key');
+    const label = readOwnDataMember(entry, 'label');
+    const children = readOwnDataMember(entry, 'children');
+    if (
+      id.kind !== 'value' ||
+      typeof id.value !== 'string' ||
+      id.value.length === 0 ||
+      label.kind !== 'value' ||
+      typeof label.value !== 'string' ||
+      label.value.trim().length === 0 ||
+      children.kind !== 'value' ||
+      !Array.isArray(children.value) ||
+      children.value.length === 0
+    ) {
+      defects.push(
+        makeDefect('invalid-presentation-section', {
+          presentationIndexPath: frame.path,
+        }),
+      );
+      continue;
+    }
+    if (
+      key.kind !== 'value' ||
+      key.value !== JSON.stringify(['section', id.value])
+    ) {
+      defects.push(
+        makeDefect('invalid-presentation-section-key', {
+          presentationIndexPath: frame.path,
+        }),
+      );
+      continue;
+    }
+    if (ids.has(id.value)) {
+      defects.push(
+        makeDefect('duplicate-presentation-section-id', {
+          presentationIndexPath: frame.path,
+        }),
+      );
+      continue;
+    }
+    ids.add(id.value);
+    active.add(entry);
+    stack.push({ phase: 'exit', value: entry });
+    for (let index = children.value.length - 1; index >= 0; index -= 1) {
+      const child = readOwnDataMember(children.value, String(index));
+      stack.push({
+        phase: 'enter',
+        value: child.kind === 'value' ? child.value : undefined,
+        path: Object.freeze([...frame.path, index]),
+      });
+    }
+  }
+  if (seen.size !== expected.size)
+    defects.push(makeDefect('missing-presented-node'));
+  return defects;
 }
 
 type InspectedNode =

@@ -163,6 +163,11 @@ Cada decisión debe registrar:
 - **Incluye:** grids, tabs, accordions, secciones, wizards, slots, acciones y layouts responsivos.
 - **Motivo:** Primero se validará la separación entre semántica de datos y presentación básica.
 - **Retomar cuando:** Existan objetos anidados y un contrato de layout neutral.
+- **Evaluación M12:** La [revisión 022](../reviews/022-m12-advanced-ui-promotion-readiness.md)
+  confirma la estructura neutral y los hosts, pero no un contrato neutral de
+  layout. Recomienda separar un primer incremento de agrupación estática y
+  mantener el resto Deferred. Ricard aceptó formalmente esa separación el 15 de
+  julio de 2026 y solo D-042 queda Promoted.
 
 ## D-012: Scopes declarativos en UI Schema
 
@@ -170,6 +175,10 @@ Cada decisión debe registrar:
 - **Pregunta:** ¿Deben los pasos y secciones declararse en metadatos?
 - **Motivo:** En la primera versión los scopes pertenecen a la aplicación.
 - **Retomar cuando:** Se diseñe UI Schema avanzado.
+- **Evaluación M12:** La [revisión 022](../reviews/022-m12-advanced-ui-promotion-readiness.md)
+  mantiene D-012 Deferred: el contrato avanzado aún no existe y no debe mover
+  silenciosamente a UI Schema la autoridad de scopes que posee la aplicación.
+  Ricard aceptó formalmente este límite el 15 de julio de 2026.
 
 ## D-013: Actualización dinámica de FormDefinition
 
@@ -481,7 +490,7 @@ Cada decisión debe registrar:
   [`SPEC-004 v0.1.1`](../specs/004-local-reference-resolution.md) el 15 de julio
   de 2026 después de que [`review 019`](../reviews/019-spec-004-review.md) ciclo
   5 pasara sin hallazgos.
-- **Plan propuesto:**
+- **Plan aprobado:**
   [`PLAN-011 revision 0`](../plans/011-local-reference-resolution.md) fue
   aprobado formalmente y mapea los
   19 escenarios y cinco checkpoints sin cambiar firmas públicas;
@@ -494,25 +503,65 @@ Cada decisión debe registrar:
 - **Siguiente gate:** ninguno para D-041; cualquier ampliación requiere promover
   separadamente D-007, D-014 u otra capacidad diferida aplicable.
 
+## D-042: Grupos de presentación estáticos y neutrales
+
+- **Estado:** Promoted
+- **Pregunta:** ¿Cómo representar un único primitivo de agrupación estática de
+  presentación sin confundirlo con la estructura de datos ni trasladar
+  workflow, scopes o estado visual al core?
+- **Motivo:** Los árboles normalizados y hosts fijos de M9/M10 prueban la
+  separación estructural, pero no constituyen un contrato neutral de layout.
+- **Promoción aceptada:** Ricard aceptó formalmente la
+  [revisión 022](../reviews/022-m12-advanced-ui-promotion-readiness.md) el 15 de
+  julio de 2026. Solo esta responsabilidad estrecha entra en diseño normativo
+  M12; D-011 y D-012 permanecen Deferred fuera de ella.
+- **Incluye:** un primitivo estático tipo `section`, salida normalizada e
+  inmutable, identidad, pertenencia, anidamiento, orden, diagnósticos, semántica
+  de label accesible y primera proyección Angular nativa fija.
+- **Excluye:** grids, tabs, accordions, wizards, slots, acciones, responsive,
+  visibilidad condicional, estado de layout, custom container renderers,
+  capability negotiation, scopes declarativos y agrupación por instancia de
+  colección.
+- **Invariantes:** no cambia paths gestionados, validación, operaciones, dirty,
+  touched, foco, estado controlado ni schema entregado al validator; Angular
+  consume únicamente output normalizado.
+- **Documento actual:**
+  [`ADR-017 revision 0`](../adrs/017-grupos-presentacion-estaticos.md) está
+  Accepted; [`review 023`](../reviews/023-adr-017-review.md) corrigió dos
+  hallazgos documentales y el ciclo 3 pasó las ocho áreas sin hallazgos.
+- **Documento observable implementado:**
+  [`SPEC-005 v0.1.1`](../specs/005-static-presentation-groups.md) está Accepted
+  tras corregir cuatro hallazgos y superar review 024 ciclo 2 sin hallazgos.
+- **Plan completado:**
+  [`PLAN-012 revision 1`](../plans/012-static-presentation-groups.md) superó
+  review 025 ciclo 2 sin hallazgos tras dos correcciones y completó sus cinco
+  checkpoints tras una revisión final repetida sin hallazgos.
+
 ## 4. Próximo trabajo de decisión
 
-1. **M12 — UI Schema avanzado:** evaluar la preparación conjunta de D-011 y
-   D-012 antes de redactar arquitectura, SPEC o plan; no hay implementación
-   autorizada.
-2. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
+1. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
    solicitud explícita de publicación.
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
 de M8; D-040 conserva la publicación como Deferred, D-005 está implementado
 dentro del alcance de M9 aunque conserva su estado registral Promoted, D-006
-queda Promoted con M10 completado por PLAN-010 y todas las demás entradas
-mantienen su estado hasta una promoción y aprobación explícitas.
+queda Promoted con M10 completado por PLAN-010, D-041 queda Promoted con M11
+completado por PLAN-011 y D-042 queda Promoted con su slice estrecho M12
+implementado por PLAN-012.
+Todas las demás entradas mantienen su estado hasta una promoción y aprobación
+explícitas.
 
 ## 5. Historial
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 15-07-2026 | PLAN-012 y M12 se completan; review 026 ciclo 6 cierra sin hallazgos tras siete correcciones; la matriz completa pasó en ciclo 3.        |
+| 15-07-2026 | SPEC-005 v0.1.1 queda Accepted tras review 024 ciclo 2 sin hallazgos; autoriza preparar PLAN-012, no implementar.                        |
+| 15-07-2026 | SPEC-005 v0.1.0 queda Draft para D-042; requiere revisión y aceptación antes de PLAN-012.                                                |
+| 15-07-2026 | ADR-017 revision 0 queda Accepted tras review 023 ciclo 3 sin hallazgos; autoriza preparar SPEC, no plan ni implementación.              |
+| 15-07-2026 | ADR-017 revision 0 queda Proposed; review 023 ciclo 3 pasa ocho áreas sin hallazgos tras dos correcciones documentales.                  |
+| 15-07-2026 | Ricard acepta review 022; D-042 queda Promoted solo para grupos de presentación estáticos y D-011/D-012 siguen Deferred.                 |
 | 15-07-2026 | PLAN-011 y M11 se completan; review 021 ciclo 2 y toda la matriz pasan sin hallazgos tras corregir provenance de políticas.              |
 | 15-07-2026 | PLAN-011 checkpoint 4 completa los 19 escenarios, paquetes y consumidores; 326 core/68 Angular tests pasan.                              |
 | 15-07-2026 | PLAN-011 checkpoint 3 integra `$defs`/`$ref`, ciclos, orden y provenance en el compiler; 304 tests core pasan.                           |

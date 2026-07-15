@@ -1,0 +1,77 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "label": "b",
+        "kind": "boolean"
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "label": "b",
+        "kind": "boolean"
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "section",
+        "id": "main",
+        "key": "[\"section\",\"main\"]",
+        "label": "Main section",
+        "children": [
+          {
+            "kind": "form-node",
+            "node": {
+              "key": "[\"b\"]",
+              "name": "b",
+              "path": ["b"],
+              "required": false,
+              "label": "b",
+              "kind": "boolean"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"a\"]",
+          "name": "a",
+          "path": ["a"],
+          "required": false,
+          "label": "a",
+          "kind": "string",
+          "constraints": {}
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

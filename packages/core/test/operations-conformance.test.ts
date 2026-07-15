@@ -65,6 +65,7 @@ function rehydrateDefinition(value: unknown): unknown {
   }
   return {
     ...definition,
+    presentation: nodes.map((node) => ({ kind: 'form-node', node })),
     fields: fields.map((field): unknown => {
       if (typeof field !== 'object' || field === null || Array.isArray(field)) {
         return field;

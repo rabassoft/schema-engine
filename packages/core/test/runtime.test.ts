@@ -8,6 +8,7 @@ import {
   type ObjectFieldDefinition,
   type ValidationResult,
 } from '../src/index.js';
+import { withDefaultPresentation } from './definition-fixtures.js';
 
 const definitionFields: FormDefinition['fields'] = [
   {
@@ -31,10 +32,10 @@ const definitionFields: FormDefinition['fields'] = [
     ui: {},
   },
 ];
-const definition: FormDefinition = {
+const definition: FormDefinition = withDefaultPresentation({
   nodes: definitionFields,
   fields: definitionFields,
-};
+});
 
 const streetField: FieldDefinition = {
   key: '["profile","address","street"]',
@@ -72,10 +73,10 @@ const profileNode: ObjectFieldDefinition = {
   kind: 'object',
   children: [addressNode],
 };
-const nestedDefinition: FormDefinition = {
+const nestedDefinition: FormDefinition = withDefaultPresentation({
   nodes: [profileNode, definitionFields[0] as FieldDefinition],
   fields: [streetField, cityField, definitionFields[0] as FieldDefinition],
-};
+});
 
 function nestedRuntime(
   overrides: Partial<
@@ -176,7 +177,10 @@ describe('controlled runtime', () => {
     const choice = Object.freeze({ value: 'draft', label: 'Draft' });
     const choices = Object.freeze([choice]);
     const fields = [{ ...definition.fields[0], choices }];
-    const manualDefinition = { nodes: fields, fields } as FormDefinition;
+    const manualDefinition = withDefaultPresentation({
+      nodes: fields,
+      fields,
+    }) as unknown as FormDefinition;
     const validate = vi.fn((): ValidationResult => ({
       valid: true,
       issues: [],
@@ -633,7 +637,7 @@ describe('controlled runtime', () => {
         children: [],
       };
       const rt = runtime({
-        definition: { nodes: [empty], fields: [] },
+        definition: withDefaultPresentation({ nodes: [empty], fields: [] }),
         value,
         baselineValue,
       });
@@ -943,7 +947,7 @@ describe('controlled runtime', () => {
     }
     const result = createControlledFormRuntime(
       options({
-        definition: { nodes: [node], fields: [leaf] },
+        definition: withDefaultPresentation({ nodes: [node], fields: [leaf] }),
         value: {},
         baselineValue: {},
       }),

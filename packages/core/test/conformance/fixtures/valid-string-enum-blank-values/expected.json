@@ -50,6 +50,34 @@
           }
         ]
       }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"value\"]",
+          "name": "value",
+          "path": ["value"],
+          "required": false,
+          "label": "value",
+          "kind": "string",
+          "constraints": {},
+          "choices": [
+            {
+              "value": "",
+              "label": "\"\""
+            },
+            {
+              "value": "   ",
+              "label": "\"   \""
+            },
+            {
+              "value": "visible",
+              "label": "visible"
+            }
+          ]
+        }
+      }
     ]
   },
   "diagnostics": []
