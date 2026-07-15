@@ -476,7 +476,8 @@ Cada decisión debe registrar:
   `next` es el canal recomendado y `latest` obligatorio no implica Stable.
 - **Estado de entrega:** PLAN-013 revision 3 publicó core `0.1.0`; su
   verificación live está aceptada tras review 030 ciclo 15. Angular permanece
-  sin publicar y requiere un candidato limpio corregido.
+  sin publicar; su candidato limpio corregido está aceptado tras review 030
+  ciclo 21 y conserva gates Git/registry separados.
 
 ## D-041: Resolución estática de referencias locales JSON Schema
 

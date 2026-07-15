@@ -18,24 +18,25 @@
 - **Promoted capabilities:** D-005/M9, D-006/M10, D-041/M11 and D-042/M12
   implemented within their accepted slices; D-034/D-040 promoted for M13
   normative design only
-- **Phase:** M1–M12 and G0 completed; M13 checkpoint 5 core publication/live
-  verification accepted; Angular candidate reconciliation pending
+- **Phase:** M1–M12 and G0 completed; M13 checkpoint 6 Angular candidate
+  accepted; private Git evidence and publication gates pending
 - **Package candidates:** core `0.1.0` live; Angular `0.1.0` remains an
   unpublished verified candidate
 
 ## Current objective
 
-Create a clean Git checkpoint for the accepted policy/docs/verifier changes,
-then rebuild/review the corrected Angular candidate before checkpoint 6.
+Commit the accepted checkpoint 6 verification evidence, then separately sync
+private Git before requesting the exact Angular publication approval.
 
 ## In progress
 
-- PLAN-013 checkpoint 6: create the authorized local Git checkpoint, then
-  rebuild/review the corrected Angular candidate against live core. Push and
-  Angular publication remain unauthorized.
+- None. The Angular candidate/review are accepted; commit, push and Angular
+  publication remain separately gated.
 
 ## Latest completed work
 
+- Accepted checkpoint 6 after review 030 cycle 21 verified deterministic Angular
+  candidate `35f7f33a…2ebd56a` against live core with zero findings.
 - Accepted checkpoint 5 after review 030 cycle 15 verified live core metadata,
   exact bytes and exact/`next` consumers with zero findings.
 - Accepted ADR-018 revision 2 and PLAN-013 revision 3 after complete repeated
@@ -43,51 +44,48 @@ then rebuild/review the corrected Angular candidate before checkpoint 6.
 - Diagnosed the failed `latest` removal: npm registry metadata requires every
   package to define `latest`, so the accepted no-`latest` contract is infeasible.
 - Published exact core `0.1.0`; unauthenticated metadata matches its license and
-  integrity, but npm automatically assigned both `next` and forbidden `latest`.
-- Confirmed the authorized core publish attempt made no registry mutation after
-  npm required an OTP; unauthenticated lookup still returns `E404`.
+  integrity; npm-mandatory `latest` and recommended `next` alias that same
+  Experimental version.
 
 ## Exact next action
 
-Review and authorize a local commit for the accepted policy/docs/live-verifier
-checkpoint, then rebuild the Angular candidate from that clean commit. Do not
-push, publish Angular or mutate npm/GitHub settings without separate approval.
+Authorize a local commit for checkpoint 6 verification tooling/state, then
+separately authorize pushing the private `develop` evidence before any Angular
+publication. Do not mutate npm/GitHub settings.
 
 ## Blockers and conflicts
 
 - No implementation blocker, open review finding or documentation conflict.
-- npm requires a one-time authenticator password for the already authorized
-  core command. The first Codex attempt returned `EOTP`; Ricard's local retry
-  succeeded.
 - npm's mandatory `latest: 0.1.0` is now accepted only as an Experimental alias
   to the same inspected core version; `next` remains recommended.
 - The immutable live core `0.1.0` README retains the pre-discovery no-`latest`
   sentence. Release notes/ADR supersede it; future package versions carry the
   corrected wording and published bytes are not overwritten.
-- Angular's existing ignored tarball predates the corrected mandatory-`latest`
-  wording and is not publishable until rebuilt/reviewed from a clean commit.
-- Checkpoint 4 is complete: private `develop` and `origin/develop` both point to
-  `7f5fcdf`; no merge remains active.
+- Angular candidate is accepted but unpublished. Private `origin/develop` does
+  not yet contain local checkpoint 6 evidence, and its tooling/state remains
+  uncommitted; commit and push each require explicit approval before publication.
+- Checkpoint 4 core source/push is complete at `7f5fcdf`; local `develop`
+  contains later checkpoint commit `102be1c`, whose private push remains gated.
 - D-042 remains registrally Promoted and its narrow M12 slice is implemented.
 - D-011 and D-012 remain Deferred outside D-042's exact boundary.
-- D-034/D-040 are Promoted only for normative design; no publication, version
-  or Stable promotion is authorized.
+- D-034/D-040 remain Promoted only within accepted M13/PLAN-013 delivery. Core
+  is published, Angular is not, and no Stable promotion is authorized.
 - Review 027 cycle 2 passes with zero findings. Ricardo Rabassó Rodríguez is the
   legal licensor, the exact public notice is fixed and the repository remains
   private pending sanitization.
-- ADR-018 revision 2 and PLAN-013 revision 3 are Accepted/Approved. Commit and
-  private push are complete; npm settings/publication, tags, visibility and
-  further registry mutations remain unauthorized.
+- ADR-018 revision 2 and PLAN-013 revision 3 are Accepted/Approved. Core source
+  commit/private push are complete; checkpoint 6 evidence commit/push and every
+  further registry/settings mutation remain separately gated.
 - SPEC-001 v0.1.15 remains the behavioral baseline. SPEC-002, SPEC-003,
   SPEC-004 and SPEC-005 are authoritative only for their accepted extensions.
 
 ## Open questions
 
-- None within the accepted core-verification scope.
+- None within the accepted checkpoint 6 review scope.
 
 ## Latest verification
 
-- Review 028 cycle 6, review 029 cycle 12 and review 030 cycle 15 repeat their
+- Review 028 cycle 6, review 029 cycle 12 and review 030 cycle 21 repeat their
   complete applicable areas with zero findings after policy/live corrections.
 - Review 026 cycle 6 closes all ten implementation-review areas and all 18
   SPEC-005 evidence groups with zero findings; the full matrix passed in cycle
@@ -95,9 +93,9 @@ push, publish Angular or mutate npm/GitHub settings without separate approval.
 - Frozen install, formatting, documentation across 86 Markdown files and 384
   local links, lint, typecheck, 359 core plus 76 Angular tests, explicit build,
   package/artifact/repository/clean consumers and diff checks pass.
-- Release security audit, isolated source rebuilds and npm dry-runs pass. Two
-  preparations produced identical SHA-512 hashes: core `dceb432e…fdb310e` and
-  Angular `ef1e491d…fa4b1507`; full hashes are in review 030 and the ignored
+- Release security audit, isolated source rebuilds and npm dry-runs pass. Core
+  live SHA-512 is `dceb432e…fdb310e`; corrected Angular candidate SHA-512 is
+  `35f7f33a…2ebd56a`. Full hashes/source commits are in review 030 and the ignored
   `.release/0.1.0/candidates.json`.
 - npm `10.9.8` targets `https://registry.npmjs.org/`; authenticated user
   `ricardrabasso` is owner of organization `rabassoft`, with verified
@@ -109,8 +107,11 @@ push, publish Angular or mutate npm/GitHub settings without separate approval.
   mandatory Experimental `latest` point to `0.1.0`.
 - `pnpm test:live:core` downloads bytes identical to canonical core SHA-512 and
   passes clean exact-version and `@next` TypeScript consumers without credentials.
-- Git refs remain aligned at `7f5fcdfe952cae5fd0322c5e942c2ff335465c52`
-  with no unmerged paths; current checkpoint documentation is uncommitted.
+- Angular SHA-512 `35f7f33a…2ebd56a` is deterministic from clean `102be1c`; its
+  exact source rebuild, npm dry-run and lower/upper Angular 22 consumers against
+  live core pass. Default verifier modes also pass after the extension.
+- Local `develop` contains checkpoint commit `102be1c`; its private push and the
+  current checkpoint 6 tooling/state commit remain pending, with no merge active.
 - Versions, exports, dependencies, peers, runtime behavior and Experimental
   classification remain unchanged. Core publication is the only npm package
   mutation; Angular and settings remain unchanged.

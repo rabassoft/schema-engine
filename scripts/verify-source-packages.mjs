@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { packCandidates, runPnpm } from './release-candidate-utils.mjs';
 
@@ -53,7 +53,24 @@ function angularBehavior(packageRoot, output) {
 
 try {
   assert.equal(process.version, 'v22.23.1');
-  const tarballs = packCandidates(temporaryRoot);
+  const coreTarballArgument = process.argv
+    .find((argument) => argument.startsWith('--core-tarball='))
+    ?.slice('--core-tarball='.length);
+  const angularTarballArgument = process.argv
+    .find((argument) => argument.startsWith('--angular-tarball='))
+    ?.slice('--angular-tarball='.length);
+  assert.equal(
+    coreTarballArgument === undefined,
+    angularTarballArgument === undefined,
+    'Both candidate tarballs must be supplied together',
+  );
+  const tarballs =
+    coreTarballArgument === undefined
+      ? packCandidates(temporaryRoot)
+      : {
+          core: resolve(coreTarballArgument),
+          angular: resolve(angularTarballArgument),
+        };
 
   const coreRoot = extract(tarballs.core, join(temporaryRoot, 'core'));
   installAndBuild(coreRoot);

@@ -8,8 +8,9 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, join } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import {
+  packAngularCandidate,
   packCandidates,
   readWorkspacePackage,
   runPnpm,
@@ -156,7 +157,7 @@ function verifyInstalledAngularTuple(directory, version) {
   }
 }
 
-function createCoreConsumer(tarball, packageManager, typescriptVersion) {
+function createCoreConsumer(packageSource, packageManager, typescriptVersion) {
   const directory = join(temporaryRoot, 'core-only');
   mkdirSync(join(directory, 'src'), { recursive: true });
   writeJson(join(directory, 'package.json'), {
@@ -166,7 +167,7 @@ function createCoreConsumer(tarball, packageManager, typescriptVersion) {
     packageManager,
     scripts: { build: 'tsc -p tsconfig.json' },
     dependencies: {
-      '@rabassoft/schema-engine': fileSpecifier(tarball),
+      '@rabassoft/schema-engine': packageSource,
     },
     devDependencies: { typescript: typescriptVersion },
   });
@@ -331,8 +332,8 @@ function createAngularConsumer(
     scripts: { build: 'ngc -p tsconfig.json' },
     dependencies: {
       ...angularDependencies,
-      '@rabassoft/schema-engine': fileSpecifier(tarballs.core),
-      '@rabassoft/schema-engine-angular': fileSpecifier(tarballs.angular),
+      '@rabassoft/schema-engine': tarballs.core,
+      '@rabassoft/schema-engine-angular': tarballs.angular,
       rxjs: '7.8.2',
       tslib: '2.8.1',
     },
@@ -501,21 +502,42 @@ try {
     /^[~^]/u,
     '',
   );
-  const tarballs = packCandidates(temporaryRoot);
+  const useLiveCore = process.argv.includes('--live-core');
+  const angularTarballArgument = process.argv
+    .find((argument) => argument.startsWith('--angular-tarball='))
+    ?.slice('--angular-tarball='.length);
+  assert.equal(
+    angularTarballArgument === undefined || useLiveCore,
+    true,
+    '--angular-tarball requires --live-core',
+  );
+  const packed = useLiveCore
+    ? {
+        core: undefined,
+        angular:
+          angularTarballArgument === undefined
+            ? packAngularCandidate(temporaryRoot)
+            : resolve(angularTarballArgument),
+      }
+    : packCandidates(temporaryRoot);
+  const packageSources = {
+    core: useLiveCore ? '0.1.0' : fileSpecifier(packed.core),
+    angular: fileSpecifier(packed.angular),
+  };
   const upperAngular = await resolveUpperAngular();
 
-  createCoreConsumer(tarballs.core, packageManager, typescriptVersion);
+  createCoreConsumer(packageSources.core, packageManager, typescriptVersion);
   createAngularConsumer(
     'lower',
     LOWER_ANGULAR,
-    tarballs,
+    packageSources,
     packageManager,
     typescriptVersion,
   );
   createAngularConsumer(
     'upper',
     upperAngular,
-    tarballs,
+    packageSources,
     packageManager,
     typescriptVersion,
   );
@@ -527,8 +549,8 @@ try {
         upperAngular,
         resolvedAt: new Date().toISOString(),
         source: REGISTRY_SOURCE,
-        coreTarball: basename(tarballs.core),
-        angularTarball: basename(tarballs.angular),
+        coreSource: useLiveCore ? 'registry:0.1.0' : basename(packed.core),
+        angularTarball: basename(packed.angular),
       },
       null,
       2,

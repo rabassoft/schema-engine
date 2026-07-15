@@ -2,7 +2,7 @@
 
 - **Date:** 2026-07-15
 - **Plan:** [`PLAN-013 revision 3`](../plans/013-public-experimental-release.md)
-- **Status:** Checkpoint 5 core accepted; Angular candidate reconciliation pending
+- **Status:** Checkpoint 6 Angular candidate accepted; Git/publication gates pending
 - **External actions:** Private push, npm login, core publication and rejected
   `latest` removal completed; no Angular/settings mutation
 
@@ -326,3 +326,73 @@ The complete applicable review passed from the beginning with zero findings:
 **Result:** zero findings and no unresolved change request. Checkpoint 5 core
 publication and live verification are accepted. Angular remains unpublished;
 its corrected candidate requires a clean committed rebuild and checkpoint 6.
+
+## Checkpoint 6 — Cycle 16 verification-scope finding
+
+The first checkpoint 6 pass found that the existing source and clean-consumer
+verifiers always repacked both workspace packages. That could not prove the
+exact corrected Angular tarball against the already published core bytes.
+
+The shared pack utility now exposes package-specific packing. Existing
+verifiers accept an explicit core/Angular tarball pair and a live-core mode,
+while their original default modes remain unchanged. Two consecutive Angular
+packs from clean commit `102be1c` are byte-identical.
+
+## Checkpoint 6 — Cycle 17 complete repeated review
+
+The complete applicable review passed from the beginning with zero findings:
+
+- exact Angular candidate SHA-512 is
+  `35f7f33adccc7c5e6ac164fc03365d2d0b13a9ef472db1d1890ae3a2f70fed43b3f92fddf74ce1e85d6ccf6bff3b8b46bcf95c416e950879c18139a332ebd56a`;
+- its source commit is clean `102be1c265030e6941e652dd9d81a4602b5f1dcc`,
+  and its corrected README describes mandatory `latest` as Experimental;
+- the exact tarball passes npm `10.9.8` public/`next`/no-provenance dry-run;
+- frozen source reconstruction uses the canonical published core tarball and
+  exact Angular candidate, with matching declarations/exports/behavior;
+- clean lower/upper Angular `22.0.6` consumers compile and execute using live
+  `@rabassoft/schema-engine@0.1.0` plus the exact local Angular tarball;
+- default local source/consumer verifier modes repeat successfully, as do live
+  core exact/`next` consumers;
+- format/docs/lint/types, 359 core plus 76 Angular tests, build, package,
+  artifact, security and diff checks pass; and
+- package/API/version/dependency/peer/license/source/private-repository
+  boundaries remain unchanged, with no Angular registry mutation.
+
+**Result:** zero findings and no unresolved change request. The corrected
+Angular `0.1.0` candidate is accepted. Commit/push of checkpoint 6 evidence and
+the exact Angular publication remain separately gated.
+
+## Checkpoint 6 — Cycle 18 current-state finding and correction
+
+The closing state review found STATUS retained checkpoint 5 wording for the old
+Angular hash, aligned Git refs, forbidden `latest`, core OTP and
+normative-design-only D-034/D-040. STATUS was compacted to the observed
+checkpoint 6 hash, local-ahead Git state, accepted mandatory alias and actual
+partial release boundary.
+
+## Checkpoint 6 — Cycle 19 complete repeated review
+
+The complete applicable documentation, package, verifier and external-evidence
+review was repeated after the correction. Current state, authority, exact
+hashes/source commits, default and checkpoint-specific verifier modes, live
+core, Angular source/dry-run/lower-upper consumers and every external stop agree.
+
+**Result:** zero findings and no unresolved change request. Checkpoint 6 and the
+corrected Angular candidate remain accepted; commit, push and publication retain
+their separate gates.
+
+## Checkpoint 6 — Cycle 20 stable-state finding and correction
+
+`docs:check` rejected STATUS's ephemeral “commit ahead” wording. The state now
+records only durable checkpoint facts: local commit `102be1c` exists, its
+private push is gated and checkpoint 6 tooling/state remains uncommitted.
+
+## Checkpoint 6 — Cycle 21 complete repeated review
+
+The complete applicable review was repeated after the stable-state correction.
+Documentation invariants, authority, hashes/source commits, package/source/
+consumer/security evidence, default verifier compatibility and external gates
+all agree without ephemeral Git-count claims.
+
+**Result:** zero findings and no unresolved change request. Checkpoint 6 and the
+Angular candidate remain accepted.

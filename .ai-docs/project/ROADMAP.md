@@ -146,14 +146,14 @@ separado antes de repetir la revisión.
 - Checkpoints 1–5 have accepted local, private-Git and read-only npm identity
   evidence. Core `0.1.0` publication/live verification is accepted after review
   030 cycle 15; npm-mandatory `latest` aliases the same Experimental version.
-  Angular remains unpublished and requires a corrected clean candidate.
+  Angular remains unpublished; its corrected clean candidate is accepted after
+  review 030 cycle 21.
 
 ### Orden de dependencias a más largo plazo
 
-1. **M13/D-034/D-040:** commit the accepted policy/docs/verifier checkpoint,
-   rebuild/review Angular from that clean commit, then resume its separate
-   publication gate; every Git/registry/settings mutation retains explicit
-   approval.
+1. **M13/D-034/D-040:** commit and privately push checkpoint 6 evidence under
+   separate approvals, then resume Angular's exact publication gate; every
+   Git/registry/settings mutation retains explicit approval.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

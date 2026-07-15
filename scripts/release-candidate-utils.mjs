@@ -34,18 +34,25 @@ function tarballAfterPack(directory, previous) {
   return join(directory, created[0]);
 }
 
-export function packCandidates(directory) {
-  const coreBefore = new Set(readdirSync(directory));
+function packWorkspacePackage(directory, workspacePackage) {
+  const before = new Set(readdirSync(directory));
   runPnpm(['pack', '--pack-destination', directory], {
-    cwd: join(workspaceRoot, 'packages/core'),
+    cwd: join(workspaceRoot, workspacePackage),
   });
-  const core = tarballAfterPack(directory, coreBefore);
+  return tarballAfterPack(directory, before);
+}
 
-  const angularBefore = new Set(readdirSync(directory));
-  runPnpm(['pack', '--pack-destination', directory], {
-    cwd: join(workspaceRoot, 'packages/angular'),
-  });
-  const angular = tarballAfterPack(directory, angularBefore);
+export function packCoreCandidate(directory) {
+  return packWorkspacePackage(directory, 'packages/core');
+}
+
+export function packAngularCandidate(directory) {
+  return packWorkspacePackage(directory, 'packages/angular');
+}
+
+export function packCandidates(directory) {
+  const core = packCoreCandidate(directory);
+  const angular = packAngularCandidate(directory);
 
   return Object.freeze({ core, angular });
 }

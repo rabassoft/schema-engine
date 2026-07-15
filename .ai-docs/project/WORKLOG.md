@@ -6,6 +6,32 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — PLAN-013 checkpoint 6 Angular candidate accepted
+
+### Completed
+
+- Committed the accepted core/policy checkpoint locally as `102be1c` with
+  Rabassoft attribution; no push occurred.
+- Packed Angular alone twice from that clean commit with byte-identical SHA-512
+  `35f7f33a…2ebd56a`.
+- Extended source and clean-consumer tooling to verify an exact Angular tarball
+  against canonical/live core while preserving default modes.
+- Review 030 cycle 21 repeated the complete applicable matrix with zero
+  findings and accepted the corrected Angular candidate.
+
+### Verification
+
+- Exact Angular source reconstruction, inventory/security and npm dry-run pass.
+- Lower/upper Angular `22.0.6` consumers compile/execute with live core `0.1.0`.
+- Full format/docs/lint/type/test/build/package/artifact/source/consumer/security
+  matrix, legacy verifier modes and live core verification pass.
+- No push, Angular publication or npm/GitHub settings mutation occurred.
+
+### Next
+
+- Obtain authorization to commit checkpoint 6 verification evidence, then
+  separately push private `develop` before requesting exact Angular publication.
+
 ## 2026-07-15 — PLAN-013 checkpoint 5 accepted
 
 ### Completed
