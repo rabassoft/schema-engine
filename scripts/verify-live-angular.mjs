@@ -29,9 +29,6 @@ const versionMetadata = await registryDocument(
   `${encodedPackage}/${VERSION}`,
   'application/json',
 );
-assert.equal(metadata['dist-tags'].next, VERSION);
-assert.equal(metadata['dist-tags'].latest, VERSION);
-
 const manifest = metadata.versions[VERSION];
 assert.ok(manifest, `Missing ${PACKAGE_NAME}@${VERSION}`);
 assert.equal(manifest.name, PACKAGE_NAME);

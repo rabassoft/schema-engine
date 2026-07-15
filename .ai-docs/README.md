@@ -8,6 +8,8 @@
 - [Stable handoff](../HANDOFF.md) — context-recovery procedure, never current
   status.
 - [Work log](./project/WORKLOG.md) — append-only history; read selectively.
+- [Coordinated Experimental 0.2.0 release notes](./releases/0.2.0.md) — local
+  candidate state and source migration; not published.
 
 ## Specifications
 
@@ -115,6 +117,12 @@
   repeated review passed with zero findings and supports Accepted v0.1.1.
 - [PLAN-014 complete review](./reviews/035-plan-014-review.md) — Cycle 3 passed
   all ten areas with zero findings; Ricard formally approved revision 0.
+- [PLAN-015 complete review](./reviews/042-plan-015-review.md) — Cycle 1
+  corrected five release-order/verification findings; cycle 2 repeated all ten
+  areas with zero findings. Ricard then formally approved revision 0.
+- [PLAN-015 local candidate review](./reviews/045-plan-015-checkpoint-3-review.md)
+  — Checkpoints 1–3 complete after cycle 5 closed the full local release review
+  with zero findings; checkpoint 4 Git actions remain separately gated.
 
 ## Architecture Decision Records
 
@@ -176,6 +184,7 @@
 - [PLAN-012: Static neutral presentation groups](./plans/012-static-presentation-groups.md) — Completed revision 1 after final repeated review with zero findings
 - [PLAN-013: First public experimental release](./plans/013-public-experimental-release.md) — Completed revision 4 after all separately authorized local, Git and npm checkpoints passed
 - [PLAN-014: Nullable primitive leaves](./plans/014-nullable-primitive-leaves.md) — Completed revision 0 after final review 041 cycle 2 passed with zero findings
+- [PLAN-015: Coordinated Experimental 0.2 release](./plans/015-coordinated-experimental-0-2-release.md) — Approved revision 0 for local checkpoints 1–3 after review 042 cycle 2 passed with zero findings
 
 Accepted publication architecture: [ADR-018 revision 3](./adrs/018-licencia-dual-publicacion-experimental.md)
 selects dual AGPL/commercial licensing and public Experimental packages while

@@ -71,9 +71,6 @@ async function verifyRegistryAndTarball() {
     `${encodedPackage}/${VERSION}`,
     'application/json',
   );
-  assert.equal(metadata['dist-tags'].next, VERSION);
-  assert.equal(metadata['dist-tags'].latest, VERSION);
-
   const manifest = metadata.versions[VERSION];
   assert.ok(manifest, `Missing ${PACKAGE_NAME}@${VERSION}`);
   assert.equal(manifest.name, PACKAGE_NAME);
@@ -176,9 +173,8 @@ created.runtime.dispose();
 try {
   await verifyRegistryAndTarball();
   verifyConsumer('exact', VERSION);
-  verifyConsumer('next', 'next');
   console.log(
-    `Live core verification passed: ${PACKAGE_NAME}@${VERSION}, exact and next consumers`,
+    `Historical live core verification passed: ${PACKAGE_NAME}@${VERSION}, exact bytes and consumer`,
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });

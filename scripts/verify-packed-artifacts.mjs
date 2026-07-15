@@ -10,8 +10,10 @@ import {
   readTarballText,
   readWorkspacePackage,
 } from './release-candidate-utils.mjs';
+import { loadReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-artifacts-'));
+const release = loadReleaseTarget();
 
 const CORE_MODULES = Object.freeze([
   'compiler',
@@ -105,7 +107,7 @@ function verifyCommon(tarball, expectedName, modules) {
 
   const manifest = readTarballJson(tarball, 'package/package.json');
   assert.equal(manifest.name, expectedName);
-  assert.equal(manifest.version, '0.1.0');
+  assert.equal(manifest.version, release.version);
   assert.equal(manifest.private, undefined);
   assert.equal(manifest.type, 'module');
   assert.equal(manifest.sideEffects, false);
@@ -180,6 +182,16 @@ try {
   );
 
   const coreIndex = readTarballText(tarballs.core, 'package/dist/index.d.ts');
+  const coreContracts = readTarballText(
+    tarballs.core,
+    'package/dist/contracts.d.ts',
+  );
+  assert.ok(
+    coreContracts.includes('readonly nullable: boolean;'),
+    'Missing required nullable declaration',
+  );
+  assert.ok(coreContracts.includes("'set-null'"));
+  assert.ok(coreContracts.includes("'null-value'"));
   for (const publicName of [
     'ArrayNodeDefinition',
     'ArrayRuntimeSnapshot',
@@ -249,6 +261,12 @@ try {
     tarballs.angular,
     'package/dist/index.d.ts',
   );
+  const angularText = readTarballText(
+    tarballs.angular,
+    'package/dist/text.d.ts',
+  );
+  assert.ok(angularText.includes('readonly setNullLabel: string;'));
+  assert.ok(angularText.includes('readonly nullValueLabel: string;'));
   for (const publicName of [
     'SchemaFormDirective',
     'SchemaFieldOutletDirective',
@@ -326,15 +344,15 @@ try {
   assert.deepEqual(angular.peerDependencies, {
     '@angular/core': '>=22.0.6 <23.0.0',
     '@angular/forms': '>=22.0.6 <23.0.0',
-    '@rabassoft/schema-engine': '^0.1.0',
+    '@rabassoft/schema-engine': release.corePeer,
   });
   assert.deepEqual(angular.devDependencies, {
-    '@rabassoft/schema-engine': '0.1.0',
+    '@rabassoft/schema-engine': release.coreDevelopment,
   });
   assert.equal(angular.optionalDependencies, undefined);
 
   console.log(
-    'Verified public 0.1.0 candidates with licensed Corresponding Source.',
+    `Verified public ${release.version} candidates with licensed Corresponding Source.`,
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });

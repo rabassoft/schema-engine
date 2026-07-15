@@ -15,6 +15,7 @@ import {
   readWorkspacePackage,
   runPnpm,
 } from './release-candidate-utils.mjs';
+import { argumentValue } from './release-target.mjs';
 
 const ANGULAR_PACKAGES = Object.freeze([
   '@angular/common',
@@ -166,7 +167,26 @@ function verifyInstalledAngularTuple(directory, version) {
   }
 }
 
-function createCoreConsumer(packageSource, packageManager, typescriptVersion) {
+function installedSchemaVersion(directory, packageName) {
+  return JSON.parse(
+    readFileSync(
+      join(
+        directory,
+        'node_modules',
+        ...packageName.split('/'),
+        'package.json',
+      ),
+      'utf8',
+    ),
+  ).version;
+}
+
+function createCoreConsumer(
+  packageSource,
+  packageManager,
+  typescriptVersion,
+  expectedSchemaVersion,
+) {
   const directory = join(temporaryRoot, 'core-only');
   mkdirSync(join(directory, 'src'), { recursive: true });
   writeJson(join(directory, 'package.json'), {
@@ -309,6 +329,12 @@ created.runtime.dispose();
   );
 
   installConsumer(directory);
+  if (expectedSchemaVersion !== undefined) {
+    assert.equal(
+      installedSchemaVersion(directory, '@rabassoft/schema-engine'),
+      expectedSchemaVersion,
+    );
+  }
   executePnpm(directory, ['run', 'build']);
   const execution = spawnSync(process.execPath, ['dist/main.js'], {
     cwd: directory,
@@ -326,6 +352,7 @@ function createAngularConsumer(
   packageManager,
   typescriptVersion,
   verifySignatures,
+  expectedSchemaVersion,
 ) {
   const directory = join(temporaryRoot, `angular-${label}`);
   mkdirSync(join(directory, 'src'), { recursive: true });
@@ -489,6 +516,16 @@ injector.destroy();
   );
 
   installConsumer(directory);
+  if (expectedSchemaVersion !== undefined) {
+    assert.equal(
+      installedSchemaVersion(directory, '@rabassoft/schema-engine'),
+      expectedSchemaVersion,
+    );
+    assert.equal(
+      installedSchemaVersion(directory, '@rabassoft/schema-engine-angular'),
+      expectedSchemaVersion,
+    );
+  }
   if (verifySignatures) {
     executeNpm(directory, ['audit', 'signatures']);
   }
@@ -517,6 +554,18 @@ try {
   );
   const useLiveCore = process.argv.includes('--live-core');
   const useLiveAngular = process.argv.includes('--live-angular');
+  const liveVersion = argumentValue(process.argv, 'live-version');
+  const liveSpecifier = argumentValue(process.argv, 'live-specifier');
+  assert.equal(
+    useLiveCore,
+    liveVersion !== undefined,
+    '--live-version is required exactly when --live-core is used',
+  );
+  assert.equal(
+    liveSpecifier === undefined || useLiveAngular,
+    true,
+    '--live-specifier requires --live-angular',
+  );
   const angularTarballArgument = process.argv
     .find((argument) => argument.startsWith('--angular-tarball='))
     ?.slice('--angular-tarball='.length);
@@ -546,12 +595,25 @@ try {
       }
     : packCandidates(temporaryRoot);
   const packageSources = {
-    core: useLiveCore ? '0.1.0' : fileSpecifier(packed.core),
-    angular: useLiveAngular ? '0.1.0' : fileSpecifier(packed.angular),
+    core: useLiveCore
+      ? liveSpecifier === 'unqualified'
+        ? '*'
+        : (liveSpecifier ?? liveVersion)
+      : fileSpecifier(packed.core),
+    angular: useLiveAngular
+      ? liveSpecifier === 'unqualified'
+        ? '*'
+        : (liveSpecifier ?? liveVersion)
+      : fileSpecifier(packed.angular),
   };
   const upperAngular = await resolveUpperAngular();
 
-  createCoreConsumer(packageSources.core, packageManager, typescriptVersion);
+  createCoreConsumer(
+    packageSources.core,
+    packageManager,
+    typescriptVersion,
+    useLiveCore ? liveVersion : undefined,
+  );
   createAngularConsumer(
     'lower',
     LOWER_ANGULAR,
@@ -559,6 +621,7 @@ try {
     packageManager,
     typescriptVersion,
     useLiveAngular,
+    useLiveAngular ? liveVersion : undefined,
   );
   createAngularConsumer(
     'upper',
@@ -567,6 +630,7 @@ try {
     packageManager,
     typescriptVersion,
     false,
+    useLiveAngular ? liveVersion : undefined,
   );
 
   console.log(
@@ -576,9 +640,11 @@ try {
         upperAngular,
         resolvedAt: new Date().toISOString(),
         source: REGISTRY_SOURCE,
-        coreSource: useLiveCore ? 'registry:0.1.0' : basename(packed.core),
+        coreSource: useLiveCore
+          ? `registry:${liveVersion}`
+          : basename(packed.core),
         angularSource: useLiveAngular
-          ? 'registry:0.1.0'
+          ? `registry:${liveVersion}`
           : basename(packed.angular),
       },
       null,

@@ -6,6 +6,150 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — PLAN-015 checkpoint 4 authorized
+
+### Authorization
+
+- Ricard explicitly authorized one commit, its private `develop` push and the
+  clean-commit candidate rebuild/comparison required by PLAN-015 checkpoint 4.
+- Git tags, GitHub Releases and every npm authentication/settings/publication/
+  dist-tag mutation remain outside this authorization.
+
+### Next
+
+- Commit the reviewed tree, push the exact commit privately, rebuild from clean
+  and reject any unexplained candidate-byte difference.
+
+## 2026-07-15 — PLAN-015 checkpoint 3 completed locally
+
+### Completed
+
+- Passed the full frozen release, package, source, consumer, licensing and
+  security matrix for coordinated local `0.2.0`.
+- Confirmed both exact versions absent from npm and both `next`/`latest` aliases
+  still at the compatible live `0.1.0` pair.
+- Generated deterministic ignored pre-commit candidates and repeated exact
+  basename-relative dry-runs from a neutral `/tmp` path with identical hashes.
+
+### Review and correction
+
+- Review 045 cycles 1–3 corrected five findings covering checkpoint formatting,
+  immutable package wording, registry-signature evidence, STATUS placement and
+  exact core target documentation.
+- Cycle 4 repeated the complete technical gate with zero findings; cycle 5
+  corrected the closing link count and repeated documentation/state checks with
+  zero findings.
+
+### Verification
+
+- Frozen install, formatting, 106-document/451-link checks, lint, types, 400
+  core plus 79 Angular tests, build, package, consumer, artifact, isolated
+  source and security checks pass.
+- Core SHA-512 is `155ae047…d13e028a`; Angular SHA-512 is
+  `aa035adb…165a5154`. They remain pre-commit evidence with null source commit.
+- No commit, push, publication, dist-tag or other external mutation occurred.
+
+### Next
+
+- Decide whether to authorize checkpoint 4 commit/private push and clean-commit
+  rebuild. No npm write is included.
+
+## 2026-07-15 — PLAN-015 checkpoint 2 completed
+
+### Implemented
+
+- Bumped both publishable manifests to coordinated `0.2.0`; Angular retains
+  source `workspace:^`/`workspace:*` and packs `^0.2.0`/`0.2.0`.
+- Updated active onboarding and added candidate-state `0.2.0` release notes
+  with exact nullable/text migrations, compatibility and exclusions.
+- Added owned declaration evidence for core nullable/text and Angular text
+  contracts without changing production behavior.
+
+### Review and verification
+
+- Review 044 cycle 1 corrected barrel-versus-owner declaration inspection;
+  cycle 2 repeated the full checkpoint with zero findings.
+- Formatting, 104-document/450-link checks, tooling tests, lint, types, builds,
+  package smoke, artifacts and diff checks pass. Offline lockfile reconciliation
+  caused no dependency drift.
+- No accepted candidate, commit, push or registry mutation occurred.
+
+### Next
+
+- Execute checkpoint 3 complete local release gate and neutral-path rehearsal.
+
+## 2026-07-15 — PLAN-015 checkpoint 1 completed
+
+### Implemented
+
+- Added explicit coordinated release-version parsing and focused mismatch
+  tests, version-aware candidate/artifact/source tooling and target live/tag
+  verification modes.
+- Separated immutable exact `0.1.0` metadata/bytes/consumer verification from
+  mutable `next`/`latest` assertions.
+- Added conditional documentation checks for the future active `0.2.0` state.
+
+### Review and verification
+
+- Review 043 cycle 1 found and corrected missing stale-documentation ownership;
+  cycle 2 repeated the complete checkpoint review with zero findings.
+- Formatting, 102-document/449-link checks, lint, focused tests, build,
+  `0.1.0` artifacts, historical exact live bytes and clean core/lower/upper
+  Angular consumers pass.
+- Manifests, lockfile, versions and external state remain unchanged.
+
+### Next
+
+- Execute PLAN-015 checkpoint 2 local `0.2.0` state and migration docs.
+
+## 2026-07-15 — PLAN-015 revision 0 approved
+
+### Decision
+
+- Ricard formally approved PLAN-015 revision 0 after review 042 cycle 2 passed
+  all ten areas with zero findings.
+- Approval authorizes only local checkpoints 1–3, beginning with version-aware
+  release tooling while package manifests remain `0.1.0`.
+- Checkpoint 4 commit/push and every npm authentication, publication, dist-tag,
+  settings or recovery mutation remain separately gated.
+
+### Next
+
+- Execute checkpoint 1 and repeat its complete review until zero findings.
+
+## 2026-07-15 — PLAN-015 drafted and completely reviewed
+
+### Draft
+
+- Drafted PLAN-015 revision 0 for coordinated Public + Experimental + Active
+  core and Angular `0.2.0`, the ADR-010 MINOR delivery of completed local M14.
+- Defined version-aware tooling, exact migrations, deterministic licensed
+  candidates, neutral publication paths, clean Git rebuild and separately
+  approved core/Angular publication and `latest` transition checkpoints.
+- Preserved immutable `0.1.0`, private GitHub/no provenance, D-043 and every
+  post-M14 deferred boundary.
+
+### Review and correction
+
+- Review 042 cycle 1 corrected five issues: pre-bump target ordering, mutable
+  historical tag assertions, source peer/dev workspace precision, premature
+  live release-note wording and implicit `latest` commands.
+- Cycle 2 repeated all ten plan areas with zero findings and no unresolved
+  change request or documentation conflict.
+
+### Verification
+
+- Formatting, documentation across 102 Markdown files and 449 local links,
+  active version/tooling searches and diff checks pass.
+- Package manifests remain `0.1.0`; no candidate, commit, push, authentication,
+  publication, dist-tag or external mutation occurred.
+
+### Next
+
+- Decide whether to formally approve PLAN-015 revision 0. Approval would cover
+  only local checkpoints 1–3; every Git and registry action stays separately
+  gated.
+
 ## 2026-07-15 — M14 coordinated release planning authorized
 
 ### Decision

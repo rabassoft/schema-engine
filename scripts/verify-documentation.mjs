@@ -7,6 +7,10 @@ const onboardingPaths = ['README.md', '.ai-docs/README.md'];
 const statusPath = '.ai-docs/project/STATUS.md';
 const specificationDirectory = '.ai-docs/specs';
 const specificationIndexPath = '.ai-docs/specs/000-index.md';
+const publishableManifestPaths = [
+  'packages/core/package.json',
+  'packages/angular/package.json',
+];
 const staleCurrentClaims = [
   {
     path: '.ai-docs/releases/0.1.0.md',
@@ -87,6 +91,59 @@ for (const guidePath of stableGuidePaths) {
 }
 
 const status = await read(statusPath);
+const publishableVersions = await Promise.all(
+  publishableManifestPaths.map(
+    async (manifestPath) => JSON.parse(await read(manifestPath)).version,
+  ),
+);
+if (new Set(publishableVersions).size !== 1) {
+  fail(
+    `Publishable package versions are not coordinated: ${publishableVersions}`,
+  );
+}
+if (publishableVersions[0] === '0.2.0') {
+  const successorStaleClaims = [
+    {
+      path: 'README.md',
+      pattern: /No successor version has been selected/i,
+    },
+    {
+      path: 'packages/core/README.md',
+      pattern: /No successor version has been selected/i,
+    },
+    {
+      path: 'packages/angular/README.md',
+      pattern: /No successor version has been selected/i,
+    },
+    {
+      path: 'packages/angular/README.md',
+      pattern: /\| `0\.1\.x` \| `\^0\.1\.0`/i,
+    },
+  ];
+  for (const claim of successorStaleClaims) {
+    const document = await read(claim.path);
+    const match = document.match(claim.pattern);
+    if (match) {
+      fail(`${claim.path} contains stale active 0.1 release text: ${match[0]}`);
+    }
+  }
+  for (const onboardingPath of [
+    'README.md',
+    'packages/core/README.md',
+    'packages/angular/README.md',
+  ]) {
+    const onboarding = await read(onboardingPath);
+    if (!onboarding.includes('0.2.0')) {
+      fail(`${onboardingPath} does not report the active 0.2.0 target`);
+    }
+    if (/no `latest` (?:tag|alias)/iu.test(onboarding)) {
+      fail(`${onboardingPath} incorrectly denies npm's latest alias`);
+    }
+    if (/npm provenance is (?:available|enabled)/iu.test(onboarding)) {
+      fail(`${onboardingPath} incorrectly claims npm provenance`);
+    }
+  }
+}
 const ephemeralGitClaim = status.match(
   /\bcommits? ahead\b|\bcommits? behind\b|no push performed|nothing was pushed/i,
 );

@@ -5,7 +5,8 @@ for the Schema Engine prototype.
 
 ## Release status
 
-- Experimental line: `0.1.x`.
+- Experimental line: `0.2.x` (`0.1.0` remains the immutable pre-M14 release).
+- Package manifest: `0.2.0`; registry availability must be verified separately.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
 - Recommended channel: npm dist-tag `next` or an explicit version. npm's
@@ -36,9 +37,9 @@ supported.
 
 ## Prototype boundary
 
-> This README describes the current source checkout. The immutable published
-> `0.1.0` package predates the nullable-leaf changes below. No successor version
-> has been selected or published.
+> This README describes the `0.2.x` package content. The immutable published
+> `0.1.0` package predates the nullable-leaf changes below. Registry availability
+> and tags must be verified independently from these immutable package bytes.
 
 The current runtime supports a root object whose properties may recursively
 contain objects, primitive `string`, `number`, `integer`, and `boolean` leaves,

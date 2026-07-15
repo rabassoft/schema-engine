@@ -169,10 +169,11 @@ separado antes de repetir la revisión.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Release plan:** draft and review PLAN-015 for coordinated Experimental
-   core and Angular `0.2.0`; ADR-010 requires MINOR rather than PATCH.
-2. **Release:** version changes, candidate preparation and publication require
-   the reviewed plan's separate approval and explicit external-action gates.
+1. **Private Git decision:** PLAN-015 local checkpoints 1–3 and review 045 cycle
+   5 are complete with zero findings; checkpoint 4 commit/private push and clean
+   candidate selection await explicit authorization.
+2. **Release:** every npm publication/dist-tag mutation retains a later
+   immediate explicit gate after clean-commit candidates are selected.
 3. **Later selection:** all other capabilities remain demand-driven; D-043 is
    not implied by M14.
 

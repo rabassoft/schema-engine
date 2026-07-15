@@ -5,7 +5,7 @@ Engine.
 
 ## Release status
 
-- Experimental line: `0.1.x`.
+- Experimental line: `0.2.x` (`0.1.0` remains the immutable pre-M14 release).
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
 - Recommended channel: npm dist-tag `next` or an explicit version. npm's
@@ -24,8 +24,8 @@ npm install @rabassoft/schema-engine-angular@next
 Consumers install both Schema Engine packages and aligned Angular peers:
 
 ```text
-@rabassoft/schema-engine-angular 0.1.x
-@rabassoft/schema-engine ^0.1.0
+@rabassoft/schema-engine-angular 0.2.x
+@rabassoft/schema-engine ^0.2.0
 @angular/core >=22.0.6 <23.0.0
 @angular/forms >=22.0.6 <23.0.0
 ```
@@ -34,18 +34,18 @@ Consumers install both Schema Engine packages and aligned Angular peers:
 version. Supporting Angular packages used by an application must use that same
 version.
 
-| Adapter | Core     | Angular core/forms | Build Angular | Tested Angular endpoints | Status                         |
-| ------- | -------- | ------------------ | ------------- | ------------------------ | ------------------------------ |
-| `0.1.x` | `^0.1.0` | `>=22.0.6 <23.0.0` | `22.0.6`      | `22.0.6` / `22.0.6`      | Public Experimental via `next` |
+| Adapter | Core     | Angular core/forms | Build Angular | Tested Angular endpoints | Status                        |
+| ------- | -------- | ------------------ | ------------- | ------------------------ | ----------------------------- |
+| `0.2.x` | `^0.2.0` | `>=22.0.6 <23.0.0` | `22.0.6`      | `22.0.6` / `22.0.6`      | Experimental; verify registry |
 
 The upper stable endpoint resolved on 2026-07-14 from public npm metadata is
 currently the same version as the lower endpoint.
 
 ## Supported import and boundary
 
-> This README describes the current source checkout. The immutable published
-> `0.1.0` package predates the nullable-leaf changes below. No successor version
-> has been selected or published.
+> This README describes the `0.2.x` package content. The immutable published
+> `0.1.0` package predates the nullable-leaf changes below. Registry availability
+> and tags must be verified independently from these immutable package bytes.
 
 Import only from `@rabassoft/schema-engine-angular`. Deep imports into `dist`,
 `src`, or other physical paths are unsupported.

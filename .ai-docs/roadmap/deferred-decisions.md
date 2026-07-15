@@ -139,9 +139,10 @@ Cada decisión debe registrar:
 ## D-009: Null y campos triestado
 
 - **Estado:** Implemented locally under completed PLAN-014 revision 0;
-  preparation and review of coordinated release PLAN-015 for core and Angular
-  `0.2.0` are authorized, but plan approval, version changes, candidates and
-  publication remain pending
+  coordinated release PLAN-015 revision 0 for core and Angular `0.2.0` passed
+  review 042 cycle 2 and completed local checkpoints 1–3 after review 045 cycle
+  5 passed with zero findings; checkpoint 4 Git/clean-candidate selection and
+  publication remain separately gated
 - **Pregunta:** ¿Cómo representar `missing`, `null`, `false` y `true` sin ambigüedad?
 - **Motivo:** La primera versión usa booleanos binarios y no soporta null explícito.
 - **Retomar cuando:** Se amplíe el subconjunto de tipos.

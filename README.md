@@ -16,8 +16,8 @@ runtime and verified public Experimental packages. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
 v0.1.1 and SPEC-006 v0.1.1 are Accepted. SPEC-006 defines the promoted M14
 nullable-primitive-leaf contract. The source checkout implements that contract
-locally under PLAN-014, but no post-M14 version or publication has been
-selected. The live checkpoint is recorded in
+locally under PLAN-014 and is prepared as the coordinated local `0.2.0`
+release target under PLAN-015. It has not been published. The live checkpoint is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
@@ -56,8 +56,10 @@ Source consumers moving from the published `0.1.0` boundary must make two
 coordinated Experimental migrations: every manually authored primitive
 definition/template supplies the required boolean `nullable`, and every
 manually authored `AngularFieldTextSnapshot` supplies `setNullLabel` and
-`nullValueLabel`. The live `0.1.0` packages remain the immutable pre-M14
-release and must not be treated as containing these source changes.
+`nullValueLabel`; exhaustive `FieldTextMember` handling also adds `set-null`
+and `null-value`. Schema-compiled consumers do not manually add definition
+members. The live `0.1.0` packages remain the immutable pre-M14 release and
+must not be treated as containing these source changes.
 
 ## Branch workflow
 
@@ -66,9 +68,10 @@ release and must not be treated as containing these source changes.
 
 ## Experimental packages and licensing
 
-Core and Angular `0.1.0` are public on npm. `next` is the recommended
-Experimental channel. npm also requires `latest` to alias each published
-Experimental version; that registry alias does not promote any API to Stable.
+Core and Angular `0.1.0` are public on npm; coordinated `0.2.0` candidates are
+being prepared locally and are not live. `next` is the recommended Experimental
+channel. npm also requires `latest` to alias each published Experimental
+version; that registry alias does not promote any API to Stable.
 
 Install explicit versions or the Experimental channel:
 

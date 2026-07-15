@@ -10,9 +10,10 @@
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1 and SPEC-006 v0.1.1
 - **Last proposed specification:** None
-- **Last implementation plan:** PLAN-014 revision 0, Completed
+- **Last implementation plan:** PLAN-015 revision 0, Approved for local
+  checkpoints 1–3
 - **Last completed implementation plan:** PLAN-014 revision 0
-- **Active implementation task:** None
+- **Active implementation task:** PLAN-015 checkpoint 4
 - **Last accepted ADR:** ADR-019 revision 1, coordinated with ADR-005 revision 4
 - **Last proposed ADR:** None
 - **Promoted capabilities:** D-005/M9, D-006/M10, D-041/M11 and D-042/M12
@@ -24,39 +25,36 @@
 
 ## Current objective
 
-Prepare and review PLAN-015 for a coordinated Experimental `0.2.0` release of
-core and Angular containing the completed local M14 changes; live `0.1.0`
-remains pre-M14.
+Execute the explicitly authorized PLAN-015 checkpoint 4 commit and private
+`develop` push, then rebuild and select only matching clean-commit candidates;
+live `0.1.0` remains pre-M14.
 
 ## In progress
 
-- None. PLAN-014 revision 0 and M14 completed locally after review 041 cycle 2
-  passed the complete implementation review with zero findings.
+- PLAN-015 checkpoint 4: commit the reviewed release preparation, push that
+  exact commit to private `develop`, rebuild from the clean tree and compare
+  candidate hashes. No npm write is authorized.
 
 ## Latest completed work
 
-- Authorized preparation and review of PLAN-015 for coordinated core and
-  Angular `0.2.0`. ADR-010 determines MINOR rather than PATCH; no manifest,
-  candidate, publication or external mutation was authorized.
-- Completed PLAN-014 revision 0 and local M14 after final review 041 cycle 2
-  passed the complete authority, diff, declaration, package, documentation and
-  deferred-boundary review with zero findings.
-- Completed PLAN-014 checkpoint 5 after review 040 cycle 1 mapped all 23 groups
-  and passed declarations, packages, artifacts, source and clean consumers with
-  zero findings, establishing the baseline for final review 041.
-- Completed PLAN-014 checkpoint 4 after review 039 cycle 2 passed all six areas
-  with zero findings; exact Angular native null projection is active locally
-  without renderer-registry or package drift.
-- Completed PLAN-014 checkpoint 3 after review 038 cycle 1 passed all six
-  areas with zero findings; definition-aware null operations/runtime are active
-  locally while Angular null projection remains inactive.
+- Completed PLAN-015 checkpoint 3 after review 045 cycle 5 passed with zero
+  findings; full frozen/package/source/consumer/security gates, npm absence/tags,
+  pre-commit candidates and neutral-path dry-runs pass.
+- Completed PLAN-015 checkpoint 2 after review 044 cycle 2 passed with zero
+  findings; coordinated local `0.2.0` manifests, migrations, declarations and
+  packed package boundaries are established.
+- Completed PLAN-015 checkpoint 1 after review 043 cycle 2 passed with zero
+  findings; tooling is version-aware and immutable exact `0.1.0` verification
+  is separated from mutable tags.
+- Formally approved PLAN-015 revision 0 for local checkpoints 1–3 after review
+  042 cycle 2 passed all ten areas with zero findings; Git and registry actions
+  remain separately gated.
 
 ## Exact next action
 
-Draft PLAN-015 revision 0 for coordinated core and Angular `0.2.0`, then review
-and correct it until a complete pass has zero findings. Do not change package
-versions, prepare candidates, publish or mutate external state under this
-authorization.
+Commit the fully verified release preparation and push that exact commit to
+private `develop`; then rebuild from the clean commit and require exact
+pre-/post-commit candidate byte equality.
 
 ## Blockers and conflicts
 
@@ -90,17 +88,28 @@ authorization.
 - ADR-018 revision 3 and PLAN-013 revision 4 are Accepted/Completed. Every
   future registry/settings mutation remains separately gated.
 - PLAN-015 preparation and review are authorized with `0.2.0` as the
-  ADR-010-compliant target for both affected packages. Plan approval,
-  implementation and every registry mutation remain separate gates.
+  ADR-010-compliant target for both affected packages. Review 042 cycle 2
+  passed with zero findings and revision 0 is Approved for local checkpoints
+  1–3; every Git or registry mutation remains separately gated.
 - SPEC-001 v0.1.15 remains the behavioral baseline. SPEC-002, SPEC-003,
   SPEC-004 and SPEC-005 are authoritative only for their accepted extensions.
 
 ## Open questions
 
-- None. The coordinated release-plan target is core and Angular `0.2.0`.
+- None for checkpoint 4. npm publication remains separately gated.
 
 ## Latest verification
 
+- Review 045 cycle 5 closes the complete checkpoint 3 review with zero
+  findings after six corrections. Frozen install, formatting, documentation
+  across 106 Markdown files and 451 local links, lint, typecheck, 400 core plus
+  79 Angular tests, build, packages, artifacts, source, security, repository and
+  clean consumers pass. Both `0.2.0` versions are absent; public tags remain
+  `0.1.0`; neutral-path dry-runs and recorded pre-commit hashes pass.
+- Review 042 cycle 2 repeats all ten PLAN-015 areas with zero findings after
+  five corrections. Formatting, documentation across 102 Markdown files and
+  449 local links, active-version/tooling searches and diff checks pass; package
+  versions and external state remain unchanged.
 - The coordinated `0.2.0` planning decision is consistent with ADR-010,
   ADR-018, SPEC-006, PLAN-014 and D-009. Formatting, documentation across 100
   Markdown files and 441 local links, and diff checks pass.
@@ -115,6 +124,15 @@ authorization.
 
 ## Task document map
 
+- Approved coordinated `0.2.0` release plan:
+  `.ai-docs/plans/015-coordinated-experimental-0-2-release.md`
+- Complete PLAN-015 review: `.ai-docs/reviews/042-plan-015-review.md`
+- PLAN-015 checkpoint 1 review:
+  `.ai-docs/reviews/043-plan-015-checkpoint-1-review.md`
+- PLAN-015 checkpoint 2 review:
+  `.ai-docs/reviews/044-plan-015-checkpoint-2-review.md`
+- PLAN-015 checkpoint 3 review:
+  `.ai-docs/reviews/045-plan-015-checkpoint-3-review.md`
 - D-009/M14 promotion readiness:
   `.ai-docs/reviews/031-m14-nullable-leaves-promotion-readiness.md`
 - Accepted M14 architecture: `.ai-docs/adrs/019-hojas-primitivas-nullable.md`

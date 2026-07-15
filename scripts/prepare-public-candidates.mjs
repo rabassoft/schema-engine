@@ -8,8 +8,10 @@ import {
   readTarballJson,
   workspaceRoot,
 } from './release-candidate-utils.mjs';
+import { loadReleaseTarget } from './release-target.mjs';
 
-const output = join(workspaceRoot, '.release/0.1.0');
+const release = loadReleaseTarget();
+const output = join(workspaceRoot, `.release/${release.version}`);
 const npmVersion = execFileSync('npm', ['--version'], {
   encoding: 'utf8',
 }).trim();
@@ -36,6 +38,7 @@ cleanEnvironment.NPM_CONFIG_CACHE = join(output, 'npm-cache');
 const candidates = [];
 for (const [role, tarball] of Object.entries(tarballs)) {
   const manifest = readTarballJson(tarball, 'package/package.json');
+  assert.equal(manifest.version, release.version);
   assert.equal(manifest.publishConfig.access, 'public');
   assert.equal(manifest.publishConfig.tag, 'next');
   assert.equal(manifest.publishConfig.provenance, false);

@@ -15,9 +15,12 @@ const corePackage = resolve(sourceBuildDirectory, '../../../core/package');
 const coreManifest = JSON.parse(
   readFileSync(join(corePackage, 'package.json'), 'utf8'),
 );
+const angularManifest = JSON.parse(
+  readFileSync(join(angularPackage, 'package.json'), 'utf8'),
+);
 
 assert.equal(coreManifest.name, '@rabassoft/schema-engine');
-assert.equal(coreManifest.version, '0.1.0');
+assert.equal(coreManifest.version, angularManifest.version);
 
 const target = join(angularPackage, 'node_modules/@rabassoft/schema-engine');
 rmSync(target, { recursive: true, force: true });
