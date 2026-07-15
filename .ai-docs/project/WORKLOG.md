@@ -6,6 +6,24 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — Post-commit ROADMAP consistency repaired
+
+### Completed
+
+- Created M13 closure commit `5127a7c` with Rabassoft attribution.
+- During next-milestone assessment, found and corrected the post-G0 ROADMAP
+  preamble that still claimed no publication was authorized or completed.
+
+### Verification
+
+- The correction changes no milestone, deferred state or package contract.
+- Formatting, documentation links and diff checks pass.
+
+### Next
+
+- Select the next milestone from product demand and the deferred register; no
+  capability is promoted by this assessment.
+
 ## 2026-07-15 — M13 completed; repository automation deferred as D-043
 
 ### Decision

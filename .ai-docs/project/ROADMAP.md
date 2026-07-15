@@ -59,11 +59,10 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7-M12 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-012
-> completó sus cinco checkpoints y la revisión final repetida pasó sin
-> hallazgos dentro del slice estrecho D-042; D-011/D-012 siguen Deferred. La
-> revisión 027 promovió D-034/D-040 únicamente para diseño normativo de M13;
-> no hay publicación ni cambio remoto autorizado.
+> M7-M13 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-013
+> publicó y verificó core/Angular `0.1.0` bajo gates explícitos, sin promover
+> APIs a Stable ni hacer público GitHub. D-011/D-012 y D-043 siguen Deferred;
+> ninguna publicación o mutación remota futura está autorizada.
 
 ### M9 — Objetos anidados — completado
 

@@ -33,6 +33,8 @@ implicitly promoting D-043 or another capability.
 
 ## Latest completed work
 
+- Corrected the post-G0 ROADMAP preamble that still described M13 as
+  unpublished after the closure commit; no milestone or scope changed.
 - Accepted ADR-018 revision 3 and completed PLAN-013 revision 4/M13 after full
   zero-finding reviews.
 - Deferred repository sanitization/publication, public metadata, OIDC, staged
@@ -40,8 +42,6 @@ implicitly promoting D-043 or another capability.
 - Published and verified Angular `0.1.0`; downloaded bytes match accepted
   SHA-512 `35f7f33a…2ebd56a`, aliases/license/peers are exact and no provenance is
   claimed.
-- Added repeatable live Angular verification plus registry-signature and
-  lower/upper Angular 22 consumer coverage.
 - Confirmed npm exposes generated local `_resolved`/`_from` metadata for both
   immutable versions; tarballs/manifests contain neither field nor credentials.
 
