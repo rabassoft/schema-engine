@@ -384,9 +384,10 @@ Cada decisión debe registrar:
   ciclo 2 pasa sin hallazgos, identifica a Ricardo Rabassó Rodríguez como
   titular jurídico y promueve D-034 únicamente para redactar/revisar ADR-018.
 - **Decisión aceptada:**
-  [`ADR-018 revision 1`](../adrs/018-licencia-dual-publicacion-experimental.md)
-  adopta `AGPL-3.0-only` o licencia comercial separada tras review 028 ciclo 4
-  sin hallazgos; solo PLAN-013 puede prepararse.
+  [`ADR-018 revision 2`](../adrs/018-licencia-dual-publicacion-experimental.md)
+  adopta `AGPL-3.0-only` o licencia comercial separada y trata `latest`
+  obligatorio de npm solo como alias Experimental tras review 028 ciclo 6 sin
+  hallazgos; PLAN-013 conserva cada gate externo.
 
 ## D-035: Especificación pública independiente de la implementación
 
@@ -469,10 +470,13 @@ Cada decisión debe registrar:
   ciclo 2 pasa sin hallazgos y promueve D-040 únicamente para diseño normativo.
   `private: true` sigue intacto; el repositorio seguirá privado hasta sanearlo
   y toda publicación requiere ADR, plan y checkpoint externo explícito.
-- **Arquitectura aceptada:** ADR-018 revision 1 mantiene el repositorio privado,
+- **Arquitectura aceptada:** ADR-018 revision 2 mantiene el repositorio privado,
   exige Corresponding Source público, 2FA inicial, trusted publishing posterior
-  y ausencia explícita de provenance hasta sanear/publicar el repositorio. No
-  autoriza implementación ni publicación sin PLAN-013 aprobado.
+  y ausencia explícita de provenance hasta sanear/publicar el repositorio;
+  `next` es el canal recomendado y `latest` obligatorio no implica Stable.
+- **Estado de entrega:** PLAN-013 revision 3 publicó core `0.1.0`; su
+  verificación live está aceptada tras review 030 ciclo 15. Angular permanece
+  sin publicar y requiere un candidato limpio corregido.
 
 ## D-041: Resolución estática de referencias locales JSON Schema
 
@@ -558,14 +562,14 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-034/D-040 — Primera publicación experimental:** están Promoted solo para
-   el diseño normativo de M13. ADR-018 revision 1 está Accepted y PLAN-013
-   revision 1 está Approved; solo se autoriza preparación local reversible, no
-   publicación ni mutación remota.
+1. **D-034/D-040 — Primera publicación experimental:** ADR-018 revision 2 está
+   Accepted y PLAN-013 revision 3 está Approved. Core `0.1.0` está publicado;
+   completar su verificación live y corregir el candidato Angular preceden su
+   gate externo separado.
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
-de M8; D-034/D-040 permanecen limitadas al diseño normativo de M13, D-005 está implementado
+de M8; D-034/D-040 permanecen limitadas a M13, D-005 está implementado
 dentro del alcance de M9 aunque conserva su estado registral Promoted, D-006
 queda Promoted con M10 completado por PLAN-010, D-041 queda Promoted con M11
 completado por PLAN-011 y D-042 queda Promoted con su slice estrecho M12

@@ -53,9 +53,10 @@ collection renderers and other deferred decisions are not active.
 
 ## Experimental packages and licensing
 
-The independent `0.1.0` candidates are configured for public npm access under
-the `next` dist-tag. They are not live until the separately approved registry
-checkpoints complete; `latest` is intentionally unused.
+Core `0.1.0` is public on npm; the independent Angular `0.1.0` candidate remains
+behind its separate publication checkpoint. `next` is the recommended
+Experimental channel. npm also requires `latest` to alias the published
+Experimental version; that registry alias does not promote any API to Stable.
 
 Once published, install explicit versions or the Experimental channel:
 
@@ -63,6 +64,10 @@ Once published, install explicit versions or the Experimental channel:
 npm install @rabassoft/schema-engine@next
 npm install @rabassoft/schema-engine-angular@next
 ```
+
+Prefer `@next` or an explicit version. An unqualified install resolves npm's
+mandatory `latest` alias but carries the same Public + Experimental + Active
+contract and no support SLA.
 
 Both packages are available under GNU AGPL v3 only (`AGPL-3.0-only`), including
 commercial use under its conditions. A separate paid commercial license may be

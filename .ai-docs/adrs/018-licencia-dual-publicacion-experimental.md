@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 15 July 2026
 - **Acceptance date:** 15 July 2026
-- **Revision:** 1 — source notices and private-repository publication security
+- **Revision:** 2 — mandatory npm latest alias without stability promotion
 - **Promotion review:**
   [`review 027`](../reviews/027-d034-d040-publication-licensing-readiness.md)
   cycle 2 passed with zero findings
@@ -104,7 +104,10 @@ public. Exclusion must not remove material required as Corresponding Source.
   published together initially.
 - Both are Public + Experimental + Active; no API becomes Stable.
 - npm access is public under the `@rabassoft` scope.
-- The first release uses dist-tag `next`, never `latest`.
+- The recommended Experimental channel is dist-tag `next`.
+- npm requires every published package to define `latest`; that mandatory alias
+  may point to the same first Experimental version. It is registry routing only
+  and never promotes an API, package or support policy to Stable.
 - Existing root entry points, exports, dependencies, peers and Angular range
   remain unchanged unless a separately accepted decision requires otherwise.
 - Already published bytes or versions are never replaced. Failure uses a new
@@ -131,7 +134,9 @@ Before publication, the plan must verify:
 2. the publishing identity and public commercial/security contacts;
 3. interactive 2FA for the first package creation, because an npm trusted
    publisher cannot be configured until that package exists;
-4. registry access, `next` tag and public visibility from packed metadata;
+4. registry access, `next` tag and public visibility from packed metadata; if
+   npm exposes mandatory `latest`, it must resolve to the same inspected
+   Experimental version and documentation must not present it as Stable;
 5. after initial creation, npm trusted publishing from the exact private GitHub
    workflow, with token publishing disabled when npm permits it;
 6. license, notices, Corresponding Source and complete tarball inventories;
@@ -178,6 +183,9 @@ real contact and executable agreement.
 - Dual licensing constrains how external contributions can be accepted.
 - Publishing complete buildable source inside release artifacts increases
   package/release complexity while the repository remains private.
+- npm's mandatory `latest` alias means an unqualified install resolves an
+  Experimental version; documentation must recommend `next` or an exact
+  version and explicitly deny any stability implication.
 - Commercial agreements, tax handling and enforcement need professional work
   outside the software implementation.
 
@@ -236,8 +244,10 @@ separate sanitization review before visibility changes.
 6. Registry identity, security, provenance, tag, rollback and clean-consumer
    gates are deliverable without credentials in the repository; the accepted
    first-release absence of provenance is explicit and truthful.
-7. Every external mutation retains an immediate explicit approval checkpoint.
-8. D-034/D-040 alone are active; no functional deferred capability changes.
+7. Mandatory `latest`, when exposed by npm, aliases the inspected Experimental
+   release without changing Public + Experimental + Active classification.
+8. Every external mutation retains an immediate explicit approval checkpoint.
+9. D-034/D-040 alone are active; no functional deferred capability changes.
 
 ## 7. References
 
@@ -247,5 +257,6 @@ separate sanitization review before visibility changes.
 - [Open Source Definition](https://opensource.org/osd)
 - [npm scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/)
 - [npm dist-tags](https://docs.npmjs.com/cli/commands/npm-dist-tag/)
+- [npm registry package metadata](https://github.com/npm/registry/blob/master/docs/responses/package-metadata.md)
 - [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
 - [npm provenance requirements](https://docs.npmjs.com/generating-provenance-statements/)

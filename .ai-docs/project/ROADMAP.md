@@ -134,21 +134,26 @@ separado antes de repetir la revisión.
 - M12 no activa D-011/D-012, agrupación anidada/item, tabs, wizards, grids,
   estado/acciones de layout, scopes generados ni container renderers custom.
 
-### M13 — Primera publicación experimental — diseño normativo
+### M13 — Primera publicación experimental — en curso
 
 - Review 027 cycle 2 promotes only D-034/D-040 after selecting
   `AGPL-3.0-only` or a separate commercial license.
 - Ricardo Rabassó Rodríguez is the legal rights holder, operating as
   Rabassoft; the initial repository remains private pending sanitization.
-- ADR-018 revision 1 is Accepted after review 028 cycle 4 closed with zero
-  findings. PLAN-013 revision 1 is Approved after review 029 cycle 4 closed
-  with zero findings; only reversible local preparation is active, while
-  commit, push and every external action retain their explicit checkpoints.
+- ADR-018 revision 2 is Accepted after review 028 cycle 6 closed with zero
+  findings. PLAN-013 revision 3 is Approved after review 029 cycle 12 closed
+  with zero findings.
+- Checkpoints 1–5 have accepted local, private-Git and read-only npm identity
+  evidence. Core `0.1.0` publication/live verification is accepted after review
+  030 cycle 15; npm-mandatory `latest` aliases the same Experimental version.
+  Angular remains unpublished and requires a corrected clean candidate.
 
 ### Orden de dependencias a más largo plazo
 
-1. **M13/D-034/D-040:** implement PLAN-013 local preparation; every Git or
-   external mutation retains explicit approval.
+1. **M13/D-034/D-040:** commit the accepted policy/docs/verifier checkpoint,
+   rebuild/review Angular from that clean commit, then resume its separate
+   publication gate; every Git/registry/settings mutation retains explicit
+   approval.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

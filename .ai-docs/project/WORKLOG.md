@@ -6,6 +6,174 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — PLAN-013 checkpoint 5 accepted
+
+### Completed
+
+- Added unauthenticated live-core verification for metadata, mandatory tags,
+  license/provenance, exact tarball bytes and clean exact/`next` consumers.
+- Corrected five verifier/fixture issues and repeated the full check after each;
+  review 030 cycle 15 then passed completely with zero findings.
+- Accepted core `0.1.0` publication/live verification under ADR-018 revision 2
+  and PLAN-013 revision 3.
+
+### Verification
+
+- Live core bytes equal canonical SHA-512 `dceb432e…fdb310e`; `next` and
+  mandatory Experimental `latest` both resolve to `0.1.0`.
+- Exact and `@next` consumers install, typecheck and execute without credentials.
+- Format/docs/lint/types, 359 core plus 76 Angular tests, build, package,
+  consumer, artifacts, isolated source/clean consumers, security and diff gates
+  pass.
+
+### Next
+
+- Obtain authorization for a local commit, then rebuild/review the corrected
+  Angular candidate from that clean commit. Push and Angular publication remain
+  separately gated.
+
+## 2026-07-15 — Mandatory latest policy accepted
+
+### Completed
+
+- Ricard accepted npm's mandatory `latest` as a registry alias to the same
+  explicitly Experimental version, with `next` remaining recommended.
+- Accepted ADR-018 revision 2 after review 028 cycle 6 and PLAN-013 revision 3
+  after review 029 cycle 12; both complete repeated reviews have zero findings.
+- Reconciled indexes, roadmap/deferred state, onboarding and release/package
+  documentation without promoting any API or support policy to Stable.
+
+### Verification
+
+- The revised authority preserves exact package/version, licensing/source,
+  private-repository/no-provenance and external-approval boundaries.
+- The immutable live core tarball is not overwritten or unpublished; its stale
+  no-`latest` README sentence is transparently superseded in release notes.
+- Angular remains unpublished and unauthorized.
+
+### Next
+
+- Complete the full applicable review and unauthenticated live core
+  tarball/install verification; then rebuild/review the corrected Angular
+  candidate before its separate external gate.
+
+## 2026-07-15 — Mandatory latest creates normative conflict
+
+### Completed
+
+- Ricard attempted the narrowly proposed removal of core's unintended `latest`
+  tag; npm returned `E400` and retained both tags.
+- Diagnosed the registry contract against official npm documentation: every
+  package metadata document must define `latest`, even though alternate tags
+  such as `next` can coexist.
+
+### Conflict
+
+- ADR-018 and PLAN-013 require no `latest`, which is infeasible for the live npm
+  package. No document silently overrides the accepted decision.
+- Core remains live and immutable at `0.1.0`; Angular remains unpublished.
+
+### Next
+
+- Decide whether to revise the accepted release contract so mandatory `latest`
+  may alias the explicitly Experimental core release. Do not unpublish core,
+  publish Angular or retry tag/settings mutations before that decision.
+
+## 2026-07-15 — Core live; unintended latest tag blocks verification
+
+### Completed
+
+- Ricard supplied the private OTP locally and npm accepted the already
+  authorized exact core publication.
+- Unauthenticated metadata confirms `@rabassoft/schema-engine@0.1.0`,
+  `AGPL-3.0-only` and the expected tarball integrity.
+
+### Finding
+
+- npm automatically assigned both `next: 0.1.0` and `latest: 0.1.0` on first
+  publication, despite the explicit `--tag next` command.
+- `latest` conflicts with ADR-018 and PLAN-013. Verification stopped before
+  live consumers; Angular remains unpublished.
+
+### Next
+
+- Obtain immediate approval to remove only the unintended core `latest`
+  dist-tag, then repeat complete unauthenticated metadata/tarball/consumer
+  verification. Do not unpublish core or publish Angular.
+
+## 2026-07-15 — Core publication stopped at OTP gate
+
+### Completed
+
+- Ricard explicitly authorized only the exact verified core `0.1.0` tarball
+  under public `next` with provenance disabled.
+- Rechecked its canonical SHA-512 and source commit, then invoked the authorized
+  command against the official registry.
+- npm returned `EOTP` before package creation; no OTP was requested from or
+  exposed to Codex.
+
+### Verification
+
+- An unauthenticated exact-version lookup after the attempt still returns
+  `E404`, confirming no core package was created.
+- Angular, npm settings, tags, GitHub Release and visibility remain untouched.
+
+### Next
+
+- Ricard retries the same authorized core command locally with a private OTP.
+  Verify the live package immediately after success; do not publish Angular.
+
+## 2026-07-15 — PLAN-013 checkpoint 5 identity accepted
+
+### Completed
+
+- Confirmed npm CLI identity `ricardrabasso`; Ricard clarified that `rabassoft`
+  is the newly created organization/scope rather than the human username.
+- Verified read-only that `ricardrabasso` owns organization `rabassoft`, the
+  confirmed email is verified and 2FA mode is `auth-and-writes`.
+- Corrected PLAN-013 as revision 2 and repeated its full eight-area review plus
+  the complete applicable implementation review with zero findings.
+- Confirmed both exact `0.1.0` package names remain absent and both candidate
+  hashes still match checkpoint 4.
+
+### Verification
+
+- `npm whoami` returns `ricardrabasso`; organization membership returns owner.
+- The organization package list is empty; unauthenticated registry reads return
+  `E404` for core and Angular.
+- No npm package setting, publish, tag, GitHub Release or visibility mutation
+  occurred.
+
+### Next
+
+- Request immediate approval for the exact verified core publication command.
+  Angular publication and all settings remain separately gated.
+
+## 2026-07-15 — PLAN-013 checkpoint 4 private push completed
+
+### Completed
+
+- Aborted the accidental merge of the obsolete pre-amend remote commit instead
+  of combining incompatible checkpoint states.
+- Ricard replaced remote `develop` with the final verified checkpoint commit
+  `7f5fcdf` using `--force-with-lease`.
+- Local `develop` and `origin/develop` now point to the same final commit.
+
+### Verification
+
+- Git reports a clean aligned branch, no unmerged paths and full commit
+  `7f5fcdfe952cae5fd0322c5e942c2ff335465c52` on both refs.
+- The commit retains `Rabassoft <ricard@rabassoft.com>` attribution.
+- npm `10.9.8` targets the official registry and the two candidate hashes still
+  match checkpoint 4; read-only `npm whoami` returns expected `ENEEDAUTH`.
+- No tag, GitHub Release, npm login, package setting or registry write occurred.
+
+### Next
+
+- Ricard performs interactive npm login/2FA outside repository files. Then run
+  checkpoint 5's read-only identity, security, registry, availability and core
+  candidate-hash checks; stop before core publication approval.
+
 ## 2026-07-15 — PLAN-013 checkpoint 4 local commit
 
 ### Completed

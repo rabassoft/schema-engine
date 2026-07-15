@@ -131,10 +131,19 @@ ADR-009/010/013 and completed PLAN-008. D-034/D-040 are Promoted only for
 drafting and reviewing ADR-018. No manifest, license file, repository
 visibility, registry write, tag, release or publication is authorized.
 
-## 10. Primary references
+## 10. Post-promotion registry evidence
+
+The historical cycle 2 proposal said not to assign `latest`. Live publication
+later proved that npm requires every package metadata document to define that
+tag and rejects removing it. ADR-018 revision 2 supersedes only that infeasible
+proposal: `next` remains recommended, while mandatory `latest` aliases the same
+Experimental version without any Stable promotion.
+
+## 11. Primary references
 
 - [GNU Affero General Public License v3](https://www.gnu.org/licenses/agpl-3.0.html)
 - [OSI AGPL-3.0 entry](https://opensource.org/license/agpl-3.0)
 - [Open Source Definition](https://opensource.org/osd)
 - [npm scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/)
 - [npm dist-tags](https://docs.npmjs.com/cli/commands/npm-dist-tag/)
+- [npm registry package metadata](https://github.com/npm/registry/blob/master/docs/responses/package-metadata.md)

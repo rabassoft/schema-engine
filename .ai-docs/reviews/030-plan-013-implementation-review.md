@@ -1,9 +1,10 @@
 # PLAN-013 implementation review
 
 - **Date:** 2026-07-15
-- **Plan:** [`PLAN-013 revision 1`](../plans/013-public-experimental-release.md)
-- **Status:** Local preparation accepted — checkpoint 4 authorization pending
-- **External actions:** None
+- **Plan:** [`PLAN-013 revision 3`](../plans/013-public-experimental-release.md)
+- **Status:** Checkpoint 5 core accepted; Angular candidate reconciliation pending
+- **External actions:** Private push, npm login, core publication and rejected
+  `latest` removal completed; no Angular/settings mutation
 
 ## Checkpoint 1 review areas
 
@@ -152,5 +153,176 @@ ignored candidate manifest records the exact clean `sourceCommit`; core and
 Angular hashes remain the deterministic cycle 7 values. No tag, push,
 credential or registry action occurred.
 
-Checkpoint 4 remains open only for its separately authorized push. The local
-commit does not authorize npm login, settings or publication.
+Ricard separately authorized and performed the private push. After aborting an
+accidental merge with the obsolete pre-amend commit, local `develop` and
+`origin/develop` both resolve to final commit
+`7f5fcdfe952cae5fd0322c5e942c2ff335465c52`. The worktree has no unmerged paths.
+
+**Result:** checkpoint 4 is accepted. Checkpoint 5 remains gated by Ricard's
+interactive npm login/2FA and read-only identity/security verification; this
+does not authorize npm settings or package publication.
+
+## Checkpoint 5 — Cycle 8 identity finding and correction
+
+The first live identity pass authenticated successfully as `ricardrabasso`, not
+the plan's former expected `rabassoft`. Ricard clarified that npm required the
+human account rename when organization `rabassoft` was created. Work stopped
+without a registry write. PLAN-013 revision 2 now models the human publisher
+and organization scope separately, and review 029 cycle 6 repeated the full
+plan review with zero findings.
+
+## Checkpoint 5 — Cycle 9 complete repeated review
+
+The complete applicable release review was repeated from the beginning:
+
+- npm `10.9.8` targets `https://registry.npmjs.org/` and authenticates as human
+  user `ricardrabasso`;
+- read-only organization access reports `ricardrabasso` as owner of
+  `rabassoft`;
+- the verified profile uses `ricard@rabassoft.com` and `auth-and-writes` 2FA;
+- the organization package list is empty and unauthenticated exact-version
+  reads return `E404` for both intended `0.1.0` names;
+- the core and Angular tarballs still match checkpoint 4 SHA-512 values
+  `dceb432e…fdb310e` and `ef1e491d…fa4b1507` respectively;
+- scope, versions, manifests, exports, dependencies, peers, license/source,
+  `next`, no-provenance and private-repository boundaries remain unchanged; and
+- no package setting, publish, tag, GitHub Release or visibility mutation
+  occurred.
+
+**Result:** zero findings and no unresolved change request. Checkpoint 5's
+identity/security gate is accepted. Work stops for immediate approval of the
+exact core publication command; Angular remains separately gated.
+
+## Checkpoint 5 — Cycle 10 persistent-state finding
+
+The closing consistency pass found ROADMAP still identified revision 1 and the
+local-preparation-only phase. ROADMAP was corrected to revision 2 and the exact
+checkpoint 5 core-publication stop. No runtime, package or registry state
+changed.
+
+## Checkpoint 5 — Cycle 11 complete repeated review
+
+The complete applicable review was repeated after the correction. Identity,
+organization ownership, 2FA, package-name absence, registry/CLI, exact candidate
+hashes, licensing/source, package/API/version boundaries, private-repository
+policy, external stop gates and persistent state all agree.
+
+**Result:** zero findings and no unresolved change request. Checkpoint 5's
+read-only identity/security gate is accepted; core publication still requires
+immediate explicit approval.
+
+## Checkpoint 5 — Cycle 12 current-state compaction finding
+
+The next closing pass found STATUS exceeded its five-outcome compact-state
+limit and retained an obsolete revision 1 outcome. It was compacted while the
+append-only WORKLOG preserved the historical evidence.
+
+## Checkpoint 5 — Cycle 13 complete repeated review
+
+The complete applicable review was repeated from the beginning. npm
+identity/organization/2FA and availability evidence, exact candidate hashes,
+package/license/source/API boundaries, authorization stops and all current-state
+documents are consistent. STATUS is compact and historical records remain
+append-only.
+
+**Result:** zero findings and no unresolved change request. Checkpoint 5's
+read-only gate remains accepted; the exact core publish command remains
+unauthorized pending Ricard's immediate approval.
+
+## Checkpoint 5 — Authorized core attempt stopped by OTP
+
+Ricard immediately authorized the exact core `0.1.0` tarball under public
+`next`, with provenance disabled. Its SHA-512 and source commit matched the
+accepted candidate immediately before the command. npm rejected the operation
+with `EOTP` before creating the package; Codex did not request or receive the
+one-time password.
+
+An unauthenticated exact-version lookup repeated after the attempt returns
+`E404`. No registry mutation, Angular action or package/settings change
+occurred. The existing authorization covers retrying that identical core
+command only; Ricard must supply the OTP privately in his local terminal.
+
+## Checkpoint 5 — Live core verification finding
+
+Ricard retried the identical authorized command locally with his private OTP;
+npm created `@rabassoft/schema-engine@0.1.0`. Unauthenticated metadata matches
+the expected `AGPL-3.0-only` license and SHA-512 integrity.
+
+npm also assigned `latest: 0.1.0` alongside the requested `next: 0.1.0`. This
+violates ADR-018 and PLAN-013's explicit no-`latest` gate. The review stopped
+before tarball download and clean live consumers. Core must not be unpublished;
+removing only the unintended tag requires a separate immediate registry-setting
+approval. Angular remains unauthorized and unpublished.
+
+## Checkpoint 5 — Registry-invariant conflict
+
+Ricard attempted the narrowly proposed removal; npm returned `E400` and kept
+both tags. Official npm registry metadata documentation states that every
+package has a `latest` tag, while alternate tags coexist with it. The accepted
+no-`latest` requirement is therefore infeasible for this registry, not merely a
+failed authentication or CLI invocation.
+
+This is an unresolved normative conflict with ADR-018 and PLAN-013. Core remains
+live at immutable `0.1.0`; Angular remains unpublished. The review stops before
+consumer completion or any further registry action. Resolving it requires an
+explicit accepted-contract revision, not another tag-removal retry.
+
+## Checkpoint 5 — Contract correction accepted
+
+Ricard accepted ADR-018 revision 2 and PLAN-013 revision 3. Review 028 cycle 6
+and review 029 cycle 12 repeated their complete areas with zero findings.
+`next` remains recommended; mandatory `latest` may alias only the same inspected
+Experimental version and cannot imply Stable API or support.
+
+The live core `0.1.0` README is immutable and retains the superseded no-`latest`
+sentence. Release notes disclose the discrepancy; published bytes are not
+overwritten or unpublished, and repository/future package wording is corrected.
+This documentation-only defect does not alter license, source, integrity,
+runtime or API behavior. Live tarball and consumer verification must now repeat
+before checkpoint 5 can close.
+
+## Checkpoint 5 — Cycle 14 findings and corrections
+
+The first post-decision implementation pass found six issues:
+
+1. Active ADR/plan/index/roadmap/deferred/onboarding/release/package prose still
+   encoded the infeasible no-`latest` rule. All active text now distinguishes
+   recommended `next` from mandatory Experimental `latest`.
+2. The immutable live core README retains the old claim. Release notes now
+   disclose and supersede it without overwriting/unpublishing `0.1.0`; future
+   package wording is corrected.
+3. The new live verifier needed Prettier formatting and an explicit ESM
+   `Buffer` import.
+4. npm's abbreviated install metadata omits `license`; the verifier now checks
+   license/provenance through the full exact-version endpoint while retaining
+   abbreviated metadata for install routing.
+5. Consumer fixture dependency values incorrectly used CLI package specs; they
+   now use manifest values `0.1.0` and `next`.
+6. The fixture read a nonexistent Public snapshot `value`; it now checks the
+   accepted Public `nodeKind` contract.
+
+Every correction triggered a full live-verification restart. The initial
+isolated source gate also encountered sandbox DNS denial; the unchanged command
+passed with registry access and is not a product finding.
+
+## Checkpoint 5 — Cycle 15 complete repeated review
+
+The complete applicable review passed from the beginning with zero findings:
+
+- ADR-018 revision 2, PLAN-013 revision 3, indexes, ROADMAP, deferred state,
+  onboarding, release notes and package documentation are consistent;
+- unauthenticated metadata reports core `0.1.0`, `AGPL-3.0-only`, no
+  attestation/provenance and `next`/mandatory `latest` both at `0.1.0`;
+- the downloaded live tarball is byte-identical to canonical SHA-512
+  `dceb432e…fdb310e`;
+- clean external TypeScript consumers install, compile and execute through both
+  exact `0.1.0` and `@next`;
+- formatting, documentation, lint, typecheck, 359 core plus 76 Angular tests,
+  builds, package/consumer/artifact/source/clean-consumer and release-security
+  gates pass; and
+- runtime/API/version/dependency/peer/license/source/private-repository
+  boundaries remain unchanged, with no Angular or settings mutation.
+
+**Result:** zero findings and no unresolved change request. Checkpoint 5 core
+publication and live verification are accepted. Angular remains unpublished;
+its corrected candidate requires a clean committed rebuild and checkpoint 6.

@@ -10,58 +10,64 @@
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1 and SPEC-005 v0.1.1
 - **Last proposed specification:** None
-- **Last implementation plan:** PLAN-013 revision 1, Approved
+- **Last implementation plan:** PLAN-013 revision 3, Approved
 - **Last completed implementation plan:** PLAN-012 revision 1
 - **Active implementation task:** None
-- **Last accepted ADR:** ADR-018 revision 1
+- **Last accepted ADR:** ADR-018 revision 2
 - **Last proposed ADR:** None
 - **Promoted capabilities:** D-005/M9, D-006/M10, D-041/M11 and D-042/M12
   implemented within their accepted slices; D-034/D-040 promoted for M13
   normative design only
-- **Phase:** M1–M12 and G0 completed; M13 checkpoint 4 local commit complete,
-  push pending
-- **Package candidates:** public-ready independent `0.1.0` artifacts with
-  verified licensed Corresponding Source; unpublished
+- **Phase:** M1–M12 and G0 completed; M13 checkpoint 5 core publication/live
+  verification accepted; Angular candidate reconciliation pending
+- **Package candidates:** core `0.1.0` live; Angular `0.1.0` remains an
+  unpublished verified candidate
 
 ## Current objective
 
-Preserve the clean checkpoint 4 commit and verified candidates; stop before
-push or npm authentication.
+Create a clean Git checkpoint for the accepted policy/docs/verifier changes,
+then rebuild/review the corrected Angular candidate before checkpoint 6.
 
 ## In progress
 
-- None. The local commit and clean rebuild are complete; push remains an
-  explicit checkpoint 4 gate.
+- PLAN-013 checkpoint 6: create the authorized local Git checkpoint, then
+  rebuild/review the corrected Angular candidate against live core. Push and
+  Angular publication remain unauthorized.
 
 ## Latest completed work
 
-- Created the authorized checkpoint 4 local commit with Rabassoft attribution
-  and rebuilt deterministic candidates from its clean tree; no push occurred.
-- Completed PLAN-013 checkpoint 3 after review 030 cycle 5 repeated the full
-  local gate with zero findings and deterministic SHA-512 candidate hashes.
-- Added isolated release security/dry-run tooling; npm `10.9.8` accepts both
-  exact tarballs under public `next` with provenance disabled in dry-run mode.
-- Completed PLAN-013 checkpoint 2 after review 030 cycle 3 passed completely
-  with zero findings; only the two package manifests are locally publishable.
-- Completed PLAN-013 checkpoint 1 after review 030 cycle 2 passed all eight
-  areas with zero findings following four source-package corrections.
-- Accepted PLAN-013 revision 1 after review 029 cycle 4 corrected a
-  source-package checkpoint-order conflict and repeated all eight areas with
-  zero findings; Ricard confirmed `ricard@rabassoft.com` as public contact.
+- Accepted checkpoint 5 after review 030 cycle 15 verified live core metadata,
+  exact bytes and exact/`next` consumers with zero findings.
+- Accepted ADR-018 revision 2 and PLAN-013 revision 3 after complete repeated
+  reviews define mandatory `latest` as an Experimental registry alias.
+- Diagnosed the failed `latest` removal: npm registry metadata requires every
+  package to define `latest`, so the accepted no-`latest` contract is infeasible.
+- Published exact core `0.1.0`; unauthenticated metadata matches its license and
+  integrity, but npm automatically assigned both `next` and forbidden `latest`.
+- Confirmed the authorized core publish attempt made no registry mutation after
+  npm required an OTP; unauthenticated lookup still returns `E404`.
 
 ## Exact next action
 
-Choose and authorize reconciliation of remote pre-amend commit `1e71ce6` with
-the final local checkpoint commit before any push; do not mutate npm yet.
+Review and authorize a local commit for the accepted policy/docs/live-verifier
+checkpoint, then rebuild the Angular candidate from that clean commit. Do not
+push, publish Angular or mutate npm/GitHub settings without separate approval.
 
 ## Blockers and conflicts
 
 - No implementation blocker, open review finding or documentation conflict.
-- Checkpoint 4 local commit is complete; push remains explicitly unauthorized.
-- `origin/develop` now points to pre-amend commit `1e71ce6`, while local
-  `develop` contains the final amended commit. Their histories diverge;
-  force-with-lease or a history-preserving follow-up requires an explicit choice
-  before push.
+- npm requires a one-time authenticator password for the already authorized
+  core command. The first Codex attempt returned `EOTP`; Ricard's local retry
+  succeeded.
+- npm's mandatory `latest: 0.1.0` is now accepted only as an Experimental alias
+  to the same inspected core version; `next` remains recommended.
+- The immutable live core `0.1.0` README retains the pre-discovery no-`latest`
+  sentence. Release notes/ADR supersede it; future package versions carry the
+  corrected wording and published bytes are not overwritten.
+- Angular's existing ignored tarball predates the corrected mandatory-`latest`
+  wording and is not publishable until rebuilt/reviewed from a clean commit.
+- Checkpoint 4 is complete: private `develop` and `origin/develop` both point to
+  `7f5fcdf`; no merge remains active.
 - D-042 remains registrally Promoted and its narrow M12 slice is implemented.
 - D-011 and D-012 remain Deferred outside D-042's exact boundary.
 - D-034/D-040 are Promoted only for normative design; no publication, version
@@ -69,18 +75,20 @@ the final local checkpoint commit before any push; do not mutate npm yet.
 - Review 027 cycle 2 passes with zero findings. Ricardo Rabassó Rodríguez is the
   legal licensor, the exact public notice is fixed and the repository remains
   private pending sanitization.
-- ADR-018 revision 1 and PLAN-013 revision 1 are Accepted/Approved. Reversible
-  local preparation is active; commit, push, credential, tag, visibility and
-  registry mutations remain unauthorized.
+- ADR-018 revision 2 and PLAN-013 revision 3 are Accepted/Approved. Commit and
+  private push are complete; npm settings/publication, tags, visibility and
+  further registry mutations remain unauthorized.
 - SPEC-001 v0.1.15 remains the behavioral baseline. SPEC-002, SPEC-003,
   SPEC-004 and SPEC-005 are authoritative only for their accepted extensions.
 
 ## Open questions
 
-- None within the active local checkpoint.
+- None within the accepted core-verification scope.
 
 ## Latest verification
 
+- Review 028 cycle 6, review 029 cycle 12 and review 030 cycle 15 repeat their
+  complete applicable areas with zero findings after policy/live corrections.
 - Review 026 cycle 6 closes all ten implementation-review areas and all 18
   SPEC-005 evidence groups with zero findings; the full matrix passed in cycle
   3 and closing documentation checks passed in cycle 6.
@@ -91,8 +99,21 @@ the final local checkpoint commit before any push; do not mutate npm yet.
   preparations produced identical SHA-512 hashes: core `dceb432e…fdb310e` and
   Angular `ef1e491d…fa4b1507`; full hashes are in review 030 and the ignored
   `.release/0.1.0/candidates.json`.
+- npm `10.9.8` targets `https://registry.npmjs.org/`; authenticated user
+  `ricardrabasso` is owner of organization `rabassoft`, with verified
+  `ricard@rabassoft.com` and `auth-and-writes` 2FA. Before publication both
+  exact names returned unauthenticated `E404` and the candidate hashes matched
+  checkpoint 4.
+- Post-publication unauthenticated metadata reports core `0.1.0`,
+  `AGPL-3.0-only` and the expected SHA-512 integrity, but both `next` and
+  mandatory Experimental `latest` point to `0.1.0`.
+- `pnpm test:live:core` downloads bytes identical to canonical core SHA-512 and
+  passes clean exact-version and `@next` TypeScript consumers without credentials.
+- Git refs remain aligned at `7f5fcdfe952cae5fd0322c5e942c2ff335465c52`
+  with no unmerged paths; current checkpoint documentation is uncommitted.
 - Versions, exports, dependencies, peers, runtime behavior and Experimental
-  classification remain unchanged; no remote or Git mutation occurred.
+  classification remain unchanged. Core publication is the only npm package
+  mutation; Angular and settings remain unchanged.
 
 ## Task document map
 

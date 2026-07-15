@@ -3,9 +3,9 @@
 - **Status:** Approved
 - **Date:** 2026-07-15
 - **Approval date:** 2026-07-15
-- **Revision:** 1 — source-package checkpoint ordering
+- **Revision:** 3 — mandatory npm latest alias and live-core recovery
 - **Requires:** accepted
-  [`ADR-018 revision 1`](../adrs/018-licencia-dual-publicacion-experimental.md),
+  [`ADR-018 revision 2`](../adrs/018-licencia-dual-publicacion-experimental.md),
   [`ADR-013 revision 1`](../adrs/013-preparacion-artefactos-experimentales-0-1.md),
   [`ADR-010 revision 1`](../adrs/010-versionado-semver-compatibilidad.md) and
   [`ADR-009 revision 1`](../adrs/009-politica-api-publica-estabilidad.md)
@@ -19,7 +19,8 @@
 ## 1. Goal and hard boundary
 
 Publish the existing independent `0.1.0` core and Angular candidates publicly
-under `@rabassoft` with dist-tag `next`, dual `AGPL-3.0-only`/commercial
+under `@rabassoft` with recommended dist-tag `next`, npm's mandatory `latest`
+alias to the same Experimental version, dual `AGPL-3.0-only`/commercial
 licensing and complete Corresponding Source, while the GitHub repository stays
 private.
 
@@ -41,12 +42,16 @@ change.
 
 ## 2. Confirmed preflight state
 
-- Ricard confirms npm user `rabassoft` owns the intended `@rabassoft` scope.
+- Ricard created npm organization `rabassoft`; authenticated human user
+  `ricardrabasso` is its verified owner and controls the intended `@rabassoft`
+  scope.
 - Unauthenticated registry reads on 2026-07-15 return `E404` for
   `@rabassoft/schema-engine` and `@rabassoft/schema-engine-angular`; this is
   evidence that neither package currently exists, not a reservation guarantee.
-- The current machine is not authenticated to npm (`npm whoami` returns
-  `ENEEDAUTH`). No credential is present in the repository.
+- The current machine is authenticated to npm as `ricardrabasso`; the
+  credential remains outside repository files.
+- npm reports `ricardrabasso` as owner of organization `rabassoft`, with
+  verified `ricard@rabassoft.com` email and `auth-and-writes` 2FA.
 - Local Node is `22.23.1`, npm is `10.9.8` and pnpm is pinned to `10.28.2`.
 - npm staged publishing and trusted-publisher CLI setup require an existing
   package, so neither can create these first versions. Initial publication must
@@ -118,8 +123,8 @@ Update package/root README and `.ai-docs/releases/0.1.0.md` to state:
 - private-repository/source-in-tarball policy and no first-release provenance;
 - root-only imports, compatibility matrix and breaking Experimental MINOR
   policy;
-- no `latest`, Stable API, support SLA, public issue tracker or accepted
-  external code contributions; and
+- mandatory `latest` as a registry alias only, with no Stable API, support SLA,
+  public issue tracker or accepted external code contributions; and
 - the exact release commit only after the private commit checkpoint exists.
 
 Update artifact/package checks to reject `private`, missing license/source,
@@ -179,10 +184,13 @@ M13 remains locally prepared and unpublished.
 
 ## 7. Checkpoint 5 — npm identity and core publication stop
 
-Ricard performs interactive npm login/2FA outside repository files. Then run
-read-only checks:
+Ricard performs interactive npm login/2FA outside repository files. The human
+publishing identity and organization scope are distinct. Then run read-only
+checks:
 
-- `npm whoami` must equal `rabassoft`;
+- `npm whoami` must equal `ricardrabasso`;
+- npm organization membership must report `ricardrabasso` as owner of
+  `rabassoft`;
 - account 2FA must protect package publication/settings;
 - both names must still be absent;
 - registry must be `https://registry.npmjs.org/`; and
@@ -204,7 +212,8 @@ npm publish <verified-core-tarball> --access public --tag next --provenance=fals
 After success, verify from unauthenticated registry/install reads that:
 
 - only `@rabassoft/schema-engine@0.1.0` exists;
-- `next` points to `0.1.0` and `latest` is absent;
+- `next` and mandatory `latest` both point to inspected Experimental `0.1.0`,
+  and documentation denies that either alias promotes stability;
 - visibility, manifest, license, files and hashes are exact; and
 - a clean external consumer installs by exact version and `@next` and passes.
 
@@ -225,8 +234,9 @@ to:
 npm publish <verified-angular-tarball> --access public --tag next --provenance=false
 ```
 
-After success, verify unauthenticated registry metadata, `next`/no-`latest`,
-packed contents, peer ranges and clean consumers using both live packages.
+After success, verify unauthenticated registry metadata, `next` and mandatory
+`latest` both resolving to inspected Experimental `0.1.0`, packed contents,
+peer ranges and clean consumers using both live packages.
 
 If core succeeds but Angular cannot be published, retain and document the
 partial core release; do not overwrite or unpublish it. Correct Angular before
@@ -272,8 +282,9 @@ Forbidden changes:
 - runtime logic, schemas, diagnostics, tests/fixtures except release tooling
   assertions, Public exports/signatures, entry points, versions, dependency
   ranges or Angular behavior;
-- root publication, `latest`, provenance from the private repo, public GitHub
-  visibility, tags/releases, committed credentials or automatic live publish;
+- root publication, any claim that mandatory `latest` means Stable, provenance
+  from the private repo, public GitHub visibility, tags/releases, committed
+  credentials or automatic live publish;
   and
 - commercial contract text presented as professionally approved when it is not.
 
@@ -286,8 +297,9 @@ Stop on any:
 - unexpected registry ownership/name collision;
 - authentication, 2FA, secret, hash, tarball or clean-consumer mismatch;
 - request to expose the private repository/history;
-- desire to use `latest`, claim provenance, accept contributions or advertise
-  executable commercial terms outside ADR-018; or
+- desire to point `latest` somewhere other than the inspected Experimental
+  release, claim it means Stable, claim provenance, accept contributions or
+  advertise executable commercial terms outside ADR-018; or
 - commit, push, tag, GitHub Release, npm setting or publish command lacking its
   immediate explicit approval.
 

@@ -8,7 +8,9 @@ Engine.
 - Candidate line: `0.1.x`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- Public channel: npm dist-tag `next` or an explicit version; no `latest` tag.
+- Recommended channel: npm dist-tag `next` or an explicit version. When
+  published, npm's mandatory `latest` alias remains Experimental and does not
+  imply stability.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 

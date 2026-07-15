@@ -15,6 +15,7 @@
     "test:artifacts": "pnpm build && node scripts/verify-packed-artifacts.mjs",
     "test:consumer": "pnpm build && pnpm --filter @rabassoft/schema-engine-angular exec vitest run test/consumer.test.ts",
     "test:consumer:clean": "pnpm build && node scripts/verify-clean-consumers.mjs",
+    "test:live:core": "node scripts/verify-live-core.mjs",
     "test:package": "pnpm build && pnpm -r --if-present test:package",
     "test:source": "pnpm build && node scripts/verify-source-packages.mjs",
     "typecheck": "pnpm build && pnpm -r --if-present typecheck"

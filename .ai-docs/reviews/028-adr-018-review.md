@@ -1,14 +1,14 @@
 # Review 028: ADR-018 complete review
 
 - **Date:** 15 July 2026
-- **Scope:** ADR-018 revision 0–1
+- **Scope:** ADR-018 revision 0–2
 - **Authority:** accepted ADR-009/010/013, completed PLAN-008 and accepted
   review 027
 - **Cycle 1:** Two corrections required
 - **Cycle 2:** Complete repeated review passed with zero findings
 - **Cycle 3:** Four closing-state documentation corrections required
 - **Cycle 4:** Complete repeated closing review passed with zero findings
-- **Result:** Passed; ADR-018 revision 1 accepted under standing authorization
+- **Result:** Passed; ADR-018 revision 2 accepted by Ricard
 
 ## Cycle 1 findings and corrections
 
@@ -67,6 +67,30 @@ Repeated authority, ADR/review/index/roadmap/deferred/status/worklog/onboarding
 consistency, documentation links, formatting and diff checks after all cycle 3
 corrections. No finding or unresolved change request remains.
 
+## Cycle 5 registry-invariant finding and correction
+
+The live first publication exposed a false premise in revision 1: npm assigned
+`latest` alongside explicit `next`, and an OTP-authorized removal returned
+`E400`. Official registry metadata requires every package to define `latest`.
+The no-`latest` rule was therefore infeasible.
+
+Ricard accepted revision 2. It keeps `next` as the recommended Experimental
+channel, accepts mandatory `latest` only as a registry alias to the same
+inspected version and states explicitly that the alias cannot promote stability
+or support guarantees.
+
+## Cycle 6 complete repeated review
+
+The complete authority, licensing, identity, source, package/API/SemVer,
+security/provenance, recovery, delivery and deferred-boundary review was
+repeated from the beginning. Mandatory `latest` changes only registry routing;
+AGPL/commercial licensing, Corresponding Source, immutable versions, private
+repository, no provenance, Public + Experimental + Active classification and
+every external approval checkpoint remain unchanged.
+
+**Result:** zero findings and no unresolved change request. ADR-018 revision 2
+is accepted by Ricard.
+
 ## Primary references
 
 - [GNU Affero General Public License v3](https://www.gnu.org/licenses/agpl-3.0.html)
@@ -74,3 +98,4 @@ corrections. No finding or unresolved change request remains.
 - [OSI AGPL-3.0 entry](https://opensource.org/license/agpl-3.0)
 - [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
 - [npm provenance requirements](https://docs.npmjs.com/generating-provenance-statements/)
+- [npm registry package metadata](https://github.com/npm/registry/blob/master/docs/responses/package-metadata.md)
