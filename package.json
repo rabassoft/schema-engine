@@ -17,6 +17,7 @@
     "test:consumer:angular-candidate": "pnpm build && node scripts/verify-clean-consumers.mjs --live-core --angular-tarball=.release/0.1.0/rabassoft-schema-engine-angular-0.1.0.tgz",
     "test:consumer:clean": "pnpm build && node scripts/verify-clean-consumers.mjs",
     "test:live:core": "node scripts/verify-live-core.mjs",
+    "test:live:angular": "node scripts/verify-live-angular.mjs && node scripts/verify-clean-consumers.mjs --live-core --live-angular",
     "test:package": "pnpm build && pnpm -r --if-present test:package",
     "test:source": "pnpm build && node scripts/verify-source-packages.mjs",
     "test:source:angular-candidate": "pnpm build && node scripts/verify-source-packages.mjs --core-tarball=.release/0.1.0/rabassoft-schema-engine-0.1.0.tgz --angular-tarball=.release/0.1.0/rabassoft-schema-engine-angular-0.1.0.tgz",

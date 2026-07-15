@@ -3,18 +3,17 @@
 Angular 22 headless adapter and accessible native HTML renderers for Schema
 Engine.
 
-## Candidate status
+## Release status
 
-- Candidate line: `0.1.x`.
+- Experimental line: `0.1.x`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- Recommended channel: npm dist-tag `next` or an explicit version. When
-  published, npm's mandatory `latest` alias remains Experimental and does not
-  imply stability.
+- Recommended channel: npm dist-tag `next` or an explicit version. npm's
+  mandatory `latest` alias remains Experimental and does not imply stability.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 
-Install the Experimental channel after its registry checkpoint is live:
+Install the Experimental channel:
 
 ```sh
 npm install @rabassoft/schema-engine-angular@next

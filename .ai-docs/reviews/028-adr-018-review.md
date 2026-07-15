@@ -1,14 +1,18 @@
 # Review 028: ADR-018 complete review
 
 - **Date:** 15 July 2026
-- **Scope:** ADR-018 revision 0–2
+- **Scope:** ADR-018 revision 0–3
 - **Authority:** accepted ADR-009/010/013, completed PLAN-008 and accepted
   review 027
 - **Cycle 1:** Two corrections required
 - **Cycle 2:** Complete repeated review passed with zero findings
 - **Cycle 3:** Four closing-state documentation corrections required
 - **Cycle 4:** Complete repeated closing review passed with zero findings
-- **Result:** Passed; ADR-018 revision 2 accepted by Ricard
+- **Cycle 5:** Mandatory npm `latest` invariant required revision 2
+- **Cycle 6:** Complete revision 2 review passed with zero findings
+- **Cycle 7:** Trusted-publisher/private-repository conflict required revision 3
+- **Cycle 8:** Complete revision 3 review passed with zero findings
+- **Result:** Passed; ADR-018 revision 3 accepted by Ricard
 
 ## Cycle 1 findings and corrections
 
@@ -89,6 +93,31 @@ repository, no provenance, Public + Experimental + Active classification and
 every external approval checkpoint remain unchanged.
 
 **Result:** zero findings and no unresolved change request. ADR-018 revision 2
+is accepted by Ricard.
+
+## Cycle 7 repository-metadata conflict and approved correction
+
+Post-publication review proved that trusted publishing requires the package
+`repository.url` to match GitHub. That requirement conflicts with ADR-018's
+accepted prohibition on advertising the inaccessible private repository.
+
+Ricard approved revision 3: M13 closes with the verified interactive 2FA
+publications and no long-lived repository credential. Public repository
+metadata, history sanitization, OIDC, staged publishing, token restrictions and
+provenance move together to a separately promoted future decision. No workflow
+or external setting is changed by the revision.
+
+## Cycle 8 complete repeated review
+
+The complete authority, licensing, identity, Corresponding Source,
+package/API/SemVer, registry security, provenance, recovery, contribution and
+deferred-boundary review was repeated from the beginning. Revision 3 preserves
+the exact public packages, private repository, absence of misleading metadata
+or provenance, immutable recovery and immediate approval gates. Deferring a
+currently unusable trusted publisher neither weakens the completed first
+release nor authorizes a later registry write.
+
+**Result:** zero findings and no unresolved change request. ADR-018 revision 3
 is accepted by Ricard.
 
 ## Primary references

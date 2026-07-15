@@ -1,7 +1,7 @@
 # PLAN-013 complete review
 
 - **Date:** 2026-07-15
-- **Subject:** [`PLAN-013 revisions 0–3`](../plans/013-public-experimental-release.md)
+- **Subject:** [`PLAN-013 revisions 0–4`](../plans/013-public-experimental-release.md)
 - **Status:** Accepted
 - **Scope:** complete delivery-contract review; no implementation, credential
   operation or external mutation
@@ -192,3 +192,28 @@ Experimental alongside recommended `next` and exact versions.
 **Result:** zero findings and no unresolved change request. PLAN-013 revision 3
 is accepted by Ricard; no Angular publication or settings mutation is
 authorized.
+
+## Cycle 13 — Trusted-publisher closure conflict and correction
+
+Checkpoint 7 required a private GitHub trusted-publishing workflow while
+checkpoint 2 prohibited the matching inaccessible `repository.url`. npm's
+current contract makes that workflow unusable, so PLAN-013 could not complete
+without violating one of its own gates.
+
+Ricard approved revision 4. Checkpoint 7 now closes the observed manual/2FA
+release through repeated live bytes, installs, signatures, no-provenance and
+documentation checks. Repository publication, metadata, OIDC, staged approval,
+token restrictions and provenance are deferred together; no workflow, setting
+or later publication is authorized.
+
+## Cycle 14 — Complete repeated review
+
+All eight review areas were repeated from the beginning. Revision 4 preserves
+the three authorization zones and every completed package publication gate,
+AGPL/commercial licensing, Corresponding Source, exact immutable bytes,
+Experimental SemVer, dependencies/peers, recovery and private-repository
+boundary. Its closure criteria are fully evidenced by review 030 and do not
+claim future-release automation or provenance.
+
+**Result:** zero findings and no unresolved change request. PLAN-013 revision 4
+is approved and complete; no Git, registry or settings mutation is authorized.

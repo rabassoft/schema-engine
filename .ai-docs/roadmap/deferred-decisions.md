@@ -384,7 +384,7 @@ Cada decisión debe registrar:
   ciclo 2 pasa sin hallazgos, identifica a Ricardo Rabassó Rodríguez como
   titular jurídico y promueve D-034 únicamente para redactar/revisar ADR-018.
 - **Decisión aceptada:**
-  [`ADR-018 revision 2`](../adrs/018-licencia-dual-publicacion-experimental.md)
+  [`ADR-018 revision 3`](../adrs/018-licencia-dual-publicacion-experimental.md)
   adopta `AGPL-3.0-only` o licencia comercial separada y trata `latest`
   obligatorio de npm solo como alias Experimental tras review 028 ciclo 6 sin
   hallazgos; PLAN-013 conserva cada gate externo.
@@ -470,14 +470,14 @@ Cada decisión debe registrar:
   ciclo 2 pasa sin hallazgos y promueve D-040 únicamente para diseño normativo.
   `private: true` sigue intacto; el repositorio seguirá privado hasta sanearlo
   y toda publicación requiere ADR, plan y checkpoint externo explícito.
-- **Arquitectura aceptada:** ADR-018 revision 2 mantiene el repositorio privado,
-  exige Corresponding Source público, 2FA inicial, trusted publishing posterior
-  y ausencia explícita de provenance hasta sanear/publicar el repositorio;
-  `next` es el canal recomendado y `latest` obligatorio no implica Stable.
-- **Estado de entrega:** PLAN-013 revision 3 publicó core `0.1.0`; su
-  verificación live está aceptada tras review 030 ciclo 15. Angular permanece
-  sin publicar; su candidato limpio corregido está aceptado tras review 030
-  ciclo 21 y conserva gates Git/registry separados.
+- **Arquitectura aceptada:** ADR-018 revision 3 mantiene el repositorio privado,
+  exige Corresponding Source público y 2FA inicial, y difiere conjuntamente
+  metadata pública, trusted publishing y provenance hasta sanear/publicar el
+  repositorio; `next` es recomendado y `latest` obligatorio no implica Stable.
+- **Estado de entrega:** PLAN-013 revision 4 publicó y verificó byte a byte core
+  y Angular `0.1.0`; ambos exponen `next` y el alias Experimental obligatorio
+  `latest`. Checkpoint 7 y M13 cierran con publicación interactiva/2FA, sin
+  provenance, workflow ni cambio de settings externo.
 
 ## D-041: Resolución estática de referencias locales JSON Schema
 
@@ -561,12 +561,36 @@ Cada decisión debe registrar:
   review 025 ciclo 2 sin hallazgos tras dos correcciones y completó sus cinco
   checkpoints tras una revisión final repetida sin hallazgos.
 
+## D-043: Publicación del repositorio y automatización segura de releases
+
+- **Estado:** Deferred
+- **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
+  trusted publishing OIDC, staged approval, restricciones de tokens y
+  provenance verificable?
+- **Motivo:** npm exige que `package.json#repository` coincida con GitHub para
+  trusted publishing, pero M13 mantiene el repositorio privado y prohíbe
+  anunciar una URL inaccesible. Estas medidas solo son coherentes si se deciden
+  y verifican conjuntamente.
+- **Incluye:** revisión de todo el historial alcanzable, secretos/datos
+  personales/documentación interna, rama por defecto, Issues y políticas de
+  seguridad/comunidad/contribución; metadata `repository`; workflow en runner
+  GitHub-hosted con OIDC; permisos stage-only, aprobación humana 2FA,
+  restricciones de tokens y provenance; ruta neutra de publicación y auditoría
+  de metadata registral.
+- **Excluye:** cambiar runtime/API/SPEC, publicar otra versión, hacer público el
+  repositorio, crear workflows o cambiar settings por la mera existencia de
+  esta entrada.
+- **Retomar cuando:** Ricard promueva explícitamente el saneamiento/publicación
+  del repositorio o autorice diseñar la automatización de una versión futura.
+- **Documento esperado:** revisión de preparación, ADR y plan con gates
+  separados para reescritura/saneamiento, visibilidad GitHub, metadata de
+  paquetes y cada setting npm.
+
 ## 4. Próximo trabajo de decisión
 
-1. **D-034/D-040 — Primera publicación experimental:** ADR-018 revision 2 está
-   Accepted y PLAN-013 revision 3 está Approved. Core `0.1.0` está publicado;
-   completar su verificación live y corregir el candidato Angular preceden su
-   gate externo separado.
+1. **Selección del siguiente hito:** M13/D-034/D-040 están completados. D-043
+   conserva la publicación del repositorio y automatización como trabajo
+   Deferred; no se promueve hasta una decisión explícita.
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
@@ -582,6 +606,7 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 15-07-2026 | ADR-018 r3/PLAN-013 r4 cierran M13 con release manual/2FA verificada; D-043 difiere repositorio público, OIDC y provenance.              |
 | 15-07-2026 | PLAN-012 y M12 se completan; review 026 ciclo 6 cierra sin hallazgos tras siete correcciones; la matriz completa pasó en ciclo 3.        |
 | 15-07-2026 | SPEC-005 v0.1.1 queda Accepted tras review 024 ciclo 2 sin hallazgos; autoriza preparar PLAN-012, no implementar.                        |
 | 15-07-2026 | SPEC-005 v0.1.0 queda Draft para D-042; requiere revisión y aceptación antes de PLAN-012.                                                |

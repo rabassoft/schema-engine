@@ -1,10 +1,10 @@
 # PLAN-013 implementation review
 
 - **Date:** 2026-07-15
-- **Plan:** [`PLAN-013 revision 3`](../plans/013-public-experimental-release.md)
-- **Status:** Checkpoint 6 Angular candidate accepted; Git/publication gates pending
-- **External actions:** Private push, npm login, core publication and rejected
-  `latest` removal completed; no Angular/settings mutation
+- **Plan:** [`PLAN-013 revision 4`](../plans/013-public-experimental-release.md)
+- **Status:** Completed after checkpoint 7 cycle 29 passed with zero findings
+- **External actions:** Private push and both npm publications completed under
+  explicit approvals; no workflow/settings/visibility mutation
 
 ## Checkpoint 1 review areas
 
@@ -396,3 +396,130 @@ all agree without ephemeral Git-count claims.
 
 **Result:** zero findings and no unresolved change request. Checkpoint 6 and the
 Angular candidate remain accepted.
+
+## Checkpoint 6 — Cycle 22 private sync and final preflight
+
+The selected private/no-provenance path was executed through its final reversible
+gate. Private `develop` was synchronized at `6f13987`; Angular was repacked from
+that clean commit with unchanged SHA-512 `35f7f33a…2ebd56a`.
+
+Exact source reconstruction, live core `0.1.0` lower/upper Angular 22 consumers,
+live core verification, unauthenticated Angular `E404`, npm identity
+`ricardrabasso` and the exact public/`next`/no-provenance dry-run all pass.
+Repository visibility remains private and no npm mutation occurred.
+
+**Result:** zero findings and no unresolved change request. Work stops for
+immediate explicit approval of the exact Angular publication command.
+
+## Checkpoint 6 — Cycle 23 live-verifier corrections
+
+Angular `0.1.0` was accepted by npm. The first two executions of the new live
+verifier found assumptions in the verifier, not package defects: abbreviated
+registry metadata exposes `versions` as a map and omits license/dependency
+fields carried by the exact-version document. Both assumptions were corrected
+and the complete applicable verification was restarted.
+
+## Checkpoint 6 — Cycle 24 complete repeated review
+
+The repeated review passes from the beginning with zero findings:
+
+- unauthenticated metadata exposes only Angular `0.1.0`; `next` and mandatory
+  Experimental `latest` both resolve to it;
+- license, dependencies, peers and absent attestations match the accepted
+  manifest;
+- the downloaded tarball is byte-identical to the candidate with SHA-512
+  `35f7f33adccc7c5e6ac164fc03365d2d0b13a9ef472db1d1890ae3a2f70fed43b3f92fddf74ce1e85d6ccf6bff3b8b46bcf95c416e950879c18139a332ebd56a`;
+- npm registry signatures verify for the live dependency graph;
+- clean Angular `22.0.6` lower/upper consumers compile and execute with both
+  live packages, and deep imports remain blocked;
+- frozen install, format/docs/lint/types, 359 core plus 76 Angular tests, build,
+  package, artifact, local/clean consumers, isolated Corresponding Source,
+  security and diff checks pass; and
+- live core exact/`next` consumers and exact bytes pass again.
+
+**Result:** zero findings and no unresolved change request. PLAN-013 checkpoint
+6 is complete and both exact `0.1.0` packages are publicly verified.
+
+## Checkpoint 7 — Cycle 25 blocking findings
+
+The post-publication review found two items before any external setting change:
+
+1. npm's current trusted-publisher contract requires the package
+   `repository.url` to match the GitHub repository exactly. ADR-018 and PLAN-013
+   intentionally prohibit publishing an inaccessible private repository URL.
+   Preparing a workflow cannot make it usable without changing one of those
+   accepted boundaries. Current staged publishing additionally requires npm
+   CLI `11.15.0` or later; local npm `10.9.8` is suitable for the completed
+   direct release but not the future workflow.
+2. Direct unauthenticated version documents expose registry-generated
+   `_resolved`/`_from` values from the local tarball argument. The fields are
+   absent from manifests/tarballs and reveal no credential or repository URL,
+   but `_resolved` includes the local username/workspace path. Immutable
+   `0.1.0` versions are retained; unpublish/overwrite remains forbidden.
+
+**Result:** checkpoint 7 cannot complete under the current accepted contract.
+No workflow or npm/GitHub setting was created or changed. A revised normative
+decision must select deferral until repository publication, a changed private
+metadata boundary, or earlier repository sanitization/publication.
+
+## Closing state — Cycle 26 consistency findings and corrections
+
+The first closing pass found stale active candidate wording in the root and
+Angular READMEs, a stale private-push statement in STATUS and an exact-live
+verifier assertion that would reject legitimate future Angular versions. The
+READMEs/STATUS now report both live packages, and the verifier checks presence
+and exact `0.1.0` evidence without assuming it remains the only version forever.
+
+## Closing state — Cycle 27 complete repeated review
+
+The complete applicable checkpoint 6 and repository-consistency review was
+repeated from the beginning. Frozen installation, format, 86-document/384-link
+checks, lint, types, 359 core plus 76 Angular tests, build, packages, artifacts,
+local/clean consumers, isolated Corresponding Source, release security, live
+core, live Angular metadata/bytes/signatures/lower-upper consumers and diff all
+pass with zero new findings.
+
+**Result:** checkpoint 6 and its persistent state have zero findings and no
+unresolved change request. Checkpoint 7 remains stopped only on the two cycle 25
+findings and cannot be accepted or complete before a normative decision.
+
+## Checkpoint 7 — Cycle 28 approved normative resolution
+
+Ricard approved the recommended resolution. ADR-018 revision 3 and PLAN-013
+revision 4 close M13 with the already verified interactive 2FA publications and
+defer repository metadata, sanitization/publication, trusted publishing, staged
+approval, token restrictions and provenance together as D-043. The immutable
+registry path disclosure remains documented; a neutral future publication path
+is required. No workflow or external setting was changed.
+
+## Checkpoint 7 — Cycle 29 complete repeated review
+
+The complete implementation and closure review was repeated from the beginning
+against the revised authority. Both packages remain byte-identical, signed,
+AGPL/source-complete, Public + Experimental + Active and installable in exact,
+`next` and supported Angular consumers. Repository privacy, absent provenance,
+no long-lived repository credential, no workflow/settings mutation, immutable
+recovery and D-043's deferred boundary all agree across ADR, plan, reviews,
+release notes, ROADMAP, STATUS, WORKLOG and the deferred register.
+
+**Result:** zero findings and no unresolved change request. PLAN-013 revision 4,
+checkpoint 7 and M13 are complete. No later release, Git operation or external
+setting is authorized.
+
+## Closing state — Cycle 30 documentation-count finding
+
+The first post-closure consistency pass found that STATUS retained the previous
+384-link count after D-043 added one applicable local link. The recorded result
+was corrected to the observed 86 Markdown files and 385 local links.
+
+## Closing state — Cycle 31 complete repeated review
+
+Authority, revisions/statuses, M13 completion, D-043 deferral, ROADMAP, release
+notes, onboarding/package READMEs, STATUS/WORKLOG, documentation links,
+formatting and diff hygiene were repeated from the beginning. The full frozen
+install, lint/types/tests/build/package/artifact/source/security/local/live
+matrix from cycle 29 remains applicable because the correction changes only the
+observed documentation count.
+
+**Result:** zero findings and no unresolved change request. ADR-018 revision 3,
+PLAN-013 revision 4 and M13 remain accepted/completed.

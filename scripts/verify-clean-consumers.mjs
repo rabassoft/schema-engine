@@ -66,6 +66,15 @@ function executePnpm(directory, args) {
   runPnpm(args, { cwd: directory, env: cleanEnvironment, stdio: 'inherit' });
 }
 
+function executeNpm(directory, args) {
+  const result = spawnSync('npm', args, {
+    cwd: directory,
+    env: cleanEnvironment,
+    stdio: 'inherit',
+  });
+  assert.equal(result.status, 0, `npm ${args.join(' ')} failed`);
+}
+
 function assertDeepImportBlocked(directory, specifier) {
   const result = spawnSync(
     process.execPath,
@@ -316,6 +325,7 @@ function createAngularConsumer(
   tarballs,
   packageManager,
   typescriptVersion,
+  verifySignatures,
 ) {
   const directory = join(temporaryRoot, `angular-${label}`);
   mkdirSync(join(directory, 'src'), { recursive: true });
@@ -479,6 +489,9 @@ injector.destroy();
   );
 
   installConsumer(directory);
+  if (verifySignatures) {
+    executeNpm(directory, ['audit', 'signatures']);
+  }
   verifyInstalledAngularTuple(directory, angularVersion);
   executePnpm(directory, ['run', 'build']);
   const execution = spawnSync(process.execPath, ['dist/main.js'], {
@@ -503,6 +516,7 @@ try {
     '',
   );
   const useLiveCore = process.argv.includes('--live-core');
+  const useLiveAngular = process.argv.includes('--live-angular');
   const angularTarballArgument = process.argv
     .find((argument) => argument.startsWith('--angular-tarball='))
     ?.slice('--angular-tarball='.length);
@@ -511,18 +525,29 @@ try {
     true,
     '--angular-tarball requires --live-core',
   );
+  assert.equal(
+    !useLiveAngular || useLiveCore,
+    true,
+    '--live-angular requires --live-core',
+  );
+  assert.equal(
+    !useLiveAngular || angularTarballArgument === undefined,
+    true,
+    '--live-angular cannot be combined with --angular-tarball',
+  );
   const packed = useLiveCore
     ? {
         core: undefined,
-        angular:
-          angularTarballArgument === undefined
+        angular: useLiveAngular
+          ? undefined
+          : angularTarballArgument === undefined
             ? packAngularCandidate(temporaryRoot)
             : resolve(angularTarballArgument),
       }
     : packCandidates(temporaryRoot);
   const packageSources = {
     core: useLiveCore ? '0.1.0' : fileSpecifier(packed.core),
-    angular: fileSpecifier(packed.angular),
+    angular: useLiveAngular ? '0.1.0' : fileSpecifier(packed.angular),
   };
   const upperAngular = await resolveUpperAngular();
 
@@ -533,6 +558,7 @@ try {
     packageSources,
     packageManager,
     typescriptVersion,
+    useLiveAngular,
   );
   createAngularConsumer(
     'upper',
@@ -540,6 +566,7 @@ try {
     packageSources,
     packageManager,
     typescriptVersion,
+    false,
   );
 
   console.log(
@@ -550,7 +577,9 @@ try {
         resolvedAt: new Date().toISOString(),
         source: REGISTRY_SOURCE,
         coreSource: useLiveCore ? 'registry:0.1.0' : basename(packed.core),
-        angularTarball: basename(packed.angular),
+        angularSource: useLiveAngular
+          ? 'registry:0.1.0'
+          : basename(packed.angular),
       },
       null,
       2,

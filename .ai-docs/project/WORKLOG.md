@@ -6,6 +6,81 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — M13 completed; repository automation deferred as D-043
+
+### Decision
+
+- Ricard approved ADR-018 revision 3 and PLAN-013 revision 4: the verified
+  interactive 2FA publications close M13 without a private-repository trusted
+  publisher.
+- D-043 now keeps repository sanitization/publication, public metadata, OIDC,
+  staged approval, token restrictions and provenance as one deferred decision.
+
+### Verification
+
+- Review 028 cycle 8, review 029 cycle 14 and review 030 cycle 31 repeat their
+  complete applicable areas with zero findings.
+- Core and Angular `0.1.0` remain exact, signed, source-complete and live under
+  recommended `next` plus mandatory Experimental `latest`.
+- No workflow, GitHub/npm setting, repository visibility, commit or push was
+  created or changed.
+
+### Next
+
+- Select the next milestone from demand and the deferred register; D-043 is not
+  promoted by completing M13.
+
+## 2026-07-15 — Angular published and checkpoint 7 conflict identified
+
+### Completed
+
+- Published `@rabassoft/schema-engine-angular@0.1.0` under recommended `next`;
+  mandatory `latest` aliases the same Experimental version.
+- Added repeatable live Angular metadata/hash/signature and lower/upper Angular
+  consumer verification. The registry tarball is byte-identical to accepted
+  SHA-512 `35f7f33a…2ebd56a` and the complete repeated checkpoint 6 review has
+  zero findings.
+- Repeated frozen install, format/docs/lint/types/tests/build, packages,
+  artifacts, consumers, Corresponding Source, release security, live core and
+  diff checks successfully.
+
+### Findings
+
+- npm trusted publishing requires an exact GitHub `repository.url`; the
+  accepted contract forbids advertising the private repository. Checkpoint 7
+  cannot complete without a normative decision.
+- Public npm version metadata generated `_resolved`/`_from` from the local
+  publish path. They are absent from tarballs and contain no credential or Git
+  URL, but the immutable versions retain the local username/workspace path.
+
+### Next
+
+- Select and approve the checkpoint 7 policy: preferably defer trusted
+  publishing until the repository passes sanitization and becomes public, then
+  revise ADR-018/PLAN-013 before any external setting change.
+
+## 2026-07-15 — Angular private sync and final preflight completed
+
+### Completed
+
+- Created state commit `6f13987` and pushed private `develop` through that
+  checkpoint without changing repository visibility.
+- Repacked Angular from the clean synchronized commit; SHA-512 remains
+  `35f7f33a…2ebd56a` and the ignored manifest records source `6f13987`.
+- Repeated exact source reconstruction, live-core lower/upper Angular consumers,
+  core live verification, unauthenticated name availability, npm identity and
+  exact public/`next`/no-provenance dry-run.
+
+### Verification
+
+- Every final prepublication check passes and Angular remains absent (`E404`).
+- No npm package/settings mutation or GitHub visibility change occurred.
+
+### Next
+
+- Request immediate approval for the exact irreversible Angular publish
+  command. Mandatory `latest` will be treated only as an Experimental alias.
+
 ## 2026-07-15 — Private Angular release path selected
 
 ### Decision

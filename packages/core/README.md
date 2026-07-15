@@ -3,9 +3,9 @@
 Framework-neutral compiler, immutable operations, and controlled form runtime
 for the Schema Engine prototype.
 
-## Candidate status
+## Release status
 
-- Candidate line: `0.1.x`.
+- Experimental line: `0.1.x`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
 - Recommended channel: npm dist-tag `next` or an explicit version. npm's

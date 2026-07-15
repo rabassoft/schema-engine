@@ -3,31 +3,32 @@
 - **Status:** Accepted
 - **Date:** 15 July 2026
 - **Acceptance date:** 15 July 2026
-- **Revision:** 2 — mandatory npm latest alias without stability promotion
+- **Revision:** 3 — defer trusted publishing until repository publication
 - **Promotion review:**
   [`review 027`](../reviews/027-d034-d040-publication-licensing-readiness.md)
   cycle 2 passed with zero findings
 - **Related:** [`ADR-009`](./009-politica-api-publica-estabilidad.md),
   [`ADR-010`](./010-versionado-semver-compatibilidad.md),
   [`ADR-013`](./013-preparacion-artefactos-experimentales-0-1.md),
-  [`D-034`](../roadmap/deferred-decisions.md#d-034-modelo-comercial-y-licenciamiento)
-  and
+  [`D-034`](../roadmap/deferred-decisions.md#d-034-modelo-comercial-y-licenciamiento),
   [`D-040`](../roadmap/deferred-decisions.md#d-040-publicacion-real-de-paquetes)
+  and
+  [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
 - **Milestone:** M13 — First public experimental release
-- **Implementation authorized:** No
+- **Implementation:** Completed by PLAN-013 revision 4
 - **Complete review:**
-  [`review 028`](../reviews/028-adr-018-review.md) cycle 4 passed the complete
-  closing review with zero findings after six corrections; accepted under
-  Ricard's standing authorization
+  [`review 028`](../reviews/028-adr-018-review.md) cycle 8 passed the complete
+  revision 3 review with zero findings; accepted by Ricard
 
 ## 1. Context
 
-M8 produced verified private `0.1.0` candidates for
+At the start of this decision, M8 had produced verified private `0.1.0`
+candidates for
 `@rabassoft/schema-engine` and `@rabassoft/schema-engine-angular`. M9–M12 then
 expanded the accepted runtime while preserving their package boundary,
 Experimental API classification and independent versioning. Both package
-manifests still use `private: true`, package documentation forbids external
-distribution and the repository is private.
+manifests then used `private: true`, package documentation forbade external
+distribution and the repository was private.
 
 Ricard selected an Open Source plus commercial dual-license model and a public
 first package release. The choice must preserve genuine AGPL rights, identify
@@ -137,8 +138,9 @@ Before publication, the plan must verify:
 4. registry access, `next` tag and public visibility from packed metadata; if
    npm exposes mandatory `latest`, it must resolve to the same inspected
    Experimental version and documentation must not present it as Stable;
-5. after initial creation, npm trusted publishing from the exact private GitHub
-   workflow, with token publishing disabled when npm permits it;
+5. no trusted publisher, workflow or public repository metadata while GitHub
+   remains private; OIDC, staged publishing, token restrictions and provenance
+   move together to the separately promoted repository-publication milestone;
 6. license, notices, Corresponding Source and complete tarball inventories;
 7. the frozen install, full test/build/package matrix and clean consumers; and
 8. a final human approval checkpoint immediately before each external mutation.
@@ -152,6 +154,19 @@ repository matching `package.json#repository`, while the selected repository
 remains private. The release documentation records that limitation. Provenance
 becomes a required follow-up gate when a sanitized public repository exists;
 the project must not publish a misleading or unverifiable provenance URL.
+
+npm trusted publishing also requires `package.json#repository` to match the
+GitHub repository. Advertising that inaccessible private URL would contradict
+the accepted package metadata boundary. M13 therefore closes with the verified
+interactive 2FA publications and no long-lived credential in the repository.
+It does not prepare a non-functional workflow or change npm package settings.
+
+A later repository-publication decision must jointly review full-history
+sanitization, public repository metadata, contribution/security/community
+boundaries, a GitHub-hosted OIDC workflow, stage-only permissions, interactive
+2FA approval, traditional-token restrictions and truthful provenance. Until
+then, every later registry write requires a separately accepted release plan
+and immediate human approval; M13 does not authorize another publication.
 
 ### 2.7 Commercial agreement
 
@@ -186,6 +201,9 @@ real contact and executable agreement.
 - npm's mandatory `latest` alias means an unqualified install resolves an
   Experimental version; documentation must recommend `next` or an exact
   version and explicitly deny any stability implication.
+- Trusted publishing and provenance cannot be activated while preserving the
+  selected private-repository metadata boundary; future releases remain gated
+  until the repository-publication decision is promoted.
 - Commercial agreements, tax handling and enforcement need professional work
   outside the software implementation.
 
@@ -226,6 +244,9 @@ separate sanitization review before visibility changes.
   review.
 - Accepting external code contributions before a rights policy exists.
 - Automating future releases beyond the narrowly approved first-release plan.
+- Preparing or configuring trusted publishing, staged publishing, public
+  repository metadata, token restrictions or provenance before the repository
+  sanitization/publication milestone.
 - Publishing, tagging, creating releases or changing remote visibility merely
   because this ADR is accepted.
 
@@ -241,13 +262,15 @@ separate sanitization review before visibility changes.
    Angular compatibility remain unchanged.
 5. Contribution rights, third-party code and commercial-contract boundaries
    are explicit.
-6. Registry identity, security, provenance, tag, rollback and clean-consumer
-   gates are deliverable without credentials in the repository; the accepted
-   first-release absence of provenance is explicit and truthful.
+6. Registry identity, interactive 2FA, tag, rollback and clean-consumer gates
+   complete without credentials in the repository; trusted publishing and
+   provenance are explicitly and truthfully deferred with repository metadata.
 7. Mandatory `latest`, when exposed by npm, aliases the inspected Experimental
    release without changing Public + Experimental + Active classification.
 8. Every external mutation retains an immediate explicit approval checkpoint.
 9. D-034/D-040 alone are active; no functional deferred capability changes.
+10. M13 may close without a trusted publisher because no matching public
+    repository exists; later automation requires separate promotion and review.
 
 ## 7. References
 

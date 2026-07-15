@@ -12,7 +12,7 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [Architecture documentation](./.ai-docs/README.md).
 
 The private development repository contains the completed M1-M12 controlled-form
-runtime and locally verified public-package candidates. Its G0 review passed;
+runtime and verified public Experimental packages. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002
 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1 and SPEC-005 v0.1.1 are Accepted.
 PLAN-012 revision 1 implemented static neutral presentation groups; all five
@@ -53,12 +53,11 @@ collection renderers and other deferred decisions are not active.
 
 ## Experimental packages and licensing
 
-Core `0.1.0` is public on npm; the independent Angular `0.1.0` candidate remains
-behind its separate publication checkpoint. `next` is the recommended
-Experimental channel. npm also requires `latest` to alias the published
+Core and Angular `0.1.0` are public on npm. `next` is the recommended
+Experimental channel. npm also requires `latest` to alias each published
 Experimental version; that registry alias does not promote any API to Stable.
 
-Once published, install explicit versions or the Experimental channel:
+Install explicit versions or the Experimental channel:
 
 ```sh
 npm install @rabassoft/schema-engine@next

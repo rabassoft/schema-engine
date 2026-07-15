@@ -1,11 +1,12 @@
 # PLAN-013: First public experimental release
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-15
 - **Approval date:** 2026-07-15
-- **Revision:** 3 — mandatory npm latest alias and live-core recovery
+- **Completion date:** 2026-07-15
+- **Revision:** 4 — verified manual closure; repository automation deferred
 - **Requires:** accepted
-  [`ADR-018 revision 2`](../adrs/018-licencia-dual-publicacion-experimental.md),
+  [`ADR-018 revision 3`](../adrs/018-licencia-dual-publicacion-experimental.md),
   [`ADR-013 revision 1`](../adrs/013-preparacion-artefactos-experimentales-0-1.md),
   [`ADR-010 revision 1`](../adrs/010-versionado-semver-compatibilidad.md) and
   [`ADR-009 revision 1`](../adrs/009-politica-api-publica-estabilidad.md)
@@ -13,8 +14,7 @@
   [`review 027`](../reviews/027-d034-d040-publication-licensing-readiness.md)
 - **Milestone:** M13 — First public experimental release
 - **Capabilities:** D-034 and D-040 only
-- **Implementation authorized:** Local preparation only; every Git or external
-  checkpoint remains separately gated
+- **Implementation:** Completed; no further Git or external mutation authorized
 
 ## 1. Goal and hard boundary
 
@@ -32,9 +32,10 @@ The plan has three authorization zones:
 3. **External release checkpoints:** npm authentication/settings and each
    package publication require separate immediate approval.
 
-Approving PLAN-013 authorizes only zone 1. It never authorizes commit, push,
-login, 2FA changes, trusted-publisher configuration, registry writes, Git tags,
-GitHub releases or repository visibility changes.
+Initial PLAN-013 approval authorized only zone 1. Later commit/push and both
+publications occurred under their recorded immediate approvals. Completion does
+not authorize another commit, push, login, credential/settings operation,
+registry write, Git tag, GitHub Release or repository visibility change.
 
 No runtime source behavior, Public export/signature, schema contract,
 dependency range, Angular compatibility, package version or Stable status may
@@ -53,9 +54,10 @@ change.
 - npm reports `ricardrabasso` as owner of organization `rabassoft`, with
   verified `ricard@rabassoft.com` email and `auth-and-writes` 2FA.
 - Local Node is `22.23.1`, npm is `10.9.8` and pnpm is pinned to `10.28.2`.
-- npm staged publishing and trusted-publisher CLI setup require an existing
-  package, so neither can create these first versions. Initial publication must
-  be direct and interactive under 2FA; later versions may use staged/OIDC flow.
+- npm staged publishing and trusted-publisher setup require an existing package,
+  so neither could create these first versions. Initial publication therefore
+  had to be direct and interactive under 2FA; later staged/OIDC work requires
+  separate D-043 promotion.
 - Ricard explicitly confirms `ricard@rabassoft.com` as the initial public
   commercial and security contact for package metadata, README and NOTICE.
 
@@ -243,25 +245,26 @@ partial core release; do not overwrite or unpublish it. Correct Angular before
 its first accepted publication, or use `0.1.1` if a defective `0.1.0` was
 already accepted by the registry.
 
-## 9. Checkpoint 7 — Post-publication security and closure
+## 9. Checkpoint 7 — Verified manual closure
 
-After both packages exist, prepare an exact private GitHub workflow for future
-OIDC trusted publishing with no long-lived write token. Configure each npm
-package's trusted publisher only after a separate external approval. While the
-repository is private:
+After both packages exist:
 
-- provenance remains disabled and is not advertised;
-- future automation may stage but not approve a release;
-- human 2FA approval remains required for staged publication; and
-- traditional token publication is disabled when npm permits it.
+1. repeat unauthenticated metadata, exact-byte, live-install and registry
+   signature checks without claiming provenance;
+2. confirm no long-lived write credential, private repository URL, workflow,
+   trusted publisher or npm settings mutation was added;
+3. record any immutable registry-generated metadata disclosure and a concrete
+   mitigation for later publication paths;
+4. repeat documentation consistency and the complete release review until zero
+   findings; and
+5. mark M13 complete with the observed interactive 2FA release state.
 
-Repeat live installs, signature checks available without false provenance
-claims, documentation consistency and the complete release review. Only then
-mark M13 complete and update STATUS/WORKLOG/ROADMAP/release notes to the exact
-live state.
-
-Repository sanitization/publication and provenance activation are a separate
-future milestone.
+Do not prepare a private GitHub OIDC workflow: npm requires the package
+`repository.url` to match GitHub, while checkpoint 2 intentionally rejects the
+inaccessible private URL. Repository sanitization/publication, public package
+metadata, trusted publishing, staged approval, traditional-token restrictions
+and provenance are one separately promoted future decision. No later package
+publication is authorized by completing M13.
 
 ## 10. Expected repository diff
 
@@ -274,7 +277,6 @@ Allowed changes:
 - package/root README and release notes;
 - artifact/source-consumer/security verification scripts and root script
   entries;
-- one manual-only future trusted-publishing workflow; and
 - ADR/plan/review/state/index/roadmap/deferred documentation.
 
 Forbidden changes:
@@ -307,9 +309,12 @@ Stop on any:
 
 PLAN-013 completes only when both exact `0.1.0` packages are live publicly
 under `next`, their AGPL/source/license/manifest contents and live consumers are
-verified, post-publication security is configured under explicit approvals and
-the final repeated review has zero findings. A local candidate, core-only
-partial release or failed external checkpoint is not M13 completion.
+verified, the manual/2FA/no-provenance security state is recorded truthfully and
+the final repeated review has zero findings. Trusted publishing, staged
+publishing, token restrictions, public repository metadata and provenance do
+not block M13 because they require the separately deferred public-repository
+milestone. A local candidate, core-only partial release or failed package
+verification is not M13 completion.
 
 ## 13. Primary references
 

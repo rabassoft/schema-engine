@@ -134,26 +134,28 @@ separado antes de repetir la revisión.
 - M12 no activa D-011/D-012, agrupación anidada/item, tabs, wizards, grids,
   estado/acciones de layout, scopes generados ni container renderers custom.
 
-### M13 — Primera publicación experimental — en curso
+### M13 — Primera publicación experimental — completado
 
 - Review 027 cycle 2 promotes only D-034/D-040 after selecting
   `AGPL-3.0-only` or a separate commercial license.
 - Ricardo Rabassó Rodríguez is the legal rights holder, operating as
   Rabassoft; the initial repository remains private pending sanitization.
-- ADR-018 revision 2 is Accepted after review 028 cycle 6 closed with zero
-  findings. PLAN-013 revision 3 is Approved after review 029 cycle 12 closed
+- ADR-018 revision 3 is Accepted after review 028 cycle 8 closed with zero
+  findings. PLAN-013 revision 4 is complete after review 029 cycle 14 closed
   with zero findings.
-- Checkpoints 1–5 have accepted local, private-Git and read-only npm identity
-  evidence. Core `0.1.0` publication/live verification is accepted after review
-  030 cycle 15; npm-mandatory `latest` aliases the same Experimental version.
-  Angular remains unpublished; its corrected clean candidate is accepted after
-  review 030 cycle 21.
+- Checkpoints 1–7 have accepted local, private-Git, npm identity and live
+  publication evidence. Core and Angular `0.1.0` are public with byte-identical
+  verified tarballs; `next` and npm-mandatory `latest` alias the same
+  Experimental versions.
+- The release closes under interactive 2FA with no long-lived repository
+  credential, private repository URL, provenance or settings mutation. D-043
+  defers repository sanitization/publication, OIDC, staged approval, token
+  restrictions and provenance as one future decision.
 
 ### Orden de dependencias a más largo plazo
 
-1. **M13/D-034/D-040:** commit and privately push checkpoint 6 evidence under
-   separate approvals, then resume Angular's exact publication gate; every
-   Git/registry/settings mutation retains explicit approval.
+1. **Next milestone selection:** evaluate demand across the deferred register.
+   D-043 remains Deferred and is not the default merely because M13 completed.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones
