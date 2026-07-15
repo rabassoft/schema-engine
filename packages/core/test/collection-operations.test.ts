@@ -17,6 +17,7 @@ function definition(): FormDefinition {
     required: true,
     label: 'Name',
     kind: 'string',
+    nullable: false,
     constraints: {},
   } as const;
   return withDefaultPresentation({
@@ -79,6 +80,7 @@ describe('M10 collection operations', () => {
       required: false,
       label: 'Title',
       kind: 'string',
+      nullable: false,
       constraints: {},
     } as const;
     const collection = definition().nodes[0]!;

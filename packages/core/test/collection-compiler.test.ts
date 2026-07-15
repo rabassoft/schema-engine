@@ -80,6 +80,7 @@ describe('M10 collection compiler', () => {
             children: [
               {
                 kind: 'boolean',
+                nullable: false,
                 relativePath: ['details', 'active'],
                 label: 'Enabled',
               },
@@ -87,6 +88,7 @@ describe('M10 collection compiler', () => {
           },
           {
             kind: 'string',
+            nullable: false,
             relativePath: ['name'],
             label: 'Full name',
           },

@@ -18,6 +18,7 @@ const definitionFields: FormDefinition['fields'] = [
     required: true,
     label: 'Name',
     kind: 'string',
+    nullable: false,
     constraints: {},
   },
   {
@@ -27,6 +28,7 @@ const definitionFields: FormDefinition['fields'] = [
     required: false,
     label: 'Age',
     kind: 'number',
+    nullable: false,
     numericType: 'integer',
     constraints: {},
     ui: {},
@@ -44,6 +46,7 @@ const streetField: FieldDefinition = {
   required: true,
   label: 'Street',
   kind: 'string',
+  nullable: false,
   constraints: {},
 };
 const cityField: FieldDefinition = {
@@ -53,6 +56,7 @@ const cityField: FieldDefinition = {
   required: false,
   label: 'City',
   kind: 'string',
+  nullable: false,
   constraints: {},
 };
 const addressNode: ObjectFieldDefinition = {
@@ -930,6 +934,7 @@ describe('controlled runtime', () => {
       required: false,
       label: 'Value',
       kind: 'string',
+      nullable: false,
       constraints: {},
     };
     let node: ObjectFieldDefinition | FieldDefinition = leaf;

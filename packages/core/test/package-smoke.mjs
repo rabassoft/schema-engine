@@ -26,6 +26,7 @@ const result = compileFormDefinition({ schema: referencedSchema });
 
 assert.equal(result.success, true);
 if (result.success) {
+  assert.equal(result.definition.fields[0]?.nullable, false);
   assert.equal(result.definition.presentation.length, 1);
   assert.equal(result.definition.presentation[0]?.kind, 'form-node');
   assert.equal(

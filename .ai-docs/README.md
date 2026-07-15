@@ -25,6 +25,9 @@
   — Accepted after four findings were corrected and review 024 cycle 2 passed
   with zero findings; completed PLAN-012 implements it after a final repeated
   review with zero findings.
+- [SPEC-006 v0.1.1: Nullable Primitive Leaves](./specs/006-nullable-primitive-leaves.md)
+  — Accepted after review 034's complete repeated review passed with zero
+  findings; Approved PLAN-014 revision 0 authorizes checkpoints 1–6 only.
 
 ## Acceptance reviews
 
@@ -100,8 +103,18 @@
   Cycles 1 and 3 corrected four design findings and one implementation-order
   conflict; cycle 4 passed the complete repeated review with zero findings.
 - [PLAN-013 implementation review](./reviews/030-plan-013-implementation-review.md) —
-  Checkpoints 1–3 accepted after cycle 7 repeated the applicable review with
-  zero findings; checkpoint 4 Git authorization is pending.
+  Completed after repeated checkpoint and closing reviews passed with zero
+  findings and both public packages were verified byte-identical.
+- [M14 nullable-leaf promotion readiness](./reviews/031-m14-nullable-leaves-promotion-readiness.md)
+  — Accepted after cycle 3 passed all eight areas with zero findings.
+- [ADR-019/ADR-005 revision 4 joint review](./reviews/032-adr-019-adr-005-revision-4-review.md)
+  — Cycle 2 passed all ten areas with zero findings.
+- [ADR-019 revision 1 review](./reviews/033-adr-019-revision-1-review.md) — Cycle
+  2 preserved SPEC-003's collection diagnostic with zero findings.
+- [SPEC-006 complete review](./reviews/034-spec-006-review.md) — Complete
+  repeated review passed with zero findings and supports Accepted v0.1.1.
+- [PLAN-014 complete review](./reviews/035-plan-014-review.md) — Cycle 3 passed
+  all ten areas with zero findings; Ricard formally approved revision 0.
 
 ## Architecture Decision Records
 
@@ -113,6 +126,9 @@
 - [ADR-017: Static neutral presentation groups](./adrs/017-grupos-presentacion-estaticos.md)
   — Accepted revision 0 for D-042 after review 023 cycle 3 passed all eight
   areas with zero findings; SPEC-005 and completed PLAN-012 implement it.
+- [ADR-019: Nullable primitive leaves](./adrs/019-hojas-primitivas-nullable.md)
+  — Accepted revision 1 under ADR-005 revision 4; SPEC-006 v0.1.1 fixes its
+  observable M14 boundary.
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
   and Ricard accepted the revision.
@@ -158,14 +174,15 @@
 - [PLAN-010: Homogeneous object collection runtime](./plans/010-homogeneous-object-collections.md) — Completed revision 0
 - [PLAN-011: Same-document static JSON Schema reference resolution](./plans/011-local-reference-resolution.md) — Completed revision 0 after final repeated review with zero findings
 - [PLAN-012: Static neutral presentation groups](./plans/012-static-presentation-groups.md) — Completed revision 1 after final repeated review with zero findings
-- [PLAN-013: First public experimental release](./plans/013-public-experimental-release.md) — Approved revision 1; local preparation active with separately approved commit/push/npm checkpoints
+- [PLAN-013: First public experimental release](./plans/013-public-experimental-release.md) — Completed revision 4 after all separately authorized local, Git and npm checkpoints passed
+- [PLAN-014: Nullable primitive leaves](./plans/014-nullable-primitive-leaves.md) — Approved revision 0; checkpoint 1 completed after review 036 cycle 2 passed with zero findings and checkpoint 2 is next
 
-Accepted publication architecture: [ADR-018 revision 1](./adrs/018-licencia-dual-publicacion-experimental.md)
-selects dual AGPL/commercial licensing and public experimental packages while
-keeping the repository private pending sanitization. PLAN-013 local preparation
-is authorized; no commit, push or publication is yet authorized.
+Accepted publication architecture: [ADR-018 revision 3](./adrs/018-licencia-dual-publicacion-experimental.md)
+selects dual AGPL/commercial licensing and public Experimental packages while
+keeping the repository private pending sanitization. Completed PLAN-013
+published and verified core and Angular `0.1.0` without promoting Stable APIs.
 
-M1-M12 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
+M1-M13 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
 increment. ADR-013 and completed PLAN-008 revision 2 govern the private local
 `0.1.0` candidates. M8 completed without publication; M9 has accepted normative
@@ -178,6 +195,8 @@ are accepted after complete review passed with zero findings; PLAN-011 revision
 its final repeated implementation review passed with zero findings. M11 is
 complete. M12 implemented the narrow D-042 static-section slice under accepted
 ADR-017, SPEC-005 v0.1.1 and completed PLAN-012; D-011/D-012 remain Deferred
-outside it.
+outside it. SPEC-006 v0.1.1 now defines the Accepted M14 nullable-leaf contract;
+PLAN-014 revision 0 authorizes its six implementation checkpoints, while
+version selection and publication remain separate.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

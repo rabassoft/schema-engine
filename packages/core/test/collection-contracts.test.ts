@@ -34,6 +34,7 @@ function templateLeaf(
 ): FieldTemplate {
   return {
     kind: 'string',
+    nullable: false,
     key: canonicalTemplateKey(collectionPath, relativePath),
     name: relativePath.at(-1) ?? '',
     relativePath,

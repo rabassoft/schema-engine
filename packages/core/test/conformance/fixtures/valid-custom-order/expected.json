@@ -7,6 +7,7 @@
         "name": "active",
         "path": ["active"],
         "required": false,
+        "nullable": false,
         "label": "active",
         "kind": "boolean"
       },
@@ -15,6 +16,7 @@
         "name": "name",
         "path": ["name"],
         "required": false,
+        "nullable": false,
         "label": "name",
         "kind": "string",
         "constraints": {}
@@ -24,6 +26,7 @@
         "name": "age",
         "path": ["age"],
         "required": false,
+        "nullable": false,
         "label": "age",
         "kind": "number",
         "numericType": "integer",
@@ -37,6 +40,7 @@
         "name": "active",
         "path": ["active"],
         "required": false,
+        "nullable": false,
         "label": "active",
         "kind": "boolean"
       },
@@ -45,6 +49,7 @@
         "name": "name",
         "path": ["name"],
         "required": false,
+        "nullable": false,
         "label": "name",
         "kind": "string",
         "constraints": {}
@@ -54,6 +59,7 @@
         "name": "age",
         "path": ["age"],
         "required": false,
+        "nullable": false,
         "label": "age",
         "kind": "number",
         "numericType": "integer",
@@ -69,6 +75,7 @@
           "name": "active",
           "path": ["active"],
           "required": false,
+          "nullable": false,
           "label": "active",
           "kind": "boolean"
         }
@@ -80,6 +87,7 @@
           "name": "name",
           "path": ["name"],
           "required": false,
+          "nullable": false,
           "label": "name",
           "kind": "string",
           "constraints": {}
@@ -92,6 +100,7 @@
           "name": "age",
           "path": ["age"],
           "required": false,
+          "nullable": false,
           "label": "age",
           "kind": "number",
           "numericType": "integer",

@@ -10,6 +10,7 @@
         "required": true,
         "label": "Name",
         "kind": "string",
+        "nullable": false,
         "constraints": {}
       },
       {
@@ -19,6 +20,7 @@
         "required": true,
         "label": "Name",
         "kind": "string",
+        "nullable": false,
         "constraints": {}
       }
     ],

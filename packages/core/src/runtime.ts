@@ -1488,6 +1488,15 @@ function invalidDefinitionOption(
       reason: 'invalid-value',
       ...describeActualValue(value),
       definitionReason: defect.reason,
+      ...(defect.member === undefined
+        ? {}
+        : { definitionMember: defect.member }),
+      ...(defect.actualType === undefined
+        ? {}
+        : { definitionActualType: defect.actualType }),
+      ...(defect.members === undefined
+        ? {}
+        : { definitionMembers: Object.freeze([...defect.members]) }),
       ...(defect.nodeIndexPath === undefined
         ? {}
         : { nodeIndexPath: Object.freeze([...defect.nodeIndexPath]) }),

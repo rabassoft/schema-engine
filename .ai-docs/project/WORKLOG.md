@@ -6,6 +6,149 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — PLAN-014 checkpoint 1 completed
+
+### Implemented
+
+- Added required Public Experimental `BaseFieldDefinition.nullable` and the
+  `set-null`/`null-value` text members without adding exports.
+- Scalar direct, nested, template and referenced compiler output now owns
+  frozen `nullable: false`; type arrays remain unsupported.
+- Manual primitive nodes/templates now require an own boolean and reject
+  `nullable: true` with non-empty choices using exact direct/template locators.
+- Operations preserve `INVALID_FORM_DEFINITION`; runtime creation preserves the
+  exact `INVALID_RUNTIME_OPTIONS` wrapper and stops before validation.
+- Migrated all repository definitions, generators and fixtures to canonical
+  false and added focused hostile/descriptor/diagnostic tests.
+
+### Review and corrections
+
+- Review 036 cycle 1 found and corrected a false secondary leaf-projection
+  diagnostic after either new capability defect.
+- The diff review restored two unrelated compact fixture parameter records
+  changed by broad regeneration.
+- Cycle 2 repeated all eight checkpoint areas with zero findings.
+
+### Verification
+
+- Formatting, documentation across 95 Markdown files and 441 local links,
+  lint, typecheck, build, 364 core tests, 76 Angular tests, both package smoke
+  suites, focused nullable tests, recursive JSON definition audit and diff
+  checks pass.
+- Type arrays, null operation compatibility, Angular null projection, versions,
+  publication, external actions, commit and push remain inactive.
+
+### Next
+
+- Begin PLAN-014 checkpoint 2 with the exact descriptor-safe nullable type-array
+  classifier, diagnostics and propagation.
+
+## 2026-07-15 — PLAN-014 formally approved
+
+### Decision
+
+- Ricard formally approved PLAN-014 revision 0 after review 035 cycle 3 passed
+  all ten acceptance areas with zero findings.
+- Approval authorizes only checkpoints 1–6 and their stated verification and
+  stop conditions.
+
+### Boundary
+
+- No implementation started during this approval checkpoint.
+- Version selection, release preparation, publication, external mutations,
+  Stable promotion, commit and push remain unauthorized.
+
+### Verification
+
+- Formatting, documentation across 94 Markdown files and 440 local links,
+  active-state reference search and diff checks pass.
+
+### Next
+
+- Begin checkpoint 1 with required nullable/text contracts, canonical
+  `nullable: false`, exact manual-definition validation and repository fixture
+  migration. Type arrays and null operations remain inactive until their later
+  checkpoints.
+
+## 2026-07-15 — PLAN-014 drafted and completely reviewed
+
+### Completed
+
+- Drafted PLAN-014 revision 0 from Accepted SPEC-006 v0.1.1 and the inspected
+  completed M13 core, Angular, package and consumer paths.
+- Defined six dependency-gated checkpoints for contracts/manual definitions,
+  compiler normalization, operations/runtime, Angular projection, package/
+  consumer evidence and final repeated implementation review.
+- Mapped all 23 SPEC-006 scenario groups and fixed the Public/Internal,
+  Experimental migration, MINOR-not-PATCH and immutable published `0.1.0`
+  boundaries.
+
+### Review
+
+- Review 035 cycle 1 found formatting; cycle 2 found three authority, migration
+  and accessibility precision defects.
+- After correction, cycle 3 repeated all ten acceptance areas with zero
+  findings and no documentation conflict.
+
+### Verification
+
+- `pnpm format:check`, `pnpm docs:check` across 94 Markdown files and 439 local
+  links, and `git diff --check` pass after final current-state reconciliation.
+- No implementation, version, release preparation, external mutation, commit
+  or push occurred.
+
+### Next
+
+- Formally approve or reject PLAN-014 revision 0. Checkpoint 1 remains
+  unauthorized until that explicit decision.
+
+## 2026-07-15 — SPEC-006 accepted after conflict resolution
+
+### Completed
+
+- Committed the accepted M14 promotion/architecture as `e6d801b`.
+- Compared ADR-019 operation rules with Accepted SPEC-003 and the current
+  collection-operation implementation before drafting SPEC-006.
+
+### Conflict
+
+- ADR-019 revision 0 assigns non-nullable `set-item-value null` to
+  `INCOMPATIBLE_OPERATION_VALUE`; SPEC-003 requires
+  `INCOMPATIBLE_COLLECTION_OPERATION_VALUE` with `reason: 'leaf-type'`.
+- No SPEC or code was changed and PLAN-014 remains unauthorized.
+
+### Resolution
+
+- Ricard approved preserving the collection-specific diagnostic.
+- ADR-019 revision 1 corrected only that sentence; review 033 cycle 1 found a
+  formatting defect, cycle 2 repeated all six areas with zero findings and the
+  revision was accepted.
+
+### Specification and review
+
+- Drafted SPEC-006 with the exact nullable-leaf schema, normalized/manual
+  definitions, direct and collection operation families, controlled runtime,
+  Angular Signal Forms projection, accessibility, diagnostics and conformance
+  boundary.
+- Review 034 found ten contract/document defects in cycles 1–2, one stale
+  accepted-ADR revision reference in cycle 3 and stale onboarding state in
+  cycle 5. Every correction restarted the complete applicable review.
+- Cycle 6 repeated all twelve review areas and accepted-state reconciliation
+  with zero findings. Ricard's standing authorization accepted SPEC-006
+  v0.1.1 and authorized preparation and review of PLAN-014 only.
+
+### Verification
+
+- `pnpm format:check`, `pnpm docs:check` across 92 Markdown files and 419 local
+  links, and `git diff --check` pass after acceptance-state reconciliation.
+- No code, plan, version, publication, Stable API or implementation change was
+  made.
+
+### Next
+
+- Draft and completely review PLAN-014 against SPEC-006 v0.1.1. Explicit plan
+  approval remains required before implementation.
+
 ## 2026-07-15 — D-009/M14 promotion accepted
 
 ### Completed

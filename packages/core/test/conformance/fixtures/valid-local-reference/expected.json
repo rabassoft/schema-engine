@@ -7,6 +7,7 @@
         "name": "value",
         "path": ["value"],
         "required": true,
+        "nullable": false,
         "label": "Referenced value",
         "kind": "string",
         "constraints": {
@@ -20,6 +21,7 @@
         "name": "value",
         "path": ["value"],
         "required": true,
+        "nullable": false,
         "label": "Referenced value",
         "kind": "string",
         "constraints": {
@@ -35,6 +37,7 @@
           "name": "value",
           "path": ["value"],
           "required": true,
+          "nullable": false,
           "label": "Referenced value",
           "kind": "string",
           "constraints": {

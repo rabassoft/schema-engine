@@ -99,6 +99,7 @@ export type FormNodeDefinition =
   ObjectFieldDefinition | ArrayNodeDefinition | FieldDefinition;
 
 export interface BaseFieldDefinition extends BaseNodeDefinition {
+  readonly nullable: boolean;
   readonly placeholder?: string;
 }
 
@@ -336,6 +337,8 @@ export type FieldTextMember =
   | 'tooltip'
   | 'placeholder'
   | 'clear'
+  | 'set-null'
+  | 'null-value'
   | 'choice'
   | 'issue';
 export type ObjectTextMember =

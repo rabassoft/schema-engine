@@ -1530,6 +1530,11 @@ function definitionDiagnostic(
       ...(defect.presentationIndexPath === undefined
         ? {}
         : { presentationIndexPath: [...defect.presentationIndexPath] }),
+      ...(defect.member === undefined ? {} : { member: defect.member }),
+      ...(defect.actualType === undefined
+        ? {}
+        : { actualType: defect.actualType }),
+      ...(defect.members === undefined ? {} : { members: [...defect.members] }),
     },
     'Form definition is invalid.',
     path,

@@ -20,6 +20,7 @@
               "name": "name",
               "relativePath": ["name"],
               "required": true,
+              "nullable": false,
               "label": "Full name",
               "kind": "string",
               "constraints": {
@@ -33,6 +34,7 @@
               "name": "name",
               "relativePath": ["name"],
               "required": true,
+              "nullable": false,
               "label": "Full name",
               "kind": "string",
               "constraints": {
@@ -65,6 +67,7 @@
                 "name": "name",
                 "relativePath": ["name"],
                 "required": true,
+                "nullable": false,
                 "label": "Full name",
                 "kind": "string",
                 "constraints": {
@@ -78,6 +81,7 @@
                 "name": "name",
                 "relativePath": ["name"],
                 "required": true,
+                "nullable": false,
                 "label": "Full name",
                 "kind": "string",
                 "constraints": {

@@ -138,7 +138,8 @@ Cada decisión debe registrar:
 
 ## D-009: Null y campos triestado
 
-- **Estado:** Promoted para diseño normativo M14; no implementado
+- **Estado:** Promoted con contrato observable y PLAN-014 Approved; no
+  implementado
 - **Pregunta:** ¿Cómo representar `missing`, `null`, `false` y `true` sin ambigüedad?
 - **Motivo:** La primera versión usa booleanos binarios y no soporta null explícito.
 - **Retomar cuando:** Se amplíe el subconjunto de tipos.
@@ -151,12 +152,17 @@ Cada decisión debe registrar:
   `integer` o `boolean`, en cualquier orden. `missing`, `null`, `false` y los
   valores primitivos permanecen distintos.
 - **Resolución arquitectónica:**
-  [`ADR-019`](../adrs/019-hojas-primitivas-nullable.md) revisión 0 y
+  [`ADR-019`](../adrs/019-hojas-primitivas-nullable.md) revisión 1 y
   [`ADR-005`](../adrs/005-politica-dialecto-json-schema.md) revisión 4,
   Accepted tras review 032 ciclo 2 sin hallazgos.
-- **Frontera:** SPEC-006 debe fijar el comportamiento observable antes de
-  PLAN-014. No se promueven unions generales, containers nullable,
-  `enum + null`, coerción, defaults, implementación ni APIs Stable.
+- **Contrato observable:**
+  [`SPEC-006 v0.1.1`](../specs/006-nullable-primitive-leaves.md) fue Accepted
+  tras review 034 ciclo 6 sin hallazgos.
+- **Plan aprobado:**
+  [`PLAN-014 revision 0`](../plans/014-nullable-primitive-leaves.md) autoriza
+  únicamente sus checkpoints 1–6 tras review 035 ciclo 3 sin hallazgos.
+- **Frontera:** No se promueven unions generales, containers nullable,
+  `enum + null`, coerción, defaults, versiones, publicación ni APIs Stable.
 
 ## D-010: Acción explícita para limpiar un campo
 

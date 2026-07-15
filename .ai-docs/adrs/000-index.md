@@ -37,7 +37,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 16. [ADR 016: Same-document static JSON Schema reference resolution](./016-resolucion-referencias-locales.md) — **Accepted; ADR-005 revision 3 and SPEC-004 v0.1.1 completed its normative follow-up gates after zero-finding reviews.**
 17. [ADR 017: Static neutral presentation groups](./017-grupos-presentacion-estaticos.md) — **Accepted revision 0 after review 023 cycle 3 passed all eight areas with zero findings; SPEC preparation only is authorized.**
 18. [ADR 018: Dual AGPL/commercial licensing and public experimental publication](./018-licencia-dual-publicacion-experimental.md) — **Accepted revision 3 after review 028 cycle 8 closed with zero findings; M13 uses verified interactive 2FA and defers trusted publishing/provenance until repository publication.**
-19. [ADR 019: Nullable primitive leaves and explicit null intention](./019-hojas-primitivas-nullable.md) — **Accepted revision 0 with ADR-005 revision 4 after review 032 cycle 2 closed with zero findings; only SPEC-006 preparation is authorized.**
+19. [ADR 019: Nullable primitive leaves and explicit null intention](./019-hojas-primitivas-nullable.md) — **Accepted revision 1 after review 033 cycle 2 preserved SPEC-003 collection diagnostics with zero findings; SPEC-006 v0.1.1 is now Accepted.**
 
 ## 4. ADRs específicos de Angular
 

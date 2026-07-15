@@ -39,6 +39,7 @@ describe('compileFormDefinition', () => {
         required: true,
         label: 'text',
         kind: 'string',
+        nullable: false,
         constraints: { minLength: 1, maxLength: 5, pattern: '^a' },
       },
       {
@@ -48,6 +49,7 @@ describe('compileFormDefinition', () => {
         required: false,
         label: 'amount',
         kind: 'number',
+        nullable: false,
         numericType: 'number',
         constraints: { minimum: 0, maximum: 10, multipleOf: 0.5 },
         ui: {},
@@ -59,6 +61,7 @@ describe('compileFormDefinition', () => {
         required: false,
         label: 'count',
         kind: 'number',
+        nullable: false,
         numericType: 'integer',
         constraints: {},
         ui: {},
@@ -70,6 +73,7 @@ describe('compileFormDefinition', () => {
         required: false,
         label: 'active',
         kind: 'boolean',
+        nullable: false,
       },
     ]);
     expect(result.definition.nodes).toEqual(result.definition.fields);

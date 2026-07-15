@@ -4938,6 +4938,7 @@ function buildFieldTemplate(
     name: candidate.name,
     relativePath: candidate.templatePath,
     required: candidate.required,
+    nullable: false,
     label: ui?.label ?? candidate.schemaTitle ?? accessibleName(candidate.name),
     ...(ui?.description !== undefined
       ? { description: ui.description }
@@ -5094,6 +5095,7 @@ function buildFieldDefinition(
     name: candidate.name,
     path: candidate.dataPath,
     required: candidate.required,
+    nullable: false,
     label: ui?.label ?? candidate.schemaTitle ?? candidate.name,
     ...(ui?.description !== undefined
       ? { description: ui.description }

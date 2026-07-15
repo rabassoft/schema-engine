@@ -9,6 +9,7 @@
         "required": true,
         "label": "Name",
         "kind": "string",
+        "nullable": false,
         "constraints": {}
       },
       {
@@ -18,6 +19,7 @@
         "required": false,
         "label": "Amount",
         "kind": "number",
+        "nullable": false,
         "numericType": "number",
         "constraints": {},
         "ui": {}
@@ -29,6 +31,7 @@
         "required": false,
         "label": "Count",
         "kind": "number",
+        "nullable": false,
         "numericType": "integer",
         "constraints": {},
         "ui": {}
@@ -39,7 +42,8 @@
         "path": ["active"],
         "required": false,
         "label": "Active",
-        "kind": "boolean"
+        "kind": "boolean",
+        "nullable": false
       }
     ],
     "fields": [
@@ -50,6 +54,7 @@
         "required": true,
         "label": "Name",
         "kind": "string",
+        "nullable": false,
         "constraints": {}
       },
       {
@@ -59,6 +64,7 @@
         "required": false,
         "label": "Amount",
         "kind": "number",
+        "nullable": false,
         "numericType": "number",
         "constraints": {},
         "ui": {}
@@ -70,6 +76,7 @@
         "required": false,
         "label": "Count",
         "kind": "number",
+        "nullable": false,
         "numericType": "integer",
         "constraints": {},
         "ui": {}
@@ -80,7 +87,8 @@
         "path": ["active"],
         "required": false,
         "label": "Active",
-        "kind": "boolean"
+        "kind": "boolean",
+        "nullable": false
       }
     ],
     "presentation": [
@@ -93,6 +101,7 @@
           "required": true,
           "label": "Name",
           "kind": "string",
+          "nullable": false,
           "constraints": {}
         }
       },
@@ -105,6 +114,7 @@
           "required": false,
           "label": "Amount",
           "kind": "number",
+          "nullable": false,
           "numericType": "number",
           "constraints": {},
           "ui": {}
@@ -119,6 +129,7 @@
           "required": false,
           "label": "Count",
           "kind": "number",
+          "nullable": false,
           "numericType": "integer",
           "constraints": {},
           "ui": {}
@@ -132,7 +143,8 @@
           "path": ["active"],
           "required": false,
           "label": "Active",
-          "kind": "boolean"
+          "kind": "boolean",
+          "nullable": false
         }
       }
     ]

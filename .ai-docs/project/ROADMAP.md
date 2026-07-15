@@ -61,9 +61,10 @@ separado antes de repetir la revisión.
 
 > M7-M13 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-013
 > publicó y verificó core/Angular `0.1.0` bajo gates explícitos, sin promover
-> APIs a Stable ni hacer público GitHub. M14 está promovido únicamente para
-> diseño normativo; D-011/D-012 y D-043 siguen Deferred y ninguna publicación o
-> mutación remota futura está autorizada.
+> APIs a Stable ni hacer público GitHub. M14 tiene contrato observable Accepted
+> y PLAN-014 revision 0 Approved para sus seis checkpoints; D-011/D-012 y D-043
+> siguen Deferred y ninguna versión, publicación o mutación remota futura está
+> autorizada.
 
 ### M9 — Objetos anidados — completado
 
@@ -152,7 +153,7 @@ separado antes de repetir la revisión.
   defers repository sanitization/publication, OIDC, staged approval, token
   restrictions and provenance as one future decision.
 
-### M14 — Hojas primitivas nullable — diseño promovido
+### M14 — Hojas primitivas nullable — implementación autorizada
 
 - D-009 fue promovido el 15 de julio de 2026 tras aceptar
   [review 031](../reviews/031-m14-nullable-leaves-promotion-readiness.md), cuyo
@@ -160,15 +161,17 @@ separado antes de repetir la revisión.
 - El alcance se limita a una hoja primitiva existente cuyo `type` contenga
   exactamente su tipo y `null`; no habilita unions generales, containers
   nullable, `enum + null`, coerciones ni defaults.
-- ADR-019 revisión 0 y ADR-005 revisión 4 fijan conjuntamente la arquitectura
-  Accepted tras review 032 ciclo 2 sin hallazgos. Solo se autoriza preparar
-  SPEC-006; PLAN-014, implementación, versión y publicación siguen fuera.
+- ADR-019 revisión 1 y ADR-005 revisión 4 fijan conjuntamente la arquitectura
+  Accepted. SPEC-006 v0.1.1 fue Accepted tras review 034 ciclo 6 sin hallazgos.
+  PLAN-014 revision 0 fue Approved tras review 035 ciclo 3 sin hallazgos y
+  autoriza solo sus checkpoints 1–6. Versión y publicación siguen fuera.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Observable contract:** prepare and completely review SPEC-006 under the
-   Accepted ADR-019/ADR-005 revision 4 architecture.
-2. **Delivery:** PLAN-014 approval must precede implementation.
+1. **Implementation:** execute approved PLAN-014 checkpoints 1–6 in order under
+   SPEC-006 v0.1.1 and the ADR-019/ADR-005 revision 4 architecture.
+2. **Release:** any version selection or publication requires a separate plan
+   and explicit authorization.
 3. **Later selection:** all other capabilities remain demand-driven; D-043 is
    not implied by M14.
 

@@ -15,6 +15,7 @@ const definitionFields = [
     required: true,
     label: 'Name',
     kind: 'string',
+    nullable: false,
     constraints: {},
   },
   {
@@ -24,6 +25,7 @@ const definitionFields = [
     required: false,
     label: 'Age',
     kind: 'number',
+    nullable: false,
     numericType: 'integer',
     constraints: {},
     ui: {},
@@ -40,6 +42,7 @@ const nestedStreet = {
   required: true,
   label: 'Street',
   kind: 'string',
+  nullable: false,
   constraints: {},
 } as const;
 const nestedProfile = {

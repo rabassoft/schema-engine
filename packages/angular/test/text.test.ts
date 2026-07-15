@@ -27,6 +27,7 @@ const field: StringFieldDefinition = Object.freeze({
   tooltip: 'status.tooltip',
   placeholder: 'status.placeholder',
   kind: 'string',
+  nullable: false,
   constraints: Object.freeze({}),
   choices,
 });

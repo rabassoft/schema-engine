@@ -11,6 +11,7 @@ import { withDefaultPresentation } from './definition-fixtures.js';
 function definition(): FormDefinition {
   const name = {
     kind: 'string',
+    nullable: false,
     key: '["template",["rows"],["name"]]',
     name: 'name',
     relativePath: ['name'],
@@ -48,6 +49,7 @@ function deepDefinition(depth: number): FormDefinition {
   const leafPath = [...objectNames, 'value'];
   const leaf = {
     kind: 'string',
+    nullable: false,
     key: JSON.stringify(['template', ['rows'], leafPath]),
     name: 'value',
     relativePath: leafPath,
@@ -88,6 +90,7 @@ function deepDefinition(depth: number): FormDefinition {
 function nestedCollectionDefinition(): FormDefinition {
   const name = {
     kind: 'string',
+    nullable: false,
     key: '["template",["section","rows"],["name"]]',
     name: 'name',
     relativePath: ['name'],
@@ -129,6 +132,7 @@ function nestedCollectionDefinition(): FormDefinition {
 function nestedItemDefinition(): FormDefinition {
   const city = {
     kind: 'string',
+    nullable: false,
     key: '["template",["rows"],["address","city"]]',
     name: 'city',
     relativePath: ['address', 'city'],
@@ -171,6 +175,7 @@ function simpleCollectionNode(name: string): ArrayNodeDefinition {
   const relativePath = ['value'];
   const field = {
     kind: 'string',
+    nullable: false,
     key: JSON.stringify(['template', path, relativePath]),
     name: 'value',
     relativePath,

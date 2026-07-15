@@ -16,6 +16,7 @@ const definitionFields: FormDefinition['fields'] = [
     required: true,
     label: 'Name',
     kind: 'string',
+    nullable: false,
     constraints: {},
   },
   {
@@ -25,6 +26,7 @@ const definitionFields: FormDefinition['fields'] = [
     required: false,
     label: 'Amount',
     kind: 'number',
+    nullable: false,
     numericType: 'number',
     constraints: {},
     ui: {},
@@ -36,6 +38,7 @@ const definitionFields: FormDefinition['fields'] = [
     required: false,
     label: 'Count',
     kind: 'number',
+    nullable: false,
     numericType: 'integer',
     constraints: {},
     ui: {},
@@ -47,6 +50,7 @@ const definitionFields: FormDefinition['fields'] = [
     required: false,
     label: 'Active',
     kind: 'boolean',
+    nullable: false,
   },
 ];
 const definition: FormDefinition = withDefaultPresentation({
@@ -429,6 +433,7 @@ describe('deep immutable operations', () => {
     required: true,
     label: 'Street',
     kind: 'string',
+    nullable: false,
     constraints: {},
   } as const;
   const address = {

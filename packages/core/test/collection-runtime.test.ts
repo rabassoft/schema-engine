@@ -186,6 +186,7 @@ describe('M10 defined collection inspection and diagnostics', () => {
   it('finds editable accessors only after valid identity in positional order', () => {
     const leaf = {
       kind: 'string',
+      nullable: false,
       key: '["template",["rows"],["nested","name"]]',
       name: 'name',
       relativePath: ['nested', 'name'],
@@ -366,6 +367,7 @@ describe('M10 collection snapshot shell', () => {
   it('matches item baselines by identity and rebuilds moved positional wrappers', () => {
     const leaf = {
       kind: 'string',
+      nullable: false,
       key: '["template",["rows"],["name"]]',
       name: 'name',
       relativePath: ['name'],
@@ -432,6 +434,7 @@ describe('M10 item field snapshots', () => {
   it('combines stable keys with current positional paths and matched dirty', () => {
     const field = {
       kind: 'string',
+      nullable: false,
       key: '["template",["rows"],["profile","name"]]',
       name: 'name',
       relativePath: ['profile', 'name'],
@@ -475,6 +478,7 @@ describe('M10 item field snapshots', () => {
   it('does not duplicate inserted-item dirty and reports blocked descendants', () => {
     const field = {
       kind: 'string',
+      nullable: false,
       key: '["template",["rows"],["profile","name"]]',
       name: 'name',
       relativePath: ['profile', 'name'],
@@ -503,6 +507,7 @@ describe('M10 item snapshot trees', () => {
   it('assembles object descendants and item-root/identity issues', () => {
     const leaf = {
       kind: 'string',
+      nullable: false,
       key: '["template",["rows"],["profile","name"]]',
       name: 'name',
       relativePath: ['profile', 'name'],
@@ -561,6 +566,7 @@ describe('M10 item snapshot trees', () => {
   it('keeps inserted item descendants clean while collection owns insertion', () => {
     const leaf = {
       kind: 'string',
+      nullable: false,
       key: '["template",["rows"],["name"]]',
       name: 'name',
       relativePath: ['name'],

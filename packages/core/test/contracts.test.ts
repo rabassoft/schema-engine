@@ -22,6 +22,7 @@ describe('public string choice contracts', () => {
       required: true,
       label: 'Status',
       kind: 'string',
+      nullable: false,
       constraints: {},
       choices: [choice],
     } satisfies StringFieldDefinition;
@@ -48,6 +49,8 @@ describe('public string choice contracts', () => {
       | 'tooltip'
       | 'placeholder'
       | 'clear'
+      | 'set-null'
+      | 'null-value'
       | 'choice'
       | 'issue'
     >();

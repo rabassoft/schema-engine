@@ -8,51 +8,56 @@
 - **Updated:** 2026-07-15 by Ricard / Codex
 - **Branch:** `develop`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
-  v0.1.2, SPEC-004 v0.1.1 and SPEC-005 v0.1.1
+  v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1 and SPEC-006 v0.1.1
 - **Last proposed specification:** None
-- **Last implementation plan:** PLAN-013 revision 4, Completed
+- **Last implementation plan:** PLAN-014 revision 0, Approved
 - **Last completed implementation plan:** PLAN-013 revision 4
 - **Active implementation task:** None
-- **Last accepted ADR:** ADR-019 revision 0, coordinated with ADR-005 revision 4
+- **Last accepted ADR:** ADR-019 revision 1, coordinated with ADR-005 revision 4
 - **Last proposed ADR:** None
 - **Promoted capabilities:** D-005/M9, D-006/M10, D-041/M11 and D-042/M12
   implemented within their accepted slices; D-034/D-040 active only within
-  accepted M13 delivery; D-009 promoted only for M14 normative design
-- **Phase:** M1–M13 and G0 completed; M14 normative design selected
+  accepted M13 delivery; D-009 promoted with its M14 observable contract
+- **Phase:** M1–M13 and G0 completed; M14 checkpoint 1 completed
 - **Published packages:** core and Angular `0.1.0` are live and byte-identical
   to their accepted candidates
 
 ## Current objective
 
-Prepare the observable SPEC-006 contract for the Accepted M14 nullable
-primitive-leaf architecture without authorizing delivery or implementation.
+Implement PLAN-014 revision 0 checkpoints 2–6 in order, beginning with closed
+descriptor-safe nullable type-array normalization.
 
 ## In progress
 
-- None. ADR-019 revision 0 and ADR-005 revision 4 are Accepted after joint
-  review 032 cycle 2 closed with zero findings.
+- None. PLAN-014 checkpoint 1 passed review 036 cycle 2 with zero findings;
+  checkpoint 2 is authorized but has not started.
 
 ## Latest completed work
 
-- Accepted ADR-019 revision 0 and ADR-005 revision 4 coordinately after review
-  032 cycle 2 closed ten areas with zero findings.
-- Accepted D-009/M14 promotion-readiness review 031 after cycle 3 closed with
-  zero findings; only nullable primitive leaves are promoted for design.
-- Corrected the post-G0 ROADMAP preamble that still described M13 as
-  unpublished after the closure commit; no milestone or scope changed.
-- Accepted ADR-018 revision 3 and completed PLAN-013 revision 4/M13 after full
-  zero-finding reviews.
-- Deferred repository sanitization/publication, public metadata, OIDC, staged
-  approval, token restrictions and provenance together as D-043.
+- Completed PLAN-014 checkpoint 1 after review 036 cycle 2 passed all eight
+  areas with zero findings; required contracts, scalar false normalization and
+  manual-definition validation are active locally.
+- Formally approved PLAN-014 revision 0 after review 035 cycle 3 passed all ten
+  areas with zero findings; only checkpoints 1–6 are authorized.
+- Drafted PLAN-014 revision 0 with six gated checkpoints and a 23-group evidence
+  matrix; review 035 cycle 3 passed all ten areas with zero findings after four
+  corrections.
+- Accepted SPEC-006 v0.1.1 after review 034 cycle 6 repeated all twelve areas
+  and accepted-state reconciliation with zero findings; PLAN-014 preparation
+  and review are now authorized.
+- Accepted ADR-019 revision 1 after review 033 cycle 2 preserved SPEC-003's
+  collection diagnostic with zero findings.
 
 ## Exact next action
 
-Draft SPEC-006 for exact compiler, definitions, operations/runtime, Angular,
-accessibility, diagnostics and conformance behavior; do not draft PLAN-014.
+Begin PLAN-014 checkpoint 2: implement the exact descriptor-safe two-member
+type-array classifier, diagnostics and direct/nested/template/reference
+normalization while leaving operations/runtime/Angular null behavior inactive.
 
 ## Blockers and conflicts
 
-- No implementation blocker or documentation conflict.
+- No implementation, environment, external-system or documentation blocker.
+  PLAN-014 checkpoint 1 is complete and checkpoint 2 is authorized.
 - npm's mandatory `latest: 0.1.0` is accepted only as an Experimental alias to
   each inspected package version; `next` remains recommended.
 - The immutable live core `0.1.0` README retains the pre-discovery no-`latest`
@@ -85,11 +90,28 @@ accessibility, diagnostics and conformance behavior; do not draft PLAN-014.
 
 ## Open questions
 
-- None for architecture. SPEC-006 must express the Accepted decisions without
-  widening M14.
+- None. Ricard approved preserving SPEC-003's collection-specific diagnostic.
 
 ## Latest verification
 
+- Review 036 cycle 2 passes all eight checkpoint 1 areas with zero findings.
+  Formatting, documentation across 95 Markdown files and 441 local links,
+  lint, typecheck, build, 364 core tests, 76 Angular tests, both package smoke
+  suites, JSON definition audit and diff checks pass.
+- PLAN-014 approval-state reconciliation passes formatting, documentation
+  across 94 Markdown files and 440 local links, active-state reference search
+  and diff checks.
+- Review 035 cycle 3 repeats all ten PLAN-014 acceptance areas with zero
+  findings after four corrections. Formatting, documentation across 94
+  Markdown files and 439 local links, and diff checks pass after final
+  current-state reconciliation.
+- Review 034 cycle 6 repeats all twelve SPEC-006 areas and accepted-state
+  reconciliation with zero findings after twelve corrections. Formatting,
+  documentation across 92 Markdown files and 419 local links, and diff checks
+  pass.
+- SPEC-006 preflight compared ADR-019 section 2.3, SPEC-003 section 12.2 and the
+  collection-operation implementation; ADR-019 revision 1 resolved the found
+  diagnostic conflict before the SPEC was accepted.
 - Review 032 cycle 2 repeats all ten joint ADR-019/ADR-005 revision 4 areas with
   zero findings. Current formatting, documentation across 89 Markdown files
   and 400 local links, and diff checks pass.
@@ -137,6 +159,14 @@ accessibility, diagnostics and conformance behavior; do not draft PLAN-014.
 - D-009/M14 promotion readiness:
   `.ai-docs/reviews/031-m14-nullable-leaves-promotion-readiness.md`
 - Accepted M14 architecture: `.ai-docs/adrs/019-hojas-primitivas-nullable.md`
+- Accepted M14 behavior: `.ai-docs/specs/006-nullable-primitive-leaves.md`
+- Complete SPEC-006 review: `.ai-docs/reviews/034-spec-006-review.md`
+- Approved M14 delivery plan: `.ai-docs/plans/014-nullable-primitive-leaves.md`
+- Complete PLAN-014 review: `.ai-docs/reviews/035-plan-014-review.md`
+- PLAN-014 checkpoint 1 review:
+  `.ai-docs/reviews/036-plan-014-checkpoint-1-review.md`
+- ADR-019 revision 1 review:
+  `.ai-docs/reviews/033-adr-019-revision-1-review.md`
 - Joint M14 ADR review:
   `.ai-docs/reviews/032-adr-019-adr-005-revision-4-review.md`
 - Completed M12 plan: `.ai-docs/plans/012-static-presentation-groups.md`

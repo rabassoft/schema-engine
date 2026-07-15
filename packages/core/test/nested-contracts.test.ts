@@ -23,6 +23,7 @@ import {
 function leaf(path: readonly string[]): FieldDefinition {
   return {
     kind: 'string',
+    nullable: false,
     key: canonicalDataPathKey(path),
     name: path.at(-1) ?? '',
     path,

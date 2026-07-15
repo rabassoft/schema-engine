@@ -1,8 +1,13 @@
 # ADR 019: Nullable primitive leaves and explicit null intention
 
-- **State:** Accepted revision 0
+- **State:** Accepted revision 1
 - **Date:** 15 July 2026
 - **Acceptance date:** 15 July 2026
+- **Proposed revision:** 1 — preserve SPEC-003 collection diagnostics
+- **Revision 1 acceptance date:** 15 July 2026
+- **Revision 1 review:**
+  [`review 033`](../reviews/033-adr-019-revision-1-review.md) cycle 2 closed
+  with zero findings
 - **Milestone:** M14
 - **Promotes:** the exact D-009 slice accepted in
   [`review 031`](../reviews/031-m14-nullable-leaves-promotion-readiness.md)
@@ -123,11 +128,15 @@ No operation or snapshot union changes. The schema-agnostic
 `unknown`, including null, because it receives no definition. Definition-aware
 behavior is exact:
 
-- `applyFormOperation()` validates `set-value`/`set-item-value` with
+- `applyFormOperation()` validates `set-value` and `set-item-value` with
   `value: null` as compatible only when the targeted normalized primitive has
   `nullable: true`;
-- the same operation against `nullable: false` fails with the existing
-  `INCOMPATIBLE_OPERATION_VALUE` and does not change data;
+- non-collection `set-value` against `nullable: false` fails with existing
+  `INCOMPATIBLE_OPERATION_VALUE` and `actualType: 'null'`;
+- item-relative `set-item-value` against `nullable: false` preserves SPEC-003's
+  `INCOMPATIBLE_COLLECTION_OPERATION_VALUE`, with `operationType:
+'set-item-value'`, `reason: 'leaf-type'`, `actualType: 'null'`, exact `field`
+  and primitive `fieldType`;
 - `remove-value`/`remove-item-value` remains the only transition to missing;
 - expectations continue matching present null through `Object.is`;
 - runtime request methods may emit null only for a nullable target and keep the
@@ -245,8 +254,9 @@ effects:
   exact `type` or member path and block only that branch;
 - `enum` on an otherwise valid nullable string leaf uses
   `INCOMPATIBLE_SCHEMA_KEYWORD` at `enum`;
-- incompatible null operations reuse `INCOMPATIBLE_OPERATION_VALUE` with the
-  existing field/path envelope and `actualType: 'null'`;
+- incompatible non-collection null operations reuse
+  `INCOMPATIBLE_OPERATION_VALUE`; item-relative null operations preserve
+  `INCOMPATIBLE_COLLECTION_OPERATION_VALUE` exactly as section 2.3 requires;
 - invalid manual `nullable` members reuse `INVALID_FORM_DEFINITION`; and
 - text resolution reuses `TEXT_RESOLUTION_FAILED`.
 
@@ -322,3 +332,29 @@ declaration migration and conformance evidence.
 PLAN-014 and implementation remain unauthorized until SPEC-006 is separately
 accepted and a plan is approved. Publication, Stable promotion and every other
 deferred capability remain outside M14.
+
+## 8. Accepted revision 1 — collection diagnostic preservation
+
+SPEC-006 preflight found that revision 0's phrase “the same operation” assigned
+both non-collection and item-relative null incompatibility to
+`INCOMPATIBLE_OPERATION_VALUE`. Accepted SPEC-003 section 12.2 instead reserves
+`INCOMPATIBLE_COLLECTION_OPERATION_VALUE` with `reason: 'leaf-type'` for
+`set-item-value`.
+
+Revision 1 replaces only that ambiguous sentence with the exact split now
+written in sections 2.3 and 3:
+
+- direct/nested non-collection `set-value` keeps
+  `INCOMPATIBLE_OPERATION_VALUE`;
+- collection item-relative `set-item-value` keeps
+  `INCOMPATIBLE_COLLECTION_OPERATION_VALUE` and its Accepted envelope.
+
+The same split applies to `requestSetValue()` and `requestSetItemValue()`.
+Compatibility, ordering, paths and no-effect behavior otherwise remain
+unchanged. No operation shape, diagnostic code, Public signature, scope,
+implementation or M14 capability is added.
+
+Revision 1 was accepted after review 033 cycle 2 confirmed consistency with
+SPEC-001, SPEC-003, ADR-015 and the current two operation/runtime paths with
+zero findings. Acceptance restores a conflict-free architecture and authorizes
+resuming SPEC-006 only.

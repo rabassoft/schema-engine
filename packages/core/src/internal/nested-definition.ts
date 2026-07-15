@@ -10,6 +10,7 @@ import {
   readOwnDataMember,
   sameDataPath,
 } from './path.js';
+import { actualType } from './value.js';
 
 export type NestedDefinitionReason =
   | 'nodes-not-array'
@@ -35,7 +36,9 @@ export type NestedDefinitionReason =
   | 'duplicate-presentation-section-id'
   | 'unknown-presented-node'
   | 'duplicate-presented-node'
-  | 'missing-presented-node';
+  | 'missing-presented-node'
+  | 'invalid-field-nullable'
+  | 'incompatible-field-capabilities';
 
 export interface NestedDefinitionDefect {
   readonly reason: NestedDefinitionReason;
@@ -47,6 +50,9 @@ export interface NestedDefinitionDefect {
   readonly path?: readonly string[];
   readonly relativePath?: readonly string[];
   readonly presentationIndexPath?: readonly number[];
+  readonly member?: 'nullable';
+  readonly actualType?: string;
+  readonly members?: readonly ['nullable', 'choices'];
 }
 
 export type NestedDefinitionValidationResult =
@@ -183,8 +189,23 @@ function collectFormDefinitionDefects(
         makeDefect(inspected.reason, {
           nodeIndexPath: frame.indexPath,
           ...(inspected.path === undefined ? {} : { path: inspected.path }),
+          ...(inspected.member === undefined
+            ? {}
+            : { member: inspected.member }),
+          ...(inspected.actualType === undefined
+            ? {}
+            : { actualType: inspected.actualType }),
+          ...(inspected.members === undefined
+            ? {}
+            : { members: inspected.members }),
         }),
       );
+      if (
+        inspected.reason === 'invalid-field-nullable' ||
+        inspected.reason === 'incompatible-field-capabilities'
+      ) {
+        leaves.push(node as FieldDefinition);
+      }
       continue;
     }
     const duplicateIndex = firstPath.get(inspected.key);
@@ -430,6 +451,9 @@ type InspectedNode =
       readonly success: false;
       readonly reason: NestedDefinitionReason;
       readonly path?: readonly string[];
+      readonly member?: 'nullable';
+      readonly actualType?: string;
+      readonly members?: readonly ['nullable', 'choices'];
     };
 
 function inspectNode(
@@ -517,6 +541,10 @@ function inspectNode(
 
   if (!validOptionalText(node, 'placeholder')) {
     return { success: false, reason: 'invalid-node', path };
+  }
+  const nullableDefect = inspectNullableCapability(node);
+  if (nullableDefect !== undefined) {
+    return { success: false, path, ...nullableDefect };
   }
   if (kind === 'string' && !validStringField(node)) {
     return { success: false, reason: 'invalid-node', path };
@@ -617,8 +645,24 @@ function collectTemplateDefects(
           ...(inspected.relativePath === undefined
             ? {}
             : { relativePath: inspected.relativePath }),
+          ...(inspected.member === undefined
+            ? {}
+            : { member: inspected.member }),
+          ...(inspected.actualType === undefined
+            ? {}
+            : { actualType: inspected.actualType }),
+          ...(inspected.members === undefined
+            ? {}
+            : { members: inspected.members }),
         }),
       );
+      if (
+        inspected.reason === 'invalid-field-nullable' ||
+        inspected.reason === 'incompatible-field-capabilities'
+      ) {
+        leaves.push(template);
+        leafIndexPaths.push(frame.indexPath);
+      }
       continue;
     }
 
@@ -713,8 +757,11 @@ type InspectedTemplateNode =
     }
   | {
       readonly success: false;
-      readonly reason: 'invalid-item-template' | 'nested-array-template';
+      readonly reason: NestedDefinitionReason;
       readonly relativePath?: readonly string[];
+      readonly member?: 'nullable';
+      readonly actualType?: string;
+      readonly members?: readonly ['nullable', 'choices'];
     };
 
 function inspectTemplateNode(
@@ -775,8 +822,18 @@ function inspectTemplateNode(
       children: nestedChildren,
     };
   }
+  if (!validOptionalText(node, 'placeholder')) {
+    return {
+      success: false,
+      reason: 'invalid-item-template',
+      relativePath,
+    };
+  }
+  const nullableDefect = inspectNullableCapability(node);
+  if (nullableDefect !== undefined) {
+    return { success: false, relativePath, ...nullableDefect };
+  }
   if (
-    !validOptionalText(node, 'placeholder') ||
     (kind === 'string' && !validStringField(node)) ||
     (kind === 'number' && !validNumberField(node))
   ) {
@@ -787,6 +844,46 @@ function inspectTemplateNode(
     };
   }
   return { success: true, kind: 'field', key, relativePath };
+}
+
+function inspectNullableCapability(node: object):
+  | {
+      readonly reason: 'invalid-field-nullable';
+      readonly member: 'nullable';
+      readonly actualType: string;
+    }
+  | {
+      readonly reason: 'incompatible-field-capabilities';
+      readonly members: readonly ['nullable', 'choices'];
+    }
+  | undefined {
+  const nullable = readOwnDataMember(node, 'nullable');
+  if (nullable.kind !== 'value' || typeof nullable.value !== 'boolean') {
+    return {
+      reason: 'invalid-field-nullable',
+      member: 'nullable',
+      actualType:
+        nullable.kind === 'missing'
+          ? 'missing'
+          : nullable.kind === 'accessor'
+            ? 'accessor'
+            : actualType(nullable.value),
+    };
+  }
+  if (nullable.value === true) {
+    const choices = readOwnDataMember(node, 'choices');
+    if (
+      choices.kind === 'value' &&
+      Array.isArray(choices.value) &&
+      choices.value.length > 0
+    ) {
+      return {
+        reason: 'incompatible-field-capabilities',
+        members: Object.freeze(['nullable', 'choices']),
+      };
+    }
+  }
+  return undefined;
 }
 
 function validStringField(node: object): boolean {

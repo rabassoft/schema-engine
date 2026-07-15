@@ -74,10 +74,12 @@ describe('nested object compiler', () => {
     expect(result.definition.fields[0]).toBe(address.children[0]);
     expect(address.children[2]).toMatchObject({
       kind: 'string',
+      nullable: false,
       path: ['address', 'line2'],
     });
     expect(address.children[3]).toMatchObject({
       kind: 'number',
+      nullable: false,
       numericType: 'number',
       path: ['address', 'latitude'],
     });

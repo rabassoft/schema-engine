@@ -11,6 +11,7 @@ const definitionFields = [
     required: true,
     label: 'Name',
     kind: 'string',
+    nullable: false,
     constraints: {},
   },
   {
@@ -20,6 +21,7 @@ const definitionFields = [
     required: false,
     label: 'Amount',
     kind: 'number',
+    nullable: false,
     numericType: 'number',
     constraints: {},
     ui: {},
@@ -31,6 +33,7 @@ const definitionFields = [
     required: false,
     label: 'Count',
     kind: 'number',
+    nullable: false,
     numericType: 'integer',
     constraints: {},
     ui: {},
@@ -42,6 +45,7 @@ const definitionFields = [
     required: false,
     label: 'Active',
     kind: 'boolean',
+    nullable: false,
   },
 ];
 const definition = {
@@ -56,6 +60,7 @@ const nestedStreet = {
   required: true,
   label: 'Street',
   kind: 'string',
+  nullable: false,
   constraints: {},
 };
 const nestedAddress = {

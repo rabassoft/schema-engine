@@ -11,13 +11,13 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The private development repository contains the completed M1-M12 controlled-form
+The private development repository contains the completed M1-M13 controlled-form
 runtime and verified public Experimental packages. Its G0 review passed;
-SPEC-001 v0.1.15, SPEC-002
-v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1 and SPEC-005 v0.1.1 are Accepted.
-PLAN-012 revision 1 implemented static neutral presentation groups; all five
-checkpoints and the repeated final review are complete with zero findings. The
-live checkpoint is recorded in
+SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
+v0.1.1 and SPEC-006 v0.1.1 are Accepted. SPEC-006 defines the promoted M14
+nullable-primitive-leaf contract; Approved PLAN-014 revision 0 authorizes its
+six implementation checkpoints, but no version or publication. The live
+checkpoint is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
