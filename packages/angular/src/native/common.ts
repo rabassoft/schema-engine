@@ -14,6 +14,8 @@ export interface FieldIds {
   readonly control: string;
   readonly label: string;
   readonly clear: string;
+  readonly setNull: string;
+  readonly nullValue: string;
   readonly description: string;
   readonly hint: string;
   readonly tooltip: string;
@@ -64,6 +66,8 @@ export function fieldIds(
     control: base,
     label: `${base}-label`,
     clear: `${base}-clear`,
+    setNull: `${base}-set-null`,
+    nullValue: `${base}-null-value`,
     description: `${base}-description`,
     hint: `${base}-hint`,
     tooltip: `${base}-tooltip`,
@@ -82,10 +86,16 @@ export function describedBy(
   ids: FieldIds,
   texts: AngularFieldTextSnapshot,
   snapshot: FieldRuntimeSnapshot,
+  field: FieldDefinition | FieldTemplate,
 ): string | null {
   const values = [
     ...(texts.description === undefined ? [] : [ids.description]),
     ...(texts.hint === undefined ? [] : [ids.hint]),
+    ...(field.nullable &&
+    snapshot.presence.kind === 'value' &&
+    snapshot.presence.value === null
+      ? [ids.nullValue]
+      : []),
     ...(snapshot.showIssues && texts.issueMessages.length > 0
       ? [ids.errors]
       : []),

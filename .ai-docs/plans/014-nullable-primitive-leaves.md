@@ -1,6 +1,6 @@
 # PLAN-014: Nullable primitive leaves
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-15
 - **Approval date:** 2026-07-15
 - **Review revision:** 0
@@ -8,9 +8,9 @@
   [`review 035`](../reviews/035-plan-014-review.md) cycle 3 passed all ten areas
   with zero findings after four corrections
 - **Implementation authorized:** Yes — checkpoints 1–6 only
-- **Implementation state:** Checkpoint 1 completed after
-  [`review 036`](../reviews/036-plan-014-checkpoint-1-review.md) cycle 2 passed
-  with zero findings; checkpoint 2 is next
+- **Implementation state:** Checkpoints 1–6 completed; final
+  [`review 041`](../reviews/041-plan-014-final-implementation-review.md) cycle 2
+  passed with zero findings
 - **Requires:** accepted
   [`SPEC-001 v0.1.15`](../specs/001-controlled-form-runtime.md),
   [`SPEC-002 v0.1.2`](../specs/002-nested-object-runtime.md),
@@ -471,3 +471,66 @@ local links, lint, typecheck, build, 364 core tests, 76 Angular tests, package
 smoke, JSON definition audit and diff checks pass. Type arrays, null operation
 compatibility and Angular null projection remain inactive; checkpoint 2 is
 next.
+
+### 17.5 Implementation checkpoint 2
+
+Checkpoint 2 completed on 15 July 2026. The compiler now accepts only exact
+two-member primitive-plus-null arrays at editable leaf positions, normalizes
+them to the existing primitive kind plus `nullable: true`, and preserves the
+closed diagnostic, provenance, keyword/UI and excluded-position contracts.
+
+Review 037 cycle 1 repeated all seven checkpoint areas with zero findings.
+Formatting, documentation, lint, typecheck, build, 389 core tests, 76 Angular
+tests and both package smoke suites pass. Null operation/runtime compatibility
+and Angular null projection remain inactive; checkpoint 3 is next.
+
+### 17.6 Implementation checkpoint 3
+
+Checkpoint 3 completed on 15 July 2026. Existing definition-aware direct/deep
+and item-relative compatibility now accepts null only for nullable leaves;
+raw operations remain structural and the controlled runtime emits the existing
+strict intentions without taking value ownership.
+
+Review 038 cycle 1 repeated all six checkpoint areas with zero findings.
+Formatting, documentation, lint, typecheck, build, 398 core tests, 76 Angular
+tests and both package smoke suites pass. Angular null projection remains
+inactive; checkpoint 4 is next.
+
+### 17.7 Implementation checkpoint 4
+
+Checkpoint 4 completed on 15 July 2026. Angular text snapshots now carry both
+required labels, and native string, number/integer and boolean renderers expose
+the exact accessible null intention/status with deterministic IDs,
+focus-before-output and controlled Signal Forms reconciliation.
+
+Review 039 cycle 1 corrected nullable-capability gating for externally
+controlled null on scalar fields. Cycle 2 repeated all six checkpoint areas
+with zero findings. Formatting, documentation, lint, typecheck, build, 398 core
+tests, 79 Angular tests and both package smoke suites pass. Checkpoint 5 is
+next.
+
+### 17.8 Implementation checkpoint 5
+
+Checkpoint 5 completed on 15 July 2026. All 23 SPEC-006 groups now have named
+passing evidence; declarations, packages, packed artifacts, isolated source,
+repository consumer and clean core/lower/upper Angular consumers pass. Root and
+package onboarding document the coordinated required source migrations and the
+immutable pre-M14 live `0.1.0` boundary.
+
+Review 040 cycle 1 repeated the complete evidence/package/migration boundary
+with zero findings. No version, release candidate, publication, Stable claim or
+external mutation occurred. Final checkpoint 6 is next.
+
+### 17.9 Final implementation checkpoint 6
+
+Checkpoint 6 completed on 15 July 2026. Review 041 cycle 1 found and corrected
+container-exclusion diagnostic ownership, then added explicit excluded-position,
+non-nullable external-null and keyboard-activation evidence. Cycle 2 repeated
+the complete authority, production/test, declaration, package, documentation
+and deferred-boundary review with zero findings.
+
+Frozen install, formatting, documentation, lint, typecheck, build, 400 core
+tests, 79 Angular tests, both package smoke, packed artifacts, isolated source,
+repository consumer and clean core/lower/upper Angular consumers pass. PLAN-014
+revision 0 and M14 are complete locally. Live `0.1.0` remains pre-M14; no
+version, release candidate, publication or external mutation occurred.

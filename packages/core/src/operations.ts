@@ -38,6 +38,7 @@ interface ParsedOperation {
 interface ManagedField {
   readonly name: string;
   readonly type: 'string' | 'number' | 'integer' | 'boolean';
+  readonly nullable: boolean;
 }
 
 interface ValidatedDefinition {
@@ -567,7 +568,12 @@ function validateDefinition(
       }
       fieldType = numericType.value;
     }
-    fields.set(key, { name: path.at(-1) as string, type: fieldType });
+    const nullable = member(fieldMember.value, 'nullable');
+    fields.set(key, {
+      name: path.at(-1) as string,
+      type: fieldType,
+      nullable: nullable.kind === 'value' && nullable.value === true,
+    });
   }
   if (diagnostics.length > 0) return { diagnostics };
 
@@ -664,6 +670,7 @@ function validateCompatibleValue(
   dataPath: readonly string[],
 ): Diagnostic | undefined {
   const compatible =
+    (field.nullable && value === null) ||
     (field.type === 'string' && typeof value === 'string') ||
     (field.type === 'boolean' && typeof value === 'boolean') ||
     (field.type === 'number' &&

@@ -36,6 +36,10 @@ supported.
 
 ## Prototype boundary
 
+> This README describes the current source checkout. The immutable published
+> `0.1.0` package predates the nullable-leaf changes below. No successor version
+> has been selected or published.
+
 The current runtime supports a root object whose properties may recursively
 contain objects, primitive `string`, `number`, `integer`, and `boolean` leaves,
 and homogeneous arrays of object items. The compiler resolves the accepted
@@ -48,6 +52,13 @@ validation, controlled application-owned state, and strict incremental deep or
 collection operations. Object/item nesting is processed iteratively without an
 arbitrary depth limit; the application remains the only source of truth for
 values and identity.
+
+Primitive leaves accept only scalar primitive types or the exact closed
+two-member primitive-plus-null type array. Normalized primitive definitions and
+templates always require `nullable: boolean`; manually authored definitions
+must add `nullable: false` for scalar leaves and may use `true` only for the
+accepted nullable capability. Definition-aware direct/deep and item-relative
+operations accept explicit null only when that capability is true.
 
 External/dynamic references, anchors, arrays of primitives, arrays inside
 collection item templates, tuples, composition, generated/editable identity,

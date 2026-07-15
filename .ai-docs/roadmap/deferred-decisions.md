@@ -138,8 +138,10 @@ Cada decisión debe registrar:
 
 ## D-009: Null y campos triestado
 
-- **Estado:** Promoted con contrato observable y PLAN-014 Approved; no
-  implementado
+- **Estado:** Implemented locally under completed PLAN-014 revision 0;
+  preparation and review of coordinated release PLAN-015 for core and Angular
+  `0.2.0` are authorized, but plan approval, version changes, candidates and
+  publication remain pending
 - **Pregunta:** ¿Cómo representar `missing`, `null`, `false` y `true` sin ambigüedad?
 - **Motivo:** La primera versión usa booleanos binarios y no soporta null explícito.
 - **Retomar cuando:** Se amplíe el subconjunto de tipos.
@@ -160,7 +162,8 @@ Cada decisión debe registrar:
   tras review 034 ciclo 6 sin hallazgos.
 - **Plan aprobado:**
   [`PLAN-014 revision 0`](../plans/014-nullable-primitive-leaves.md) autoriza
-  únicamente sus checkpoints 1–6 tras review 035 ciclo 3 sin hallazgos.
+  únicamente sus checkpoints 1–6 tras review 035 ciclo 3 sin hallazgos; todos
+  quedaron completados tras review 041 ciclo 2 sin hallazgos.
 - **Frontera:** No se promueven unions generales, containers nullable,
   `enum + null`, coerción, defaults, versiones, publicación ni APIs Stable.
 

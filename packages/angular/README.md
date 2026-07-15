@@ -43,6 +43,10 @@ currently the same version as the lower endpoint.
 
 ## Supported import and boundary
 
+> This README describes the current source checkout. The immutable published
+> `0.1.0` package predates the nullable-leaf changes below. No successor version
+> has been selected or published.
+
 Import only from `@rabassoft/schema-engine-angular`. Deep imports into `dist`,
 `src`, or other physical paths are unsupported.
 
@@ -63,6 +67,13 @@ identity across movement; remove/move actions are fixed and accessible, while
 insertion remains application-owned. Native leaves remain replaceable through
 the renderer extension contract. The adapter does not own domain data,
 identity, validation, persistence, submit flows, or runtime behavior.
+
+Native string, number/integer and boolean renderers expose a localized explicit
+set-null intention and a visible confirmed-null status for accepted nullable
+leaves. String enum remains excluded. Manually authored
+`AngularFieldTextSnapshot` values must supply the required `setNullLabel` and
+`nullValueLabel` strings in addition to `clearLabel`; this is a coordinated
+Experimental source migration with core's required `nullable` member.
 
 Arrays of primitives, arrays inside collection item templates, tuples,
 references, composition, advanced layouts, generated identity, implicit Add

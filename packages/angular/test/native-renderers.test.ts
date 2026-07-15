@@ -67,6 +67,20 @@ if (!compiled.success || compiled.definition.fields.length !== 4)
   throw new Error('native fixture compilation failed');
 const definition = compiled.definition;
 const fields = definition.fields;
+const nullableCompiled = compileFormDefinition({
+  schema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      name: { type: ['string', 'null'], description: 'name.description' },
+      amount: { type: ['number', 'null'] },
+      active: { type: ['boolean', 'null'] },
+    },
+  },
+});
+if (!nullableCompiled.success)
+  throw new Error('nullable native fixture compilation failed');
+const nullableDefinition = nullableCompiled.definition;
 const schema = Object.freeze({});
 const validValidator: SchemaValidator = Object.freeze({
   validate: () => ({ valid: true, issues: [] }),
@@ -325,6 +339,7 @@ describe('native Signal Forms renderers', () => {
     TestBed.tick();
     expect(select.value).toBe('');
     expect(fixture.componentInstance.operations).toHaveLength(1);
+
     expect(fixture.componentInstance.form?.snapshot()?.fields[3]).toMatchObject(
       { focused: false, touched: true },
     );
@@ -427,6 +442,12 @@ describe('native Signal Forms renderers', () => {
         expected: 42,
       },
       {
+        field: fields[0]!,
+        key: 'name',
+        value: { name: null, amount: 1234.5 },
+        expected: null,
+      },
+      {
         field: fields[1]!,
         key: 'amount',
         value: { name: 'Ada', amount: -0 },
@@ -497,6 +518,10 @@ describe('native Signal Forms renderers', () => {
       expect(button.getAttribute('aria-labelledby')).toBe(
         `${base}-clear ${base}-label`,
       );
+      if (current.expected === null) {
+        expect(root.querySelector(`[id="${base}-null-value"]`)).toBeNull();
+        expect(root.querySelector(`[id="${base}-set-null"]`)).toBeNull();
+      }
 
       if (current.key === 'name' && current.expected === '') {
         control.focus();
@@ -547,6 +572,153 @@ describe('native Signal Forms renderers', () => {
       expect(fixture.componentInstance.operations).toHaveLength(operationCount);
       fixture.destroy();
     }
+  });
+
+  it('projects accessible set-null intentions and confirmed-null status for native primitives', () => {
+    const validator: SchemaValidator = {
+      validate: () => ({
+        valid: false,
+        issues: [
+          {
+            code: 'required',
+            path: ['name'],
+            parameters: {},
+            fallbackMessage: 'Required name',
+          },
+        ],
+      }),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaTextResolver({
+          resolve: (text, context) =>
+            context.member === 'set-null'
+              ? 'Use null'
+              : context.member === 'null-value'
+                ? 'Confirmed null'
+                : text,
+        }),
+        provideSchemaEngineAngularNative(),
+      ],
+    });
+    const fixture = TestBed.createComponent(NativeHost);
+    fixture.componentInstance.config.set(
+      createConfig({
+        definition: nullableDefinition,
+        value: {},
+        baselineValue: {},
+        validator,
+        validationVisibility: 'all',
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+
+    for (const path of ['name', 'amount', 'active']) {
+      const base = nodeBase('native form', [path]);
+      const button = root.querySelector(
+        `[id="${base}-set-null"]`,
+      ) as HTMLButtonElement;
+      expect(button).not.toBeNull();
+      expect(button.type).toBe('button');
+      expect(button.textContent?.trim()).toBe('Use null');
+      expect(button.getAttribute('aria-labelledby')).toBe(
+        `${base}-set-null ${base}-label`,
+      );
+      expect(root.querySelector(`[id="${base}-null-value"]`)).toBeNull();
+    }
+
+    const nameBase = nodeBase('native form', ['name']);
+    const nameControl = controlByBase(root, nameBase);
+    const setNull = root.querySelector(
+      `[id="${nameBase}-set-null"]`,
+    ) as HTMLButtonElement;
+    setNull.click();
+    expect(document.activeElement).toBe(nameControl);
+    expect(fixture.componentInstance.operationFocusStates.at(-1)).toBe(true);
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'set-value',
+      path: ['name'],
+      expected: { kind: 'missing' },
+      value: null,
+    });
+    expect(fixture.componentInstance.operations).toHaveLength(1);
+
+    const keyboardCount = fixture.componentInstance.operations.length;
+    setNull.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+    );
+    setNull.dispatchEvent(
+      new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }),
+    );
+    setNull.click();
+    expect(fixture.componentInstance.operations).toHaveLength(
+      keyboardCount + 1,
+    );
+
+    fixture.componentInstance.config.set(
+      createConfig({
+        definition: nullableDefinition,
+        value: { name: null, amount: null, active: null },
+        baselineValue: {},
+        validator,
+        validationVisibility: 'all',
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+
+    const nameInput = controlByBase(root, nameBase) as HTMLInputElement;
+    const amountInput = controlByBase(
+      root,
+      nodeBase('native form', ['amount']),
+    ) as HTMLInputElement;
+    const activeInput = controlByBase(
+      root,
+      nodeBase('native form', ['active']),
+    ) as HTMLInputElement;
+    expect(nameInput.value).toBe('');
+    expect(amountInput.value).toBe('');
+    expect(activeInput.checked).toBe(false);
+
+    for (const path of ['name', 'amount', 'active']) {
+      const base = nodeBase('native form', [path]);
+      expect(root.querySelector(`[id="${base}-set-null"]`)).toBeNull();
+      const status = root.querySelector(
+        `[id="${base}-null-value"]`,
+      ) as HTMLSpanElement;
+      expect(status.textContent?.trim()).toBe('Confirmed null');
+      expect(status.hasAttribute('role')).toBe(false);
+      expect(status.hasAttribute('aria-live')).toBe(false);
+      expect(root.querySelector(`[id="${base}-clear"]`)).not.toBeNull();
+    }
+    expect(nameInput.getAttribute('aria-describedby')).toBe(
+      `${nameBase}-description ${nameBase}-null-value ${nameBase}-errors`,
+    );
+    expect(fixture.componentInstance.operations).toHaveLength(2);
+
+    nameInput.value = 'after';
+    nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+    amountInput.value = '2';
+    amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+    activeInput.checked = true;
+    activeInput.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(fixture.componentInstance.operations.slice(-3)).toMatchObject([
+      { type: 'set-value', path: ['name'], value: 'after' },
+      { type: 'set-value', path: ['amount'], value: 2 },
+      { type: 'set-value', path: ['active'], value: true },
+    ]);
+
+    const clearNull = root.querySelector(
+      `[id="${nameBase}-clear"]`,
+    ) as HTMLButtonElement;
+    clearNull.click();
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'remove-value',
+      path: ['name'],
+      expected: { kind: 'value', value: null },
+    });
   });
 
   it('uses LOCALE_ID, resolves text, and keeps string edits controlled', () => {

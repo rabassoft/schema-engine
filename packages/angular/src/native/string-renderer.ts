@@ -61,6 +61,19 @@ import {
         (focus)="fieldFocus.emit()"
         (blur)="onBlur()"
       />
+      @if (canSetNull()) {
+        <button
+          type="button"
+          [id]="ids().setNull"
+          [attr.aria-labelledby]="ids().setNull + ' ' + ids().label"
+          (click)="onSetNull()"
+        >
+          {{ texts().setNullLabel }}
+        </button>
+      }
+      @if (confirmedNull()) {
+        <span [id]="ids().nullValue">{{ texts().nullValueLabel }}</span>
+      }
       @if (snapshot().presence.kind === 'value') {
         <button
           type="button"
@@ -104,10 +117,24 @@ export class SchemaStringRendererComponent implements AngularFieldRenderer {
     fieldIds(this.formId(), this.field(), this.instanceContext?.address()),
   );
   protected readonly describedBy = computed(() =>
-    describedBy(this.ids(), this.texts(), this.snapshot()),
+    describedBy(this.ids(), this.texts(), this.snapshot(), this.field()),
   );
   protected readonly ariaInvalid = computed(() =>
     this.snapshot().showIssues && !this.snapshot().valid ? 'true' : null,
+  );
+  protected readonly confirmedNull = computed(() => {
+    const presence = this.snapshot().presence;
+    return (
+      this.field().nullable &&
+      presence.kind === 'value' &&
+      presence.value === null
+    );
+  });
+  protected readonly canSetNull = computed(
+    () =>
+      this.field().nullable &&
+      !fieldDisabled(this.snapshot()) &&
+      !this.confirmedNull(),
   );
   private readonly confirmedText = computed(() => {
     const presence = this.snapshot().presence;
@@ -132,6 +159,14 @@ export class SchemaStringRendererComponent implements AngularFieldRenderer {
   protected onClear(): void {
     this.controlField().focusBoundControl();
     this.removeValue.emit();
+  }
+
+  protected onSetNull(): void {
+    try {
+      this.controlField().focusBoundControl();
+    } finally {
+      this.setValue.emit(null);
+    }
   }
 
   focus(options?: FocusOptions): void {

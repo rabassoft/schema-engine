@@ -1,0 +1,448 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"stringFirst\"]",
+        "name": "stringFirst",
+        "path": ["stringFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "stringFirst",
+        "kind": "string",
+        "constraints": {
+          "minLength": 1
+        }
+      },
+      {
+        "key": "[\"nullString\"]",
+        "name": "nullString",
+        "path": ["nullString"],
+        "required": false,
+        "nullable": true,
+        "label": "nullString",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"numberFirst\"]",
+        "name": "numberFirst",
+        "path": ["numberFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "numberFirst",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"nullNumber\"]",
+        "name": "nullNumber",
+        "path": ["nullNumber"],
+        "required": false,
+        "nullable": true,
+        "label": "nullNumber",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"integerFirst\"]",
+        "name": "integerFirst",
+        "path": ["integerFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "integerFirst",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"nullInteger\"]",
+        "name": "nullInteger",
+        "path": ["nullInteger"],
+        "required": false,
+        "nullable": true,
+        "label": "nullInteger",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"booleanFirst\"]",
+        "name": "booleanFirst",
+        "path": ["booleanFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "booleanFirst",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"nullBoolean\"]",
+        "name": "nullBoolean",
+        "path": ["nullBoolean"],
+        "required": false,
+        "nullable": true,
+        "label": "nullBoolean",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"nested\"]",
+        "name": "nested",
+        "path": ["nested"],
+        "required": false,
+        "label": "nested",
+        "kind": "object",
+        "children": [
+          {
+            "key": "[\"nested\",\"value\"]",
+            "name": "value",
+            "path": ["nested", "value"],
+            "required": false,
+            "nullable": true,
+            "label": "value",
+            "kind": "string",
+            "constraints": {}
+          }
+        ]
+      },
+      {
+        "key": "[\"rows\"]",
+        "name": "rows",
+        "path": ["rows"],
+        "required": false,
+        "label": "rows",
+        "kind": "array",
+        "identity": {
+          "property": "id"
+        },
+        "item": {
+          "kind": "item-template",
+          "children": [
+            {
+              "key": "[\"template\",[\"rows\"],[\"amount\"]]",
+              "name": "amount",
+              "relativePath": ["amount"],
+              "required": false,
+              "nullable": true,
+              "label": "amount",
+              "kind": "number",
+              "numericType": "number",
+              "constraints": {
+                "minimum": 0
+              },
+              "ui": {}
+            }
+          ],
+          "fields": [
+            {
+              "key": "[\"template\",[\"rows\"],[\"amount\"]]",
+              "name": "amount",
+              "relativePath": ["amount"],
+              "required": false,
+              "nullable": true,
+              "label": "amount",
+              "kind": "number",
+              "numericType": "number",
+              "constraints": {
+                "minimum": 0
+              },
+              "ui": {}
+            }
+          ]
+        }
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"stringFirst\"]",
+        "name": "stringFirst",
+        "path": ["stringFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "stringFirst",
+        "kind": "string",
+        "constraints": {
+          "minLength": 1
+        }
+      },
+      {
+        "key": "[\"nullString\"]",
+        "name": "nullString",
+        "path": ["nullString"],
+        "required": false,
+        "nullable": true,
+        "label": "nullString",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"numberFirst\"]",
+        "name": "numberFirst",
+        "path": ["numberFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "numberFirst",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"nullNumber\"]",
+        "name": "nullNumber",
+        "path": ["nullNumber"],
+        "required": false,
+        "nullable": true,
+        "label": "nullNumber",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"integerFirst\"]",
+        "name": "integerFirst",
+        "path": ["integerFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "integerFirst",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"nullInteger\"]",
+        "name": "nullInteger",
+        "path": ["nullInteger"],
+        "required": false,
+        "nullable": true,
+        "label": "nullInteger",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"booleanFirst\"]",
+        "name": "booleanFirst",
+        "path": ["booleanFirst"],
+        "required": false,
+        "nullable": true,
+        "label": "booleanFirst",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"nullBoolean\"]",
+        "name": "nullBoolean",
+        "path": ["nullBoolean"],
+        "required": false,
+        "nullable": true,
+        "label": "nullBoolean",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"nested\",\"value\"]",
+        "name": "value",
+        "path": ["nested", "value"],
+        "required": false,
+        "nullable": true,
+        "label": "value",
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"stringFirst\"]",
+          "name": "stringFirst",
+          "path": ["stringFirst"],
+          "required": false,
+          "nullable": true,
+          "label": "stringFirst",
+          "kind": "string",
+          "constraints": {
+            "minLength": 1
+          }
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"nullString\"]",
+          "name": "nullString",
+          "path": ["nullString"],
+          "required": false,
+          "nullable": true,
+          "label": "nullString",
+          "kind": "string",
+          "constraints": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"numberFirst\"]",
+          "name": "numberFirst",
+          "path": ["numberFirst"],
+          "required": false,
+          "nullable": true,
+          "label": "numberFirst",
+          "kind": "number",
+          "numericType": "number",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"nullNumber\"]",
+          "name": "nullNumber",
+          "path": ["nullNumber"],
+          "required": false,
+          "nullable": true,
+          "label": "nullNumber",
+          "kind": "number",
+          "numericType": "number",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"integerFirst\"]",
+          "name": "integerFirst",
+          "path": ["integerFirst"],
+          "required": false,
+          "nullable": true,
+          "label": "integerFirst",
+          "kind": "number",
+          "numericType": "integer",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"nullInteger\"]",
+          "name": "nullInteger",
+          "path": ["nullInteger"],
+          "required": false,
+          "nullable": true,
+          "label": "nullInteger",
+          "kind": "number",
+          "numericType": "integer",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"booleanFirst\"]",
+          "name": "booleanFirst",
+          "path": ["booleanFirst"],
+          "required": false,
+          "nullable": true,
+          "label": "booleanFirst",
+          "kind": "boolean"
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"nullBoolean\"]",
+          "name": "nullBoolean",
+          "path": ["nullBoolean"],
+          "required": false,
+          "nullable": true,
+          "label": "nullBoolean",
+          "kind": "boolean"
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"nested\"]",
+          "name": "nested",
+          "path": ["nested"],
+          "required": false,
+          "label": "nested",
+          "kind": "object",
+          "children": [
+            {
+              "key": "[\"nested\",\"value\"]",
+              "name": "value",
+              "path": ["nested", "value"],
+              "required": false,
+              "nullable": true,
+              "label": "value",
+              "kind": "string",
+              "constraints": {}
+            }
+          ]
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"rows\"]",
+          "name": "rows",
+          "path": ["rows"],
+          "required": false,
+          "label": "rows",
+          "kind": "array",
+          "identity": {
+            "property": "id"
+          },
+          "item": {
+            "kind": "item-template",
+            "children": [
+              {
+                "key": "[\"template\",[\"rows\"],[\"amount\"]]",
+                "name": "amount",
+                "relativePath": ["amount"],
+                "required": false,
+                "nullable": true,
+                "label": "amount",
+                "kind": "number",
+                "numericType": "number",
+                "constraints": {
+                  "minimum": 0
+                },
+                "ui": {}
+              }
+            ],
+            "fields": [
+              {
+                "key": "[\"template\",[\"rows\"],[\"amount\"]]",
+                "name": "amount",
+                "relativePath": ["amount"],
+                "required": false,
+                "nullable": true,
+                "label": "amount",
+                "kind": "number",
+                "numericType": "number",
+                "constraints": {
+                  "minimum": 0
+                },
+                "ui": {}
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

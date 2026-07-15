@@ -74,6 +74,7 @@ type StringEnumState =
 interface FieldCandidate {
   readonly name: string;
   readonly type: FieldType;
+  readonly nullable: boolean;
   readonly required: boolean;
   readonly schemaTitle?: string;
   readonly schemaDescription?: string;
@@ -1343,6 +1344,36 @@ function inspectNodes(
       typeDescriptor !== undefined && 'value' in typeDescriptor
         ? typeDescriptor.value
         : ACCESSOR_VALUE;
+    if (Array.isArray(rawType) && !isNullableContainerTypeArray(rawType)) {
+      const nullableType = inspectNullableTypeArray(
+        name,
+        rawType,
+        dataPath,
+        resolvedFieldPath,
+        diagnostics,
+      );
+      if (nullableType !== undefined) {
+        output.push(
+          inspectValidField(
+            name,
+            nullableType,
+            true,
+            field,
+            required,
+            diagnostics,
+            dataPath,
+            resolvedFieldPath,
+          ),
+        );
+      }
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
+      continue;
+    }
     if (typeof rawType !== 'string' || !SUPPORTED_NODE_TYPES.has(rawType)) {
       diagnostics.push(
         diagnostic({
@@ -1374,6 +1405,7 @@ function inspectNodes(
         inspectValidField(
           name,
           rawType as FieldType,
+          false,
           field,
           required,
           diagnostics,
@@ -2129,6 +2161,32 @@ function inspectItemTemplateChildren(
       releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
+    if (Array.isArray(rawType) && !isNullableContainerTypeArray(rawType)) {
+      const nullableType = inspectNullableTypeArray(
+        frame.name,
+        rawType,
+        arrayPath,
+        resolvedDocumentPath,
+        diagnostics,
+      );
+      if (nullableType !== undefined) {
+        const candidate = inspectValidField(
+          frame.name,
+          nullableType,
+          true,
+          schema,
+          frame.required,
+          diagnostics,
+          arrayPath,
+          resolvedDocumentPath,
+        );
+        frame.output.push({ ...candidate, templatePath: frame.templatePath });
+      }
+      addTemplatePathToRange(diagnostics, start, frame.templatePath);
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
     if (rawType === 'array') {
       diagnostics.push(
         withTemplatePath(
@@ -2177,6 +2235,7 @@ function inspectItemTemplateChildren(
       const candidate = inspectValidField(
         frame.name,
         rawType as FieldType,
+        false,
         schema,
         frame.required,
         diagnostics,
@@ -2265,7 +2324,7 @@ function inspectIdentitySchema(
   diagnostics: Diagnostic[],
 ): boolean {
   let compatible = rawType === 'string';
-  if (!compatible) {
+  if (!compatible && !Array.isArray(rawType)) {
     diagnostics.push(
       withTemplatePath(
         diagnostic({
@@ -2635,9 +2694,156 @@ function inspectObjectCandidate(
   };
 }
 
+function inspectNullableTypeArray(
+  name: string,
+  typeArray: unknown[],
+  dataPath: readonly string[],
+  fieldPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+): FieldType | undefined {
+  const fallbackMessage = `Field "${name}" has an unsupported type.`;
+  const fail = (
+    suffix: readonly (string | number)[],
+    parameters: Readonly<Record<string, unknown>>,
+  ): undefined => {
+    diagnostics.push(
+      diagnostic({
+        code: 'UNSUPPORTED_FIELD_TYPE',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: [...fieldPath, 'type', ...suffix],
+        parameters: { field: name, ...parameters },
+        fallbackMessage,
+      }),
+    );
+    return undefined;
+  };
+
+  const lengthDescriptor = Object.getOwnPropertyDescriptor(typeArray, 'length');
+  if (lengthDescriptor === undefined) {
+    return fail([], {
+      expected: 'primitive type plus null',
+      actualType: 'missing',
+    });
+  }
+  if (!('value' in lengthDescriptor)) {
+    return fail([], {
+      expected: 'primitive type plus null',
+      actualType: 'accessor',
+    });
+  }
+  if (typeof lengthDescriptor.value !== 'number') {
+    return fail([], {
+      expected: 'primitive type plus null',
+      actualType: actualType(lengthDescriptor.value),
+    });
+  }
+  if (lengthDescriptor.value !== 2) {
+    return fail([], {
+      expected: 'primitive type plus null',
+      actualLength: lengthDescriptor.value,
+    });
+  }
+
+  const members: string[] = [];
+  for (const index of [0, 1] as const) {
+    const descriptor = Object.getOwnPropertyDescriptor(typeArray, index);
+    if (descriptor === undefined) {
+      return fail([index], {
+        expected: 'null or primitive type',
+        actualType: 'missing',
+      });
+    }
+    if (!descriptor.enumerable) {
+      return fail([index], {
+        expected: 'null or primitive type',
+        actualType: 'non-enumerable',
+      });
+    }
+    if (!('value' in descriptor)) {
+      return fail([index], {
+        expected: 'null or primitive type',
+        actualType: 'accessor',
+      });
+    }
+    if (typeof descriptor.value !== 'string') {
+      return fail([index], {
+        expected: 'null or primitive type',
+        ...describeActualValue(descriptor.value),
+      });
+    }
+    if (
+      descriptor.value !== 'null' &&
+      !SUPPORTED_FIELD_TYPES.has(descriptor.value as FieldType)
+    ) {
+      return fail([index], {
+        expected: 'null or primitive type',
+        reason: 'unsupported-type-member',
+        ...describeActualValue(descriptor.value),
+      });
+    }
+    members.push(descriptor.value);
+  }
+
+  const extraKey = Object.keys(typeArray).find(
+    (key) => key !== '0' && key !== '1',
+  );
+  if (extraKey !== undefined) {
+    return fail([extraKey], { reason: 'unexpected-type-array-member' });
+  }
+
+  const first = members[0] as string;
+  const second = members[1] as string;
+  if (first === 'null' && second === 'null') {
+    return fail([], {
+      expected: 'one primitive type and null',
+      reason: 'duplicate-null',
+    });
+  }
+  if (first === second) {
+    return fail([], {
+      expected: 'one primitive type and null',
+      reason: 'duplicate-primitive',
+    });
+  }
+  if (first !== 'null' && second !== 'null') {
+    return fail([], {
+      expected: 'one primitive type and null',
+      reason: 'missing-null',
+    });
+  }
+  return (first === 'null' ? second : first) as FieldType;
+}
+
+function isNullableContainerTypeArray(typeArray: unknown[]): boolean {
+  const length = Object.getOwnPropertyDescriptor(typeArray, 'length');
+  if (length === undefined || !('value' in length) || length.value !== 2)
+    return false;
+  const first = Object.getOwnPropertyDescriptor(typeArray, 0);
+  const second = Object.getOwnPropertyDescriptor(typeArray, 1);
+  if (
+    first === undefined ||
+    second === undefined ||
+    !first.enumerable ||
+    !second.enumerable ||
+    !('value' in first) ||
+    !('value' in second) ||
+    Object.keys(typeArray).some((key) => key !== '0' && key !== '1')
+  )
+    return false;
+  return (
+    (first.value === 'null' &&
+      (second.value === 'object' || second.value === 'array')) ||
+    (second.value === 'null' &&
+      (first.value === 'object' || first.value === 'array'))
+  );
+}
+
 function inspectValidField(
   name: string,
   type: FieldType,
+  nullable: boolean,
   field: Record<string, unknown>,
   required: boolean,
   diagnostics: Diagnostic[],
@@ -2661,6 +2867,22 @@ function inspectValidField(
 
   for (const keyword of Object.keys(field)) {
     const documentPath = [...fieldPath, keyword] as const;
+
+    if (nullable && keyword === 'enum') {
+      stringEnum = { kind: 'schema-blocked' };
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath,
+          parameters: { keyword, fieldType: type },
+          fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "${type}".`,
+        }),
+      );
+      continue;
+    }
 
     if (!supportedKeywords.has(keyword)) {
       if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
@@ -2822,6 +3044,7 @@ function inspectValidField(
   return {
     name,
     type,
+    nullable,
     required,
     ...(schemaTitle === undefined ? {} : { schemaTitle }),
     ...(schemaDescription === undefined ? {} : { schemaDescription }),
@@ -4938,7 +5161,7 @@ function buildFieldTemplate(
     name: candidate.name,
     relativePath: candidate.templatePath,
     required: candidate.required,
-    nullable: false,
+    nullable: candidate.nullable,
     label: ui?.label ?? candidate.schemaTitle ?? accessibleName(candidate.name),
     ...(ui?.description !== undefined
       ? { description: ui.description }
@@ -5095,7 +5318,7 @@ function buildFieldDefinition(
     name: candidate.name,
     path: candidate.dataPath,
     required: candidate.required,
-    nullable: false,
+    nullable: candidate.nullable,
     label: ui?.label ?? candidate.schemaTitle ?? candidate.name,
     ...(ui?.description !== undefined
       ? { description: ui.description }

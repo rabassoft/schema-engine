@@ -2477,6 +2477,7 @@ function compatible(
 ): boolean {
   const type = fieldType(field);
   return (
+    (field.nullable && value === null) ||
     (type === 'string' && typeof value === 'string') ||
     (type === 'boolean' && typeof value === 'boolean') ||
     (type === 'number' &&

@@ -6,6 +6,196 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — M14 coordinated release planning authorized
+
+### Decision
+
+- Authorized preparation and complete review of PLAN-015 for a coordinated
+  Experimental release of the completed local M14 changes.
+- Selected core and Angular `0.2.0` as the plan target: both affected packages
+  are live at `0.1.0`, and ADR-010 requires an incompatible Experimental change
+  to use at least MINOR, never PATCH.
+- Kept plan approval, manifest/version changes, candidate preparation,
+  publication and every external mutation outside this authorization.
+
+### State
+
+- Live core and Angular `0.1.0` remain immutable and pre-M14.
+- No implementation task is active and there is no blocker or open policy
+  question before drafting the plan.
+
+### Next
+
+- Draft PLAN-015 revision 0, then correct and repeat its complete review until
+  one pass has zero findings.
+
+## 2026-07-15 — PLAN-014 and M14 completed locally
+
+### Completed
+
+- Completed checkpoints 1–6 of PLAN-014 revision 0 and the promoted D-009/M14
+  nullable primitive-leaf implementation.
+- Delivered exact compiler normalization, required/manual contracts, strict
+  definition-aware null operations/runtime and accessible Angular native
+  intention/status behavior.
+- Retained all exclusions, application ownership, validator authority,
+  renderer selection, exports, packages and deferred boundaries.
+
+### Final review and correction
+
+- Review 041 cycle 1 found that exact nullable object/array attempts needed to
+  preserve their existing container-position blocking diagnostics.
+- Added a descriptor-safe exclusion discriminator and focused root, object,
+  array, item-root and identity tests; also made non-nullable external-null and
+  keyboard activation evidence explicit.
+- Cycle 2 repeated the complete implementation review with zero findings.
+
+### Verification
+
+- Frozen install, formatting, documentation across 100 Markdown files and 441
+  local links, lint, typecheck, build, 400 core tests and 79 Angular tests pass.
+- Both package smoke, packed artifacts, isolated source rebuilds, repository
+  consumer and clean core/lower/upper Angular 22 consumers pass.
+- Manifests, dependencies, peers, lockfile, versions, exports and published
+  `0.1.0` bytes remain unchanged; no external mutation occurred.
+
+### Next
+
+- Decide whether to authorize a separate coordinated MINOR release plan for
+  the completed local M14 changes. Do not select a version or publish without
+  that separate approval.
+
+## 2026-07-15 — PLAN-014 checkpoint 5 completed
+
+### Completed
+
+- Mapped all 23 SPEC-006 groups to named passing compiler, operations/runtime,
+  Angular, declaration, package and regression evidence.
+- Added package smoke coverage for nullable compilation/application and
+  verified declarations, export/allowlist stability and both package smokes.
+- Documented the coordinated required manual-definition and Angular-text source
+  migrations while distinguishing local M14 source from live pre-M14 `0.1.0`.
+- Reconciled current onboarding, roadmap, deferred and implementation-plan
+  state without selecting a version or rewriting historical release evidence.
+
+### Review
+
+- Review 040 cycle 1 repeated the complete evidence, package, consumer,
+  migration and release-boundary review with zero findings.
+
+### Verification
+
+- Frozen install, formatting, documentation across 99 Markdown files and 441
+  local links, lint, typecheck, build, 398 core tests and 79 Angular tests pass.
+- Both package smoke, packed artifacts, isolated source rebuilds, repository
+  consumer and clean core/lower/upper Angular consumers pass.
+- The initial sandboxed reinstall lacked network after recreating
+  `node_modules`; the exact lockfile install and isolated checks passed with
+  authorized network and no lockfile change.
+
+### Next
+
+- Execute PLAN-014 checkpoint 6: inspect the complete authority, production/
+  test diff, declarations, packages, documentation and deferred boundaries;
+  correct and repeat until one full cycle has zero findings.
+
+## 2026-07-15 — PLAN-014 checkpoint 4 completed
+
+### Implemented
+
+- Added required Angular set-null/null-value texts with exact resolver order,
+  neutral sources, failure handling and empty snapshot values.
+- Added deterministic action/status IDs and native nullable projection for
+  string, number/integer and boolean without changing renderer registration.
+- Implemented focus-before-null output, visible non-live confirmed-null status,
+  exact described-by order, retained clear and controlled Signal Forms buffers.
+- Added DOM-state, accessibility, resolver, locale, focus, no-emission,
+  edit-after-null and non-nullable external-null regressions.
+
+### Review and correction
+
+- Review 039 cycle 1 found that confirmed-null projection initially lacked an
+  explicit nullable-capability gate; it was corrected in both DOM and
+  described-by paths.
+- Cycle 2 repeated all six checkpoint areas with zero findings.
+
+### Verification
+
+- Formatting, documentation across 98 Markdown files and 441 local links,
+  lint, typecheck, build, 398 core tests, 79 Angular tests, both package smoke
+  suites and diff checks pass.
+- Registrations, providers, exports, manifests, versions, publication and
+  external actions remain unchanged.
+
+### Next
+
+- Begin PLAN-014 checkpoint 5 with the complete evidence map, declarations,
+  packages, artifacts, source and clean-consumer verification plus migration
+  documentation.
+
+## 2026-07-15 — PLAN-014 checkpoint 3 completed
+
+### Implemented
+
+- Retained the validated nullable capability in managed direct and collection
+  template metadata.
+- Definition-aware direct/deep and item-relative sets now accept null only for
+  nullable leaves while preserving the two existing diagnostic families.
+- Controlled runtime requests emit the existing frozen null intentions without
+  optimistic projection; raw operations remain structural and unchanged.
+- Added focused missing/null/primitive, expectation, stale/no-op, removal,
+  ancestor, dirty, validator-identity and controlled-emission evidence.
+
+### Review
+
+- Review 038 cycle 1 repeated all six checkpoint areas with zero findings and
+  no unresolved change request.
+
+### Verification
+
+- Formatting, documentation across 97 Markdown files and 441 local links,
+  lint, typecheck, build, 398 core tests, 76 Angular tests, both package smoke
+  suites and diff checks pass.
+- Angular production behavior, public shapes, versions, publication and
+  external actions remain unchanged.
+
+### Next
+
+- Begin PLAN-014 checkpoint 4 with text projection, deterministic IDs,
+  accessible native actions/status and controlled Signal Forms reconciliation.
+
+## 2026-07-15 — PLAN-014 checkpoint 2 completed
+
+### Implemented
+
+- Added the exact descriptor-safe two-member primitive-plus-null classifier to
+  the existing direct and collection-template leaf traversal.
+- Valid arrays in either order now normalize to the existing primitive kind
+  plus frozen `nullable: true` at direct, nested, template and referenced paths.
+- Added the closed `UNSUPPORTED_FIELD_TYPE` failure catalog, provenance,
+  branch stopping, identity-policy ownership and nullable-string enum exclusion.
+- Added serializable conformance coverage and programmatic descriptor,
+  accessor, hostile-hook, extra-key, immutability and no-retention tests.
+
+### Review
+
+- Review 037 cycle 1 repeated all seven checkpoint areas with zero findings.
+- Broad fixture regeneration introduced only formatting churn outside the new
+  fixture; it was removed before the reviewed diff.
+
+### Verification
+
+- Formatting, documentation across 96 Markdown files and 441 local links,
+  lint, typecheck, build, 389 core tests, 76 Angular tests, both package smoke
+  suites and diff checks pass.
+- Operations/runtime still reject null as a primitive value; Angular null
+  intention/status, versions, publication and external actions remain inactive.
+
+### Next
+
+- Begin PLAN-014 checkpoint 3 with definition-aware direct/deep and collection
+  null operations plus controlled runtime transitions.
+
 ## 2026-07-15 — PLAN-014 checkpoint 1 completed
 
 ### Implemented

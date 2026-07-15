@@ -116,7 +116,7 @@ export class SchemaStringEnumRendererComponent implements AngularFieldRenderer {
     fieldIds(this.formId(), this.field(), this.instanceContext?.address()),
   );
   protected readonly describedBy = computed(() =>
-    describedBy(this.ids(), this.texts(), this.snapshot()),
+    describedBy(this.ids(), this.texts(), this.snapshot(), this.field()),
   );
   protected readonly ariaInvalid = computed(() =>
     this.snapshot().showIssues && !this.snapshot().valid ? 'true' : null,

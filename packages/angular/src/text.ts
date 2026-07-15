@@ -51,6 +51,8 @@ export interface AngularFieldTextSnapshot {
   readonly tooltip?: string;
   readonly placeholder?: string;
   readonly clearLabel: string;
+  readonly setNullLabel: string;
+  readonly nullValueLabel: string;
   readonly choiceLabels: readonly string[];
   readonly issueMessages: readonly string[];
 }
@@ -220,6 +222,8 @@ export class AngularTextProjector {
         ? undefined
         : resolve(field.placeholder, 'placeholder');
     const clearLabel = resolve('Clear', 'clear', true);
+    const setNullLabel = resolve('Set null', 'set-null', true);
+    const nullValueLabel = resolve('Null value', 'null-value', true);
     const choiceLabels = ownChoices(field).map((choice) =>
       resolveText(
         this.parsed.resolver,
@@ -247,6 +251,8 @@ export class AngularTextProjector {
         ...(tooltip === undefined ? {} : { tooltip }),
         ...(placeholder === undefined ? {} : { placeholder }),
         clearLabel,
+        setNullLabel,
+        nullValueLabel,
         choiceLabels: Object.freeze(choiceLabels),
         issueMessages: Object.freeze(issueMessages),
       }),
@@ -638,6 +644,8 @@ export function emptyTextSnapshot(): AngularFieldTextSnapshot {
   return Object.freeze({
     label: '',
     clearLabel: 'Clear',
+    setNullLabel: 'Set null',
+    nullValueLabel: 'Null value',
     choiceLabels: Object.freeze([]),
     issueMessages: Object.freeze([]),
   });

@@ -342,33 +342,28 @@ describe('PLAN-014 checkpoint 1 nullable contracts', () => {
     expect(validator.validate).not.toHaveBeenCalled();
   });
 
-  it('keeps type arrays and null compatibility inactive during checkpoint 1', () => {
-    expect(
-      compileFormDefinition({
-        schema: {
-          $schema: 'https://json-schema.org/draft/2020-12/schema',
-          type: 'object',
-          properties: { name: { type: ['string', 'null'] } },
-        },
-      }),
-    ).toMatchObject({
-      success: false,
-      diagnostics: [{ code: 'UNSUPPORTED_FIELD_TYPE' }],
+  it('supports the progressively activated compiler and operation contracts', () => {
+    const compiled = compileFormDefinition({
+      schema: {
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: { name: { type: ['string', 'null'] } },
+      },
     });
+    expect(compiled).toMatchObject({ success: true, diagnostics: [] });
+    if (compiled.success) {
+      expect(compiled.definition.fields[0]).toMatchObject({ nullable: true });
+    }
 
     const nullable = field(true);
     const manual = definition(nullable) as unknown as FormDefinition;
     expect(validateCollectionFormDefinition(manual)).toEqual({ success: true });
 
     expect(applyFormOperation(manual, {}, setValue(null))).toMatchObject({
-      success: false,
-      changed: false,
-      diagnostics: [
-        {
-          code: 'INCOMPATIBLE_OPERATION_VALUE',
-          parameters: { actualType: 'null' },
-        },
-      ],
+      success: true,
+      changed: true,
+      value: { name: null },
+      diagnostics: [],
     });
   });
 });

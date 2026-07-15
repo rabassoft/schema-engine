@@ -10,54 +10,58 @@
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1 and SPEC-006 v0.1.1
 - **Last proposed specification:** None
-- **Last implementation plan:** PLAN-014 revision 0, Approved
-- **Last completed implementation plan:** PLAN-013 revision 4
+- **Last implementation plan:** PLAN-014 revision 0, Completed
+- **Last completed implementation plan:** PLAN-014 revision 0
 - **Active implementation task:** None
 - **Last accepted ADR:** ADR-019 revision 1, coordinated with ADR-005 revision 4
 - **Last proposed ADR:** None
 - **Promoted capabilities:** D-005/M9, D-006/M10, D-041/M11 and D-042/M12
   implemented within their accepted slices; D-034/D-040 active only within
-  accepted M13 delivery; D-009 promoted with its M14 observable contract
-- **Phase:** M1–M13 and G0 completed; M14 checkpoint 1 completed
+  accepted M13 delivery; D-009/M14 implemented locally under completed PLAN-014
+- **Phase:** M1–M14 and G0 completed locally
 - **Published packages:** core and Angular `0.1.0` are live and byte-identical
   to their accepted candidates
 
 ## Current objective
 
-Implement PLAN-014 revision 0 checkpoints 2–6 in order, beginning with closed
-descriptor-safe nullable type-array normalization.
+Prepare and review PLAN-015 for a coordinated Experimental `0.2.0` release of
+core and Angular containing the completed local M14 changes; live `0.1.0`
+remains pre-M14.
 
 ## In progress
 
-- None. PLAN-014 checkpoint 1 passed review 036 cycle 2 with zero findings;
-  checkpoint 2 is authorized but has not started.
+- None. PLAN-014 revision 0 and M14 completed locally after review 041 cycle 2
+  passed the complete implementation review with zero findings.
 
 ## Latest completed work
 
-- Completed PLAN-014 checkpoint 1 after review 036 cycle 2 passed all eight
-  areas with zero findings; required contracts, scalar false normalization and
-  manual-definition validation are active locally.
-- Formally approved PLAN-014 revision 0 after review 035 cycle 3 passed all ten
-  areas with zero findings; only checkpoints 1–6 are authorized.
-- Drafted PLAN-014 revision 0 with six gated checkpoints and a 23-group evidence
-  matrix; review 035 cycle 3 passed all ten areas with zero findings after four
-  corrections.
-- Accepted SPEC-006 v0.1.1 after review 034 cycle 6 repeated all twelve areas
-  and accepted-state reconciliation with zero findings; PLAN-014 preparation
-  and review are now authorized.
-- Accepted ADR-019 revision 1 after review 033 cycle 2 preserved SPEC-003's
-  collection diagnostic with zero findings.
+- Authorized preparation and review of PLAN-015 for coordinated core and
+  Angular `0.2.0`. ADR-010 determines MINOR rather than PATCH; no manifest,
+  candidate, publication or external mutation was authorized.
+- Completed PLAN-014 revision 0 and local M14 after final review 041 cycle 2
+  passed the complete authority, diff, declaration, package, documentation and
+  deferred-boundary review with zero findings.
+- Completed PLAN-014 checkpoint 5 after review 040 cycle 1 mapped all 23 groups
+  and passed declarations, packages, artifacts, source and clean consumers with
+  zero findings, establishing the baseline for final review 041.
+- Completed PLAN-014 checkpoint 4 after review 039 cycle 2 passed all six areas
+  with zero findings; exact Angular native null projection is active locally
+  without renderer-registry or package drift.
+- Completed PLAN-014 checkpoint 3 after review 038 cycle 1 passed all six
+  areas with zero findings; definition-aware null operations/runtime are active
+  locally while Angular null projection remains inactive.
 
 ## Exact next action
 
-Begin PLAN-014 checkpoint 2: implement the exact descriptor-safe two-member
-type-array classifier, diagnostics and direct/nested/template/reference
-normalization while leaving operations/runtime/Angular null behavior inactive.
+Draft PLAN-015 revision 0 for coordinated core and Angular `0.2.0`, then review
+and correct it until a complete pass has zero findings. Do not change package
+versions, prepare candidates, publish or mutate external state under this
+authorization.
 
 ## Blockers and conflicts
 
 - No implementation, environment, external-system or documentation blocker.
-  PLAN-014 checkpoint 1 is complete and checkpoint 2 is authorized.
+  PLAN-014 and local M14 are complete.
 - npm's mandatory `latest: 0.1.0` is accepted only as an Experimental alias to
   each inspected package version; `next` remains recommended.
 - The immutable live core `0.1.0` README retains the pre-discovery no-`latest`
@@ -85,74 +89,29 @@ normalization while leaving operations/runtime/Angular null behavior inactive.
   private pending sanitization.
 - ADR-018 revision 3 and PLAN-013 revision 4 are Accepted/Completed. Every
   future registry/settings mutation remains separately gated.
+- PLAN-015 preparation and review are authorized with `0.2.0` as the
+  ADR-010-compliant target for both affected packages. Plan approval,
+  implementation and every registry mutation remain separate gates.
 - SPEC-001 v0.1.15 remains the behavioral baseline. SPEC-002, SPEC-003,
   SPEC-004 and SPEC-005 are authoritative only for their accepted extensions.
 
 ## Open questions
 
-- None. Ricard approved preserving SPEC-003's collection-specific diagnostic.
+- None. The coordinated release-plan target is core and Angular `0.2.0`.
 
 ## Latest verification
 
-- Review 036 cycle 2 passes all eight checkpoint 1 areas with zero findings.
-  Formatting, documentation across 95 Markdown files and 441 local links,
-  lint, typecheck, build, 364 core tests, 76 Angular tests, both package smoke
-  suites, JSON definition audit and diff checks pass.
-- PLAN-014 approval-state reconciliation passes formatting, documentation
-  across 94 Markdown files and 440 local links, active-state reference search
-  and diff checks.
-- Review 035 cycle 3 repeats all ten PLAN-014 acceptance areas with zero
-  findings after four corrections. Formatting, documentation across 94
-  Markdown files and 439 local links, and diff checks pass after final
-  current-state reconciliation.
-- Review 034 cycle 6 repeats all twelve SPEC-006 areas and accepted-state
-  reconciliation with zero findings after twelve corrections. Formatting,
-  documentation across 92 Markdown files and 419 local links, and diff checks
-  pass.
-- SPEC-006 preflight compared ADR-019 section 2.3, SPEC-003 section 12.2 and the
-  collection-operation implementation; ADR-019 revision 1 resolved the found
-  diagnostic conflict before the SPEC was accepted.
-- Review 032 cycle 2 repeats all ten joint ADR-019/ADR-005 revision 4 areas with
-  zero findings. Current formatting, documentation across 89 Markdown files
-  and 400 local links, and diff checks pass.
-- Review 031 cycle 3 repeats all eight D-009/M14 readiness areas with zero
-  findings and supports the accepted narrow promotion.
-- Review 028 cycle 8, review 029 cycle 14 and review 030 cycle 31 repeat their
-  complete applicable areas with zero findings and close ADR-018 revision 3,
-  PLAN-013 revision 4 and M13.
-- Review 026 cycle 6 closes all ten implementation-review areas and all 18
-  SPEC-005 evidence groups with zero findings; the full matrix passed in cycle
-  3 and closing documentation checks passed in cycle 6.
-- Frozen install, formatting, documentation across 86 Markdown files and 385
-  local links, lint, typecheck, 359 core plus 76 Angular tests, explicit build,
-  package/artifact/repository/clean consumers and diff checks pass.
-- Release security audit, isolated source rebuilds and npm dry-runs pass. Core
-  live SHA-512 is `dceb432e…fdb310e`; corrected Angular candidate SHA-512 is
-  `35f7f33a…2ebd56a`. Full hashes/source commits are in review 030 and the ignored
-  `.release/0.1.0/candidates.json`.
-- npm `10.9.8` targets `https://registry.npmjs.org/`; authenticated user
-  `ricardrabasso` is owner of organization `rabassoft`, with verified
-  `ricard@rabassoft.com` and `auth-and-writes` 2FA. Before publication both
-  exact names returned unauthenticated `E404` and the candidate hashes matched
-  checkpoint 4.
-- Post-publication unauthenticated metadata reports both `0.1.0` packages,
-  `AGPL-3.0-only` and the expected SHA-512 integrity, but both `next` and
-  mandatory Experimental `latest` point to their `0.1.0`.
-- `pnpm test:live:core` downloads bytes identical to canonical core SHA-512 and
-  passes clean exact-version and `@next` TypeScript consumers without credentials.
-- `pnpm test:live:angular` proves exact live Angular bytes, metadata, absent
-  attestations, registry signatures and clean lower/upper Angular 22 consumers
-  using both public packages. Default verifier modes also pass.
-- Local/private `develop` both resolve to `6f13987`; no merge is active.
-- Direct registry version documents confirm npm-generated local `_resolved` and
-  `_from` fields for both versions; candidate manifests/tarballs omit them.
-- GitHub reports PRIVATE visibility, default branch `main`, Issues enabled and
-  Wiki disabled. Local history has 46 commits, one Rabassoft author identity and
-  no currently tracked credential-like path; full-history sanitization has not
-  been formally completed.
-- Versions, exports, dependencies, peers, runtime behavior and Experimental
-  classification remain unchanged. Both package publications are complete;
-  settings remain unchanged.
+- The coordinated `0.2.0` planning decision is consistent with ADR-010,
+  ADR-018, SPEC-006, PLAN-014 and D-009. Formatting, documentation across 100
+  Markdown files and 441 local links, and diff checks pass.
+- Review 041 cycle 2 passes the complete final implementation review with zero
+  findings after correcting container-exclusion ownership. Frozen install,
+  formatting, documentation across 100 Markdown files and 441 local links,
+  lint, typecheck, build, 400 core tests, 79 Angular tests, packages, artifacts,
+  source and repository/clean consumers pass.
+- Review 030 cycle 31 closed M13 with zero findings. Exact live `0.1.0`
+  tarballs, integrity, public metadata, `next`/mandatory `latest`, source and
+  clean consumers were verified; full immutable evidence remains in review 030.
 
 ## Task document map
 
@@ -165,6 +124,16 @@ normalization while leaving operations/runtime/Angular null behavior inactive.
 - Complete PLAN-014 review: `.ai-docs/reviews/035-plan-014-review.md`
 - PLAN-014 checkpoint 1 review:
   `.ai-docs/reviews/036-plan-014-checkpoint-1-review.md`
+- PLAN-014 checkpoint 2 review:
+  `.ai-docs/reviews/037-plan-014-checkpoint-2-review.md`
+- PLAN-014 checkpoint 3 review:
+  `.ai-docs/reviews/038-plan-014-checkpoint-3-review.md`
+- PLAN-014 checkpoint 4 review:
+  `.ai-docs/reviews/039-plan-014-checkpoint-4-review.md`
+- PLAN-014 checkpoint 5 review:
+  `.ai-docs/reviews/040-plan-014-checkpoint-5-review.md`
+- PLAN-014 final implementation review:
+  `.ai-docs/reviews/041-plan-014-final-implementation-review.md`
 - ADR-019 revision 1 review:
   `.ai-docs/reviews/033-adr-019-revision-1-review.md`
 - Joint M14 ADR review:

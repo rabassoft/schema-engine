@@ -175,7 +175,7 @@
 - [PLAN-011: Same-document static JSON Schema reference resolution](./plans/011-local-reference-resolution.md) — Completed revision 0 after final repeated review with zero findings
 - [PLAN-012: Static neutral presentation groups](./plans/012-static-presentation-groups.md) — Completed revision 1 after final repeated review with zero findings
 - [PLAN-013: First public experimental release](./plans/013-public-experimental-release.md) — Completed revision 4 after all separately authorized local, Git and npm checkpoints passed
-- [PLAN-014: Nullable primitive leaves](./plans/014-nullable-primitive-leaves.md) — Approved revision 0; checkpoint 1 completed after review 036 cycle 2 passed with zero findings and checkpoint 2 is next
+- [PLAN-014: Nullable primitive leaves](./plans/014-nullable-primitive-leaves.md) — Completed revision 0 after final review 041 cycle 2 passed with zero findings
 
 Accepted publication architecture: [ADR-018 revision 3](./adrs/018-licencia-dual-publicacion-experimental.md)
 selects dual AGPL/commercial licensing and public Experimental packages while
@@ -196,7 +196,8 @@ its final repeated implementation review passed with zero findings. M11 is
 complete. M12 implemented the narrow D-042 static-section slice under accepted
 ADR-017, SPEC-005 v0.1.1 and completed PLAN-012; D-011/D-012 remain Deferred
 outside it. SPEC-006 v0.1.1 now defines the Accepted M14 nullable-leaf contract;
-PLAN-014 revision 0 authorizes its six implementation checkpoints, while
-version selection and publication remain separate.
+PLAN-014 revision 0 and local M14 implementation are complete after final
+review 041 cycle 2 passed with zero findings. Version selection and publication
+remain separate.
 
 > Existing ADRs predate SPEC-001 and remain subject to review where they conflict with the controlled runtime specification.

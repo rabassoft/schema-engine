@@ -20,6 +20,8 @@ const texts: AngularFieldTextSnapshot = Object.freeze({
   label: 'Status',
   placeholder: 'Choose status',
   clearLabel: 'Clear',
+  setNullLabel: 'Set null',
+  nullValueLabel: 'Null value',
   choiceLabels: Object.freeze(['Empty', 'Draft']),
   issueMessages: Object.freeze([]),
 });

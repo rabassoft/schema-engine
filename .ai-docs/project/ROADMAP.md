@@ -61,10 +61,9 @@ separado antes de repetir la revisión.
 
 > M7-M13 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-013
 > publicó y verificó core/Angular `0.1.0` bajo gates explícitos, sin promover
-> APIs a Stable ni hacer público GitHub. M14 tiene contrato observable Accepted
-> y PLAN-014 revision 0 Approved para sus seis checkpoints; D-011/D-012 y D-043
-> siguen Deferred y ninguna versión, publicación o mutación remota futura está
-> autorizada.
+> APIs a Stable ni hacer público GitHub. M14 y PLAN-014 revision 0 están
+> completados localmente; D-011/D-012 y D-043 siguen Deferred y ningún cambio
+> de versión, publicación o mutación remota futura está autorizado.
 
 ### M9 — Objetos anidados — completado
 
@@ -153,7 +152,7 @@ separado antes de repetir la revisión.
   defers repository sanitization/publication, OIDC, staged approval, token
   restrictions and provenance as one future decision.
 
-### M14 — Hojas primitivas nullable — implementación autorizada
+### M14 — Hojas primitivas nullable — completado localmente
 
 - D-009 fue promovido el 15 de julio de 2026 tras aceptar
   [review 031](../reviews/031-m14-nullable-leaves-promotion-readiness.md), cuyo
@@ -165,13 +164,15 @@ separado antes de repetir la revisión.
   Accepted. SPEC-006 v0.1.1 fue Accepted tras review 034 ciclo 6 sin hallazgos.
   PLAN-014 revision 0 fue Approved tras review 035 ciclo 3 sin hallazgos y
   autoriza solo sus checkpoints 1–6. Versión y publicación siguen fuera.
+- Los checkpoints 1–6 y PLAN-014 revisión 0 están completados tras review 041
+  ciclo 2 sin hallazgos. No se seleccionó versión ni se publicó M14.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Implementation:** execute approved PLAN-014 checkpoints 1–6 in order under
-   SPEC-006 v0.1.1 and the ADR-019/ADR-005 revision 4 architecture.
-2. **Release:** any version selection or publication requires a separate plan
-   and explicit authorization.
+1. **Release plan:** draft and review PLAN-015 for coordinated Experimental
+   core and Angular `0.2.0`; ADR-010 requires MINOR rather than PATCH.
+2. **Release:** version changes, candidate preparation and publication require
+   the reviewed plan's separate approval and explicit external-action gates.
 3. **Later selection:** all other capabilities remain demand-driven; D-043 is
    not implied by M14.
 

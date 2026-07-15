@@ -88,6 +88,7 @@ interface ManagedCollection {
 interface ManagedTemplateField {
   readonly name: string;
   readonly type: 'string' | 'number' | 'integer' | 'boolean';
+  readonly nullable: boolean;
 }
 
 type Member =
@@ -952,11 +953,14 @@ function findManagedCollection(
               )
                 fieldType = numeric.value;
             }
-            if (fieldType !== undefined)
+            if (fieldType !== undefined) {
+              const nullable = readOwnDataMember(field, 'nullable');
               fields.set(canonicalDataPathKey(fieldPath), {
                 name: fieldPath.at(-1) as string,
                 type: fieldType,
+                nullable: nullable.kind === 'value' && nullable.value === true,
               });
+            }
           }
         }
       }
@@ -1312,6 +1316,7 @@ function incompatibleLeaf(
 ): Diagnostic | undefined {
   const value = operation.value;
   const compatible =
+    (field.nullable && value === null) ||
     (field.type === 'string' && typeof value === 'string') ||
     (field.type === 'boolean' && typeof value === 'boolean') ||
     (field.type === 'number' &&

@@ -15,9 +15,9 @@ The private development repository contains the completed M1-M13 controlled-form
 runtime and verified public Experimental packages. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
 v0.1.1 and SPEC-006 v0.1.1 are Accepted. SPEC-006 defines the promoted M14
-nullable-primitive-leaf contract; Approved PLAN-014 revision 0 authorizes its
-six implementation checkpoints, but no version or publication. The live
-checkpoint is recorded in
+nullable-primitive-leaf contract. The source checkout implements that contract
+locally under PLAN-014, but no post-M14 version or publication has been
+selected. The live checkpoint is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
@@ -45,6 +45,19 @@ primitives, arrays inside collection item templates, tuples, composition,
 generated identity, async validation, persistence, advanced layouts beyond the
 fixed static section primitive, custom
 collection renderers and other deferred decisions are not active.
+
+Primitive leaves may additionally use the exact JSON Schema type array
+`[primitive, "null"]` or `["null", primitive]`. This remains a closed nullable
+leaf capability, not a general union or nullable-container feature. Native
+string, number/integer and boolean renderers expose an explicit localized null
+intention and confirmed-null status; string enum remains excluded.
+
+Source consumers moving from the published `0.1.0` boundary must make two
+coordinated Experimental migrations: every manually authored primitive
+definition/template supplies the required boolean `nullable`, and every
+manually authored `AngularFieldTextSnapshot` supplies `setNullLabel` and
+`nullValueLabel`. The live `0.1.0` packages remain the immutable pre-M14
+release and must not be treated as containing these source changes.
 
 ## Branch workflow
 

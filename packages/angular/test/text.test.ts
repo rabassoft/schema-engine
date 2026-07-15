@@ -80,6 +80,8 @@ describe('AngularTextProjector choice texts', () => {
       'tooltip',
       'placeholder',
       'clear',
+      'set-null',
+      'null-value',
       'choice',
       'choice',
       'issue',
@@ -103,6 +105,8 @@ describe('AngularTextProjector choice texts', () => {
       tooltip: 'ca:status.tooltip',
       placeholder: 'ca:status.placeholder',
       clearLabel: 'ca:Clear',
+      setNullLabel: 'ca:Set null',
+      nullValueLabel: 'ca:Null value',
       choiceLabels: ['ca:status.draft', 'ca:status.published'],
       issueMessages: ['ca:status.required'],
     });
@@ -128,7 +132,12 @@ describe('AngularTextProjector choice texts', () => {
       providers: [
         provideSchemaTextResolver({
           resolve(_text, context) {
-            if (context.member === 'clear') return 'Clear';
+            if (
+              context.member === 'clear' ||
+              context.member === 'set-null' ||
+              context.member === 'null-value'
+            )
+              return _text;
             if (context.member !== 'choice') return '';
             if (context.choice.value === 'exception') throw new Error('hidden');
             if (context.choice.value === 'non-string') return 42 as never;
@@ -245,6 +254,59 @@ describe('AngularTextProjector choice texts', () => {
     }
   });
 
+  it.each([
+    ['set-null', 'Set null', 'setNullLabel'],
+    ['null-value', 'Null value', 'nullValueLabel'],
+  ] as const)(
+    'falls back for %s with every existing failure reason',
+    (member, source, snapshotMember) => {
+      const fieldWithoutChoices = { ...field };
+      delete fieldWithoutChoices.choices;
+      const cases = [
+        {
+          reason: 'exception',
+          resolve: () => {
+            throw new Error('hidden');
+          },
+        },
+        { reason: 'non-string-result', resolve: () => 42 as never },
+        { reason: 'blank-string-result', resolve: () => '   ' },
+      ] as const;
+
+      for (const current of cases) {
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+          providers: [
+            provideSchemaTextResolver({
+              resolve(text, context) {
+                return context.member === member ? current.resolve() : text;
+              },
+            }),
+          ],
+        });
+        const result = TestBed.inject(AngularTextProjector).project(
+          fieldWithoutChoices,
+          { ...snapshot, issues: [] },
+          'form',
+          'en',
+        );
+        expect(result.texts[snapshotMember]).toBe(source);
+        expect(result.diagnostics).toMatchObject([
+          {
+            code: 'TEXT_RESOLUTION_FAILED',
+            dataPath: ['status'],
+            parameters: {
+              field: 'status',
+              member,
+              reason: current.reason,
+            },
+          },
+        ]);
+        expect(result.diagnostics).toHaveLength(1);
+      }
+    },
+  );
+
   it('uses empty frozen labels without inherited or accessor choices', () => {
     let getterCalls = 0;
     const accessorField: StringFieldDefinition = Object.defineProperty(
@@ -278,6 +340,8 @@ describe('AngularTextProjector choice texts', () => {
     expect(getterCalls).toBe(0);
     const empty = emptyTextSnapshot();
     expect(empty.clearLabel).toBe('Clear');
+    expect(empty.setNullLabel).toBe('Set null');
+    expect(empty.nullValueLabel).toBe('Null value');
     expect(empty.choiceLabels).toEqual([]);
     expect(Object.isFrozen(empty)).toBe(true);
     expect(Object.isFrozen(empty.choiceLabels)).toBe(true);

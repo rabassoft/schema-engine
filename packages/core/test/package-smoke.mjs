@@ -36,6 +36,31 @@ if (result.success) {
   assert.equal(Object.isFrozen(result.definition.presentation), true);
 }
 
+const nullableSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: { value: { type: ['string', 'null'] } },
+};
+const nullableResult = compileFormDefinition({ schema: nullableSchema });
+assert.equal(nullableResult.success, true);
+if (!nullableResult.success) throw new Error('Nullable compilation failed');
+assert.equal(nullableResult.definition.fields[0]?.nullable, true);
+const nullableApplied = applyFormOperation(
+  nullableResult.definition,
+  { value: 'before' },
+  {
+    type: 'set-value',
+    metadata: { id: 1, formId: 'nullable-smoke' },
+    path: ['value'],
+    expected: { kind: 'value', value: 'before' },
+    value: null,
+    source: 'user',
+  },
+);
+assert.equal(nullableApplied.success, true);
+if (!nullableApplied.success) throw new Error('Nullable set failed');
+assert.equal(nullableApplied.value.value, null);
+
 const runtimeResult = createControlledFormRuntime({
   formId: 'smoke',
   definition: result.definition,
