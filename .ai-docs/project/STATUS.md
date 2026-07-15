@@ -19,39 +19,39 @@
   implemented within their accepted slices; D-034/D-040 promoted for M13
   normative design only
 - **Phase:** M1–M12 and G0 completed; M13 checkpoint 6 Angular candidate
-  accepted; private Git evidence and publication gates pending
+  accepted; private/no-provenance release path selected
 - **Package candidates:** core `0.1.0` live; Angular `0.1.0` remains an
   unpublished verified candidate
 
 ## Current objective
 
-Commit the accepted checkpoint 6 verification evidence, then separately sync
-private Git before requesting the exact Angular publication approval.
+Commit and privately sync the accepted checkpoint evidence, then repeat the
+exact Angular prepublication gate without changing repository visibility.
 
 ## In progress
 
-- None. The Angular candidate/review are accepted; commit, push and Angular
-  publication remain separately gated.
+- PLAN-013 checkpoint 6 private path: commit current state, push private
+  `develop`, then repeat exact Angular hash/source/consumer/dry-run checks. Stop
+  before npm publication approval.
 
 ## Latest completed work
 
+- Ricard selected the recommended private/no-provenance Angular release path;
+  repository sanitization/publication remains a separate future milestone.
+- Created local checkpoint 6 evidence commit `f661f84` with Rabassoft
+  attribution; private push and Angular publication were not performed.
+- Assessed public-repository readiness: the accepted sanitization/history,
+  default-branch and community-policy gates are not complete.
 - Accepted checkpoint 6 after review 030 cycle 21 verified deterministic Angular
   candidate `35f7f33a…2ebd56a` against live core with zero findings.
 - Accepted checkpoint 5 after review 030 cycle 15 verified live core metadata,
   exact bytes and exact/`next` consumers with zero findings.
-- Accepted ADR-018 revision 2 and PLAN-013 revision 3 after complete repeated
-  reviews define mandatory `latest` as an Experimental registry alias.
-- Diagnosed the failed `latest` removal: npm registry metadata requires every
-  package to define `latest`, so the accepted no-`latest` contract is infeasible.
-- Published exact core `0.1.0`; unauthenticated metadata matches its license and
-  integrity; npm-mandatory `latest` and recommended `next` alias that same
-  Experimental version.
 
 ## Exact next action
 
-Authorize a local commit for checkpoint 6 verification tooling/state, then
-separately authorize pushing the private `develop` evidence before any Angular
-publication. Do not mutate npm/GitHub settings.
+Commit the selected-path state, push private `develop`, rebuild/verify the exact
+Angular tarball from the resulting clean commit and stop for immediate approval
+of its exact npm command. Do not change GitHub visibility or npm settings.
 
 ## Blockers and conflicts
 
@@ -62,8 +62,12 @@ publication. Do not mutate npm/GitHub settings.
   sentence. Release notes/ADR supersede it; future package versions carry the
   corrected wording and published bytes are not overwritten.
 - Angular candidate is accepted but unpublished. Private `origin/develop` does
-  not yet contain local checkpoint 6 evidence, and its tooling/state remains
-  uncommitted; commit and push each require explicit approval before publication.
+  not yet contain local commits `102be1c`/`f661f84`; their push remains gated.
+- The repository is not ready for public visibility under ADR-018: no accepted
+  full-history sanitization exists, 77 internal `.ai-docs` files are tracked,
+  remote default `main` remains at the initialization commit, Issues is enabled
+  despite the no-public-issue policy, and public community/security boundaries
+  have not been reviewed.
 - Checkpoint 4 core source/push is complete at `7f5fcdf`; local `develop`
   contains later checkpoint commit `102be1c`, whose private push remains gated.
 - D-042 remains registrally Promoted and its narrow M12 slice is implemented.
@@ -81,7 +85,7 @@ publication. Do not mutate npm/GitHub settings.
 
 ## Open questions
 
-- None within the accepted checkpoint 6 review scope.
+- None within the selected private/no-provenance prepublication path.
 
 ## Latest verification
 
@@ -110,8 +114,12 @@ publication. Do not mutate npm/GitHub settings.
 - Angular SHA-512 `35f7f33a…2ebd56a` is deterministic from clean `102be1c`; its
   exact source rebuild, npm dry-run and lower/upper Angular 22 consumers against
   live core pass. Default verifier modes also pass after the extension.
-- Local `develop` contains checkpoint commit `102be1c`; its private push and the
-  current checkpoint 6 tooling/state commit remain pending, with no merge active.
+- Local `develop` contains checkpoint commits `102be1c` and `f661f84`; their
+  private push remains pending, with no merge active.
+- GitHub reports PRIVATE visibility, default branch `main`, Issues enabled and
+  Wiki disabled. Local history has 46 commits, one Rabassoft author identity and
+  no currently tracked credential-like path; full-history sanitization has not
+  been formally completed.
 - Versions, exports, dependencies, peers, runtime behavior and Experimental
   classification remain unchanged. Core publication is the only npm package
   mutation; Angular and settings remain unchanged.

@@ -6,6 +6,46 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — Private Angular release path selected
+
+### Decision
+
+- Ricard selected the recommended path: keep GitHub private, sync the accepted
+  evidence privately and publish Angular without provenance under PLAN-013.
+- Public-repository sanitization/publication remains a separate future
+  milestone and is not silently combined with M13.
+
+### Next
+
+- Commit current state, push private `develop`, rebuild/reverify the exact
+  Angular candidate from the clean commit and stop for immediate approval of
+  the exact npm publication command.
+
+## 2026-07-15 — Checkpoint 6 committed; public readiness not established
+
+### Completed
+
+- Created local commit `f661f84` for checkpoint 6 verification tooling/state
+  using `Rabassoft <ricard@rabassoft.com>`; no push occurred.
+- Evaluated whether the repository satisfied ADR-018's condition for public
+  visibility without changing GitHub or npm.
+
+### Findings
+
+- GitHub remains PRIVATE with default branch `main` at the initialization line;
+  local release evidence is not yet on private origin.
+- Seventy-seven `.ai-docs` files remain tracked, Issues is enabled despite the
+  current no-public-issue policy, and community/security contribution boundaries
+  have not been reviewed.
+- The required full reachable-history sanitization review has not occurred.
+  Current tracked-path/security checks do not substitute for that review.
+
+### Next
+
+- Ricard chooses between publishing Angular under the already accepted
+  private/no-provenance path or authorizing a new public-repository sanitization
+  milestone first. Do not change visibility or publish Angular by inference.
+
 ## 2026-07-15 — PLAN-013 checkpoint 6 Angular candidate accepted
 
 ### Completed
