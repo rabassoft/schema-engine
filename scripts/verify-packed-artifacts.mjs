@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -7,6 +8,7 @@ import {
   packCandidates,
   readTarballJson,
   readTarballText,
+  readWorkspacePackage,
 } from './release-candidate-utils.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-artifacts-'));
@@ -46,11 +48,26 @@ const ANGULAR_MODULES = Object.freeze([
   'text',
 ]);
 const MODULE_SUFFIXES = Object.freeze(['.js', '.js.map', '.d.ts', '.d.ts.map']);
+const LICENSE_SHA256 =
+  '0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0';
+const SOURCE_HEADER =
+  '// Copyright (C) 2026 Ricardo Rabassó Rodríguez, operating as Rabassoft\n' +
+  '// SPDX-License-Identifier: AGPL-3.0-only\n';
 
 function expectedMembers(modules) {
   return new Set([
     'package/package.json',
     'package/README.md',
+    'package/SOURCE.md',
+    'package/LICENSE',
+    'package/NOTICE.md',
+    'package/source-build/package.json',
+    'package/source-build/pnpm-lock.yaml',
+    ...(modules === ANGULAR_MODULES
+      ? ['package/source-build/prepare-core.mjs']
+      : []),
+    'package/source-build/tsconfig.json',
+    ...modules.map((module) => `package/src/${module}.ts`),
     ...modules.flatMap((module) =>
       MODULE_SUFFIXES.map((suffix) => `package/dist/${module}${suffix}`),
     ),
@@ -70,14 +87,48 @@ function verifyCommon(tarball, expectedName, modules) {
   assert.ok(files.has('package/README.md'));
   assert.ok(files.has('package/dist/index.js'));
   assert.ok(files.has('package/dist/index.d.ts'));
+  assert.equal(
+    createHash('sha256')
+      .update(readTarballText(tarball, 'package/LICENSE'))
+      .digest('hex'),
+    LICENSE_SHA256,
+  );
+
+  for (const module of modules) {
+    assert.ok(
+      readTarballText(tarball, `package/src/${module}.ts`).startsWith(
+        SOURCE_HEADER,
+      ),
+      `Missing source license header: ${module}.ts`,
+    );
+  }
 
   const manifest = readTarballJson(tarball, 'package/package.json');
   assert.equal(manifest.name, expectedName);
   assert.equal(manifest.version, '0.1.0');
-  assert.equal(manifest.private, true);
+  assert.equal(manifest.private, undefined);
   assert.equal(manifest.type, 'module');
   assert.equal(manifest.sideEffects, false);
-  assert.deepEqual(manifest.files, ['dist', 'README.md']);
+  assert.deepEqual(manifest.files, [
+    'dist',
+    'src',
+    'source-build',
+    'README.md',
+    'SOURCE.md',
+    'LICENSE',
+    'NOTICE.md',
+  ]);
+  assert.equal(manifest.license, 'AGPL-3.0-only');
+  assert.deepEqual(manifest.author, {
+    name: 'Ricardo Rabassó Rodríguez, operating as Rabassoft',
+    email: 'ricard@rabassoft.com',
+  });
+  assert.deepEqual(manifest.publishConfig, {
+    access: 'public',
+    tag: 'next',
+    provenance: false,
+  });
+  assert.equal(manifest.repository, undefined);
   assert.deepEqual(manifest.exports, {
     '.': {
       types: './dist/index.d.ts',
@@ -87,6 +138,26 @@ function verifyCommon(tarball, expectedName, modules) {
   });
   assert.equal(JSON.stringify(manifest).includes('workspace:'), false);
 
+  const sourceBuildManifest = readTarballJson(
+    tarball,
+    'package/source-build/package.json',
+  );
+  assert.equal(sourceBuildManifest.private, true);
+  assert.equal(sourceBuildManifest.packageManager, 'pnpm@10.28.2');
+  assert.equal(
+    JSON.stringify(sourceBuildManifest).includes('workspace:'),
+    false,
+  );
+
+  const readme = readTarballText(tarball, 'package/README.md');
+  assert.ok(readme.includes('@next'));
+  assert.ok(readme.includes('AGPL-3.0-only'));
+  assert.ok(readme.includes('no npm provenance'));
+  assert.equal(readme.includes('github.com/rabassoft/schema-engine'), false);
+  const notice = readTarballText(tarball, 'package/NOTICE.md');
+  assert.ok(notice.includes('ricard@rabassoft.com'));
+  assert.ok(notice.includes('not itself a commercial offer'));
+
   for (const target of Object.values(manifest.exports['.'])) {
     assert.ok(files.has(`package/${target.slice(2)}`), `Missing ${target}`);
   }
@@ -95,6 +166,7 @@ function verifyCommon(tarball, expectedName, modules) {
 }
 
 try {
+  assert.equal(readWorkspacePackage().private, true);
   const tarballs = packCandidates(temporaryRoot);
   const core = verifyCommon(
     tarballs.core,
@@ -262,7 +334,7 @@ try {
   assert.equal(angular.optionalDependencies, undefined);
 
   console.log(
-    'Verified private 0.1.0 candidate manifests and tarball contents.',
+    'Verified public 0.1.0 candidates with licensed Corresponding Source.',
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });

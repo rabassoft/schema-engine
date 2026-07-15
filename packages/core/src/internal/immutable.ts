@@ -1,3 +1,6 @@
+// Copyright (C) 2026 Ricardo Rabassó Rodríguez, operating as Rabassoft
+// SPDX-License-Identifier: AGPL-3.0-only
+
 export function deepFreeze<T>(value: T): T {
   if (typeof value !== 'object' || value === null) {
     return value;

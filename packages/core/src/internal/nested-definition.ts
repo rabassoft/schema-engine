@@ -1,3 +1,6 @@
+// Copyright (C) 2026 Ricardo Rabassó Rodríguez, operating as Rabassoft
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import type { FieldDefinition } from '../contracts.js';
 import { canonicalTemplateKey } from './collection-address.js';
 import {

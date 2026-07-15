@@ -1,3 +1,6 @@
+// Copyright (C) 2026 Ricardo Rabassó Rodríguez, operating as Rabassoft
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import type { EnvironmentProviders } from '@angular/core';
 import type { FieldDefinition, FieldTemplate } from '@rabassoft/schema-engine';
 import { provideSchemaEngineAngular } from '../renderer.js';

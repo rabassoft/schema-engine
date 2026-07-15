@@ -90,6 +90,18 @@
 - [M12 PLAN-012 implementation review — Cycles 1–6](./reviews/026-plan-012-implementation-review.md) —
   Seven findings were corrected across cycles 1–5; cycle 6 passed the closing
   review with zero findings after the complete matrix passed in cycle 3.
+- [D-034/D-040 public publication and dual licensing readiness](./reviews/027-d034-d040-publication-licensing-readiness.md) —
+  Accepted after cycle 2 passed with zero findings; promotes normative design
+  only for the selected `AGPL-3.0-only` or paid commercial model.
+- [ADR-018 complete review — Cycles 1–4](./reviews/028-adr-018-review.md) — Six
+  normative/closing-state findings were corrected; cycle 4 passed the complete
+  closing review with zero findings and ADR-018 revision 1 was accepted.
+- [PLAN-013 complete review — Cycles 1–4](./reviews/029-plan-013-review.md) —
+  Cycles 1 and 3 corrected four design findings and one implementation-order
+  conflict; cycle 4 passed the complete repeated review with zero findings.
+- [PLAN-013 implementation review](./reviews/030-plan-013-implementation-review.md) —
+  Checkpoints 1–3 accepted after cycle 7 repeated the applicable review with
+  zero findings; checkpoint 4 Git authorization is pending.
 
 ## Architecture Decision Records
 
@@ -146,6 +158,12 @@
 - [PLAN-010: Homogeneous object collection runtime](./plans/010-homogeneous-object-collections.md) — Completed revision 0
 - [PLAN-011: Same-document static JSON Schema reference resolution](./plans/011-local-reference-resolution.md) — Completed revision 0 after final repeated review with zero findings
 - [PLAN-012: Static neutral presentation groups](./plans/012-static-presentation-groups.md) — Completed revision 1 after final repeated review with zero findings
+- [PLAN-013: First public experimental release](./plans/013-public-experimental-release.md) — Approved revision 1; local preparation active with separately approved commit/push/npm checkpoints
+
+Accepted publication architecture: [ADR-018 revision 1](./adrs/018-licencia-dual-publicacion-experimental.md)
+selects dual AGPL/commercial licensing and public experimental packages while
+keeping the repository private pending sanitization. PLAN-013 local preparation
+is authorized; no commit, push or publication is yet authorized.
 
 M1-M12 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing

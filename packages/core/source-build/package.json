@@ -1,0 +1,15 @@
+{
+  "name": "@rabassoft/schema-engine-source-build",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": "22.23.1"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "6.0.2"
+  }
+}

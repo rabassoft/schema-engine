@@ -1,12 +1,21 @@
 {
   "name": "@rabassoft/schema-engine",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "sideEffects": false,
+  "license": "AGPL-3.0-only",
+  "author": {
+    "name": "Ricardo Rabassó Rodríguez, operating as Rabassoft",
+    "email": "ricard@rabassoft.com"
+  },
   "files": [
     "dist",
-    "README.md"
+    "src",
+    "source-build",
+    "README.md",
+    "SOURCE.md",
+    "LICENSE",
+    "NOTICE.md"
   ],
   "exports": {
     ".": {
@@ -14,6 +23,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next",
+    "provenance": false
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

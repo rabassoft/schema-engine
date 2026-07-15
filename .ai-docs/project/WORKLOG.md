@@ -6,6 +6,207 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — PLAN-013 checkpoint 4 local commit
+
+### Completed
+
+- Ricard explicitly authorized a local commit, not push.
+- Committed the complete verified PLAN-013 preparation on `develop` using
+  `Rabassoft <ricard@rabassoft.com>`.
+- Rebuilt from the clean committed tree; the ignored candidate manifest records
+  the exact `sourceCommit` and preserves the deterministic core/Angular hashes.
+
+### Verification
+
+- The clean-tree release build repeats artifact/security checks and both npm
+  dry-runs successfully.
+- The Git worktree is clean apart from ignored local candidates. After the
+  amend, `origin/develop` was observed at pre-amend commit `1e71ce6`; local and
+  remote are one commit ahead/behind and require explicit reconciliation.
+- No push, tag, credential, npm login, registry write or visibility change
+  occurred.
+
+### Next
+
+- Choose between replacing the obsolete pre-amend remote commit with
+  force-with-lease or preserving it with a follow-up history, then authorize
+  that external action. npm identity/publication remain separate checkpoints.
+
+## 2026-07-15 — PLAN-013 local preparation completed
+
+### Completed
+
+- Completed checkpoint 3's full local matrix, rights/security audit, isolated
+  source builds and npm dry-runs without authentication or registry writes.
+- Isolated npm's empty user configuration and cache after the first dry-run
+  exposed a global-cache permission dependency; review 030 cycle 5 repeated the
+  complete gate with zero findings.
+- Produced identical hashes across two consecutive preparations:
+  - core SHA-512
+    `dceb432ed1ee4bed4740134e52d1dc5896bb62a5cad9f0e763692e19ef1a0f3076b7f5ee22f9046c82bc2d0cb2d8dafc2253cf5ed970caefa93930280fdb310e`;
+  - Angular SHA-512
+    `ef1e491da53f88596bcc4ab2e9472d1d1dd0b7dca02c383a750a74e5302779973ecd0e8c4d1a67e2ea4f0e03b9d2219a16d946bd3ffaf21f0e10a26afa4b1507`.
+- Stopped at PLAN-013 checkpoint 4; commit and push remain unauthorized.
+
+### Verification
+
+- Frozen install, format, docs, lint, typecheck, 359 core plus 76 Angular tests,
+  build, package smoke, repository/clean consumers and artifact checks pass.
+- Both source harnesses rebuild warning-free from extracted tarballs and match
+  shipped root declarations, exports and behavior.
+- Security audit covers tracked/packed secrets, sensitive paths, personal tax
+  or address patterns, distributed private links and source authorship.
+- npm `10.9.8` dry-runs both public `0.1.0` candidates with `next` and no
+  provenance using Node `22.23.1` and pnpm `10.28.2`.
+- No credential, registry, visibility, Git tag, commit or push action occurred.
+
+### Next
+
+- Request explicit authorization for the checkpoint 4 private commit and push;
+  then rebuild from the clean commit and make those hashes canonical.
+
+## 2026-07-15 — PLAN-013 checkpoint 2 completed
+
+### Completed
+
+- Removed `private` only from the two package manifests and added the exact
+  `AGPL-3.0-only`, holder/contact, public access, `next` and no-provenance
+  metadata; the workspace root remains private.
+- Updated root/package READMEs and release notes for the public Experimental
+  channel, dual-license explanation, private-repository source policy,
+  compatibility, no `latest`, no SLA and contribution/issue-tracker limits.
+- Extended artifact checks to reject private candidates, workspace specifiers,
+  inaccessible repository metadata, missing public fields or false provenance.
+- Review 030 cycle 3 passed the complete checkpoint review with zero findings.
+
+### Verification
+
+- Package smoke, repository consumer, packed artifact and isolated frozen
+  source-rebuild checks pass.
+- Formatting, documentation across 86 Markdown files and 384 local links,
+  lint and diff checks pass.
+- Versions, exports, dependencies, peers, runtime behavior and API stability
+  remain unchanged. No credential, registry, visibility, Git tag, commit or
+  push action occurred.
+
+### Next
+
+- Run PLAN-013 checkpoint 3's complete local release gate and repeated review.
+
+## 2026-07-15 — PLAN-013 checkpoint 1 completed
+
+### Completed
+
+- Added the unmodified official GNU AGPL v3 text at root and in both packages;
+  all three copies share SHA-256
+  `0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0`.
+- Added exact package notices and copyright/SPDX headers to all 30 owned
+  production source files.
+- Included preferred source plus frozen package-local build harnesses in both
+  still-private package inventories.
+- Corrected four implementation-review findings covering header placement,
+  TypeScript 6 configuration, core-tarball integrity cycles and Angular
+  verifier isolation.
+- Review 030 cycle 2 repeated all eight checkpoint areas with zero findings.
+
+### Verification
+
+- Isolated clean core-first source reconstruction passes without workspace
+  input or warnings; shipped/rebuilt declarations, root exports and executable
+  behavior match.
+- Artifact inventories, frozen source locks, notices and source headers pass.
+- Formatting, documentation across 85 Markdown files and 382 local links,
+  lint, typecheck, 359 core plus 76 Angular tests and diff checks pass.
+- Both publishable manifests remain `private: true`; no credential, registry,
+  visibility, Git tag, commit or push action occurred.
+
+### Next
+
+- Implement PLAN-013 checkpoint 2 public candidate metadata and documentation
+  locally; publication remains unauthorized.
+
+## 2026-07-15 — PLAN-013 approved
+
+### Completed
+
+- Ricard explicitly confirmed `ricard@rabassoft.com` as the public commercial
+  and security contact for npm metadata, README and NOTICE.
+- Repeated all eight PLAN-013 review areas after cycle 1 corrections; review
+  029 cycle 2 passed with zero findings and no unresolved change request.
+- Accepted PLAN-013 revision 0 under the standing authorization. Only
+  reversible local preparation is active; commit, push, credentials and every
+  registry mutation remain separately gated.
+- During the first implementation step, found and corrected an ordering
+  conflict between the checkpoint 1 source-tarball gate and checkpoint 2
+  `files` allowlist. Review 029 cycle 4 then repeated all eight areas with zero
+  findings and accepted PLAN-013 revision 1.
+
+### Verification
+
+- The repeated review reconciles ADR-018, ADR-013, ADR-010, ADR-009,
+  D-034/D-040, package boundaries, npm security and persistent state.
+- No manifest, source, credential, registry, Git tag, visibility, commit or
+  push change occurred during approval.
+
+### Next
+
+- Implement PLAN-013 checkpoint 1 locally, then run its gate and complete
+  repeated review before advancing.
+
+## 2026-07-15 — PLAN-013 review cycle 1
+
+### Completed
+
+- Confirmed npm user `rabassoft` as the intended `@rabassoft` scope owner and
+  drafted PLAN-013 revision 0 without authorizing implementation or any remote
+  action.
+- Reviewed the complete plan across eight areas and recorded review 029 cycle
+  1 with four findings.
+- Corrected the source reconstruction contract to use extracted package-local
+  frozen build harnesses, fixed the exact npm CLI/security evidence gate and
+  reconciled the stale D-040 current-work text.
+- Kept public use of `ricard@rabassoft.com` unresolved instead of inferring a
+  privacy-sensitive decision.
+
+### Verification
+
+- `pnpm format:check`, `pnpm docs:check` and `git diff --check` pass.
+- Documentation checks cover 81 Markdown files and 382 local links.
+- No manifest, source, credential, registry, Git tag, visibility, commit or
+  push change occurred.
+
+### Next
+
+- Confirm or replace the public commercial/security contact, then repeat the
+  complete PLAN-013 review until one cycle has zero findings.
+
+## 2026-07-15 — D-034/D-040 promoted for normative design
+
+### Completed
+
+- Selected `AGPL-3.0-only` or a separate paid commercial license for Schema
+  Engine's dual-license direction.
+- Identified Ricardo Rabassó Rodríguez, operating as Rabassoft, as legal rights
+  holder and selected the exact public copyright notice.
+- Kept the GitHub repository private pending a separate complete sanitization
+  review; public packages must independently provide Corresponding Source.
+- Completed review 027 cycle 2 with zero findings and promoted D-034/D-040 only
+  for normative M13 design.
+- Corrected six ADR-018 review/closing-state findings covering source-file
+  notices, private-repository provenance and final state reconciliation; review
+  028 cycle 4 closed with zero findings.
+- Accepted ADR-018 revision 1 under the standing authorization without changing
+  manifests, license files, credentials, tags, visibility or remote state.
+
+### Verification
+
+- Documentation consistency, formatting and diff checks pass after ADR-018
+  acceptance across 79 Markdown files and 374 local links.
+
+### Next
+
+- Prepare and review PLAN-013 without executing any external mutation.
+
 ## 2026-07-15 — PLAN-012 and M12 completed
 
 ### Completed

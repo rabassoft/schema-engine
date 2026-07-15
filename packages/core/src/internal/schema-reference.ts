@@ -1,3 +1,6 @@
+// Copyright (C) 2026 Ricardo Rabassó Rodríguez, operating as Rabassoft
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import type { DocumentPath } from '../contracts.js';
 import { isOrdinaryObject } from './path.js';
 import { actualType } from './value.js';

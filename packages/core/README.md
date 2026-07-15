@@ -8,8 +8,15 @@ for the Schema Engine prototype.
 - Candidate line: `0.1.x`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- This is an unpublished local candidate. Distribution terms have not been
-  selected, so the tarball is not authorized for external distribution.
+- Public channel: npm dist-tag `next` or an explicit version; no `latest` tag.
+- Experimental incompatible changes require at least a MINOR release and an
+  approved contract; no support SLA is provided.
+
+Install the Experimental channel after its registry checkpoint is live:
+
+```sh
+npm install @rabassoft/schema-engine@next
+```
 
 ## Supported import
 
@@ -46,5 +53,15 @@ collection item templates, tuples, composition, generated/editable identity,
 async validation, persistence, advanced layouts, custom collection renderers,
 and other deferred capabilities are not included.
 
-See the [Schema Engine repository](https://github.com/rabassoft/schema-engine)
-for SPEC-001 through SPEC-004, ADRs, plans, and current project status.
+## License and source
+
+This package is licensed under GNU AGPL v3 only (`AGPL-3.0-only`), including
+commercial use under its conditions. A separate paid commercial license may be
+available; contact `ricard@rabassoft.com`. No final commercial agreement or
+support SLA is represented by this package.
+
+The development repository is private pending sanitization. Preferred
+TypeScript source and a frozen package-local build harness are included; see
+`SOURCE.md`. The first public release has no npm provenance because there is no
+matching public repository. External code contributions and a public issue
+tracker are not currently offered.

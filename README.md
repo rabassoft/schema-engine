@@ -11,8 +11,9 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The repository contains the completed M1-M12 controlled-form runtime and private
-local release candidates. Its G0 review passed; SPEC-001 v0.1.15, SPEC-002
+The private development repository contains the completed M1-M12 controlled-form
+runtime and locally verified public-package candidates. Its G0 review passed;
+SPEC-001 v0.1.15, SPEC-002
 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1 and SPEC-005 v0.1.1 are Accepted.
 PLAN-012 revision 1 implemented static neutral presentation groups; all five
 checkpoints and the repeated final review are complete with zero findings. The
@@ -50,6 +51,29 @@ collection renderers and other deferred decisions are not active.
 - `main` represents the stable, deployment-ready line.
 - `develop` is the integration branch for ongoing development.
 
-Both packages are private local candidates at version `0.1.0`. No publication,
-external distribution, license, registry write, or deployment automation is
-configured or authorized.
+## Experimental packages and licensing
+
+The independent `0.1.0` candidates are configured for public npm access under
+the `next` dist-tag. They are not live until the separately approved registry
+checkpoints complete; `latest` is intentionally unused.
+
+Once published, install explicit versions or the Experimental channel:
+
+```sh
+npm install @rabassoft/schema-engine@next
+npm install @rabassoft/schema-engine-angular@next
+```
+
+Both packages are available under GNU AGPL v3 only (`AGPL-3.0-only`), including
+commercial use under its conditions. A separate paid commercial license may be
+available for organizations that do not want to comply with AGPL; contact
+`ricard@rabassoft.com`. No final commercial terms or support SLA are currently
+offered.
+
+The development repository remains private pending a separate sanitization
+review. Each package carries its preferred TypeScript source, frozen build
+harness, license and notices so its release can be rebuilt without repository
+access. The first release cannot truthfully carry npm provenance while the
+matching repository is private. External code contributions are not accepted
+until a separately reviewed rights policy exists; there is no public issue
+tracker yet.

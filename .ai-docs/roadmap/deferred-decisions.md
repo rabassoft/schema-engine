@@ -374,10 +374,19 @@ Cada decisión debe registrar:
 
 ## D-034: Modelo comercial y licenciamiento
 
-- **Estado:** Deferred
+- **Estado:** Promoted
 - **Opciones:** MIT, open core, plugins comerciales, soporte, SaaS o licencias enterprise.
 - **Motivo:** Debe validarse primero el valor técnico y la demanda.
 - **Retomar cuando:** Exista una comunidad inicial o consumidores empresariales.
+- **Selección iniciada:** Ricard seleccionó el 15 de julio de 2026 el modelo
+  dual `AGPL-3.0-only` o licencia comercial de pago. La
+  [revisión 027](../reviews/027-d034-d040-publication-licensing-readiness.md)
+  ciclo 2 pasa sin hallazgos, identifica a Ricardo Rabassó Rodríguez como
+  titular jurídico y promueve D-034 únicamente para redactar/revisar ADR-018.
+- **Decisión aceptada:**
+  [`ADR-018 revision 1`](../adrs/018-licencia-dual-publicacion-experimental.md)
+  adopta `AGPL-3.0-only` o licencia comercial separada tras review 028 ciclo 4
+  sin hallazgos; solo PLAN-013 puede prepararse.
 
 ## D-035: Especificación pública independiente de la implementación
 
@@ -443,7 +452,7 @@ Cada decisión debe registrar:
 
 ## D-040: Publicación real de paquetes
 
-- **Estado:** Deferred
+- **Estado:** Promoted
 - **Pregunta:** ¿Dónde, con qué visibilidad, licencia, access, provenance,
   credenciales y proceso se publicarán los artefactos preparados por M8?
 - **Motivo:** Probar tarballs locales no concede términos de distribución ni
@@ -454,6 +463,16 @@ Cada decisión debe registrar:
 - **Documento esperado:** ADR de publicación que resuelva también la relación
   con D-034, seguido de un plan aprobado para registry, access, provenance,
   credenciales, tags y rollback.
+- **Selección iniciada:** Ricard decidió el 15 de julio de 2026 preparar una
+  publicación pública bajo el modelo dual de D-034. La
+  [revisión 027](../reviews/027-d034-d040-publication-licensing-readiness.md)
+  ciclo 2 pasa sin hallazgos y promueve D-040 únicamente para diseño normativo.
+  `private: true` sigue intacto; el repositorio seguirá privado hasta sanearlo
+  y toda publicación requiere ADR, plan y checkpoint externo explícito.
+- **Arquitectura aceptada:** ADR-018 revision 1 mantiene el repositorio privado,
+  exige Corresponding Source público, 2FA inicial, trusted publishing posterior
+  y ausencia explícita de provenance hasta sanear/publicar el repositorio. No
+  autoriza implementación ni publicación sin PLAN-013 aprobado.
 
 ## D-041: Resolución estática de referencias locales JSON Schema
 
@@ -539,12 +558,14 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-040 — Publicación real:** permanece Deferred y solo se retomará tras una
-   solicitud explícita de publicación.
+1. **D-034/D-040 — Primera publicación experimental:** están Promoted solo para
+   el diseño normativo de M13. ADR-018 revision 1 está Accepted y PLAN-013
+   revision 1 está Approved; solo se autoriza preparación local reversible, no
+   publicación ni mutación remota.
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
-de M8; D-040 conserva la publicación como Deferred, D-005 está implementado
+de M8; D-034/D-040 permanecen limitadas al diseño normativo de M13, D-005 está implementado
 dentro del alcance de M9 aunque conserva su estado registral Promoted, D-006
 queda Promoted con M10 completado por PLAN-010, D-041 queda Promoted con M11
 completado por PLAN-011 y D-042 queda Promoted con su slice estrecho M12
