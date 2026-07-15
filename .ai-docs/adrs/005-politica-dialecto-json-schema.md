@@ -1,9 +1,9 @@
 # ADR 005: Política de dialecto y compatibilidad de JSON Schema
 
-- **Estado:** Accepted revision 3
+- **Estado:** Accepted revision 4
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
-- **Revisión aceptada:** 3 — referencias estáticas locales `$defs`/`$ref`
+- **Revisión aceptada:** 4 — type array nullable cerrado
 - **Fecha de aceptación de revisión 1:** 14 de julio de 2026
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md)
 - **Revisado parcialmente por:**
@@ -18,14 +18,20 @@
 - **Revisión 3 coordinada con:**
   [`ADR-016`](./016-resolucion-referencias-locales.md) Accepted
 - **Fecha de aceptación de revisión 3:** 14 de julio de 2026
-- **Autoridad vigente:** las secciones 1–11 conservan la conducta Accepted de
-  M1–M10; la sección 12 queda Accepted para diseño normativo M11 y no activa
-  comportamiento ni implementación sin SPEC-004 aceptada y plan aprobado
+- **Autoridad vigente:** las secciones 1–12 conservan la conducta Accepted de
+  M1–M11; la sección 13 queda Accepted para diseño normativo M14 y no activa
+  comportamiento ni implementación sin SPEC-006 aceptada y PLAN-014 aprobado
 - **Revisión completa:** ciclo 3 pasó las nueve áreas sin hallazgos y Ricard
   aceptó formalmente revision 2
 - **Revisión 3 completa y aceptada:**
   [`review 018`](../reviews/018-adr-005-revision-3-review.md) ciclo 2 pasó las
   diez áreas sin hallazgos; Ricard aceptó formalmente revision 3
+- **Revisión 4 aceptada y coordinada con:**
+  [`ADR-019`](./019-hojas-primitivas-nullable.md); solo D-009/M14
+- **Fecha de aceptación de revisión 4:** 15 de julio de 2026
+- **Revisión 4 completa:**
+  [`review 032`](../reviews/032-adr-019-adr-005-revision-4-review.md) ciclo 2
+  pasó las diez áreas sin hallazgos
 
 ## 1. Contexto y problema
 
@@ -957,3 +963,160 @@ Tras cada corrección se repitió la revisión completa. El ciclo 2 pasó las di
 áreas con cero hallazgos y Ricard aceptó formalmente revision 3 el 14 de julio
 de 2026. La aceptación autoriza preparar SPEC-004 como tarea separada; no
 autoriza un plan, implementación, publicación ni Stable API.
+
+## 13. Revisión 4 aceptada — type array nullable cerrado
+
+> Esta sección amplía solo el diseño normativo M14 promovido por review 031 y
+> coordinado con ADR-019. Las revisiones 0–3 conservan su autoridad Accepted.
+> La aceptación no modifica ninguna SPEC ni autoriza plan, implementación,
+> versión, publicación o promoción Stable.
+
+### 13.1 Motivo, autoridad y frontera
+
+D-009 activa el criterio de revisión de la sección 7 para un único subconjunto
+Draft 2020-12: hojas primitive cuyo `type` contiene exactamente su tipo actual
+y `null`. Se conservan dialecto/URI, warnings, catálogo de keywords,
+descriptor-safety, recorrido iterativo, referencias, policies, orden global,
+validación externa y todas las fronteras M1–M13 no sustituidas aquí.
+
+La raíz continúa exigiendo `type: "object"`. Objetos, arrays, item roots e
+identity properties continúan usando su declaración string exacta y no pueden
+ser nullable. Solo las posiciones donde las revisiones Accepted ya permiten
+una hoja `string`, `number`, `integer` o `boolean` admiten la forma array.
+
+### 13.2 Forma exterior descriptor-safe
+
+La data property propia `type` conserva su forma string Accepted. Cuando su
+valor seguro es un array, el compilador lo inspecciona sin iteradores ni acceso
+indexado ordinario:
+
+1. `Array.isArray(value)` debe ser true y el descriptor propio de `length` debe
+   ser una data property con valor exacto 2;
+2. los índices `0` y `1` deben existir como data properties propias
+   enumerables;
+3. cada valor debe ser string y pertenecer a `null`, `string`, `number`,
+   `integer` o `boolean`;
+4. el array debe contener exactamente un `null` y exactamente un tipo
+   primitive no-null; y
+5. `Object.keys(value)` no puede contener una key distinta de `0` o `1`.
+
+No se ejecutan accessors, `Symbol.iterator` ni coerciones. Como en el contrato
+Accepted, un Proxy puede ejecutar traps por la propia reflexión y no es una
+frontera soportada de aislamiento de input; esta revisión no promete inspección
+trap-free ni añade una política nueva para excepciones de Proxy.
+
+El compilador no retiene el array. Normaliza el miembro primitive a la clase de
+hoja Accepted y fija `nullable: true`; una declaración string fija
+`nullable: false`.
+
+### 13.3 Diagnóstico y precedencia
+
+Se reutiliza `UNSUPPORTED_FIELD_TYPE`; no se añade código. El fallback conserva
+`Field "<name>" has an unsupported type.` y los parámetros existentes seguros
+incluyen `field`.
+
+La precedencia dentro de `type` es:
+
+1. descriptor de `type` accessor o valor exterior no string/no array: ruta
+   `[..., 'type']` y `actualType` existente;
+2. descriptor `length` ausente/accessor/no numérico o longitud distinta de 2:
+   ruta `[..., 'type']`, `expected: 'primitive type plus null'` y
+   `actualType: 'missing' | 'accessor' | <tipo seguro>` para forma no numérica,
+   o `actualLength` para un número distinto de 2;
+3. índice `0` y después `1`: ruta `[..., 'type', index]`, con `actualType` igual
+   a `missing`, `non-enumerable`, `accessor` o la descripción segura del valor;
+4. primera key enumerable extra en `Object.keys()` order: ruta
+   `[..., 'type', key]`, `reason: 'unexpected-type-array-member'`; y
+5. combinación de dos miembros segura pero inválida: ruta `[..., 'type']`,
+   `expected: 'one primitive type and null'`, `reason` igual a
+   `missing-null`, `duplicate-null` o `duplicate-primitive`.
+
+Un miembro string fuera del catálogo usa el paso 3 con
+`reason: 'unsupported-type-member'`. Un miembro `object` o `array` no abre un
+container nullable. En el paso 5, dos `null` usan `duplicate-null`; dos tipos
+primitive iguales usan `duplicate-primitive`; dos tipos primitive distintos
+usan `missing-null`. Para cada array se emite solo el primer diagnóstico de
+esta precedencia y se detiene su rama antes de constraints/UI dependientes.
+Siblings independientes conservan el orden Accepted.
+
+Si el type array es válido, las keywords se clasifican usando el tipo primitive
+normalizado. `enum` es una excepción: incluso sobre string produce
+`INCOMPATIBLE_SCHEMA_KEYWORD` porque `enum + null` no está promovido. Las
+constraints string/numéricas Accepted siguen siendo compatibles con su tipo;
+boolean no añade constraints. `default` y anotaciones conservan exactamente su
+tratamiento Accepted y no adquieren semántica nullable.
+
+UI Schema usa el tipo primitive normalizado para `placeholder` y opciones
+numéricas existentes. Si `enum` bloquea una hoja string nullable, un
+`enumLabels` exterior malformed conserva su `INVALID_UI_SCHEMA_VALUE`; un
+objeto exterior válido se ignora sin diagnósticos derivados, como cualquier
+enum schema-blocked Accepted. La forma/textos UI inspeccionables de manera
+independiente conservan su orden. Un type array malformed deja el tipo sin
+clasificar y suprime solo compatibilidad/members UI derivados, nunca errores de
+forma exterior independientes.
+
+### 13.4 Ubicaciones, referencias y templates
+
+La inspección ocurre en el schema fuente efectivo de cada hoja, incluido un
+target alcanzado mediante `$ref`. `documentPath` y `referenceChain` continúan
+señalando el target; `dataPath` corresponde al use site. Compartir un target
+nullable normaliza una definición independiente por use site sin retener el
+array fuente.
+
+Dentro de un collection item template, `documentPath`, `dataPath` y
+`parameters.templatePath` conservan las reglas Accepted. La identity directa
+requiere todavía `type: "string"`; un type array exteriormente válido allí no
+produce `UNSUPPORTED_FIELD_TYPE` ni un campo nullable. La policy emite el
+diagnóstico semántico Accepted `INVALID_COLLECTION_POLICY`, sin
+`documentPath`, con el `dataPath` del array y parámetros
+`{ reason: 'identity-schema-incompatible', policyIndex, member:
+'itemIdentityProperty', expected: 'required direct string identity property' }`.
+La inspección independiente de annotations/keywords prohibidas de identity
+conserva su orden Accepted antes de ese fallo semántico.
+
+La UI Schema no añade ninguna opción. Su inspección ocurre solo si la rama
+schema sigue siendo clasificable, en el orden global Accepted.
+
+### 13.5 Validación externa y compatibilidad
+
+Aceptar el type array significa que el compilador puede crear una definición,
+no que core valide el valor como JSON Schema completo. `SchemaValidator`
+recibe sin cambios el schema original con el array y el valor controlado. Core
+no aplica `required`, defaults, coercion ni assertions de negocio.
+
+La compatibilidad estructural de operaciones/runtime usa el boolean normalizado
+de ADR-019: null es compatible solo con la hoja nullable; el tipo primitive
+conserva sus reglas Accepted. Null externo no nullable se conserva como dato
+presente incompatible y nunca se corrige silenciosamente.
+
+### 13.6 Public/Internal y exclusiones
+
+Revision 4 cambia comportamiento Public de `compileFormDefinition()` y sus
+diagnósticos, y coordina la nueva firma Public + Experimental
+`BaseFieldDefinition.nullable` de ADR-019. El inspector de arrays y su metadata
+de traversal son Internal. No cambia exports, entry points, packages, dialecto,
+versiones ni clasificación de estabilidad.
+
+Siguen fuera type arrays generales, standalone null, containers/identity
+nullable, `enum + null`, applicators, conditionals, defaults aplicados,
+coerciones, AST público, recursos externos/dinámicos, UI dinámica, persistencia,
+publicación y todas las decisiones no promovidas.
+
+### 13.7 Gate de aceptación
+
+Revision 4 se aceptó coordinadamente con ADR-019 después de que una revisión
+completa repetida confirmara:
+
+1. forma type-array cerrada, descriptor-safe y determinista;
+2. códigos, parámetros, paths, precedence y branch stopping exactos;
+3. catálogo de keywords por tipo y exclusión de `enum + null`;
+4. propagación directa/nested/template/reference e identity inalterada;
+5. schema original y autoridad intacta del validator externo;
+6. inventario Public/Internal y migración Experimental exactos;
+7. coherencia con todas las revisiones Accepted de ADR-005 y ADR-019; y
+8. ausencia de autorización de SPEC, plan, código, versión o publicación.
+
+Tras cada hallazgo se corrigió y repitió la revisión completa. Review 032 ciclo
+2 cerró las diez áreas sin hallazgos y Ricard había aprobado las tres decisiones
+antes de la redacción. La aceptación conjunta autoriza únicamente redactar
+SPEC-006 como tarea separada.

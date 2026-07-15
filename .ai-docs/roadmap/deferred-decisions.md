@@ -138,10 +138,25 @@ Cada decisión debe registrar:
 
 ## D-009: Null y campos triestado
 
-- **Estado:** Deferred
+- **Estado:** Promoted para diseño normativo M14; no implementado
 - **Pregunta:** ¿Cómo representar `missing`, `null`, `false` y `true` sin ambigüedad?
 - **Motivo:** La primera versión usa booleanos binarios y no soporta null explícito.
 - **Retomar cuando:** Se amplíe el subconjunto de tipos.
+- **Revisión de preparación:**
+  [`review 031`](../reviews/031-m14-nullable-leaves-promotion-readiness.md)
+  pasó su revisión completa ciclo 3 sin hallazgos y fue aceptada formalmente el
+  15 de julio de 2026.
+- **Decisión promovida:** Solo hojas primitivas existentes con un `type` array
+  denso y único que contenga exactamente `null` y uno de `string`, `number`,
+  `integer` o `boolean`, en cualquier orden. `missing`, `null`, `false` y los
+  valores primitivos permanecen distintos.
+- **Resolución arquitectónica:**
+  [`ADR-019`](../adrs/019-hojas-primitivas-nullable.md) revisión 0 y
+  [`ADR-005`](../adrs/005-politica-dialecto-json-schema.md) revisión 4,
+  Accepted tras review 032 ciclo 2 sin hallazgos.
+- **Frontera:** SPEC-006 debe fijar el comportamiento observable antes de
+  PLAN-014. No se promueven unions generales, containers nullable,
+  `enum + null`, coerción, defaults, implementación ni APIs Stable.
 
 ## D-010: Acción explícita para limpiar un campo
 

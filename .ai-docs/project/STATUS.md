@@ -13,42 +13,42 @@
 - **Last implementation plan:** PLAN-013 revision 4, Completed
 - **Last completed implementation plan:** PLAN-013 revision 4
 - **Active implementation task:** None
-- **Last accepted ADR:** ADR-018 revision 3
+- **Last accepted ADR:** ADR-019 revision 0, coordinated with ADR-005 revision 4
 - **Last proposed ADR:** None
 - **Promoted capabilities:** D-005/M9, D-006/M10, D-041/M11 and D-042/M12
   implemented within their accepted slices; D-034/D-040 active only within
-  accepted M13 delivery
-- **Phase:** M1–M13 and G0 completed; next milestone not selected
+  accepted M13 delivery; D-009 promoted only for M14 normative design
+- **Phase:** M1–M13 and G0 completed; M14 normative design selected
 - **Published packages:** core and Angular `0.1.0` are live and byte-identical
   to their accepted candidates
 
 ## Current objective
 
-Select the next milestone from product demand and the deferred register without
-implicitly promoting D-043 or another capability.
+Prepare the observable SPEC-006 contract for the Accepted M14 nullable
+primitive-leaf architecture without authorizing delivery or implementation.
 
 ## In progress
 
-- None. PLAN-013 revision 4 and M13 are complete.
+- None. ADR-019 revision 0 and ADR-005 revision 4 are Accepted after joint
+  review 032 cycle 2 closed with zero findings.
 
 ## Latest completed work
 
+- Accepted ADR-019 revision 0 and ADR-005 revision 4 coordinately after review
+  032 cycle 2 closed ten areas with zero findings.
+- Accepted D-009/M14 promotion-readiness review 031 after cycle 3 closed with
+  zero findings; only nullable primitive leaves are promoted for design.
 - Corrected the post-G0 ROADMAP preamble that still described M13 as
   unpublished after the closure commit; no milestone or scope changed.
 - Accepted ADR-018 revision 3 and completed PLAN-013 revision 4/M13 after full
   zero-finding reviews.
 - Deferred repository sanitization/publication, public metadata, OIDC, staged
   approval, token restrictions and provenance together as D-043.
-- Published and verified Angular `0.1.0`; downloaded bytes match accepted
-  SHA-512 `35f7f33a…2ebd56a`, aliases/license/peers are exact and no provenance is
-  claimed.
-- Confirmed npm exposes generated local `_resolved`/`_from` metadata for both
-  immutable versions; tarballs/manifests contain neither field nor credentials.
 
 ## Exact next action
 
-Select the next milestone from product demand and the deferred register. Any
-push remains a separate explicit action.
+Draft SPEC-006 for exact compiler, definitions, operations/runtime, Angular,
+accessibility, diagnostics and conformance behavior; do not draft PLAN-014.
 
 ## Blockers and conflicts
 
@@ -85,10 +85,16 @@ push remains a separate explicit action.
 
 ## Open questions
 
-- Which deferred capability should become the next milestone.
+- None for architecture. SPEC-006 must express the Accepted decisions without
+  widening M14.
 
 ## Latest verification
 
+- Review 032 cycle 2 repeats all ten joint ADR-019/ADR-005 revision 4 areas with
+  zero findings. Current formatting, documentation across 89 Markdown files
+  and 400 local links, and diff checks pass.
+- Review 031 cycle 3 repeats all eight D-009/M14 readiness areas with zero
+  findings and supports the accepted narrow promotion.
 - Review 028 cycle 8, review 029 cycle 14 and review 030 cycle 31 repeat their
   complete applicable areas with zero findings and close ADR-018 revision 3,
   PLAN-013 revision 4 and M13.
@@ -128,6 +134,11 @@ push remains a separate explicit action.
 
 ## Task document map
 
+- D-009/M14 promotion readiness:
+  `.ai-docs/reviews/031-m14-nullable-leaves-promotion-readiness.md`
+- Accepted M14 architecture: `.ai-docs/adrs/019-hojas-primitivas-nullable.md`
+- Joint M14 ADR review:
+  `.ai-docs/reviews/032-adr-019-adr-005-revision-4-review.md`
 - Completed M12 plan: `.ai-docs/plans/012-static-presentation-groups.md`
 - Final M12 implementation review:
   `.ai-docs/reviews/026-plan-012-implementation-review.md`

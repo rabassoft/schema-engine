@@ -6,6 +6,44 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-15 — D-009/M14 promotion accepted
+
+### Completed
+
+- Reviewed accepted schema, definition, operation, runtime, nested/collection/
+  reference and Angular contracts against the current implementation.
+- Review 031 cycle 1 found two closing state-document defects and cycle 2 found
+  imprecise verification chronology. After correction, cycle 3 repeats all
+  eight areas and documentation checks with zero findings. It recommends a
+  closed nullable primitive-leaf slice, not general unions.
+- Ricard formally accepted review 031 and promoted only that slice for M14
+  normative design.
+- Acceptance reconciliation initially changed D-001 instead of D-009 and kept
+  the pre-acceptance link count. Both defects were corrected before the full
+  documentation verification was repeated with zero findings.
+- Ricard approved the required normalized boolean, common Angular null action
+  and unchanged renderer registrations. ADR-019 revision 0 and ADR-005 revision
+  4 were drafted; review 032 cycle 1 found eight issues, all corrected, and
+  cycle 2 repeated ten areas with zero findings before coordinated acceptance.
+- Final acceptance reconciliation found and corrected the ADR index still
+  reporting revision 3 before the complete documentation checks were repeated.
+
+### Verification
+
+- Review 032 cycle 2 passes all ten joint architecture areas with zero findings.
+- Formatting, documentation across 89 Markdown files and 400 local links, and
+  diff checks pass; code and package artifacts are unchanged.
+
+### Boundary
+
+- D-009 is Promoted for design but remains unimplemented.
+- ADR-019 revision 0 and ADR-005 revision 4 are Accepted for design. SPEC-006
+  preparation is authorized; PLAN-014 and implementation remain unauthorized.
+
+### Next
+
+- Draft and completely review SPEC-006; do not prepare PLAN-014 or code.
+
 ## 2026-07-15 — Post-commit ROADMAP consistency repaired
 
 ### Completed

@@ -23,7 +23,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Superseded por ADR-010.**
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
 4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
-5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 3; incorpora solo D-041, implementado por PLAN-011 tras revisión final repetida sin hallazgos.**
+5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 4; conserva D-041/M11 e incorpora solo el diseño D-009/M14 coordinado con ADR-019 tras review 032 ciclo 2 sin hallazgos.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
@@ -37,6 +37,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 16. [ADR 016: Same-document static JSON Schema reference resolution](./016-resolucion-referencias-locales.md) — **Accepted; ADR-005 revision 3 and SPEC-004 v0.1.1 completed its normative follow-up gates after zero-finding reviews.**
 17. [ADR 017: Static neutral presentation groups](./017-grupos-presentacion-estaticos.md) — **Accepted revision 0 after review 023 cycle 3 passed all eight areas with zero findings; SPEC preparation only is authorized.**
 18. [ADR 018: Dual AGPL/commercial licensing and public experimental publication](./018-licencia-dual-publicacion-experimental.md) — **Accepted revision 3 after review 028 cycle 8 closed with zero findings; M13 uses verified interactive 2FA and defers trusted publishing/provenance until repository publication.**
+19. [ADR 019: Nullable primitive leaves and explicit null intention](./019-hojas-primitivas-nullable.md) — **Accepted revision 0 with ADR-005 revision 4 after review 032 cycle 2 closed with zero findings; only SPEC-006 preparation is authorized.**
 
 ## 4. ADRs específicos de Angular
 
