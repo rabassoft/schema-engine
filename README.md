@@ -16,9 +16,10 @@ runtime and verified public Experimental packages. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
 v0.1.1 and SPEC-006 v0.1.1 are Accepted. SPEC-006 defines the promoted M14
 nullable-primitive-leaf contract. The source checkout implements that contract
-locally under PLAN-014 and is prepared as the coordinated local `0.2.0`
-release target under PLAN-015. It has not been published. The live checkpoint is recorded in
-[project status](./.ai-docs/project/STATUS.md).
+under completed PLAN-014. PLAN-015 published and verified byte-identical core
+and Angular `0.2.0` packages under both `next` and `latest`. M15 completed a
+private reference platform without changing those Public packages. The live
+checkpoint is recorded in [project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
 
@@ -46,6 +47,37 @@ generated identity, async validation, persistence, advanced layouts beyond the
 fixed static section primitive, custom
 collection renderers and other deferred decisions are not active.
 
+## Private reference platform
+
+The repository contains a private, non-publishable scenario catalog and an
+Angular 22 reference application. They compose only Public package entry points
+and provide maintained examples, state/diagnostic inspectors and one Chromium
+smoke lane. The application—not the library—owns complete `value` and
+`baselineValue` roots, locale, validation visibility and every decision to
+confirm, reject or defer an emitted operation.
+
+Use Node `22.23.1`, pnpm `10.28.2` and the frozen workspace lockfile:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm reference:build
+pnpm reference:test:unit
+pnpm reference:test:boundaries
+pnpm exec playwright install chromium
+pnpm reference:test:e2e
+pnpm reference:dev
+```
+
+`reference:dev` serves the Angular application at `http://127.0.0.1:4200` and
+watches the private catalog/application. Restart it after changing core or the
+Angular adapter. The browser command is explicit because Playwright binaries
+are local machine state and are never installed by a package lifecycle script.
+
+This reference workspace is not a Public package, hosted product, compatibility
+matrix, exhaustive conformance suite, visual baseline or accessibility
+certification. Standard/DOM, React, Vue and legacy-Angular shells remain
+deferred and must be delivered independently when promoted.
+
 Primitive leaves may additionally use the exact JSON Schema type array
 `[primitive, "null"]` or `["null", primitive]`. This remains a closed nullable
 leaf capability, not a general union or nullable-container feature. Native
@@ -68,10 +100,9 @@ must not be treated as containing these source changes.
 
 ## Experimental packages and licensing
 
-Core and Angular `0.1.0` are public on npm; coordinated `0.2.0` candidates are
-being prepared locally and are not live. `next` is the recommended Experimental
-channel. npm also requires `latest` to alias each published Experimental
-version; that registry alias does not promote any API to Stable.
+Core and Angular `0.2.0` are public and verified on npm. `next` is the
+recommended Experimental channel. `latest` aliases the same published
+Experimental version; that registry alias does not promote any API to Stable.
 
 Install explicit versions or the Experimental channel:
 

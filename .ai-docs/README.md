@@ -8,8 +8,8 @@
 - [Stable handoff](../HANDOFF.md) — context-recovery procedure, never current
   status.
 - [Work log](./project/WORKLOG.md) — append-only history; read selectively.
-- [Coordinated Experimental 0.2.0 release notes](./releases/0.2.0.md) — local
-  candidate state and source migration; not published.
+- [Coordinated Experimental 0.2.0 release notes](./releases/0.2.0.md) — selected
+  clean candidate state and source migration; not published.
 
 ## Specifications
 
@@ -122,7 +122,65 @@
   areas with zero findings. Ricard then formally approved revision 0.
 - [PLAN-015 local candidate review](./reviews/045-plan-015-checkpoint-3-review.md)
   — Checkpoints 1–3 complete after cycle 5 closed the full local release review
-  with zero findings; checkpoint 4 Git actions remain separately gated.
+  with zero findings.
+- [PLAN-015 clean committed candidate review](./reviews/046-plan-015-checkpoint-4-review.md)
+  — Checkpoint 4 private commit/push, deterministic clean rebuild and
+  neutral-path rehearsal passed with zero findings; npm remains separately
+  gated.
+- [PLAN-015 core publication preflight review](./reviews/047-plan-015-checkpoint-5-preflight-review.md)
+  — Identity, organization ownership, write-protected 2FA, registry state,
+  immutable history and the exact core command passed with zero findings; the
+  registry write awaits immediate approval.
+- [PLAN-015 live core review](./reviews/048-plan-015-checkpoint-5-live-core-review.md)
+  — Core `0.2.0` bytes, metadata, signature, source/license, neutral disclosure,
+  tags and consumers passed with zero findings.
+- [PLAN-015 Angular publication preflight](./reviews/049-plan-015-checkpoint-6-preflight-review.md)
+  — Angular absence, selected bytes, peer/source/artifacts, live-core consumers
+  and exact neutral-path command passed with zero findings; publication awaits
+  separate approval.
+- [PLAN-015 live Angular/checkpoint 7 preflight](./reviews/050-plan-015-checkpoint-6-live-angular-review.md)
+  — Angular bytes/metadata and exact/`next` paired consumers passed with zero
+  findings; Angular `latest` is the next separately gated mutation.
+- [PLAN-015 Angular latest review](./reviews/051-plan-015-angular-latest-review.md)
+  — The first coordinated tag mutation passed without drift; core `latest`
+  remains separately gated.
+- [PLAN-015 final release review](./reviews/052-plan-015-final-review.md) — The
+  coordinated `0.2.0` tags, bytes and all consumer modes passed with zero
+  findings; PLAN-015 is complete.
+- [D-044/M15 reference-platform promotion readiness](./reviews/053-d044-m15-reference-platform-promotion-readiness.md)
+  — Accepted after cycle 2 passed ten areas with zero findings; promotes only a
+  private neutral catalog and first Angular shell for ADR-020 design and
+  registers Angular legacy separately as D-045 Deferred.
+- [ADR-020 complete review](./reviews/054-adr-020-review.md) — Cycle 3 passed
+  ten areas with zero findings and accepted the private catalog/Angular 22
+  architecture; only PLAN-016 preparation is authorized.
+- [PLAN-016 complete review](./reviews/055-plan-016-review.md) — Cycle 5 passed
+  twelve areas with zero findings; revision 0 is Approved for checkpoints 1–8.
+- [PLAN-016 checkpoint 1 review](./reviews/056-plan-016-checkpoint-1-review.md)
+  — Cycle 4 passed the private workspace, exact toolchain, official builder,
+  boundaries and linked-development gate with zero findings.
+- [PLAN-016 checkpoint 2 review](./reviews/057-plan-016-checkpoint-2-review.md)
+  — Cycle 3 passed the complete Internal catalog authoring and regression gate
+  with zero findings.
+- [PLAN-016 checkpoint 3 review](./reviews/058-plan-016-checkpoint-3-review.md)
+  — Cycle 3 passed the exact six-scenario inventory, Public compilation,
+  transition evidence and deterministic validation gate with zero findings.
+- [PLAN-016 checkpoint 4 review](./reviews/059-plan-016-checkpoint-4-review.md)
+  — Cycle 3 passed application-owned Angular state, explicit decision flows,
+  inspectors, strict templates and regressions with zero findings.
+- [PLAN-016 checkpoint 5 review](./reviews/060-plan-016-checkpoint-5-review.md)
+  — Cycle 3 passed semantic shell UI, accessibility, collection controls and
+  deterministic build-checked snippets with zero findings.
+- [PLAN-016 checkpoint 6 review](./reviews/061-plan-016-checkpoint-6-review.md)
+  — Cycle 3 passed one real Chromium lane twice consecutively, including all
+  scenarios, controlled decisions, keyboard interaction and explicit
+  non-claims, with zero findings.
+- [PLAN-016 checkpoint 7 review](./reviews/062-plan-016-checkpoint-7-review.md)
+  — Cycle 2 passed Public/private isolation, full regressions, exact artifacts,
+  source rebuilds, clean consumers and onboarding with zero findings.
+- [PLAN-016 final implementation review](./reviews/063-plan-016-final-implementation-review.md)
+  — Cycle 2 repeated authority, implementation, browser, Public isolation and
+  persistent-state review with zero findings; PLAN-016/M15 are complete.
 
 ## Architecture Decision Records
 
@@ -137,6 +195,11 @@
 - [ADR-019: Nullable primitive leaves](./adrs/019-hojas-primitivas-nullable.md)
   — Accepted revision 1 under ADR-005 revision 4; SPEC-006 v0.1.1 fixes its
   observable M14 boundary.
+- [ADR-020: Private multi-framework reference platform](./adrs/020-plataforma-referencia-multiframework.md)
+  — Accepted revision 0 after review 054 cycle 3; PLAN-016 revision 0 was
+  separately approved and completed after final review 063 cycle 2.
+  Approved for checkpoints 1–8.
+
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
   and Ricard accepted the revision.
@@ -185,6 +248,7 @@
 - [PLAN-013: First public experimental release](./plans/013-public-experimental-release.md) — Completed revision 4 after all separately authorized local, Git and npm checkpoints passed
 - [PLAN-014: Nullable primitive leaves](./plans/014-nullable-primitive-leaves.md) — Completed revision 0 after final review 041 cycle 2 passed with zero findings
 - [PLAN-015: Coordinated Experimental 0.2 release](./plans/015-coordinated-experimental-0-2-release.md) — Approved revision 0 for local checkpoints 1–3 after review 042 cycle 2 passed with zero findings
+- [PLAN-016: Private reference platform and Angular 22 shell](./plans/016-private-reference-platform.md) — Completed revision 0 after final review 063 cycle 2 passed with zero findings
 
 Accepted publication architecture: [ADR-018 revision 3](./adrs/018-licencia-dual-publicacion-experimental.md)
 selects dual AGPL/commercial licensing and public Experimental packages while

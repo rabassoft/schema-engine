@@ -1,6 +1,6 @@
 # PLAN-015: Coordinated Experimental 0.2 release
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-15
 - **Approval date:** 2026-07-15
 - **Revision:** 0 — initial coordinated MINOR release draft
@@ -15,9 +15,8 @@
   `@rabassoft/schema-engine-angular@0.2.0`
 - **Milestone:** coordinated public delivery of completed local M14
 - **Capability:** only the already implemented D-009/M14 slice
-- **Implementation:** Local checkpoints 1–3 complete; checkpoint 4 commit,
-  private push and clean rebuild explicitly authorized; npm actions remain
-  separately gated
+- **Implementation:** Completed; both `0.2.0` packages and all coordinated
+  `next`/`latest` consumer modes are verified
 
 ## 1. Goal and hard boundary
 
@@ -357,8 +356,9 @@ not completion.
 Revision 0 was drafted on 15 July 2026 under the authorization recorded in
 STATUS. Review 042 cycle 1 found and corrected five ordering, historical-tag,
 workspace-range, release-state and exact-command issues. Cycle 2 repeated all
-ten areas with zero findings. Ricard formally approved revision 0 on 15 July 2026. Approval authorizes only local checkpoints 1–3; checkpoint 4 and every
-repository/external action remain separately gated.
+ten areas with zero findings. Ricard formally approved revision 0 on 15 July 2026. Approval authorized local checkpoints 1–3; checkpoint 4 was authorized
+and completed separately. Every remaining registry or other external action
+remains separately gated.
 
 ### 15.1 Implementation checkpoint 1
 
@@ -403,3 +403,127 @@ Ricard explicitly authorized checkpoint 4 on 15 July 2026: commit the reviewed
 release preparation, push that exact commit to private `develop`, rebuild from
 the clean commit and select only matching clean candidate hashes. No Git tag,
 GitHub Release or npm write is authorized.
+
+### 15.5 Implementation checkpoint 4
+
+Checkpoint 4 completed on 15 July 2026. Commit
+`ce53dc1f5b3147ddd24e14912c0ff9dc1b32e412` was pushed to private
+`origin/develop`, and local `HEAD` and the remote-tracking branch matched. A
+clean-tree `pnpm prepare:release` rebuild selected candidates whose byte counts
+and SHA-512 values exactly matched the pre-commit evidence:
+
+- core: 200245 bytes,
+  `155ae047c8ee949bddcaba412fcff90e4b65396a47f89f63e065e7b7814e8a8e0e2851d8e891465d12f69b54fa00192fe5884b163deb292aedec73f9d13e028a`;
+- Angular: 93133 bytes,
+  `aa035adb83c01ae1ffccae2126c78f0095ec4f930547d923b80ba7f0419a39ead58dfe45c35818fde4b884dd31793cec17aa2b8c3963520c24f1891d165a5154`.
+
+Candidate metadata records that commit as both base and source commit. The
+exact bytes were copied to fresh neutral path
+`/tmp/rabassoft-release-0.2.0.6bKsP2`; hashes matched again and both
+basename-relative `npm publish --dry-run --tag next --access public` rehearsals
+passed. Review 046 recorded zero findings. No Git tag, GitHub Release or npm
+write occurred; checkpoint 5 remains separately gated.
+
+### 15.6 Checkpoint 5 preflight
+
+The read-only checkpoint 5 preflight passed on 15 July 2026 with npm CLI
+`10.9.8` against `https://registry.npmjs.org/`. Authenticated identity is
+`ricardrabasso`, which is owner of organization `rabassoft`; the verified
+account uses `auth-and-writes` 2FA. Both exact `0.2.0` versions returned E404,
+both `next` and `latest` tags remained at `0.1.0`, and historical core/Angular
+`0.1.0` bytes passed their immutable live verification.
+
+At neutral path `/tmp/rabassoft-release-0.2.0.6bKsP2`, the selected core remains
+200245 bytes with the checkpoint 4 SHA-512. The exact command with
+`--provenance=false` passed one final dry-run. Review 047 recorded zero
+findings. No registry write occurred; execution now stops for immediate
+approval of the exact core publication command.
+
+Ricard granted that immediate approval on 15 July 2026 for the single exact
+core command only. Angular publication, dist-tag, Git and settings mutations
+remain unauthorized.
+
+The authorized attempt reverified the selected hash and reached npm, then
+stopped with mandatory `EOTP` before any write. Immediate read-only checks
+confirmed core `0.2.0` remained absent and `next`/`latest` remained at `0.1.0`.
+Checkpoint 5 pauses for Ricard to repeat the exact neutral-path command with a
+current OTP; no code is shared or persisted in project state.
+
+### 15.7 Implementation checkpoint 5
+
+Ricard completed the authorized neutral-path publication on 16 July 2026.
+Review 048 verified public `@rabassoft/schema-engine@0.2.0` byte-identical to
+the selected 200245-byte candidate with the accepted SHA-512 and integrity.
+The registry carries one signature, `AGPL-3.0-only`, package-local source, no
+repository URL, no attestation/provenance and only neutral
+`/private/tmp/rabassoft-release-0.2.0-manual` path metadata. Core `next` is
+`0.2.0`, `latest` remains `0.1.0`, and exact core plus lower/upper Angular 22
+candidate consumers pass. Checkpoint 5 is complete; no Angular or dist-tag
+mutation occurred.
+
+### 15.8 Checkpoint 6 preflight
+
+The checkpoint 6 read-only preflight passed on 16 July 2026. Angular `0.2.0`
+remains absent; its selected 93133-byte tarball retains SHA-512
+`aa035adb83c01ae1ffccae2126c78f0095ec4f930547d923b80ba7f0419a39ead58dfe45c35818fde4b884dd31793cec17aa2b8c3963520c24f1891d165a5154`.
+Packed artifact/license/source boundaries, frozen isolated source rebuilds,
+`^0.2.0` core peer and clean lower/upper Angular 22 consumers against live core
+pass. The exact neutral-path Angular command with no provenance passes its
+dry-run. Review 049 recorded zero findings; execution stops for separate
+immediate approval of the real Angular publication.
+
+Ricard granted that immediate approval on 16 July 2026 for the single exact
+Angular command only. Every `latest`, Git and settings mutation remains
+unauthorized.
+
+The authorized automated attempt reverified the selected hash and reached npm,
+then stopped with mandatory `EOTP` before any write. Immediate read-only checks
+confirmed Angular `0.2.0` remained absent and its `next`/`latest` remained at
+`0.1.0`. Checkpoint 6 pauses for Ricard to run the same command interactively
+with the configured Security Key.
+
+### 15.9 Implementation checkpoint 6 and checkpoint 7 preflight
+
+Ricard completed the authorized Angular publication on 16 July 2026. Review
+050 verified public `@rabassoft/schema-engine-angular@0.2.0` byte-identical to
+the selected 93133-byte candidate with the accepted SHA-512 and integrity.
+Its `^0.2.0` core peer, Angular 22 peers, registry signature, AGPL/source,
+absent repository/provenance and neutral path metadata pass.
+
+Both exact `0.2.0` candidates and both `next` aliases are verified live.
+Exact and `@next` core/Angular consumers pass at Angular `22.0.6` and `22.0.7`,
+including registry signature audit. Both `latest` aliases remain `0.1.0` and no
+open release finding exists. Checkpoint 6 is complete and checkpoint 7
+preconditions pass. Execution stops for immediate approval of the Angular
+`latest` mutation only; core `latest` retains its later separate gate.
+
+Ricard granted that immediate approval on 16 July 2026 for the Angular
+`latest` mutation only. Core `latest`, Git and settings mutations remain
+unauthorized.
+
+The authorized automated attempt stopped with mandatory `EOTP` before any
+mutation. Immediate checks confirmed both `latest` aliases remained `0.1.0`
+and both `next` aliases remained `0.2.0`. Checkpoint 7 pauses for Ricard to run
+the same Angular tag command interactively with the configured Security Key.
+
+### 15.10 Checkpoint 7 Angular latest
+
+Ricard completed the authorized Angular tag mutation on 16 July 2026. Review
+051 confirmed Angular `latest` and `next` both resolve to verified `0.2.0`,
+while core `next` remains `0.2.0` and core `latest` remains `0.1.0`. No other
+tag or setting drift occurred. This is the planned minimal mixed window;
+consumer evidence is intentionally not accepted from it. Execution stops for
+separate immediate approval of the core `latest` mutation.
+
+### 15.11 Checkpoint 7 completion and final review
+
+Ricard completed the separately authorized core `latest` mutation on 16 July 2026. Core and Angular `next` and `latest` all resolve to verified `0.2.0`.
+The complete final matrix repeated exact, `@next`, `@latest` and unqualified
+clean core/Angular consumers at Angular `22.0.6` and `22.0.7`; selected bytes,
+registry signatures and package metadata remained exact.
+
+Review 052 repeated the complete PLAN-015 release boundary with zero findings.
+PLAN-015 revision 0 and the coordinated Experimental `0.2.0` release are
+complete. No API was promoted to Stable, and no Git tag, GitHub Release,
+repository visibility/settings, trusted publisher, provenance or D-043 action
+occurred.

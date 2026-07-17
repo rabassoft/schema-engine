@@ -62,8 +62,11 @@ separado antes de repetir la revisión.
 > M7-M13 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-013
 > publicó y verificó core/Angular `0.1.0` bajo gates explícitos, sin promover
 > APIs a Stable ni hacer público GitHub. M14 y PLAN-014 revision 0 están
-> completados localmente; D-011/D-012 y D-043 siguen Deferred y ningún cambio
-> de versión, publicación o mutación remota futura está autorizado.
+> completados localmente. PLAN-015 publicó y verificó core y Angular `0.2.0`;
+> ambos `next` y `latest` resuelven al par coordinado. D-011/D-012 y D-043
+> siguen Deferred. ADR-020 revisión 0 fija la arquitectura M15 y PLAN-016
+> revisión 0 está Approved para sus checkpoints 1–8; D-045 conserva Angular
+> legacy como trabajo Deferred.
 
 ### M9 — Objetos anidados — completado
 
@@ -152,7 +155,7 @@ separado antes de repetir la revisión.
   defers repository sanitization/publication, OIDC, staged approval, token
   restrictions and provenance as one future decision.
 
-### M14 — Hojas primitivas nullable — completado localmente
+### M14 — Hojas primitivas nullable — completado y publicado
 
 - D-009 fue promovido el 15 de julio de 2026 tras aceptar
   [review 031](../reviews/031-m14-nullable-leaves-promotion-readiness.md), cuyo
@@ -165,17 +168,40 @@ separado antes de repetir la revisión.
   PLAN-014 revision 0 fue Approved tras review 035 ciclo 3 sin hallazgos y
   autoriza solo sus checkpoints 1–6. Versión y publicación siguen fuera.
 - Los checkpoints 1–6 y PLAN-014 revisión 0 están completados tras review 041
-  ciclo 2 sin hallazgos. No se seleccionó versión ni se publicó M14.
+  ciclo 2 sin hallazgos. PLAN-015 publicó y verificó el alcance como core y
+  Angular `0.2.0`; review 052 cerró la release coordinada sin hallazgos.
+
+### M15 — Plataforma de referencia multi-framework — Completed
+
+- [Review 053](../reviews/053-d044-m15-reference-platform-promotion-readiness.md)
+  ciclo 2 pasó diez áreas sin hallazgos y promovió D-044 solo para redactar y
+  revisar ADR-020; no es un producto superior D-033.
+- La frontera promovida comparte un catálogo privado y neutral de escenarios,
+  fixtures, valores, operaciones/issues esperados y metadata explicativa, no
+  runtime semantics ni una abstracción UI común a todos los frameworks.
+- Cada target mantiene un shell independiente que consume solo entry points
+  Public y conserva en la aplicación la propiedad de `value`/`baselineValue`,
+  operaciones, persistencia y decisiones de negocio.
+- La primera entrega completada incluye el catálogo compartido y el shell
+  Angular. Standard/DOM, React, Vue y otros shells requieren antes una frontera
+  de integración aceptada para su adapter y entregas posteriores separadas.
+- La promoción separa workspace interactivo de consumidores limpios
+  tarball/npm, selecciona builder oficial Angular y un smoke
+  Playwright/Chromium, y mantiene fixtures/snippets bajo ownership explícito.
+- ADR-020 revisión 0 fue Accepted tras review 054 ciclo 3 sin hallazgos y
+  autorizó preparar/revisar PLAN-016. PLAN-016 revisión 0 superó review 055
+  ciclo 5 sin hallazgos y fue aprobado explícitamente para checkpoints 1–8. La
+  implementación completada no activa D-026, D-035 ni D-045.
+- PLAN-016 checkpoints 1–8 están completos tras reviews 056–063 sin hallazgos.
+  Catálogo, ownership Angular, UI semántica, colección, snippets build-checked
+  y una única lane Chromium repetible están presentes. Aislamiento, regresiones,
+  artefactos, consumidores y documentación están verificados; review 063 ciclo
+  2 repitió la revisión final completa y cerró PLAN-016/M15 sin hallazgos.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Private Git decision:** PLAN-015 local checkpoints 1–3 and review 045 cycle
-   5 are complete with zero findings; checkpoint 4 commit/private push and clean
-   candidate selection await explicit authorization.
-2. **Release:** every npm publication/dist-tag mutation retains a later
-   immediate explicit gate after clean-commit candidates are selected.
-3. **Later selection:** all other capabilities remain demand-driven; D-043 is
-   not implied by M14.
+1. **Later selection:** all other capabilities remain demand-driven; D-043 and
+   D-033 are not implied by M15.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

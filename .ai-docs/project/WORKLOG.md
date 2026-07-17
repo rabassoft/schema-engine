@@ -6,6 +6,512 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-17 — PLAN-016 and M15 completed
+
+### Completed
+
+- Completed checkpoints 1–8: exact private workspace/toolchain, descriptor-safe
+  neutral catalog, six SPEC-001–006 scenarios, application-owned Angular 22
+  integration, semantic UI, build-checked snippets and one Chromium smoke lane.
+- Extended isolation across private/Public manifests, export targets, imports,
+  artifacts and clean consumers. Public core/Angular source, contracts,
+  manifests, exports, versions and verified `0.2.0` tarballs remain unchanged.
+- Review 063 corrected the stale D-044 checkpoint, ADR index authorization and
+  final active-state wording, then repeated the complete review. Cycle 2 passed
+  with zero findings and closed PLAN-016 revision 0 and M15/D-044.
+- The final matrix passes frozen install, format/docs/lint/types, 525 unit and
+  ten tooling tests, production/reference builds, Chromium, package/artifact/
+  source/security checks and clean Angular `22.0.6`/`22.0.7` consumers.
+- No commit, push, publication, hosting or external setting mutation occurred.
+
+### Next
+
+- Select a concrete demand-backed deferred capability and perform its own
+  promotion-readiness review. D-045 stays Deferred until target majors or an
+  enterprise consumer are concrete.
+
+## 2026-07-17 — PLAN-016 checkpoint 7 completed
+
+### Completed
+
+- Extended isolation checks to two private and two Public projects, every
+  package files/export target, reverse dependencies and generated/browser/app
+  paths. Seven boundary tests inspect 20 manifest targets and 334 imports.
+- Corrected root onboarding to record live `0.2.0`, exact reference commands,
+  prerequisites, application-owned controlled state and explicit non-claims.
+- Excluded the ignored local Playwright cache from lint traversal. Public core
+  and Angular source/manifests/exports/versions remain unchanged.
+- Review 062 cycle 2 repeated the complete matrix with zero findings: frozen
+  install, docs/format/lint/types, 525 unit tests, ten script tests, Chromium,
+  package/artifact/source/security checks and clean Angular `22.0.6`/`22.0.7`
+  consumers all pass.
+
+### Next
+
+- Execute checkpoint 8: repeat the complete authority, implementation,
+  isolation and persistent-state review before closing PLAN-016/M15.
+
+## 2026-07-17 — PLAN-016 checkpoint 6 completed
+
+### Completed
+
+- Added one Chromium Playwright project with loopback serving, fresh CI server,
+  failure-only diagnostics and no video, cross-browser or certification claim.
+- Installed Playwright Chromium/Chrome for Testing `149.0.7827.55` revision
+  `1228`, headless shell `1228` and FFmpeg `1011` in ignored local cache state
+  after the default cache proved unwritable; no `sudo` or tracked binary was
+  introduced.
+- Added three smoke tests covering all six scenarios, inspectors, immediate/
+  reject/pending/stale decisions, reset/baseline/dirty, locale/visibility,
+  nested/collection/nullable behavior, roles, names, groups and keyboard use.
+- Review 061 corrected missing visible explanations, cache ownership handling
+  and three inaccurate interaction assumptions. Cycle 3 repeated the full
+  review with zero findings; two consecutive fresh-server runs passed 3/3.
+
+### Next
+
+- Execute checkpoint 7: extend isolation verification and run the full package,
+  artifact, source, security, consumer and documentation regression matrix.
+
+## 2026-07-17 — PLAN-016 checkpoint 5 completed
+
+### Completed
+
+- Added semantic navigation, application/decision/collection controls, status,
+  inspector disclosures, pressed state, explicit labels and readable styling
+  while preserving Public native renderer accessibility.
+- Added three exact marked source regions, deterministic write/check extraction
+  and one imported generated excerpts module. App builds now fail if it is
+  stale; final PLAN-016 root/app script literals are present.
+- Seven script tests cover boundary policy plus duplicate/missing/empty/nested/
+  unclosed markers, line endings, idempotence, no source rewriting and stale
+  source. Eleven app tests cover all six scenarios, shell semantics, collection
+  actions and excerpt provenance.
+- Review 060 corrected generator formatting, JIT query metadata, stale-source
+  proof, the final e2e script, same-component coverage and pending accessible
+  names. Cycle 3 repeated the full review with zero findings.
+- Full build/tests pass with 400 core, 79 Angular, 35 catalog and eleven app
+  tests; boundary verification inspects 332 imports without Public changes.
+
+### Next
+
+- Execute checkpoint 6 step 1: configure the single Chromium lane, then stop at
+  the explicit `pnpm exec playwright install chromium` external gate.
+
+## 2026-07-17 — PLAN-016 checkpoint 4 completed
+
+### Completed
+
+- Added a focused standalone Angular reference-form component whose signals own
+  complete roots, locale, visibility, selected scenario, decision mode and
+  immutable operation history.
+- Scenario selection compiles through the Public compiler before mounting the
+  Public `schemaForm`; immediate, reject, multi-pending, stale and incompatible
+  flows use only Public operations and preserve application ownership.
+- Added reset, whole-baseline commit and deterministic inspector panels for all
+  required schema/state/definition/snapshot/diagnostic/issue/history evidence.
+- Review 059 corrected the app TestBed setup, presentation-only input metadata,
+  explicit standalone declarations, reset/pending immutability and the Angular
+  testing-entry boundary rule. Cycle 3 repeated the full review with zero
+  findings.
+- Full build/tests pass with 400 core, 79 Angular, 35 catalog and eight app
+  tests; four boundary tests inspect 330 imports without Public package changes.
+
+### Next
+
+- Execute checkpoint 5 only: shell UI/accessibility, collection controls and
+  deterministic generated snippets from marked build-checked source.
+
+## 2026-07-17 — PLAN-016 checkpoint 3 completed
+
+### Completed
+
+- Added exactly six neutral scenarios for controlled primitives, nested
+  objects, stable collections, local definitions, static presentation groups
+  and nullable leaves.
+- All eleven closed feature tags have unique named ownership. Transition
+  evidence covers decisions, full controlled roots, stable operations/issues,
+  missing-ancestor blocking and nullable presence distinctions.
+- Every scenario compiles without diagnostics through the Public compiler,
+  replays through Public operations, receives exact schema identity at its
+  deterministic validator and preserves immutable reset sources.
+- Review 058 corrected strict array narrowing, explicit transition inventory,
+  blocked-ancestor diagnostic specificity and repeated transition validation.
+  Cycle 3 repeated the full review with zero findings.
+- Full build/tests pass with 400 core, 79 Angular and 35 catalog tests; four
+  boundary tests inspect 312 imports without Public package changes.
+
+### Next
+
+- Execute checkpoint 4 only: application-owned Angular signals, compile/reset,
+  explicit operation decisions and deterministic inspectors.
+
+## 2026-07-17 — PLAN-016 checkpoint 2 completed
+
+### Completed
+
+- Added the private generic scenario contract, closed feature vocabulary,
+  metadata/source-free expected operation type and stable issue/explanation
+  evidence.
+- Added iterative descriptor-safe JSON-compatible copy/freeze, a fresh frozen
+  validator wrapper and deterministic `ReferenceCatalogAuthoringError`
+  failures with reason, path and optional scenario identity.
+- Fifteen catalog tests cover all thirteen failure reasons, hostile descriptors,
+  sparse arrays, cycles, symbols, proxies, hostile names, deep immutability,
+  non-retention and the no-compile/no-apply/no-validation authoring boundary.
+- Review 057 corrected catalog-level proxy inspection, transition-shape
+  coverage, strict typing, private relative-import analysis and lint findings.
+  Cycle 3 repeated the full review with zero findings.
+- Full build/tests pass with 400 core, 79 Angular and 15 catalog tests; four
+  boundary tests inspect 285 imports without Public package changes.
+
+### Next
+
+- Execute checkpoint 3 only: author the exact six neutral scenarios and prove
+  Public compilation, deterministic validation and complete capability coverage.
+
+## 2026-07-17 — PLAN-016 checkpoint 1 completed
+
+### Completed
+
+- Added exact Angular CLI/build `22.0.6` and Playwright `1.61.1`, five-workspace
+  frozen resolution, two exact private app manifests and browser-only official
+  Angular application/dev-server targets.
+- The minimal standalone shell consumes core, Angular adapter and catalog only
+  through package roots. Boundary verification covers 279 imports and public
+  package manifests remain unchanged.
+- A real catalog edit and revert each triggered catalog incremental compilation
+  plus Angular dev-server rebuild. Recursive production build, strict types,
+  lint and focused boundary tests pass.
+- Review 056 corrected side-effect/deep-import analysis, Angular app compilation,
+  sandbox IPC diagnosis and generated-cache lint ownership. Cycle 4 repeated
+  the complete gate with zero findings.
+
+### Next
+
+- Execute checkpoint 2 only: Internal catalog contract, descriptor-safe
+  copy/freeze, validator wrapper and deterministic authoring failures.
+
+## 2026-07-17 — PLAN-016 approved; checkpoint 1 opened
+
+### Approved
+
+- Ricard explicitly approved PLAN-016 revision 0 after review 055 cycle 5
+  passed twelve areas with zero findings.
+- Approval activates only checkpoints 1–8 for the private neutral catalog and
+  first Angular 22 shell. Standard/DOM, React, Vue, legacy Angular, persistence,
+  hosting, publication and Public contract changes remain outside scope.
+- The exact dependency installation and Chromium download remain explicit
+  execution gates. Git and every other external/settings action remain
+  separately unauthorized.
+
+### In progress
+
+- Checkpoint 1 begins with the pinned dependency gate, manifest/lockfile
+  inspection, private workspace skeletons, official Angular builder and package
+  boundary verification.
+
+## 2026-07-17 — PLAN-016 reviewed and awaiting approval
+
+### Reviewed
+
+- PLAN-016 revision 0 defines eight buildable checkpoints for workspace/tooling,
+  safe catalog authoring, six scenarios, Angular ownership, UI/snippets,
+  Chromium smoke, release isolation and final repeated review.
+- Angular CLI/build are pinned to `22.0.6`; Playwright is pinned to `1.61.1`.
+  Dependency installation and the Chromium binary download remain separate
+  external execution gates with exact commands and no lifecycle/CI cache.
+- Review 055 corrected formatting, literal scripts, linked-catalog development,
+  snippet freshness, clean-checkout focused commands and ambiguous Git wording.
+  Cycle 5 repeated twelve areas with zero findings.
+
+### Decision pending
+
+- PLAN-016 is reviewed but not approved. No implementation, dependency/browser
+  install, Git, publication, hosting or external settings action is authorized.
+
+### Next
+
+- Ricard decides whether to approve PLAN-016 revision 0 for checkpoints 1–8;
+  the two external install gates and all Git actions remain separately gated.
+
+## 2026-07-17 — ADR-020 accepted; PLAN-016 preparation opened
+
+### Accepted
+
+- ADR-020 revision 0 closes all nine M15 architecture questions with a private
+  buildable neutral catalog, a first standalone Angular 22 shell, explicit
+  application-owned controlled state, six initial scenarios, generated
+  build-checked snippets and one Playwright/Chromium smoke boundary.
+- Review 054 corrected formatting plus five build, evidence, ownership,
+  pending-operation and zoneless-authority ambiguities. Cycle 3 repeated ten
+  areas with zero findings and found no Public contract or deferred-scope
+  conflict.
+- Workspace interaction remains distinct from package/tarball/npm clean
+  consumers. Standard/DOM, React, Vue, hosting and Angular before 19 remain
+  gated or Deferred.
+
+### Next
+
+- Draft and completely review PLAN-016. No implementation, dependency install,
+  Git or external action is authorized by ADR acceptance.
+
+## 2026-07-16 — D-044/M15 promotion review accepted
+
+### Accepted
+
+- Review 053 cycle 1 corrected three authority, durable-deferral and
+  alternatives-rationale findings. Cycle 2 repeated ten areas with zero
+  findings and promoted D-044 only for ADR-020 normative design.
+- Accepted-state cycle 3 corrected three tense/state/count findings. Cycle 4
+  then found and corrected one residual Candidate/pre-selection label inside
+  the active D-044 register. Cycle 5 repeated the complete review and
+  reconciliation with zero findings. Format, docs across 114 Markdown
+  files/461 links, active-state and diff checks pass.
+- The accepted boundary contains a private neutral scenario catalog, a first
+  independently built Angular 22 shell, workspace development and separate
+  clean tarball/npm compatibility evidence. Playwright/Chromium is the selected
+  real-browser smoke class.
+- Standard/DOM, React, Vue and later shells remain gated. D-045 records future
+  enterprise-oriented Angular versions before 19 without selecting a floor,
+  package family or compatibility claim.
+
+### Next
+
+- Draft and completely review ADR-020. PLAN-016 and implementation remain
+  unauthorized until their later explicit gates.
+
+## 2026-07-16 — D-044 reframed as a multi-framework reference platform
+
+### Decision recorded
+
+- Ricard directed the future demonstration work to cover every supported target:
+  standard/no-framework, Angular, React, Vue and later adapters.
+- D-044/M15 now proposes a private framework-neutral scenario catalog with one
+  independent shell per supported target. Angular remains the only first shell
+  candidate because it is the currently Accepted adapter.
+- Shared scenarios may own fixtures, values, expected operations/issues and
+  explanatory metadata, but not runtime semantics or a cross-framework UI
+  abstraction. Standard/DOM and later framework shells remain gated by their
+  own accepted integration boundaries.
+
+### Next scope
+
+- Complete the D-044 promotion-readiness review before drafting ADR-020 or
+  PLAN-016. No adapter, application or public contract was activated.
+
+## 2026-07-16 — PLAN-015 completed; D-044/M15 registered
+
+### Completed
+
+- Ricard moved core `latest` to `0.2.0`; core and Angular `next`/`latest` now
+  resolve to the coordinated verified pair.
+- Exact, `@next`, `@latest` and unqualified clean consumers pass at Angular
+  `22.0.6` and `22.0.7`. Review 052 passed the complete final release review
+  with zero findings and completed PLAN-015 revision 0.
+
+### Next scope
+
+- Registered D-044/M15 as Candidate for a maintained Angular reference,
+  consumption and demonstration application.
+- No architecture or implementation is active. The exact next action is its
+  promotion-readiness review before ADR-020 or PLAN-016.
+
+## 2026-07-16 — PLAN-015 Angular latest verified
+
+### Verified
+
+- Ricard moved Angular `latest` to verified `0.2.0`; Angular `next` remains
+  `0.2.0`.
+- Core remains `next: 0.2.0` and `latest: 0.1.0`; no other tag or settings drift
+  occurred. Review 051 passed with zero findings.
+- No consumer evidence was accepted from the planned mixed-tag window.
+
+### Next
+
+- Stop for separate immediate approval to move core `latest` to `0.2.0`.
+
+## 2026-07-16 — PLAN-015 Angular latest paused at interactive 2FA
+
+### Observed
+
+- The authorized Angular `latest` command reached npm, which rejected it with
+  `EOTP` before mutation.
+- Immediate checks confirm both `latest` aliases remain `0.1.0` and both
+  `next` aliases remain `0.2.0`.
+
+### Next
+
+- Ricard runs the same exact Angular tag command interactively with the
+  configured Security Key; Codex then verifies it before the core gate.
+
+## 2026-07-16 — PLAN-015 Angular latest authorized
+
+### Authorization
+
+- Ricard explicitly authorized moving only
+  `@rabassoft/schema-engine-angular@0.2.0` to `latest`.
+- Core `latest`, Git and settings mutations remain unauthorized.
+
+### Next
+
+- Execute and verify the exact Angular tag mutation, then stop before the
+  separate core `latest` gate.
+
+## 2026-07-16 — PLAN-015 checkpoint 6 completed
+
+### Published and verified
+
+- Ricard published selected Angular `0.2.0` from neutral `/private/tmp`; npm
+  Angular `next` now resolves to `0.2.0` while `latest` remains `0.1.0`.
+- Downloaded bytes exactly match the selected 93133-byte SHA-512. Peer,
+  integrity, signature, AGPL/source, absent provenance/repository and neutral
+  public path metadata pass.
+- Exact and `@next` paired consumers pass at Angular `22.0.6` and `22.0.7`.
+  Review 050 closed checkpoint 6 and checkpoint 7 preflight with zero findings.
+
+### Next
+
+- Stop for immediate approval to move Angular `latest` to `0.2.0`; core
+  `latest` remains separately gated.
+
+## 2026-07-16 — PLAN-015 checkpoint 6 paused at interactive 2FA
+
+### Observed
+
+- The authorized neutral-path Angular publication reverified the selected
+  SHA-512 and reached npm, which rejected it with `EOTP` before publication.
+- Immediate checks confirm Angular `0.2.0` remains absent and its
+  `next`/`latest` tags remain at `0.1.0`; no registry mutation occurred.
+
+### Next
+
+- Ricard executes the same exact command from the neutral directory and
+  authenticates with the configured Security Key; Codex then performs all live
+  verification.
+
+## 2026-07-16 — PLAN-015 checkpoint 6 Angular publication authorized
+
+### Authorization
+
+- Ricard explicitly authorized the single exact neutral-path publication of
+  `@rabassoft/schema-engine-angular@0.2.0` with public access, `next` and no
+  provenance.
+- Every `latest`, Git and settings mutation remains outside this authorization.
+
+### Next
+
+- Execute the exact Angular command and immediately verify immutable public
+  bytes, metadata, tags, path disclosure and clean exact/`next` consumers.
+
+## 2026-07-16 — PLAN-015 checkpoint 6 preflight passed
+
+### Verified
+
+- Angular `0.2.0` remains absent; its selected 93133-byte SHA-512, packed peer,
+  artifacts, AGPL/source and isolated frozen rebuilds pass.
+- Exact core plus local Angular candidate consumers pass on Angular `22.0.6`
+  and `22.0.7`; the neutral-path exact Angular command passes its dry-run.
+- Review 049 passed the complete preflight with zero findings and no external
+  mutation.
+
+### Next
+
+- Stop for separate immediate approval of Angular `0.2.0` under `next`.
+
+## 2026-07-16 — PLAN-015 checkpoint 5 completed
+
+### Published and verified
+
+- Ricard published the selected core `0.2.0` from neutral `/private/tmp`; npm
+  `next` now resolves to `0.2.0` while `latest` remains `0.1.0`.
+- Downloaded bytes exactly match the selected 200245-byte SHA-512. Integrity,
+  registry signature, AGPL/source, absent provenance/repository and neutral
+  public path metadata pass.
+- Exact core and lower/upper Angular candidate consumers pass. Review 048
+  closed the complete checkpoint with zero findings.
+
+### Next
+
+- Execute checkpoint 6 Angular publication preflight and stop before its
+  separately gated registry write.
+
+## 2026-07-15 — PLAN-015 checkpoint 5 paused at interactive 2FA
+
+### Observed
+
+- The authorized neutral-path core publication reverified the selected SHA-512
+  and reached npm, which rejected it with expected `EOTP` before publication.
+- Immediate read-only checks confirm core `0.2.0` remains absent and its
+  `next`/`latest` tags remain at `0.1.0`; no registry mutation occurred.
+
+### Next
+
+- Ricard executes the same exact command with a current OTP from the neutral
+  directory and reports success; Codex then performs all live verification.
+
+## 2026-07-15 — PLAN-015 checkpoint 5 core publication authorized
+
+### Authorization
+
+- Ricard explicitly authorized the single exact neutral-path publication of
+  `@rabassoft/schema-engine@0.2.0` with public access, `next` and no provenance.
+- Angular publication, all dist-tag mutations, Git actions and settings changes
+  remain outside this authorization.
+
+### Next
+
+- Execute the exact core command and immediately verify immutable public bytes,
+  metadata, tags, path disclosure and clean exact/`next` consumers.
+
+## 2026-07-15 — PLAN-015 checkpoint 5 preflight passed
+
+### Verified
+
+- npm CLI `10.9.8` targets the official registry; authenticated user
+  `ricardrabasso` owns organization `rabassoft`, with verified email and
+  `auth-and-writes` 2FA.
+- Both exact `0.2.0` versions are absent; core and Angular `next`/`latest`
+  remain at `0.1.0`, whose immutable live bytes pass verification.
+- The neutral-path core candidate remains 200245 bytes with SHA-512
+  `155ae047…d13e028a`; the exact publication command passed its final dry-run.
+- Review 047 repeated the full preflight boundary with zero findings. No token,
+  OTP or registry write occurred.
+
+### Next
+
+- Stop for immediate explicit approval of the exact core `0.2.0` publication
+  under `next` with no provenance.
+
+## 2026-07-15 — PLAN-015 checkpoint 4 completed
+
+### Completed
+
+- Committed the reviewed release preparation as `ce53dc1` and pushed it to
+  private `origin/develop`; local and remote-tracking commits matched.
+- Rebuilt from the clean committed tree and selected candidates whose bytes and
+  SHA-512 values exactly matched the pre-commit evidence.
+- Reverified both hashes and successful basename-relative npm dry-runs from the
+  fresh neutral path `/tmp/rabassoft-release-0.2.0.6bKsP2`.
+
+### Review and verification
+
+- Review 046 passed the complete authorization, commit, provenance,
+  reproducibility, neutral-path, command and external-boundary review with zero
+  findings.
+- Core remains 200245 bytes with SHA-512 `155ae047…d13e028a`; Angular remains
+  93133 bytes with SHA-512 `aa035adb…165a5154`.
+- No Git tag, GitHub Release, npm publication, dist-tag or settings mutation
+  occurred.
+- Checkpoint closure documentation remains intentionally uncommitted because
+  the authorization covered the selected source commit and its private push,
+  not a second Git mutation.
+
+### Next
+
+- Run checkpoint 5 read-only registry/identity preflight, then stop for
+  immediate approval of the exact core `0.2.0` publication command.
+
 ## 2026-07-15 — PLAN-015 checkpoint 4 authorized
 
 ### Authorization

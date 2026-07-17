@@ -139,10 +139,10 @@ Cada decisión debe registrar:
 ## D-009: Null y campos triestado
 
 - **Estado:** Implemented locally under completed PLAN-014 revision 0;
-  coordinated release PLAN-015 revision 0 for core and Angular `0.2.0` passed
-  review 042 cycle 2 and completed local checkpoints 1–3 after review 045 cycle
-  5 passed with zero findings; checkpoint 4 Git/clean-candidate selection and
-  publication remain separately gated
+  coordinated release PLAN-015 revision 0 for core and Angular `0.2.0`
+  completed checkpoints 1–6; core and Angular are verified live under `next`,
+  checkpoint 7 coordinated both `latest` aliases, and review 052 completed the
+  plan with zero findings
 - **Pregunta:** ¿Cómo representar `missing`, `null`, `false` y `true` sin ambigüedad?
 - **Motivo:** La primera versión usa booleanos binarios y no soporta null explícito.
 - **Retomar cuando:** Se amplíe el subconjunto de tipos.
@@ -611,11 +611,79 @@ Cada decisión debe registrar:
   separados para reescritura/saneamiento, visibilidad GitHub, metadata de
   paquetes y cada setting npm.
 
+## D-044: Plataforma multi-framework de referencia, consumo y demostración
+
+- **Estado:** Implemented; ADR-020 revision 0 and completed PLAN-016 revision 0
+  delivered the promoted M15 boundary after final review 063 cycle 2 passed
+  with zero findings on 17 July 2026
+- **Resolución:**
+  [Review 053](../reviews/053-d044-m15-reference-platform-promotion-readiness.md)
+  promotes only its section 3 boundary: one private neutral scenario catalog,
+  one first Angular 22 shell and isolated compatibility evidence.
+- **Pregunta:** ¿Cómo compartir escenarios neutrales entre consumidores
+  standard/sin framework, Angular, React, Vue y futuros targets, manteniendo
+  shells independientes que validen el producto en uso real sin convertir la
+  plataforma en fuente de verdad del core ni ocultar defectos de empaquetado?
+- **Motivo:** Los consumidores limpios actuales prueban contratos, tarballs y
+  compatibilidad, pero no permiten revisar de forma interactiva la experiencia,
+  el flujo controlado, la accesibilidad ni ejemplos completos de integración.
+- **Frontera promovida:** Plataforma privada al repositorio dentro de `apps/`
+  con un catálogo neutral compartido de schemas/UI Schemas, valores iniciales y
+  baseline, operaciones/issues esperados, metadata explicativa y fixtures. Cada
+  target tiene un shell independiente, importa exclusivamente entry points
+  Public y presenta paneles de schema/UI/value/baseline/operaciones/issues y
+  ejemplos copiables. La entrega implementada incluye el catálogo y un shell
+  Angular 22 standalone; complementa, no sustituye, los consumidores limpios.
+- **Límites de reutilización:** Compartir contratos de escenario y evidencia,
+  no lifecycle, reactividad, componentes, registries, templates ni una
+  abstracción visual común. El catálogo no es paquete público ni puede adquirir
+  runtime semantics. El target standard/DOM necesita decidir si será un ejemplo
+  directo sobre core o un adapter soportado; React, Vue y otros shells solo se
+  incorporan después de aceptar su propia frontera de adapter.
+- **Selección de review 053:** `apps/*` privados; catálogo y shells con ownership
+  separado; builder oficial Angular; workspace para desarrollo y consumidores
+  limpios para tarballs/npm/matriz; smoke Playwright/Chromium; snippets
+  build-checked; hosting y shells posteriores bajo gates propios. No activa
+  persistencia, backend, D-011/D-012, D-026, D-033, D-035 ni otra capacidad
+  diferida.
+- **Condición satisfecha:** PLAN-015 está completo; review 053 aceptó la
+  promoción estrecha, ADR-020 revisión 0 cerró su arquitectura y PLAN-016
+  revisión 0 completó checkpoints 1–8 tras review 063 ciclo 2. El alcance no se
+  amplía a shells posteriores.
+- **Documento entregado:** PLAN-016 revisión 0 está Completed. Cada shell
+  posterior requiere su propio alcance aceptado. No requiere SPEC nueva
+  mientras no cambie comportamiento público.
+
+## D-045: Familias de compatibilidad Angular legacy
+
+- **Estado:** Deferred; no existe soporte declarado fuera del rango Angular
+  `>=22.0.6 <23.0.0`
+- **Pregunta:** ¿Qué majors Angular anteriores a 19 deben soportarse y mediante
+  qué familias de código, paquetes/entry points, builds y matrices sin degradar
+  el adaptador moderno basado en Signal Forms?
+- **Motivo:** La adopción enterprise puede requerir versiones antiguas, pero el
+  artefacto actual se compila con Angular 22 y usa APIs que no permiten ampliar
+  honestamente el peer range hacia atrás. El floor exacto y la demanda real aún
+  no están seleccionados.
+- **Dirección futura no normativa:** Reutilizar el catálogo neutral D-044 y
+  mantener un shell canónico por familia de integración source-compatible,
+  acompañado por consumidores aislados para los extremos de cada matriz. No
+  duplicar una aplicación completa por patch o major compatible.
+- **Retomar cuando:** Exista un consumidor enterprise concreto o una selección
+  explícita de majors objetivo, y la base compartida M15 esté implementada.
+- **Documento esperado:** revisión de promoción propia; después, si procede,
+  ADR que revise ADR-009/010, límites de paquetes/entry points, toolchains,
+  mantenimiento y coexistencia. Requiere SPEC si cambia comportamiento Public
+  observable.
+
 ## 4. Próximo trabajo de decisión
 
-1. **Selección del siguiente hito:** M13/D-034/D-040 están completados. D-043
-   conserva la publicación del repositorio y automatización como trabajo
-   Deferred; no se promueve hasta una decisión explícita.
+1. **Selección posterior:** escoger una capacidad diferida respaldada por
+   demanda y superar su propia revisión de promoción antes de ADR/SPEC/plan.
+2. **D-043:** conserva la publicación del repositorio y automatización como
+   trabajo Deferred; no se promueve por D-044.
+3. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
+   familia de artefactos seleccionada.
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
@@ -631,6 +699,10 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                   |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 17-07-2026 | PLAN-016 checkpoints 1–2 completan workspace privado y authoring seguro del catálogo; review 057 ciclo 3 cierra sin hallazgos.           |
+| 16-07-2026 | Review 053 promueve D-044/M15 para ADR-020 y registra D-045 Deferred para futuras familias Angular anteriores a 19.                      |
+| 16-07-2026 | D-044 se amplía a plataforma multi-framework; el primer alcance candidato sigue limitado a catálogo neutral y shell Angular.             |
+| 16-07-2026 | PLAN-015 cierra la release coordinada 0.2.0; D-044 queda Candidate para revisar una aplicación Angular de referencia, consumo y demo.    |
 | 15-07-2026 | ADR-018 r3/PLAN-013 r4 cierran M13 con release manual/2FA verificada; D-043 difiere repositorio público, OIDC y provenance.              |
 | 15-07-2026 | PLAN-012 y M12 se completan; review 026 ciclo 6 cierra sin hallazgos tras siete correcciones; la matriz completa pasó en ciclo 3.        |
 | 15-07-2026 | SPEC-005 v0.1.1 queda Accepted tras review 024 ciclo 2 sin hallazgos; autoriza preparar PLAN-012, no implementar.                        |

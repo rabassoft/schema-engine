@@ -1,0 +1,23 @@
+{
+  "name": "@schema-engine-internal/reference-angular",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --workspace-root reference:snippets:check && ng build reference-angular",
+    "dev": "ng serve reference-angular --host 127.0.0.1 --port 4200",
+    "dev:e2e": "ng serve reference-angular --host 127.0.0.1 --port 4207",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@angular/common": "22.0.6",
+    "@angular/core": "22.0.6",
+    "@angular/forms": "22.0.6",
+    "@angular/platform-browser": "22.0.6",
+    "@rabassoft/schema-engine": "workspace:*",
+    "@rabassoft/schema-engine-angular": "workspace:*",
+    "@schema-engine-internal/reference-scenarios": "workspace:*",
+    "tslib": "^2.8.1"
+  }
+}

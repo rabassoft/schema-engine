@@ -10,6 +10,10 @@ dist/
 coverage/
 .vitest/
 .release/
+.angular/
+.playwright-browsers/
+playwright-report/
+test-results/
 *.tsbuildinfo
 
 # Tool caches
