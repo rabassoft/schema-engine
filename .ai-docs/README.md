@@ -211,6 +211,14 @@
   — Cycle 2 replaces only review 071's mutually exclusive workspace tabs with
   simultaneous Form preview/Schemas columns and passes responsive, workflow and
   Public-isolation review with zero findings.
+- [Reference workspace sober-theme review](./reviews/073-reference-workspace-theme-review.md)
+  — Cycle 2 passes the custom Auto/Light/Dark token system, restrained visual
+  hierarchy, accessible CodeMirror syntax palette and Public isolation with
+  zero findings.
+- [Reference workspace heading review](./reviews/074-reference-workspace-heading-review.md)
+  — Cycle 1 passes the integrated scenario explanation, single semantic group
+  headings, initially open State/Value evidence and Public isolation with zero
+  findings.
 
 ## Architecture Decision Records
 

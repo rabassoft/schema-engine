@@ -10,6 +10,7 @@ import { html } from '@codemirror/lang-html';
 import { javascript } from '@codemirror/lang-javascript';
 import { basicSetup, EditorView } from 'codemirror';
 
+import { referenceSyntaxTheme } from './reference-code-theme.js';
 import { ReferenceCopyButtonComponent } from './reference-copy-button.component.js';
 
 export type ReferenceCodeLanguage = 'html' | 'typescript';
@@ -33,10 +34,16 @@ export type ReferenceCodeLanguage = 'html' | 'typescript';
   `,
   styles: `
     .reference-code-example {
+      --syntax-keyword: #c4b5fd;
+      --syntax-string: #fda4af;
+      --syntax-literal: #86efac;
+      --syntax-property: #93c5fd;
+      --syntax-name: #e6e8ec;
+      --syntax-comment: #a9b0bc;
       overflow: hidden;
-      border: 1px solid #64748b;
-      border-radius: 0.55rem;
-      background: #111827;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-medium);
+      background: var(--color-code-background);
     }
 
     .code-example-toolbar {
@@ -46,24 +53,24 @@ export type ReferenceCodeLanguage = 'html' | 'typescript';
       align-items: center;
       justify-content: space-between;
       padding: 0.55rem 0.7rem;
-      border-bottom: 1px solid #64748b;
-      background: #f8fafc;
-      color: #172033;
+      border-bottom: 1px solid var(--color-border-strong);
+      background: var(--color-surface-muted);
+      color: var(--color-text);
       font-size: 0.82rem;
       font-weight: 800;
     }
 
     reference-code-example .cm-editor {
       max-height: 30rem;
-      background: #111827;
-      color: #f8fafc;
+      background: var(--color-code-background);
+      color: var(--color-code-text);
       font-size: 0.84rem;
     }
 
     reference-code-example .cm-gutters {
-      border-right-color: #64748b;
-      background: #172033;
-      color: #cbd5e1;
+      border-right-color: var(--color-border-strong);
+      background: var(--color-code-surface);
+      color: var(--color-code-muted);
     }
 
     reference-code-example .cm-scroller {
@@ -76,7 +83,7 @@ export type ReferenceCodeLanguage = 'html' | 'typescript';
     }
 
     reference-code-example .cm-editor.cm-focused {
-      outline: 3px solid #60a5fa;
+      outline: 3px solid var(--color-focus);
       outline-offset: -3px;
     }
   `,
@@ -102,6 +109,7 @@ export class ReferenceCodeExampleComponent implements AfterViewInit, OnDestroy {
         this.language === 'typescript'
           ? javascript({ typescript: true })
           : html(),
+        referenceSyntaxTheme,
         EditorView.editable.of(false),
         EditorView.lineWrapping,
         EditorView.contentAttributes.of({

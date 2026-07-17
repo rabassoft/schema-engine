@@ -45,7 +45,7 @@ type CopyStatus = 'idle' | 'copied' | 'failed';
     }
 
     .copy-status {
-      color: #526078;
+      color: var(--color-text-muted);
       font-size: 0.82rem;
     }
   `,

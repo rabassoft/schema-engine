@@ -99,9 +99,11 @@ function fixture() {
         '@codemirror/lang-html': '6.4.11',
         '@codemirror/lang-javascript': '6.2.5',
         '@codemirror/lang-json': '6.0.2',
+        '@codemirror/language': '6.12.4',
         '@rabassoft/schema-engine': 'workspace:*',
         '@rabassoft/schema-engine-angular': 'workspace:*',
         '@schema-engine-internal/reference-scenarios': 'workspace:*',
+        '@lezer/highlight': '1.2.3',
         codemirror: '6.0.2',
         tslib: '^2.8.1',
       },
@@ -110,7 +112,7 @@ function fixture() {
   write(
     root,
     'apps/reference-angular/src/main.ts',
-    "import '@angular/core/testing';\nimport '@codemirror/lang-html';\nimport '@codemirror/lang-javascript';\nimport '@codemirror/lang-json';\nimport '@rabassoft/schema-engine-angular';\nimport 'codemirror';\n",
+    "import '@angular/core/testing';\nimport '@codemirror/lang-html';\nimport '@codemirror/lang-javascript';\nimport '@codemirror/lang-json';\nimport '@codemirror/language';\nimport '@lezer/highlight';\nimport '@rabassoft/schema-engine-angular';\nimport 'codemirror';\n",
   );
   return root;
 }
@@ -119,7 +121,7 @@ test('accepts the exact private reference dependency boundary', () => {
   const root = fixture();
   try {
     assert.deepEqual(verifyReferenceBoundaries(root), {
-      inspectedImports: 9,
+      inspectedImports: 11,
       inspectedManifestTargets: 2,
       privateProjects: 2,
       publicProjects: 2,

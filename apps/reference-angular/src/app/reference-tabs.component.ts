@@ -65,8 +65,9 @@ export function referenceTabPanelId(tabSetId: string, tabId: string): string {
     }
 
     button[aria-selected='true'] {
-      border-color: currentColor;
-      background: #e7edff;
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft);
+      color: var(--color-primary-strong);
     }
   `,
 })

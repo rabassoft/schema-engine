@@ -150,14 +150,14 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="reference-workspace" aria-labelledby="scenario-heading">
+    <section
+      class="reference-workspace"
+      aria-labelledby="reference-scenario-heading"
+    >
       <header class="reference-card scenario-card">
-        <div class="scenario-copy">
-          <p class="eyebrow">Reference scenario</p>
-          <h2 id="scenario-heading">{{ selectedScenario().title }}</h2>
-          <p id="scenario-summary">{{ selectedScenario().summary }}</p>
-        </div>
-
+        <h2 class="eyebrow" id="reference-scenario-heading">
+          Reference scenario
+        </h2>
         <nav class="scenario-navigation" aria-label="Reference scenarios">
           <label for="scenario-selector">Scenario</label>
           <select
@@ -170,6 +170,15 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
               <option [value]="scenario.id">{{ scenario.title }}</option>
             }
           </select>
+          <p id="scenario-summary">{{ selectedScenario().summary }}</p>
+          <div class="explanation-grid">
+            @for (entry of selectedScenario().explanation; track entry.id) {
+              <article>
+                <h3>{{ entry.title }}</h3>
+                <p>{{ entry.body }}</p>
+              </article>
+            }
+          </div>
         </nav>
 
         <p
@@ -186,30 +195,13 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
       </header>
 
       <section
-        class="reference-card scenario-explanation"
-        aria-labelledby="scenario-explanation-heading"
-      >
-        <h3 id="scenario-explanation-heading">Scenario explanation</h3>
-        <div class="explanation-grid">
-          @for (entry of selectedScenario().explanation; track entry.id) {
-            <article>
-              <h4>{{ entry.title }}</h4>
-              <p>{{ entry.body }}</p>
-            </article>
-          }
-        </div>
-      </section>
-
-      <section
         class="reference-card consumer-workspace"
-        aria-labelledby="consumer-workspace-heading"
+        aria-labelledby="interactive-consumer-heading"
       >
         <div class="card-heading">
-          <div>
-            <p class="eyebrow">Interactive consumer</p>
-            <h3 id="consumer-workspace-heading">Consumer workspace</h3>
-          </div>
-          <span class="category-mark" aria-hidden="true">LAB</span>
+          <h2 class="eyebrow" id="interactive-consumer-heading">
+            Interactive consumer
+          </h2>
         </div>
         <div class="workspace-split">
           <section
@@ -619,14 +611,12 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
 
       <section
         class="reference-card tool-card tool-card--evidence"
-        aria-labelledby="evidence-heading"
+        aria-labelledby="observable-evidence-heading"
       >
         <div class="card-heading">
-          <div>
-            <p class="eyebrow">Observable evidence</p>
-            <h3 id="evidence-heading">Evidence</h3>
-          </div>
-          <span class="category-mark" aria-hidden="true">OBS</span>
+          <h2 class="eyebrow" id="observable-evidence-heading">
+            Observable evidence
+          </h2>
         </div>
         <reference-tabs
           tabSetId="evidence"
@@ -648,6 +638,7 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
               <reference-inspector-panel
                 label="Value"
                 testId="inspector-value"
+                [expanded]="true"
                 [value]="value()"
               />
               <reference-inspector-panel

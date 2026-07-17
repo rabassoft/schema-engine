@@ -1,7 +1,6 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   font-family:
-    Inter,
     ui-sans-serif,
     system-ui,
     -apple-system,
@@ -9,23 +8,49 @@
     'Segoe UI',
     sans-serif;
   line-height: 1.5;
-  background: #eef2f8;
-  color: #172033;
-  --surface: #ffffff;
-  --surface-subtle: #f8fafc;
-  --line: #8492a6;
-  --muted: #526078;
-  --focus: #1748c8;
-  --configuration: #4338ca;
-  --configuration-soft: #eef2ff;
-  --state: #075985;
-  --state-soft: #e0f2fe;
-  --runtime: #92400e;
-  --runtime-soft: #fef3c7;
-  --diagnostic: #b91c1c;
-  --diagnostic-soft: #fee2e2;
-  --success: #166534;
-  --shadow: 0 0.75rem 2rem rgb(15 23 42 / 8%);
+  --color-background: light-dark(#f4f5f7, #111318);
+  --color-surface: light-dark(#ffffff, #191c22);
+  --color-surface-muted: light-dark(#f7f8fa, #20242c);
+  --color-text: light-dark(#20242c, #e6e8ec);
+  --color-text-muted: light-dark(#5f6877, #a9b0bc);
+  --color-border: light-dark(#c5cad3, #3c424d);
+  --color-border-strong: light-dark(#8d96a5, #697282);
+  --color-primary: light-dark(#4338ca, #a5b4fc);
+  --color-primary-strong: light-dark(#3730a3, #c7d2fe);
+  --color-primary-soft: light-dark(#eef2ff, #292a46);
+  --color-secondary: light-dark(#475569, #aeb8c8);
+  --color-secondary-soft: light-dark(#eef0f3, #292e37);
+  --color-focus: light-dark(#2457d6, #93c5fd);
+  --color-success: light-dark(#166534, #86efac);
+  --color-success-soft: light-dark(#ecfdf3, #173527);
+  --color-warning: light-dark(#854d0e, #fcd34d);
+  --color-warning-soft: light-dark(#fffbeb, #3a2c16);
+  --color-danger: light-dark(#b42318, #fda4af);
+  --color-danger-soft: light-dark(#fff1f2, #3b1d25);
+  --syntax-keyword: light-dark(#5b21b6, #c4b5fd);
+  --syntax-string: light-dark(#9f1239, #fda4af);
+  --syntax-literal: light-dark(#166534, #86efac);
+  --syntax-property: light-dark(#1d4ed8, #93c5fd);
+  --syntax-name: var(--color-text);
+  --syntax-comment: var(--color-text-muted);
+  --color-code-background: #111827;
+  --color-code-surface: #172033;
+  --color-code-text: #f8fafc;
+  --color-code-muted: #cbd5e1;
+  --radius-small: 0.35rem;
+  --radius-medium: 0.55rem;
+  --radius-large: 0.75rem;
+  --shadow-surface: 0 0.15rem 0.4rem rgb(15 23 42 / 6%);
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 * {
@@ -36,8 +61,8 @@ body {
   min-width: 20rem;
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at top left, #dbeafe 0, transparent 28rem), #eef2f8;
+  background: var(--color-background);
+  color: var(--color-text);
 }
 
 main {
@@ -47,9 +72,9 @@ main {
 }
 
 h1 {
-  margin: 0 0 1.25rem;
-  font-size: clamp(1.7rem, 3vw, 2.35rem);
-  letter-spacing: -0.035em;
+  margin: 0;
+  font-size: clamp(1.55rem, 2.5vw, 2rem);
+  letter-spacing: -0.025em;
 }
 
 h2,
@@ -67,6 +92,41 @@ h5 {
   line-height: 1.2;
 }
 
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-kicker {
+  margin-bottom: 0.15rem;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.theme-control {
+  display: grid;
+  grid-template-columns: auto minmax(7rem, 9rem);
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.theme-control select {
+  width: 100%;
+  margin: 0;
+}
+
 .reference-workspace {
   display: grid;
   gap: 1rem;
@@ -74,29 +134,22 @@ h5 {
 
 .reference-card {
   min-width: 0;
-  border: 1px solid var(--line);
-  border-radius: 0.85rem;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-surface);
 }
 
 .scenario-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(15rem, 24rem);
-  gap: 1rem 2rem;
-  align-items: end;
+  gap: 0.75rem;
   padding: clamp(1rem, 2vw, 1.5rem);
-  border-top: 0.3rem solid var(--state);
 }
 
-.scenario-copy h2 {
-  margin-bottom: 0.4rem;
-  font-size: clamp(1.45rem, 2.5vw, 2rem);
-}
-
-.scenario-copy p:last-child {
+.scenario-navigation > p {
+  margin-top: 0.25rem;
   margin-bottom: 0;
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .scenario-navigation label {
@@ -104,13 +157,12 @@ h5 {
 }
 
 .scenario-navigation select {
-  width: 100%;
+  width: min(100%, 32rem);
   margin-inline: 0;
 }
 
 .state-pill {
   display: flex;
-  grid-column: 1 / -1;
   flex-wrap: wrap;
   gap: 0.45rem;
   margin-bottom: 0;
@@ -118,21 +170,12 @@ h5 {
 
 .state-pill span {
   padding: 0.3rem 0.65rem;
-  border: 1px solid #bae6fd;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: var(--state-soft);
-  color: #0c4a6e;
+  background: var(--color-secondary-soft);
+  color: var(--color-secondary);
   font-size: 0.88rem;
   font-weight: 700;
-}
-
-.scenario-explanation {
-  padding: 1rem 1.25rem;
-  border-left: 0.3rem solid var(--state);
-}
-
-.scenario-explanation > h3 {
-  margin-bottom: 0.75rem;
 }
 
 .explanation-grid {
@@ -144,16 +187,17 @@ h5 {
 .explanation-grid article {
   padding: 0.8rem;
   border-radius: 0.6rem;
-  background: var(--surface-subtle);
+  background: var(--color-surface-muted);
 }
 
-.explanation-grid h4 {
+.explanation-grid h3 {
   margin-bottom: 0.35rem;
+  font-size: 1rem;
 }
 
 .explanation-grid p {
   margin-bottom: 0;
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .consumer-workspace,
@@ -162,7 +206,7 @@ h5 {
 }
 
 .consumer-workspace {
-  border-top: 0.3rem solid var(--configuration);
+  border-color: var(--color-border-strong);
 }
 
 .workspace-split {
@@ -176,7 +220,7 @@ h5 {
   min-width: 0;
   margin-top: 0.75rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--color-border);
 }
 
 .preview-workspace .application-controls {
@@ -190,10 +234,9 @@ h5 {
   align-items: center;
   margin-bottom: 1rem;
   padding: 0.85rem;
-  border: 1px solid var(--line);
-  border-left: 0.3rem solid var(--configuration);
-  border-radius: 0.65rem;
-  background: var(--configuration-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-muted);
 }
 
 .application-controls h4,
@@ -211,11 +254,11 @@ h5 {
 
 .schema-heading p {
   margin-bottom: 0.75rem;
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .tool-card--evidence {
-  border-top: 0.3rem solid var(--runtime);
+  border-color: var(--color-border-strong);
 }
 
 .integration-panel article + article {
@@ -230,36 +273,13 @@ h5 {
   justify-content: space-between;
 }
 
-.card-heading h3 {
-  margin-bottom: 0.5rem;
-}
-
 .eyebrow {
   margin-bottom: 0.25rem;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-}
-
-.category-mark {
-  display: inline-flex;
-  min-width: 2.8rem;
-  min-height: 2.2rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.55rem;
-  background: var(--configuration-soft);
-  color: var(--configuration);
-  font-size: 0.7rem;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-}
-
-.tool-card--evidence .category-mark {
-  background: var(--runtime-soft);
-  color: var(--runtime);
 }
 
 .configuration-status {
@@ -268,7 +288,7 @@ h5 {
   gap: 0.5rem;
   align-items: center;
   margin-top: 0.75rem;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 0.88rem;
 }
 
@@ -277,24 +297,24 @@ h5 {
   align-items: center;
   min-height: 1.8rem;
   padding: 0.2rem 0.6rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: var(--surface-subtle);
-  color: #334155;
+  background: var(--color-surface-muted);
+  color: var(--color-secondary);
   font-weight: 800;
 }
 
 .status-badge[data-status='valid'] {
-  border-color: #86efac;
-  background: #dcfce7;
-  color: var(--success);
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
 }
 
 .status-badge[data-status='invalid-json'],
 .status-badge[data-status='compile-failed'] {
-  border-color: #fca5a5;
-  background: var(--diagnostic-soft);
-  color: var(--diagnostic);
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .configuration-actions {
@@ -304,23 +324,23 @@ h5 {
 .scope-guidance,
 .validation-caveat {
   margin: 0.65rem 0 0;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 0.88rem;
 }
 
 .validation-caveat {
   padding: 0.7rem;
-  border-left: 0.25rem solid var(--runtime);
-  background: var(--runtime-soft);
-  color: #713f12;
+  border-left: 0.25rem solid var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
 }
 
 .configuration-confirmation {
   margin-top: 0.75rem;
   padding: 0.85rem;
-  border: 2px solid var(--runtime);
-  border-radius: 0.65rem;
-  background: var(--runtime-soft);
+  border: 2px solid var(--color-warning);
+  border-radius: var(--radius-medium);
+  background: var(--color-warning-soft);
 }
 
 .configuration-confirmation h4 {
@@ -334,9 +354,9 @@ h5 {
 .draft-diagnostics {
   margin-top: 0.75rem;
   padding: 0.8rem;
-  border: 1px solid var(--line);
-  border-radius: 0.65rem;
-  background: var(--surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-muted);
 }
 
 .draft-diagnostics h4 {
@@ -357,17 +377,17 @@ h5 {
   gap: 0.35rem 0.55rem;
   align-items: baseline;
   padding: 0.65rem;
-  border-left: 0.25rem solid var(--line);
-  border-radius: 0.4rem;
-  background: var(--surface);
+  border-left: 0.25rem solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
 }
 
 .diagnostic-row--error {
-  border-left-color: var(--diagnostic);
+  border-left-color: var(--color-danger);
 }
 
 .diagnostic-row--warning {
-  border-left-color: var(--runtime);
+  border-left-color: var(--color-warning);
 }
 
 .diagnostic-row > span:not(.diagnostic-severity),
@@ -386,11 +406,11 @@ h5 {
 }
 
 .diagnostic-row--error .diagnostic-severity {
-  color: var(--diagnostic);
+  color: var(--color-danger);
 }
 
 .diagnostic-row--warning .diagnostic-severity {
-  color: var(--runtime);
+  color: var(--color-warning);
 }
 
 .decision-control,
@@ -402,57 +422,57 @@ h5 {
   width: fit-content;
   max-width: 100%;
   padding: 0.5rem;
-  background: var(--state-soft);
+  background: var(--color-primary-soft);
 }
 
 .decision-control legend {
-  color: var(--state);
+  color: var(--color-primary);
 }
 
 .form-surface {
   min-width: 0;
   padding: 1rem;
-  border: 1px solid var(--line);
-  border-radius: 0.7rem;
-  background: var(--surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-muted);
 }
 
 .pending-card {
   margin-top: 1rem;
   padding: 1rem;
-  border: 1px solid #fcd34d;
-  border-radius: 0.65rem;
-  background: var(--runtime-soft);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-medium);
+  background: var(--color-warning-soft);
 }
 
 .tab-panel {
   min-width: 0;
   margin-top: 0.65rem;
   padding: 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: 0.65rem;
-  background: var(--surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-muted);
 }
 
 .tool-card--configuration .tab-panel {
-  border-left: 0.25rem solid var(--configuration);
+  border-left: 0.25rem solid var(--color-primary);
 }
 
 .tool-card--evidence .tab-panel {
-  border-left: 0.25rem solid var(--state);
+  border-left: 0.25rem solid var(--color-secondary);
 }
 
 .diagnostics-panel {
-  border-left-color: var(--diagnostic) !important;
+  border-left-color: var(--color-danger) !important;
   background: linear-gradient(
     90deg,
-    var(--diagnostic-soft),
-    var(--surface-subtle) 1.25rem
+    var(--color-danger-soft),
+    var(--color-surface-muted) 1.25rem
   );
 }
 
 .integration-panel {
-  border-left-color: var(--runtime) !important;
+  border-left-color: var(--color-warning) !important;
 }
 
 .button-row {
@@ -476,10 +496,10 @@ h5 {
 
 fieldset,
 details {
-  border: 1px solid var(--line);
-  border-radius: 0.55rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
   padding: 0.75rem;
-  background: var(--surface);
+  background: var(--color-surface);
 }
 
 details {
@@ -503,27 +523,29 @@ select {
   min-height: 2.55rem;
   margin: 0.2rem;
   padding: 0.5rem 0.7rem;
-  border: 1px solid #64748b;
-  border-radius: 0.45rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
   font: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 button {
-  background: var(--surface);
-  color: #172033;
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
   font-weight: 700;
 }
 
 button:hover:not(:disabled) {
-  border-color: var(--focus);
-  background: #eff6ff;
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 
 button[aria-pressed='true'] {
-  border-color: var(--focus);
-  background: #dbeafe;
-  color: #173b8f;
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
 }
 
 button:disabled {
@@ -537,7 +559,7 @@ select:focus-visible,
 summary:focus-visible,
 .tab-panel:focus-visible,
 .workspace-panel:focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -545,9 +567,9 @@ pre {
   max-width: 100%;
   overflow: auto;
   padding: 0.85rem;
-  border-radius: 0.45rem;
-  background: #111827;
-  color: #f8fafc;
+  border-radius: var(--radius-small);
+  background: var(--color-code-background);
+  color: var(--color-code-text);
   font-size: 0.82rem;
   white-space: pre;
 }
@@ -561,14 +583,6 @@ pre {
 @media (max-width: 46rem) {
   main {
     padding: 0.75rem;
-  }
-
-  .scenario-card {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .state-pill {
-    grid-column: auto;
   }
 
   .card-heading {

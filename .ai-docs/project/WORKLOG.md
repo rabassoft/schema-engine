@@ -6,6 +6,51 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-17 — Reference workspace hierarchy corrected
+
+### Completed
+
+- Integrated the selected scenario's summary and explanation beneath its
+  selector and removed the separate explanation card.
+- Retained `Reference scenario`, `Interactive consumer` and
+  `Observable evidence` as the sole semantic group headings, removing their
+  redundant secondary titles.
+- Opened State/Value by default while leaving Baseline value and the other
+  native inspector disclosures collapsed.
+- Review 074 cycle 1 passed hierarchy, accessibility, visual, behavioral,
+  build, Chromium 8/8, boundary and Public-isolation checks with zero findings.
+- No Public contract, deferred capability, commit, push, publication or
+  external setting changed.
+
+### Next
+
+- Choose one concrete demand-backed deferred capability and perform its
+  promotion-readiness review before architecture or implementation work.
+
+## 2026-07-17 — Sober theme system completed
+
+### Completed
+
+- Replaced the accent-heavy light-only shell with a custom semantic token layer
+  and visible Auto/Light/Dark preference without adopting Pico, Simple.css or
+  another CSS framework.
+- Removed the background gradient, category stripes/markers and deep shadows;
+  unified cards, forms, tabs, statuses and focus around a restrained
+  slate/indigo hierarchy.
+- Corrected the first dark review's low-contrast fallback CodeMirror tokens
+  with one shared custom syntax theme for JSON, TypeScript and Angular template
+  examples.
+- Review 073 cycle 2 passed light/dark visual inspection, automatic preference,
+  390 px/200% behavior, 23 Angular-reference tests, 35 catalog tests, 369
+  boundaries, production build and Chromium 8/8 with zero findings.
+- No Public contract, deferred capability, framework CSS dependency, commit,
+  push, publication or external setting changed.
+
+### Next
+
+- Choose one concrete demand-backed deferred capability and perform its
+  promotion-readiness review before architecture or implementation work.
+
 ## 2026-07-17 — Simultaneous preview/schema layout completed
 
 ### Completed

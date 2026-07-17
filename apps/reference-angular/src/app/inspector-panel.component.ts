@@ -9,7 +9,7 @@ import { ReferenceCopyButtonComponent } from './reference-copy-button.component.
   imports: [ReferenceCopyButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <details [attr.data-testid]="testId">
+    <details [attr.data-testid]="testId" [open]="expanded">
       <summary>{{ label }}</summary>
       <div class="inspector-toolbar">
         <reference-copy-button [label]="label" [text]="serialized" />
@@ -28,6 +28,7 @@ import { ReferenceCopyButtonComponent } from './reference-copy-button.component.
 export class InspectorPanelComponent {
   @Input({ required: true }) label = '';
   @Input({ required: true }) testId = '';
+  @Input() expanded = false;
   @Input({ required: true }) value: unknown;
 
   protected get serialized(): string {

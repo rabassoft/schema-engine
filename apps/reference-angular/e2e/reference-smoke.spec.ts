@@ -10,8 +10,10 @@ const scenarios = [
 ] as const;
 
 async function selectScenario(page: Page, id: string, heading: string) {
-  await page.getByRole('combobox', { name: 'Scenario' }).selectOption(id);
-  await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+  const selector = page.getByRole('combobox', { name: 'Scenario' });
+  await selector.selectOption(id);
+  await expect(selector).toHaveValue(id);
+  await expect(selector.locator('option:checked')).toHaveText(heading);
   await expect(
     page.getByRole('form', { name: 'Selected schema form' }),
   ).toBeVisible();
@@ -30,7 +32,13 @@ async function openInspector(page: Page, testId: string) {
     await page.getByRole('tab', { name: tab, exact: true }).click();
   }
   const inspector = page.getByTestId(testId);
-  await inspector.locator('summary').click();
+  if (
+    !(await inspector.evaluate(
+      (element) => (element as HTMLDetailsElement).open,
+    ))
+  ) {
+    await inspector.locator('summary').click();
+  }
   return inspector.locator('pre');
 }
 
@@ -50,6 +58,41 @@ test.beforeEach(async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Schema Engine reference platform' }),
   ).toBeVisible();
+});
+
+test('switches between sober light, dark and automatic themes', async ({
+  page,
+}) => {
+  const theme = page.getByRole('combobox', { name: 'Theme' });
+  const root = page.locator('html');
+  const readColors = () =>
+    page.evaluate(() => {
+      const card = document.querySelector<HTMLElement>('.reference-card');
+      const editor = document.querySelector<HTMLElement>(
+        '.reference-json-editor .cm-editor',
+      );
+      return {
+        background: getComputedStyle(document.body).backgroundColor,
+        surface: card === null ? '' : getComputedStyle(card).backgroundColor,
+        text: getComputedStyle(document.body).color,
+        editor: editor === null ? '' : getComputedStyle(editor).backgroundColor,
+      };
+    });
+
+  await theme.selectOption('light');
+  await expect(root).toHaveAttribute('data-theme', 'light');
+  const light = await readColors();
+
+  await theme.selectOption('dark');
+  await expect(root).toHaveAttribute('data-theme', 'dark');
+  const dark = await readColors();
+  expect(dark.background).not.toBe(light.background);
+  expect(dark.surface).not.toBe(light.surface);
+  expect(dark.text).not.toBe(light.text);
+  expect(dark.editor).not.toBe(light.editor);
+
+  await theme.selectOption('auto');
+  await expect(root).not.toHaveAttribute('data-theme');
 });
 
 test('navigates every scenario and exposes the complete inspector inventory', async ({
@@ -126,7 +169,11 @@ test('highlights and copies integration code, editable JSON and inspector JSON',
 
   await page.getByRole('tab', { name: 'State', exact: true }).click();
   const valueInspector = page.getByTestId('inspector-value');
-  await valueInspector.locator('summary').click();
+  await expect(valueInspector).toHaveAttribute('open', '');
+  await expect(page.getByTestId('inspector-baseline')).not.toHaveAttribute(
+    'open',
+    '',
+  );
   await valueInspector.getByRole('button', { name: 'Copy Value' }).click();
   await expect(valueInspector.getByText('Copied Value.')).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(

@@ -30,6 +30,12 @@ for promotion-readiness review; no implementation is active.
 
 ## Latest completed work
 
+- Completed the private-shell hierarchy correction after review 074 cycle 1
+  passed with zero findings: the scenario explanation follows its selector,
+  each group has one semantic eyebrow heading and State/Value opens by default.
+- Completed the sober private-shell theme after review 073 cycle 2 passed with
+  zero findings: custom semantic tokens, Auto/Light/Dark control, restrained
+  slate/indigo surfaces and accessible shared CodeMirror syntax colors.
 - Completed the simultaneous private-shell layout after review 072 cycle 2
   passed with zero findings: Form preview remains visible in the left column
   while Schema/UI Schema editing occupies the right, with Evidence below and a
@@ -40,9 +46,6 @@ for promotion-readiness review; no implementation is active.
 - Completed PLAN-017 after final review 070 cycle 1 repeated all authority,
   implementation, browser, package, consumer, documentation and diff areas with
   zero findings; no active implementation task remains.
-- Completed PLAN-017 checkpoint 5 after review 069 cycle 2 passed with zero
-  findings: 390 px/200% reflow, focus, corrected boundary contrast, 535 tests,
-  artifacts/source/security and clean consumers all pass without Public drift.
 
 ## Exact next action
 
@@ -58,11 +61,10 @@ and perform a promotion-readiness review before drafting an ADR, SPEC or plan.
 - This machine uses an ignored workspace-local Playwright cache because its
   default global cache is owned by another user; no browser binary is tracked.
 - The working tree contains an unrelated Angular CLI analytics identifier in
-  `angular.json`; it remains outside PLAN-017 and will stay unstaged. The
-  completed PLAN-017 checkpoint is authorized for commit; no push is
+  `angular.json`; it remains outside PLAN-017 and will stay unstaged. No push is
   authorized.
-- The private application emits a 750 kB bundle warning at 939.81 kB but remains
-  below its 1 MB error budget; syntax viewing is isolated in a lazy 142.74 kB
+- The private application emits a 750 kB bundle warning at 943.65 kB but remains
+  below its 1 MB error budget; syntax viewing is isolated in a lazy 143.11 kB
   chunk. This is an optimization observation, not an implementation blocker.
 - D-045 remains Deferred. Standard/DOM, React, Vue, legacy Angular,
   persistence, hosting, CI, Public contract, release and repository-visibility
@@ -74,6 +76,20 @@ and perform a promotion-readiness review before drafting an ADR, SPEC or plan.
 
 ## Latest verification
 
+- Heading review 074 cycle 1 repeated the complete applicable hierarchy,
+  accessibility, layout, disclosure-state, browser, build, boundary and
+  Public-isolation review with zero findings.
+- Formatting, lint, strict app types, 23 Angular-reference tests, 35 catalog
+  tests, three snippets, 369 boundaries, nine boundary-verifier tests, the
+  943.08 kB official production build plus lazy 143.11 kB code-viewer chunk and
+  Chromium 8/8 pass.
+- Theme review 073 cycle 2 repeated the complete applicable token, light/dark,
+  automatic-preference, syntax, responsive/accessibility, build, browser,
+  boundary and Public-isolation review with zero findings.
+- Formatting, lint, strict app types, 23 Angular-reference tests, 35 catalog
+  tests, three snippets, 369 boundaries, nine boundary-verifier tests, the
+  943.65 kB official production build plus lazy 143.11 kB code-viewer chunk and
+  Chromium 8/8 pass.
 - Layout review 072 cycle 2 repeated the complete applicable authority,
   simultaneous-workflow, responsive/accessibility, browser, build, boundary
   and Public-isolation review with zero findings.
@@ -111,6 +127,8 @@ and perform a promotion-readiness review before drafting an ADR, SPEC or plan.
 - Final review: `.ai-docs/reviews/070-plan-017-final-implementation-review.md`
 - Follow-up review: `.ai-docs/reviews/071-reference-workspace-follow-up-review.md`
 - Current layout review: `.ai-docs/reviews/072-reference-workspace-simultaneous-layout-review.md`
+- Current theme review: `.ai-docs/reviews/073-reference-workspace-theme-review.md`
+- Current heading review: `.ai-docs/reviews/074-reference-workspace-heading-review.md`
 - Accepted architecture: `.ai-docs/adrs/020-plataforma-referencia-multiframework.md`
 - Promotion boundary: `.ai-docs/reviews/053-d044-m15-reference-platform-promotion-readiness.md`
 - Deferred boundaries: `.ai-docs/roadmap/deferred-decisions.md`

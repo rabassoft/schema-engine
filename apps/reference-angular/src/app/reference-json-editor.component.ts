@@ -12,6 +12,7 @@ import type { AfterViewInit, ElementRef, OnDestroy } from '@angular/core';
 import { json } from '@codemirror/lang-json';
 import { basicSetup, EditorView } from 'codemirror';
 
+import { referenceSyntaxTheme } from './reference-code-theme.js';
 import { ReferenceCopyButtonComponent } from './reference-copy-button.component.js';
 
 @Component({
@@ -35,22 +36,35 @@ import { ReferenceCopyButtonComponent } from './reference-copy-button.component.
       align-items: center;
       justify-content: space-between;
       margin-bottom: 0.45rem;
-      color: #526078;
+      color: var(--color-text-muted);
       font-size: 0.82rem;
       font-weight: 800;
     }
 
     .reference-json-editor {
       overflow: hidden;
-      border: 1px solid #64748b;
-      border-radius: 0.5rem;
-      background: #fff;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-medium);
+      background: var(--color-surface);
     }
 
     reference-json-editor .reference-json-editor .cm-editor {
       min-height: 16rem;
       max-height: 34rem;
+      background: var(--color-surface);
+      color: var(--color-text);
       font-size: 0.9rem;
+    }
+
+    reference-json-editor .reference-json-editor .cm-gutters {
+      border-right-color: var(--color-border);
+      background: var(--color-surface-muted);
+      color: var(--color-text-muted);
+    }
+
+    reference-json-editor .reference-json-editor .cm-activeLine,
+    reference-json-editor .reference-json-editor .cm-activeLineGutter {
+      background: var(--color-primary-soft);
     }
 
     reference-json-editor .reference-json-editor .cm-scroller {
@@ -59,7 +73,7 @@ import { ReferenceCopyButtonComponent } from './reference-copy-button.component.
     }
 
     reference-json-editor .reference-json-editor .cm-editor.cm-focused {
-      outline: 3px solid #2457d6;
+      outline: 3px solid var(--color-focus);
       outline-offset: -1px;
     }
   `,
@@ -108,6 +122,7 @@ export class ReferenceJsonEditorComponent implements AfterViewInit, OnDestroy {
       extensions: [
         basicSetup,
         json(),
+        referenceSyntaxTheme,
         EditorView.lineWrapping,
         EditorView.contentAttributes.of(contentAttributes),
         EditorView.updateListener.of((update) => {

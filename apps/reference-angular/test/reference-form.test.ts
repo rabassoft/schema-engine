@@ -394,8 +394,18 @@ describe('ReferenceFormComponent application ownership', () => {
       'Matches baseline',
     );
     expect(
-      root.querySelector('#scenario-explanation-heading')?.textContent,
-    ).toBe('Scenario explanation');
+      root.querySelector('#reference-scenario-heading')?.textContent,
+    ).toContain('Reference scenario');
+    expect(root.querySelector('#scenario-explanation-heading')).toBeNull();
+    expect(
+      root.querySelector('.scenario-navigation .explanation-grid'),
+    ).not.toBeNull();
+    expect(
+      root.querySelector('#interactive-consumer-heading')?.textContent,
+    ).toContain('Interactive consumer');
+    expect(
+      root.querySelector('#observable-evidence-heading')?.textContent,
+    ).toContain('Observable evidence');
     for (const entry of fixture.componentInstance.selectedScenario()
       .explanation) {
       expect(root.textContent).toContain(entry.title);
@@ -422,6 +432,16 @@ describe('ReferenceFormComponent application ownership', () => {
       root.querySelector('[data-testid="inspector-value"] summary')
         ?.textContent,
     ).toBe('Value');
+    expect(
+      root
+        .querySelector('[data-testid="inspector-value"]')
+        ?.hasAttribute('open'),
+    ).toBe(true);
+    expect(
+      root
+        .querySelector('[data-testid="inspector-baseline"]')
+        ?.hasAttribute('open'),
+    ).toBe(false);
     expect(root.textContent).toContain('A required display name.');
 
     const component = fixture.componentInstance;
