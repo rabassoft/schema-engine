@@ -5,7 +5,7 @@ export const referenceSnippets = Object.freeze({
     'private readonly selectionState = signal<ScenarioSelection>(',
     '  Object.freeze({',
     '    scenario: initialScenario,',
-    '    compilation: compileFormDefinition(initialScenario.compileInput),',
+    '    compilation: initialCompilation,',
     '  }),',
     ');',
     'private readonly valueState = signal<Readonly<object>>(',
@@ -67,7 +67,7 @@ export const referenceSnippets = Object.freeze({
   'controlled-form-template': [
     '<form',
     '  aria-label="Selected schema form"',
-    '  [schemaForm]="config"',
+    '  [schemaForm]="mount.config"',
     '  (schemaOperation)="handleOperation($event)"',
     '  (schemaDiagnostics)="recordRuntimeDiagnostics($event)"',
     '></form>',

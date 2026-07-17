@@ -16,6 +16,33 @@ const PRIVATE_PROJECTS = Object.freeze({
 
 const PUBLIC_PROJECTS = Object.freeze(['packages/core', 'packages/angular']);
 
+export const ANGULAR_PREBUNDLE_EXCLUDES = Object.freeze([
+  '@codemirror/autocomplete',
+  '@codemirror/commands',
+  '@codemirror/lang-css',
+  '@codemirror/lang-html',
+  '@codemirror/lang-javascript',
+  '@codemirror/lang-json',
+  '@codemirror/language',
+  '@codemirror/lint',
+  '@codemirror/search',
+  '@codemirror/state',
+  '@codemirror/view',
+  '@lezer/common',
+  '@lezer/css',
+  '@lezer/highlight',
+  '@lezer/html',
+  '@lezer/javascript',
+  '@lezer/json',
+  '@lezer/lr',
+  '@marijn/find-cluster-break',
+  '@schema-engine-internal/reference-scenarios',
+  'codemirror',
+  'crelt',
+  'style-mod',
+  'w3c-keyname',
+]);
+
 const FORBIDDEN_PUBLIC_PATH =
   /(?:^|\/)(?:apps|e2e|generated|playwright-report|test-results)(?:\/|$)|\.playwright-browsers/u;
 
@@ -230,11 +257,22 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
       '@angular/core',
       '@angular/forms',
       '@angular/platform-browser',
+      '@codemirror/lang-html',
+      '@codemirror/lang-javascript',
+      '@codemirror/lang-json',
       '@rabassoft/schema-engine',
       '@rabassoft/schema-engine-angular',
       '@schema-engine-internal/reference-scenarios',
+      'codemirror',
       'tslib',
     ].sort(),
+  );
+  const workspace = readJson(join(root, 'angular.json'));
+  assert.deepEqual(
+    workspace.projects?.['reference-angular']?.architect?.serve?.options
+      ?.prebundle?.exclude,
+    ANGULAR_PREBUNDLE_EXCLUDES,
+    'reference-angular: prebundle exclusions must match the approved private dependency graph',
   );
 
   const inspectedManifestTargets = PUBLIC_PROJECTS.reduce(

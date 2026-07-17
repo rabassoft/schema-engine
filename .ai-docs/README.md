@@ -181,6 +181,36 @@
 - [PLAN-016 final implementation review](./reviews/063-plan-016-final-implementation-review.md)
   — Cycle 2 repeated authority, implementation, browser, Public isolation and
   persistent-state review with zero findings; PLAN-016/M15 are complete.
+- [PLAN-017 complete review](./reviews/064-plan-017-review.md) — Cycle 3 passed
+  the private UX, editor state, runtime replacement, accessibility, dependency
+  and Public-isolation contract with zero findings; revision 0 is Approved.
+- [PLAN-017 checkpoint 1 review](./reviews/065-plan-017-checkpoint-1-review.md)
+  — Cycle 2 passed exact private dependencies, accessible tab/editor
+  primitives, lifecycle, keyboard, build and Public isolation with zero
+  findings.
+- [PLAN-017 checkpoint 2 review](./reviews/066-plan-017-checkpoint-2-review.md)
+  — Cycle 2 passed semantic cards, responsive Configuration/Evidence tabs,
+  complete inspector reachability and Chromium 4/4 with zero findings.
+- [PLAN-017 checkpoint 3 review](./reviews/067-plan-017-checkpoint-3-review.md)
+  — Cycle 2 passed configuration ownership, exact draft validation, stale-safe
+  application and complete runtime replacement with zero findings.
+- [PLAN-017 checkpoint 4 review](./reviews/068-plan-017-checkpoint-4-review.md)
+  — Cycle 2 passed diagnostic routing, validation caveat, visible reset and
+  confirmation-focus behavior with zero findings.
+- [PLAN-017 checkpoint 5 review](./reviews/069-plan-017-checkpoint-5-review.md)
+  — Cycle 2 passed responsive/accessibility and full release-isolation
+  regression after correcting component-boundary contrast.
+- [PLAN-017 final implementation review](./reviews/070-plan-017-final-implementation-review.md)
+  — Cycle 1 repeated the complete implementation and verification matrix with
+  zero findings; PLAN-017 is complete.
+- [Reference workspace follow-up review](./reviews/071-reference-workspace-follow-up-review.md)
+  — Cycle 2 passed the merged full-width workspace, real Integration syntax
+  highlighting, accessible copy actions and private/Public isolation with zero
+  findings.
+- [Reference workspace simultaneous-layout review](./reviews/072-reference-workspace-simultaneous-layout-review.md)
+  — Cycle 2 replaces only review 071's mutually exclusive workspace tabs with
+  simultaneous Form preview/Schemas columns and passes responsive, workflow and
+  Public-isolation review with zero findings.
 
 ## Architecture Decision Records
 
@@ -249,6 +279,15 @@
 - [PLAN-014: Nullable primitive leaves](./plans/014-nullable-primitive-leaves.md) — Completed revision 0 after final review 041 cycle 2 passed with zero findings
 - [PLAN-015: Coordinated Experimental 0.2 release](./plans/015-coordinated-experimental-0-2-release.md) — Approved revision 0 for local checkpoints 1–3 after review 042 cycle 2 passed with zero findings
 - [PLAN-016: Private reference platform and Angular 22 shell](./plans/016-private-reference-platform.md) — Completed revision 0 after final review 063 cycle 2 passed with zero findings
+- [PLAN-017: Reference workspace UX and configuration laboratory](./plans/017-reference-workspace-ux.md) — Completed revision 0 after final review 070 cycle 1 repeated the complete implementation and verification matrix with zero findings
+
+Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
+[066](./reviews/066-plan-017-checkpoint-2-review.md) and
+[067](./reviews/067-plan-017-checkpoint-3-review.md), plus
+[068](./reviews/068-plan-017-checkpoint-4-review.md) and
+[069](./reviews/069-plan-017-checkpoint-5-review.md) each passed cycle 2 with
+zero findings; [final review 070](./reviews/070-plan-017-final-implementation-review.md)
+passed cycle 1 with zero findings and completed PLAN-017.
 
 Accepted publication architecture: [ADR-018 revision 3](./adrs/018-licencia-dual-publicacion-experimental.md)
 selects dual AGPL/commercial licensing and public Experimental packages while

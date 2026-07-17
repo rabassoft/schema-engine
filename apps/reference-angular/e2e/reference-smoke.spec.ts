@@ -18,11 +18,32 @@ async function selectScenario(page: Page, id: string, heading: string) {
   await expect(page.getByRole('alert')).toHaveCount(0);
 }
 
+async function expectSchemas(page: Page) {
+  await expect(
+    page.getByRole('tablist', { name: 'Schema documents' }),
+  ).toBeVisible();
+}
+
 async function openInspector(page: Page, testId: string) {
+  const tab = inspectorTab[testId];
+  if (tab !== undefined) {
+    await page.getByRole('tab', { name: tab, exact: true }).click();
+  }
   const inspector = page.getByTestId(testId);
   await inspector.locator('summary').click();
   return inspector.locator('pre');
 }
+
+const inspectorTab: Readonly<Record<string, string>> = {
+  'inspector-value': 'State',
+  'inspector-baseline': 'State',
+  'inspector-definition': 'Definition',
+  'inspector-snapshot': 'Runtime',
+  'inspector-history': 'Runtime',
+  'inspector-compiler-diagnostics': 'Diagnostics',
+  'inspector-runtime-diagnostics': 'Diagnostics',
+  'inspector-issues': 'Diagnostics',
+};
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -34,27 +55,254 @@ test.beforeEach(async ({ page }) => {
 test('navigates every scenario and exposes the complete inspector inventory', async ({
   page,
 }) => {
+  const previewBounds = await page
+    .getByRole('heading', { name: 'Form preview' })
+    .boundingBox();
+  const schemaBounds = await page
+    .getByRole('heading', { name: 'Schemas' })
+    .boundingBox();
+  expect(previewBounds).not.toBeNull();
+  expect(schemaBounds).not.toBeNull();
+  expect(schemaBounds!.x).toBeGreaterThan(previewBounds!.x);
+
   for (const [id, heading] of scenarios) {
     await selectScenario(page, id, heading);
   }
 
-  for (const name of [
-    'Schema',
-    'UI Schema',
-    'Value',
-    'Baseline value',
-    'Normalized definition',
-    'Runtime snapshot',
-    'Compiler diagnostics',
-    'Runtime diagnostics',
-    'Validation issues',
-    'Operation history',
-  ]) {
-    await expect(page.getByText(name, { exact: true })).toBeVisible();
+  for (const testId of Object.keys(inspectorTab)) {
+    await expect(await openInspector(page, testId)).toBeVisible();
   }
+  await expectSchemas(page);
+  await page.getByRole('tab', { name: 'Schema', exact: true }).click();
+  await expect(
+    page.getByRole('textbox', { name: 'JSON Schema editor' }),
+  ).toBeVisible();
+  await page.getByRole('tab', { name: 'UI Schema', exact: true }).click();
+  await expect(
+    page.getByRole('textbox', { name: 'UI Schema editor' }),
+  ).toBeVisible();
+  await page.getByRole('tab', { name: 'Integration', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Build-checked integration excerpts' }),
   ).toBeVisible();
+});
+
+test('highlights and copies integration code, editable JSON and inspector JSON', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], {
+    origin: 'http://127.0.0.1:4207',
+  });
+  await expectSchemas(page);
+  await page.getByRole('button', { name: 'Copy JSON Schema editor' }).click();
+  await expect(page.getByText('Copied JSON Schema editor.')).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    '"$schema"',
+  );
+
+  await page.getByRole('tab', { name: 'Integration', exact: true }).click();
+  const snippet = page.getByTestId('snippet-application-signals');
+  const code = snippet.getByRole('textbox', {
+    name: 'Application signals excerpt code',
+  });
+  await expect(code).toBeVisible();
+  const tokenColors = await snippet
+    .locator('.cm-content span')
+    .evaluateAll(
+      (tokens) =>
+        new Set(tokens.map((token) => getComputedStyle(token).color)).size,
+    );
+  expect(tokenColors).toBeGreaterThan(1);
+  await snippet
+    .getByRole('button', { name: 'Copy Application signals excerpt' })
+    .click();
+  await expect(
+    snippet.getByText('Copied Application signals excerpt.'),
+  ).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    'private readonly selectionState',
+  );
+
+  await page.getByRole('tab', { name: 'State', exact: true }).click();
+  const valueInspector = page.getByTestId('inspector-value');
+  await valueInspector.locator('summary').click();
+  await valueInspector.getByRole('button', { name: 'Copy Value' }).click();
+  await expect(valueInspector.getByText('Copied Value.')).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    '"name": "Ada"',
+  );
+});
+
+test('validates, cancels, applies and restores configuration drafts safely', async ({
+  page,
+}) => {
+  await expectSchemas(page);
+  await page.getByRole('tab', { name: 'Schema', exact: true }).click();
+  const editor = page.getByRole('textbox', { name: 'JSON Schema editor' });
+  const editedSchema = JSON.stringify(
+    {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'object',
+      properties: {
+        name: { type: 'string', title: 'Name', minLength: 1 },
+        age: { type: 'integer', title: 'Age', minimum: 0 },
+        active: { type: 'boolean', title: 'Active' },
+      },
+      required: ['name', 'age', 'active'],
+    },
+    undefined,
+    2,
+  );
+
+  await editor.fill('{');
+  await page.getByRole('button', { name: 'Validate configuration' }).click();
+  await expect(page.getByText('Invalid JSON', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Configuration diagnostics' }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Focus JSON Schema editor' }).click();
+  await expect(editor).toBeFocused();
+  await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue('Ada');
+
+  await page.getByRole('button', { name: 'Cancel changes' }).click();
+  await expect(page.getByText('Not validated', { exact: true })).toBeVisible();
+  await expect(editor).toContainText('"$schema"');
+  await editor.fill('{"type":"string"}');
+  await page.getByRole('button', { name: 'Validate configuration' }).click();
+  await expect(
+    page.getByText('Compilation failed', { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('ROOT_TYPE_MUST_BE_OBJECT')).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Focus schema editor' })
+    .first()
+    .click();
+  await expect(editor).toBeFocused();
+  await page.getByRole('button', { name: 'Cancel changes' }).click();
+  await editor.fill(editedSchema);
+  await page.getByRole('button', { name: 'Validate configuration' }).click();
+  await expect(page.getByText('Valid', { exact: true })).toBeVisible();
+
+  await page.getByRole('textbox', { name: 'Name' }).fill('Grace');
+  await page.getByRole('button', { name: 'Apply configuration' }).click();
+  const confirmation = page.getByRole('alertdialog', {
+    name: 'Confirm configuration reset',
+  });
+  await expect(confirmation).toBeVisible();
+  await expect(
+    confirmation.getByRole('button', { name: 'Apply and reset form' }),
+  ).toBeFocused();
+  await confirmation
+    .getByRole('button', { name: 'Keep current state' })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Apply configuration' }),
+  ).toBeFocused();
+  await page.getByRole('button', { name: 'Apply configuration' }).click();
+  await confirmation
+    .getByRole('button', { name: 'Apply and reset form' })
+    .click();
+  await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue('Ada');
+  await expect(page.getByRole('combobox', { name: 'Role' })).toHaveCount(0);
+  await expect(
+    page.getByText('Matches applied configuration', { exact: true }),
+  ).toBeVisible();
+  await page.getByRole('tab', { name: 'Diagnostics', exact: true }).click();
+  await expect(
+    page.getByText(/do not prove that the edited schema is fully validated/u),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Scenario validation issues', { exact: true }),
+  ).toBeVisible();
+
+  await page
+    .getByRole('button', { name: 'Restore scenario configuration' })
+    .click();
+  const restoreConfirmation = page.getByRole('alertdialog', {
+    name: 'Confirm configuration reset',
+  });
+  await expect(
+    restoreConfirmation.getByRole('button', { name: 'Restore scenario' }),
+  ).toBeFocused();
+  await restoreConfirmation
+    .getByRole('button', { name: 'Restore scenario' })
+    .click();
+  await expect(page.getByRole('combobox', { name: 'Role' })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Restore scenario configuration' }),
+  ).toBeDisabled();
+});
+
+test('keeps both tab sets keyboard-accessible and usable at a narrow viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole('heading', { name: 'Form preview' }),
+  ).toBeVisible();
+  await expectSchemas(page);
+  await expect(
+    page.getByRole('tablist', { name: 'Evidence views' }),
+  ).toBeVisible();
+
+  const state = page.getByRole('tab', { name: 'State', exact: true });
+  await state.focus();
+  await expect
+    .poll(() =>
+      state.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return `${style.outlineStyle} ${style.outlineWidth}`;
+      }),
+    )
+    .toBe('solid 3px');
+  await state.press('End');
+  await expect(
+    page.getByRole('tab', { name: 'Integration', exact: true }),
+  ).toHaveAttribute('aria-selected', 'true');
+  await expect(
+    page.getByRole('heading', { name: 'Build-checked integration excerpts' }),
+  ).toBeVisible();
+
+  await page
+    .getByRole('tab', { name: 'Integration', exact: true })
+    .press('Home');
+  await expect(state).toHaveAttribute('aria-selected', 'true');
+  await state.press('ArrowRight');
+  await expect(
+    page.getByRole('tab', { name: 'Definition', exact: true }),
+  ).toHaveAttribute('aria-selected', 'true');
+
+  const viewport = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
+});
+
+test('reflows at 200% zoom without hiding configuration actions', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 800, height: 900 });
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = '2';
+  });
+  await expectSchemas(page);
+  await page.getByRole('tab', { name: 'Schema', exact: true }).click();
+  await expect(
+    page.getByRole('textbox', { name: 'JSON Schema editor' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Validate configuration' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Restore scenario configuration' }),
+  ).toBeVisible();
+  const viewport = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
 });
 
 test('shows confirm, reject, pending, stale, reset and application controls', async ({
@@ -98,13 +346,17 @@ test('shows confirm, reject, pending, stale, reset and application controls', as
   );
   await page.getByRole('button', { name: 'Locale es' }).click();
   await page.getByRole('button', { name: 'All issues' }).click();
-  await expect(page.getByTestId('reference-state')).toContainText(
-    'locale es · all validation',
-  );
+  const state = page.getByTestId('reference-state');
+  await expect(state.getByText('locale es', { exact: true })).toBeVisible();
+  await expect(
+    state.getByText('all validation', { exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Reset scenario' }).click();
-  await expect(page.getByTestId('reference-state')).toContainText(
-    'locale en · touched validation · 0 pending',
-  );
+  await expect(state.getByText('locale en', { exact: true })).toBeVisible();
+  await expect(
+    state.getByText('touched validation', { exact: true }),
+  ).toBeVisible();
+  await expect(state.getByText('0 pending', { exact: true })).toBeVisible();
 });
 
 test('covers nested, collection and nullable keyboard interaction with accessible groups', async ({
@@ -124,6 +376,28 @@ test('covers nested, collection and nullable keyboard interaction with accessibl
   await expect(
     page.getByRole('group', { name: 'Team collection controls' }),
   ).toBeVisible();
+  await page.getByRole('textbox', { name: 'New member ID' }).fill('temporary');
+  await selectScenario(
+    page,
+    'controlled-primitives',
+    'Controlled primitive fields',
+  );
+  await selectScenario(page, 'stable-team', 'Stable team collection');
+  await expect(
+    page.getByRole('textbox', { name: 'New member ID' }),
+  ).toHaveValue('new-member');
+  await expect(
+    page.getByRole('textbox', { name: 'New member name' }),
+  ).toHaveValue('New member');
+  await page.getByRole('textbox', { name: 'New member ID' }).fill('linus');
+  await page.getByRole('textbox', { name: 'New member name' }).fill('Linus');
+  await page.getByRole('button', { name: 'Reset scenario' }).click();
+  await expect(
+    page.getByRole('textbox', { name: 'New member ID' }),
+  ).toHaveValue('new-member');
+  await expect(
+    page.getByRole('textbox', { name: 'New member name' }),
+  ).toHaveValue('New member');
   await page.getByRole('textbox', { name: 'New member ID' }).fill('linus');
   await page.getByRole('textbox', { name: 'New member name' }).fill('Linus');
   await page.getByRole('button', { name: 'Insert member at end' }).click();

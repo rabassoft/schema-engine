@@ -6,6 +6,229 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-17 — Simultaneous preview/schema layout completed
+
+### Completed
+
+- Removed the mutually exclusive Form preview/Schemas outer tabs introduced by
+  the preceding follow-up and deleted their redundant application state.
+- Rendered application controls and Form preview continuously in the left
+  column and Schema/UI Schema editing continuously in the right column, with
+  Observable Evidence below the complete workspace.
+- Added a responsive one-column fallback while retaining only the meaningful
+  Schema document and Evidence tab sets.
+- Review 072 cycle 2 passed wide visual inspection, direct edit/apply workflow,
+  390 px/200% reflow, 22 Angular-reference tests, 35 neutral-catalog tests, the
+  939.81 kB production build, Chromium 7/7, boundaries and Public-isolation
+  checks with zero findings.
+- No Public contract, deferred capability, accepted plan, commit, push,
+  publication or external setting changed.
+
+### Next
+
+- Choose one concrete demand-backed deferred capability and perform its
+  promotion-readiness review before architecture or implementation work.
+
+## 2026-07-17 — Reference workspace follow-up completed
+
+### Completed
+
+- Merged the former Interactive consumer and Configuration areas into one
+  full-width Consumer workspace with Form preview/Schemas views and retained
+  Observable Evidence as the following independent region.
+- Added language-aware read-only TypeScript/Angular-template highlighting and
+  accessible exact-copy controls for Integration excerpts, editable JSON
+  drafts and serialized inspector evidence.
+- Kept the language tooling in a deferred 142.74 kB chunk after the first
+  static attempt exceeded the initial limit; the final 940.61 kB initial bundle
+  remains below its 1 MB error budget.
+- Review 071 cycle 2 repeated the applicable authority, hierarchy,
+  highlighting/copy, accessibility, regression, browser, visual and isolation
+  areas with zero findings. Scoped tests pass 22 Angular-reference tests, 35
+  catalog tests, Chromium 7/7, three snippets, 359 boundaries and nine boundary
+  verifier tests.
+- No Public contract, deferred capability, accepted document, commit, push,
+  publication or external setting changed.
+
+### Next
+
+- Choose one concrete demand-backed deferred capability and perform its
+  promotion-readiness review before architecture or implementation work.
+
+## 2026-07-17 — PLAN-017 completed
+
+### Completed
+
+- Completed all six checkpoints of the private reference workspace UX and
+  configuration laboratory: accessible tabs/cards, CodeMirror JSON editors,
+  safe draft state machine, diagnostics, focus/reset behavior and full
+  responsive/isolation regression.
+- Final review 070 cycle 1 repeated authority, dependency, UI, state,
+  diagnostics, accessibility, runtime, browser, package, consumer,
+  documentation and diff areas from the beginning with zero findings.
+- Final matrix passes frozen install, format/docs/lint/types, 535 unit tests, 14
+  tooling tests, snippets, 348 boundaries, production build, Chromium 6/6,
+  packages/artifacts/source/security and clean 22.0.6/22.0.7 consumers.
+- Public source/manifests/exports/versions remain unchanged. The private build's
+  915.88 kB size emits a documented warning but stays below its 1 MB limit.
+- No active implementation task, blocker, commit, push, publication or external
+  setting mutation remains from this plan.
+
+### Next
+
+- Choose one concrete demand-backed deferred capability and perform its
+  promotion-readiness review before architecture or implementation work.
+
+## 2026-07-17 — PLAN-017 checkpoint 5 completed
+
+### Completed
+
+- Exercised all six scenarios, two tab sets, editors, diagnostics, confirmation,
+  operation modes, inspectors and snippets in Chromium 6/6.
+- Proved 390 px and 200% reflow without global overflow and a visible 3 px focus
+  ring; visual inspection confirmed wide-layout hierarchy.
+- Review 069 found and corrected sub-3:1 control/editor borders; general
+  boundaries now measure 3.16:1 and interactive/editor boundaries 4.76:1.
+- Frozen install, format/docs/lint/types, 535 unit tests, 14 tooling tests,
+  snippets, 348 boundaries, build, packages, exact artifacts, source rebuilds,
+  security and clean consumers pass after the correction.
+- Public source/manifests/exports/versions have no diff. No commit, push,
+  publication or external-setting mutation occurred.
+
+### Next
+
+- Execute PLAN-017 checkpoint 6: repeat the complete implementation review and
+  verification matrix from the beginning, then close only on zero findings.
+
+## 2026-07-17 — PLAN-017 checkpoint 4 completed
+
+### Completed
+
+- Added deterministic application syntax and unchanged Public compiler
+  diagnostic rows with severity, code, message, paths and safe editor focus.
+- Renamed scenario validation evidence and added the edited-schema caveat
+  without changing the selected scenario validator.
+- Documented Reset/Cancel/Restore scopes, completed inline confirmation focus
+  entry/return and retained stale-confirmation dismissal.
+- Proved actual collection draft inputs reset after Reset and a real scenario
+  leave/return cycle.
+- Review 068 corrected focus trigger plumbing, visible reset evidence and one
+  stale browser diagnostic expectation, then passed cycle 2 with zero findings.
+- Lint, strict types, 21 app tests, docs/diff checks and Chromium 5/5 pass. No
+  Public, Git, publication or external-setting mutation occurred.
+
+### Next
+
+- Execute PLAN-017 checkpoint 5: full UX, accessibility and release-isolation
+  regression.
+
+## 2026-07-17 — PLAN-017 checkpoint 3 completed
+
+### Completed
+
+- Added independent copied original/active configuration, exact Schema/UI
+  Schema drafts, draft-result state and a runtime epoch per scenario.
+- Implemented non-mutating Validate, fresh-compile Apply, stale-safe loss
+  confirmation, Cancel and original Restore with complete runtime replacement.
+- Preserved the complete compile input, routed form and scenario validation
+  through active schema, and verified warnings as successful diagnostics.
+- Review 067 corrected lost collection policy, the private dev-prebundle graph
+  and repeated original serialization, then passed cycle 2 with zero findings.
+- Strict types, lint, 20 app tests, snippets, production build, expanded
+  boundaries and Chromium 5/5 pass. The private bundle's non-blocking 750 kB
+  warning remains below its 1 MB error limit; Public packages are unchanged.
+- No commit, push, publication or external setting mutation occurred.
+
+### Next
+
+- Execute PLAN-017 checkpoint 4: diagnostic routing, honest validation/reset
+  guidance and complete visible reset/focus behavior.
+
+## 2026-07-17 — PLAN-017 checkpoint 2 completed
+
+### Completed
+
+- Rebuilt the Angular reference shell as semantic scenario, explanation, form
+  preview, Configuration and Evidence cards with two independent accessible tab
+  sets and all ten inspectors grouped by meaning.
+- Added state/configuration/runtime/diagnostic visual accents with redundant
+  labels, visible focus, responsive two-to-one-column behavior and contained
+  long content.
+- Review 066 corrected a clipped `Integration` tab and stale linear-shell
+  browser assertions, then passed cycle 2 with zero findings after real visual
+  inspection and complete repetition.
+- Fourteen unit tests, Chromium 4/4 including 390 px keyboard/reflow, strict
+  types, lint, snippets, production build, boundaries, docs/format and diff
+  checks pass. Public packages remain unchanged.
+- No commit, push, publication or external setting mutation occurred.
+
+### Next
+
+- Execute PLAN-017 checkpoint 3: configuration draft, validation and runtime-
+  replacement application state.
+
+## 2026-07-17 — PLAN-017 checkpoint 1 completed
+
+### Completed
+
+- Installed exact private `codemirror@6.0.2` and
+  `@codemirror/lang-json@6.0.2` with pnpm 10.28.2 after Ricard authorized the
+  external gate; no Public dependency changed.
+- Added Internal accessible tab and controlled JSON-editor primitives with
+  deterministic relationships, full tab keyboard behavior, labelled CodeMirror
+  lifecycle ownership and focused tests.
+- Extended the exact private boundary verifier and added a negative test for an
+  unapproved editor dependency. It verifies 20 targets and 346 imports.
+- Review 065 removed deprecated `::ng-deep`, repeated the complete checkpoint
+  review and passed cycle 2 with zero findings. Frozen install, format/docs/
+  lint/types, 14 app tests, eight boundary tests and the official Node 22.23.1
+  production build pass.
+- No commit, push, publication or Public change occurred. The unrelated Angular
+  analytics diff remains untouched.
+
+### Next
+
+- Execute PLAN-017 checkpoint 2: workspace structure and visual system.
+
+## 2026-07-17 — PLAN-017 revision 0 approved
+
+### Completed
+
+- Ricard explicitly approved PLAN-017 revision 0 after review 064 cycle 3
+  passed all twelve areas with zero findings.
+- Authorized checkpoints 1–6 within the private Angular reference-shell
+  boundary. No Public contract, deferred capability or release state changed.
+- Per the approved plan, the exact CodeMirror dependency installation remains a
+  separate external execution gate. No implementation, install, Git or external
+  action occurred in this approval checkpoint.
+
+### Next
+
+- Obtain authorization for the exact PLAN-017 section 3 dependency command,
+  then execute checkpoint 1.
+
+## 2026-07-17 — PLAN-017 drafted and completely reviewed
+
+### Completed
+
+- Drafted PLAN-017 revision 0 for the private Angular reference workspace:
+  semantic cards, two accessible tab sets, responsive layout, CodeMirror JSON
+  Schema/UI Schema editing and safe validate/apply/cancel/restore behavior.
+- Preserved D-011/D-012 shell-only boundaries and D-013 by requiring complete
+  runtime replacement after a successful Apply; no Public contract or deferred
+  capability changed.
+- Review 064 corrected an edited-schema validation overclaim and required
+  accessible loss confirmation for Apply/Restore, then repeated all twelve
+  areas. Cycle 3 passed with zero findings.
+- Recorded the known collection-draft Reset correction in the plan. No
+  implementation, dependency installation, Git, publication or external action
+  occurred; the unrelated Angular analytics diff remains untouched.
+
+### Next
+
+- Decide whether to approve PLAN-017 revision 0. After approval, checkpoint 1
+  still requires separate authorization for the exact CodeMirror install.
+
 ## 2026-07-17 — PLAN-016 and M15 completed
 
 ### Completed

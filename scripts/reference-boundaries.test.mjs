@@ -9,7 +9,10 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { verifyReferenceBoundaries } from './verify-reference-boundaries.mjs';
+import {
+  ANGULAR_PREBUNDLE_EXCLUDES,
+  verifyReferenceBoundaries,
+} from './verify-reference-boundaries.mjs';
 
 function write(root, path, contents) {
   const target = join(root, path);
@@ -33,6 +36,23 @@ function fixture() {
     root,
     'packages/angular/package.json',
     manifest({ ...publicManifest, name: '@rabassoft/schema-engine-angular' }),
+  );
+  write(
+    root,
+    'angular.json',
+    manifest({
+      projects: {
+        'reference-angular': {
+          architect: {
+            serve: {
+              options: {
+                prebundle: { exclude: ANGULAR_PREBUNDLE_EXCLUDES },
+              },
+            },
+          },
+        },
+      },
+    }),
   );
   write(
     root,
@@ -76,9 +96,13 @@ function fixture() {
         '@angular/core': '22.0.6',
         '@angular/forms': '22.0.6',
         '@angular/platform-browser': '22.0.6',
+        '@codemirror/lang-html': '6.4.11',
+        '@codemirror/lang-javascript': '6.2.5',
+        '@codemirror/lang-json': '6.0.2',
         '@rabassoft/schema-engine': 'workspace:*',
         '@rabassoft/schema-engine-angular': 'workspace:*',
         '@schema-engine-internal/reference-scenarios': 'workspace:*',
+        codemirror: '6.0.2',
         tslib: '^2.8.1',
       },
     }),
@@ -86,7 +110,7 @@ function fixture() {
   write(
     root,
     'apps/reference-angular/src/main.ts',
-    "import '@angular/core/testing';\nimport '@rabassoft/schema-engine-angular';\n",
+    "import '@angular/core/testing';\nimport '@codemirror/lang-html';\nimport '@codemirror/lang-javascript';\nimport '@codemirror/lang-json';\nimport '@rabassoft/schema-engine-angular';\nimport 'codemirror';\n",
   );
   return root;
 }
@@ -95,11 +119,54 @@ test('accepts the exact private reference dependency boundary', () => {
   const root = fixture();
   try {
     assert.deepEqual(verifyReferenceBoundaries(root), {
-      inspectedImports: 5,
+      inspectedImports: 9,
       inspectedManifestTargets: 2,
       privateProjects: 2,
       publicProjects: 2,
     });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects an unapproved private editor dependency', () => {
+  const root = fixture();
+  try {
+    const path = 'apps/reference-angular/package.json';
+    const value = JSON.parse(readFixture(root, path));
+    write(
+      root,
+      path,
+      manifest({
+        ...value,
+        dependencies: {
+          ...value.dependencies,
+          '@codemirror/state': '6.7.1',
+        },
+      }),
+    );
+    assert.throws(() => verifyReferenceBoundaries(root), assert.AssertionError);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects an incomplete private editor prebundle graph', () => {
+  const root = fixture();
+  try {
+    const path = 'angular.json';
+    const value = JSON.parse(readFixture(root, path));
+    value.projects[
+      'reference-angular'
+    ].architect.serve.options.prebundle.exclude =
+      ANGULAR_PREBUNDLE_EXCLUDES.filter(
+        (dependency) => dependency !== '@codemirror/state',
+      );
+    write(root, path, manifest(value));
+    assert.throws(
+      () => verifyReferenceBoundaries(root),
+      /prebundle exclusions/u,
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -76,7 +76,10 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(initial).toBeDefined();
     expect(initial?.value).toBe(component.value());
     expect(initial?.baselineValue).toBe(component.baselineValue());
-    expect(initial?.schema).toBe(
+    expect(initial?.schema).toEqual(
+      component.selectedScenario().compileInput.schema,
+    );
+    expect(initial?.schema).not.toBe(
       component.selectedScenario().compileInput.schema,
     );
 
@@ -195,6 +198,183 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(component.formConfig()).toBeDefined();
   });
 
+  it('restores visible collection drafts on reset and scenario selection', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    component.selectScenario('stable-team');
+    fixture.detectChanges();
+    TestBed.tick();
+
+    const id = root.querySelector<HTMLInputElement>('#team-item-id');
+    const name = root.querySelector<HTMLInputElement>('#team-item-name');
+    expect(id).not.toBeNull();
+    expect(name).not.toBeNull();
+    if (id === null || name === null) return;
+    id.value = 'temporary';
+    id.dispatchEvent(new Event('input'));
+    name.value = 'Temporary member';
+    name.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    component.resetScenario();
+    fixture.detectChanges();
+    expect(id.value).toBe('new-member');
+    expect(name.value).toBe('New member');
+
+    id.value = 'another';
+    id.dispatchEvent(new Event('input'));
+    component.selectScenario('controlled-primitives');
+    fixture.detectChanges();
+    TestBed.tick();
+    component.selectScenario('stable-team');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(root.querySelector<HTMLInputElement>('#team-item-id')?.value).toBe(
+      'new-member',
+    );
+  });
+
+  it('parses both drafts independently and leaves active state untouched on failure', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    const active = component.activeCompileInput();
+    const value = component.value();
+    const epoch = component.runtimeEpoch();
+
+    component.updateSchemaDraft('{');
+    component.updateUiSchemaDraft('[');
+
+    expect(component.validateConfiguration()).toBe(false);
+    expect(component.draftResult()).toMatchObject({
+      status: 'invalid-json',
+      syntaxIssues: [
+        { document: 'schema', message: 'Invalid JSON syntax.' },
+        { document: 'ui-schema', message: 'Invalid JSON syntax.' },
+      ],
+      diagnostics: [],
+    });
+    expect(Object.isFrozen(component.draftResult().syntaxIssues)).toBe(true);
+    expect(component.activeCompileInput()).toBe(active);
+    expect(component.value()).toBe(value);
+    expect(component.runtimeEpoch()).toBe(epoch);
+    expect(component.formConfig()).toBeDefined();
+  });
+
+  it('keeps compiler failure non-mutating and validates without applying', () => {
+    const component = createComponent().componentInstance;
+    const active = component.activeCompileInput();
+    const epoch = component.runtimeEpoch();
+
+    component.updateSchemaDraft('{"type":"string"}');
+    expect(component.validateConfiguration()).toBe(false);
+    expect(component.draftResult().status).toBe('compile-failed');
+    expect(component.draftResult().diagnostics.length).toBeGreaterThan(0);
+    expect(component.activeCompileInput()).toBe(active);
+    expect(component.runtimeEpoch()).toBe(epoch);
+
+    component.updateSchemaDraft(`${JSON.stringify(active.schema, null, 2)}\n`);
+    expect(component.validateConfiguration()).toBe(true);
+    expect(component.draftResult().status).toBe('valid');
+    expect(component.activeCompileInput()).toBe(active);
+    expect(component.runtimeEpoch()).toBe(epoch);
+  });
+
+  it('treats compiler warnings as a successful draft result', () => {
+    const component = createComponent().componentInstance;
+    const schema = component.activeCompileInput().schema as Record<
+      string,
+      unknown
+    >;
+
+    component.updateSchemaDraft(
+      JSON.stringify({ ...schema, 'x-reference-note': true }, undefined, 2),
+    );
+
+    expect(component.validateConfiguration()).toBe(true);
+    expect(component.draftResult().status).toBe('valid');
+    expect(component.draftResult().diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'UNKNOWN_SCHEMA_KEYWORD',
+          severity: 'warning',
+          source: 'schema',
+          documentPath: ['x-reference-note'],
+        }),
+      ]),
+    );
+  });
+
+  it('applies exact current drafts by replacing the mounted runtime', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const previousForm = root.querySelector('form');
+    const previousEpoch = component.runtimeEpoch();
+    const previousActive = component.activeCompileInput();
+
+    component.updateSchemaDraft(`${component.schemaDraft()}\n`);
+    expect(component.applyConfiguration()).toBe(true);
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect(component.runtimeEpoch()).toBe(previousEpoch + 1);
+    expect(component.activeCompileInput()).not.toBe(previousActive);
+    expect(component.draftModified()).toBe(false);
+    expect(component.draftResult().status).toBe('valid');
+    expect(root.querySelector('form')).not.toBe(previousForm);
+    expect(component.value()).toBe(
+      component.selectedScenario().initialState.value,
+    );
+  });
+
+  it('confirms destructive apply from a freshly recompiled draft', () => {
+    const component = createComponent().componentInstance;
+    component.handleOperation(setValue(1, ['name'], 'Ada', 'Grace'));
+    const active = component.activeCompileInput();
+    component.updateSchemaDraft(`${component.schemaDraft()}\n`);
+
+    expect(component.applyConfiguration()).toBe(false);
+    expect(component.pendingConfigurationAction()).toBe('apply');
+    component.updateSchemaDraft('{');
+    expect(component.pendingConfigurationAction()).toBeUndefined();
+    expect(component.confirmConfigurationAction()).toBe(false);
+    expect(component.activeCompileInput()).toBe(active);
+    expect(component.value()).toMatchObject({ name: 'Grace' });
+
+    component.updateSchemaDraft(`${JSON.stringify(active.schema, null, 2)}\n`);
+    expect(component.applyConfiguration()).toBe(false);
+    expect(component.pendingConfigurationAction()).toBe('apply');
+    expect(component.confirmConfigurationAction()).toBe(true);
+    expect(component.pendingConfigurationAction()).toBeUndefined();
+    expect(component.dirty()).toBe(false);
+    expect(component.history()).toEqual([]);
+    expect(component.value()).toBe(
+      component.selectedScenario().initialState.value,
+    );
+  });
+
+  it('cancels drafts and restores the immutable scenario configuration', () => {
+    const component = createComponent().componentInstance;
+    const originalSchemaText = component.schemaDraft();
+    const originalUiSchemaText = component.uiSchemaDraft();
+
+    component.updateSchemaDraft(`${originalSchemaText}\n`);
+    component.cancelConfigurationChanges();
+    expect(component.schemaDraft()).toBe(originalSchemaText);
+    expect(component.draftResult().status).toBe('unvalidated');
+
+    component.updateUiSchemaDraft(`${originalUiSchemaText}\n`);
+    expect(component.applyConfiguration()).toBe(true);
+    expect(component.canRestoreOriginalConfiguration()).toBe(true);
+    component.restoreScenarioConfiguration();
+    expect(component.pendingConfigurationAction()).toBe('restore');
+    expect(component.confirmConfigurationAction()).toBe(true);
+    expect(component.schemaDraft()).toBe(originalSchemaText);
+    expect(component.uiSchemaDraft()).toBe(originalUiSchemaText);
+    expect(component.canRestoreOriginalConfiguration()).toBe(false);
+  });
+
   it('renders semantic navigation, controls, inspectors and build-checked excerpts', () => {
     const fixture = createComponent();
     const root = fixture.nativeElement as HTMLElement;
@@ -229,20 +409,64 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(root.querySelector('form')?.getAttribute('aria-label')).toBe(
       'Selected schema form',
     );
+    expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(2);
+    expect(root.querySelectorAll('[role="tab"]')).toHaveLength(7);
+    expect(root.querySelectorAll('[role="tabpanel"]')).toHaveLength(2);
+    expect(root.querySelector('.preview-workspace')).not.toBeNull();
+    expect(root.querySelector('.schema-workspace')).not.toBeNull();
     expect(
-      root.querySelectorAll('details[data-testid^="inspector-"]'),
-    ).toHaveLength(10);
+      root.querySelector('.cm-content[aria-label="JSON Schema editor"]'),
+    ).not.toBeNull();
+    expect(root.querySelector('#evidence-panel-state')).not.toBeNull();
     expect(
       root.querySelector('[data-testid="inspector-value"] summary')
         ?.textContent,
     ).toBe('Value');
     expect(root.textContent).toContain('A required display name.');
 
-    for (const [id, source] of Object.entries(referenceSnippets)) {
-      expect(
-        root.querySelector(`[data-testid="snippet-${id}"] pre`)?.textContent,
-      ).toBe(source);
-    }
+    const component = fixture.componentInstance;
+    component.setConfigurationTab('schema');
+    component.setEvidenceTab('definition');
+    fixture.detectChanges();
+    expect(
+      root.querySelector('.cm-content[aria-label="JSON Schema editor"]'),
+    ).not.toBeNull();
+    expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(2);
+    expect(root.querySelectorAll('[role="tab"]')).toHaveLength(7);
+    expect(
+      root.querySelector('[data-testid="inspector-definition"]'),
+    ).not.toBeNull();
+
+    component.setConfigurationTab('ui-schema');
+    component.setEvidenceTab('runtime');
+    fixture.detectChanges();
+    expect(
+      root.querySelector('.cm-content[aria-label="UI Schema editor"]'),
+    ).not.toBeNull();
+    expect(
+      root.querySelector('[data-testid="inspector-snapshot"]'),
+    ).not.toBeNull();
+    expect(
+      root.querySelector('[data-testid="inspector-history"]'),
+    ).not.toBeNull();
+
+    component.setEvidenceTab('diagnostics');
+    fixture.detectChanges();
+    expect(
+      root.querySelector('[data-testid="inspector-compiler-diagnostics"]'),
+    ).not.toBeNull();
+    expect(
+      root.querySelector('[data-testid="inspector-runtime-diagnostics"]'),
+    ).not.toBeNull();
+    expect(
+      root.querySelector('[data-testid="inspector-issues"]'),
+    ).not.toBeNull();
+
+    component.setEvidenceTab('integration');
+    fixture.detectChanges();
+    expect(component.snippets.map(({ source }) => source)).toEqual(
+      Object.values(referenceSnippets),
+    );
     expect(root.textContent).toContain(
       'generated from marked regions in the compiled reference-form source',
     );

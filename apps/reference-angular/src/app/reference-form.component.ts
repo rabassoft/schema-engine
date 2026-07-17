@@ -1,13 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Injector,
   ViewChild,
+  afterNextRender,
   computed,
+  inject,
   signal,
+  type ElementRef,
 } from '@angular/core';
 import {
   applyFormOperation,
   compileFormDefinition,
+  type CompileFormDefinitionInput,
   type CompileFormResult,
   type Diagnostic,
   type FormOperation,
@@ -23,8 +28,14 @@ import {
 } from '@schema-engine-internal/reference-scenarios';
 
 import { InspectorPanelComponent } from './inspector-panel.component.js';
+import { ReferenceCodeExampleComponent } from './reference-code-example.component.js';
 import { referenceSnippets } from './generated/reference-snippets.js';
 import { serializeInspector } from './inspector-serialization.js';
+import { ReferenceJsonEditorComponent } from './reference-json-editor.component.js';
+import {
+  ReferenceTabsComponent,
+  type ReferenceTab,
+} from './reference-tabs.component.js';
 
 export type OperationDecisionMode = 'confirm' | 'reject' | 'pending';
 export type OperationHistoryStatus =
@@ -42,294 +53,722 @@ interface ScenarioSelection {
   readonly compilation: CompileFormResult;
 }
 
+interface AppliedConfiguration {
+  readonly input: CompileFormDefinitionInput;
+  readonly schemaText: string;
+  readonly uiSchemaText: string;
+}
+
+export type ConfigurationDraftStatus =
+  'unvalidated' | 'invalid-json' | 'compile-failed' | 'valid';
+
+export interface ConfigurationSyntaxIssue {
+  readonly document: 'schema' | 'ui-schema';
+  readonly message: 'Invalid JSON syntax.';
+}
+
+export interface ConfigurationDraftResult {
+  readonly status: ConfigurationDraftStatus;
+  readonly syntaxIssues: readonly ConfigurationSyntaxIssue[];
+  readonly diagnostics: readonly Diagnostic[];
+}
+
+type PendingConfigurationAction = 'apply' | 'restore';
+
+type DraftEvaluation =
+  | {
+      readonly success: false;
+      readonly result: ConfigurationDraftResult;
+    }
+  | {
+      readonly success: true;
+      readonly result: ConfigurationDraftResult;
+      readonly configuration: AppliedConfiguration;
+      readonly compilation: Extract<CompileFormResult, { success: true }>;
+    };
+
 const initialScenario = referenceScenarios[0];
 if (initialScenario === undefined) {
   throw new Error('The reference catalog must contain an initial scenario.');
 }
 
+const initialConfiguration = prepareConfiguration(initialScenario.compileInput);
+const initialActiveConfiguration = prepareConfiguration(
+  initialConfiguration.input,
+);
+const initialCompilation = compileFormDefinition(
+  initialActiveConfiguration.input,
+);
+
 const snippetEntries = Object.freeze([
   Object.freeze({
     id: 'application-signals',
     label: 'Application signals excerpt',
+    language: 'typescript' as const,
     source: referenceSnippets['application-signals'],
   }),
   Object.freeze({
     id: 'operation-decisions',
     label: 'Operation decisions excerpt',
+    language: 'typescript' as const,
     source: referenceSnippets['operation-decisions'],
   }),
   Object.freeze({
     id: 'controlled-form-template',
     label: 'Controlled form template excerpt',
+    language: 'html' as const,
     source: referenceSnippets['controlled-form-template'],
   }),
+]);
+
+type ConfigurationTabId = 'schema' | 'ui-schema';
+type EvidenceTabId =
+  'state' | 'definition' | 'runtime' | 'diagnostics' | 'integration';
+
+const configurationTabs = Object.freeze<readonly ReferenceTab[]>([
+  Object.freeze({ id: 'schema', label: 'Schema' }),
+  Object.freeze({ id: 'ui-schema', label: 'UI Schema' }),
+]);
+
+const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
+  Object.freeze({ id: 'state', label: 'State' }),
+  Object.freeze({ id: 'definition', label: 'Definition' }),
+  Object.freeze({ id: 'runtime', label: 'Runtime' }),
+  Object.freeze({ id: 'diagnostics', label: 'Diagnostics' }),
+  Object.freeze({ id: 'integration', label: 'Integration' }),
 ]);
 
 @Component({
   selector: 'reference-form',
   standalone: true,
-  imports: [SchemaFormDirective, InspectorPanelComponent],
+  imports: [
+    SchemaFormDirective,
+    InspectorPanelComponent,
+    ReferenceCodeExampleComponent,
+    ReferenceJsonEditorComponent,
+    ReferenceTabsComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section aria-labelledby="scenario-heading">
-      <header>
-        <h2 id="scenario-heading">{{ selectedScenario().title }}</h2>
-        <p id="scenario-summary">{{ selectedScenario().summary }}</p>
+    <section class="reference-workspace" aria-labelledby="scenario-heading">
+      <header class="reference-card scenario-card">
+        <div class="scenario-copy">
+          <p class="eyebrow">Reference scenario</p>
+          <h2 id="scenario-heading">{{ selectedScenario().title }}</h2>
+          <p id="scenario-summary">{{ selectedScenario().summary }}</p>
+        </div>
+
+        <nav class="scenario-navigation" aria-label="Reference scenarios">
+          <label for="scenario-selector">Scenario</label>
+          <select
+            id="scenario-selector"
+            aria-describedby="scenario-summary"
+            [value]="selectedScenario().id"
+            (change)="selectFromEvent($event)"
+          >
+            @for (scenario of scenarios; track scenario.id) {
+              <option [value]="scenario.id">{{ scenario.title }}</option>
+            }
+          </select>
+        </nav>
+
+        <p
+          class="state-pill"
+          role="status"
+          aria-live="polite"
+          data-testid="reference-state"
+        >
+          <span>{{ dirty() ? 'Modified' : 'Matches baseline' }}</span>
+          <span>locale {{ locale() }}</span>
+          <span>{{ validationVisibility() }} validation</span>
+          <span>{{ pendingEntries().length }} pending</span>
+        </p>
       </header>
 
-      <nav aria-label="Reference scenarios">
-        <label for="scenario-selector">Scenario</label>
-        <select
-          id="scenario-selector"
-          aria-describedby="scenario-summary"
-          [value]="selectedScenario().id"
-          (change)="selectFromEvent($event)"
-        >
-          @for (scenario of scenarios; track scenario.id) {
-            <option [value]="scenario.id">{{ scenario.title }}</option>
-          }
-        </select>
-      </nav>
-
-      <p role="status" aria-live="polite" data-testid="reference-state">
-        {{ dirty() ? 'Modified' : 'Matches baseline' }} · locale
-        {{ locale() }} · {{ validationVisibility() }} validation ·
-        {{ pendingEntries().length }}
-        pending
-      </p>
-
-      <section aria-labelledby="scenario-explanation-heading">
+      <section
+        class="reference-card scenario-explanation"
+        aria-labelledby="scenario-explanation-heading"
+      >
         <h3 id="scenario-explanation-heading">Scenario explanation</h3>
-        @for (entry of selectedScenario().explanation; track entry.id) {
-          <article>
-            <h4>{{ entry.title }}</h4>
-            <p>{{ entry.body }}</p>
-          </article>
-        }
-      </section>
-
-      <fieldset>
-        <legend>Operation decision</legend>
-        <button
-          type="button"
-          data-testid="decision-confirm"
-          [attr.aria-pressed]="decisionMode() === 'confirm'"
-          (click)="setDecisionMode('confirm')"
-        >
-          Confirm
-        </button>
-        <button
-          type="button"
-          data-testid="decision-reject"
-          [attr.aria-pressed]="decisionMode() === 'reject'"
-          (click)="setDecisionMode('reject')"
-        >
-          Reject
-        </button>
-        <button
-          type="button"
-          data-testid="decision-pending"
-          [attr.aria-pressed]="decisionMode() === 'pending'"
-          (click)="setDecisionMode('pending')"
-        >
-          Pending
-        </button>
-      </fieldset>
-
-      <section aria-labelledby="application-controls-heading">
-        <h3 id="application-controls-heading">Application controls</h3>
-        <button type="button" (click)="resetScenario()">Reset scenario</button>
-        <button type="button" (click)="commitBaseline()">
-          Commit baseline
-        </button>
-        <button
-          type="button"
-          [attr.aria-pressed]="locale() === 'en'"
-          (click)="setLocale('en')"
-        >
-          Locale en
-        </button>
-        <button
-          type="button"
-          [attr.aria-pressed]="locale() === 'es'"
-          (click)="setLocale('es')"
-        >
-          Locale es
-        </button>
-        <button
-          type="button"
-          [attr.aria-pressed]="validationVisibility() === 'touched'"
-          (click)="setValidationVisibility('touched')"
-        >
-          Touched issues
-        </button>
-        <button
-          type="button"
-          [attr.aria-pressed]="validationVisibility() === 'all'"
-          (click)="setValidationVisibility('all')"
-        >
-          All issues
-        </button>
-      </section>
-
-      @if (selectedScenario().id === 'stable-team') {
-        <fieldset>
-          <legend>Team collection controls</legend>
-          <label for="team-item-id">New member ID</label>
-          <input
-            id="team-item-id"
-            [value]="collectionDraftId()"
-            (input)="updateCollectionDraftId($event)"
-          />
-          <label for="team-item-name">New member name</label>
-          <input
-            id="team-item-name"
-            [value]="collectionDraftName()"
-            (input)="updateCollectionDraftName($event)"
-          />
-          <button type="button" (click)="insertTeamMember()">
-            Insert member at end
-          </button>
-          <button
-            type="button"
-            [disabled]="teamMembers().length < 2"
-            (click)="moveFirstTeamMemberLater()"
-          >
-            Move first member after second
-          </button>
-          <button
-            type="button"
-            [disabled]="teamMembers().length === 0"
-            (click)="removeLastTeamMember()"
-          >
-            Remove last member
-          </button>
-        </fieldset>
-      }
-
-      @if (formConfig(); as config) {
-        <!-- reference-snippet:start controlled-form-template -->
-        <form
-          aria-label="Selected schema form"
-          [schemaForm]="config"
-          (schemaOperation)="handleOperation($event)"
-          (schemaDiagnostics)="recordRuntimeDiagnostics($event)"
-        ></form>
-        <!-- reference-snippet:end controlled-form-template -->
-      } @else {
-        <p role="alert">The selected scenario could not be compiled.</p>
-      }
-
-      @if (pendingEntries().length > 0) {
-        <section aria-labelledby="pending-heading" data-testid="pending-list">
-          <h3 id="pending-heading">Pending intentions</h3>
-          @for (entry of pendingEntries(); track entry.id) {
-            <p>
-              {{ entry.operation.type }}
-              <button
-                type="button"
-                [attr.aria-label]="
-                  'Confirm pending operation ' +
-                  entry.id +
-                  ': ' +
-                  entry.operation.type
-                "
-                (click)="resolvePending(entry.id, 'confirm')"
-              >
-                Confirm pending
-              </button>
-              <button
-                type="button"
-                [attr.aria-label]="
-                  'Reject pending operation ' +
-                  entry.id +
-                  ': ' +
-                  entry.operation.type
-                "
-                (click)="resolvePending(entry.id, 'reject')"
-              >
-                Reject pending
-              </button>
-            </p>
+        <div class="explanation-grid">
+          @for (entry of selectedScenario().explanation; track entry.id) {
+            <article>
+              <h4>{{ entry.title }}</h4>
+              <p>{{ entry.body }}</p>
+            </article>
           }
-        </section>
-      }
+        </div>
+      </section>
 
-      <reference-inspector-panel
-        label="Schema"
-        testId="inspector-schema"
-        [value]="selectedScenario().compileInput.schema"
-      />
-      <reference-inspector-panel
-        label="UI Schema"
-        testId="inspector-ui-schema"
-        [value]="selectedScenario().compileInput.uiSchema"
-      />
-      <reference-inspector-panel
-        label="Value"
-        testId="inspector-value"
-        [value]="value()"
-      />
-      <reference-inspector-panel
-        label="Baseline value"
-        testId="inspector-baseline"
-        [value]="baselineValue()"
-      />
-      <reference-inspector-panel
-        label="Normalized definition"
-        testId="inspector-definition"
-        [value]="definition()"
-      />
-      <reference-inspector-panel
-        label="Runtime snapshot"
-        testId="inspector-snapshot"
-        [value]="runtimeSnapshot()"
-      />
-      <reference-inspector-panel
-        label="Compiler diagnostics"
-        testId="inspector-compiler-diagnostics"
-        [value]="compilerDiagnostics()"
-      />
-      <reference-inspector-panel
-        label="Runtime diagnostics"
-        testId="inspector-runtime-diagnostics"
-        [value]="runtimeDiagnostics()"
-      />
-      <reference-inspector-panel
-        label="Validation issues"
-        testId="inspector-issues"
-        [value]="validationIssues()"
-      />
-      <reference-inspector-panel
-        label="Operation history"
-        testId="inspector-history"
-        [value]="history()"
-      />
+      <section
+        class="reference-card consumer-workspace"
+        aria-labelledby="consumer-workspace-heading"
+      >
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Interactive consumer</p>
+            <h3 id="consumer-workspace-heading">Consumer workspace</h3>
+          </div>
+          <span class="category-mark" aria-hidden="true">LAB</span>
+        </div>
+        <div class="workspace-split">
+          <section
+            class="workspace-panel preview-workspace"
+            aria-labelledby="form-preview-heading"
+          >
+            <section
+              class="application-controls"
+              aria-labelledby="application-controls-heading"
+            >
+              <div>
+                <h4 id="application-controls-heading">Application controls</h4>
+                <p class="scope-guidance">
+                  Reset keeps the applied configuration and unapplied editor
+                  text while restoring scenario and shell state.
+                </p>
+              </div>
+              <div class="button-row">
+                <button type="button" (click)="resetScenario()">
+                  Reset scenario
+                </button>
+                <button type="button" (click)="commitBaseline()">
+                  Commit baseline
+                </button>
+                <button
+                  type="button"
+                  [attr.aria-pressed]="locale() === 'en'"
+                  (click)="setLocale('en')"
+                >
+                  Locale en
+                </button>
+                <button
+                  type="button"
+                  [attr.aria-pressed]="locale() === 'es'"
+                  (click)="setLocale('es')"
+                >
+                  Locale es
+                </button>
+                <button
+                  type="button"
+                  [attr.aria-pressed]="validationVisibility() === 'touched'"
+                  (click)="setValidationVisibility('touched')"
+                >
+                  Touched issues
+                </button>
+                <button
+                  type="button"
+                  [attr.aria-pressed]="validationVisibility() === 'all'"
+                  (click)="setValidationVisibility('all')"
+                >
+                  All issues
+                </button>
+              </div>
+            </section>
 
-      <section aria-labelledby="snippets-heading">
-        <h2 id="snippets-heading">Build-checked integration excerpts</h2>
-        <p>
-          These excerpts are generated from marked regions in the compiled
-          reference-form source.
-        </p>
-        @for (snippet of snippets; track snippet.id) {
-          <article [attr.data-testid]="'snippet-' + snippet.id">
-            <h3>{{ snippet.label }}</h3>
-            <pre>{{ snippet.source }}</pre>
-          </article>
+            <div class="preview-heading">
+              <div>
+                <h4 id="form-preview-heading">Form preview</h4>
+              </div>
+              <fieldset class="decision-control">
+                <legend>Operation decision</legend>
+                <button
+                  type="button"
+                  data-testid="decision-confirm"
+                  [attr.aria-pressed]="decisionMode() === 'confirm'"
+                  (click)="setDecisionMode('confirm')"
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  data-testid="decision-reject"
+                  [attr.aria-pressed]="decisionMode() === 'reject'"
+                  (click)="setDecisionMode('reject')"
+                >
+                  Reject
+                </button>
+                <button
+                  type="button"
+                  data-testid="decision-pending"
+                  [attr.aria-pressed]="decisionMode() === 'pending'"
+                  (click)="setDecisionMode('pending')"
+                >
+                  Pending
+                </button>
+              </fieldset>
+            </div>
+
+            @if (selectedScenario().id === 'stable-team') {
+              <fieldset class="collection-controls">
+                <legend>Team collection controls</legend>
+                <div class="field-grid">
+                  <label for="team-item-id">New member ID</label>
+                  <input
+                    id="team-item-id"
+                    [value]="collectionDraftId()"
+                    (input)="updateCollectionDraftId($event)"
+                  />
+                  <label for="team-item-name">New member name</label>
+                  <input
+                    id="team-item-name"
+                    [value]="collectionDraftName()"
+                    (input)="updateCollectionDraftName($event)"
+                  />
+                </div>
+                <div class="button-row">
+                  <button type="button" (click)="insertTeamMember()">
+                    Insert member at end
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="teamMembers().length < 2"
+                    (click)="moveFirstTeamMemberLater()"
+                  >
+                    Move first member after second
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="teamMembers().length === 0"
+                    (click)="removeLastTeamMember()"
+                  >
+                    Remove last member
+                  </button>
+                </div>
+              </fieldset>
+            }
+
+            <div class="form-surface">
+              @for (mount of formMounts(); track mount.epoch) {
+                <!-- reference-snippet:start controlled-form-template -->
+                <form
+                  aria-label="Selected schema form"
+                  [schemaForm]="mount.config"
+                  (schemaOperation)="handleOperation($event)"
+                  (schemaDiagnostics)="recordRuntimeDiagnostics($event)"
+                ></form>
+                <!-- reference-snippet:end controlled-form-template -->
+              } @empty {
+                <p role="alert">The selected scenario could not be compiled.</p>
+              }
+            </div>
+
+            @if (pendingEntries().length > 0) {
+              <section
+                class="pending-card"
+                aria-labelledby="pending-heading"
+                data-testid="pending-list"
+              >
+                <h4 id="pending-heading">Pending intentions</h4>
+                @for (entry of pendingEntries(); track entry.id) {
+                  <p>
+                    {{ entry.operation.type }}
+                    <button
+                      type="button"
+                      [attr.aria-label]="
+                        'Confirm pending operation ' +
+                        entry.id +
+                        ': ' +
+                        entry.operation.type
+                      "
+                      (click)="resolvePending(entry.id, 'confirm')"
+                    >
+                      Confirm pending
+                    </button>
+                    <button
+                      type="button"
+                      [attr.aria-label]="
+                        'Reject pending operation ' +
+                        entry.id +
+                        ': ' +
+                        entry.operation.type
+                      "
+                      (click)="resolvePending(entry.id, 'reject')"
+                    >
+                      Reject pending
+                    </button>
+                  </p>
+                }
+              </section>
+            }
+          </section>
+          <section
+            class="workspace-panel schema-workspace"
+            aria-labelledby="schemas-heading"
+          >
+            <div class="schema-heading">
+              <h4 id="schemas-heading">Schemas</h4>
+              <p>
+                Edit, validate and apply JSON Schema and UI Schema while the
+                form preview remains visible alongside.
+              </p>
+            </div>
+            <reference-tabs
+              tabSetId="configuration"
+              label="Schema documents"
+              [tabs]="configurationTabs"
+              [activeId]="configurationTab()"
+              (activeIdChange)="setConfigurationTab($event)"
+            />
+
+            <div
+              #configurationStatus
+              class="configuration-status"
+              aria-live="polite"
+              tabindex="-1"
+            >
+              <span
+                class="status-badge"
+                [attr.data-status]="draftResult().status"
+              >
+                {{ draftStatusLabel() }}
+              </span>
+              @if (draftModified()) {
+                <span>Modified draft</span>
+              } @else {
+                <span>Matches applied configuration</span>
+              }
+            </div>
+            <div class="button-row configuration-actions">
+              <button type="button" (click)="validateConfiguration()">
+                Validate configuration
+              </button>
+              <button
+                type="button"
+                [disabled]="!draftModified()"
+                (click)="applyConfiguration($event.currentTarget)"
+              >
+                Apply configuration
+              </button>
+              <button
+                type="button"
+                [disabled]="!draftModified()"
+                (click)="cancelConfigurationChanges()"
+              >
+                Cancel changes
+              </button>
+              <button
+                type="button"
+                [disabled]="!canRestoreOriginalConfiguration()"
+                (click)="restoreScenarioConfiguration($event.currentTarget)"
+              >
+                Restore scenario configuration
+              </button>
+            </div>
+            <p class="scope-guidance">
+              Cancel restores only the last applied editor text. Restore
+              reinstalls the scenario's original configuration and resets the
+              form and shell state.
+            </p>
+
+            @if (pendingConfigurationAction(); as action) {
+              <section
+                #configurationConfirmation
+                class="configuration-confirmation"
+                role="alertdialog"
+                aria-labelledby="configuration-confirmation-heading"
+                aria-describedby="configuration-confirmation-description"
+                aria-modal="false"
+                tabindex="-1"
+              >
+                <h4 id="configuration-confirmation-heading">
+                  Confirm configuration reset
+                </h4>
+                <p id="configuration-confirmation-description">
+                  @if (action === 'apply') {
+                    Applying this configuration will reset the form value,
+                    baseline, operation history and shell controls.
+                  } @else {
+                    Restoring the scenario will discard active configuration,
+                    draft text and current form state.
+                  }
+                </p>
+                <div class="button-row">
+                  <button type="button" (click)="confirmConfigurationAction()">
+                    {{
+                      action === 'apply'
+                        ? 'Apply and reset form'
+                        : 'Restore scenario'
+                    }}
+                  </button>
+                  <button type="button" (click)="cancelConfigurationAction()">
+                    Keep current state
+                  </button>
+                </div>
+              </section>
+            }
+
+            @if (
+              draftResult().syntaxIssues.length > 0 ||
+              draftResult().diagnostics.length > 0
+            ) {
+              <section
+                class="draft-diagnostics"
+                aria-labelledby="draft-diagnostics-heading"
+              >
+                <h4 id="draft-diagnostics-heading">
+                  Configuration diagnostics
+                </h4>
+                <ol>
+                  @for (
+                    issue of draftResult().syntaxIssues;
+                    track issue.document
+                  ) {
+                    <li class="diagnostic-row diagnostic-row--error">
+                      <span class="diagnostic-severity">Error</span>
+                      <code>JSON syntax</code>
+                      <span>{{ issue.message }}</span>
+                      <button
+                        type="button"
+                        (click)="focusConfigurationDocument(issue.document)"
+                      >
+                        Focus
+                        {{
+                          issue.document === 'schema'
+                            ? 'JSON Schema'
+                            : 'UI Schema'
+                        }}
+                        editor
+                      </button>
+                    </li>
+                  }
+                  @for (diagnostic of draftResult().diagnostics; track $index) {
+                    <li
+                      class="diagnostic-row"
+                      [class.diagnostic-row--error]="
+                        diagnostic.severity === 'error'
+                      "
+                      [class.diagnostic-row--warning]="
+                        diagnostic.severity === 'warning'
+                      "
+                    >
+                      <span class="diagnostic-severity">
+                        {{ diagnostic.severity }}
+                      </span>
+                      <code>{{ diagnostic.code }}</code>
+                      <span>{{ diagnosticMessage(diagnostic) }}</span>
+                      @if (diagnostic.documentPath; as path) {
+                        <span>Document path {{ formatPath(path) }}</span>
+                      }
+                      @if (diagnostic.dataPath; as path) {
+                        <span>Data path {{ formatPath(path) }}</span>
+                      }
+                      @if (diagnostic.source !== 'runtime') {
+                        <button
+                          type="button"
+                          (click)="
+                            focusConfigurationDocument(diagnostic.source)
+                          "
+                        >
+                          Focus {{ diagnostic.source }} editor
+                        </button>
+                      }
+                    </li>
+                  }
+                </ol>
+              </section>
+            }
+            @switch (configurationTab()) {
+              @case ('schema') {
+                <section
+                  class="tab-panel"
+                  id="configuration-panel-schema"
+                  role="tabpanel"
+                  aria-labelledby="configuration-tab-schema"
+                  tabindex="0"
+                >
+                  <h4>JSON Schema draft</h4>
+                  <p id="schema-editor-help">
+                    Edit JSON, then validate or apply the complete
+                    configuration.
+                  </p>
+                  <reference-json-editor
+                    #schemaEditor
+                    label="JSON Schema editor"
+                    instructionsId="schema-editor-help"
+                    [value]="schemaDraft()"
+                    (valueChange)="updateSchemaDraft($event)"
+                  />
+                </section>
+              }
+              @case ('ui-schema') {
+                <section
+                  class="tab-panel"
+                  id="configuration-panel-ui-schema"
+                  role="tabpanel"
+                  aria-labelledby="configuration-tab-ui-schema"
+                  tabindex="0"
+                >
+                  <h4>UI Schema draft</h4>
+                  <p id="ui-schema-editor-help">
+                    Presentation metadata is compiled together with the current
+                    JSON Schema draft.
+                  </p>
+                  <reference-json-editor
+                    #uiSchemaEditor
+                    label="UI Schema editor"
+                    instructionsId="ui-schema-editor-help"
+                    [value]="uiSchemaDraft()"
+                    (valueChange)="updateUiSchemaDraft($event)"
+                  />
+                </section>
+              }
+            }
+          </section>
+        </div>
+      </section>
+
+      <section
+        class="reference-card tool-card tool-card--evidence"
+        aria-labelledby="evidence-heading"
+      >
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Observable evidence</p>
+            <h3 id="evidence-heading">Evidence</h3>
+          </div>
+          <span class="category-mark" aria-hidden="true">OBS</span>
+        </div>
+        <reference-tabs
+          tabSetId="evidence"
+          label="Evidence views"
+          [tabs]="evidenceTabs"
+          [activeId]="evidenceTab()"
+          (activeIdChange)="setEvidenceTab($event)"
+        />
+
+        @switch (evidenceTab()) {
+          @case ('state') {
+            <section
+              class="tab-panel"
+              id="evidence-panel-state"
+              role="tabpanel"
+              aria-labelledby="evidence-tab-state"
+              tabindex="0"
+            >
+              <reference-inspector-panel
+                label="Value"
+                testId="inspector-value"
+                [value]="value()"
+              />
+              <reference-inspector-panel
+                label="Baseline value"
+                testId="inspector-baseline"
+                [value]="baselineValue()"
+              />
+            </section>
+          }
+          @case ('definition') {
+            <section
+              class="tab-panel"
+              id="evidence-panel-definition"
+              role="tabpanel"
+              aria-labelledby="evidence-tab-definition"
+              tabindex="0"
+            >
+              <reference-inspector-panel
+                label="Normalized definition"
+                testId="inspector-definition"
+                [value]="definition()"
+              />
+            </section>
+          }
+          @case ('runtime') {
+            <section
+              class="tab-panel"
+              id="evidence-panel-runtime"
+              role="tabpanel"
+              aria-labelledby="evidence-tab-runtime"
+              tabindex="0"
+            >
+              <reference-inspector-panel
+                label="Runtime snapshot"
+                testId="inspector-snapshot"
+                [value]="runtimeSnapshot()"
+              />
+              <reference-inspector-panel
+                label="Operation history"
+                testId="inspector-history"
+                [value]="history()"
+              />
+            </section>
+          }
+          @case ('diagnostics') {
+            <section
+              class="tab-panel diagnostics-panel"
+              id="evidence-panel-diagnostics"
+              role="tabpanel"
+              aria-labelledby="evidence-tab-diagnostics"
+              tabindex="0"
+            >
+              <reference-inspector-panel
+                label="Compiler diagnostics"
+                testId="inspector-compiler-diagnostics"
+                [value]="compilerDiagnostics()"
+              />
+              <reference-inspector-panel
+                label="Runtime diagnostics"
+                testId="inspector-runtime-diagnostics"
+                [value]="runtimeDiagnostics()"
+              />
+              <reference-inspector-panel
+                label="Scenario validation issues"
+                testId="inspector-issues"
+                [value]="validationIssues()"
+              />
+              @if (activeConfigurationDiffersFromOriginal()) {
+                <p class="validation-caveat" role="note">
+                  The active configuration differs from the scenario original.
+                  These issues demonstrate this scenario's validation port; they
+                  do not prove that the edited schema is fully validated.
+                </p>
+              }
+            </section>
+          }
+          @case ('integration') {
+            <section
+              class="tab-panel integration-panel"
+              id="evidence-panel-integration"
+              role="tabpanel"
+              aria-labelledby="evidence-tab-integration"
+              tabindex="0"
+            >
+              <h4 id="snippets-heading">Build-checked integration excerpts</h4>
+              <p>
+                These excerpts are generated from marked regions in the compiled
+                reference-form source.
+              </p>
+              @defer {
+                @for (snippet of snippets; track snippet.id) {
+                  <article [attr.data-testid]="'snippet-' + snippet.id">
+                    <h5>{{ snippet.label }}</h5>
+                    <reference-code-example
+                      [label]="snippet.label"
+                      [language]="snippet.language"
+                      [source]="snippet.source"
+                    />
+                  </article>
+                }
+              } @placeholder {
+                <p>Loading highlighted integration excerpts…</p>
+              }
+            </section>
+          }
         }
       </section>
     </section>
   `,
 })
 export class ReferenceFormComponent {
+  private readonly injector = inject(Injector);
   readonly scenarios = referenceScenarios;
   readonly snippets = snippetEntries;
+  readonly configurationTabs = configurationTabs;
+  readonly evidenceTabs = evidenceTabs;
   // reference-snippet:start application-signals
   private readonly selectionState = signal<ScenarioSelection>(
     Object.freeze({
       scenario: initialScenario,
-      compilation: compileFormDefinition(initialScenario.compileInput),
+      compilation: initialCompilation,
     }),
   );
   private readonly valueState = signal<Readonly<object>>(
@@ -355,6 +794,26 @@ export class ReferenceFormComponent {
   );
   private readonly collectionDraftIdState = signal('new-member');
   private readonly collectionDraftNameState = signal('New member');
+  private readonly activeConfigurationState = signal<AppliedConfiguration>(
+    initialActiveConfiguration,
+  );
+  private readonly originalConfigurationState =
+    signal<AppliedConfiguration>(initialConfiguration);
+  private readonly schemaDraftState = signal(
+    initialActiveConfiguration.schemaText,
+  );
+  private readonly uiSchemaDraftState = signal(
+    initialActiveConfiguration.uiSchemaText,
+  );
+  private readonly draftResultState =
+    signal<ConfigurationDraftResult>(emptyDraftResult());
+  private readonly runtimeEpochState = signal(0);
+  private readonly pendingConfigurationActionState = signal<
+    PendingConfigurationAction | undefined
+  >(undefined);
+  private configurationActionTrigger: HTMLElement | undefined;
+  private readonly configurationTabState = signal<ConfigurationTabId>('schema');
+  private readonly evidenceTabState = signal<EvidenceTabId>('state');
   private nextHistoryId = 1;
 
   readonly selectedScenario = computed(() => this.selectionState().scenario);
@@ -373,6 +832,54 @@ export class ReferenceFormComponent {
   readonly runtimeDiagnostics = this.runtimeDiagnosticsState.asReadonly();
   readonly collectionDraftId = this.collectionDraftIdState.asReadonly();
   readonly collectionDraftName = this.collectionDraftNameState.asReadonly();
+  readonly activeCompileInput = computed(
+    () => this.activeConfigurationState().input,
+  );
+  readonly schemaDraft = this.schemaDraftState.asReadonly();
+  readonly uiSchemaDraft = this.uiSchemaDraftState.asReadonly();
+  readonly draftResult = this.draftResultState.asReadonly();
+  readonly runtimeEpoch = this.runtimeEpochState.asReadonly();
+  readonly pendingConfigurationAction =
+    this.pendingConfigurationActionState.asReadonly();
+  readonly configurationTab = this.configurationTabState.asReadonly();
+  readonly evidenceTab = this.evidenceTabState.asReadonly();
+  readonly draftModified = computed(() => {
+    const active = this.activeConfigurationState();
+    return (
+      this.schemaDraft() !== active.schemaText ||
+      this.uiSchemaDraft() !== active.uiSchemaText
+    );
+  });
+  readonly activeConfigurationDiffersFromOriginal = computed(() => {
+    const original = this.originalConfigurationState();
+    const active = this.activeConfigurationState();
+    return (
+      active.schemaText !== original.schemaText ||
+      active.uiSchemaText !== original.uiSchemaText
+    );
+  });
+  readonly canRestoreOriginalConfiguration = computed(() => {
+    const original = this.originalConfigurationState();
+    const active = this.activeConfigurationState();
+    return (
+      active.schemaText !== original.schemaText ||
+      active.uiSchemaText !== original.uiSchemaText ||
+      this.schemaDraft() !== original.schemaText ||
+      this.uiSchemaDraft() !== original.uiSchemaText
+    );
+  });
+  readonly draftStatusLabel = computed(() => {
+    switch (this.draftResult().status) {
+      case 'unvalidated':
+        return 'Not validated';
+      case 'invalid-json':
+        return 'Invalid JSON';
+      case 'compile-failed':
+        return 'Compilation failed';
+      case 'valid':
+        return 'Valid';
+    }
+  });
   readonly teamMembers = computed(() => readTeamMembers(this.value()));
   readonly pendingEntries = computed(() =>
     Object.freeze(this.history().filter(({ status }) => status === 'pending')),
@@ -385,7 +892,7 @@ export class ReferenceFormComponent {
   readonly validationIssues = computed(
     () =>
       this.selectedScenario().validator.validate(
-        this.selectedScenario().compileInput.schema,
+        this.activeCompileInput().schema,
         this.value(),
       ).issues,
   );
@@ -397,13 +904,20 @@ export class ReferenceFormComponent {
     return Object.freeze({
       formId: `reference-${selection.scenario.id}`,
       definition: selection.compilation.definition,
-      schema: selection.scenario.compileInput.schema,
+      schema: this.activeCompileInput().schema,
       value: this.value(),
       baselineValue: this.baselineValue(),
       locale: this.locale(),
       validator: selection.scenario.validator,
       validationVisibility: this.validationVisibility(),
     });
+  });
+  readonly formMounts = computed(() => {
+    const config = this.formConfig();
+    if (config === undefined) return Object.freeze([]);
+    return Object.freeze([
+      Object.freeze({ epoch: this.runtimeEpoch(), config }),
+    ]);
   });
   readonly runtimeSnapshot = computed(() => this.formDirective?.snapshot());
 
@@ -416,30 +930,40 @@ export class ReferenceFormComponent {
     this.formState.set(value);
   }
 
+  @ViewChild('schemaEditor')
+  private schemaEditor?: ReferenceJsonEditorComponent;
+
+  @ViewChild('uiSchemaEditor')
+  private uiSchemaEditor?: ReferenceJsonEditorComponent;
+
+  @ViewChild('configurationConfirmation')
+  private configurationConfirmation?: ElementRef<HTMLElement>;
+
+  @ViewChild('configurationStatus')
+  private configurationStatus?: ElementRef<HTMLElement>;
+
   selectScenario(id: string): void {
     const scenario = this.scenarios.find((candidate) => candidate.id === id);
     if (scenario !== undefined) this.loadScenario(scenario);
   }
 
   loadScenario(scenario: ReferenceScenario): void {
-    const compilation = compileFormDefinition(scenario.compileInput);
+    const original = prepareConfiguration(scenario.compileInput);
+    const configuration = prepareConfiguration(original.input);
+    const compilation = compileFormDefinition(configuration.input);
     this.selectionState.set(Object.freeze({ scenario, compilation }));
-    this.valueState.set(scenario.initialState.value);
-    this.baselineValueState.set(scenario.initialState.baselineValue);
-    this.localeState.set(scenario.initialState.locale);
-    this.visibilityState.set(scenario.initialState.validationVisibility);
-    this.decisionModeState.set('confirm');
-    this.clearOperationState();
+    this.originalConfigurationState.set(original);
+    this.activeConfigurationState.set(configuration);
+    this.schemaDraftState.set(configuration.schemaText);
+    this.uiSchemaDraftState.set(configuration.uiSchemaText);
+    this.draftResultState.set(emptyDraftResult());
+    this.pendingConfigurationActionState.set(undefined);
+    this.runtimeEpochState.update((epoch) => epoch + 1);
+    this.resetApplicationState(scenario);
   }
 
   resetScenario(): void {
-    const scenario = this.selectedScenario();
-    this.valueState.set(scenario.initialState.value);
-    this.baselineValueState.set(scenario.initialState.baselineValue);
-    this.localeState.set(scenario.initialState.locale);
-    this.visibilityState.set(scenario.initialState.validationVisibility);
-    this.decisionModeState.set('confirm');
-    this.clearOperationState();
+    this.resetApplicationState(this.selectedScenario());
   }
 
   commitBaseline(): void {
@@ -460,6 +984,130 @@ export class ReferenceFormComponent {
 
   setDecisionMode(mode: OperationDecisionMode): void {
     this.decisionModeState.set(mode);
+  }
+
+  setConfigurationTab(id: string): void {
+    if (isConfigurationTabId(id)) this.configurationTabState.set(id);
+  }
+
+  setEvidenceTab(id: string): void {
+    if (isEvidenceTabId(id)) this.evidenceTabState.set(id);
+  }
+
+  updateSchemaDraft(value: string): void {
+    this.schemaDraftState.set(value);
+    this.invalidateDraftResult();
+  }
+
+  updateUiSchemaDraft(value: string): void {
+    this.uiSchemaDraftState.set(value);
+    this.invalidateDraftResult();
+  }
+
+  validateConfiguration(): boolean {
+    const evaluation = evaluateDraft(
+      this.schemaDraft(),
+      this.uiSchemaDraft(),
+      this.activeCompileInput(),
+    );
+    this.draftResultState.set(evaluation.result);
+    return evaluation.success;
+  }
+
+  applyConfiguration(trigger?: EventTarget | null): boolean {
+    const evaluation = evaluateDraft(
+      this.schemaDraft(),
+      this.uiSchemaDraft(),
+      this.activeCompileInput(),
+    );
+    this.draftResultState.set(evaluation.result);
+    if (!evaluation.success) return false;
+    if (this.requiresApplicationResetConfirmation()) {
+      this.rememberConfigurationActionTrigger(trigger);
+      this.pendingConfigurationActionState.set('apply');
+      this.focusConfigurationConfirmationAfterRender();
+      return false;
+    }
+    this.installConfiguration(evaluation.configuration, evaluation.compilation);
+    return true;
+  }
+
+  cancelConfigurationChanges(): void {
+    const active = this.activeConfigurationState();
+    this.schemaDraftState.set(active.schemaText);
+    this.uiSchemaDraftState.set(active.uiSchemaText);
+    this.draftResultState.set(emptyDraftResult());
+    this.pendingConfigurationActionState.set(undefined);
+  }
+
+  restoreScenarioConfiguration(trigger?: EventTarget | null): void {
+    if (!this.canRestoreOriginalConfiguration()) return;
+    this.rememberConfigurationActionTrigger(trigger);
+    this.pendingConfigurationActionState.set('restore');
+    this.focusConfigurationConfirmationAfterRender();
+  }
+
+  confirmConfigurationAction(): boolean {
+    const action = this.pendingConfigurationAction();
+    if (action === undefined) return false;
+    if (action === 'apply') {
+      const evaluation = evaluateDraft(
+        this.schemaDraft(),
+        this.uiSchemaDraft(),
+        this.activeCompileInput(),
+      );
+      this.draftResultState.set(evaluation.result);
+      if (!evaluation.success) {
+        this.pendingConfigurationActionState.set(undefined);
+        return false;
+      }
+      this.installConfiguration(
+        evaluation.configuration,
+        evaluation.compilation,
+      );
+      return true;
+    }
+
+    const original = this.originalConfigurationState();
+    const restored = prepareConfiguration(original.input);
+    const compilation = compileFormDefinition(restored.input);
+    if (!compilation.success) {
+      this.draftResultState.set(
+        Object.freeze({
+          status: 'compile-failed',
+          syntaxIssues: Object.freeze([]),
+          diagnostics: compilation.diagnostics,
+        }),
+      );
+      this.pendingConfigurationActionState.set(undefined);
+      return false;
+    }
+    this.installConfiguration(restored, compilation);
+    return true;
+  }
+
+  cancelConfigurationAction(): void {
+    this.pendingConfigurationActionState.set(undefined);
+    this.returnConfigurationActionFocusAfterRender();
+  }
+
+  protected focusConfigurationDocument(document: 'schema' | 'ui-schema'): void {
+    this.configurationTabState.set(document);
+    afterNextRender(
+      () => {
+        if (document === 'schema') this.schemaEditor?.focus();
+        else this.uiSchemaEditor?.focus();
+      },
+      { injector: this.injector },
+    );
+  }
+
+  protected diagnosticMessage(diagnostic: Diagnostic): string {
+    return diagnostic.fallbackMessage ?? 'No fallback message provided.';
+  }
+
+  protected formatPath(path: readonly (string | number)[]): string {
+    return JSON.stringify(path);
   }
 
   // reference-snippet:start operation-decisions
@@ -606,6 +1254,79 @@ export class ReferenceFormComponent {
     this.runtimeDiagnosticsState.set(Object.freeze([]));
     this.nextHistoryId = 1;
   }
+
+  private invalidateDraftResult(): void {
+    this.draftResultState.set(emptyDraftResult());
+    this.pendingConfigurationActionState.set(undefined);
+  }
+
+  private rememberConfigurationActionTrigger(
+    trigger: EventTarget | null | undefined,
+  ): void {
+    this.configurationActionTrigger =
+      trigger instanceof HTMLElement ? trigger : undefined;
+  }
+
+  private focusConfigurationConfirmationAfterRender(): void {
+    afterNextRender(
+      () =>
+        this.configurationConfirmation?.nativeElement
+          .querySelector<HTMLElement>('button')
+          ?.focus(),
+      { injector: this.injector },
+    );
+  }
+
+  private returnConfigurationActionFocusAfterRender(): void {
+    const trigger = this.configurationActionTrigger;
+    this.configurationActionTrigger = undefined;
+    afterNextRender(() => trigger?.focus(), { injector: this.injector });
+  }
+
+  private focusConfigurationStatusAfterRender(): void {
+    afterNextRender(() => this.configurationStatus?.nativeElement.focus(), {
+      injector: this.injector,
+    });
+  }
+
+  private requiresApplicationResetConfirmation(): boolean {
+    return this.dirty() || this.history().length > 0;
+  }
+
+  private installConfiguration(
+    configuration: AppliedConfiguration,
+    compilation: Extract<CompileFormResult, { success: true }>,
+  ): void {
+    this.activeConfigurationState.set(configuration);
+    this.selectionState.update((selection) =>
+      Object.freeze({ ...selection, compilation }),
+    );
+    this.schemaDraftState.set(configuration.schemaText);
+    this.uiSchemaDraftState.set(configuration.uiSchemaText);
+    this.draftResultState.set(
+      Object.freeze({
+        status: 'valid',
+        syntaxIssues: Object.freeze([]),
+        diagnostics: compilation.diagnostics,
+      }),
+    );
+    this.pendingConfigurationActionState.set(undefined);
+    this.configurationActionTrigger = undefined;
+    this.runtimeEpochState.update((epoch) => epoch + 1);
+    this.resetApplicationState(this.selectedScenario());
+    this.focusConfigurationStatusAfterRender();
+  }
+
+  private resetApplicationState(scenario: ReferenceScenario): void {
+    this.valueState.set(scenario.initialState.value);
+    this.baselineValueState.set(scenario.initialState.baselineValue);
+    this.localeState.set(scenario.initialState.locale);
+    this.visibilityState.set(scenario.initialState.validationVisibility);
+    this.decisionModeState.set('confirm');
+    this.collectionDraftIdState.set('new-member');
+    this.collectionDraftNameState.set('New member');
+    this.clearOperationState();
+  }
 }
 
 interface TeamMember {
@@ -628,4 +1349,134 @@ function readTeamMembers(value: Readonly<object>): readonly TeamMember[] {
 
 function isUnknownArray(value: unknown): value is readonly unknown[] {
   return Array.isArray(value);
+}
+
+function isConfigurationTabId(value: string): value is ConfigurationTabId {
+  return value === 'schema' || value === 'ui-schema';
+}
+
+function isEvidenceTabId(value: string): value is EvidenceTabId {
+  return (
+    value === 'state' ||
+    value === 'definition' ||
+    value === 'runtime' ||
+    value === 'diagnostics' ||
+    value === 'integration'
+  );
+}
+
+function prepareConfiguration(
+  input: CompileFormDefinitionInput,
+): AppliedConfiguration {
+  const copiedInput = JSON.parse(
+    formatJson(input),
+  ) as CompileFormDefinitionInput;
+  const schemaText = formatJson(copiedInput.schema);
+  const uiSchemaText = formatJson(copiedInput.uiSchema ?? {});
+  return Object.freeze({
+    input: freezeJson({
+      ...copiedInput,
+      schema: JSON.parse(schemaText) as unknown,
+      uiSchema: JSON.parse(uiSchemaText) as unknown,
+    }),
+    schemaText,
+    uiSchemaText,
+  });
+}
+
+function formatJson(value: unknown): string {
+  const serialized = JSON.stringify(value, undefined, 2);
+  if (serialized === undefined) {
+    throw new Error('Reference configuration must be JSON serializable.');
+  }
+  return serialized;
+}
+
+function emptyDraftResult(): ConfigurationDraftResult {
+  return Object.freeze({
+    status: 'unvalidated',
+    syntaxIssues: Object.freeze([]),
+    diagnostics: Object.freeze([]),
+  });
+}
+
+function evaluateDraft(
+  schemaText: string,
+  uiSchemaText: string,
+  baseInput: CompileFormDefinitionInput,
+): DraftEvaluation {
+  const syntaxIssues: ConfigurationSyntaxIssue[] = [];
+  let schema: unknown;
+  let uiSchema: unknown;
+  try {
+    schema = JSON.parse(schemaText) as unknown;
+  } catch {
+    syntaxIssues.push(
+      Object.freeze({
+        document: 'schema',
+        message: 'Invalid JSON syntax.',
+      }),
+    );
+  }
+  try {
+    uiSchema = JSON.parse(uiSchemaText) as unknown;
+  } catch {
+    syntaxIssues.push(
+      Object.freeze({
+        document: 'ui-schema',
+        message: 'Invalid JSON syntax.',
+      }),
+    );
+  }
+
+  if (syntaxIssues.length > 0) {
+    return Object.freeze({
+      success: false,
+      result: Object.freeze({
+        status: 'invalid-json',
+        syntaxIssues: Object.freeze(syntaxIssues),
+        diagnostics: Object.freeze([]),
+      }),
+    });
+  }
+
+  const input = freezeJson({ ...baseInput, schema, uiSchema });
+  const compilation = compileFormDefinition(input);
+  if (!compilation.success) {
+    return Object.freeze({
+      success: false,
+      result: Object.freeze({
+        status: 'compile-failed',
+        syntaxIssues: Object.freeze([]),
+        diagnostics: compilation.diagnostics,
+      }),
+    });
+  }
+  const configuration = Object.freeze({
+    input,
+    schemaText,
+    uiSchemaText,
+  });
+  return Object.freeze({
+    success: true,
+    configuration,
+    compilation,
+    result: Object.freeze({
+      status: 'valid',
+      syntaxIssues: Object.freeze([]),
+      diagnostics: compilation.diagnostics,
+    }),
+  });
+}
+
+function freezeJson<T>(value: T): T {
+  if (typeof value !== 'object' || value === null || Object.isFrozen(value)) {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    for (const entry of value) freezeJson(entry);
+  } else {
+    for (const entry of Object.values(value)) freezeJson(entry);
+  }
+  return Object.freeze(value);
 }
