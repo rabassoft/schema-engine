@@ -32,6 +32,7 @@ import { ReferenceCodeExampleComponent } from './reference-code-example.componen
 import { referenceSnippets } from './generated/reference-snippets.js';
 import { serializeInspector } from './inspector-serialization.js';
 import { ReferenceJsonEditorComponent } from './reference-json-editor.component.js';
+import { REFERENCE_SCHEMA_VALIDATOR } from './reference-validator.js';
 import {
   ReferenceTabsComponent,
   type ReferenceTab,
@@ -702,15 +703,15 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                 [value]="runtimeDiagnostics()"
               />
               <reference-inspector-panel
-                label="Scenario validation issues"
+                label="JSON Schema validation issues"
                 testId="inspector-issues"
                 [value]="validationIssues()"
               />
               @if (activeConfigurationDiffersFromOriginal()) {
                 <p class="validation-caveat" role="note">
                   The active configuration differs from the scenario original.
-                  These issues demonstrate this scenario's validation port; they
-                  do not prove that the edited schema is fully validated.
+                  These issues come from the active Draft 2020-12 schema through
+                  the reusable synchronous Ajv integration.
                 </p>
               }
             </section>
@@ -751,6 +752,7 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
 })
 export class ReferenceFormComponent {
   private readonly injector = inject(Injector);
+  private readonly validator = inject(REFERENCE_SCHEMA_VALIDATOR);
   readonly scenarios = referenceScenarios;
   readonly snippets = snippetEntries;
   readonly configurationTabs = configurationTabs;
@@ -882,10 +884,8 @@ export class ReferenceFormComponent {
   );
   readonly validationIssues = computed(
     () =>
-      this.selectedScenario().validator.validate(
-        this.activeCompileInput().schema,
-        this.value(),
-      ).issues,
+      this.validator.validate(this.activeCompileInput().schema, this.value())
+        .issues,
   );
   readonly formConfig = computed<
     AngularControlledFormConfig<object> | undefined
@@ -899,7 +899,7 @@ export class ReferenceFormComponent {
       value: this.value(),
       baselineValue: this.baselineValue(),
       locale: this.locale(),
-      validator: selection.scenario.validator,
+      validator: this.validator,
       validationVisibility: this.validationVisibility(),
     });
   });

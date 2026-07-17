@@ -192,7 +192,12 @@ test('validates, cancels, applies and restores configuration drafts safely', asy
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       type: 'object',
       properties: {
-        name: { type: 'string', title: 'Name', minLength: 1 },
+        name: {
+          type: 'string',
+          title: 'Name',
+          minLength: 1,
+          maxLength: 2,
+        },
         age: { type: 'integer', title: 'Age', minimum: 0 },
         active: { type: 'boolean', title: 'Active' },
       },
@@ -256,12 +261,11 @@ test('validates, cancels, applies and restores configuration drafts safely', asy
     page.getByText('Matches applied configuration', { exact: true }),
   ).toBeVisible();
   await page.getByRole('tab', { name: 'Diagnostics', exact: true }).click();
+  await expect(page.getByText(/active Draft 2020-12 schema/u)).toBeVisible();
   await expect(
-    page.getByText(/do not prove that the edited schema is fully validated/u),
+    page.getByText('JSON Schema validation issues', { exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByText('Scenario validation issues', { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByTestId('inspector-issues')).toContainText('maxLength');
 
   await page
     .getByRole('button', { name: 'Restore scenario configuration' })

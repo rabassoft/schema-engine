@@ -1,0 +1,30 @@
+{
+  "name": "@rabassoft/schema-engine-validator-ajv",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "license": "AGPL-3.0-only",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:package": "node test/package-smoke.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@rabassoft/schema-engine": "workspace:*"
+  },
+  "peerDependencies": {
+    "@rabassoft/schema-engine": "workspace:^"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}

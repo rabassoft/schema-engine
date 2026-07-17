@@ -14,8 +14,8 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 The private development repository contains the completed M1-M13 controlled-form
 runtime and verified public Experimental packages. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
-v0.1.1 and SPEC-006 v0.1.1 are Accepted. SPEC-006 defines the promoted M14
-nullable-primitive-leaf contract. The source checkout implements that contract
+v0.1.1, SPEC-006 v0.1.1 and SPEC-007 v0.1.0 are Accepted. SPEC-007 defines the
+private M17 reusable synchronous Ajv-validator contract. The source checkout implements the M14 contract
 under completed PLAN-014. PLAN-015 published and verified byte-identical core
 and Angular `0.2.0` packages under both `next` and `latest`. M15 completed a
 private reference platform without changing those Public packages. The live
@@ -47,10 +47,14 @@ generated identity, async validation, persistence, advanced layouts beyond the
 fixed static section primitive, custom
 collection renderers and other deferred decisions are not active.
 
+`packages/validator-ajv` is a completed private, unpublished integration package that
+implements the replaceable validation port with Ajv Draft 2020-12. It is used
+by the reference shells and does not make Ajv a core dependency.
+
 ## Private reference platform
 
-The repository contains a private, non-publishable scenario catalog and an
-Angular 22 reference application. They compose only Public package entry points
+The repository contains a private, non-publishable scenario catalog plus
+Angular 22 and Standard/DOM reference applications. They compose only Public package entry points
 and provide maintained examples, state/diagnostic inspectors and one Chromium
 smoke lane. The application—not the library—owns complete `value` and
 `baselineValue` roots, locale, validation visibility and every decision to
@@ -75,8 +79,8 @@ are local machine state and are never installed by a package lifecycle script.
 
 This reference workspace is not a Public package, hosted product, compatibility
 matrix, exhaustive conformance suite, visual baseline or accessibility
-certification. Standard/DOM, React, Vue and legacy-Angular shells remain
-deferred and must be delivered independently when promoted.
+certification. React, Vue and legacy-Angular shells remain deferred and must be
+delivered independently when promoted.
 
 Primitive leaves may additionally use the exact JSON Schema type array
 `[primitive, "null"]` or `["null", primitive]`. This remains a closed nullable

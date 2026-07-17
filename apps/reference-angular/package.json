@@ -19,10 +19,11 @@
     "@codemirror/lang-javascript": "6.2.5",
     "@codemirror/lang-json": "6.0.2",
     "@codemirror/language": "6.12.4",
+    "@lezer/highlight": "1.2.3",
     "@rabassoft/schema-engine": "workspace:*",
     "@rabassoft/schema-engine-angular": "workspace:*",
+    "@rabassoft/schema-engine-validator-ajv": "workspace:*",
     "@schema-engine-internal/reference-scenarios": "workspace:*",
-    "@lezer/highlight": "1.2.3",
     "codemirror": "6.0.2",
     "tslib": "^2.8.1"
   }

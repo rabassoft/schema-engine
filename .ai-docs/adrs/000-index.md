@@ -39,6 +39,8 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 18. [ADR 018: Dual AGPL/commercial licensing and public experimental publication](./018-licencia-dual-publicacion-experimental.md) — **Accepted revision 3 after review 028 cycle 8 closed with zero findings; M13 uses verified interactive 2FA and defers trusted publishing/provenance until repository publication.**
 19. [ADR 019: Nullable primitive leaves and explicit null intention](./019-hojas-primitivas-nullable.md) — **Accepted revision 1 after review 033 cycle 2 preserved SPEC-003 collection diagnostics with zero findings; SPEC-006 v0.1.1 is now Accepted.**
 20. [ADR 020: Private multi-framework reference platform](./020-plataforma-referencia-multiframework.md) — **Accepted revision 0 after review 054 cycle 3; separately approved PLAN-016 revision 0 completed the private catalog and first Angular 22 shell after final review 063 cycle 2 passed with zero findings.**
+21. [ADR 021: Private Standard/DOM direct-core reference shell](./021-shell-standard-dom-core-directo.md) — **Accepted revision 0 after review 076 cycle 1 passed ten areas with zero findings; PLAN-018 preparation only is authorized.**
+22. [ADR 022: Reusable synchronous Ajv validator package](./022-validador-ajv-sincrono-reutilizable.md) — **Accepted revision 1 after review 083 cycle 2 passed ten areas with zero findings; completed PLAN-019 implements it privately.**
 
 ## 4. ADRs específicos de Angular
 

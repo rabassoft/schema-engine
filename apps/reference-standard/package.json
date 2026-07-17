@@ -1,0 +1,18 @@
+{
+  "name": "@schema-engine-internal/reference-standard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 127.0.0.1 --port 4211",
+    "dev:e2e": "vite --host 127.0.0.1 --port 4212",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@rabassoft/schema-engine": "workspace:*",
+    "@rabassoft/schema-engine-validator-ajv": "workspace:*",
+    "@schema-engine-internal/reference-scenarios": "workspace:*"
+  }
+}

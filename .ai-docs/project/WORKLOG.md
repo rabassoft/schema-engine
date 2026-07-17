@@ -6,6 +6,193 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-17 — PLAN-019/M17 reusable validator completed
+
+### Completed
+
+- Added private `@rabassoft/schema-engine-validator-ajv` with one Experimental
+  factory, exact Ajv 8.20.0/Draft 2020-12 behavior, weak cache and immutable
+  normalized issues.
+- Migrated Angular and Standard runtime validation from fixed scenario logic to
+  the reusable integration while retaining catalog validators as fixtures.
+- Added lazy Angular pre-bootstrap loading to restore the 1 MB initial budget
+  and exact root development ownership for Angular/Vite virtual-root resolution.
+- Corrected stale scenario-validation assertions; edited `maxLength` evidence
+  now passes unit and Chromium flows.
+- Review 089 cycle 2 passed the complete matrix with zero findings; PLAN-019
+  revision 1 and D-047/M17 are complete without Public package drift.
+
+### Next
+
+- Resume Approved PLAN-018 checkpoint 5 for the Standard reference workspace
+  UX, build-checked snippet and active validation evidence.
+
+## 2026-07-17 — D-047/M17 validator delivery authorized
+
+### Completed
+
+- Promoted one private reusable synchronous Draft 2020-12 Ajv integration after
+  review 082 cycle 1 passed with zero findings.
+- Accepted ADR-022 revision 0 and SPEC-007 v0.1.0 after reviews 083–084 passed
+  completely with zero findings.
+- Approved PLAN-019 revision 0 for package foundation, Angular integration,
+  Standard integration and final repeated review.
+- Fixed exact Ajv 8.20.0 ownership, non-mutating options, weak identity cache,
+  immutable issue normalization and publication/deferred boundaries.
+
+### Next
+
+- Implement PLAN-019 checkpoint 1 with the exact offline dependency mutation.
+
+## 2026-07-17 — PLAN-018 checkpoint 4 completed
+
+### Completed
+
+- Added identity-keyed collection/item bindings with stable DOM reconciliation
+  and deterministic cleanup of removed controls.
+- Added normalized generic insertion drafts, nested item materialization and
+  Public item edit/insert/move/remove intentions without scenario semantics.
+- Verified confirmed focus behavior plus atomic stale/incompatible pending
+  collection decisions against complete application-owned roots.
+- Expanded Standard evidence to 25 tests covering all six catalog scenarios;
+  corrected duplicate IDs and scenario-specific insertion after cycle 1.
+- Review 081 cycle 2 passed format/lint/types, core/catalog/Angular/Standard
+  suites, builds, 389 boundaries and Public isolation with zero findings.
+- Accepted the new product demand for reusable synchronous JSON Schema
+  validation; PLAN-018 checkpoint 5 is paused until separate promotion and
+  architecture/contract gates complete.
+
+### Next
+
+- Perform promotion-readiness review for the reusable JSON Schema validator/Ajv
+  integration before resuming PLAN-018 checkpoint 5.
+
+## 2026-07-17 — PLAN-018 checkpoint 3 completed
+
+### Completed
+
+- Added a private stable DOM renderer consuming only normalized Public
+  definitions, snapshots and runtime intentions.
+- Built semantic labelled primitives, nested fieldsets and static presentation
+  sections with in-place canonical-key reconciliation and deterministic cleanup.
+- Added private localized number buffers, explicit clear/null actions and
+  visible distinctions for missing, null, false, empty string and zero.
+- Added eight focused DOM/main tests, bringing Standard evidence to 16 tests;
+  corrected selectors, native enum events and incomplete-number handling after
+  the first review.
+- Review 080 cycle 2 passed format/lint/types, core/catalog/Angular/Standard
+  tests, builds, 388 boundaries and Public isolation with zero findings.
+
+### Next
+
+- Implement PLAN-018 checkpoint 4: stable identity-keyed collections and full
+  interactive scenario coverage.
+
+## 2026-07-17 — PLAN-018 checkpoint 2 completed
+
+### Completed
+
+- Added the private Standard composition root with copied immutable controlled
+  roots, Public compilation/runtime creation and observable failure diagnostics.
+- Implemented exact confirm/reject/pending decisions, later pending resolution,
+  stale/incompatible history and complete-root external updates without
+  constructing operations or optimistic values.
+- Added reset, complete baseline commit, locale and validation-visibility
+  actions plus one idempotent binding/subscription/runtime cleanup path.
+- Added eight focused state/lifecycle tests; corrected reset mode and cleanup
+  idempotence after the first review.
+- Review 079 cycle 2 passed format/lint/types, core/catalog/Angular/Standard
+  tests, builds, 383 boundaries and Public isolation with zero findings.
+
+### Next
+
+- Implement PLAN-018 checkpoint 3: stable normalized DOM projection for
+  primitives, nested objects, presentation groups and nullable leaves.
+
+## 2026-07-17 — PLAN-018 checkpoint 1 completed
+
+### Completed
+
+- Added exact root Vite 8.1.4 ownership and the private
+  `@schema-engine-internal/reference-standard` buildable skeleton consuming only
+  Public core and the neutral catalog.
+- Added strict TypeScript/Vite/Vitest configuration, loopback dev/build scripts,
+  minimal semantic bootstrap and a 92.55 kB production bundle.
+- Extended boundaries to three private projects and added Standard framework/
+  export rejection fixtures; 378 imports and 11 verifier tests pass.
+- Proved catalog watch rebuilds trigger Vite reloads without physical source
+  imports, and corrected the first review's missing `vite/client` types.
+- Review 078 cycle 2 passed frozen install, format/lint/types/unit/build,
+  snippets, Angular/Public regression, watch and isolation with zero findings.
+
+### Next
+
+- Implement PLAN-018 checkpoint 2: controlled Standard application ownership,
+  operation decisions and idempotent runtime/subscription lifecycle.
+
+## 2026-07-17 — PLAN-018 approved for Standard/DOM delivery
+
+### Completed
+
+- Sequenced the private Standard/DOM shell into seven checkpoints: foundation,
+  controlled lifecycle, normalized DOM projection, collections, reference UX,
+  Chromium/isolation and final repeated review.
+- Fixed exact Vite ownership, scripts, ports, file boundaries, evidence matrix,
+  verification order and stop conditions.
+- Preserved existing Angular commands and package/release consumers as
+  independent evidence that the Standard workspace app cannot replace.
+- Review 077 cycle 1 repeated twelve plan areas with zero findings and
+  PLAN-018 revision 0 is Approved for checkpoints 1–7.
+- The exact Vite dependency mutation, any browser download/replacement, commit,
+  push and external actions retain separate gates.
+
+### Next
+
+- After explicit authorization, run the exact Vite dependency command, inspect
+  its manifest/lock diff and execute checkpoint 1.
+
+## 2026-07-17 — ADR-021 Standard/DOM architecture accepted
+
+### Completed
+
+- Fixed `apps/reference-standard` as a private direct-core consumer with no
+  Angular/framework dependency or publishable adapter boundary.
+- Selected exact root Vite 8.1.4 tooling, independent build/ports and strict
+  package/release isolation.
+- Defined shell-owned controlled state, runtime/subscription cleanup,
+  normalized incremental DOM projection, all six scenarios and build-checked
+  Standard integration snippets.
+- Review 076 cycle 1 repeated ten architectural areas with zero findings and
+  ADR-021 revision 0 is Accepted.
+- Acceptance authorizes preparing/reviewing PLAN-018 only; implementation,
+  dependencies, commit, push and external actions remain unauthorized.
+
+### Next
+
+- Draft PLAN-018, repeat its complete review until zero findings and require a
+  separate approval before implementation.
+
+## 2026-07-17 — D-046/M16 Standard/DOM boundary promoted for design
+
+### Completed
+
+- Confirmed that the Public core root already exposes the compiler, controlled
+  runtime, operations, snapshots and subscriptions required by a direct
+  Standard/DOM consumer.
+- Selected one private `apps/reference-standard` shell consuming only Public
+  core and the neutral catalog, without a new adapter, package or Public API.
+- Required independent DOM ownership, all six catalog scenarios,
+  build-checked snippets and target-specific unit/build/Chromium evidence.
+- Review 075 cycle 1 repeated ten promotion areas with zero findings and
+  promotes D-046 only for ADR-021 preparation.
+- React, Vue, D-026, D-035, D-043, D-045, implementation, dependencies,
+  hosting, publication, commit and push remain unauthorized.
+
+### Next
+
+- Draft ADR-021 and repeat its complete review until one pass produces zero
+  findings before considering PLAN-018.
+
 ## 2026-07-17 — Reference workspace hierarchy corrected
 
 ### Completed

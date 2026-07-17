@@ -12,9 +12,19 @@ const PRIVATE_PROJECTS = Object.freeze({
     directory: 'apps/reference-angular',
     name: '@schema-engine-internal/reference-angular',
   }),
+  standard: Object.freeze({
+    directory: 'apps/reference-standard',
+    name: '@schema-engine-internal/reference-standard',
+  }),
 });
 
 const PUBLIC_PROJECTS = Object.freeze(['packages/core', 'packages/angular']);
+const PRIVATE_PRODUCT_PROJECTS = Object.freeze([
+  Object.freeze({
+    directory: 'packages/validator-ajv',
+    name: '@rabassoft/schema-engine-validator-ajv',
+  }),
+]);
 
 export const ANGULAR_PREBUNDLE_EXCLUDES = Object.freeze([
   '@codemirror/autocomplete',
@@ -167,6 +177,32 @@ function assertPublicManifest(root, directory) {
   return { inspectedTargets, manifest };
 }
 
+function assertPrivateProductManifest(root, project) {
+  const manifestPath = join(root, project.directory, 'package.json');
+  const manifest = readJson(manifestPath);
+  assert.equal(manifest.name, project.name, `${project.name}: wrong name`);
+  assert.equal(manifest.private, true, `${project.name}: must stay private`);
+  assert.equal(
+    Object.hasOwn(manifest, 'publishConfig'),
+    false,
+    `${project.name}: publication is not authorized`,
+  );
+  assert.equal(
+    dependencyNames(manifest).some((name) =>
+      name.startsWith('@schema-engine-internal/'),
+    ),
+    false,
+    `${project.name}: product package depends on a private app`,
+  );
+  const inspectedTargets = assertSafeManifestTargets(
+    root,
+    manifestPath,
+    'exports',
+    manifest.exports ?? {},
+  );
+  return { inspectedTargets, manifest };
+}
+
 function assertImport(root, file, specifier, owner) {
   const label = relative(root, file);
   const isRelative = specifier.startsWith('.');
@@ -224,6 +260,21 @@ function assertImport(root, file, specifier, owner) {
       `${label}: catalog imports Angular shell`,
     );
   }
+
+  if (owner === 'standard') {
+    assert.equal(
+      /^(?:@angular\/|@rabassoft\/schema-engine-angular$|react(?:\/|$)|react-dom(?:\/|$)|rxjs(?:\/|$)|vue(?:\/|$))/u.test(
+        specifier,
+      ),
+      false,
+      `${label}: Standard shell imports framework dependency ${specifier}`,
+    );
+    assert.equal(
+      specifier === '@schema-engine-internal/reference-angular',
+      false,
+      `${label}: Standard shell imports Angular shell`,
+    );
+  }
 }
 
 function inspectImports(root, directory, owner) {
@@ -239,8 +290,12 @@ function inspectImports(root, directory, owner) {
 }
 
 export function verifyReferenceBoundaries(root = resolve('.')) {
+  const rootManifest = readJson(join(root, 'package.json'));
   const scenarios = assertPrivateManifest(root, PRIVATE_PROJECTS.scenarios);
   const angular = assertPrivateManifest(root, PRIVATE_PROJECTS.angular);
+  const standard = assertPrivateManifest(root, PRIVATE_PROJECTS.standard);
+  const validatorProject = PRIVATE_PRODUCT_PROJECTS[0];
+  const validator = assertPrivateProductManifest(root, validatorProject);
 
   assert.deepEqual(scenarios.exports, {
     '.': {
@@ -263,11 +318,38 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
       '@codemirror/language',
       '@rabassoft/schema-engine',
       '@rabassoft/schema-engine-angular',
+      '@rabassoft/schema-engine-validator-ajv',
       '@schema-engine-internal/reference-scenarios',
       '@lezer/highlight',
       'codemirror',
       'tslib',
     ].sort(),
+  );
+  assert.equal(
+    Object.hasOwn(standard, 'exports'),
+    false,
+    'reference-standard: exports are forbidden',
+  );
+  assert.deepEqual(dependencyNames(standard).sort(), [
+    '@rabassoft/schema-engine',
+    '@rabassoft/schema-engine-validator-ajv',
+    '@schema-engine-internal/reference-scenarios',
+  ]);
+  assert.deepEqual(dependencyNames(validator.manifest).sort(), [
+    '@rabassoft/schema-engine',
+    'ajv',
+  ]);
+  assert.deepEqual(validator.manifest.exports, {
+    '.': {
+      types: './dist/index.d.ts',
+      import: './dist/index.js',
+      default: './dist/index.js',
+    },
+  });
+  assert.equal(
+    rootManifest.devDependencies?.ajv,
+    '8.20.0',
+    'workspace root must own exact Ajv for Angular/Vite virtual-root resolution',
   );
   const workspace = readJson(join(root, 'angular.json'));
   assert.deepEqual(
@@ -277,15 +359,19 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
     'reference-angular: prebundle exclusions must match the approved private dependency graph',
   );
 
-  const inspectedManifestTargets = PUBLIC_PROJECTS.reduce(
-    (count, directory) =>
-      count + assertPublicManifest(root, directory).inspectedTargets,
-    0,
-  );
+  const inspectedManifestTargets =
+    validator.inspectedTargets +
+    PUBLIC_PROJECTS.reduce(
+      (count, directory) =>
+        count + assertPublicManifest(root, directory).inspectedTargets,
+      0,
+    );
 
   const inspectedImports =
     inspectImports(root, PRIVATE_PROJECTS.scenarios.directory, 'scenarios') +
     inspectImports(root, PRIVATE_PROJECTS.angular.directory, 'angular') +
+    inspectImports(root, PRIVATE_PROJECTS.standard.directory, 'standard') +
+    inspectImports(root, validatorProject.directory, 'public') +
     PUBLIC_PROJECTS.reduce(
       (count, directory) => count + inspectImports(root, directory, 'public'),
       0,
@@ -294,7 +380,8 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
   return Object.freeze({
     inspectedImports,
     inspectedManifestTargets,
-    privateProjects: 2,
+    privateProjects: 3,
+    privateProductProjects: PRIVATE_PRODUCT_PROJECTS.length,
     publicProjects: PUBLIC_PROJECTS.length,
   });
 }
@@ -307,6 +394,6 @@ if (
 ) {
   const result = verifyReferenceBoundaries();
   console.log(
-    `Verified ${result.privateProjects} private reference projects, ${result.publicProjects} public projects, ${result.inspectedManifestTargets} manifest targets and ${result.inspectedImports} import boundaries.`,
+    `Verified ${result.privateProjects} private reference projects, ${result.privateProductProjects} private product projects, ${result.publicProjects} public projects, ${result.inspectedManifestTargets} manifest targets and ${result.inspectedImports} import boundaries.`,
   );
 }

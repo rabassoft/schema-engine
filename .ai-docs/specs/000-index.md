@@ -6,3 +6,4 @@
 4. [SPEC-004: Same-document Static JSON Schema Reference Resolution](./004-local-reference-resolution.md) — **Accepted 0.1.1 and implemented by completed PLAN-011 after final repeated review with zero findings.**
 5. [SPEC-005: Static Neutral Presentation Groups](./005-static-presentation-groups.md) — **Accepted 0.1.1 and implemented by completed PLAN-012 after final repeated review with zero findings.**
 6. [SPEC-006: Nullable Primitive Leaves](./006-nullable-primitive-leaves.md) — **Accepted 0.1.1 after review 034 cycle 6 passed all twelve areas and accepted-state reconciliation with zero findings; Approved PLAN-014 revision 0 now authorizes checkpoints 1–6 only.**
+7. [SPEC-007: Reusable Synchronous Ajv Validator](./007-synchronous-ajv-validator.md) — **Accepted 0.1.0 after review 084 cycle 1 passed all twelve areas with zero findings; completed PLAN-019 revision 1 implements it privately.**

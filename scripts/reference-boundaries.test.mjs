@@ -30,6 +30,11 @@ function fixture() {
     name: '@rabassoft/schema-engine',
     files: ['dist'],
   };
+  write(
+    root,
+    'package.json',
+    manifest({ private: true, devDependencies: { ajv: '8.20.0' } }),
+  );
   write(root, 'packages/core/package.json', manifest(publicManifest));
   write(root, 'packages/core/src/index.ts', 'export const core = true;\n');
   write(
@@ -58,6 +63,29 @@ function fixture() {
     root,
     'packages/angular/src/index.ts',
     "import type { DataPath } from '@rabassoft/schema-engine';\nexport type Path = DataPath;\n",
+  );
+  write(
+    root,
+    'packages/validator-ajv/package.json',
+    manifest({
+      name: '@rabassoft/schema-engine-validator-ajv',
+      private: true,
+      exports: {
+        '.': {
+          types: './dist/index.d.ts',
+          import: './dist/index.js',
+          default: './dist/index.js',
+        },
+      },
+      dependencies: { ajv: '8.20.0' },
+      devDependencies: { '@rabassoft/schema-engine': 'workspace:*' },
+      peerDependencies: { '@rabassoft/schema-engine': 'workspace:^' },
+    }),
+  );
+  write(
+    root,
+    'packages/validator-ajv/src/index.ts',
+    "import type { SchemaValidator } from '@rabassoft/schema-engine';\nimport { Ajv2020 } from 'ajv/dist/2020.js';\nexport const validator: SchemaValidator | typeof Ajv2020 = Ajv2020;\n",
   );
   write(
     root,
@@ -102,6 +130,7 @@ function fixture() {
         '@codemirror/language': '6.12.4',
         '@rabassoft/schema-engine': 'workspace:*',
         '@rabassoft/schema-engine-angular': 'workspace:*',
+        '@rabassoft/schema-engine-validator-ajv': 'workspace:*',
         '@schema-engine-internal/reference-scenarios': 'workspace:*',
         '@lezer/highlight': '1.2.3',
         codemirror: '6.0.2',
@@ -112,7 +141,25 @@ function fixture() {
   write(
     root,
     'apps/reference-angular/src/main.ts',
-    "import '@angular/core/testing';\nimport '@codemirror/lang-html';\nimport '@codemirror/lang-javascript';\nimport '@codemirror/lang-json';\nimport '@codemirror/language';\nimport '@lezer/highlight';\nimport '@rabassoft/schema-engine-angular';\nimport 'codemirror';\n",
+    "import '@angular/core/testing';\nimport '@codemirror/lang-html';\nimport '@codemirror/lang-javascript';\nimport '@codemirror/lang-json';\nimport '@codemirror/language';\nimport '@lezer/highlight';\nimport '@rabassoft/schema-engine-angular';\nimport '@rabassoft/schema-engine-validator-ajv';\nimport 'codemirror';\n",
+  );
+  write(
+    root,
+    'apps/reference-standard/package.json',
+    manifest({
+      name: '@schema-engine-internal/reference-standard',
+      private: true,
+      dependencies: {
+        '@rabassoft/schema-engine': 'workspace:*',
+        '@rabassoft/schema-engine-validator-ajv': 'workspace:*',
+        '@schema-engine-internal/reference-scenarios': 'workspace:*',
+      },
+    }),
+  );
+  write(
+    root,
+    'apps/reference-standard/src/main.ts',
+    "import '@rabassoft/schema-engine';\nimport '@rabassoft/schema-engine-validator-ajv';\nimport '@schema-engine-internal/reference-scenarios';\n",
   );
   return root;
 }
@@ -121,11 +168,48 @@ test('accepts the exact private reference dependency boundary', () => {
   const root = fixture();
   try {
     assert.deepEqual(verifyReferenceBoundaries(root), {
-      inspectedImports: 11,
-      inspectedManifestTargets: 2,
-      privateProjects: 2,
+      inspectedImports: 17,
+      inspectedManifestTargets: 5,
+      privateProjects: 3,
+      privateProductProjects: 1,
       publicProjects: 2,
     });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects a framework dependency in the Standard shell', () => {
+  const root = fixture();
+  try {
+    write(
+      root,
+      'apps/reference-standard/src/main.ts',
+      "import '@angular/core';\n",
+    );
+    assert.throws(
+      () => verifyReferenceBoundaries(root),
+      /Standard shell imports framework dependency/u,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects exports from the Standard shell', () => {
+  const root = fixture();
+  try {
+    const path = 'apps/reference-standard/package.json';
+    const value = JSON.parse(readFixture(root, path));
+    write(
+      root,
+      path,
+      manifest({ ...value, exports: { '.': './src/main.ts' } }),
+    );
+    assert.throws(
+      () => verifyReferenceBoundaries(root),
+      /exports are forbidden/u,
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

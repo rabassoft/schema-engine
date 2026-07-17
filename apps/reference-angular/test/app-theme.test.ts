@@ -1,9 +1,11 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideSchemaEngineAngularNative } from '@rabassoft/schema-engine-angular';
+import { createAjvSchemaValidator } from '@rabassoft/schema-engine-validator-ajv';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AppComponent } from '../src/app/app.component.js';
+import { REFERENCE_SCHEMA_VALIDATOR } from '../src/app/reference-validator.js';
 
 describe('reference application theme control', () => {
   beforeEach(() => TestBed.resetTestingModule());
@@ -15,6 +17,10 @@ describe('reference application theme control', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideSchemaEngineAngularNative(),
+        {
+          provide: REFERENCE_SCHEMA_VALIDATOR,
+          useValue: createAjvSchemaValidator(),
+        },
       ],
     });
     const fixture = TestBed.createComponent(AppComponent);

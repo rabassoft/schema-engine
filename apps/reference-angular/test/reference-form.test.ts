@@ -5,11 +5,13 @@ import {
   type SetValueOperation,
 } from '@rabassoft/schema-engine';
 import { provideSchemaEngineAngularNative } from '@rabassoft/schema-engine-angular';
+import { createAjvSchemaValidator } from '@rabassoft/schema-engine-validator-ajv';
 import type { ReferenceScenario } from '@schema-engine-internal/reference-scenarios';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { referenceSnippets } from '../src/app/generated/reference-snippets.js';
 import { ReferenceFormComponent } from '../src/app/reference-form.component.js';
+import { REFERENCE_SCHEMA_VALIDATOR } from '../src/app/reference-validator.js';
 
 function setValue(
   id: number,
@@ -33,6 +35,10 @@ function createComponent() {
     providers: [
       provideZonelessChangeDetection(),
       provideSchemaEngineAngularNative(),
+      {
+        provide: REFERENCE_SCHEMA_VALIDATOR,
+        useValue: createAjvSchemaValidator(),
+      },
     ],
   });
   const fixture = TestBed.createComponent(ReferenceFormComponent);
@@ -326,6 +332,41 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(component.value()).toBe(
       component.selectedScenario().initialState.value,
     );
+  });
+
+  it('validates newly applied supported constraints through Ajv', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    const activeSchema = component.activeCompileInput().schema as {
+      readonly properties: Readonly<Record<string, object>>;
+    };
+    component.updateSchemaDraft(
+      JSON.stringify(
+        {
+          ...(component.activeCompileInput().schema as object),
+          properties: {
+            ...activeSchema.properties,
+            name: { ...activeSchema.properties.name, maxLength: 2 },
+          },
+        },
+        undefined,
+        2,
+      ),
+    );
+
+    expect(component.applyConfiguration()).toBe(true);
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.validationIssues()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'maxLength', path: ['name'] }),
+      ]),
+    );
+
+    component.handleOperation(setValue(9, ['name'], 'Ada', 'Al'));
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.validationIssues()).toEqual([]);
   });
 
   it('confirms destructive apply from a freshly recompiled draft', () => {

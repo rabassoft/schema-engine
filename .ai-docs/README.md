@@ -30,6 +30,9 @@
 - [SPEC-006 v0.1.1: Nullable Primitive Leaves](./specs/006-nullable-primitive-leaves.md)
   — Accepted after review 034's complete repeated review passed with zero
   findings; Approved PLAN-014 revision 0 authorizes checkpoints 1–6 only.
+- [SPEC-007 v0.1.0: Reusable Synchronous Ajv Validator](./specs/007-synchronous-ajv-validator.md)
+  — Accepted after review 084 cycle 1; completed PLAN-019 revision 1 delivers a
+  private reusable Ajv integration for Angular and Standard.
 
 ## Acceptance reviews
 
@@ -219,6 +222,31 @@
   — Cycle 1 passes the integrated scenario explanation, single semantic group
   headings, initially open State/Value evidence and Public isolation with zero
   findings.
+- [D-046/M16 Standard/DOM promotion-readiness review](./reviews/075-d046-m16-standard-dom-promotion-readiness.md)
+  — Cycle 1 promotes only a private direct-core Standard/DOM shell for ADR-021
+  preparation; no adapter, Public contract or implementation is authorized.
+- [ADR-021 review](./reviews/076-adr-021-review.md)
+  — Cycle 1 accepts the private Standard/DOM architecture with zero findings
+  and authorizes PLAN-018 preparation only.
+- [PLAN-018 review](./reviews/077-plan-018-review.md)
+  — Cycle 1 approves seven Standard/DOM delivery checkpoints with zero findings;
+  dependency/browser execution gates remain separate.
+- [PLAN-018 checkpoint 1 review](./reviews/078-plan-018-checkpoint-1-review.md)
+  — Cycle 2 passes the private Vite skeleton, catalog watch, strict boundaries
+  and Angular/Public regression after correcting Vite CSS module types.
+- [D-047/M17 Ajv validator promotion readiness](./reviews/082-d047-m17-ajv-validator-promotion-readiness.md)
+  — Cycle 1 promotes one private reusable synchronous Draft 2020-12 validator.
+- [ADR-022 review](./reviews/083-adr-022-review.md) — Cycle 1 accepts the exact
+  package, options, normalization, cache and shell-integration architecture.
+- [SPEC-007 review](./reviews/084-spec-007-review.md) — Cycle 1 accepts the
+  observable factory and issue-normalization contract.
+- [PLAN-019 review](./reviews/085-plan-019-review.md) — Cycle 1 approves four
+  implementation checkpoints; network, publication, commit and push stay gated.
+- [PLAN-019 checkpoint reviews](./reviews/086-plan-019-checkpoint-1-review.md) —
+  Reviews 086–088 close package, Angular and Standard delivery after repeated
+  corrections.
+- [PLAN-019 final review](./reviews/089-plan-019-final-review.md) — Cycle 2
+  repeats the complete matrix with zero findings and completes M17.
 
 ## Architecture Decision Records
 
@@ -237,6 +265,9 @@
   — Accepted revision 0 after review 054 cycle 3; PLAN-016 revision 0 was
   separately approved and completed after final review 063 cycle 2.
   Approved for checkpoints 1–8.
+- [ADR-022: Reusable synchronous Ajv validator package](./adrs/022-validador-ajv-sincrono-reutilizable.md)
+  — Accepted revision 1; SPEC-007 and completed PLAN-019 define the private M17
+  delivery.
 
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
@@ -288,6 +319,7 @@
 - [PLAN-015: Coordinated Experimental 0.2 release](./plans/015-coordinated-experimental-0-2-release.md) — Approved revision 0 for local checkpoints 1–3 after review 042 cycle 2 passed with zero findings
 - [PLAN-016: Private reference platform and Angular 22 shell](./plans/016-private-reference-platform.md) — Completed revision 0 after final review 063 cycle 2 passed with zero findings
 - [PLAN-017: Reference workspace UX and configuration laboratory](./plans/017-reference-workspace-ux.md) — Completed revision 0 after final review 070 cycle 1 repeated the complete implementation and verification matrix with zero findings
+- [PLAN-018: Private Standard/DOM direct-core reference shell](./plans/018-standard-dom-reference-shell.md) — Approved revision 0 after review 077 cycle 1 passed twelve areas with zero findings; checkpoint 1 awaits its dependency gate
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and

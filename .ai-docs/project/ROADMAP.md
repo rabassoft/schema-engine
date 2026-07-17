@@ -198,10 +198,45 @@ separado antes de repetir la revisión.
   artefactos, consumidores y documentación están verificados; review 063 ciclo
   2 repitió la revisión final completa y cerró PLAN-016/M15 sin hallazgos.
 
+### M16 — Shell de referencia Standard/DOM — entrega autorizada
+
+- [Review 075](../reviews/075-d046-m16-standard-dom-promotion-readiness.md)
+  ciclo 1 pasó diez áreas con cero hallazgos y promueve D-046 únicamente para
+  redactar y revisar ADR-021.
+- La frontera seleccionada es una aplicación privada browser/sin framework que
+  consume directamente el core Public y el catálogo neutral; no crea un
+  adapter, paquete, entry point, Web Components ni contrato Public nuevos.
+- El shell tendrá bootstrap, estado controlado, proyección DOM, lifecycle,
+  snippets, build, tests y smoke Chromium independientes y cubrirá los seis
+  escenarios actuales con UI idiomática del target.
+- React, Vue, D-026, D-035, D-043, D-045, hosting, publicación y cambios de
+  SPEC permanecen inactivos. ADR-021 revisión 0 quedó Accepted tras review 076
+  ciclo 1 sin hallazgos. PLAN-018 revisión 0 quedó Approved tras review 077
+  ciclo 1 y autoriza checkpoints 1–7. Los checkpoints 1–4 están completos tras
+  reviews 078–081 ciclo 2 sin hallazgos; checkpoint 5 está pausado hasta cerrar
+  la integración reutilizable D-047/M17.
+
+### M17 — Validador JSON Schema síncrono reutilizable — completado
+
+- [Review 082](../reviews/082-d047-m17-ajv-validator-promotion-readiness.md)
+  ciclo 1 pasó diez áreas con cero hallazgos y promovió D-047 para diseño.
+- La frontera selecciona un paquete workspace privado
+  `@rabassoft/schema-engine-validator-ajv`, Ajv 8.20.0/Draft 2020-12, factory
+  síncrona sustituible y normalización immutable al contrato core existente.
+- Los shells Angular y Standard lo consumirán para que constraints soportados
+  añadidos en schemas editados participen en la validación real.
+- ADR-022 revisión 1 y SPEC-007 v0.1.0 están Accepted. PLAN-019 revisión 1 está
+  Completed tras review 089 ciclo 2 sin hallazgos.
+- El paquete privado, ambos shells, lazy Angular bootstrap, 7 tests propios,
+  package smoke, builds y Chromium están verificados. Async, formats,
+  referencias remotas, publicación, release y core changes permanecen fuera.
+
 ### Orden de dependencias a más largo plazo
 
-1. **Later selection:** all other capabilities remain demand-driven; D-043 and
-   D-033 are not implied by M15.
+1. **M16 resume:** implement PLAN-018 checkpoints 5–7 with repeated complete
+   reviews; checkpoints 1–4 and prerequisite M17 are complete.
+2. **Later selection:** React, Vue and all other capabilities remain
+   demand-driven; D-043 and D-033 are not implied by M15/M16.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

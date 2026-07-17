@@ -41,6 +41,9 @@ importers:
       '@types/node':
         specifier: ^26.1.1
         version: 26.1.1
+      ajv:
+        specifier: 8.20.0
+        version: 8.20.0
       eslint:
         specifier: ^10.7.0
         version: 10.7.0
@@ -59,6 +62,9 @@ importers:
       typescript-eslint:
         specifier: ^8.63.0
         version: 8.63.0(eslint@10.7.0)(typescript@6.0.2)
+      vite:
+        specifier: 8.1.4
+        version: 8.1.4(@types/node@26.1.1)(esbuild@0.28.1)(sass@1.99.0)
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@26.1.1)(happy-dom@20.10.6)(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.1)(sass@1.99.0))
@@ -89,18 +95,21 @@ importers:
       '@codemirror/language':
         specifier: 6.12.4
         version: 6.12.4
+      '@lezer/highlight':
+        specifier: 1.2.3
+        version: 1.2.3
       '@rabassoft/schema-engine':
         specifier: workspace:*
         version: link:../../packages/core
       '@rabassoft/schema-engine-angular':
         specifier: workspace:*
         version: link:../../packages/angular
+      '@rabassoft/schema-engine-validator-ajv':
+        specifier: workspace:*
+        version: link:../../packages/validator-ajv
       '@schema-engine-internal/reference-scenarios':
         specifier: workspace:*
         version: link:../reference-scenarios
-      '@lezer/highlight':
-        specifier: 1.2.3
-        version: 1.2.3
       codemirror:
         specifier: 6.0.2
         version: 6.0.2
@@ -113,6 +122,18 @@ importers:
       '@rabassoft/schema-engine':
         specifier: workspace:*
         version: link:../../packages/core
+
+  apps/reference-standard:
+    dependencies:
+      '@rabassoft/schema-engine':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@rabassoft/schema-engine-validator-ajv':
+        specifier: workspace:*
+        version: link:../../packages/validator-ajv
+      '@schema-engine-internal/reference-scenarios':
+        specifier: workspace:*
+        version: link:../reference-scenarios
 
   packages/angular:
     dependencies:
@@ -131,6 +152,16 @@ importers:
         version: link:../core
 
   packages/core: {}
+
+  packages/validator-ajv:
+    dependencies:
+      ajv:
+        specifier: 8.20.0
+        version: 8.20.0
+    devDependencies:
+      '@rabassoft/schema-engine':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 
