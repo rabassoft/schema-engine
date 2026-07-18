@@ -228,12 +228,33 @@
 - [ADR-021 review](./reviews/076-adr-021-review.md)
   — Cycle 1 accepts the private Standard/DOM architecture with zero findings
   and authorizes PLAN-018 preparation only.
+- [ADR-021 revision 1 review](./reviews/090-adr-021-revision-1-review.md)
+  — Cycle 3 passes the proposed cross-target workspace and editable-
+  configuration parity amendment with zero findings; revision 1 is Accepted
+  and a revised PLAN-018 remains pending.
 - [PLAN-018 review](./reviews/077-plan-018-review.md)
   — Cycle 1 approves seven Standard/DOM delivery checkpoints with zero findings;
   dependency/browser execution gates remain separate.
+- [PLAN-018 revision 1 review](./reviews/091-plan-018-revision-1-review.md)
+  — Cycle 3 passes the four remaining workspace/configuration delivery
+  checkpoints with zero findings; revision 1 is Approved while dependency and
+  external execution gates remain separate.
 - [PLAN-018 checkpoint 1 review](./reviews/078-plan-018-checkpoint-1-review.md)
   — Cycle 2 passes the private Vite skeleton, catalog watch, strict boundaries
   and Angular/Public regression after correcting Vite CSS module types.
+- [PLAN-018 checkpoint 5 review](./reviews/092-plan-018-checkpoint-5-review.md)
+  — Cycle 2 passes exact Standard CodeMirror ownership, editable configuration,
+  runtime replacement, active-schema Ajv and release isolation with zero
+  findings.
+- [PLAN-018 checkpoint 6 review](./reviews/093-plan-018-checkpoint-6-review.md)
+  — Cycle 1 passes simultaneous workspace, tabs, evidence, themes and exact
+  multi-target snippets with zero findings.
+- [PLAN-018 checkpoint 7 review](./reviews/094-plan-018-checkpoint-7-review.md)
+  — Cycle 2 passes both Chromium lanes, release isolation and onboarding after
+  correcting pending-control DOM stability.
+- [PLAN-018 final implementation review](./reviews/095-plan-018-final-implementation-review.md)
+  — Cycle 2 repeats all fourteen areas and the complete matrix with zero
+  findings, completing PLAN-018 revision 1 and M16.
 - [D-047/M17 Ajv validator promotion readiness](./reviews/082-d047-m17-ajv-validator-promotion-readiness.md)
   — Cycle 1 promotes one private reusable synchronous Draft 2020-12 validator.
 - [ADR-022 review](./reviews/083-adr-022-review.md) — Cycle 1 accepts the exact
@@ -319,7 +340,7 @@
 - [PLAN-015: Coordinated Experimental 0.2 release](./plans/015-coordinated-experimental-0-2-release.md) — Approved revision 0 for local checkpoints 1–3 after review 042 cycle 2 passed with zero findings
 - [PLAN-016: Private reference platform and Angular 22 shell](./plans/016-private-reference-platform.md) — Completed revision 0 after final review 063 cycle 2 passed with zero findings
 - [PLAN-017: Reference workspace UX and configuration laboratory](./plans/017-reference-workspace-ux.md) — Completed revision 0 after final review 070 cycle 1 repeated the complete implementation and verification matrix with zero findings
-- [PLAN-018: Private Standard/DOM direct-core reference shell](./plans/018-standard-dom-reference-shell.md) — Approved revision 0 after review 077 cycle 1 passed twelve areas with zero findings; checkpoint 1 awaits its dependency gate
+- [PLAN-018: Private Standard/DOM direct-core reference shell](./plans/018-standard-dom-reference-shell.md) — Completed revision 1 after final review 095 cycle 2 repeated all fourteen areas and the full matrix with zero findings
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and

@@ -265,6 +265,33 @@ h5 {
   margin-top: 1rem;
 }
 
+.integration-flow {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+  padding-left: 1.4rem;
+}
+
+.snippet-explanation {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.32fr) minmax(0, 1fr);
+  gap: 0.4rem 0.75rem;
+  margin: 0 0 0.75rem;
+  padding: 0.75rem;
+  border-left: 0.25rem solid var(--color-primary);
+  background: var(--color-surface-muted);
+}
+
+.snippet-explanation dt {
+  color: var(--color-primary-strong);
+  font-weight: 750;
+}
+
+.snippet-explanation dd {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
 .card-heading {
   display: flex;
   flex-wrap: wrap;
@@ -599,6 +626,10 @@ pre {
   }
 
   .field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .snippet-explanation {
     grid-template-columns: minmax(0, 1fr);
   }
 

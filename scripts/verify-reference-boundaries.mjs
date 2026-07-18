@@ -331,9 +331,14 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
     'reference-standard: exports are forbidden',
   );
   assert.deepEqual(dependencyNames(standard).sort(), [
+    '@codemirror/lang-javascript',
+    '@codemirror/lang-json',
+    '@codemirror/language',
+    '@lezer/highlight',
     '@rabassoft/schema-engine',
     '@rabassoft/schema-engine-validator-ajv',
     '@schema-engine-internal/reference-scenarios',
+    'codemirror',
   ]);
   assert.deepEqual(dependencyNames(validator.manifest).sort(), [
     '@rabassoft/schema-engine',

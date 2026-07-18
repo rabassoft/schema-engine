@@ -1,0 +1,70 @@
+// Copyright (C) 2026 Ricardo Rabassó Rodríguez, operating as Rabassoft
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import { json } from '@codemirror/lang-json';
+import { basicSetup, EditorView } from 'codemirror';
+
+export interface StandardJsonEditorOptions {
+  readonly host: HTMLElement;
+  readonly label: string;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+  readonly describedBy?: string;
+}
+
+export class StandardJsonEditor {
+  private readonly view: EditorView;
+  private synchronizing = false;
+  private disposed = false;
+
+  constructor(options: StandardJsonEditorOptions) {
+    const attributes: Record<string, string> = {
+      'aria-label': options.label,
+      spellcheck: 'false',
+    };
+    if (options.describedBy !== undefined) {
+      attributes['aria-describedby'] = options.describedBy;
+    }
+    this.view = new EditorView({
+      doc: options.value,
+      extensions: [
+        basicSetup,
+        json(),
+        EditorView.lineWrapping,
+        EditorView.contentAttributes.of(attributes),
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged && !this.disposed && !this.synchronizing) {
+            options.onChange(update.state.doc.toString());
+          }
+        }),
+      ],
+      parent: options.host,
+    });
+  }
+
+  getValue(): string {
+    return this.view.state.doc.toString();
+  }
+
+  setValue(value: string): void {
+    if (this.disposed || value === this.getValue()) return;
+    this.synchronizing = true;
+    try {
+      this.view.dispatch({
+        changes: { from: 0, to: this.view.state.doc.length, insert: value },
+      });
+    } finally {
+      this.synchronizing = false;
+    }
+  }
+
+  focus(): void {
+    if (!this.disposed) this.view.focus();
+  }
+
+  destroy(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.view.destroy();
+  }
+}

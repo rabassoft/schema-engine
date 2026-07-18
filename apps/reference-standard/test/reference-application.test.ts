@@ -99,6 +99,136 @@ describe('StandardReferenceApplication', () => {
     application.dispose();
   });
 
+  it('validates drafts without mutating the active runtime or controlled roots', () => {
+    const application = new StandardReferenceApplication();
+    const before = application.getState();
+    application.updateSchemaDraft('{');
+
+    expect(application.validateConfiguration()).toBe(false);
+    expect(application.getState()).toMatchObject({
+      draftResult: {
+        status: 'invalid-json',
+        syntaxIssues: [{ document: 'schema' }],
+      },
+      runtimeEpoch: before.runtimeEpoch,
+      value: before.value,
+      history: [],
+    });
+    expect(application.getRuntime()).toBeDefined();
+
+    application.updateSchemaDraft(before.schemaDraft);
+    expect(application.validateConfiguration()).toBe(true);
+    expect(application.getState().draftResult.status).toBe('valid');
+    expect(application.getState().runtimeEpoch).toBe(before.runtimeEpoch);
+    application.dispose();
+  });
+
+  it('applies active configuration through a fresh runtime and active-schema Ajv', () => {
+    const application = new StandardReferenceApplication();
+    const before = application.getState();
+    const oldRuntime = requiredRuntime(application);
+    const schema = JSON.parse(before.schemaDraft) as {
+      properties: Record<string, unknown>;
+    };
+    schema.properties['nickname'] = { type: 'string', maxLength: 2 };
+    application.updateSchemaDraft(JSON.stringify(schema, undefined, 2));
+
+    expect(application.applyConfiguration()).toBe(true);
+    const applied = application.getState();
+    expect(applied.runtimeEpoch).toBe(before.runtimeEpoch + 1);
+    expect(applied.activeConfigurationDiffersFromOriginal).toBe(true);
+    expect(applied.draftModified).toBe(false);
+    expect(oldRuntime.requestSetValue(['name'], 'ignored').success).toBe(false);
+
+    expect(
+      application.replaceValue({ ...applied.value, nickname: 'long' })?.success,
+    ).toBe(true);
+    expect(application.getState().snapshot?.valid).toBe(false);
+    expect(
+      application
+        .getState()
+        .snapshot?.fields.flatMap(({ issues }) => issues)
+        .some(
+          ({ code, path }) =>
+            code === 'maxLength' && path.join('.') === 'nickname',
+        ),
+    ).toBe(true);
+    application.dispose();
+  });
+
+  it('confirms destructive apply, invalidates stale confirmation and restores original input', () => {
+    const application = new StandardReferenceApplication();
+    const original = application.getState();
+    requiredRuntime(application).requestSetValue(['name'], 'Grace');
+    application.updateSchemaDraft(addNameMaximum(original.schemaDraft, 3));
+
+    expect(application.applyConfiguration()).toBe(false);
+    expect(application.getState().pendingConfigurationAction).toBe('apply');
+    application.updateSchemaDraft(addNameMaximum(original.schemaDraft, 4));
+    expect(application.getState().pendingConfigurationAction).toBeUndefined();
+    expect(application.confirmConfigurationAction()).toBe(false);
+
+    expect(application.applyConfiguration()).toBe(false);
+    const oldRuntime = requiredRuntime(application);
+    expect(application.confirmConfigurationAction()).toBe(true);
+    expect(application.getState()).toMatchObject({
+      value: original.value,
+      baselineValue: original.baselineValue,
+      history: [],
+      decisionMode: 'confirm',
+      activeConfigurationDiffersFromOriginal: true,
+    });
+    expect(oldRuntime.requestSetValue(['name'], 'ignored').success).toBe(false);
+
+    expect(application.restoreScenarioConfiguration()).toBe(false);
+    expect(application.getState().pendingConfigurationAction).toBe('restore');
+    application.cancelConfigurationAction();
+    expect(application.getState().pendingConfigurationAction).toBeUndefined();
+    expect(application.restoreScenarioConfiguration()).toBe(false);
+    expect(application.confirmConfigurationAction()).toBe(true);
+    expect(application.getState().activeConfigurationDiffersFromOriginal).toBe(
+      false,
+    );
+    expect(application.getState().schemaDraft).toBe(original.schemaDraft);
+    application.dispose();
+  });
+
+  it('cancels drafts and resets state while preserving active configuration and draft text', () => {
+    const application = new StandardReferenceApplication();
+    const original = application.getState();
+    application.updateSchemaDraft(addNameMaximum(original.schemaDraft, 8));
+    expect(application.applyConfiguration()).toBe(true);
+    const active = application.getState();
+
+    application.updateUiSchemaDraft(`${active.uiSchemaDraft}\n`);
+    expect(application.getState().draftModified).toBe(true);
+    application.cancelConfigurationChanges();
+    expect(application.getState().draftModified).toBe(false);
+
+    application.updateUiSchemaDraft(`${active.uiSchemaDraft}\n`);
+    requiredRuntime(application).requestSetValue(['name'], 'Grace');
+    application.setDecisionMode('pending');
+    const epoch = application.getState().runtimeEpoch;
+    application.resetScenario();
+    expect(application.getState()).toMatchObject({
+      activeCompileInput: active.activeCompileInput,
+      uiSchemaDraft: `${active.uiSchemaDraft}\n`,
+      value: original.value,
+      baselineValue: original.baselineValue,
+      decisionMode: 'confirm',
+      history: [],
+      runtimeEpoch: epoch,
+    });
+
+    expect(application.selectScenario('nested-profile')).toBe(true);
+    expect(application.getState()).toMatchObject({
+      draftModified: false,
+      activeConfigurationDiffersFromOriginal: false,
+    });
+    expect(application.getState().pendingConfigurationAction).toBeUndefined();
+    application.dispose();
+  });
+
   it('confirms, rejects and explicitly resolves pending operations', () => {
     const application = new StandardReferenceApplication();
     const runtime = requiredRuntime(application);
@@ -196,6 +326,37 @@ describe('StandardReferenceApplication', () => {
     application.dispose();
   });
 
+  it('drives stable-team aggregate actions through public runtime intentions', () => {
+    const application = new StandardReferenceApplication();
+    expect(application.selectScenario('stable-team')).toBe(true);
+    const initialTeam = readTeam(application);
+
+    application.updateCollectionDraftId('linus');
+    application.updateCollectionDraftName('Linus Torvalds');
+    expect(application.insertTeamMember()).toBe(true);
+    expect(readTeam(application).at(-1)).toMatchObject({
+      id: 'linus',
+      name: 'Linus Torvalds',
+      role: 'Member',
+    });
+
+    expect(application.moveFirstTeamMemberLater()).toBe(true);
+    expect(
+      readTeam(application)
+        .slice(0, 2)
+        .map(({ id }) => id),
+    ).toEqual([initialTeam[1]?.id, initialTeam[0]?.id]);
+    expect(application.removeLastTeamMember()).toBe(true);
+    expect(readTeam(application).some(({ id }) => id === 'linus')).toBe(false);
+
+    application.resetScenario();
+    expect(application.getState()).toMatchObject({
+      collectionDraftId: 'new-member',
+      collectionDraftName: 'New member',
+    });
+    application.dispose();
+  });
+
   it('replaces scenarios repeatedly without old delivery or duplicate cleanup', () => {
     const application = new StandardReferenceApplication();
     const oldRuntime = requiredRuntime(application);
@@ -253,9 +414,36 @@ function requiredRuntime(
   return runtime;
 }
 
+function readTeam(application: StandardReferenceApplication): readonly {
+  readonly id: string;
+  readonly name: string;
+  readonly role: string;
+}[] {
+  const value = application.getState().value;
+  if (!('team' in value)) throw new Error('Expected stable team members.');
+  const team = value.team;
+  if (!Array.isArray(team)) throw new Error('Expected stable team members.');
+  return team as readonly {
+    readonly id: string;
+    readonly name: string;
+    readonly role: string;
+  }[];
+}
+
 function requiredSequence(
   entry: { readonly sequence: number } | undefined,
 ): number {
   if (entry === undefined) throw new Error('Expected a pending operation.');
   return entry.sequence;
+}
+
+function addNameMaximum(schemaText: string, maxLength: number): string {
+  const schema = JSON.parse(schemaText) as {
+    properties: Record<string, Record<string, unknown>>;
+  };
+  schema.properties['name'] = {
+    ...schema.properties['name'],
+    maxLength,
+  };
+  return JSON.stringify(schema, undefined, 2);
 }

@@ -5,6 +5,8 @@ import {
   applyFormOperation,
   compileFormDefinition,
   createControlledFormRuntime,
+  type CompileFormDefinitionInput,
+  type CompileFormResult,
   type Diagnostic,
   type FormDefinition,
   type FormOperation,
@@ -19,6 +21,15 @@ import {
   referenceScenarios,
   type ReferenceScenario,
 } from '@schema-engine-internal/reference-scenarios';
+
+import {
+  configurationsEqual,
+  emptyDraftResult,
+  evaluateDraft,
+  prepareConfiguration,
+  type AppliedConfiguration,
+  type ConfigurationDraftResult,
+} from './configuration.js';
 
 export type OperationDecisionMode = 'confirm' | 'reject' | 'pending';
 
@@ -40,13 +51,27 @@ export interface StandardReferenceApplicationState {
   readonly locale: string;
   readonly validationVisibility: ValidationVisibility;
   readonly decisionMode: OperationDecisionMode;
+  readonly collectionDraftId: string;
+  readonly collectionDraftName: string;
   readonly compilationDiagnostics: readonly Diagnostic[];
   readonly runtimeDiagnostics: readonly Diagnostic[];
   readonly actionDiagnostics: readonly Diagnostic[];
   readonly snapshot?: FormRuntimeSnapshot<object>;
   readonly pendingOperations: readonly OperationHistoryEntry[];
   readonly history: readonly OperationHistoryEntry[];
+  readonly originalCompileInput: CompileFormDefinitionInput;
+  readonly activeCompileInput: CompileFormDefinitionInput;
+  readonly schemaDraft: string;
+  readonly uiSchemaDraft: string;
+  readonly draftResult: ConfigurationDraftResult;
+  readonly draftModified: boolean;
+  readonly activeConfigurationDiffersFromOriginal: boolean;
+  readonly canRestoreOriginalConfiguration: boolean;
+  readonly runtimeEpoch: number;
+  readonly pendingConfigurationAction?: PendingConfigurationAction;
 }
+
+export type PendingConfigurationAction = 'apply' | 'restore';
 
 type StateListener = (state: StandardReferenceApplicationState) => void;
 type Cleanup = () => void;
@@ -64,12 +89,21 @@ const EMPTY_HISTORY: readonly OperationHistoryEntry[] = Object.freeze([]);
 export class StandardReferenceApplication {
   private readonly scenarios: readonly ReferenceScenario[];
   private scenario: ReferenceScenario;
+  private originalConfiguration: AppliedConfiguration;
+  private activeConfiguration: AppliedConfiguration;
+  private schemaDraft: string;
+  private uiSchemaDraft: string;
+  private draftResult = emptyDraftResult();
+  private runtimeEpoch = 0;
+  private pendingConfigurationAction: PendingConfigurationAction | undefined;
   private definition: FormDefinition | undefined;
   private value: Readonly<object>;
   private baselineValue: Readonly<object>;
   private locale: string;
   private validationVisibility: ValidationVisibility;
   private decisionMode: OperationDecisionMode = 'confirm';
+  private collectionDraftId = 'new-member';
+  private collectionDraftName = 'New member';
   private compilationDiagnostics = EMPTY_DIAGNOSTICS;
   private runtimeDiagnostics = EMPTY_DIAGNOSTICS;
   private actionDiagnostics = EMPTY_DIAGNOSTICS;
@@ -97,11 +131,17 @@ export class StandardReferenceApplication {
 
     this.scenarios = scenarios;
     this.scenario = initial;
+    this.originalConfiguration = prepareConfiguration(initial.compileInput);
+    this.activeConfiguration = prepareConfiguration(
+      this.originalConfiguration.input,
+    );
+    this.schemaDraft = this.activeConfiguration.schemaText;
+    this.uiSchemaDraft = this.activeConfiguration.uiSchemaText;
     this.value = ownRoot(initial.initialState.value);
     this.baselineValue = ownRoot(initial.initialState.baselineValue);
     this.locale = initial.initialState.locale;
     this.validationVisibility = initial.initialState.validationVisibility;
-    this.replaceScenario(initial);
+    this.loadScenario(initial);
   }
 
   getState(): StandardReferenceApplicationState {
@@ -116,12 +156,29 @@ export class StandardReferenceApplication {
       locale: this.locale,
       validationVisibility: this.validationVisibility,
       decisionMode: this.decisionMode,
+      collectionDraftId: this.collectionDraftId,
+      collectionDraftName: this.collectionDraftName,
       compilationDiagnostics: this.compilationDiagnostics,
       runtimeDiagnostics: this.runtimeDiagnostics,
       actionDiagnostics: this.actionDiagnostics,
       ...(this.snapshot === undefined ? {} : { snapshot: this.snapshot }),
       pendingOperations,
       history: this.history,
+      originalCompileInput: this.originalConfiguration.input,
+      activeCompileInput: this.activeConfiguration.input,
+      schemaDraft: this.schemaDraft,
+      uiSchemaDraft: this.uiSchemaDraft,
+      draftResult: this.draftResult,
+      draftModified: this.isDraftModified(),
+      activeConfigurationDiffersFromOriginal: !configurationsEqual(
+        this.activeConfiguration,
+        this.originalConfiguration,
+      ),
+      canRestoreOriginalConfiguration: this.canRestoreOriginalConfiguration(),
+      runtimeEpoch: this.runtimeEpoch,
+      ...(this.pendingConfigurationAction === undefined
+        ? {}
+        : { pendingConfigurationAction: this.pendingConfigurationAction }),
     });
   }
 
@@ -161,13 +218,49 @@ export class StandardReferenceApplication {
     if (this.disposed) return false;
     const scenario = this.scenarios.find(({ id }) => id === scenarioId);
     if (scenario === undefined) return false;
-    this.replaceScenario(scenario);
+    this.loadScenario(scenario);
     return true;
   }
 
   resetScenario(): void {
     if (this.disposed) return;
-    this.replaceScenario(this.scenario);
+    const value = ownRoot(this.scenario.initialState.value);
+    const baselineValue = ownRoot(this.scenario.initialState.baselineValue);
+    const locale = this.scenario.initialState.locale;
+    const visibility = this.scenario.initialState.validationVisibility;
+    const runtime = this.runtime;
+    this.decisionMode = 'confirm';
+    this.resetCollectionDrafts();
+    this.history = EMPTY_HISTORY;
+    this.nextHistorySequence = 1;
+    this.runtimeDiagnostics = EMPTY_DIAGNOSTICS;
+    this.actionDiagnostics = EMPTY_DIAGNOSTICS;
+    this.pendingConfigurationAction = undefined;
+    if (runtime === undefined) {
+      this.value = value;
+      this.baselineValue = baselineValue;
+      this.locale = locale;
+      this.validationVisibility = visibility;
+      this.emitState();
+      return;
+    }
+    const update = this.withSuppressedSnapshots(() =>
+      runtime.updateExternalState({ value, baselineValue, locale }),
+    );
+    const visibilityUpdate = this.withSuppressedSnapshots(() =>
+      runtime.setValidationVisibility(visibility),
+    );
+    this.actionDiagnostics = freezeDiagnostics([
+      ...update.diagnostics,
+      ...visibilityUpdate.diagnostics,
+    ]);
+    if (update.success && visibilityUpdate.success) {
+      this.value = value;
+      this.baselineValue = baselineValue;
+      this.locale = locale;
+      this.validationVisibility = visibility;
+    }
+    this.emitState();
   }
 
   setDecisionMode(mode: OperationDecisionMode): void {
@@ -175,6 +268,74 @@ export class StandardReferenceApplication {
     this.decisionMode = mode;
     this.actionDiagnostics = EMPTY_DIAGNOSTICS;
     this.emitState();
+  }
+
+  updateCollectionDraftId(value: string): void {
+    if (this.disposed || this.collectionDraftId === value) return;
+    this.collectionDraftId = value;
+    this.emitState();
+  }
+
+  updateCollectionDraftName(value: string): void {
+    if (this.disposed || this.collectionDraftName === value) return;
+    this.collectionDraftName = value;
+    this.emitState();
+  }
+
+  insertTeamMember(): boolean {
+    const runtime = this.runtime;
+    const id = this.collectionDraftId.trim();
+    const name = this.collectionDraftName.trim();
+    if (
+      this.disposed ||
+      this.scenario.id !== 'stable-team' ||
+      runtime === undefined ||
+      id.length === 0 ||
+      name.length === 0
+    ) {
+      return false;
+    }
+    return runtime.requestInsertItem(
+      ['team'],
+      id,
+      { id, name, role: 'Member' },
+      { kind: 'end' },
+    ).success;
+  }
+
+  moveFirstTeamMemberLater(): boolean {
+    const runtime = this.runtime;
+    const [first, second] = readTeamMembers(this.value);
+    if (
+      this.disposed ||
+      this.scenario.id !== 'stable-team' ||
+      runtime === undefined ||
+      first === undefined ||
+      second === undefined
+    ) {
+      return false;
+    }
+    return runtime.requestMoveItem(
+      { collectionPath: ['team'], itemId: first.id },
+      { kind: 'after', itemId: second.id },
+    ).success;
+  }
+
+  removeLastTeamMember(): boolean {
+    const runtime = this.runtime;
+    const last = readTeamMembers(this.value).at(-1);
+    if (
+      this.disposed ||
+      this.scenario.id !== 'stable-team' ||
+      runtime === undefined ||
+      last === undefined
+    ) {
+      return false;
+    }
+    return runtime.requestRemoveItem({
+      collectionPath: ['team'],
+      itemId: last.id,
+    }).success;
   }
 
   replaceValue(value: Readonly<object>): RuntimeActionResult | undefined {
@@ -203,6 +364,115 @@ export class StandardReferenceApplication {
     return result;
   }
 
+  updateSchemaDraft(value: string): void {
+    if (this.disposed || value === this.schemaDraft) return;
+    this.schemaDraft = value;
+    this.invalidateDraftResult();
+    this.emitState();
+  }
+
+  updateUiSchemaDraft(value: string): void {
+    if (this.disposed || value === this.uiSchemaDraft) return;
+    this.uiSchemaDraft = value;
+    this.invalidateDraftResult();
+    this.emitState();
+  }
+
+  validateConfiguration(): boolean {
+    if (this.disposed) return false;
+    const evaluation = evaluateDraft(
+      this.schemaDraft,
+      this.uiSchemaDraft,
+      this.activeConfiguration.input,
+    );
+    this.draftResult = evaluation.result;
+    this.emitState();
+    return evaluation.success;
+  }
+
+  applyConfiguration(): boolean {
+    if (this.disposed) return false;
+    const evaluation = evaluateDraft(
+      this.schemaDraft,
+      this.uiSchemaDraft,
+      this.activeConfiguration.input,
+    );
+    this.draftResult = evaluation.result;
+    if (!evaluation.success) {
+      this.pendingConfigurationAction = undefined;
+      this.emitState();
+      return false;
+    }
+    if (this.requiresApplicationResetConfirmation()) {
+      this.pendingConfigurationAction = 'apply';
+      this.emitState();
+      return false;
+    }
+    this.installConfiguration(evaluation.configuration, evaluation.compilation);
+    return true;
+  }
+
+  cancelConfigurationChanges(): void {
+    if (this.disposed) return;
+    this.schemaDraft = this.activeConfiguration.schemaText;
+    this.uiSchemaDraft = this.activeConfiguration.uiSchemaText;
+    this.draftResult = emptyDraftResult();
+    this.pendingConfigurationAction = undefined;
+    this.emitState();
+  }
+
+  restoreScenarioConfiguration(): boolean {
+    if (this.disposed || !this.canRestoreOriginalConfiguration()) return false;
+    this.pendingConfigurationAction = 'restore';
+    this.emitState();
+    return false;
+  }
+
+  confirmConfigurationAction(): boolean {
+    if (this.disposed) return false;
+    const action = this.pendingConfigurationAction;
+    if (action === undefined) return false;
+    if (action === 'apply') {
+      const evaluation = evaluateDraft(
+        this.schemaDraft,
+        this.uiSchemaDraft,
+        this.activeConfiguration.input,
+      );
+      this.draftResult = evaluation.result;
+      if (!evaluation.success) {
+        this.pendingConfigurationAction = undefined;
+        this.emitState();
+        return false;
+      }
+      this.installConfiguration(
+        evaluation.configuration,
+        evaluation.compilation,
+      );
+      return true;
+    }
+
+    const restored = prepareConfiguration(this.originalConfiguration.input);
+    const compilation = compileFormDefinition(restored.input);
+    if (!compilation.success) {
+      this.draftResult = Object.freeze({
+        status: 'compile-failed',
+        syntaxIssues: Object.freeze([]),
+        diagnostics: compilation.diagnostics,
+      });
+      this.pendingConfigurationAction = undefined;
+      this.emitState();
+      return false;
+    }
+    this.installConfiguration(restored, compilation);
+    return true;
+  }
+
+  cancelConfigurationAction(): void {
+    if (this.disposed || this.pendingConfigurationAction === undefined) return;
+    this.pendingConfigurationAction = undefined;
+    this.emitState();
+  }
+
   confirmPending(sequence: number): boolean {
     return this.resolvePending(sequence, true);
   }
@@ -218,7 +488,42 @@ export class StandardReferenceApplication {
     this.stateListeners.clear();
   }
 
-  private replaceScenario(scenario: ReferenceScenario): void {
+  private loadScenario(scenario: ReferenceScenario): void {
+    const original = prepareConfiguration(scenario.compileInput);
+    const active = prepareConfiguration(original.input);
+    this.originalConfiguration = original;
+    this.activeConfiguration = active;
+    this.schemaDraft = active.schemaText;
+    this.uiSchemaDraft = active.uiSchemaText;
+    this.draftResult = emptyDraftResult();
+    this.pendingConfigurationAction = undefined;
+    // reference-snippet:start standard-compile-definition
+    const compilation = compileFormDefinition(active.input);
+    // reference-snippet:end standard-compile-definition
+    this.recreateRuntime(scenario, active, compilation);
+  }
+
+  private installConfiguration(
+    configuration: AppliedConfiguration,
+    compilation: Extract<CompileFormResult, { success: true }>,
+  ): void {
+    this.activeConfiguration = configuration;
+    this.schemaDraft = configuration.schemaText;
+    this.uiSchemaDraft = configuration.uiSchemaText;
+    this.draftResult = Object.freeze({
+      status: 'valid',
+      syntaxIssues: Object.freeze([]),
+      diagnostics: compilation.diagnostics,
+    });
+    this.pendingConfigurationAction = undefined;
+    this.recreateRuntime(this.scenario, configuration, compilation);
+  }
+
+  private recreateRuntime(
+    scenario: ReferenceScenario,
+    configuration: AppliedConfiguration,
+    compilation: CompileFormResult,
+  ): void {
     this.cleanupRuntimeAndBindings();
     this.scenario = scenario;
     this.definition = undefined;
@@ -233,8 +538,9 @@ export class StandardReferenceApplication {
     this.snapshot = undefined;
     this.history = EMPTY_HISTORY;
     this.nextHistorySequence = 1;
+    this.resetCollectionDrafts();
+    this.runtimeEpoch += 1;
 
-    const compilation = compileFormDefinition(scenario.compileInput);
     this.compilationDiagnostics = freezeDiagnostics(compilation.diagnostics);
     if (!compilation.success) {
       this.emitState();
@@ -242,16 +548,18 @@ export class StandardReferenceApplication {
     }
     this.definition = compilation.definition;
 
+    // reference-snippet:start standard-create-runtime
     const created = createControlledFormRuntime({
       formId: `reference-standard-${scenario.id}`,
       definition: compilation.definition,
-      schema: scenario.compileInput.schema,
+      schema: configuration.input.schema,
       value: this.value,
       baselineValue: this.baselineValue,
       locale: this.locale,
       validationVisibility: this.validationVisibility,
       validator: this.validator,
     });
+    // reference-snippet:end standard-create-runtime
     this.runtimeDiagnostics = freezeDiagnostics(created.diagnostics);
     if (!created.success) {
       this.emitState();
@@ -261,6 +569,7 @@ export class StandardReferenceApplication {
     const runtime = created.runtime;
     this.runtime = runtime;
     this.snapshot = runtime.getSnapshot();
+    // reference-snippet:start standard-runtime-subscriptions
     const snapshotSubscription = runtime.subscribe((snapshot) => {
       this.snapshot = snapshot;
       if (!this.suppressSnapshotNotification) this.emitState();
@@ -287,6 +596,7 @@ export class StandardReferenceApplication {
       return;
     }
     this.unsubscribeOperations = operationSubscription.unsubscribe;
+    // reference-snippet:end standard-runtime-subscriptions
     this.emitState();
   }
 
@@ -316,6 +626,7 @@ export class StandardReferenceApplication {
     if (definition === undefined || this.runtime === undefined) {
       return { decision: 'failed', diagnostics: EMPTY_DIAGNOSTICS };
     }
+    // reference-snippet:start standard-controlled-operation
     const applied = applyFormOperation(definition, this.value, operation);
     if (!applied.success) {
       return {
@@ -327,6 +638,7 @@ export class StandardReferenceApplication {
     const update = this.updateControlledState({
       value: ownRoot(applied.value),
     });
+    // reference-snippet:end standard-controlled-operation
     if (update === undefined || !update.success) {
       return {
         decision: 'failed',
@@ -405,7 +717,40 @@ export class StandardReferenceApplication {
     return result;
   }
 
+  private invalidateDraftResult(): void {
+    this.draftResult = emptyDraftResult();
+    this.pendingConfigurationAction = undefined;
+  }
+
+  private isDraftModified(): boolean {
+    return (
+      this.schemaDraft !== this.activeConfiguration.schemaText ||
+      this.uiSchemaDraft !== this.activeConfiguration.uiSchemaText
+    );
+  }
+
+  private canRestoreOriginalConfiguration(): boolean {
+    return (
+      !configurationsEqual(
+        this.activeConfiguration,
+        this.originalConfiguration,
+      ) ||
+      this.schemaDraft !== this.originalConfiguration.schemaText ||
+      this.uiSchemaDraft !== this.originalConfiguration.uiSchemaText
+    );
+  }
+
+  private requiresApplicationResetConfirmation(): boolean {
+    return this.snapshot?.dirty === true || this.history.length > 0;
+  }
+
+  private resetCollectionDrafts(): void {
+    this.collectionDraftId = 'new-member';
+    this.collectionDraftName = 'New member';
+  }
+
   private cleanupRuntimeAndBindings(): void {
+    // reference-snippet:start standard-runtime-cleanup
     for (const cleanup of [...this.bindingCleanups]) cleanup();
     this.bindingCleanups.clear();
     this.unsubscribeSnapshot?.();
@@ -414,6 +759,7 @@ export class StandardReferenceApplication {
     this.unsubscribeOperations = undefined;
     this.runtime?.dispose();
     this.runtime = undefined;
+    // reference-snippet:end standard-runtime-cleanup
   }
 
   private withSuppressedSnapshots<T>(action: () => T): T {
@@ -434,6 +780,20 @@ export class StandardReferenceApplication {
 
 function ownRoot(value: Readonly<object>): Readonly<object> {
   return deepFreeze(structuredClone(value));
+}
+
+function readTeamMembers(
+  value: Readonly<object>,
+): readonly { readonly id: string }[] {
+  const team = (value as { readonly team?: unknown }).team;
+  if (!Array.isArray(team)) return Object.freeze([]);
+  return Object.freeze(
+    team.flatMap((member) => {
+      if (typeof member !== 'object' || member === null) return [];
+      const id = (member as { readonly id?: unknown }).id;
+      return typeof id === 'string' ? [{ id }] : [];
+    }),
+  );
 }
 
 function deepFreeze<T>(value: T): T {

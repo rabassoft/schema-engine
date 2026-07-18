@@ -146,6 +146,12 @@ test('highlights and copies integration code, editable JSON and inspector JSON',
 
   await page.getByRole('tab', { name: 'Integration', exact: true }).click();
   const snippet = page.getByTestId('snippet-application-signals');
+  await expect(snippet.locator('.snippet-explanation')).toBeVisible();
+  await expect(snippet).toContainText('What it demonstrates');
+  await expect(snippet).toContainText('Application responsibility');
+  await expect(snippet).toContainText(
+    'The application remains the source of truth',
+  );
   const code = snippet.getByRole('textbox', {
     name: 'Application signals excerpt code',
   });

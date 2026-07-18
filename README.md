@@ -55,8 +55,8 @@ by the reference shells and does not make Ajv a core dependency.
 
 The repository contains a private, non-publishable scenario catalog plus
 Angular 22 and Standard/DOM reference applications. They compose only Public package entry points
-and provide maintained examples, state/diagnostic inspectors and one Chromium
-smoke lane. The application—not the library—owns complete `value` and
+and provide maintained examples, editable configuration, state/diagnostic
+inspectors and independent Chromium smoke lanes. The application—not the library—owns complete `value` and
 `baselineValue` roots, locale, validation visibility and every decision to
 confirm, reject or defer an emitted operation.
 
@@ -70,12 +70,20 @@ pnpm reference:test:boundaries
 pnpm exec playwright install chromium
 pnpm reference:test:e2e
 pnpm reference:dev
+pnpm reference:standard:build
+pnpm reference:standard:test:unit
+pnpm reference:standard:test:e2e
+pnpm reference:standard:dev
 ```
 
 `reference:dev` serves the Angular application at `http://127.0.0.1:4200` and
 watches the private catalog/application. Restart it after changing core or the
-Angular adapter. The browser command is explicit because Playwright binaries
-are local machine state and are never installed by a package lifecycle script.
+Angular adapter. `reference:standard:dev` serves the direct-core Standard/DOM
+application at `http://127.0.0.1:4211`; its preview and editable schemas are
+simultaneous, with observable evidence below. The browser installation command
+is explicit because Playwright binaries are local machine state and are never
+installed by a package lifecycle script. Each E2E command runs only its named
+target and neither substitutes for the other.
 
 This reference workspace is not a Public package, hosted product, compatibility
 matrix, exhaustive conformance suite, visual baseline or accessibility

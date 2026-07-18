@@ -528,9 +528,16 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(component.snippets.map(({ source }) => source)).toEqual(
       Object.values(referenceSnippets),
     );
+    expect(
+      component.snippets.every(
+        ({ purpose, responsibility }) =>
+          purpose.length > 0 && responsibility.length > 0,
+      ),
+    ).toBe(true);
     expect(root.textContent).toContain(
-      'generated from marked regions in the compiled reference-form source',
+      'Read them in order to follow the controlled integration',
     );
+    expect(root.textContent).toContain('Own state:');
   });
 
   it('loads all six scenarios through the same focused form component', () => {

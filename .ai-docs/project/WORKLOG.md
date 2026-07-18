@@ -6,6 +6,233 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-18 — Integration examples explained in both reference shells
+
+### Completed
+
+- Added an ordered controlled-integration reading path to the Angular and
+  Standard Integration tabs without changing any extracted snippet.
+- Explained what every Angular state/decision/template excerpt demonstrates
+  and which state, decision, persistence and mutation responsibilities remain
+  with the application.
+- Explained Standard compilation, runtime creation, snapshot/operation
+  subscriptions, controlled operation application and deterministic cleanup
+  individually, including failure and ownership boundaries.
+- Kept metadata, templates/DOM and explanatory styling independently owned by
+  each target under ADR-021; extended parity evidence for the common
+  explanation vocabulary.
+- Review 097 cycle 2 passed all ten areas with zero findings. Eight snippets,
+  Angular unit/DOM 24/24 and Chromium 8/8, Standard unit/DOM 47/47 and Chromium
+  6/6, strict types, lint/format, builds and diff checks pass.
+- No commit or push was performed; the unrelated `angular.json` change remains
+  untouched.
+
+### Next
+
+- Select the next milestone explicitly from the remaining Deferred register,
+  then complete its promotion/design/plan gates before implementation.
+
+## 2026-07-18 — Standard/Angular reference experience parity maintained
+
+### Completed
+
+- Preserved ADR-021 target independence while duplicating Angular's requested
+  visible labels, control hierarchy and semantic visual language in Standard.
+- Moved Standard theme selection into the header, replaced locale/visibility/
+  decision selects with accessible state buttons and added coherent app-owned
+  stable-team aggregate controls backed only by Public runtime intentions.
+- Retained independently tested generic renderer collection controls while the
+  reference shell hides them in favor of the equivalent aggregate laboratory.
+- Added a test-only cross-target parity matrix for requested texts and nineteen
+  semantic token values; no shared component, template, controller or CSS was
+  introduced.
+- Corrected unsafe team reads and a stale 17-versus-22 boundary-fixture count;
+  review 096 cycle 3 repeated ten areas with zero findings.
+- Standard unit/DOM 47/47, Chromium 6/6, strict types, lint/format, 12/12
+  boundary fixtures, 431 imports and diff checks pass. No commit or push was
+  performed; the unrelated `angular.json` change remains untouched.
+
+### Next
+
+- Select the next milestone explicitly from the remaining Deferred register,
+  then complete its promotion/design/plan gates before implementation.
+
+## 2026-07-18 — PLAN-018 revision 1 / D-046 / M16 completed
+
+### Completed
+
+- Repeated the complete checkpoint-8 authority, architecture, controlled
+  lifecycle, normalized DOM, configuration, UX, accessibility, snippet,
+  browser, release-isolation, documentation and diff review.
+- Corrected manual theme ownership so Light/Dark covers and cleans up the whole
+  document rather than only application cards; unit and Chromium evidence
+  compare page and surface colors.
+- Repeated frozen install, format/docs/lint/types, 590 unit/DOM tests, 431
+  boundaries, Angular Chromium 8/8 and Standard Chromium 6/6 after correction.
+- Repeated package smokes, exact 0.2.0 artifacts, Corresponding Source rebuilds,
+  release security and clean consumers without Public/release drift.
+- Final review 095 cycle 2 passed all fourteen areas and the full matrix with
+  zero findings; PLAN-018 revision 1, D-046 and M16 are complete.
+
+### Next
+
+- Select the next milestone explicitly from the remaining Deferred register,
+  then complete its promotion/design/plan gates before implementation.
+
+## 2026-07-18 — PLAN-018 checkpoint 7 completed
+
+### Completed
+
+- Added an independent loopback-only Standard Playwright/Chromium lane covering
+  all six scenarios, representative interactions, controlled decisions,
+  configuration lifecycle, Ajv, tabs/copy/themes and repeated replacement.
+- Verified 390 px and 200% reflow, keyboard/focus/status behavior and explicit
+  non-certification boundaries while reusing the ignored installed browser.
+- Corrected pending-operation DOM stability after Chromium exposed a lost-click
+  path on form-control blur; focused unit evidence and the repeated 6/6 browser
+  lane now pass.
+- Repeated unchanged Angular Chromium 8/8 plus package, artifact, Corresponding
+  Source, security and clean-consumer gates without Public or release drift.
+- Updated root onboarding with independent Standard build/unit/E2E/dev commands
+  and ports; review 094 cycle 2 repeated twelve areas with zero findings.
+
+### Next
+
+- Execute PLAN-018 checkpoint 8: final repeated implementation review and full
+  verification to zero findings, then complete PLAN-018/M16.
+
+## 2026-07-18 — PLAN-018 checkpoint 6 completed
+
+### Completed
+
+- Reorganized the Standard reference into scenario, simultaneous preview/
+  editable schemas and lower observable-evidence regions with no redundant
+  headings or mutually exclusive workspace tabs.
+- Added independent accessible Schema/UI Schema and five-panel evidence tabs,
+  keyboard roving focus, initially open Value disclosure and deterministic
+  teardown.
+- Added safe JSON/TypeScript highlighting, copy feedback, exact integration
+  excerpts, responsive target-owned Auto/Light/Dark styling and reduced-motion
+  behavior.
+- Refactored snippet extraction into a declarative two-target inventory,
+  preserved Angular output byte-for-byte and build-checks five exact Standard
+  markers in the committed generated module.
+- Expanded Standard evidence to 44 tests, extractor evidence to five tests and
+  boundaries to 429 imports; review 093 cycle 1 repeated twelve areas with zero
+  findings.
+
+### Next
+
+- Implement PLAN-018 checkpoint 7: independent Standard Chromium, complete
+  release isolation and current onboarding/documentation reconciliation.
+
+## 2026-07-18 — PLAN-018 checkpoint 5 completed
+
+### Completed
+
+- Added the exact five private Standard CodeMirror/highlighting dependencies
+  with zero downloads and importer-only manifest/lockfile ownership.
+- Added direct labelled JSON editors with controlled synchronization, line
+  numbers, focus and deterministic idempotent teardown.
+- Added copied original/active configuration, exact drafts/results, Validate,
+  Apply, Cancel, Restore, configuration-preserving Reset and scenario selection
+  with fresh runtime epochs and active-schema Ajv.
+- Added inline destructive confirmation, stale invalidation, cancellation focus
+  return, success status focus and distinct syntax/compiler/runtime/validation
+  provenance.
+- Expanded Standard evidence to 35 tests and boundaries to 417 imports; package,
+  artifact, source, security and clean-consumer gates pass without Public drift.
+- Corrected boundary ordering and success-focus behavior; review 092 cycle 2
+  repeated twelve areas with zero findings.
+
+### Next
+
+- Implement PLAN-018 checkpoint 6: simultaneous workspace/evidence parity,
+  syntax/copy/themes and exact multi-target Standard snippets.
+
+## 2026-07-18 — PLAN-018 revision 1 approved
+
+### Completed
+
+- Ricard formally approved PLAN-018 revision 1 after review 091 cycle 3 passed
+  all fourteen areas with zero findings.
+- Authorized checkpoints 5–8 for private Standard editors/configuration,
+  workspace parity/snippets, Chromium/isolation and final repeated review.
+- Preserved completed checkpoints 1–4 and kept Public contracts, future
+  frameworks, D-013, persistence, hosting, release and publication outside M16.
+- Reconciled PLAN, review, ROADMAP, D-046, README and STATUS without starting
+  implementation or mutating dependencies.
+
+### Next
+
+- Authorize and run only PLAN-018 section 15.2's exact private Standard
+  dependency command; stop if the lockfile changes beyond importer ownership.
+
+## 2026-07-18 — PLAN-018 revision 1 proposed and reviewed
+
+### Completed
+
+- Drafted four remaining M16 checkpoints that preserve completed checkpoints
+  1–4 and deliver Accepted ADR-021 revision 1 without reimplementation.
+- Fixed the exact five private Standard CodeMirror/highlighting dependencies,
+  importer-only lock expectation and separate dependency-mutation gate.
+- Fixed Validate/Apply/Cancel/Restore/Reset, active-schema Ajv, complete runtime
+  recreation and D-013 isolation plus simultaneous workspace/evidence parity.
+- Closed exact boundary allowlists/negative fixtures and five Standard snippet
+  IDs with an app-local generated target while preserving Angular output.
+- Corrected both tooling omissions plus the revision-0 approval-date ambiguity
+  and repeated the complete review; review 091 cycle 3 passed all fourteen
+  areas with zero findings.
+
+### Next
+
+- Decide formal approval of PLAN-018 revision 1. If approved, obtain the
+  separate checkpoint 5 dependency-mutation gate before implementation.
+
+## 2026-07-18 — ADR-021 revision 1 accepted
+
+### Completed
+
+- Ricard formally accepted ADR-021 revision 1 after review 090 cycle 3 passed
+  all twelve areas with zero findings.
+- Made cross-target reference experience and editable-configuration parity
+  authoritative for M16 while retaining independent Angular and Standard
+  components, lifecycle, controller state and CSS.
+- Reconciled the ADR/index, D-046, ROADMAP, STATUS, WORKLOG and documentation
+  review state without changing code or Public contracts.
+- Kept PLAN-018 revision 0 as the approved implementation contract and paused
+  checkpoint 5 because its read-only configuration scope is stale.
+
+### Next
+
+- Draft and completely review PLAN-018 revision 1 before requesting approval
+  to resume checkpoint 5.
+
+## 2026-07-17 — ADR-021 revision 1 proposed and reviewed
+
+### Completed
+
+- Committed PLAN-018 checkpoints 1–4 and completed PLAN-019/M17 as `0eecde0`
+  (`feat: add standard reference foundation and Ajv validator`), excluding the
+  unrelated user-owned `angular.json` analytics change.
+- Drafted ADR-021 revision 1 to require one recognizable Angular/Standard
+  reference experience: simultaneous preview/configuration, all evidence tabs,
+  editable Schema/UI Schema, syntax presentation, copy, themes and responsive
+  accessibility.
+- Preserved target independence: Standard owns direct CodeMirror/DOM/lifecycle/
+  CSS implementation; no shared controller, component/style package, Public
+  contract or future framework target is introduced.
+- Fixed exact Validate/Apply/Cancel/Restore/Reset semantics, complete runtime
+  recreation and active-schema Ajv validation while keeping D-013 Deferred.
+- Corrected the initially incomplete evidence-tab list and missing
+  ADR-022/SPEC-007/D-013 metadata, repeated the complete review and passed
+  review 090 cycle 3 with zero findings.
+
+### Next
+
+- Decide formal acceptance of ADR-021 revision 1. If accepted, draft and
+  completely review PLAN-018 revision 1 before implementing checkpoint 5.
+
 ## 2026-07-17 — PLAN-019/M17 reusable validator completed
 
 ### Completed

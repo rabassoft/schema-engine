@@ -125,6 +125,18 @@ importers:
 
   apps/reference-standard:
     dependencies:
+      '@codemirror/lang-javascript':
+        specifier: 6.2.5
+        version: 6.2.5
+      '@codemirror/lang-json':
+        specifier: 6.0.2
+        version: 6.0.2
+      '@codemirror/language':
+        specifier: 6.12.4
+        version: 6.12.4
+      '@lezer/highlight':
+        specifier: 1.2.3
+        version: 1.2.3
       '@rabassoft/schema-engine':
         specifier: workspace:*
         version: link:../../packages/core
@@ -134,6 +146,9 @@ importers:
       '@schema-engine-internal/reference-scenarios':
         specifier: workspace:*
         version: link:../reference-scenarios
+      codemirror:
+        specifier: 6.0.2
+        version: 6.0.2
 
   packages/angular:
     dependencies:

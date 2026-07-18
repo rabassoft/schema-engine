@@ -150,16 +150,21 @@ function fixture() {
       name: '@schema-engine-internal/reference-standard',
       private: true,
       dependencies: {
+        '@codemirror/lang-javascript': '6.2.5',
+        '@codemirror/lang-json': '6.0.2',
+        '@codemirror/language': '6.12.4',
+        '@lezer/highlight': '1.2.3',
         '@rabassoft/schema-engine': 'workspace:*',
         '@rabassoft/schema-engine-validator-ajv': 'workspace:*',
         '@schema-engine-internal/reference-scenarios': 'workspace:*',
+        codemirror: '6.0.2',
       },
     }),
   );
   write(
     root,
     'apps/reference-standard/src/main.ts',
-    "import '@rabassoft/schema-engine';\nimport '@rabassoft/schema-engine-validator-ajv';\nimport '@schema-engine-internal/reference-scenarios';\n",
+    "import '@codemirror/lang-javascript';\nimport '@codemirror/lang-json';\nimport '@codemirror/language';\nimport '@lezer/highlight';\nimport '@rabassoft/schema-engine';\nimport '@rabassoft/schema-engine-validator-ajv';\nimport '@schema-engine-internal/reference-scenarios';\nimport 'codemirror';\n",
   );
   return root;
 }
@@ -168,7 +173,7 @@ test('accepts the exact private reference dependency boundary', () => {
   const root = fixture();
   try {
     assert.deepEqual(verifyReferenceBoundaries(root), {
-      inspectedImports: 17,
+      inspectedImports: 22,
       inspectedManifestTargets: 5,
       privateProjects: 3,
       privateProductProjects: 1,
@@ -219,6 +224,28 @@ test('rejects an unapproved private editor dependency', () => {
   const root = fixture();
   try {
     const path = 'apps/reference-angular/package.json';
+    const value = JSON.parse(readFixture(root, path));
+    write(
+      root,
+      path,
+      manifest({
+        ...value,
+        dependencies: {
+          ...value.dependencies,
+          '@codemirror/state': '6.7.1',
+        },
+      }),
+    );
+    assert.throws(() => verifyReferenceBoundaries(root), assert.AssertionError);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects an undeclared CodeMirror transitive in the Standard shell', () => {
+  const root = fixture();
+  try {
+    const path = 'apps/reference-standard/package.json';
     const value = JSON.parse(readFixture(root, path));
     write(
       root,

@@ -106,18 +106,30 @@ const snippetEntries = Object.freeze([
     id: 'application-signals',
     label: 'Application signals excerpt',
     language: 'typescript' as const,
+    purpose:
+      'Defines the application-owned value, baseline, locale, visibility and decision state that drives the controlled form.',
+    responsibility:
+      'The application remains the source of truth. Signals are shell state; the runtime observes complete roots but does not own them.',
     source: referenceSnippets['application-signals'],
   }),
   Object.freeze({
     id: 'operation-decisions',
     label: 'Operation decisions excerpt',
     language: 'typescript' as const,
+    purpose:
+      'Receives operation requests from the form and makes confirmation, rejection and pending decisions explicit.',
+    responsibility:
+      'The application chooses when to apply an operation, owns pending history and publishes the resulting complete value after confirmation.',
     source: referenceSnippets['operation-decisions'],
   }),
   Object.freeze({
     id: 'controlled-form-template',
     label: 'Controlled form template excerpt',
     language: 'html' as const,
+    purpose:
+      'Connects the Angular directive to the current normalized configuration and exposes operation and diagnostic outputs.',
+    responsibility:
+      'The template is only the integration boundary. Persistence, submission and application-state mutation stay outside the directive.',
     source: referenceSnippets['controlled-form-template'],
   }),
 ]);
@@ -727,12 +739,37 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
               <h4 id="snippets-heading">Build-checked integration excerpts</h4>
               <p>
                 These excerpts are generated from marked regions in the compiled
-                reference-form source.
+                reference-form source. Read them in order to follow the
+                controlled integration from application-owned state, through
+                operation decisions, to the Angular template boundary.
               </p>
+              <ol
+                class="integration-flow"
+                aria-label="Angular integration flow"
+              >
+                <li>
+                  <strong>Own state:</strong> keep value and baseline in the
+                  application.
+                </li>
+                <li>
+                  <strong>Decide operations:</strong> confirm, reject or defer
+                  every request.
+                </li>
+                <li>
+                  <strong>Bind the form:</strong> pass configuration in and
+                  receive events out.
+                </li>
+              </ol>
               @defer {
                 @for (snippet of snippets; track snippet.id) {
                   <article [attr.data-testid]="'snippet-' + snippet.id">
                     <h5>{{ snippet.label }}</h5>
+                    <dl class="snippet-explanation">
+                      <dt>What it demonstrates</dt>
+                      <dd>{{ snippet.purpose }}</dd>
+                      <dt>Application responsibility</dt>
+                      <dd>{{ snippet.responsibility }}</dd>
+                    </dl>
                     <reference-code-example
                       [label]="snippet.label"
                       [language]="snippet.language"

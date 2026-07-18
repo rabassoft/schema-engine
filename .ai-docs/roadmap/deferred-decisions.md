@@ -678,9 +678,11 @@ Cada decisión debe registrar:
 
 ## D-046: Shell de referencia Standard/DOM con consumo directo del core
 
-- **Estado:** Promoted con entrega M16 autorizada; review 075 ciclo 1 pasó con
-  cero hallazgos, ADR-021 revisión 0 quedó Accepted tras review 076 ciclo 1 y
-  PLAN-018 revisión 0 Approved tras review 077 ciclo 1 el 17 de julio de 2026
+- **Estado:** Implemented en M16; ADR-021 revisión
+  1 quedó Accepted el 18 de julio de 2026 tras review 090 ciclo 3 sin hallazgos.
+  PLAN-018 revisión 1 quedó Approved tras review 091 ciclo 3 sin hallazgos y
+  final review 095 ciclo 2 completó sus checkpoints 1–8 y M16 sin hallazgos el
+  18 de julio de 2026
 - **Pregunta:** ¿Cómo demostrar todos los escenarios aceptados en una
   aplicación browser sin framework que consuma directamente el core Public,
   sin convertir el ejemplo en un adaptador o producto DOM soportado?
@@ -699,9 +701,15 @@ Cada decisión debe registrar:
 - **Resolución de preparación:**
   [`review 075`](../reviews/075-d046-m16-standard-dom-promotion-readiness.md)
   promovió la frontera y [`ADR-021`](../adrs/021-shell-standard-dom-core-directo.md)
-  revisión 0 fija la arquitectura Accepted. PLAN-018 revisión 0 pasó review 077
-  ciclo 1 sin hallazgos y está Approved para checkpoints 1–7; su mutación exacta
-  de dependencia Vite y checkpoint 1 quedaron completados tras review 078 ciclo 2. Las acciones externas posteriores conservan gates separados.
+  revisión 1 fija la arquitectura Accepted. PLAN-018 revisión 0 pasó review 077
+  ciclo 1 sin hallazgos y sus checkpoints 1–4 están completos. PLAN-018 revisión
+  1 incorpora la paridad de experiencia/configuración y review 091 ciclo 3 la
+  dejó sin hallazgos; Ricard la aprobó formalmente el 18 de julio. Checkpoint 5
+  completó editores/configuración y aislamiento tras review 092 ciclo 2;
+  checkpoint 6 completó workspace/evidencia/snippets tras review 093 ciclo 1.
+  Checkpoint 7 completó Chromium/aislamiento/documentación tras review 094 ciclo 2. Final review 095 ciclo 2 completó checkpoint 8, PLAN-018 revisión 1 y M16
+  tras repetir catorce áreas y toda la matriz sin hallazgos. Las acciones
+  externas posteriores conservan gates separados.
 
 ## D-047: Integración síncrona reutilizable de validación JSON Schema con Ajv
 
@@ -729,14 +737,15 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **D-046/M16:** reanudar PLAN-018 checkpoint 5 tras completar D-047/M17.
+1. **Next milestone:** evaluar el registro Deferred y seleccionar explícitamente
+   la siguiente capacidad; D-046/M16 y D-047/M17 están completos.
 2. **D-043:** conserva la publicación del repositorio y automatización como
    trabajo Deferred; no se promueve por D-044.
 3. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
    familia de artefactos seleccionada.
-4. **D-046/M16:** tiene ADR-021 Accepted y PLAN-018 revisión 0 Approved;
-   checkpoints 1–4 y el prerrequisito M17 están completos; checkpoint 5 es el
-   siguiente.
+4. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;
+   ADR-021 revisión 1 está Accepted y PLAN-018 revisión 1 está Completed tras
+   review final 095 ciclo 2 sin hallazgos.
 
 [`ROADMAP.md`](../project/ROADMAP.md) distingue el gate G0 completado de la
 secuencia posterior. ADR-013 y PLAN-008 completaron únicamente la preparación
@@ -752,6 +761,14 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                         |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 18-07-2026 | PLAN-018 revisión 1/D-046/M16 quedan Completed; review final 095 ciclo 2 repite catorce áreas y toda la matriz sin hallazgos.                  |
+| 18-07-2026 | PLAN-018 checkpoint 7 completa Chromium/aislamiento/onboarding; review 094 ciclo 2 cierra sin hallazgos.                                       |
+| 18-07-2026 | PLAN-018 checkpoint 6 completa workspace/evidencia/snippets; review 093 ciclo 1 cierra sin hallazgos.                                          |
+| 18-07-2026 | PLAN-018 checkpoint 5 completa CodeMirror/configuración/active Ajv; review 092 ciclo 2 cierra sin hallazgos.                                   |
+| 18-07-2026 | PLAN-018 revisión 1 queda Approved para checkpoints 5–8; checkpoint 5 espera el gate exacto de dependencias.                                   |
+| 18-07-2026 | PLAN-018 revisión 1 queda Proposed tras review 091 ciclo 3 sin hallazgos; checkpoints 5–8 esperan aprobación formal.                           |
+| 18-07-2026 | ADR-021 revisión 1 queda Accepted; autoriza redactar/revisar PLAN-018 revisión 1, no implementar checkpoint 5 todavía.                         |
+| 17-07-2026 | ADR-021 revisión 1 queda Proposed tras review 090 ciclo 3 sin hallazgos; aceptación formal y revisión de PLAN-018 siguen pendientes.           |
 | 17-07-2026 | PLAN-019/M17 completa el paquete Ajv privado y ambos shells; review 089 ciclo 2 cierra sin hallazgos y PLAN-018 checkpoint 5 puede reanudarse. |
 | 17-07-2026 | Review 082 promueve D-047/M17 para diseñar un paquete privado Ajv síncrono y reutilizable; publicación y capacidades avanzadas siguen fuera.   |
 | 17-07-2026 | PLAN-018 checkpoint 1 completa Vite/skeleton/watch/boundaries; review 078 ciclo 2 cierra sin hallazgos tras corregir tipos CSS.                |

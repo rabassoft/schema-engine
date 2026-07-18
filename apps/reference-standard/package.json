@@ -4,15 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "pnpm --workspace-root reference:snippets:check && vite build",
     "dev": "vite --host 127.0.0.1 --port 4211",
     "dev:e2e": "vite --host 127.0.0.1 --port 4212",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/lang-json": "6.0.2",
+    "@codemirror/language": "6.12.4",
+    "@lezer/highlight": "1.2.3",
     "@rabassoft/schema-engine": "workspace:*",
     "@rabassoft/schema-engine-validator-ajv": "workspace:*",
-    "@schema-engine-internal/reference-scenarios": "workspace:*"
+    "@schema-engine-internal/reference-scenarios": "workspace:*",
+    "codemirror": "6.0.2"
   }
 }

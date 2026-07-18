@@ -198,7 +198,7 @@ separado antes de repetir la revisión.
   artefactos, consumidores y documentación están verificados; review 063 ciclo
   2 repitió la revisión final completa y cerró PLAN-016/M15 sin hallazgos.
 
-### M16 — Shell de referencia Standard/DOM — entrega autorizada
+### M16 — Shell de referencia Standard/DOM — completado
 
 - [Review 075](../reviews/075-d046-m16-standard-dom-promotion-readiness.md)
   ciclo 1 pasó diez áreas con cero hallazgos y promueve D-046 únicamente para
@@ -210,11 +210,13 @@ separado antes de repetir la revisión.
   snippets, build, tests y smoke Chromium independientes y cubrirá los seis
   escenarios actuales con UI idiomática del target.
 - React, Vue, D-026, D-035, D-043, D-045, hosting, publicación y cambios de
-  SPEC permanecen inactivos. ADR-021 revisión 0 quedó Accepted tras review 076
-  ciclo 1 sin hallazgos. PLAN-018 revisión 0 quedó Approved tras review 077
-  ciclo 1 y autoriza checkpoints 1–7. Los checkpoints 1–4 están completos tras
-  reviews 078–081 ciclo 2 sin hallazgos; checkpoint 5 está pausado hasta cerrar
-  la integración reutilizable D-047/M17.
+  SPEC permanecen inactivos. ADR-021 revisión 1 quedó Accepted el 18 de julio
+  tras review 090 ciclo 3 sin hallazgos y amplía la paridad privada de
+  experiencia/configuración. PLAN-018 revisión 0 conserva su autoridad de
+  implementación. PLAN-018 revisión 1 quedó Approved tras review 091 ciclo 3
+  sin hallazgos. Los checkpoints 1–8 y D-047/M17 están completos; review final
+  095 ciclo 2 repitió catorce áreas y toda la matriz sin hallazgos, cerrando
+  PLAN-018 revisión 1 y M16.
 
 ### M17 — Validador JSON Schema síncrono reutilizable — completado
 
@@ -233,9 +235,9 @@ separado antes de repetir la revisión.
 
 ### Orden de dependencias a más largo plazo
 
-1. **M16 resume:** implement PLAN-018 checkpoints 5–7 with repeated complete
-   reviews; checkpoints 1–4 and prerequisite M17 are complete.
-2. **Later selection:** React, Vue and all other capabilities remain
+1. **Next selection:** evaluate the remaining deferred capabilities and select
+   the next milestone explicitly; M16 and prerequisite M17 are complete.
+2. **Later candidates:** React, Vue and all other capabilities remain
    demand-driven; D-043 and D-033 are not implied by M15/M16.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta

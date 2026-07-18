@@ -51,6 +51,10 @@ interface CollectionBinding {
   dispose(): void;
 }
 
+export interface StandardDomRendererOptions {
+  readonly embeddedCollectionControls?: boolean;
+}
+
 export class StandardDomRenderer {
   private readonly form = document.createElement('form');
   private readonly bindings = new Map<string, FieldBinding>();
@@ -62,6 +66,7 @@ export class StandardDomRenderer {
     private readonly host: HTMLElement,
     definition: FormDefinition,
     private readonly runtime: FormRuntime<object>,
+    private readonly options: StandardDomRendererOptions = {},
   ) {
     this.form.noValidate = true;
     this.form.className = 'standard-form';
@@ -132,7 +137,11 @@ export class StandardDomRenderer {
       return fieldset;
     }
     if (node.kind === 'array') {
-      const binding = createCollectionBinding(node, this.runtime);
+      const binding = createCollectionBinding(
+        node,
+        this.runtime,
+        this.options.embeddedCollectionControls !== false,
+      );
       this.collections.set(node.key, binding);
       return binding.element;
     }
@@ -332,6 +341,7 @@ function createFieldBinding(
 function createCollectionBinding(
   definition: ArrayNodeDefinition,
   runtime: FormRuntime<object>,
+  embeddedControls: boolean,
 ): CollectionBinding {
   const collectionPath = stringPath(definition.path);
   const section = document.createElement('section');
@@ -344,6 +354,7 @@ function createCollectionBinding(
 
   const insert = document.createElement('div');
   insert.className = 'collection-insert';
+  insert.hidden = !embeddedControls;
   const inputScope = domId(definition.key);
   const idInput = labelledInput(`${inputScope}-new-id`, 'New item id');
   const drafts = definition.item.fields.map((field) => ({
@@ -416,6 +427,7 @@ function createCollectionBinding(
             runtime,
             () => current,
             () => add.focus(),
+            embeddedControls,
           );
           items.set(itemSnapshot.address.itemId, binding);
         }
@@ -438,6 +450,7 @@ function createItemBinding(
   runtime: FormRuntime<object>,
   getCollection: () => ArrayRuntimeSnapshot | undefined,
   focusAfterRemove: () => void,
+  embeddedControls: boolean,
 ) {
   const fieldset = document.createElement('fieldset');
   fieldset.className = 'collection-item';
@@ -454,6 +467,7 @@ function createItemBinding(
   }
   const actions = document.createElement('div');
   actions.className = 'field-actions';
+  actions.hidden = !embeddedControls;
   const earlier = button('Move earlier');
   const later = button('Move later');
   const remove = button('Remove item');
