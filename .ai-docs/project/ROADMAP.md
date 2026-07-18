@@ -233,11 +233,37 @@ separado antes de repetir la revisión.
   package smoke, builds y Chromium están verificados. Async, formats,
   referencias remotas, publicación, release y core changes permanecen fuera.
 
+### M18 — Layout neutral avanzado — aprobado para implementación
+
+- Ricard seleccionó madurar core/Angular/Standard y la portabilidad hacia
+  librerías UI antes de iniciar React/Vue.
+- [Review 098](../reviews/098-d011-m18-advanced-layout-promotion-readiness.md)
+  ciclo 2 pasó doce áreas con cero hallazgos y promueve solo tabs estáticos,
+  accordions estáticos y grid lógico estático root-only sobre el bosque de
+  presentación aceptado.
+- El estado de selección/expansión pertenece al target; core/runtime, scopes,
+  operaciones, datos, workflow y persistencia no cambian.
+- ADR-023 revisión 1 está Accepted tras review 099 ciclo 3 con cero hallazgos.
+  Review 100 ciclo 4 promovió solo el seam Angular Experimental de contenedores,
+  fallback nativo y un piloto opcional. ADR-024 revisión 1 está Accepted tras
+  review 101 ciclo 4 con cero hallazgos y selecciona Angular Aria 22 como único
+  piloto. SPEC-008 v0.1.0 está Accepted tras review 102 ciclo 5 sin hallazgos;
+  PLAN-020 revisión 0 está Approved tras review 103 ciclo 2 sin hallazgos y
+  autoriza sus ocho checkpoints. Checkpoint 1 completa los contratos Public
+  core, compilador y fixtures tras review 104 ciclo 3 sin hallazgos;
+  checkpoints 2–8 permanecen pendientes.
+- Wizards, acciones, D-012, D-018, nested/item layout, breakpoints arbitrarios,
+  dependencias UI, React/Vue y release permanecen Deferred.
+
 ### Orden de dependencias a más largo plazo
 
-1. **Next selection:** evaluate the remaining deferred capabilities and select
-   the next milestone explicitly; M16 and prerequisite M17 are complete.
-2. **Later candidates:** React, Vue and all other capabilities remain
+1. **Next action:** execute PLAN-020 checkpoint 2 for manual FormDefinition
+   validation and runtime invariance, then repeat its complete checkpoint
+   review until zero findings.
+2. **External gates:** checkpoint 5 dependency resolution and checkpoint 7
+   registry-backed clean consumers require separate execution authorization;
+   publication, commit and push remain separately gated.
+3. **Later candidates:** React, Vue and all other capabilities remain
    demand-driven; D-043 and D-033 are not implied by M15/M16.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta

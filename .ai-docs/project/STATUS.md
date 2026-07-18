@@ -8,57 +8,69 @@
 - **Updated:** 2026-07-18 by Ricard / Codex
 - **Branch:** `develop`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
-  v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1 and SPEC-007
-  v0.1.0
-- **Last implementation plan:** PLAN-018 revision 1, Completed
+  v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
+  v0.1.0 and SPEC-008 v0.1.0
+- **Last implementation plan:** PLAN-020 revision 0, Approved
 - **Last completed implementation plan:** PLAN-018 revision 1
 - **Active implementation task:** None
-- **Last accepted ADR:** ADR-021 revision 1
-- **Implemented capability:** D-046/M16 private direct-core Standard/DOM shell,
+- **Last accepted ADR:** ADR-024 revision 1
+- **Implemented capability:** PLAN-020 checkpoint 1 Public core advanced
+  presentation compiler, D-046/M16 private direct-core Standard/DOM shell,
   D-047/M17 reusable synchronous Ajv validation and D-044/M15
-- **Phase:** M1–M17 and G0 completed
+- **Phase:** M1–M17 and G0 completed; M18 implementation in progress
 - **Published packages:** core and Angular `0.2.0` are byte-identical and
   verified under coordinated `next` and `latest`
 
 ## Current objective
 
-Select the next milestone explicitly from the remaining deferred capabilities;
-do not start implementation before its promotion/design/plan gates.
+Execute approved PLAN-020 for the accepted M18 neutral layout, Angular
+presentation-container SPI and sole Angular Aria 22 pilot.
 
 ## In progress
 
-- None.
+None.
 
 ## Latest completed work
 
-- Completed private integration-explanation maintenance after review 097 cycle
-  2 passed all ten areas with zero findings: Angular and Standard now explain
-  the controlled flow, purpose and retained application responsibility around
-  every exact build-checked excerpt.
+- Completed PLAN-020 checkpoint 1 after review 104 cycle 3 repeated all ten
+  areas and the complete verification gate with zero findings. Core now exports
+  the thirteen exact advanced-presentation contracts, normalizes tabs,
+  accordion and grid iteratively with the closed diagnostics/fallback contract,
+  and carries programmatic plus serializable conformance evidence. Runtime,
+  Angular, Standard, manifests, versions and dependencies remain unchanged.
 
-- Completed post-M16 private reference-experience maintenance after review 096
-  cycle 3 passed all ten areas with zero findings: Standard independently
-  matches Angular's requested labels, button hierarchy, stable-team controls,
-  semantic visual tokens and header theme without shared production UI code.
+- Approved PLAN-020 revision 0 after review 103 cycle 2 repeated all fourteen
+  areas with zero findings. Eight bounded checkpoints map every SPEC-008
+  conformance row; checkpoint 5/7 network actions, publication, external
+  settings, commit and push retain separate gates.
 
-- Completed PLAN-018 revision 1/D-046/M16 after final review 095 cycle 2 fixed
-  full-page theme ownership and repeated all fourteen areas plus the complete
-  verification matrix with zero findings.
+- Accepted SPEC-008 v0.1.0 after review 102 cycle 5 repeated all twelve areas
+  with zero findings. It closes neutral grammar/diagnostics/runtime boundaries,
+  independent target projection, the Angular container SPI/native fallback,
+  sole Aria pilot, package/theme matrix and conformance contract.
 
-- Completed PLAN-018 checkpoint 7 after review 094 cycle 2 corrected pending
-  control DOM stability and repeated all twelve areas with zero findings:
-  independent Standard/Angular Chromium, release isolation and onboarding are
-  green without Public drift.
+- Accepted ADR-024 revision 1 after review 101 cycle 4 repeated all eleven
+  areas with zero findings. It fixes a separate Angular Experimental container
+  SPI, exact provider/child-projection behavior, mandatory native fallback, an
+  isolated future package/theme boundary and Angular Aria 22 as the sole pilot.
+
+- Accepted D-025 promotion-readiness review 100 after cycle 4 repeated all
+  twelve areas with zero findings. It promotes only an Angular Experimental
+  presentation-container seam with mandatory native fallback and one isolated
+  optional pilot; broader kits remain Deferred.
 
 ## Exact next action
 
-Review the remaining Deferred register and ROADMAP with Ricard, choose the next
-milestone explicitly, then run its required promotion/design/plan gates before
-implementation.
+Execute PLAN-020 checkpoint 2: extend iterative manual FormDefinition
+validation with the eight exact reasons and prove runtime, operation, snapshot,
+validation, scope and collection-identity invariance; repeat the complete
+checkpoint review until one pass has zero findings.
 
 ## Blockers and conflicts
 
-- No implementation, documentation or external-system blocker.
+- No implementation or documentation blocker. PLAN-020 revision 0 authorizes
+  checkpoints 1–8; checkpoint 5 dependency resolution and checkpoint 7
+  registry-backed consumers retain separate network execution gates.
 - Angular application builds require execution outside the restricted sandbox
   because esbuild IPC deadlocks inside it. Angular CLI also rejects the bundled
   Node 24.14.0; installed Node 22.23.1 is compatible and the identical official
@@ -66,7 +78,7 @@ implementation.
 - This machine uses an ignored workspace-local Playwright cache because its
   default global cache is owned by another user; no browser binary is tracked.
 - The working tree contains an unrelated Angular CLI analytics identifier in
-  `angular.json`; it remains outside PLAN-018 and will stay unstaged. No push is
+  `angular.json`; it remains outside PLAN-020 and will stay unstaged. No push is
   authorized.
 - The private Angular application emits a 750 kB bundle warning at 945.80 kB
   but remains below its 1 MB error budget; syntax and Ajv are isolated in lazy
@@ -82,48 +94,56 @@ implementation.
 
 ## Open questions
 
-- None.
+None.
 
 ## Latest verification
 
-- Review 097 cycle 2 repeated scope, snippet integrity, target-specific
-  explanation, architectural accuracy, independence, accessibility,
-  regression, builds and delivery controls with zero findings. Eight exact
-  snippets, Angular unit/DOM 24/24 plus Chromium 8/8 and Standard unit/DOM
-  47/47 plus Chromium 6/6 pass with strict types and scoped lint/format.
+- PLAN-020 checkpoint 1 review 104 cycle 3 repeated authority/scope, Public
+  inventory, descriptor safety, grammar/diagnostics, order/precedence,
+  normalization/identity, immutability/fallback, hostile inputs,
+  fixtures/package surface and regression/dirty-worktree safety with zero
+  findings. Core build, strict types, scoped ESLint/Prettier, built-package
+  smoke, declaration inspection and diff checks pass; 23 files and 429 core
+  tests pass.
 
-- Review 096 cycle 3 repeated authority/scope, independent target ownership,
-  visible hierarchy/text, stable-team intentions, semantic visual parity,
-  accessibility/lifecycle, regression, boundaries and delivery controls with
-  zero findings. Standard unit/DOM passes 47/47, Chromium 6/6, strict types,
-  scoped lint/format, 12/12 boundary fixtures, 431 import boundaries and diff
-  checks pass.
+- PLAN-020 review 103 cycle 2 repeated authority/scope, sequencing, Public
+  migration, compiler safety, runtime ownership, Angular SPI/native fallback,
+  Standard independence, pilot behavior, package/theme isolation,
+  compatibility, all 22 conformance rows, verification/persistence, deferred
+  boundaries and dirty-worktree safety with zero findings. Scoped formatting
+  and diff checks pass; documentation checks pass for 178 Markdown files and
+  628 local links.
 
-- Final review 095 cycle 2 repeated authority, dependencies/privacy,
-  direct-core architecture, controlled lifecycle, normalized DOM,
-  configuration/UX/accessibility, snippets/browsers, release isolation,
-  documentation and complete diff with zero findings.
+- SPEC-008 review 102 cycle 5 repeated authority/scope, neutral Public surface,
+  grammar/normalization, compiler diagnostics, manual/runtime behavior,
+  state/grid/accessibility, application ownership, Angular SPI/providers,
+  Aria pilot, compatibility/support, cross-target/deferred boundaries and
+  documentation with zero findings. Documentation checks pass for 176 Markdown
+  files and 615 local links; scoped format and diff checks pass.
 
-- Review 094 cycle 2 repeated authority, Chromium ownership, scenarios,
-  controlled/configuration behavior, UX/accessibility, Angular independence,
-  release/Public isolation, documentation and diff with zero findings.
+- ADR-024 review 101 cycle 4 repeated authority/scope, Public/Internal
+  minimality, provider behavior, fallback/failure, projection/lifecycle,
+  interaction, primary-source pilot evidence, package/theme isolation,
+  compatibility, deferred boundaries and documentation with zero findings.
+  Documentation checks pass for 174 Markdown files and 605 local links; scoped
+  format and diff checks pass.
 
-- Review 093 cycle 1 repeated authority, simultaneous hierarchy, tabs,
-  evidence, highlighting/copy/themes, snippets, responsive accessibility,
-  lifecycle, regression/isolation and diff with zero findings.
+- D-025 review 100 cycle 4 repeated restart evidence, cohesion, core/Angular
+  ownership, native continuity, pilot/package/theme isolation, cross-target
+  boundaries, Public migration, exclusions and delivery sequence with zero
+  findings.
 
-- Review 092 cycle 2 repeated authority, dependency/boundary ownership,
-  editors, configuration transitions, D-013/Ajv isolation, accessibility,
-  regression/release isolation and diff with zero findings.
-- Review 091 cycle 3 repeated authority, dependencies, private boundaries,
-  configuration transitions, D-013, workspace parity, accessibility, tooling,
-  regression/release isolation and delivery controls with zero findings.
-- Review 090 cycle 3 repeated scope, authority, UX parity, target independence,
-  editor/configuration lifecycle, D-013, Ajv ownership, accessibility,
-  release/Public isolation and documentation with zero findings.
-- Final review 089 cycle 2 repeated authority, package/API, Ajv behavior,
-  Angular/Standard integration, catalog/release isolation, documentation and
-  diff with zero findings.
+- ADR-023 review 099 cycle 3 repeated grammar/composition, identity, state,
+  grid, safety/fallback, text/accessibility/failure, runtime authority,
+  renderer-kit seam, cross-target/Public migration and exclusions/gates with
+  zero findings.
+
+- Promotion-readiness review 098 cycle 2 repeated demand, restart condition,
+  authority, cohesion, state, grid, accessibility, renderer ownership,
+  cross-target evidence, compatibility, exclusions and delivery sequencing
+  with zero findings. Documentation-only diff checks pass; no contract, code,
+  external action, commit or push is part of the promotion.
+
 - Formatting/check, lint, docs, strict types, 400 core tests, 79 Public Angular
   tests, 35 catalog tests, 7 validator tests, 24 Angular reference tests and 47
   Standard tests pass. Standard/Angular Chromium pass 6/6 and 8/8.
@@ -134,6 +154,18 @@ implementation.
 
 ## Task document map
 
+- Approved M18 plan: `.ai-docs/plans/020-static-advanced-presentation-layout.md`
+- M18 plan review: `.ai-docs/reviews/103-plan-020-review.md`
+- PLAN-020 checkpoint 1 review: `.ai-docs/reviews/104-plan-020-checkpoint-1-review.md`
+
+- Accepted M18 specification: `.ai-docs/specs/008-static-advanced-presentation-layout.md`
+- M18 specification review: `.ai-docs/reviews/102-spec-008-review.md`
+- Accepted Angular container architecture: `.ai-docs/adrs/024-spi-contenedores-angular-y-piloto-angular-aria.md`
+- Angular container architecture review: `.ai-docs/reviews/101-adr-024-review.md`
+- D-025 promotion decision: `.ai-docs/reviews/100-d025-angular-container-kit-promotion-readiness.md`
+- Accepted M18 architecture: `.ai-docs/adrs/023-contenedores-layout-neutral-estatico.md`
+- M18 architecture review: `.ai-docs/reviews/099-adr-023-review.md`
+- M18 promotion decision: `.ai-docs/reviews/098-d011-m18-advanced-layout-promotion-readiness.md`
 - Latest completed plan: `.ai-docs/plans/018-standard-dom-reference-shell.md`
 - Latest explanation review: `.ai-docs/reviews/097-integration-explanation-maintenance-review.md`
 - Latest maintenance review: `.ai-docs/reviews/096-standard-reference-parity-maintenance-review.md`
@@ -155,5 +187,5 @@ implementation.
 - Validator checkpoint reviews: `.ai-docs/reviews/086-plan-019-checkpoint-1-review.md`
   through `.ai-docs/reviews/088-plan-019-checkpoint-3-review.md`
 - Active Standard architecture: `.ai-docs/adrs/021-shell-standard-dom-core-directo.md`
-- Accepted architecture review: `.ai-docs/reviews/090-adr-021-revision-1-review.md`
+- Standard architecture review: `.ai-docs/reviews/090-adr-021-revision-1-review.md`
 - Deferred boundaries: `.ai-docs/roadmap/deferred-decisions.md`

@@ -1,0 +1,220 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "nullable": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "nullable": false,
+        "label": "b",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"c\"]",
+        "name": "c",
+        "path": ["c"],
+        "required": false,
+        "nullable": false,
+        "label": "c",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"d\"]",
+        "name": "d",
+        "path": ["d"],
+        "required": false,
+        "nullable": false,
+        "label": "d",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "nullable": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "nullable": false,
+        "label": "b",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"c\"]",
+        "name": "c",
+        "path": ["c"],
+        "required": false,
+        "nullable": false,
+        "label": "c",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"d\"]",
+        "name": "d",
+        "path": ["d"],
+        "required": false,
+        "nullable": false,
+        "label": "d",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "tabs",
+        "id": "root-tabs",
+        "key": "[\"tabs\",\"root-tabs\"]",
+        "label": "Root tabs",
+        "panels": [
+          {
+            "kind": "panel",
+            "id": "details",
+            "key": "[\"tabs\",\"root-tabs\",\"panel\",\"details\"]",
+            "label": "Details",
+            "children": [
+              {
+                "kind": "form-node",
+                "node": {
+                  "key": "[\"a\"]",
+                  "name": "a",
+                  "path": ["a"],
+                  "required": false,
+                  "nullable": false,
+                  "label": "a",
+                  "kind": "string",
+                  "constraints": {}
+                }
+              },
+              {
+                "kind": "grid",
+                "id": "details-grid",
+                "key": "[\"grid\",\"details-grid\"]",
+                "label": "Details grid",
+                "columns": 2,
+                "items": [
+                  {
+                    "kind": "grid-item",
+                    "key": "[\"grid\",\"details-grid\",\"item\",0]",
+                    "span": 2,
+                    "child": {
+                      "kind": "form-node",
+                      "node": {
+                        "key": "[\"b\"]",
+                        "name": "b",
+                        "path": ["b"],
+                        "required": false,
+                        "nullable": false,
+                        "label": "b",
+                        "kind": "boolean"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "grid-item",
+                    "key": "[\"grid\",\"details-grid\",\"item\",1]",
+                    "span": 1,
+                    "child": {
+                      "kind": "section",
+                      "id": "nested-section",
+                      "key": "[\"section\",\"nested-section\"]",
+                      "label": "Nested section",
+                      "children": [
+                        {
+                          "kind": "form-node",
+                          "node": {
+                            "key": "[\"c\"]",
+                            "name": "c",
+                            "path": ["c"],
+                            "required": false,
+                            "nullable": false,
+                            "label": "c",
+                            "kind": "number",
+                            "numericType": "number",
+                            "constraints": {},
+                            "ui": {}
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "panel",
+            "id": "more",
+            "key": "[\"tabs\",\"root-tabs\",\"panel\",\"more\"]",
+            "label": "More",
+            "children": [
+              {
+                "kind": "accordion",
+                "id": "nested-accordion",
+                "key": "[\"accordion\",\"nested-accordion\"]",
+                "label": "Nested accordion",
+                "panels": [
+                  {
+                    "kind": "panel",
+                    "id": "only",
+                    "key": "[\"accordion\",\"nested-accordion\",\"panel\",\"only\"]",
+                    "label": "Only",
+                    "children": [
+                      {
+                        "kind": "form-node",
+                        "node": {
+                          "key": "[\"d\"]",
+                          "name": "d",
+                          "path": ["d"],
+                          "required": false,
+                          "nullable": false,
+                          "label": "d",
+                          "kind": "number",
+                          "numericType": "integer",
+                          "constraints": {},
+                          "ui": {}
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "diagnostics": []
+}

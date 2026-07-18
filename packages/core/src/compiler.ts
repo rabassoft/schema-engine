@@ -15,7 +15,13 @@ import type {
   ObjectItemTemplateDefinition,
   ObjectFieldDefinition,
   ObjectNodeTemplate,
+  PresentationAccordionDefinition,
   PresentationEntryDefinition,
+  PresentationGridDefinition,
+  PresentationGridItemDefinition,
+  PresentationPanelDefinition,
+  PresentationSectionDefinition,
+  PresentationTabsDefinition,
   StringFieldDefinition,
 } from './contracts.js';
 import { diagnostic, hasErrors } from './internal/diagnostics.js';
@@ -137,7 +143,37 @@ type ParsedPresentationEntry =
       readonly id: string;
       readonly label: string;
       readonly children: readonly ParsedPresentationEntry[];
+    }
+  | {
+      readonly kind: 'tabs';
+      readonly id: string;
+      readonly label: string;
+      readonly panels: readonly ParsedPresentationPanel[];
+    }
+  | {
+      readonly kind: 'accordion';
+      readonly id: string;
+      readonly label: string;
+      readonly panels: readonly ParsedPresentationPanel[];
+    }
+  | {
+      readonly kind: 'grid';
+      readonly id: string;
+      readonly label: string;
+      readonly columns: 1 | 2 | 3 | 4;
+      readonly items: readonly ParsedGridItem[];
     };
+
+interface ParsedPresentationPanel {
+  readonly id: string;
+  readonly label: string;
+  readonly children: readonly ParsedPresentationEntry[];
+}
+
+interface ParsedGridItem {
+  readonly span: 1 | 2 | 3 | 4;
+  readonly child: readonly ParsedPresentationEntry[];
+}
 
 interface ParsedObjectUi extends ParsedFieldUi {
   readonly order: readonly string[];
@@ -3284,196 +3320,49 @@ function inspectRootPresentation(
   const known = new Set(nodeNames);
   const normalizedNodeNames = presentationNodeOrder(ui, nodeNames);
   const firstNodes = new Map<string, readonly (string | number)[]>();
-  const firstSections = new Map<string, readonly (string | number)[]>();
+  const firstContainers = new Map<string, readonly (string | number)[]>();
   const active = new Map<object, readonly (string | number)[]>();
   const result: ParsedPresentationEntry[] = [];
-  type Frame =
-    | {
-        readonly kind: 'entry';
-        readonly value: unknown;
-        readonly index: number;
-        readonly path: readonly (string | number)[];
-        readonly output: ParsedPresentationEntry[];
-      }
-    | { readonly kind: 'exit'; readonly section: object };
-  const stack: Frame[] = [];
+  const stack: PresentationInspectionFrame[] = [];
   pushPresentationEntries(presentation.value, ['presentation'], result, stack);
 
   while (stack.length > 0) {
     const frame = stack.pop();
     if (frame === undefined) break;
     if (frame.kind === 'exit') {
-      active.delete(frame.section);
+      active.delete(frame.value);
       continue;
     }
-    if (frame.value === SPARSE_PRESENTATION_ENTRY) {
-      invalid = true;
-      diagnostics.push(
-        invalidUiPresentation('sparse-entry', frame.path, {
-          entryIndex: frame.index,
-        }),
-      );
-      continue;
-    }
-    if (frame.value === ACCESSOR_PRESENTATION_ENTRY) {
-      invalid = true;
-      diagnostics.push(
-        invalidUiPresentation('entry-accessor', frame.path, {
-          entryIndex: frame.index,
-        }),
-      );
-      continue;
-    }
-    if (typeof frame.value === 'string') {
-      if (!known.has(frame.value)) {
-        invalid = true;
-        diagnostics.push(
-          invalidUiPresentation('unknown-node', frame.path, {
-            entryIndex: frame.index,
-            node: frame.value,
-          }),
-        );
-        continue;
-      }
-      const firstDocumentPath = firstNodes.get(frame.value);
-      if (firstDocumentPath !== undefined) {
-        invalid = true;
-        diagnostics.push(
-          invalidUiPresentation('duplicate-node', frame.path, {
-            entryIndex: frame.index,
-            node: frame.value,
-            firstDocumentPath: [...firstDocumentPath],
-          }),
-        );
-        continue;
-      }
-      firstNodes.set(frame.value, frame.path);
-      frame.output.push({ kind: 'form-node', name: frame.value });
-      continue;
-    }
-    if (!isOrdinaryRecord(frame.value)) {
-      invalid = true;
-      diagnostics.push(
-        invalidUiPresentation('invalid-entry', frame.path, {
-          entryIndex: frame.index,
-          expected: 'root node name or section object',
-          actualType: actualType(frame.value),
-        }),
-      );
-      continue;
-    }
-
-    const section = frame.value;
-    const firstActivePath = active.get(section);
-    if (firstActivePath !== undefined) {
-      invalid = true;
-      diagnostics.push(
-        invalidUiPresentation('cyclic-presentation', frame.path, {
-          firstDocumentPath: [...firstActivePath],
-        }),
-      );
-      continue;
-    }
-
-    const kind = presentationSectionMember(section, 'kind');
-    const id = presentationSectionMember(section, 'id');
-    const label = presentationSectionMember(section, 'label');
-    const children = presentationSectionMember(section, 'children');
-    invalid =
-      inspectPresentationSectionMember(
-        kind,
-        'kind',
-        'section',
-        frame.path,
+    if (frame.kind === 'entry') {
+      const outcome = inspectPresentationEntryFrame(
+        frame,
+        known,
+        firstNodes,
+        firstContainers,
+        active,
         diagnostics,
-        (value) => value === 'section',
-      ) || invalid;
-    invalid =
-      inspectPresentationSectionMember(
-        id,
-        'id',
-        'non-empty string',
-        frame.path,
-        diagnostics,
-        (value) => typeof value === 'string' && value.length > 0,
-      ) || invalid;
-    invalid =
-      inspectPresentationLabel(label, frame.path, diagnostics) || invalid;
-    invalid =
-      inspectPresentationSectionMember(
-        children,
-        'children',
-        'non-empty dense array',
-        frame.path,
-        diagnostics,
-        Array.isArray,
-      ) || invalid;
-
-    const sectionId =
-      id.kind === 'value' && typeof id.value === 'string' && id.value.length > 0
-        ? id.value
-        : undefined;
-    const sectionLabel =
-      label.kind === 'value' &&
-      typeof label.value === 'string' &&
-      label.value.trim().length > 0
-        ? label.value
-        : undefined;
-    if (sectionId !== undefined) {
-      const idPath = [...frame.path, 'id'];
-      const firstDocumentPath = firstSections.get(sectionId);
-      if (firstDocumentPath !== undefined) {
-        invalid = true;
-        diagnostics.push(
-          invalidUiPresentation('duplicate-section-id', idPath, {
-            sectionId,
-            firstDocumentPath: [...firstDocumentPath],
-          }),
-        );
-      } else firstSections.set(sectionId, idPath);
-    }
-
-    for (const key of Object.keys(section)) {
-      if (!['kind', 'id', 'label', 'children'].includes(key)) {
-        diagnostics.push(unknownUiKey(key, [...frame.path, key]));
-      }
-    }
-
-    if (children.kind !== 'value' || !Array.isArray(children.value)) continue;
-    if (children.value.length === 0) {
-      if (sectionId !== undefined) {
-        invalid = true;
-        diagnostics.push(
-          invalidUiPresentation('empty-section', [...frame.path, 'children'], {
-            sectionId,
-            expected: 'non-empty dense children array',
-          }),
-        );
-      }
+        stack,
+      );
+      invalid = outcome || invalid;
       continue;
     }
-    const parsedChildren: ParsedPresentationEntry[] = [];
-    if (
-      kind.kind === 'value' &&
-      kind.value === 'section' &&
-      sectionId !== undefined &&
-      sectionLabel !== undefined
-    ) {
-      frame.output.push({
-        kind: 'section',
-        id: sectionId,
-        label: sectionLabel,
-        children: parsedChildren,
-      });
+    if (frame.kind === 'panel') {
+      const outcome = inspectPresentationPanelFrame(
+        frame,
+        active,
+        diagnostics,
+        stack,
+      );
+      invalid = outcome || invalid;
+      continue;
     }
-    active.set(section, frame.path);
-    stack.push({ kind: 'exit', section });
-    pushPresentationEntries(
-      children.value,
-      [...frame.path, 'children'],
-      parsedChildren,
+    const outcome = inspectPresentationGridItemFrame(
+      frame,
+      active,
+      diagnostics,
       stack,
     );
+    invalid = outcome || invalid;
   }
 
   for (const name of normalizedNodeNames) {
@@ -3485,6 +3374,741 @@ function inspectRootPresentation(
     }
   }
   return invalid ? undefined : result;
+}
+
+function inspectPresentationEntryFrame(
+  frame: PresentationEntryFrame,
+  known: ReadonlySet<string>,
+  firstNodes: Map<string, readonly (string | number)[]>,
+  firstContainers: Map<string, readonly (string | number)[]>,
+  active: Map<object, readonly (string | number)[]>,
+  diagnostics: Diagnostic[],
+  stack: PresentationInspectionFrame[],
+): boolean {
+  if (frame.value === SPARSE_PRESENTATION_ENTRY) {
+    diagnostics.push(
+      invalidUiPresentation('sparse-entry', frame.path, {
+        entryIndex: frame.index,
+      }),
+    );
+    return true;
+  }
+  if (frame.value === ACCESSOR_PRESENTATION_ENTRY) {
+    diagnostics.push(
+      invalidUiPresentation('entry-accessor', frame.path, {
+        entryIndex: frame.index,
+      }),
+    );
+    return true;
+  }
+  if (typeof frame.value === 'string') {
+    if (!known.has(frame.value)) {
+      diagnostics.push(
+        invalidUiPresentation('unknown-node', frame.path, {
+          entryIndex: frame.index,
+          node: frame.value,
+        }),
+      );
+      return true;
+    }
+    const firstDocumentPath = firstNodes.get(frame.value);
+    if (firstDocumentPath !== undefined) {
+      diagnostics.push(
+        invalidUiPresentation('duplicate-node', frame.path, {
+          entryIndex: frame.index,
+          node: frame.value,
+          firstDocumentPath: [...firstDocumentPath],
+        }),
+      );
+      return true;
+    }
+    firstNodes.set(frame.value, frame.path);
+    frame.output.push({ kind: 'form-node', name: frame.value });
+    return false;
+  }
+  if (!isOrdinaryRecord(frame.value)) {
+    diagnostics.push(
+      invalidUiPresentation('invalid-entry', frame.path, {
+        entryIndex: frame.index,
+        expected: 'root node name or presentation container object',
+        actualType: actualType(frame.value),
+      }),
+    );
+    return true;
+  }
+
+  const firstActivePath = active.get(frame.value);
+  if (firstActivePath !== undefined) {
+    diagnostics.push(
+      invalidUiPresentation('cyclic-presentation', frame.path, {
+        firstDocumentPath: [...firstActivePath],
+      }),
+    );
+    return true;
+  }
+
+  const kind = presentationMember(frame.value, 'kind');
+  if (
+    kind.kind === 'value' &&
+    typeof kind.value === 'string' &&
+    !['section', 'tabs', 'accordion', 'grid'].includes(kind.value)
+  ) {
+    diagnostics.push(
+      invalidUiPresentation('unsupported-entry-kind', [...frame.path, 'kind'], {
+        expected: 'section, tabs, accordion or grid',
+        actualType: 'string',
+      }),
+    );
+    return true;
+  }
+
+  if (kind.kind !== 'value' || kind.value === 'section') {
+    return inspectPresentationSectionFrame(
+      frame,
+      kind,
+      firstContainers,
+      active,
+      diagnostics,
+      stack,
+    );
+  }
+  if (kind.value === 'tabs' || kind.value === 'accordion') {
+    return inspectPresentationPanelsContainerFrame(
+      frame,
+      kind.value,
+      firstContainers,
+      active,
+      diagnostics,
+      stack,
+    );
+  }
+  if (kind.value === 'grid') {
+    return inspectPresentationGridFrame(
+      frame,
+      firstContainers,
+      active,
+      diagnostics,
+      stack,
+    );
+  }
+
+  return inspectPresentationSectionFrame(
+    frame,
+    kind,
+    firstContainers,
+    active,
+    diagnostics,
+    stack,
+  );
+}
+
+function inspectPresentationSectionFrame(
+  frame: PresentationEntryFrame,
+  kind: PresentationMember,
+  firstContainers: Map<string, readonly (string | number)[]>,
+  active: Map<object, readonly (string | number)[]>,
+  diagnostics: Diagnostic[],
+  stack: PresentationInspectionFrame[],
+): boolean {
+  const section = frame.value as Record<string, unknown>;
+  const id = presentationMember(section, 'id');
+  const label = presentationMember(section, 'label');
+  const children = presentationMember(section, 'children');
+  let invalid = inspectPresentationSectionMember(
+    kind,
+    'kind',
+    'section',
+    frame.path,
+    diagnostics,
+    (value) => value === 'section',
+  );
+  invalid =
+    inspectPresentationSectionMember(
+      id,
+      'id',
+      'non-empty string',
+      frame.path,
+      diagnostics,
+      isNonEmptyString,
+    ) || invalid;
+  invalid = inspectPresentationLabel(label, frame.path, diagnostics) || invalid;
+  invalid =
+    inspectPresentationSectionMember(
+      children,
+      'children',
+      'non-empty dense array',
+      frame.path,
+      diagnostics,
+      Array.isArray,
+    ) || invalid;
+
+  const sectionId = memberNonEmptyString(id);
+  const sectionLabel = memberNonBlankString(label);
+  if (
+    sectionId !== undefined &&
+    registerContainerId(
+      'section',
+      sectionId,
+      frame.path,
+      firstContainers,
+      diagnostics,
+    )
+  ) {
+    invalid = true;
+  }
+  inspectUnknownPresentationKeys(
+    section,
+    ['kind', 'id', 'label', 'children'],
+    frame.path,
+    diagnostics,
+  );
+
+  if (children.kind !== 'value' || !Array.isArray(children.value))
+    return invalid;
+  if (children.value.length === 0) {
+    if (sectionId !== undefined) {
+      diagnostics.push(
+        invalidUiPresentation('empty-section', [...frame.path, 'children'], {
+          sectionId,
+          expected: 'non-empty dense children array',
+        }),
+      );
+      return true;
+    }
+    return invalid;
+  }
+
+  const parsedChildren: ParsedPresentationEntry[] = [];
+  if (
+    kind.kind === 'value' &&
+    kind.value === 'section' &&
+    sectionId !== undefined &&
+    sectionLabel !== undefined
+  ) {
+    frame.output.push({
+      kind: 'section',
+      id: sectionId,
+      label: sectionLabel,
+      children: parsedChildren,
+    });
+  }
+  active.set(section, frame.path);
+  stack.push({ kind: 'exit', value: section });
+  pushPresentationEntries(
+    children.value,
+    [...frame.path, 'children'],
+    parsedChildren,
+    stack,
+  );
+  return invalid;
+}
+
+function inspectPresentationPanelsContainerFrame(
+  frame: PresentationEntryFrame,
+  containerKind: 'tabs' | 'accordion',
+  firstContainers: Map<string, readonly (string | number)[]>,
+  active: Map<object, readonly (string | number)[]>,
+  diagnostics: Diagnostic[],
+  stack: PresentationInspectionFrame[],
+): boolean {
+  const container = frame.value as Record<string, unknown>;
+  const id = presentationMember(container, 'id');
+  const label = presentationMember(container, 'label');
+  const panels = presentationMember(container, 'panels');
+  let invalid = inspectContainerMember(
+    id,
+    containerKind,
+    'id',
+    'non-empty string',
+    frame.path,
+    diagnostics,
+    isNonEmptyString,
+  );
+  invalid =
+    inspectContainerLabel(label, containerKind, frame.path, diagnostics) ||
+    invalid;
+  invalid =
+    inspectContainerMember(
+      panels,
+      containerKind,
+      'panels',
+      'non-empty dense panels array',
+      frame.path,
+      diagnostics,
+      Array.isArray,
+    ) || invalid;
+
+  const containerId = memberNonEmptyString(id);
+  const containerLabel = memberNonBlankString(label);
+  if (
+    containerId !== undefined &&
+    registerContainerId(
+      containerKind,
+      containerId,
+      frame.path,
+      firstContainers,
+      diagnostics,
+    )
+  ) {
+    invalid = true;
+  }
+  inspectUnknownPresentationKeys(
+    container,
+    ['kind', 'id', 'label', 'panels'],
+    frame.path,
+    diagnostics,
+  );
+
+  if (panels.kind !== 'value' || !Array.isArray(panels.value)) return invalid;
+  if (panels.value.length === 0) {
+    if (containerId !== undefined) {
+      diagnostics.push(
+        invalidUiPresentation('empty-panels', [...frame.path, 'panels'], {
+          containerKind,
+          containerId,
+          expected: 'non-empty dense panels array',
+        }),
+      );
+      return true;
+    }
+    return invalid;
+  }
+
+  const parsedPanels: ParsedPresentationPanel[] = [];
+  if (containerId !== undefined && containerLabel !== undefined) {
+    frame.output.push({
+      kind: containerKind,
+      id: containerId,
+      label: containerLabel,
+      panels: parsedPanels,
+    });
+  }
+  active.set(container, frame.path);
+  stack.push({ kind: 'exit', value: container });
+  pushPresentationPanels(
+    panels.value,
+    [...frame.path, 'panels'],
+    containerKind,
+    containerId,
+    parsedPanels,
+    new Map(),
+    stack,
+  );
+  return invalid;
+}
+
+function inspectPresentationGridFrame(
+  frame: PresentationEntryFrame,
+  firstContainers: Map<string, readonly (string | number)[]>,
+  active: Map<object, readonly (string | number)[]>,
+  diagnostics: Diagnostic[],
+  stack: PresentationInspectionFrame[],
+): boolean {
+  const grid = frame.value as Record<string, unknown>;
+  const id = presentationMember(grid, 'id');
+  const label = presentationMember(grid, 'label');
+  const columns = presentationMember(grid, 'columns');
+  const items = presentationMember(grid, 'items');
+  let invalid = inspectContainerMember(
+    id,
+    'grid',
+    'id',
+    'non-empty string',
+    frame.path,
+    diagnostics,
+    isNonEmptyString,
+  );
+  invalid =
+    inspectContainerLabel(label, 'grid', frame.path, diagnostics) || invalid;
+  invalid =
+    inspectContainerMember(
+      columns,
+      'grid',
+      'columns',
+      'integer from 1 through 4',
+      frame.path,
+      diagnostics,
+      isGridInteger,
+    ) || invalid;
+  invalid =
+    inspectContainerMember(
+      items,
+      'grid',
+      'items',
+      'non-empty dense items array',
+      frame.path,
+      diagnostics,
+      Array.isArray,
+    ) || invalid;
+
+  const gridId = memberNonEmptyString(id);
+  const gridLabel = memberNonBlankString(label);
+  const gridColumns =
+    columns.kind === 'value' && isGridInteger(columns.value)
+      ? columns.value
+      : undefined;
+  if (
+    gridId !== undefined &&
+    registerContainerId(
+      'grid',
+      gridId,
+      frame.path,
+      firstContainers,
+      diagnostics,
+    )
+  ) {
+    invalid = true;
+  }
+  inspectUnknownPresentationKeys(
+    grid,
+    ['kind', 'id', 'label', 'columns', 'items'],
+    frame.path,
+    diagnostics,
+  );
+
+  if (items.kind !== 'value' || !Array.isArray(items.value)) return invalid;
+  if (items.value.length === 0) {
+    if (gridId !== undefined) {
+      diagnostics.push(
+        invalidUiPresentation('empty-grid', [...frame.path, 'items'], {
+          containerId: gridId,
+          expected: 'non-empty dense items array',
+        }),
+      );
+      return true;
+    }
+    return invalid;
+  }
+
+  const parsedItems: ParsedGridItem[] = [];
+  if (
+    gridId !== undefined &&
+    gridLabel !== undefined &&
+    gridColumns !== undefined
+  ) {
+    frame.output.push({
+      kind: 'grid',
+      id: gridId,
+      label: gridLabel,
+      columns: gridColumns,
+      items: parsedItems,
+    });
+  }
+  active.set(grid, frame.path);
+  stack.push({ kind: 'exit', value: grid });
+  pushPresentationGridItems(
+    items.value,
+    [...frame.path, 'items'],
+    gridColumns,
+    parsedItems,
+    stack,
+  );
+  return invalid;
+}
+
+function inspectPresentationPanelFrame(
+  frame: PresentationPanelFrame,
+  active: Map<object, readonly (string | number)[]>,
+  diagnostics: Diagnostic[],
+  stack: PresentationInspectionFrame[],
+): boolean {
+  if (frame.value === SPARSE_PRESENTATION_ENTRY) {
+    diagnostics.push(
+      invalidUiPresentation('sparse-panel', frame.path, {
+        containerKind: frame.containerKind,
+        panelIndex: frame.index,
+      }),
+    );
+    return true;
+  }
+  if (frame.value === ACCESSOR_PRESENTATION_ENTRY) {
+    diagnostics.push(
+      invalidUiPresentation('panel-accessor', frame.path, {
+        containerKind: frame.containerKind,
+        panelIndex: frame.index,
+      }),
+    );
+    return true;
+  }
+  if (!isOrdinaryRecord(frame.value)) {
+    diagnostics.push(
+      invalidUiPresentation('panel-not-object', frame.path, {
+        containerKind: frame.containerKind,
+        panelIndex: frame.index,
+        expected: 'panel object',
+        actualType: actualType(frame.value),
+      }),
+    );
+    return true;
+  }
+  const firstActivePath = active.get(frame.value);
+  if (firstActivePath !== undefined) {
+    diagnostics.push(
+      invalidUiPresentation('cyclic-presentation', frame.path, {
+        firstDocumentPath: [...firstActivePath],
+      }),
+    );
+    return true;
+  }
+
+  const panel = frame.value;
+  const kind = presentationMember(panel, 'kind');
+  const id = presentationMember(panel, 'id');
+  const label = presentationMember(panel, 'label');
+  const children = presentationMember(panel, 'children');
+  let invalid = inspectPanelMember(
+    kind,
+    frame,
+    'kind',
+    'panel',
+    diagnostics,
+    (value) => value === 'panel',
+  );
+  invalid =
+    inspectPanelMember(
+      id,
+      frame,
+      'id',
+      'non-empty string',
+      diagnostics,
+      isNonEmptyString,
+    ) || invalid;
+  invalid = inspectPanelLabel(label, frame, diagnostics) || invalid;
+  invalid =
+    inspectPanelMember(
+      children,
+      frame,
+      'children',
+      'non-empty dense children array',
+      diagnostics,
+      Array.isArray,
+    ) || invalid;
+
+  const panelId = memberNonEmptyString(id);
+  const panelLabel = memberNonBlankString(label);
+  if (panelId !== undefined && frame.containerId !== undefined) {
+    const idPath = [...frame.path, 'id'];
+    const firstDocumentPath = frame.firstPanels.get(panelId);
+    if (firstDocumentPath !== undefined) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('duplicate-panel-id', idPath, {
+          containerKind: frame.containerKind,
+          containerId: frame.containerId,
+          panelId,
+          firstDocumentPath: [...firstDocumentPath],
+        }),
+      );
+    } else frame.firstPanels.set(panelId, idPath);
+  }
+  inspectUnknownPresentationKeys(
+    panel,
+    ['kind', 'id', 'label', 'children'],
+    frame.path,
+    diagnostics,
+  );
+
+  if (children.kind !== 'value' || !Array.isArray(children.value))
+    return invalid;
+  if (children.value.length === 0) {
+    if (panelId !== undefined) {
+      diagnostics.push(
+        invalidUiPresentation('empty-panel', [...frame.path, 'children'], {
+          containerKind: frame.containerKind,
+          panelId,
+          expected: 'non-empty dense children array',
+        }),
+      );
+      return true;
+    }
+    return invalid;
+  }
+
+  const parsedChildren: ParsedPresentationEntry[] = [];
+  if (
+    kind.kind === 'value' &&
+    kind.value === 'panel' &&
+    panelId !== undefined &&
+    panelLabel !== undefined
+  ) {
+    frame.output.push({
+      id: panelId,
+      label: panelLabel,
+      children: parsedChildren,
+    });
+  }
+  active.set(panel, frame.path);
+  stack.push({ kind: 'exit', value: panel });
+  pushPresentationEntries(
+    children.value,
+    [...frame.path, 'children'],
+    parsedChildren,
+    stack,
+  );
+  return invalid;
+}
+
+function inspectPresentationGridItemFrame(
+  frame: PresentationGridItemFrame,
+  active: Map<object, readonly (string | number)[]>,
+  diagnostics: Diagnostic[],
+  stack: PresentationInspectionFrame[],
+): boolean {
+  if (frame.value === SPARSE_PRESENTATION_ENTRY) {
+    diagnostics.push(
+      invalidUiPresentation('sparse-grid-item', frame.path, {
+        itemIndex: frame.index,
+      }),
+    );
+    return true;
+  }
+  if (frame.value === ACCESSOR_PRESENTATION_ENTRY) {
+    diagnostics.push(
+      invalidUiPresentation('grid-item-accessor', frame.path, {
+        itemIndex: frame.index,
+      }),
+    );
+    return true;
+  }
+  if (!isOrdinaryRecord(frame.value)) {
+    diagnostics.push(
+      invalidUiPresentation('grid-item-not-object', frame.path, {
+        itemIndex: frame.index,
+        expected: 'grid item object',
+        actualType: actualType(frame.value),
+      }),
+    );
+    return true;
+  }
+  const firstActivePath = active.get(frame.value);
+  if (firstActivePath !== undefined) {
+    diagnostics.push(
+      invalidUiPresentation('cyclic-presentation', frame.path, {
+        firstDocumentPath: [...firstActivePath],
+      }),
+    );
+    return true;
+  }
+
+  const item = frame.value;
+  const span = presentationMember(item, 'span');
+  const child = presentationMember(item, 'child');
+  let invalid = false;
+  let normalizedSpan: 1 | 2 | 3 | 4 = 1;
+  if (span.kind === 'accessor') {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation(
+        'grid-item-member-accessor',
+        [...frame.path, 'span'],
+        {
+          itemIndex: frame.index,
+          member: 'span',
+          expected: 'integer from 1 through 4',
+        },
+      ),
+    );
+  } else if (span.kind === 'value') {
+    if (!isGridInteger(span.value)) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation(
+          'grid-item-member-invalid',
+          [...frame.path, 'span'],
+          {
+            itemIndex: frame.index,
+            member: 'span',
+            expected: 'integer from 1 through 4',
+            actualType: actualType(span.value),
+          },
+        ),
+      );
+    } else {
+      normalizedSpan = span.value;
+      if (frame.columns !== undefined && normalizedSpan > frame.columns) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation(
+            'grid-span-exceeds-columns',
+            [...frame.path, 'span'],
+            {
+              itemIndex: frame.index,
+              span: normalizedSpan,
+              columns: frame.columns,
+              expected: 'integer not greater than grid columns',
+            },
+          ),
+        );
+      }
+    }
+  }
+
+  let childInspectable = false;
+  if (child.kind === 'missing') {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation(
+        'grid-item-member-missing',
+        [...frame.path, 'child'],
+        {
+          itemIndex: frame.index,
+          member: 'child',
+          expected: 'presentation entry',
+        },
+      ),
+    );
+  } else if (child.kind === 'accessor') {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation(
+        'grid-item-member-accessor',
+        [...frame.path, 'child'],
+        {
+          itemIndex: frame.index,
+          member: 'child',
+          expected: 'presentation entry',
+        },
+      ),
+    );
+  } else if (
+    typeof child.value !== 'string' &&
+    !isOrdinaryRecord(child.value)
+  ) {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation(
+        'grid-item-member-invalid',
+        [...frame.path, 'child'],
+        {
+          itemIndex: frame.index,
+          member: 'child',
+          expected: 'presentation entry',
+          actualType: actualType(child.value),
+        },
+      ),
+    );
+  } else childInspectable = true;
+
+  inspectUnknownPresentationKeys(
+    item,
+    ['span', 'child'],
+    frame.path,
+    diagnostics,
+  );
+  if (!childInspectable || child.kind !== 'value') return invalid;
+
+  const parsedChild: ParsedPresentationEntry[] = [];
+  frame.output.push({ span: normalizedSpan, child: parsedChild });
+  active.set(item, frame.path);
+  stack.push({ kind: 'exit', value: item });
+  stack.push({
+    kind: 'entry',
+    value: child.value,
+    index: 0,
+    path: [...frame.path, 'child'],
+    output: parsedChild,
+  });
+  return invalid;
 }
 
 function presentationNodeOrder(
@@ -3515,7 +4139,7 @@ function presentationNodeOrder(
   return result;
 }
 
-type PresentationInspectionFrame = {
+type PresentationEntryFrame = {
   readonly kind: 'entry';
   readonly value: unknown;
   readonly index: number;
@@ -3523,14 +4147,37 @@ type PresentationInspectionFrame = {
   readonly output: ParsedPresentationEntry[];
 };
 
+type PresentationPanelFrame = {
+  readonly kind: 'panel';
+  readonly value: unknown;
+  readonly index: number;
+  readonly path: readonly (string | number)[];
+  readonly containerKind: 'tabs' | 'accordion';
+  readonly containerId: string | undefined;
+  readonly output: ParsedPresentationPanel[];
+  readonly firstPanels: Map<string, readonly (string | number)[]>;
+};
+
+type PresentationGridItemFrame = {
+  readonly kind: 'grid-item';
+  readonly value: unknown;
+  readonly index: number;
+  readonly path: readonly (string | number)[];
+  readonly columns: 1 | 2 | 3 | 4 | undefined;
+  readonly output: ParsedGridItem[];
+};
+
+type PresentationInspectionFrame =
+  | PresentationEntryFrame
+  | PresentationPanelFrame
+  | PresentationGridItemFrame
+  | { readonly kind: 'exit'; readonly value: object };
+
 function pushPresentationEntries(
   entries: readonly unknown[],
   basePath: readonly (string | number)[],
   output: ParsedPresentationEntry[],
-  stack: Array<
-    | PresentationInspectionFrame
-    | { readonly kind: 'exit'; readonly section: object }
-  >,
+  stack: PresentationInspectionFrame[],
 ): void {
   for (let index = entries.length - 1; index >= 0; index -= 1) {
     const descriptor = Object.getOwnPropertyDescriptor(entries, String(index));
@@ -3562,19 +4209,70 @@ function pushPresentationEntries(
   }
 }
 
+function pushPresentationPanels(
+  panels: readonly unknown[],
+  basePath: readonly (string | number)[],
+  containerKind: 'tabs' | 'accordion',
+  containerId: string | undefined,
+  output: ParsedPresentationPanel[],
+  firstPanels: Map<string, readonly (string | number)[]>,
+  stack: PresentationInspectionFrame[],
+): void {
+  for (let index = panels.length - 1; index >= 0; index -= 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(panels, String(index));
+    stack.push({
+      kind: 'panel',
+      value:
+        descriptor === undefined
+          ? SPARSE_PRESENTATION_ENTRY
+          : 'value' in descriptor
+            ? descriptor.value
+            : ACCESSOR_PRESENTATION_ENTRY,
+      index,
+      path: [...basePath, index],
+      containerKind,
+      containerId,
+      output,
+      firstPanels,
+    });
+  }
+}
+
+function pushPresentationGridItems(
+  items: readonly unknown[],
+  basePath: readonly (string | number)[],
+  columns: 1 | 2 | 3 | 4 | undefined,
+  output: ParsedGridItem[],
+  stack: PresentationInspectionFrame[],
+): void {
+  for (let index = items.length - 1; index >= 0; index -= 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(items, String(index));
+    stack.push({
+      kind: 'grid-item',
+      value:
+        descriptor === undefined
+          ? SPARSE_PRESENTATION_ENTRY
+          : 'value' in descriptor
+            ? descriptor.value
+            : ACCESSOR_PRESENTATION_ENTRY,
+      index,
+      path: [...basePath, index],
+      columns,
+      output,
+    });
+  }
+}
+
 const SPARSE_PRESENTATION_ENTRY = Symbol('sparse-presentation-entry');
 const ACCESSOR_PRESENTATION_ENTRY = Symbol('accessor-presentation-entry');
 
-type PresentationSectionMember =
+type PresentationMember =
   | { readonly kind: 'missing' }
   | { readonly kind: 'accessor' }
   | { readonly kind: 'value'; readonly value: unknown };
 
-function presentationSectionMember(
-  section: object,
-  member: string,
-): PresentationSectionMember {
-  const descriptor = Object.getOwnPropertyDescriptor(section, member);
+function presentationMember(value: object, member: string): PresentationMember {
+  const descriptor = Object.getOwnPropertyDescriptor(value, member);
   if (descriptor === undefined || descriptor.enumerable !== true)
     return { kind: 'missing' };
   return 'value' in descriptor
@@ -3583,7 +4281,7 @@ function presentationSectionMember(
 }
 
 function inspectPresentationSectionMember(
-  inspected: PresentationSectionMember,
+  inspected: PresentationMember,
   member: string,
   expected: string,
   sectionPath: readonly (string | number)[],
@@ -3623,7 +4321,7 @@ function inspectPresentationSectionMember(
 }
 
 function inspectPresentationLabel(
-  inspected: PresentationSectionMember,
+  inspected: PresentationMember,
   sectionPath: readonly (string | number)[],
   diagnostics: Diagnostic[],
 ): boolean {
@@ -3648,6 +4346,221 @@ function inspectPresentationLabel(
     }),
   );
   return true;
+}
+
+function inspectContainerMember(
+  inspected: PresentationMember,
+  containerKind: 'tabs' | 'accordion' | 'grid',
+  member: string,
+  expected: string,
+  containerPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+  valid: (value: unknown) => boolean,
+): boolean {
+  const documentPath = [...containerPath, member];
+  if (inspected.kind === 'missing') {
+    diagnostics.push(
+      invalidUiPresentation('container-member-missing', documentPath, {
+        containerKind,
+        member,
+        expected,
+      }),
+    );
+    return true;
+  }
+  if (inspected.kind === 'accessor') {
+    diagnostics.push(
+      invalidUiPresentation('container-member-accessor', documentPath, {
+        containerKind,
+        member,
+        expected,
+      }),
+    );
+    return true;
+  }
+  if (!valid(inspected.value)) {
+    diagnostics.push(
+      invalidUiPresentation('container-member-invalid', documentPath, {
+        containerKind,
+        member,
+        expected,
+        actualType: actualType(inspected.value),
+      }),
+    );
+    return true;
+  }
+  return false;
+}
+
+function inspectContainerLabel(
+  inspected: PresentationMember,
+  containerKind: 'tabs' | 'accordion' | 'grid',
+  containerPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+): boolean {
+  if (
+    inspected.kind !== 'value' ||
+    typeof inspected.value !== 'string' ||
+    inspected.value.trim().length > 0
+  ) {
+    return inspectContainerMember(
+      inspected,
+      containerKind,
+      'label',
+      'non-blank string',
+      containerPath,
+      diagnostics,
+      (value) => typeof value === 'string',
+    );
+  }
+  diagnostics.push(
+    invalidUiPresentation(
+      'container-member-blank',
+      [...containerPath, 'label'],
+      {
+        containerKind,
+        member: 'label',
+        expected: 'non-blank string',
+      },
+    ),
+  );
+  return true;
+}
+
+function inspectPanelMember(
+  inspected: PresentationMember,
+  frame: PresentationPanelFrame,
+  member: string,
+  expected: string,
+  diagnostics: Diagnostic[],
+  valid: (value: unknown) => boolean,
+): boolean {
+  const documentPath = [...frame.path, member];
+  const parameters = {
+    containerKind: frame.containerKind,
+    panelIndex: frame.index,
+    member,
+    expected,
+  };
+  if (inspected.kind === 'missing') {
+    diagnostics.push(
+      invalidUiPresentation('panel-member-missing', documentPath, parameters),
+    );
+    return true;
+  }
+  if (inspected.kind === 'accessor') {
+    diagnostics.push(
+      invalidUiPresentation('panel-member-accessor', documentPath, parameters),
+    );
+    return true;
+  }
+  if (!valid(inspected.value)) {
+    diagnostics.push(
+      invalidUiPresentation('panel-member-invalid', documentPath, {
+        ...parameters,
+        actualType: actualType(inspected.value),
+      }),
+    );
+    return true;
+  }
+  return false;
+}
+
+function inspectPanelLabel(
+  inspected: PresentationMember,
+  frame: PresentationPanelFrame,
+  diagnostics: Diagnostic[],
+): boolean {
+  if (
+    inspected.kind !== 'value' ||
+    typeof inspected.value !== 'string' ||
+    inspected.value.trim().length > 0
+  ) {
+    return inspectPanelMember(
+      inspected,
+      frame,
+      'label',
+      'non-blank string',
+      diagnostics,
+      (value) => typeof value === 'string',
+    );
+  }
+  diagnostics.push(
+    invalidUiPresentation('panel-member-blank', [...frame.path, 'label'], {
+      containerKind: frame.containerKind,
+      panelIndex: frame.index,
+      member: 'label',
+      expected: 'non-blank string',
+    }),
+  );
+  return true;
+}
+
+function registerContainerId(
+  containerKind: 'section' | 'tabs' | 'accordion' | 'grid',
+  containerId: string,
+  containerPath: readonly (string | number)[],
+  firstContainers: Map<string, readonly (string | number)[]>,
+  diagnostics: Diagnostic[],
+): boolean {
+  const idPath = [...containerPath, 'id'];
+  const firstDocumentPath = firstContainers.get(containerId);
+  if (firstDocumentPath === undefined) {
+    firstContainers.set(containerId, idPath);
+    return false;
+  }
+  diagnostics.push(
+    containerKind === 'section'
+      ? invalidUiPresentation('duplicate-section-id', idPath, {
+          sectionId: containerId,
+          firstDocumentPath: [...firstDocumentPath],
+        })
+      : invalidUiPresentation('duplicate-container-id', idPath, {
+          containerKind,
+          containerId,
+          firstDocumentPath: [...firstDocumentPath],
+        }),
+  );
+  return true;
+}
+
+function inspectUnknownPresentationKeys(
+  value: object,
+  knownKeys: readonly string[],
+  path: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+): void {
+  const known = new Set(knownKeys);
+  for (const key of Object.keys(value)) {
+    if (!known.has(key)) diagnostics.push(unknownUiKey(key, [...path, key]));
+  }
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
+function isGridInteger(value: unknown): value is 1 | 2 | 3 | 4 {
+  return (
+    Number.isInteger(value) &&
+    typeof value === 'number' &&
+    value >= 1 &&
+    value <= 4
+  );
+}
+
+function memberNonEmptyString(member: PresentationMember): string | undefined {
+  return member.kind === 'value' && isNonEmptyString(member.value)
+    ? member.value
+    : undefined;
+}
+
+function memberNonBlankString(member: PresentationMember): string | undefined {
+  return member.kind === 'value' &&
+    typeof member.value === 'string' &&
+    member.value.trim().length > 0
+    ? member.value
+    : undefined;
 }
 
 function inspectUiOrder(
@@ -5274,21 +6187,21 @@ function createPresentationDefinition(
   const byName = new Map(nodes.map((node) => [node.name, node] as const));
   const result: PresentationEntryDefinition[] = [];
   type Frame = {
-    readonly entries: readonly ParsedPresentationEntry[];
+    readonly entry: ParsedPresentationEntry;
     readonly output: PresentationEntryDefinition[];
-    index: number;
   };
-  const stack: Frame[] = [{ entries: parsed, output: result, index: 0 }];
+  const stack: Frame[] = [];
+  const pendingGridItems: Array<{
+    readonly target: Omit<PresentationGridItemDefinition, 'child'> & {
+      child?: PresentationEntryDefinition;
+    };
+    readonly childOutput: PresentationEntryDefinition[];
+  }> = [];
+  pushPresentationBuildFrames(parsed, result, stack);
   while (stack.length > 0) {
-    const frame = stack.at(-1);
+    const frame = stack.pop();
     if (frame === undefined) break;
-    if (frame.index >= frame.entries.length) {
-      stack.pop();
-      continue;
-    }
-    const entry = frame.entries[frame.index];
-    frame.index += 1;
-    if (entry === undefined) continue;
+    const entry = frame.entry;
     if (entry.kind === 'form-node') {
       const node = byName.get(entry.name);
       if (node === undefined)
@@ -5296,17 +6209,101 @@ function createPresentationDefinition(
       frame.output.push({ kind: 'form-node', node });
       continue;
     }
-    const children: PresentationEntryDefinition[] = [];
-    frame.output.push({
-      kind: 'section',
+    if (entry.kind === 'section') {
+      const children: PresentationEntryDefinition[] = [];
+      const section: PresentationSectionDefinition = {
+        kind: 'section',
+        id: entry.id,
+        key: JSON.stringify(['section', entry.id]),
+        label: entry.label,
+        children,
+      };
+      frame.output.push(section);
+      pushPresentationBuildFrames(entry.children, children, stack);
+      continue;
+    }
+    if (entry.kind === 'tabs' || entry.kind === 'accordion') {
+      const panels: PresentationPanelDefinition[] = entry.panels.map(
+        (panel) => ({
+          kind: 'panel',
+          id: panel.id,
+          key: JSON.stringify([entry.kind, entry.id, 'panel', panel.id]),
+          label: panel.label,
+          children: [],
+        }),
+      );
+      const container:
+        PresentationTabsDefinition | PresentationAccordionDefinition = {
+        kind: entry.kind,
+        id: entry.id,
+        key: JSON.stringify([entry.kind, entry.id]),
+        label: entry.label,
+        panels,
+      };
+      frame.output.push(container);
+      for (let index = entry.panels.length - 1; index >= 0; index -= 1) {
+        const parsedPanel = entry.panels[index];
+        const panel = panels[index];
+        if (parsedPanel === undefined || panel === undefined)
+          throw new Error('Internal compiler error: missing panel.');
+        pushPresentationBuildFrames(
+          parsedPanel.children,
+          panel.children as PresentationEntryDefinition[],
+          stack,
+        );
+      }
+      continue;
+    }
+
+    const items: PresentationGridItemDefinition[] = entry.items.map(
+      (item, itemIndex) => {
+        const parsedChild = item.child[0];
+        if (parsedChild === undefined || item.child.length !== 1)
+          throw new Error('Internal compiler error: missing grid item child.');
+        const childOutput: PresentationEntryDefinition[] = [];
+        stack.push({ entry: parsedChild, output: childOutput });
+        const target: Omit<PresentationGridItemDefinition, 'child'> & {
+          child?: PresentationEntryDefinition;
+        } = {
+          kind: 'grid-item',
+          key: JSON.stringify(['grid', entry.id, 'item', itemIndex]),
+          span: item.span,
+        };
+        pendingGridItems.push({ target, childOutput });
+        return target as PresentationGridItemDefinition;
+      },
+    );
+    const grid: PresentationGridDefinition = {
+      kind: 'grid',
       id: entry.id,
-      key: JSON.stringify(['section', entry.id]),
+      key: JSON.stringify(['grid', entry.id]),
       label: entry.label,
-      children,
-    });
-    stack.push({ entries: entry.children, output: children, index: 0 });
+      columns: entry.columns,
+      items,
+    };
+    frame.output.push(grid);
+  }
+  for (const pending of pendingGridItems) {
+    const child = pending.childOutput[0];
+    if (child === undefined || pending.childOutput.length !== 1)
+      throw new Error('Internal compiler error: unbuilt grid item child.');
+    pending.target.child = child;
   }
   return result;
+}
+
+function pushPresentationBuildFrames(
+  entries: readonly ParsedPresentationEntry[],
+  output: PresentationEntryDefinition[],
+  stack: Array<{
+    readonly entry: ParsedPresentationEntry;
+    readonly output: PresentationEntryDefinition[];
+  }>,
+): void {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (entry !== undefined) stack.push({ entry, output });
+  }
 }
 
 function buildFieldDefinition(

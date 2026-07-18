@@ -78,7 +78,7 @@ describe('root UI presentation compilation', () => {
       path: ['presentation', 0],
       parameters: {
         entryIndex: 0,
-        expected: 'root node name or section object',
+        expected: 'root node name or presentation container object',
         actualType: 'number',
       },
     },

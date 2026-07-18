@@ -1,0 +1,15 @@
+{
+  "presentation": [
+    {
+      "kind": "grid",
+      "id": "grid",
+      "label": "Grid",
+      "columns": 2,
+      "items": [{ "span": 3, "child": "a", "extension": true }],
+      "extension": true
+    },
+    "b",
+    "c",
+    "d"
+  ]
+}

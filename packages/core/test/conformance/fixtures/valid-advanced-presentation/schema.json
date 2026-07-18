@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "a": { "type": "string" },
+    "b": { "type": "boolean" },
+    "c": { "type": "number" },
+    "d": { "type": "integer" }
+  }
+}

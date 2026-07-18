@@ -6,6 +6,189 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-18 — PLAN-020 checkpoint 1 completed
+
+### Completed
+
+- Added the thirteen exact Public Experimental core advanced-presentation
+  contracts and widened only the three unions accepted by SPEC-008.
+- Extended root presentation compilation with iterative, descriptor-safe tabs,
+  accordion, panel, grid and grid-item inspection; exact global/owner-local
+  identity; closed diagnostics; atomic default-forest fallback; and immutable
+  exact-key normalization retaining presented-node identity.
+- Added exhaustive programmatic coverage for diagnostic families,
+  deterministic order/precedence, accessors, sparse arrays, cycles, reuse,
+  1,500-level depth, prototype-sensitive/whitespace/lone-surrogate IDs and
+  exact freezing, plus valid/invalid serializable conformance fixtures.
+- Added root type assertions and built-package smoke evidence. Review 104
+  cycles 1–2 found three evidence/lint issues; cycle 3 repeated all ten areas
+  with zero findings.
+- Core build, strict types, scoped lint/format, package smoke, emitted
+  declarations and diff checks pass; all 23 core test files and 429 tests pass.
+  Runtime/manual definitions, Angular, Standard, manifests, versions,
+  dependencies, the unrelated `angular.json` change, external actions, commit
+  and push remain untouched.
+
+### Next
+
+- Execute PLAN-020 checkpoint 2: manual FormDefinition validation and runtime
+  invariance, followed by a complete repeated checkpoint review to zero
+  findings.
+
+## 2026-07-18 — PLAN-020 revision 0 approved
+
+### Completed
+
+- Converted accepted SPEC-008 into eight bounded M18 checkpoints covering core
+  grammar/compiler, manual/runtime invariance, base Angular SPI/native hosts,
+  independent Standard/reference evidence, exact version/dependency gates, the
+  sole Angular Aria pilot, clean consumers and final repeated review.
+- Mapped all 22 required conformance rows to checkpoint evidence and preserved
+  every runtime, application, deferred-target and release boundary.
+- Corrected four cycle-1 findings: fixed the exact pilot dependency command and
+  lock scope, separated Standard local text failures from Angular diagnostics,
+  separated private `0.3.0`/`0.1.0` evidence from published `0.2.0` scripts and
+  gated every registry/network action.
+- Review 103 cycle 2 repeated all fourteen areas with zero findings. PLAN-020
+  revision 0 was approved under the standing authorization; no implementation,
+  dependency, version, external action, commit or push was performed. The
+  unrelated `angular.json` analytics setting remains untouched.
+
+### Next
+
+- Execute PLAN-020 checkpoint 1: core Public contracts, compiler normalization,
+  diagnostics and conformance fixtures; repeat the complete checkpoint review
+  until zero findings.
+
+## 2026-07-18 — SPEC-008 v0.1.0 accepted
+
+### Completed
+
+- Converted accepted ADR-023/024 into the normative M18 contract for static
+  root tabs, accordion and logical grid without changing runtime/application
+  authority or activating any deferred layout behavior.
+- Closed raw/normalized contracts, exact keys and object identity,
+  descriptor-safe diagnostics/atomic fallback, manual-definition reasons and
+  target-owned state, mounted lifecycle, grid, accessibility and host failures.
+- Closed the nine-export Angular container SPI, immutable provider resolver,
+  exact claims/diagnostics, mandatory native fallback and no selected-host
+  retry.
+- Fixed exactly one Angular Aria 22 pilot, selective primitive use, isolated
+  `0.1.0` package, core/base Angular `0.3.0` compatibility line, six opt-in CSS
+  properties/defaults and Experimental support tiers.
+- Required independent private Standard and shared-scenario evidence without a
+  Public Standard adapter or shared target implementation.
+- Review 102 cycles 1–4 found twenty normative/documentation gaps; cycle 5
+  repeated all twelve areas with zero findings. SPEC-008 v0.1.0 was accepted
+  under the standing authorization. No plan, code, dependency, version,
+  external action, commit or push was performed; the unrelated `angular.json`
+  change remains untouched.
+
+### Next
+
+- Draft and completely review PLAN-020. Do not implement before explicit plan
+  approval.
+
+## 2026-07-18 — ADR-024 revision 1 accepted
+
+### Completed
+
+- Compared current Angular Aria, Angular Material, PrimeNG and spartan/ui
+  candidates using primary documentation, package metadata and distributed
+  declarations; selected exactly Angular Aria 22 as the sole pilot.
+- Fixed the nine-export Public Experimental Angular container SPI, Internal
+  provider/claim machinery, deterministic fallback/failure behavior and exact
+  child projection/lifecycle boundary without changing core authority.
+- Fixed the future isolated `@rabassoft/schema-engine-angular-aria` package,
+  exact Angular/Aria/CDK compatibility, six kit-local CSS properties, opt-in
+  theme ownership and Experimental support tiers.
+- Kept native section/tabs/accordion/grid registrations mandatory and retained
+  every broader kit, generic-token, cross-framework, legacy-major,
+  implementation, dependency and publication capability as Deferred.
+- Review 101 cycles 1–3 found six design/documentation gaps; cycle 4 repeated
+  all eleven areas with zero findings. ADR-024 revision 1 was accepted under
+  the standing authorization. No code, dependency, external action, commit or
+  push was performed; the unrelated `angular.json` change remains untouched.
+
+### Next
+
+- Draft and completely review SPEC-008. Do not draft PLAN-020 or implement
+  before the SPEC is accepted.
+
+## 2026-07-18 — Narrow D-025 Angular container-kit slice promoted
+
+### Completed
+
+- Reviewed accepted ADR-023 against the current Angular leaf provider/fixed
+  host architecture, independent Standard projection and private duplicated
+  reference themes.
+- Promoted only an Angular Public + Experimental presentation-container seam
+  for `section` plus tabs/accordion/grid, dependency-free native fallback and
+  one isolated optional UI-library pilot.
+- Kept core, Standard, React/Vue, generic tokens/CSS, complete field kits,
+  multiple pilots, Stable support, publication and implementation inactive.
+- Reconciled the old “Stable kit” trigger: no kit is Stable, so review 100
+  permits only architecture and a privately verifiable Experimental pilot,
+  avoiding a circular prerequisite without claiming existing support.
+- Review 100 cycles 1–3 found eight scope/evidence/state gaps; cycle 4 repeated
+  all twelve areas with zero findings. No contract, code, dependency, external
+  action, commit or push was performed; `angular.json` remains untouched.
+
+### Next
+
+- Draft and completely review ADR-024, comparing current Angular UI-library
+  candidates through primary sources and selecting exactly one pilot. Do not
+  draft SPEC-008 or change code before acceptance.
+
+## 2026-07-18 — ADR-023 revision 1 accepted
+
+### Completed
+
+- Drafted the narrow M18 architecture for static root tabs, accordions and
+  logical grid over the accepted immutable presentation forest.
+- Fixed target-owned initial/interaction/replacement state, always-mounted
+  hidden panel subtrees, bounded source-order grid placement and safe
+  one-column fallback without core breakpoints or UI-library metadata.
+- Closed raw/normalized Public Experimental inventory, deterministic identity,
+  descriptor-safe validation, text order/fallback, exact DOM tuples,
+  accessibility and target-host failure envelopes.
+- Review 099 cycles 1–2 found five documentation/design gaps; revision 1 closed
+  them and cycle 3 repeated all ten areas with zero findings.
+- Accepted ADR-023 revision 1 under the standing authorization. No SPEC, plan,
+  code, dependency, external action, commit or push was performed; the
+  unrelated `angular.json` change remains untouched.
+
+### Next
+
+- Conduct and completely review D-025 promotion readiness. Stop M18 before
+  SPEC-008 if evidence is insufficient; a ready result may authorize only a
+  separate architecture ADR.
+
+## 2026-07-18 — D-011/M18 narrow layout slice promoted for design
+
+### Completed
+
+- Accepted review 098 after its corrected cycle 2 repeated all twelve areas
+  with zero findings.
+- Promoted only static root presentation tabs, accordions and logical grid from
+  D-011 for ADR-023, preserving exact-once form-node identity, application and
+  runtime authority, target-owned visual state and independent Angular +
+  Standard evidence.
+- Kept wizards, actions, scopes, conditions, nested/item layout, arbitrary
+  breakpoints, controlled or persisted layout state, React/Vue and all other
+  unlisted D-011/D-012 capabilities Deferred.
+- Retained D-025 as a conditional separate readiness and ADR gate after
+  ADR-023: an unready result stops M18 before SPEC-008/PLAN-020.
+- Reconciled STATUS, ROADMAP, the documentation index, onboarding summary and
+  Deferred register. This was documentation-only promotion work; no contract,
+  code, external action, commit or push was performed. The unrelated
+  `angular.json` change remains untouched.
+
+### Next
+
+- Draft ADR-023 and repeat its complete review until a pass has zero findings;
+  do not draft SPEC-008, activate D-025 or change code before acceptance.
+
 ## 2026-07-18 — Integration examples explained in both reference shells
 
 ### Completed

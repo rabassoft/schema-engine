@@ -1,0 +1,56 @@
+{
+  "presentation": [
+    {
+      "kind": "tabs",
+      "id": "root-tabs",
+      "label": "Root tabs",
+      "panels": [
+        {
+          "kind": "panel",
+          "id": "details",
+          "label": "Details",
+          "children": [
+            "a",
+            {
+              "kind": "grid",
+              "id": "details-grid",
+              "label": "Details grid",
+              "columns": 2,
+              "items": [
+                { "span": 2, "child": "b" },
+                {
+                  "child": {
+                    "kind": "section",
+                    "id": "nested-section",
+                    "label": "Nested section",
+                    "children": ["c"]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "panel",
+          "id": "more",
+          "label": "More",
+          "children": [
+            {
+              "kind": "accordion",
+              "id": "nested-accordion",
+              "label": "Nested accordion",
+              "panels": [
+                {
+                  "kind": "panel",
+                  "id": "only",
+                  "label": "Only",
+                  "children": ["d"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

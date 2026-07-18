@@ -18,8 +18,16 @@ v0.1.1, SPEC-006 v0.1.1 and SPEC-007 v0.1.0 are Accepted. SPEC-007 defines the
 private M17 reusable synchronous Ajv-validator contract. The source checkout implements the M14 contract
 under completed PLAN-014. PLAN-015 published and verified byte-identical core
 and Angular `0.2.0` packages under both `next` and `latest`. M15 completed a
-private reference platform without changing those Public packages. The live
-checkpoint is recorded in [project status](./.ai-docs/project/STATUS.md).
+private reference platform without changing those Public packages. M18 is
+approved for implementation of a narrow static neutral tabs, accordion and
+logical-grid layout boundary. ADR-023 revision 1, ADR-024 revision 1 and
+SPEC-008 v0.1.0 are Accepted; PLAN-020 revision 0 is Approved after review 103
+cycle 2 passed with zero findings. Checkpoint 1 now implements the exact Public
+core contracts, compiler normalization/diagnostics and conformance fixtures
+after review 104 cycle 3 passed with zero findings. Angular Aria 22 is the sole
+Experimental container-kit pilot; broader theming and other targets remain
+Deferred. PLAN-020 checkpoint 2 is the next action. The live checkpoint is recorded in
+[project status](./.ai-docs/project/STATUS.md).
 
 ## Current implementation
 

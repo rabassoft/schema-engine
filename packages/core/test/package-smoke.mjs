@@ -36,6 +36,40 @@ if (result.success) {
   assert.equal(Object.isFrozen(result.definition.presentation), true);
 }
 
+const advancedResult = compileFormDefinition({
+  schema: referencedSchema,
+  uiSchema: {
+    presentation: [
+      {
+        kind: 'tabs',
+        id: 'profile-tabs',
+        label: 'Profile',
+        panels: [
+          {
+            kind: 'panel',
+            id: 'main',
+            label: 'Main',
+            children: ['profile'],
+          },
+        ],
+      },
+    ],
+  },
+});
+assert.equal(advancedResult.success, true);
+if (!advancedResult.success)
+  throw new Error('Advanced presentation compilation failed');
+const advancedTabs = advancedResult.definition.presentation[0];
+assert.equal(advancedTabs?.kind, 'tabs');
+if (advancedTabs?.kind !== 'tabs') throw new Error('Missing normalized tabs');
+assert.equal(advancedTabs.key, '["tabs","profile-tabs"]');
+assert.equal(advancedTabs.panels[0]?.children[0]?.kind, 'form-node');
+const advancedChild = advancedTabs.panels[0]?.children[0];
+if (advancedChild?.kind !== 'form-node')
+  throw new Error('Missing normalized advanced child');
+assert.equal(advancedChild.node, advancedResult.definition.nodes[0]);
+assert.equal(Object.isFrozen(advancedTabs.panels), true);
+
 const nullableSchema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   type: 'object',

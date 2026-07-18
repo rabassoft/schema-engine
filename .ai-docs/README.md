@@ -33,6 +33,10 @@
 - [SPEC-007 v0.1.0: Reusable Synchronous Ajv Validator](./specs/007-synchronous-ajv-validator.md)
   — Accepted after review 084 cycle 1; completed PLAN-019 revision 1 delivers a
   private reusable Ajv integration for Angular and Standard.
+- [SPEC-008 v0.1.0: Static Advanced Presentation Layout and Angular Container Pilot](./specs/008-static-advanced-presentation-layout.md)
+  — Accepted after review 102 cycle 5 passed all twelve areas with zero
+  findings; Approved PLAN-020 revision 0 now authorizes its eight bounded
+  implementation checkpoints.
 
 ## Acceptance reviews
 
@@ -268,6 +272,27 @@
   corrections.
 - [PLAN-019 final review](./reviews/089-plan-019-final-review.md) — Cycle 2
   repeats the complete matrix with zero findings and completes M17.
+- [D-011/M18 advanced neutral layout promotion readiness](./reviews/098-d011-m18-advanced-layout-promotion-readiness.md)
+  — Cycle 2 promotes only static root tabs, accordions and logical grid for
+  ADR-023; D-025 retains a conditional readiness and ADR gate before SPEC or
+  plan.
+- [ADR-023 review](./reviews/099-adr-023-review.md) — Cycle 3 accepts revision 1
+  after closing exact DOM identity, diagnostic envelopes and text order; only
+  the D-025 promotion-readiness review is authorized.
+- [D-025 Angular presentation-container kit promotion readiness](./reviews/100-d025-angular-container-kit-promotion-readiness.md)
+  — Cycle 4 promotes only an Angular Experimental section/advanced-container
+  seam, native fallback and one isolated optional pilot for ADR-024.
+- [ADR-024 review](./reviews/101-adr-024-review.md) — Cycle 4 accepts revision 1
+  after closing provider diagnostics, child claims, target state and exact
+  Aria/CDK compatibility; SPEC-008 preparation is the only authorized effect.
+- [SPEC-008 review](./reviews/102-spec-008-review.md) — Cycle 5 accepts v0.1.0
+  after twenty corrections and a complete twelve-area zero-finding pass.
+- [PLAN-020 review](./reviews/103-plan-020-review.md) — Cycle 2 approves eight
+  bounded M18 checkpoints after four corrections and a complete fourteen-area
+  zero-finding pass; network, publication, commit and push remain gated.
+- [PLAN-020 checkpoint 1 review](./reviews/104-plan-020-checkpoint-1-review.md) —
+  Cycle 3 closes the exact core contracts, compiler and fixtures after three
+  corrections and a complete ten-area zero-finding pass.
 
 ## Architecture Decision Records
 
@@ -288,7 +313,12 @@
   Approved for checkpoints 1–8.
 - [ADR-022: Reusable synchronous Ajv validator package](./adrs/022-validador-ajv-sincrono-reutilizable.md)
   — Accepted revision 1; SPEC-007 and completed PLAN-019 define the private M17
-  delivery.
+  validator boundary.
+- [ADR-023: Static neutral tabs, accordion and logical-grid containers](./adrs/023-contenedores-layout-neutral-estatico.md)
+  — Accepted revision 1; its separate D-025 architecture gate is now completed.
+- [ADR-024: Angular presentation-container SPI and Angular Aria pilot](./adrs/024-spi-contenedores-angular-y-piloto-angular-aria.md)
+  — Accepted revision 1; Angular Aria 22 is the sole Experimental pilot and
+  accepted SPEC-008 v0.1.0 completes its normative gate.
 
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
@@ -341,6 +371,8 @@
 - [PLAN-016: Private reference platform and Angular 22 shell](./plans/016-private-reference-platform.md) — Completed revision 0 after final review 063 cycle 2 passed with zero findings
 - [PLAN-017: Reference workspace UX and configuration laboratory](./plans/017-reference-workspace-ux.md) — Completed revision 0 after final review 070 cycle 1 repeated the complete implementation and verification matrix with zero findings
 - [PLAN-018: Private Standard/DOM direct-core reference shell](./plans/018-standard-dom-reference-shell.md) — Completed revision 1 after final review 095 cycle 2 repeated all fourteen areas and the full matrix with zero findings
+- [PLAN-019: Reusable synchronous Ajv validator](./plans/019-reusable-synchronous-ajv-validator.md) — Completed revision 1 after final review 089 cycle 2 repeated the complete matrix with zero findings
+- [PLAN-020: Static advanced presentation layout and Angular Aria pilot](./plans/020-static-advanced-presentation-layout.md) — Approved revision 0; checkpoint 1 completed after review 104 cycle 3 passed with zero findings
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -367,8 +399,17 @@ are accepted after complete review passed with zero findings; PLAN-011 revision
 0 passed complete review, was approved and completed all five checkpoints after
 its final repeated implementation review passed with zero findings. M11 is
 complete. M12 implemented the narrow D-042 static-section slice under accepted
-ADR-017, SPEC-005 v0.1.1 and completed PLAN-012; D-011/D-012 remain Deferred
-outside it. SPEC-006 v0.1.1 now defines the Accepted M14 nullable-leaf contract;
+ADR-017, SPEC-005 v0.1.1 and completed PLAN-012. Review 098 now promotes only
+static root tabs, accordions and logical grid from D-011 for M18 design; its
+remainder and all D-012 remain Deferred. ADR-023 revision 1 now fixes that
+neutral architecture. Review 100 promoted the narrow D-025 Angular
+container-kit slice, and accepted ADR-024 revision 1 fixes its provider seam,
+native fallback, isolated theme/package boundary and sole Angular Aria 22 pilot.
+SPEC-008 v0.1.0 is Accepted after review 102 cycle 5. PLAN-020 revision 0 is
+Approved after review 103 cycle 2; checkpoint 1 now implements its exact core
+contracts, compiler and fixtures after review 104 cycle 3, while dependencies
+remain untouched. Checkpoint 2 is the next action.
+SPEC-006 v0.1.1 now defines the Accepted M14 nullable-leaf contract;
 PLAN-014 revision 0 and local M14 implementation are complete after final
 review 041 cycle 2 passed with zero findings. Version selection and publication
 remain separate.

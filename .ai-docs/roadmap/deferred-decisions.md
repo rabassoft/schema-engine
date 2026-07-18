@@ -184,7 +184,8 @@ Cada decisión debe registrar:
 
 ## D-011: UI Schema avanzado
 
-- **Estado:** Deferred
+- **Estado:** Promoted only for the narrow M18 static neutral layout boundary
+  accepted in review 098; every unlisted capability remains Deferred
 - **Incluye:** grids, tabs, accordions, secciones, wizards, slots, acciones y layouts responsivos.
 - **Motivo:** Primero se validará la separación entre semántica de datos y presentación básica.
 - **Retomar cuando:** Existan objetos anidados y un contrato de layout neutral.
@@ -193,6 +194,30 @@ Cada decisión debe registrar:
   layout. Recomienda separar un primer incremento de agrupación estática y
   mantener el resto Deferred. Ricard aceptó formalmente esa separación el 15 de
   julio de 2026 y solo D-042 queda Promoted.
+- **Nueva evidencia:** D-042/M12 está implementado y aceptado; Angular y
+  Standard proyectan independientemente el bosque neutral completo. Ricard
+  seleccionó madurar core/Angular/Standard y preservar portabilidad hacia
+  librerías UI antes de React/Vue.
+- **Promoción M18 aceptada:**
+  [`review 098`](../reviews/098-d011-m18-advanced-layout-promotion-readiness.md)
+  ciclo 2 pasó doce áreas sin hallazgos. Promueve solo tabs estáticos,
+  accordions estáticos y grid lógico estático root-only sobre el bosque de
+  presentación, con estado visual propiedad del target y evidencia Angular +
+  Standard independiente.
+- **Arquitectura neutral aceptada:** ADR-023 revisión 1 cierra
+  grammar/normalización, identidad, estado visual, grid/fallback,
+  accesibilidad, diagnósticos y migración Public tras review 099 ciclo 3 sin
+  hallazgos. Review 100 y ADR-024 revisión 1 completaron después el gate D-025;
+  SPEC-008 v0.1.0 está Accepted tras review 102 ciclo 5 y PLAN-020 revisión 0
+  está Approved tras review 103 ciclo 2 para ocho checkpoints verificables.
+- **Contrato normativo aceptado:** SPEC-008 v0.1.0 cierra gramática,
+  normalización, diagnósticos, validación manual, estado target-owned,
+  accesibilidad, proyección Angular/Standard y evidencia de conformidad sin
+  activar implementación.
+- **Permanece Deferred:** wizards, workflow, slots, acciones, scopes,
+  condiciones, layout nested/item, breakpoints arbitrarios, estado controlado o
+  persistido y todo renderer kit salvo la arquitectura estrecha del único
+  piloto Angular Aria 22 aceptada por ADR-024.
 
 ## D-012: Scopes declarativos en UI Schema
 
@@ -204,6 +229,8 @@ Cada decisión debe registrar:
   mantiene D-012 Deferred: el contrato avanzado aún no existe y no debe mover
   silenciosamente a UI Schema la autoridad de scopes que posee la aplicación.
   Ricard aceptó formalmente este límite el 15 de julio de 2026.
+- **Límite M18:** review 098 no genera scopes desde tabs, panels, accordions ni
+  grid; la aplicación conserva toda autoridad de validación y workflow.
 
 ## D-013: Actualización dinámica de FormDefinition
 
@@ -324,10 +351,50 @@ Cada decisión debe registrar:
 
 ## D-025: Design tokens y theming
 
-- **Estado:** Deferred
+- **Estado:** Promoted and architecturally resolved only for the narrow Angular
+  Experimental presentation-container seam accepted by review 100 and ADR-024
+  revision 1; every broader theming or multi-target capability remains Deferred
 - **Pregunta:** ¿Cómo personalizar estilos sin acoplar el core a Material o Tailwind?
 - **Dirección propuesta:** Design tokens y contratos visuales en paquetes de UI.
-- **Retomar cuando:** Exista al menos un renderer kit estable.
+- **Trigger histórico:** Existiera al menos un renderer kit estable; review 100
+  lo reconcilia solo para el slice Experimental estrecho descrito abajo.
+- **Demanda y gate coordinado:** Ricard solicitó integrar distintas librerías UI
+  por plataforma sin acoplarlas al core. Review 098 exige que ADR-023 defina
+  layout neutral compatible con futuros kits y que, una vez aceptado, D-025
+  reciba una revisión de promoción antes de SPEC-008/PLAN-020. El kit HTML
+  nativo Angular implementado y la proyección Standard aportan evidencia, pero
+  no garantizan el resultado: si la revisión concluye que D-025 no está listo,
+  M18 se detiene antes de la SPEC; si está listo, su ADR requiere aceptación
+  separada. En ese checkpoint D-025 continuaba íntegramente Deferred y no
+  autorizaba paquete, provider, tokens, dependencia ni implementación.
+- **Evidencia neutral aceptada:** ADR-023 revisión 1 fija el surface semántico
+  que un futuro kit debe respetar sin seleccionar provider API ni librería.
+  Review 099 ciclo 3 cerró sin hallazgos y autorizó exclusivamente la revisión
+  de promotion readiness ya completada en review 100.
+- **Promoción estrecha aceptada:** review 100 ciclo 4 pasó doce áreas sin
+  hallazgos. Autoriza ADR-024 solo para un dominio Angular separado de
+  registrations de `section`/tabs/accordion/grid, fallback nativo sin
+  dependencias, un piloto opcional aislado, ownership de tema y tiers
+  Experimental.
+- **Arquitectura estrecha aceptada:** ADR-024 revisión 1, aceptada tras review
+  101 ciclo 4 sin hallazgos, fija el SPI/provider Angular separado, el fallback
+  nativo obligatorio, el paquete aislado, seis tokens locales y Angular Aria 22
+  como único piloto. No activa dependencias, paquete, publicación ni código.
+- **Contrato estrecho aceptado:** SPEC-008 v0.1.0 fija nueve exports Angular,
+  providers/fallback/claims, paquete Aria `0.1.0`, matriz core/Angular `0.3.0`,
+  seis propiedades CSS y tiers Experimental. PLAN-020 revisión 0 está Approved
+  tras review 103 ciclo 2 y mantiene todo alcance más amplio Deferred.
+- **Trigger reconciliado:** no existe todavía un kit Stable. Esperarlo antes de
+  diseñar el primer seam sería circular; review 100 sustituye ese trigger solo
+  para arquitectura/piloto Experimental verificable en privado. No promueve
+  Stable, publicación ni afirma que el kit ya exista.
+- **Permanece Deferred:** tokens Rabassoft genéricos, CSS compartido,
+  traducción de temas, suite completa de fields, múltiples pilotos, protocolo
+  multi-framework, otros Angular majors y cualquier implementación/publicación.
+- **Plan aprobado:** PLAN-020 revisión 0 mapea las 22 filas de conformidad a
+  ocho checkpoints. Checkpoint 1 está completo tras review 104 ciclo 3;
+  checkpoint 2 es la siguiente acción. Sus gates de red, publicación, commit y
+  push conservan autorización separada.
 
 ## D-026: Capabilities de adaptadores
 
@@ -737,13 +804,16 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **Next milestone:** evaluar el registro Deferred y seleccionar explícitamente
-   la siguiente capacidad; D-046/M16 y D-047/M17 están completos.
-2. **D-043:** conserva la publicación del repositorio y automatización como
+1. **M18/ADR-023:** la arquitectura neutral de tabs/accordions/grid está
+   Accepted en revisión 1 tras review 099 ciclo 3 sin hallazgos.
+2. **M18 delivery:** SPEC-008 v0.1.0 está Accepted y PLAN-020 revisión 0 está
+   Approved tras review 103 ciclo 2. Checkpoint 1 está completo tras review 104
+   ciclo 3; checkpoint 2 es la siguiente acción.
+3. **D-043:** conserva la publicación del repositorio y automatización como
    trabajo Deferred; no se promueve por D-044.
-3. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
+4. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
    familia de artefactos seleccionada.
-4. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;
+5. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;
    ADR-021 revisión 1 está Accepted y PLAN-018 revisión 1 está Completed tras
    review final 095 ciclo 2 sin hallazgos.
 
@@ -761,6 +831,13 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                         |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 18-07-2026 | PLAN-020 checkpoint 1 completa contratos/compiler/fixtures core tras review 104 ciclo 3; checkpoint 2 es la siguiente acción.                  |
+| 18-07-2026 | PLAN-020 revisión 0 queda Approved tras review 103 ciclo 2; checkpoint 1 es la siguiente acción y los gates externos siguen separados.         |
+| 18-07-2026 | SPEC-008 v0.1.0 queda Accepted tras review 102 ciclo 5; PLAN-020 es el siguiente gate y aún no autoriza implementación.                        |
+| 18-07-2026 | ADR-024 revisión 1 queda Accepted tras review 101 ciclo 4; Angular Aria 22 es el único piloto y SPEC-008 es el siguiente gate.                 |
+| 18-07-2026 | Review 100 ciclo 4 promueve el seam Angular Experimental estrecho de D-025; ADR-024 es el siguiente gate y SPEC-008 sigue bloqueada.           |
+| 18-07-2026 | ADR-023 revisión 1 queda Accepted tras review 099 ciclo 3; D-025 promotion readiness es el siguiente gate y SPEC-008 continúa bloqueada.       |
+| 18-07-2026 | Review 098 ciclo 2 promueve el slice estático neutral de D-011 para ADR-023/M18; D-025 conserva un gate separado antes de SPEC/plan.           |
 | 18-07-2026 | PLAN-018 revisión 1/D-046/M16 quedan Completed; review final 095 ciclo 2 repite catorce áreas y toda la matriz sin hallazgos.                  |
 | 18-07-2026 | PLAN-018 checkpoint 7 completa Chromium/aislamiento/onboarding; review 094 ciclo 2 cierra sin hallazgos.                                       |
 | 18-07-2026 | PLAN-018 checkpoint 6 completa workspace/evidencia/snippets; review 093 ciclo 1 cierra sin hallazgos.                                          |

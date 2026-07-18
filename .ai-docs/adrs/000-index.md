@@ -41,6 +41,8 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 20. [ADR 020: Private multi-framework reference platform](./020-plataforma-referencia-multiframework.md) — **Accepted revision 0 after review 054 cycle 3; separately approved PLAN-016 revision 0 completed the private catalog and first Angular 22 shell after final review 063 cycle 2 passed with zero findings.**
 21. [ADR 021: Private Standard/DOM direct-core reference shell](./021-shell-standard-dom-core-directo.md) — **Accepted revision 1 after review 090 cycle 3 passed twelve areas with zero findings; it requires a reviewed PLAN-018 revision before checkpoint 5 resumes.**
 22. [ADR 022: Reusable synchronous Ajv validator package](./022-validador-ajv-sincrono-reutilizable.md) — **Accepted revision 1 after review 083 cycle 2 passed ten areas with zero findings; completed PLAN-019 implements it privately.**
+23. [ADR 023: Static neutral tabs, accordion and logical-grid containers](./023-contenedores-layout-neutral-estatico.md) — **Accepted revision 1 after review 099 cycle 3 passed ten areas with zero findings; review 100 and accepted ADR-024 completed its separate Angular-kit architecture gate.**
+24. [ADR 024: Angular presentation-container SPI and Angular Aria pilot](./024-spi-contenedores-angular-y-piloto-angular-aria.md) — **Accepted revision 1 after review 101 cycle 4 passed eleven areas with zero findings; SPEC-008 and Approved PLAN-020 revision 0 now govern delivery.**
 
 ## 4. ADRs específicos de Angular
 

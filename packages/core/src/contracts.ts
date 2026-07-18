@@ -11,13 +11,48 @@ export interface UiSchema {
   readonly presentation?: readonly UiPresentationEntry[];
 }
 
-export type UiPresentationEntry = string | UiSectionSchema;
+export type UiPresentationEntry =
+  string | UiSectionSchema | UiTabsSchema | UiAccordionSchema | UiGridSchema;
 
 export interface UiSectionSchema {
   readonly kind: 'section';
   readonly id: string;
   readonly label: string;
   readonly children: readonly UiPresentationEntry[];
+}
+
+export interface UiTabsSchema {
+  readonly kind: 'tabs';
+  readonly id: string;
+  readonly label: string;
+  readonly panels: readonly UiPresentationPanelSchema[];
+}
+
+export interface UiAccordionSchema {
+  readonly kind: 'accordion';
+  readonly id: string;
+  readonly label: string;
+  readonly panels: readonly UiPresentationPanelSchema[];
+}
+
+export interface UiPresentationPanelSchema {
+  readonly kind: 'panel';
+  readonly id: string;
+  readonly label: string;
+  readonly children: readonly UiPresentationEntry[];
+}
+
+export interface UiGridSchema {
+  readonly kind: 'grid';
+  readonly id: string;
+  readonly label: string;
+  readonly columns: 1 | 2 | 3 | 4;
+  readonly items: readonly UiGridItemSchema[];
+}
+
+export interface UiGridItemSchema {
+  readonly span?: 1 | 2 | 3 | 4;
+  readonly child: UiPresentationEntry;
 }
 
 export type UiNodeSchema = ObjectUiSchema | ArrayUiSchema | FieldUiSchema;
@@ -64,7 +99,11 @@ export interface FormDefinition {
 }
 
 export type PresentationEntryDefinition =
-  PresentedFormNodeDefinition | PresentationSectionDefinition;
+  | PresentedFormNodeDefinition
+  | PresentationSectionDefinition
+  | PresentationTabsDefinition
+  | PresentationAccordionDefinition
+  | PresentationGridDefinition;
 
 export interface PresentedFormNodeDefinition {
   readonly kind: 'form-node';
@@ -77,6 +116,46 @@ export interface PresentationSectionDefinition {
   readonly key: string;
   readonly label: string;
   readonly children: readonly PresentationEntryDefinition[];
+}
+
+export interface PresentationTabsDefinition {
+  readonly kind: 'tabs';
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly panels: readonly PresentationPanelDefinition[];
+}
+
+export interface PresentationAccordionDefinition {
+  readonly kind: 'accordion';
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly panels: readonly PresentationPanelDefinition[];
+}
+
+export interface PresentationPanelDefinition {
+  readonly kind: 'panel';
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly children: readonly PresentationEntryDefinition[];
+}
+
+export interface PresentationGridDefinition {
+  readonly kind: 'grid';
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly columns: 1 | 2 | 3 | 4;
+  readonly items: readonly PresentationGridItemDefinition[];
+}
+
+export interface PresentationGridItemDefinition {
+  readonly kind: 'grid-item';
+  readonly key: string;
+  readonly span: 1 | 2 | 3 | 4;
+  readonly child: PresentationEntryDefinition;
 }
 
 export interface BaseNodeDefinition {
@@ -351,6 +430,12 @@ export type CollectionTextMember =
   | 'move-item-later'
   | 'issue';
 export type SectionTextMember = 'label';
+export type AdvancedPresentationTextMember = 'label';
+export type AdvancedPresentationLabelDefinition =
+  | PresentationTabsDefinition
+  | PresentationAccordionDefinition
+  | PresentationPanelDefinition
+  | PresentationGridDefinition;
 export type FieldTextResolutionContext =
   | {
       readonly formId: string;
@@ -425,11 +510,18 @@ export interface SectionTextResolutionContext {
   readonly section: PresentationSectionDefinition;
   readonly member: SectionTextMember;
 }
+export interface AdvancedPresentationTextResolutionContext {
+  readonly formId: string;
+  readonly locale: string;
+  readonly presentation: AdvancedPresentationLabelDefinition;
+  readonly member: AdvancedPresentationTextMember;
+}
 export type TextResolutionContext =
   | FieldTextResolutionContext
   | ObjectTextResolutionContext
   | CollectionTextResolutionContext
-  | SectionTextResolutionContext;
+  | SectionTextResolutionContext
+  | AdvancedPresentationTextResolutionContext;
 export interface TextResolver {
   resolve(text: string, context: TextResolutionContext): string;
 }

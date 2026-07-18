@@ -1,0 +1,188 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "nullable": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "nullable": false,
+        "label": "b",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"c\"]",
+        "name": "c",
+        "path": ["c"],
+        "required": false,
+        "nullable": false,
+        "label": "c",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"d\"]",
+        "name": "d",
+        "path": ["d"],
+        "required": false,
+        "nullable": false,
+        "label": "d",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"a\"]",
+        "name": "a",
+        "path": ["a"],
+        "required": false,
+        "nullable": false,
+        "label": "a",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"b\"]",
+        "name": "b",
+        "path": ["b"],
+        "required": false,
+        "nullable": false,
+        "label": "b",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"c\"]",
+        "name": "c",
+        "path": ["c"],
+        "required": false,
+        "nullable": false,
+        "label": "c",
+        "kind": "number",
+        "numericType": "number",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"d\"]",
+        "name": "d",
+        "path": ["d"],
+        "required": false,
+        "nullable": false,
+        "label": "d",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"a\"]",
+          "name": "a",
+          "path": ["a"],
+          "required": false,
+          "nullable": false,
+          "label": "a",
+          "kind": "string",
+          "constraints": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"b\"]",
+          "name": "b",
+          "path": ["b"],
+          "required": false,
+          "nullable": false,
+          "label": "b",
+          "kind": "boolean"
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"c\"]",
+          "name": "c",
+          "path": ["c"],
+          "required": false,
+          "nullable": false,
+          "label": "c",
+          "kind": "number",
+          "numericType": "number",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"d\"]",
+          "name": "d",
+          "path": ["d"],
+          "required": false,
+          "nullable": false,
+          "label": "d",
+          "kind": "number",
+          "numericType": "integer",
+          "constraints": {},
+          "ui": {}
+        }
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "UNKNOWN_UI_SCHEMA_KEY",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["presentation", 0, "extension"],
+      "parameters": {
+        "key": "extension"
+      },
+      "fallbackMessage": "Unknown UI Schema key \"extension\" is ignored."
+    },
+    {
+      "code": "INVALID_UI_PRESENTATION",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["presentation", 0, "items", 0, "span"],
+      "parameters": {
+        "reason": "grid-span-exceeds-columns",
+        "itemIndex": 0,
+        "span": 3,
+        "columns": 2,
+        "expected": "integer not greater than grid columns"
+      },
+      "fallbackMessage": "UI presentation is invalid."
+    },
+    {
+      "code": "UNKNOWN_UI_SCHEMA_KEY",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["presentation", 0, "items", 0, "extension"],
+      "parameters": {
+        "key": "extension"
+      },
+      "fallbackMessage": "Unknown UI Schema key \"extension\" is ignored."
+    }
+  ]
+}
