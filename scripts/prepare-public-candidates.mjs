@@ -1,17 +1,28 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  packCandidates,
+  packReleaseCandidates,
   readTarballJson,
   workspaceRoot,
 } from './release-candidate-utils.mjs';
-import { loadReleaseTarget } from './release-target.mjs';
+import {
+  assertM19CandidateEvidence,
+  loadM19ReleaseTarget,
+} from './release-target.mjs';
 
-const release = loadReleaseTarget();
-const output = join(workspaceRoot, `.release/${release.version}`);
+const { descriptor } = loadM19ReleaseTarget();
+const output = join(workspaceRoot, `.release/${descriptor.releaseDirectory}`);
 const npmVersion = execFileSync('npm', ['--version'], {
   encoding: 'utf8',
 }).trim();
@@ -20,7 +31,7 @@ assert.equal(npmVersion, '10.9.8');
 
 rmSync(output, { recursive: true, force: true });
 mkdirSync(output, { recursive: true });
-const tarballs = packCandidates(output);
+const tarballs = packReleaseCandidates(output, descriptor);
 const cleanEnvironment = { ...process.env };
 for (const name of Object.keys(cleanEnvironment)) {
   if (
@@ -38,7 +49,12 @@ cleanEnvironment.NPM_CONFIG_CACHE = join(output, 'npm-cache');
 const candidates = [];
 for (const [role, tarball] of Object.entries(tarballs)) {
   const manifest = readTarballJson(tarball, 'package/package.json');
-  assert.equal(manifest.version, release.version);
+  const packageTarget = descriptor.packages.find(
+    (candidate) => candidate.role === role,
+  );
+  assert.ok(packageTarget, `Unexpected candidate role ${role}`);
+  assert.equal(manifest.name, packageTarget.name);
+  assert.equal(manifest.version, packageTarget.version);
   assert.equal(manifest.publishConfig.access, 'public');
   assert.equal(manifest.publishConfig.tag, 'next');
   assert.equal(manifest.publishConfig.provenance, false);
@@ -51,8 +67,8 @@ for (const [role, tarball] of Object.entries(tarballs)) {
       '--access',
       'public',
       '--tag',
-      'next',
-      '--provenance=false',
+      descriptor.distTag,
+      `--provenance=${descriptor.provenance}`,
     ],
     { env: cleanEnvironment, stdio: 'inherit' },
   );
@@ -68,28 +84,63 @@ for (const [role, tarball] of Object.entries(tarballs)) {
   });
 }
 
+const neutralDirectory = mkdtempSync(
+  join(tmpdir(), 'schema-engine-m19-neutral-'),
+);
+try {
+  for (const candidate of candidates) {
+    const source = join(output, candidate.file);
+    const neutralTarball = join(neutralDirectory, candidate.file);
+    copyFileSync(source, neutralTarball);
+    const neutralBytes = readFileSync(neutralTarball);
+    assert.equal(neutralBytes.length, candidate.bytes);
+    assert.equal(
+      createHash('sha512').update(neutralBytes).digest('hex'),
+      candidate.sha512,
+    );
+    execFileSync(
+      'npm',
+      [
+        'publish',
+        `./${candidate.file}`,
+        '--dry-run',
+        '--access',
+        'public',
+        '--tag',
+        descriptor.distTag,
+        `--provenance=${descriptor.provenance}`,
+      ],
+      { cwd: neutralDirectory, env: cleanEnvironment, stdio: 'inherit' },
+    );
+  }
+} finally {
+  rmSync(neutralDirectory, { recursive: true, force: true });
+}
+
 const baseCommit = execFileSync('git', ['rev-parse', 'HEAD'], {
   encoding: 'utf8',
 }).trim();
 const treeState = execFileSync('git', ['status', '--porcelain'], {
   encoding: 'utf8',
 }).trim();
+const evidence = {
+  release: descriptor.id,
+  releaseDirectory: descriptor.releaseDirectory,
+  node: process.version.slice(1),
+  npm: npmVersion,
+  pnpm: '10.28.2',
+  baseCommit,
+  sourceCommit: treeState === '' ? baseCommit : null,
+  distTag: descriptor.distTag,
+  provenance: descriptor.provenance,
+  neutralDryRun: true,
+  candidates,
+};
+assertM19CandidateEvidence(evidence, descriptor);
 writeFileSync(
   join(output, 'candidates.json'),
-  `${JSON.stringify(
-    {
-      node: process.version.slice(1),
-      npm: npmVersion,
-      pnpm: '10.28.2',
-      baseCommit,
-      sourceCommit: treeState === '' ? baseCommit : null,
-      distTag: 'next',
-      provenance: false,
-      candidates,
-    },
-    null,
-    2,
-  )}\n`,
+  `${JSON.stringify(evidence, null, 2)}\n`,
 );
 
 console.log(`Prepared dry-run candidates in ${output}`);
+console.log('Verified neutral basename-relative dry runs for all candidates.');

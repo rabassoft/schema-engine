@@ -3,7 +3,7 @@
 
 import type { EnvironmentProviders } from '@angular/core';
 import type { FieldDefinition, FieldTemplate } from '@rabassoft/schema-engine';
-import { provideSchemaEngineAngular } from '../renderer.js';
+import { provideSchemaEngineAngular } from '../provider.js';
 import type { AngularRendererRegistration } from '../renderer.js';
 import { SchemaBooleanRendererComponent } from './boolean-renderer.js';
 import { SchemaNumberRendererComponent } from './number-renderer.js';

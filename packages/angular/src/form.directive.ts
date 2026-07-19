@@ -34,6 +34,7 @@ import {
   type ValidationVisibility,
 } from '@rabassoft/schema-engine';
 import { SchemaPresentationOutletComponent } from './node-outlet.js';
+import { AngularPresentationContainerResolver } from './presentation-container.js';
 
 export type AngularControlledFormConfig<TData extends object> = Omit<
   ControlledFormRuntimeOptions<TData>,
@@ -64,9 +65,9 @@ export function readRuntimeContext(form: object): RuntimeContext | undefined {
   template: `
     @for (
       projected of projectedPresentation();
-      track projected.entry.kind === 'section'
-        ? projected.entry.key
-        : projected.entry.node.key
+      track projected.entry.kind === 'form-node'
+        ? projected.entry.node.key
+        : projected.entry.key
     ) {
       <schema-presentation-outlet
         [entry]="projected.entry"
@@ -99,7 +100,12 @@ export class SchemaFormDirective<TData extends object> {
   >(() => {
     const definition = this.acceptedDefinitionState();
     const snapshot = this.snapshotState();
-    if (definition === undefined || snapshot === undefined) return [];
+    if (
+      definition === undefined ||
+      snapshot === undefined ||
+      this.presentationContainerResolver?.ready === false
+    )
+      return [];
     return Object.freeze(
       definition.presentation.map((entry) =>
         Object.freeze({
@@ -117,9 +123,19 @@ export class SchemaFormDirective<TData extends object> {
   private unsubscribeOperations: (() => void) | undefined;
   private readonly destroyRef = inject(DestroyRef);
   private readonly defaultLocale = inject(LOCALE_ID);
+  private readonly presentationContainerResolver = inject(
+    AngularPresentationContainerResolver,
+    { optional: true },
+  );
 
   constructor() {
     runtimeContexts.set(this, this.runtimeContextState.asReadonly());
+    if (this.presentationContainerResolver?.ready === false)
+      queueMicrotask(() =>
+        this.reportDiagnostics(
+          this.presentationContainerResolver?.configurationDiagnostics ?? [],
+        ),
+      );
     effect(() => this.synchronize(this.schemaForm()));
     this.destroyRef.onDestroy(() => {
       this.destroyRuntime();

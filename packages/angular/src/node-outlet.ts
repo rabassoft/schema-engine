@@ -7,6 +7,7 @@ import {
   DestroyRef,
   EnvironmentInjector,
   Injectable,
+  Injector,
   ViewContainerRef,
   computed,
   effect,
@@ -36,7 +37,6 @@ import type {
   ObjectNodeTemplate,
   ObjectRuntimeSnapshot,
   PresentationEntryDefinition,
-  PresentationSectionDefinition,
 } from '@rabassoft/schema-engine';
 import { SchemaFieldOutletDirective } from './field-outlet.directive.js';
 import { SchemaFormDirective, readRuntimeContext } from './form.directive.js';
@@ -46,6 +46,10 @@ import {
   nodeIdBase,
 } from './native/common.js';
 import { adapterDiagnostic } from './renderer.js';
+import {
+  PresentationContainerHostFactory,
+  presentationHostDiagnostic,
+} from './presentation-host.js';
 import {
   AngularTextProjector,
   emptyCollectionTextSnapshot,
@@ -215,7 +219,10 @@ export class SchemaPresentationOutletComponent {
 
   private readonly form = inject(SchemaFormDirective);
   private readonly environmentInjector = inject(EnvironmentInjector);
-  private readonly sectionHostFactory = inject(SectionHostFactory);
+  private readonly injector = inject(Injector);
+  private readonly presentationHostFactory = inject(
+    PresentationContainerHostFactory,
+  );
   private readonly destroyRef = inject(DestroyRef);
   private readonly container = viewChild.required('container', {
     read: ViewContainerRef,
@@ -236,6 +243,7 @@ export class SchemaPresentationOutletComponent {
             SchemaNodeOutletComponent,
             {
               environmentInjector: this.environmentInjector,
+              injector: this.injector,
               bindings: [
                 inputBinding('definition', () => entry.node),
                 inputBinding('snapshot', () => {
@@ -248,28 +256,51 @@ export class SchemaPresentationOutletComponent {
           );
           return;
         }
-        this.componentRef = this.sectionHostFactory.create(
+        this.componentRef = this.presentationHostFactory.create(
           container,
           this.environmentInjector,
+          this.injector,
           () => entry,
           () => this.definition(),
           () => this.snapshot(),
+          (child, childContainer) => this.renderEntry(child, childContainer),
         );
       } catch {
         this.destroyComponent(container);
-        if (entry.kind === 'section') {
-          this.form.reportDiagnostics([
-            adapterDiagnostic(
-              'SECTION_HOST_INSTANTIATION_FAILED',
-              'error',
-              { sectionId: entry.id },
-              'Section host could not be instantiated.',
-            ),
-          ]);
-        }
+        if (entry.kind !== 'form-node')
+          this.form.reportDiagnostics([presentationHostDiagnostic(entry)]);
       }
     });
     this.destroyRef.onDestroy(() => this.destroyComponent(this.container()));
+  }
+
+  private renderEntry(
+    entry: PresentationEntryDefinition,
+    container: ViewContainerRef,
+  ): ComponentRef<unknown> {
+    if (entry.kind === 'form-node') {
+      return container.createComponent(SchemaNodeOutletComponent, {
+        environmentInjector: this.environmentInjector,
+        injector: this.injector,
+        bindings: [
+          inputBinding('definition', () => entry.node),
+          inputBinding('snapshot', () => {
+            const definition = this.definition();
+            const index = definition.nodes.indexOf(entry.node);
+            return this.snapshot().nodes[index];
+          }),
+        ],
+      });
+    }
+    return this.presentationHostFactory.create(
+      container,
+      this.environmentInjector,
+      this.injector,
+      () => entry,
+      () => this.definition(),
+      () => this.snapshot(),
+      (child, childContainer) => this.renderEntry(child, childContainer),
+    );
   }
 
   private destroyComponent(container: ViewContainerRef): void {
@@ -283,91 +314,6 @@ export class SchemaPresentationOutletComponent {
     if (index >= 0) container.remove(index);
     else if (!ref.hostView.destroyed) ref.destroy();
   }
-}
-
-/** @internal */
-@Injectable({ providedIn: 'root' })
-export class SectionHostFactory {
-  create(
-    container: ViewContainerRef,
-    environmentInjector: EnvironmentInjector,
-    section: () => PresentationSectionDefinition,
-    definition: () => FormDefinition,
-    snapshot: () => FormRuntimeSnapshot<object>,
-  ): ComponentRef<unknown> {
-    return container.createComponent(PresentationSectionHostComponent, {
-      environmentInjector,
-      bindings: [
-        inputBinding('section', section),
-        inputBinding('definition', definition),
-        inputBinding('snapshot', snapshot),
-      ],
-    });
-  }
-}
-
-@Component({
-  selector: 'schema-presentation-section-host',
-  standalone: true,
-  imports: [forwardRef(() => SchemaPresentationOutletComponent)],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <fieldset>
-      <legend [id]="legendId()">{{ label() }}</legend>
-      @for (
-        child of section().children;
-        track child.kind === 'section' ? child.key : child.node.key
-      ) {
-        <schema-presentation-outlet
-          [entry]="child"
-          [definition]="definition()"
-          [snapshot]="snapshot()"
-        />
-      }
-    </fieldset>
-  `,
-})
-class PresentationSectionHostComponent {
-  readonly section = input.required<PresentationSectionDefinition>();
-  readonly definition = input.required<FormDefinition>();
-  readonly snapshot = input.required<FormRuntimeSnapshot<object>>();
-
-  private readonly form = inject(SchemaFormDirective);
-  private readonly projector = inject(AngularTextProjector);
-  private readonly labelState = signal('');
-  private lastTextIdentity: readonly unknown[] | undefined;
-  protected readonly label = this.labelState.asReadonly();
-  protected readonly legendId = computed(() => {
-    const context = readRuntimeContext(this.form);
-    return `${sectionIdBase(context?.formId ?? '', this.section().id)}--legend`;
-  });
-
-  constructor() {
-    effect(() => {
-      const section = this.section();
-      const context = readRuntimeContext(this.form);
-      if (context === undefined) {
-        this.labelState.set(section.label);
-        return;
-      }
-      const locale = this.snapshot().locale;
-      const identity = [section, context.formId, locale] as const;
-      if (sameIdentity(this.lastTextIdentity, identity)) return;
-      this.lastTextIdentity = identity;
-      const projection = this.projector.projectSection(
-        section,
-        context.formId,
-        locale,
-      );
-      this.labelState.set(projection.text);
-      this.form.reportDiagnostics(projection.diagnostics);
-    });
-  }
-}
-
-/** @internal */
-export function sectionIdBase(formId: string, sectionId: string): string {
-  return `se-${encodeURIComponent(JSON.stringify([formId, 'section', sectionId]))}`;
 }
 
 /** @internal */

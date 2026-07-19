@@ -139,10 +139,146 @@ describe('StandardDomRenderer', () => {
     nested.dispose();
     const sections = mount('presentation-sections');
     expect(
-      [...sections.host.querySelectorAll('.form-section > h2')].map(
+      [...sections.host.querySelectorAll('.form-section > legend')].map(
         ({ textContent }) => textContent,
       ),
     ).toEqual(['Identity', 'Contact preferences']);
+  });
+
+  it('projects advanced layout with exact state, accessibility and mounted reconciliation', () => {
+    const harness = mount('advanced-presentation');
+    const root = harness.host;
+    const tabs = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    );
+    const panels = Array.from(
+      root.querySelectorAll<HTMLElement>('[role="tabpanel"]'),
+    );
+    expect(tabs.map(({ textContent }) => textContent)).toEqual([
+      'Identity',
+      'Contact',
+    ]);
+    expect(tabs.map((tab) => tab.getAttribute('aria-selected'))).toEqual([
+      'true',
+      'false',
+    ]);
+    const tabBase = `se-${encodeURIComponent(
+      JSON.stringify([
+        'reference-standard-advanced-presentation',
+        'presentation',
+        'tabs',
+        'account-tabs',
+      ]),
+    )}`;
+    expect(root.querySelector('[role="tablist"]')?.id).toBe(
+      `${tabBase}--tablist`,
+    );
+    expect(panels.map(({ hidden }) => hidden)).toEqual([false, true]);
+    const email = fieldControl(root, 'email');
+    expect(panels[1]?.contains(email)).toBe(true);
+    email.value = 'hidden@rabassoft.test';
+    email.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(harness.application.getState().value).toMatchObject({
+      email: 'hidden@rabassoft.test',
+    });
+    expect(fieldControl(root, 'email')).toBe(email);
+
+    tabs[1]?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }),
+    );
+    expect(tabs[0]?.getAttribute('aria-selected')).toBe('true');
+    tabs[0]?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'End', bubbles: true }),
+    );
+    expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
+    expect(tabs[1]?.getAttribute('aria-controls')).toBe(panels[1]?.id);
+    expect(panels[1]?.getAttribute('aria-labelledby')).toBe(tabs[1]?.id);
+
+    const triggers = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[id$="--trigger"]'),
+    );
+    triggers[0]?.click();
+    triggers[1]?.click();
+    expect(
+      triggers.map((trigger) => trigger.getAttribute('aria-expanded')),
+    ).toEqual(['true', 'true']);
+    expect(root.querySelectorAll('.presentation-grid-cell')).toHaveLength(2);
+
+    harness.application.setLocale('es');
+    expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
+    expect(triggers[0]?.getAttribute('aria-expanded')).toBe('true');
+    harness.application.resetScenario();
+    expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
+    expect(triggers[0]?.getAttribute('aria-expanded')).toBe('true');
+    harness.dispose();
+    const replacement = mount('advanced-presentation');
+    expect(
+      replacement.host
+        .querySelector('[role="tab"]')
+        ?.getAttribute('aria-selected'),
+    ).toBe('true');
+    expect(
+      Array.from(replacement.host.querySelectorAll('[id$="--trigger"]')).map(
+        (trigger) => trigger.getAttribute('aria-expanded'),
+      ),
+    ).toEqual(['false', 'false']);
+  });
+
+  it('resolves Standard labels depth-first with safe local fallback', () => {
+    const scenario = referenceScenarios.find(
+      ({ id }) => id === 'advanced-presentation',
+    );
+    if (scenario === undefined) throw new Error('Advanced scenario missing.');
+    const application = new StandardReferenceApplication(
+      undefined,
+      scenario.id,
+    );
+    const state = application.getState();
+    const runtime = application.getRuntime();
+    if (state.definition === undefined || runtime === undefined)
+      throw new Error('Advanced runtime missing.');
+    const calls: string[] = [];
+    const host = document.createElement('main');
+    const renderer = new StandardDomRenderer(host, state.definition, runtime, {
+      formId: `reference-standard-${scenario.id}`,
+      resolvePresentationLabel(label) {
+        calls.push(label);
+        if (label === 'Account details') throw new Error('Local resolver');
+        if (label === 'Contact') return { label };
+        if (label === 'Security') return ' ';
+        return `Resolved ${label}`;
+      },
+    });
+    expect(calls).toEqual([
+      'Account workspace',
+      'Account details',
+      'Identity',
+      'Identity grid',
+      'Contact',
+      'Account preferences',
+      'Notifications',
+      'Security',
+    ]);
+    expect(
+      host.querySelector('[role="tablist"]')?.getAttribute('aria-label'),
+    ).toBe('Account details');
+    expect(
+      Array.from(host.querySelectorAll('[role="tab"]')).at(-1)?.textContent,
+    ).toBe('Contact');
+    expect(
+      host.querySelector('[id$="--accordion"]')?.getAttribute('aria-label'),
+    ).toBe('Resolved Account preferences');
+    expect(
+      Array.from(host.querySelectorAll('[id$="--trigger"]')).at(-1)
+        ?.textContent,
+    ).toBe('Security');
+    renderer.reconcile(runtime.getSnapshot());
+    expect(calls).toHaveLength(8);
+    application.setLocale('es');
+    renderer.reconcile(runtime.getSnapshot());
+    expect(calls).toHaveLength(16);
+    renderer.dispose();
+    application.dispose();
   });
 
   it('keeps null, missing, false and zero visibly distinct', () => {
@@ -307,7 +443,9 @@ function mount(initialScenarioId?: string): {
     throw new Error('Expected a renderable scenario.');
   const host = document.createElement('main');
   document.body.append(host);
-  const renderer = new StandardDomRenderer(host, definition, runtime);
+  const renderer = new StandardDomRenderer(host, definition, runtime, {
+    formId: `reference-standard-${application.getState().scenario.id}`,
+  });
   const unsubscribe = application.subscribeState((state) => {
     if (state.snapshot !== undefined) renderer.reconcile(state.snapshot);
   });

@@ -1,10 +1,4 @@
-import {
-  Component,
-  ViewChild,
-  computed,
-  signal,
-  type ViewContainerRef,
-} from '@angular/core';
+import { Component, ViewChild, computed, input, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   compileFormDefinition,
@@ -17,10 +11,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   SchemaFormDirective,
   provideSchemaEngineAngularNative,
+  provideSchemaPresentationContainer,
   provideSchemaTextResolver,
+  type AngularPresentationContainerRenderModel,
+  type AngularPresentationContainerRenderer,
   type AngularControlledFormConfig,
 } from '../dist/index.js';
-import { SectionHostFactory } from '../dist/node-outlet.js';
 import { AngularTextProjector } from '../dist/text.js';
 
 const schema = {
@@ -89,6 +85,37 @@ class PresentationHost {
   template: '',
 })
 class PartialSectionHost {}
+
+@Component({
+  selector: 'throwing-section-host',
+  standalone: true,
+  template: '',
+})
+class ThrowingSectionHost implements AngularPresentationContainerRenderer {
+  readonly presentation =
+    input.required<AngularPresentationContainerRenderModel>();
+
+  constructor() {
+    throw new Error('hidden');
+  }
+}
+
+@Component({
+  selector: 'binding-section-host',
+  standalone: true,
+  template: '<partial-section-host />',
+  imports: [PartialSectionHost],
+})
+class BindingSectionHost implements AngularPresentationContainerRenderer {
+  readonly presentation = input.required<
+    AngularPresentationContainerRenderModel,
+    AngularPresentationContainerRenderModel
+  >({
+    transform: () => {
+      throw new Error('hidden');
+    },
+  });
+}
 
 describe('Angular static presentation projection', () => {
   beforeEach(() => TestBed.resetTestingModule());
@@ -211,16 +238,18 @@ describe('Angular static presentation projection', () => {
   it.each(['creation', 'binding'])(
     'isolates section-host %s failure',
     (mode) => {
-      const factory = {
-        create(container: ViewContainerRef) {
-          if (mode === 'binding') container.createComponent(PartialSectionHost);
-          throw new Error('hidden');
-        },
-      };
       TestBed.configureTestingModule({
         providers: [
-          { provide: SectionHostFactory, useValue: factory },
           provideSchemaEngineAngularNative(),
+          provideSchemaPresentationContainer({
+            id: `broken-section-${mode}`,
+            renderer:
+              mode === 'creation' ? ThrowingSectionHost : BindingSectionHost,
+            tester: (candidate) =>
+              candidate.kind === 'section' && candidate.id === 'outer'
+                ? 10
+                : null,
+          }),
         ],
       });
       const fixture = TestBed.createComponent(PresentationHost);

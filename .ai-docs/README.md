@@ -9,7 +9,10 @@
   status.
 - [Work log](./project/WORKLOG.md) — append-only history; read selectively.
 - [Coordinated Experimental 0.2.0 release notes](./releases/0.2.0.md) — selected
-  clean candidate state and source migration; not published.
+  clean bytes, source migration and verified public `next`/`latest` state.
+- [M19 coordinated Experimental candidate release notes](./releases/0.3.0.md)
+  — private core/base `0.3.0` plus pilot `0.1.0` candidate contract; no selected
+  clean bytes or registry publication yet.
 
 ## Specifications
 
@@ -29,14 +32,14 @@
   review with zero findings.
 - [SPEC-006 v0.1.1: Nullable Primitive Leaves](./specs/006-nullable-primitive-leaves.md)
   — Accepted after review 034's complete repeated review passed with zero
-  findings; Approved PLAN-014 revision 0 authorizes checkpoints 1–6 only.
+  findings; completed PLAN-014 revision 0 delivered checkpoints 1–6.
 - [SPEC-007 v0.1.0: Reusable Synchronous Ajv Validator](./specs/007-synchronous-ajv-validator.md)
   — Accepted after review 084 cycle 1; completed PLAN-019 revision 1 delivers a
   private reusable Ajv integration for Angular and Standard.
 - [SPEC-008 v0.1.0: Static Advanced Presentation Layout and Angular Container Pilot](./specs/008-static-advanced-presentation-layout.md)
   — Accepted after review 102 cycle 5 passed all twelve areas with zero
-  findings; Approved PLAN-020 revision 0 now authorizes its eight bounded
-  implementation checkpoints.
+  findings; completed PLAN-020 revision 0 delivered its eight bounded
+  checkpoints after final review 113 passed with zero findings.
 
 ## Acceptance reviews
 
@@ -105,9 +108,8 @@
 - [D-034/D-040 public publication and dual licensing readiness](./reviews/027-d034-d040-publication-licensing-readiness.md) —
   Accepted after cycle 2 passed with zero findings; promotes normative design
   only for the selected `AGPL-3.0-only` or paid commercial model.
-- [ADR-018 complete review — Cycles 1–4](./reviews/028-adr-018-review.md) — Six
-  normative/closing-state findings were corrected; cycle 4 passed the complete
-  closing review with zero findings and ADR-018 revision 1 was accepted.
+- [ADR-018 revision 3 complete review](./reviews/028-adr-018-review.md) — Cycle
+  8 passed the complete revision 3 review with zero findings.
 - [PLAN-013 complete review — Cycles 1–4](./reviews/029-plan-013-review.md) —
   Cycles 1 and 3 corrected four design findings and one implementation-order
   conflict; cycle 4 passed the complete repeated review with zero findings.
@@ -293,6 +295,53 @@
 - [PLAN-020 checkpoint 1 review](./reviews/104-plan-020-checkpoint-1-review.md) —
   Cycle 3 closes the exact core contracts, compiler and fixtures after three
   corrections and a complete ten-area zero-finding pass.
+- [PLAN-020 checkpoint 2 review](./reviews/105-plan-020-checkpoint-2-review.md) —
+  Cycle 3 closes manual advanced definitions and runtime invariance after two
+  corrections and a complete ten-area zero-finding pass.
+- [PLAN-020 checkpoint 3 review](./reviews/106-plan-020-checkpoint-3-review.md) —
+  Cycle 3 closes the exact base Angular SPI and mandatory native projection
+  after five corrections and a complete twelve-area zero-finding pass.
+- [PLAN-020 checkpoint 4 review](./reviews/107-plan-020-checkpoint-4-review.md) —
+  Cycle 5 closes the independent Standard projection and shared advanced
+  scenario after four corrections and a complete twelve-area zero-finding pass.
+- [PLAN-020 checkpoint 5 pre-network review](./reviews/108-plan-020-checkpoint-5-pre-network-review.md)
+  — Cycle 3 passes all ten local manifest/package areas after two corrections;
+  checkpoint 5 remains open at its separately authorized Aria/CDK network gate.
+- [PLAN-020 checkpoint 5 review](./reviews/109-plan-020-checkpoint-5-review.md) —
+  Cycle 1 closes exact dependency resolution, peer patch, license, lifecycle,
+  lock and isolation evidence with zero findings.
+- [PLAN-020 checkpoint 6 review](./reviews/110-plan-020-checkpoint-6-review.md) —
+  Cycle 2 closes the isolated pilot, selective Angular Aria tabs and exact
+  six-property style boundary after one formatting correction.
+- [PLAN-020 checkpoint 7 pre-network review](./reviews/111-plan-020-checkpoint-7-pre-network-review.md)
+  — Cycle 3 passes twelve local artifact/source/security/lower-consumer areas
+  after correcting the frozen `0.2.0` regression; registry `latest` remains
+  separately gated.
+- [PLAN-020 checkpoint 7 review](./reviews/112-plan-020-checkpoint-7-review.md) —
+  Cycle 1 closes Angular `22.0.7`, exact Aria/CDK `22.0.5`, both latest clean
+  consumers and all 22 rows with zero findings.
+- [PLAN-020 final implementation review](./reviews/113-plan-020-final-implementation-review.md)
+  — Cycle 2 repeats fourteen areas, all 22 rows, the frozen install and complete
+  matrix with zero findings, completing checkpoint 8, PLAN-020 and M18.
+- [M19 coordinated Experimental 0.3 release promotion readiness](./reviews/114-m19-coordinated-0-3-release-promotion-readiness.md)
+  — Cycle 2 promotes only core/base `0.3.0` plus pilot `0.1.0` release design;
+  its required ADR-018 revision 4 gate is now satisfied by review 115.
+- [ADR-018 revision 4 complete review](./reviews/115-adr-018-revision-4-review.md)
+  — Cycle 4 reconciles eight findings and passes thirteen areas plus closing
+  documentation with zero findings; revision 4 is Accepted and authorizes
+  PLAN-021 preparation only.
+- [PLAN-021 complete review](./reviews/116-plan-021-review.md) — Cycle 3 passes
+  fourteen areas and closing documentation with zero findings; revision 0 is
+  Approved for local checkpoints 1–3 only.
+- [PLAN-021 checkpoint 1 review](./reviews/117-plan-021-checkpoint-1-review.md)
+  — Cycle 2 passes all ten descriptor/tooling/evidence areas with zero
+  findings.
+- [PLAN-021 checkpoint 2 review](./reviews/118-plan-021-checkpoint-2-review.md)
+  — Cycle 3 passes all ten release-note/onboarding/candidate-contract areas
+  with zero findings.
+- [PLAN-021 checkpoint 3 review](./reviews/119-plan-021-checkpoint-3-review.md)
+  — Cycle 5 passes all fourteen local-release areas and all 22 SPEC-008 rows
+  with zero findings; checkpoint 4 remains separately gated.
 
 ## Architecture Decision Records
 
@@ -367,12 +416,13 @@
 - [PLAN-012: Static neutral presentation groups](./plans/012-static-presentation-groups.md) — Completed revision 1 after final repeated review with zero findings
 - [PLAN-013: First public experimental release](./plans/013-public-experimental-release.md) — Completed revision 4 after all separately authorized local, Git and npm checkpoints passed
 - [PLAN-014: Nullable primitive leaves](./plans/014-nullable-primitive-leaves.md) — Completed revision 0 after final review 041 cycle 2 passed with zero findings
-- [PLAN-015: Coordinated Experimental 0.2 release](./plans/015-coordinated-experimental-0-2-release.md) — Approved revision 0 for local checkpoints 1–3 after review 042 cycle 2 passed with zero findings
+- [PLAN-015: Coordinated Experimental 0.2 release](./plans/015-coordinated-experimental-0-2-release.md) — Completed revision 0 after final review 052 passed with zero findings
 - [PLAN-016: Private reference platform and Angular 22 shell](./plans/016-private-reference-platform.md) — Completed revision 0 after final review 063 cycle 2 passed with zero findings
 - [PLAN-017: Reference workspace UX and configuration laboratory](./plans/017-reference-workspace-ux.md) — Completed revision 0 after final review 070 cycle 1 repeated the complete implementation and verification matrix with zero findings
 - [PLAN-018: Private Standard/DOM direct-core reference shell](./plans/018-standard-dom-reference-shell.md) — Completed revision 1 after final review 095 cycle 2 repeated all fourteen areas and the full matrix with zero findings
 - [PLAN-019: Reusable synchronous Ajv validator](./plans/019-reusable-synchronous-ajv-validator.md) — Completed revision 1 after final review 089 cycle 2 repeated the complete matrix with zero findings
-- [PLAN-020: Static advanced presentation layout and Angular Aria pilot](./plans/020-static-advanced-presentation-layout.md) — Approved revision 0; checkpoint 1 completed after review 104 cycle 3 passed with zero findings
+- [PLAN-020: Static advanced presentation layout and Angular Aria pilot](./plans/020-static-advanced-presentation-layout.md) — Completed revision 0 after final review 113 repeated all fourteen areas and 22 rows with zero findings
+- [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Approved revision 0 after review 116 cycle 3 passed all fourteen areas and closing documentation with zero findings
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -382,7 +432,7 @@ Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 zero findings; [final review 070](./reviews/070-plan-017-final-implementation-review.md)
 passed cycle 1 with zero findings and completed PLAN-017.
 
-Accepted publication architecture: [ADR-018 revision 3](./adrs/018-licencia-dual-publicacion-experimental.md)
+Accepted publication architecture: [ADR-018 revision 4](./adrs/018-licencia-dual-publicacion-experimental.md)
 selects dual AGPL/commercial licensing and public Experimental packages while
 keeping the repository private pending sanitization. Completed PLAN-013
 published and verified core and Angular `0.1.0` without promoting Stable APIs.
@@ -405,10 +455,17 @@ remainder and all D-012 remain Deferred. ADR-023 revision 1 now fixes that
 neutral architecture. Review 100 promoted the narrow D-025 Angular
 container-kit slice, and accepted ADR-024 revision 1 fixes its provider seam,
 native fallback, isolated theme/package boundary and sole Angular Aria 22 pilot.
-SPEC-008 v0.1.0 is Accepted after review 102 cycle 5. PLAN-020 revision 0 is
-Approved after review 103 cycle 2; checkpoint 1 now implements its exact core
-contracts, compiler and fixtures after review 104 cycle 3, while dependencies
-remain untouched. Checkpoint 2 is the next action.
+SPEC-008 v0.1.0 is Accepted after review 102 cycle 5. PLAN-020 revision 0 and
+M18 are complete after reviews 104–113; final review 113 cycle 2 repeated all
+fourteen areas and 22 conformance rows with zero findings. The remaining
+D-011/D-025 scope, D-012 and other targets remain Deferred; release
+implementation and external publication stay separately gated.
+Review 114 selects M19 only for the coordinated core/base `0.3.0` plus pilot
+`0.1.0` release. ADR-018 revision 4 is Accepted after review 115 cycle 4;
+PLAN-021 revision 0 is Approved after review 116 cycle 3. Local checkpoint 1 is
+complete after review 117 cycle 2 and checkpoint 2 after review 118 cycle 3;
+checkpoint 3 is complete after review 119 cycle 5. Checkpoint 4 Git/clean-build
+work and every registry read/write retain separate gates.
 SPEC-006 v0.1.1 now defines the Accepted M14 nullable-leaf contract;
 PLAN-014 revision 0 and local M14 implementation are complete after final
 review 041 cycle 2 passed with zero findings. Version selection and publication

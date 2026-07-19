@@ -209,11 +209,14 @@ Cada decisión debe registrar:
   accesibilidad, diagnósticos y migración Public tras review 099 ciclo 3 sin
   hallazgos. Review 100 y ADR-024 revisión 1 completaron después el gate D-025;
   SPEC-008 v0.1.0 está Accepted tras review 102 ciclo 5 y PLAN-020 revisión 0
-  está Approved tras review 103 ciclo 2 para ocho checkpoints verificables.
+  fue Approved tras review 103 ciclo 2 para ocho checkpoints verificables;
+  ahora está Completed tras review 113 ciclo 2.
 - **Contrato normativo aceptado:** SPEC-008 v0.1.0 cierra gramática,
   normalización, diagnósticos, validación manual, estado target-owned,
-  accesibilidad, proyección Angular/Standard y evidencia de conformidad sin
-  activar implementación.
+  accesibilidad, proyección Angular/Standard y evidencia de conformidad.
+- **Slice implementado:** PLAN-020 revisión 0 y M18 están Completed tras review
+  113 ciclo 2 sin hallazgos; el cierre verifica las 22 filas, native/Aria
+  lower/latest, fuentes, artefactos y ambos targets independientes.
 - **Permanece Deferred:** wizards, workflow, slots, acciones, scopes,
   condiciones, layout nested/item, breakpoints arbitrarios, estado controlado o
   persistido y todo renderer kit salvo la arquitectura estrecha del único
@@ -382,8 +385,9 @@ Cada decisión debe registrar:
   como único piloto. No activa dependencias, paquete, publicación ni código.
 - **Contrato estrecho aceptado:** SPEC-008 v0.1.0 fija nueve exports Angular,
   providers/fallback/claims, paquete Aria `0.1.0`, matriz core/Angular `0.3.0`,
-  seis propiedades CSS y tiers Experimental. PLAN-020 revisión 0 está Approved
-  tras review 103 ciclo 2 y mantiene todo alcance más amplio Deferred.
+  seis propiedades CSS y tiers Experimental. PLAN-020 revisión 0 fue Approved
+  tras review 103 ciclo 2 y ahora está Completed tras review 113; todo alcance
+  más amplio permanece Deferred.
 - **Trigger reconciliado:** no existe todavía un kit Stable. Esperarlo antes de
   diseñar el primer seam sería circular; review 100 sustituye ese trigger solo
   para arquitectura/piloto Experimental verificable en privado. No promueve
@@ -392,9 +396,9 @@ Cada decisión debe registrar:
   traducción de temas, suite completa de fields, múltiples pilotos, protocolo
   multi-framework, otros Angular majors y cualquier implementación/publicación.
 - **Plan aprobado:** PLAN-020 revisión 0 mapea las 22 filas de conformidad a
-  ocho checkpoints. Checkpoint 1 está completo tras review 104 ciclo 3;
-  checkpoint 2 es la siguiente acción. Sus gates de red, publicación, commit y
-  push conservan autorización separada.
+  ocho checkpoints. Todos están completos tras reviews 104–113; review 113
+  ciclo 2 repite la matriz final y cierra PLAN-020/M18 sin hallazgos. El alcance
+  más amplio de D-025 continúa Deferred.
 
 ## D-026: Capabilities de adaptadores
 
@@ -476,10 +480,10 @@ Cada decisión debe registrar:
   ciclo 2 pasa sin hallazgos, identifica a Ricardo Rabassó Rodríguez como
   titular jurídico y promueve D-034 únicamente para redactar/revisar ADR-018.
 - **Decisión aceptada:**
-  [`ADR-018 revision 3`](../adrs/018-licencia-dual-publicacion-experimental.md)
-  adopta `AGPL-3.0-only` o licencia comercial separada y trata `latest`
-  obligatorio de npm solo como alias Experimental tras review 028 ciclo 6 sin
-  hallazgos; PLAN-013 conserva cada gate externo.
+  [`ADR-018 revision 4`](../adrs/018-licencia-dual-publicacion-experimental.md)
+  conserva `AGPL-3.0-only` o licencia comercial separada y trata todo `latest`
+  observado solo como alias Experimental. Review 115 ciclo 4 acepta la revisión
+  sin cambiar los gates externos de PLAN-013/M19.
 
 ## D-035: Especificación pública independiente de la implementación
 
@@ -560,14 +564,33 @@ Cada decisión debe registrar:
   publicación pública bajo el modelo dual de D-034. La
   [revisión 027](../reviews/027-d034-d040-publication-licensing-readiness.md)
   ciclo 2 pasa sin hallazgos y promueve D-040 únicamente para diseño normativo.
-  `private: true` sigue intacto; el repositorio seguirá privado hasta sanearlo
-  y toda publicación requiere ADR, plan y checkpoint externo explícito.
-- **Arquitectura aceptada:** ADR-018 revision 3 mantiene el repositorio privado,
-  exige Corresponding Source público y 2FA inicial, y difiere conjuntamente
+  En ese gate inicial `private: true` seguía intacto; el repositorio continuaría
+  privado hasta sanearlo y toda publicación requería ADR, plan y checkpoint
+  externo explícito.
+- **Release M19 seleccionada:** Ricard seleccionó el 19 de julio de 2026 la
+  entrega coordinada de core/base Angular `0.3.0` y el primer piloto Angular
+  Aria `0.1.0`. Review 114 ciclo 2 pasa doce áreas sin hallazgos y promueve solo
+  la revisión normativa de publicación.
+- **Arquitectura M19 aceptada:** ADR-018 revisión 4 está Accepted tras review
+  115 ciclo 4. Sustituye el límite histórico de dos paquetes, incorpora el
+  tercer nombre y cierra publicación `next` dependency-first, transición
+  `latest` dependent-first, observación del primer alias del piloto, fallos
+  parciales y recuperación immutable. SPEC-008/ADR-010 no requieren revisión.
+- **Plan M19 aprobado:** PLAN-021 revisión 0 está Approved tras review 116
+  ciclo 3 sin hallazgos. Checkpoint 1 completa el descriptor/tooling de tres
+  paquetes tras review 117 ciclo 2; checkpoint 2 completa release notes,
+  onboarding y checks documentales tras review 118 ciclo 3; checkpoint 3
+  completa gate local, candidatos deterministas, dry runs neutrales y las 22
+  filas tras review 119 ciclo 5. Checkpoint 4 queda detenido para autorización
+  explícita de Git y reconstrucción limpia; registry/npm mantienen gates
+  separados. D-043 permanece Deferred.
+- **Arquitectura aceptada:** ADR-018 revision 4 mantiene el repositorio privado,
+  exige Corresponding Source público y 2FA por write, y difiere conjuntamente
   metadata pública, trusted publishing y provenance hasta sanear/publicar el
-  repositorio; `next` es recomendado y `latest` obligatorio no implica Stable.
+  repositorio; `next` es recomendado y todo `latest` observado no implica
+  Stable.
 - **Estado de entrega:** PLAN-013 revision 4 publicó y verificó byte a byte core
-  y Angular `0.1.0`; ambos exponen `next` y el alias Experimental obligatorio
+  y Angular `0.1.0`; ambos exponen `next` y el alias Experimental observado
   `latest`. Checkpoint 7 y M13 cierran con publicación interactiva/2FA, sin
   provenance, workflow ni cambio de settings externo.
 
@@ -804,11 +827,14 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M18/ADR-023:** la arquitectura neutral de tabs/accordions/grid está
-   Accepted en revisión 1 tras review 099 ciclo 3 sin hallazgos.
-2. **M18 delivery:** SPEC-008 v0.1.0 está Accepted y PLAN-020 revisión 0 está
-   Approved tras review 103 ciclo 2. Checkpoint 1 está completo tras review 104
-   ciclo 3; checkpoint 2 es la siguiente acción.
+1. **M19 release:** ADR-018 revisión 4 está Accepted y PLAN-021 revisión 0 está
+   Approved tras review 116 ciclo 3; checkpoint 1 está completo tras review 117
+   ciclo 2, checkpoint 2 tras review 118 ciclo 3 y checkpoint 3 tras review 119
+   ciclo 4. La siguiente acción es detenerse para autorización explícita del
+   checkpoint 4 Git/reconstrucción limpia; registry/npm siguen separados.
+2. **M18 delivery:** SPEC-008 v0.1.0 y ADR-023/ADR-024 permanecen Accepted;
+   PLAN-020 revisión 0 y M18 están Completed tras review 113 ciclo 2 sin
+   hallazgos.
 3. **D-043:** conserva la publicación del repositorio y automatización como
    trabajo Deferred; no se promueve por D-044.
 4. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
@@ -829,96 +855,111 @@ explícitas.
 
 ## 5. Historial
 
-| Fecha      | Cambio                                                                                                                                         |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| 18-07-2026 | PLAN-020 checkpoint 1 completa contratos/compiler/fixtures core tras review 104 ciclo 3; checkpoint 2 es la siguiente acción.                  |
-| 18-07-2026 | PLAN-020 revisión 0 queda Approved tras review 103 ciclo 2; checkpoint 1 es la siguiente acción y los gates externos siguen separados.         |
-| 18-07-2026 | SPEC-008 v0.1.0 queda Accepted tras review 102 ciclo 5; PLAN-020 es el siguiente gate y aún no autoriza implementación.                        |
-| 18-07-2026 | ADR-024 revisión 1 queda Accepted tras review 101 ciclo 4; Angular Aria 22 es el único piloto y SPEC-008 es el siguiente gate.                 |
-| 18-07-2026 | Review 100 ciclo 4 promueve el seam Angular Experimental estrecho de D-025; ADR-024 es el siguiente gate y SPEC-008 sigue bloqueada.           |
-| 18-07-2026 | ADR-023 revisión 1 queda Accepted tras review 099 ciclo 3; D-025 promotion readiness es el siguiente gate y SPEC-008 continúa bloqueada.       |
-| 18-07-2026 | Review 098 ciclo 2 promueve el slice estático neutral de D-011 para ADR-023/M18; D-025 conserva un gate separado antes de SPEC/plan.           |
-| 18-07-2026 | PLAN-018 revisión 1/D-046/M16 quedan Completed; review final 095 ciclo 2 repite catorce áreas y toda la matriz sin hallazgos.                  |
-| 18-07-2026 | PLAN-018 checkpoint 7 completa Chromium/aislamiento/onboarding; review 094 ciclo 2 cierra sin hallazgos.                                       |
-| 18-07-2026 | PLAN-018 checkpoint 6 completa workspace/evidencia/snippets; review 093 ciclo 1 cierra sin hallazgos.                                          |
-| 18-07-2026 | PLAN-018 checkpoint 5 completa CodeMirror/configuración/active Ajv; review 092 ciclo 2 cierra sin hallazgos.                                   |
-| 18-07-2026 | PLAN-018 revisión 1 queda Approved para checkpoints 5–8; checkpoint 5 espera el gate exacto de dependencias.                                   |
-| 18-07-2026 | PLAN-018 revisión 1 queda Proposed tras review 091 ciclo 3 sin hallazgos; checkpoints 5–8 esperan aprobación formal.                           |
-| 18-07-2026 | ADR-021 revisión 1 queda Accepted; autoriza redactar/revisar PLAN-018 revisión 1, no implementar checkpoint 5 todavía.                         |
-| 17-07-2026 | ADR-021 revisión 1 queda Proposed tras review 090 ciclo 3 sin hallazgos; aceptación formal y revisión de PLAN-018 siguen pendientes.           |
-| 17-07-2026 | PLAN-019/M17 completa el paquete Ajv privado y ambos shells; review 089 ciclo 2 cierra sin hallazgos y PLAN-018 checkpoint 5 puede reanudarse. |
-| 17-07-2026 | Review 082 promueve D-047/M17 para diseñar un paquete privado Ajv síncrono y reutilizable; publicación y capacidades avanzadas siguen fuera.   |
-| 17-07-2026 | PLAN-018 checkpoint 1 completa Vite/skeleton/watch/boundaries; review 078 ciclo 2 cierra sin hallazgos tras corregir tipos CSS.                |
-| 17-07-2026 | PLAN-018 revisión 0 queda Approved tras review 077 ciclo 1 sin hallazgos; checkpoint 1 espera el gate exacto de Vite.                          |
-| 17-07-2026 | ADR-021 revisión 0 queda Accepted tras review 076 ciclo 1 sin hallazgos; autoriza solo preparar y revisar PLAN-018.                            |
-| 17-07-2026 | Review 075 promueve D-046/M16 solo para ADR-021: shell privado Standard/DOM directo al core, sin adapter ni contrato Public.                   |
-| 17-07-2026 | PLAN-016 checkpoints 1–2 completan workspace privado y authoring seguro del catálogo; review 057 ciclo 3 cierra sin hallazgos.                 |
-| 16-07-2026 | Review 053 promueve D-044/M15 para ADR-020 y registra D-045 Deferred para futuras familias Angular anteriores a 19.                            |
-| 16-07-2026 | D-044 se amplía a plataforma multi-framework; el primer alcance candidato sigue limitado a catálogo neutral y shell Angular.                   |
-| 16-07-2026 | PLAN-015 cierra la release coordinada 0.2.0; D-044 queda Candidate para revisar una aplicación Angular de referencia, consumo y demo.          |
-| 15-07-2026 | ADR-018 r3/PLAN-013 r4 cierran M13 con release manual/2FA verificada; D-043 difiere repositorio público, OIDC y provenance.                    |
-| 15-07-2026 | PLAN-012 y M12 se completan; review 026 ciclo 6 cierra sin hallazgos tras siete correcciones; la matriz completa pasó en ciclo 3.              |
-| 15-07-2026 | SPEC-005 v0.1.1 queda Accepted tras review 024 ciclo 2 sin hallazgos; autoriza preparar PLAN-012, no implementar.                              |
-| 15-07-2026 | SPEC-005 v0.1.0 queda Draft para D-042; requiere revisión y aceptación antes de PLAN-012.                                                      |
-| 15-07-2026 | ADR-017 revision 0 queda Accepted tras review 023 ciclo 3 sin hallazgos; autoriza preparar SPEC, no plan ni implementación.                    |
-| 15-07-2026 | ADR-017 revision 0 queda Proposed; review 023 ciclo 3 pasa ocho áreas sin hallazgos tras dos correcciones documentales.                        |
-| 15-07-2026 | Ricard acepta review 022; D-042 queda Promoted solo para grupos de presentación estáticos y D-011/D-012 siguen Deferred.                       |
-| 15-07-2026 | PLAN-011 y M11 se completan; review 021 ciclo 2 y toda la matriz pasan sin hallazgos tras corregir provenance de políticas.                    |
-| 15-07-2026 | PLAN-011 checkpoint 4 completa los 19 escenarios, paquetes y consumidores; 326 core/68 Angular tests pasan.                                    |
-| 15-07-2026 | PLAN-011 checkpoint 3 integra `$defs`/`$ref`, ciclos, orden y provenance en el compiler; 304 tests core pasan.                                 |
-| 15-07-2026 | PLAN-011 checkpoint 2 completa registry/decoder/resolver Internal y 297 tests core pasan; compiler/reference behavior sigue intacto.           |
-| 15-07-2026 | PLAN-011 checkpoint 1 completa fundamentos Internal inmutables y 252 tests core pasan; referencias siguen inactivas.                           |
-| 15-07-2026 | PLAN-011 revisión 0 queda Approved; checkpoint 1 inicia solo fundamentos Internal inmutables sin activar referencias.                          |
-| 15-07-2026 | PLAN-011 revisión 0 supera revisión completa ciclo 1 sin hallazgos y permanece Proposed pendiente de aprobación formal.                        |
-| 15-07-2026 | PLAN-011 revisión 0 queda Proposed con 19 escenarios y cinco checkpoints; requiere revisión completa y aprobación antes de implementar.        |
-| 15-07-2026 | SPEC-004 v0.1.1 queda Accepted tras revisión completa ciclo 5 sin hallazgos; se autoriza preparar/revisar PLAN-011, no implementar.            |
-| 14-07-2026 | SPEC-004 v0.1.1 corrige nueve hallazgos y la revisión completa ciclo 5 pasa sin hallazgos; aceptación formal pendiente.                        |
-| 14-07-2026 | SPEC-004 v0.1.0 queda Draft con el contrato observable D-041; requiere revisión completa y aceptación antes de cualquier plan.                 |
-| 14-07-2026 | ADR-005 revision 3 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar SPEC-004, no plan ni implementación.              |
-| 14-07-2026 | ADR-016 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar ADR-005 revisión 3, no SPEC ni implementación.               |
-| 14-07-2026 | Ricard acepta review 016; D-041 queda Promoted para diseño local estático y se propone ADR-016 sin autorizar implementación.                   |
-| 14-07-2026 | La revisión de preparación M11 recomienda separar resolución local estática de D-007 completo; aceptación pendiente.                           |
-| 14-07-2026 | PLAN-010 checkpoint 7 repite revisión y matriz completas sin hallazgos; PLAN-010 y M10 quedan completados sin publicar.                        |
-| 14-07-2026 | PLAN-010 checkpoint 6 migra docs, declaraciones, paquetes, artefactos y consumidores; checkpoint 7 queda pendiente.                            |
-| 14-07-2026 | PLAN-010 checkpoint 5 completa la proyección Angular estable y accesible de colecciones/ítems; checkpoint 6 queda pendiente.                   |
-| 14-07-2026 | PLAN-010 checkpoint 4 completa runtime, snapshots, requests, scopes, interacción y sharing de colecciones; checkpoint 5 queda pendiente.       |
-| 14-07-2026 | PLAN-010 checkpoint 3 completa las cinco operaciones de colección y sus fixtures puras/form; checkpoint 4 queda pendiente.                     |
-| 14-07-2026 | PLAN-010 checkpoint 2 completa policies, compiler array/item/UI, templates inmutables y fixtures con matriz verde.                             |
-| 14-07-2026 | PLAN-010 checkpoint 1 completa contratos Public, helpers Internal, validación de definición y paquetes/consumidores.                           |
-| 14-07-2026 | PLAN-010 revisión 0 se aprueba tras revisión completa sin hallazgos; M10 queda autorizado, checkpoint 1 aún no iniciado.                       |
-| 14-07-2026 | Se acepta la revisión de promoción M10; D-006 queda Promoted para diseño normativo, sin autorizar implementación.                              |
-| 14-07-2026 | Revisión de promoción M10 pasa sin hallazgos y recomienda D-006 para diseño estrecho; aceptación sigue pendiente.                              |
-| 14-07-2026 | PLAN-009 checkpoint 7 supera revisión integral repetida y matriz completa; M9 queda completado sin activar M10 ni publicación.                 |
-| 14-07-2026 | PLAN-009 checkpoint 6 migra paquetes, declaraciones, artefactos y consumidores limpios; checkpoint 7 queda pendiente.                          |
-| 14-07-2026 | PLAN-009 checkpoint 5 completa la proyección Angular recursiva y accesible; checkpoint 6 queda pendiente.                                      |
-| 14-07-2026 | PLAN-009 checkpoint 4 completa runtime, snapshots, scopes y sharing anidados; checkpoint 5 queda pendiente.                                    |
-| 14-07-2026 | PLAN-009 checkpoint 3 completa operaciones profundas y fixtures con matriz verde; checkpoint 4 queda pendiente.                                |
-| 14-07-2026 | PLAN-009 checkpoint 2 completa el compiler schema/UI recursivo y sus fixtures con matriz verde; checkpoint 3 queda pendiente.                  |
-| 14-07-2026 | PLAN-009 checkpoint 1 completa contratos/helpers neutrales y migración plana con matriz verde; checkpoint 2 queda pendiente.                   |
-| 14-07-2026 | Se aprueba PLAN-009 revisión 1 tras la revisión repetida sin hallazgos; la implementación de M9 aún no ha comenzado.                           |
-| 14-07-2026 | PLAN-009 revisión 1 corrige cuatro hallazgos y supera la revisión completa repetida; aprobación e implementación siguen pendientes.            |
-| 14-07-2026 | Se aceptan ADR-014 revision 2 y SPEC-002 v0.1.2 tras revisión sin hallazgos; PLAN-009 sigue pendiente y M9 inactivo.                           |
-| 14-07-2026 | ADR-014 revision 2 propuesta y SPEC-002 v0.1.2 corrigen seis hallazgos; la revisión repetida pasa y la aceptación queda pendiente.             |
-| 14-07-2026 | Se aceptan coordinadamente ADR-014 revision 1 y ADR-005 revision 1; SPEC-002 y la implementación de M9 siguen pendientes.                      |
-| 14-07-2026 | Se acepta la revisión de promoción, D-005 pasa a Promoted para diseño y se proponen ADR-014, ADR-005 revisión 1 y SPEC-002.                    |
-| 14-07-2026 | PLAN-008 y M8 se completan con candidatos privados 0.1.0 verificados; D-040 y D-034 continúan Deferred.                                        |
-| 14-07-2026 | PLAN-008 revision 2 supera la revisión formal repetida; M8 sigue inactivo y D-040 continúa Deferred.                                           |
-| 14-07-2026 | Se acepta ADR-013 revision 1; D-040 sigue Deferred y PLAN-008 puede pasar a revisión sin activar M8.                                           |
-| 14-07-2026 | ADR-013 revision 1 supera la revisión formal repetida; D-040 continúa Deferred y la aceptación sigue pendiente.                                |
-| 14-07-2026 | Se propone ADR-013 y PLAN-008 para preparar artefactos 0.1 locales; D-040 separa y difiere la publicación real.                                |
-| 14-07-2026 | Se acepta ADR-012 revision 1, D-010 queda Promoted y M7 avanza a sincronización de SPEC y preparación de PLAN-007.                             |
-| 14-07-2026 | ADR-012 revision 1 supera sus ocho criterios tras precisar foco, accesibilidad y migración; D-010 sigue Candidate.                             |
-| 14-07-2026 | Se propone ADR-012 para revisar la limpieza explícita nativa; D-010 permanece Candidate y M7 no está activo.                                   |
-| 14-07-2026 | G0 se completa y SPEC-001 v0.1.14 queda Accepted sin promover ninguna decisión diferida ni API a Stable.                                       |
-| 14-07-2026 | G0 difiere como D-038 y D-039 los helpers no implementados de baseline parcial y aplicación explícita de defaults.                             |
-| 14-07-2026 | PLAN-006 y M6 se completan con enum string normalizado y select Angular controlado, manteniendo las exclusiones diferidas.                     |
-| 13-07-2026 | M6 comienza y completa el paso 1 de contratos neutrales de PLAN-006 sin activar otra decisión aplazada.                                        |
-| 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                                           |
-| 13-07-2026 | Se acepta ADR-011, D-008 se promueve y `const`/`format` se separan como D-036 y D-037 sin activar su implementación.                           |
-| 13-07-2026 | D-024 registra custom renderers como resueltos por ADR-007/009 y aplaza el bridge Angular hasta existir un consumidor concreto.                |
-| 13-07-2026 | Se acepta ADR-010, ADR-002 queda Superseded y D-028 se promueve con versionado y compatibilidad explícitos.                                    |
-| 13-07-2026 | Se propone ADR-010 para resolver D-028 y sustituir el lockstep Angular del ADR-002 pre-SPEC.                                                   |
-| 13-07-2026 | Se acepta ADR-009 y D-029 se promueve con la frontera pública y la política de estabilidad iniciales.                                          |
-| 13-07-2026 | Se propone ADR-009 para delimitar la API pública y su política de estabilidad; D-029 permanece Candidate hasta su aceptación.                  |
-| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes.                             |
-| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                                                          |
+| Fecha      | Cambio                                                                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 19-07-2026 | PLAN-021 checkpoint 3 completa gate local/candidatos/dry runs/22 filas tras review 119 ciclo 5; checkpoint 4 Git queda gated.                      |
+| 19-07-2026 | PLAN-021 checkpoint 2 completa release notes/onboarding/checks M19 tras review 118 ciclo 3; checkpoint local 3 sigue sin Git ni registry.          |
+| 19-07-2026 | PLAN-021 checkpoint 1 completa descriptor/tooling/evidence M19 tras review 117 ciclo 2; checkpoint local 2 sigue sin Git ni acción externa.        |
+| 19-07-2026 | PLAN-021 revisión 0 queda Approved tras review 116 ciclo 3; checkpoint local 1 es el siguiente paso y todos los gates Git/npm siguen separados.    |
+| 19-07-2026 | ADR-018 revisión 4 queda Accepted tras review 115 ciclo 4; PLAN-021 es el siguiente gate y no hay acción externa autorizada.                       |
+| 19-07-2026 | Review 114 ciclo 2 selecciona M19 y promueve solo ADR-018 revisión 4 para la release coordinada `0.3.0`/piloto `0.1.0`.                            |
+| 18-07-2026 | PLAN-020/M18 completan checkpoint 8 y las 22 filas tras review 113 ciclo 2 sin hallazgos; no queda implementación activa.                          |
+| 18-07-2026 | PLAN-020 checkpoint 7 completa lower/latest clean consumers y las 22 filas tras review 112 ciclo 1.                                                |
+| 18-07-2026 | PLAN-020 checkpoint 7 local pasa review 111 ciclo 3; solo la lane latest-compatible registry-backed permanece gated.                               |
+| 18-07-2026 | PLAN-020 checkpoint 6 completa el piloto Aria aislado y su boundary de tema tras review 110 ciclo 2.                                               |
+| 18-07-2026 | PLAN-020 checkpoint 5 resuelve Aria/CDK 22.0.5 y pasa review 109 ciclo 1 sin hallazgos.                                                            |
+| 18-07-2026 | PLAN-020 checkpoint 5 local pasa review 108 ciclo 3; versiones/esqueleto están listos y el comando Aria/CDK conserva su gate de red separado.      |
+| 18-07-2026 | PLAN-020 checkpoint 4 completa escenario/proyección Standard y Angular independiente tras review 107 ciclo 5; checkpoint 5 es la siguiente acción. |
+| 18-07-2026 | PLAN-020 checkpoint 3 completa SPI Angular base/proyección nativa tras review 106 ciclo 3; checkpoint 4 es la siguiente acción.                    |
+| 18-07-2026 | PLAN-020 checkpoint 2 completa validación manual/invariancia runtime tras review 105 ciclo 3; checkpoint 3 es la siguiente acción.                 |
+| 18-07-2026 | PLAN-020 checkpoint 1 completa contratos/compiler/fixtures core tras review 104 ciclo 3; checkpoint 2 es la siguiente acción.                      |
+| 18-07-2026 | PLAN-020 revisión 0 queda Approved tras review 103 ciclo 2; checkpoint 1 es la siguiente acción y los gates externos siguen separados.             |
+| 18-07-2026 | SPEC-008 v0.1.0 queda Accepted tras review 102 ciclo 5; PLAN-020 es el siguiente gate y aún no autoriza implementación.                            |
+| 18-07-2026 | ADR-024 revisión 1 queda Accepted tras review 101 ciclo 4; Angular Aria 22 es el único piloto y SPEC-008 es el siguiente gate.                     |
+| 18-07-2026 | Review 100 ciclo 4 promueve el seam Angular Experimental estrecho de D-025; ADR-024 es el siguiente gate y SPEC-008 sigue bloqueada.               |
+| 18-07-2026 | ADR-023 revisión 1 queda Accepted tras review 099 ciclo 3; D-025 promotion readiness es el siguiente gate y SPEC-008 continúa bloqueada.           |
+| 18-07-2026 | Review 098 ciclo 2 promueve el slice estático neutral de D-011 para ADR-023/M18; D-025 conserva un gate separado antes de SPEC/plan.               |
+| 18-07-2026 | PLAN-018 revisión 1/D-046/M16 quedan Completed; review final 095 ciclo 2 repite catorce áreas y toda la matriz sin hallazgos.                      |
+| 18-07-2026 | PLAN-018 checkpoint 7 completa Chromium/aislamiento/onboarding; review 094 ciclo 2 cierra sin hallazgos.                                           |
+| 18-07-2026 | PLAN-018 checkpoint 6 completa workspace/evidencia/snippets; review 093 ciclo 1 cierra sin hallazgos.                                              |
+| 18-07-2026 | PLAN-018 checkpoint 5 completa CodeMirror/configuración/active Ajv; review 092 ciclo 2 cierra sin hallazgos.                                       |
+| 18-07-2026 | PLAN-018 revisión 1 queda Approved para checkpoints 5–8; checkpoint 5 espera el gate exacto de dependencias.                                       |
+| 18-07-2026 | PLAN-018 revisión 1 queda Proposed tras review 091 ciclo 3 sin hallazgos; checkpoints 5–8 esperan aprobación formal.                               |
+| 18-07-2026 | ADR-021 revisión 1 queda Accepted; autoriza redactar/revisar PLAN-018 revisión 1, no implementar checkpoint 5 todavía.                             |
+| 17-07-2026 | ADR-021 revisión 1 queda Proposed tras review 090 ciclo 3 sin hallazgos; aceptación formal y revisión de PLAN-018 siguen pendientes.               |
+| 17-07-2026 | PLAN-019/M17 completa el paquete Ajv privado y ambos shells; review 089 ciclo 2 cierra sin hallazgos y PLAN-018 checkpoint 5 puede reanudarse.     |
+| 17-07-2026 | Review 082 promueve D-047/M17 para diseñar un paquete privado Ajv síncrono y reutilizable; publicación y capacidades avanzadas siguen fuera.       |
+| 17-07-2026 | PLAN-018 checkpoint 1 completa Vite/skeleton/watch/boundaries; review 078 ciclo 2 cierra sin hallazgos tras corregir tipos CSS.                    |
+| 17-07-2026 | PLAN-018 revisión 0 queda Approved tras review 077 ciclo 1 sin hallazgos; checkpoint 1 espera el gate exacto de Vite.                              |
+| 17-07-2026 | ADR-021 revisión 0 queda Accepted tras review 076 ciclo 1 sin hallazgos; autoriza solo preparar y revisar PLAN-018.                                |
+| 17-07-2026 | Review 075 promueve D-046/M16 solo para ADR-021: shell privado Standard/DOM directo al core, sin adapter ni contrato Public.                       |
+| 17-07-2026 | PLAN-016 checkpoints 1–2 completan workspace privado y authoring seguro del catálogo; review 057 ciclo 3 cierra sin hallazgos.                     |
+| 16-07-2026 | Review 053 promueve D-044/M15 para ADR-020 y registra D-045 Deferred para futuras familias Angular anteriores a 19.                                |
+| 16-07-2026 | D-044 se amplía a plataforma multi-framework; el primer alcance candidato sigue limitado a catálogo neutral y shell Angular.                       |
+| 16-07-2026 | PLAN-015 cierra la release coordinada 0.2.0; D-044 queda Candidate para revisar una aplicación Angular de referencia, consumo y demo.              |
+| 15-07-2026 | ADR-018 r3/PLAN-013 r4 cierran M13 con release manual/2FA verificada; D-043 difiere repositorio público, OIDC y provenance.                        |
+| 15-07-2026 | PLAN-012 y M12 se completan; review 026 ciclo 6 cierra sin hallazgos tras siete correcciones; la matriz completa pasó en ciclo 3.                  |
+| 15-07-2026 | SPEC-005 v0.1.1 queda Accepted tras review 024 ciclo 2 sin hallazgos; autoriza preparar PLAN-012, no implementar.                                  |
+| 15-07-2026 | SPEC-005 v0.1.0 queda Draft para D-042; requiere revisión y aceptación antes de PLAN-012.                                                          |
+| 15-07-2026 | ADR-017 revision 0 queda Accepted tras review 023 ciclo 3 sin hallazgos; autoriza preparar SPEC, no plan ni implementación.                        |
+| 15-07-2026 | ADR-017 revision 0 queda Proposed; review 023 ciclo 3 pasa ocho áreas sin hallazgos tras dos correcciones documentales.                            |
+| 15-07-2026 | Ricard acepta review 022; D-042 queda Promoted solo para grupos de presentación estáticos y D-011/D-012 siguen Deferred.                           |
+| 15-07-2026 | PLAN-011 y M11 se completan; review 021 ciclo 2 y toda la matriz pasan sin hallazgos tras corregir provenance de políticas.                        |
+| 15-07-2026 | PLAN-011 checkpoint 4 completa los 19 escenarios, paquetes y consumidores; 326 core/68 Angular tests pasan.                                        |
+| 15-07-2026 | PLAN-011 checkpoint 3 integra `$defs`/`$ref`, ciclos, orden y provenance en el compiler; 304 tests core pasan.                                     |
+| 15-07-2026 | PLAN-011 checkpoint 2 completa registry/decoder/resolver Internal y 297 tests core pasan; compiler/reference behavior sigue intacto.               |
+| 15-07-2026 | PLAN-011 checkpoint 1 completa fundamentos Internal inmutables y 252 tests core pasan; referencias siguen inactivas.                               |
+| 15-07-2026 | PLAN-011 revisión 0 queda Approved; checkpoint 1 inicia solo fundamentos Internal inmutables sin activar referencias.                              |
+| 15-07-2026 | PLAN-011 revisión 0 supera revisión completa ciclo 1 sin hallazgos y permanece Proposed pendiente de aprobación formal.                            |
+| 15-07-2026 | PLAN-011 revisión 0 queda Proposed con 19 escenarios y cinco checkpoints; requiere revisión completa y aprobación antes de implementar.            |
+| 15-07-2026 | SPEC-004 v0.1.1 queda Accepted tras revisión completa ciclo 5 sin hallazgos; se autoriza preparar/revisar PLAN-011, no implementar.                |
+| 14-07-2026 | SPEC-004 v0.1.1 corrige nueve hallazgos y la revisión completa ciclo 5 pasa sin hallazgos; aceptación formal pendiente.                            |
+| 14-07-2026 | SPEC-004 v0.1.0 queda Draft con el contrato observable D-041; requiere revisión completa y aceptación antes de cualquier plan.                     |
+| 14-07-2026 | ADR-005 revision 3 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar SPEC-004, no plan ni implementación.                  |
+| 14-07-2026 | ADR-016 queda Accepted tras revisión completa sin hallazgos; se autoriza redactar ADR-005 revisión 3, no SPEC ni implementación.                   |
+| 14-07-2026 | Ricard acepta review 016; D-041 queda Promoted para diseño local estático y se propone ADR-016 sin autorizar implementación.                       |
+| 14-07-2026 | La revisión de preparación M11 recomienda separar resolución local estática de D-007 completo; aceptación pendiente.                               |
+| 14-07-2026 | PLAN-010 checkpoint 7 repite revisión y matriz completas sin hallazgos; PLAN-010 y M10 quedan completados sin publicar.                            |
+| 14-07-2026 | PLAN-010 checkpoint 6 migra docs, declaraciones, paquetes, artefactos y consumidores; checkpoint 7 queda pendiente.                                |
+| 14-07-2026 | PLAN-010 checkpoint 5 completa la proyección Angular estable y accesible de colecciones/ítems; checkpoint 6 queda pendiente.                       |
+| 14-07-2026 | PLAN-010 checkpoint 4 completa runtime, snapshots, requests, scopes, interacción y sharing de colecciones; checkpoint 5 queda pendiente.           |
+| 14-07-2026 | PLAN-010 checkpoint 3 completa las cinco operaciones de colección y sus fixtures puras/form; checkpoint 4 queda pendiente.                         |
+| 14-07-2026 | PLAN-010 checkpoint 2 completa policies, compiler array/item/UI, templates inmutables y fixtures con matriz verde.                                 |
+| 14-07-2026 | PLAN-010 checkpoint 1 completa contratos Public, helpers Internal, validación de definición y paquetes/consumidores.                               |
+| 14-07-2026 | PLAN-010 revisión 0 se aprueba tras revisión completa sin hallazgos; M10 queda autorizado, checkpoint 1 aún no iniciado.                           |
+| 14-07-2026 | Se acepta la revisión de promoción M10; D-006 queda Promoted para diseño normativo, sin autorizar implementación.                                  |
+| 14-07-2026 | Revisión de promoción M10 pasa sin hallazgos y recomienda D-006 para diseño estrecho; aceptación sigue pendiente.                                  |
+| 14-07-2026 | PLAN-009 checkpoint 7 supera revisión integral repetida y matriz completa; M9 queda completado sin activar M10 ni publicación.                     |
+| 14-07-2026 | PLAN-009 checkpoint 6 migra paquetes, declaraciones, artefactos y consumidores limpios; checkpoint 7 queda pendiente.                              |
+| 14-07-2026 | PLAN-009 checkpoint 5 completa la proyección Angular recursiva y accesible; checkpoint 6 queda pendiente.                                          |
+| 14-07-2026 | PLAN-009 checkpoint 4 completa runtime, snapshots, scopes y sharing anidados; checkpoint 5 queda pendiente.                                        |
+| 14-07-2026 | PLAN-009 checkpoint 3 completa operaciones profundas y fixtures con matriz verde; checkpoint 4 queda pendiente.                                    |
+| 14-07-2026 | PLAN-009 checkpoint 2 completa el compiler schema/UI recursivo y sus fixtures con matriz verde; checkpoint 3 queda pendiente.                      |
+| 14-07-2026 | PLAN-009 checkpoint 1 completa contratos/helpers neutrales y migración plana con matriz verde; checkpoint 2 queda pendiente.                       |
+| 14-07-2026 | Se aprueba PLAN-009 revisión 1 tras la revisión repetida sin hallazgos; la implementación de M9 aún no ha comenzado.                               |
+| 14-07-2026 | PLAN-009 revisión 1 corrige cuatro hallazgos y supera la revisión completa repetida; aprobación e implementación siguen pendientes.                |
+| 14-07-2026 | Se aceptan ADR-014 revision 2 y SPEC-002 v0.1.2 tras revisión sin hallazgos; PLAN-009 sigue pendiente y M9 inactivo.                               |
+| 14-07-2026 | ADR-014 revision 2 propuesta y SPEC-002 v0.1.2 corrigen seis hallazgos; la revisión repetida pasa y la aceptación queda pendiente.                 |
+| 14-07-2026 | Se aceptan coordinadamente ADR-014 revision 1 y ADR-005 revision 1; SPEC-002 y la implementación de M9 siguen pendientes.                          |
+| 14-07-2026 | Se acepta la revisión de promoción, D-005 pasa a Promoted para diseño y se proponen ADR-014, ADR-005 revisión 1 y SPEC-002.                        |
+| 14-07-2026 | PLAN-008 y M8 se completan con candidatos privados 0.1.0 verificados; D-040 y D-034 continúan Deferred.                                            |
+| 14-07-2026 | PLAN-008 revision 2 supera la revisión formal repetida; M8 sigue inactivo y D-040 continúa Deferred.                                               |
+| 14-07-2026 | Se acepta ADR-013 revision 1; D-040 sigue Deferred y PLAN-008 puede pasar a revisión sin activar M8.                                               |
+| 14-07-2026 | ADR-013 revision 1 supera la revisión formal repetida; D-040 continúa Deferred y la aceptación sigue pendiente.                                    |
+| 14-07-2026 | Se propone ADR-013 y PLAN-008 para preparar artefactos 0.1 locales; D-040 separa y difiere la publicación real.                                    |
+| 14-07-2026 | Se acepta ADR-012 revision 1, D-010 queda Promoted y M7 avanza a sincronización de SPEC y preparación de PLAN-007.                                 |
+| 14-07-2026 | ADR-012 revision 1 supera sus ocho criterios tras precisar foco, accesibilidad y migración; D-010 sigue Candidate.                                 |
+| 14-07-2026 | Se propone ADR-012 para revisar la limpieza explícita nativa; D-010 permanece Candidate y M7 no está activo.                                       |
+| 14-07-2026 | G0 se completa y SPEC-001 v0.1.14 queda Accepted sin promover ninguna decisión diferida ni API a Stable.                                           |
+| 14-07-2026 | G0 difiere como D-038 y D-039 los helpers no implementados de baseline parcial y aplicación explícita de defaults.                                 |
+| 14-07-2026 | PLAN-006 y M6 se completan con enum string normalizado y select Angular controlado, manteniendo las exclusiones diferidas.                         |
+| 13-07-2026 | M6 comienza y completa el paso 1 de contratos neutrales de PLAN-006 sin activar otra decisión aplazada.                                            |
+| 13-07-2026 | Se aprueba PLAN-006 revisión 1 y sus contratos se promueven a SPEC-001 Draft v0.1.13 sin iniciar M6.                                               |
+| 13-07-2026 | Se acepta ADR-011, D-008 se promueve y `const`/`format` se separan como D-036 y D-037 sin activar su implementación.                               |
+| 13-07-2026 | D-024 registra custom renderers como resueltos por ADR-007/009 y aplaza el bridge Angular hasta existir un consumidor concreto.                    |
+| 13-07-2026 | Se acepta ADR-010, ADR-002 queda Superseded y D-028 se promueve con versionado y compatibilidad explícitos.                                        |
+| 13-07-2026 | Se propone ADR-010 para resolver D-028 y sustituir el lockstep Angular del ADR-002 pre-SPEC.                                                       |
+| 13-07-2026 | Se acepta ADR-009 y D-029 se promueve con la frontera pública y la política de estabilidad iniciales.                                              |
+| 13-07-2026 | Se propone ADR-009 para delimitar la API pública y su política de estabilidad; D-029 permanece Candidate hasta su aceptación.                      |
+| 13-07-2026 | La selección del dialecto de JSON Schema se promueve a ADR-005 y se elimina de las próximas decisiones pendientes.                                 |
+| 13-07-2026 | Creación del registro con las decisiones aplazadas durante la definición de SPEC-001.                                                              |

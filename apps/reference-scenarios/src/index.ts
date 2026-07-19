@@ -19,6 +19,7 @@ export type {
 } from './contracts.js';
 
 import { controlledPrimitives } from './scenarios/controlled-primitives.js';
+import { advancedPresentation } from './scenarios/advanced-presentation.js';
 import { localDefinitions } from './scenarios/local-definitions.js';
 import { nestedProfile } from './scenarios/nested-profile.js';
 import { nullablePreferences } from './scenarios/nullable-preferences.js';
@@ -32,4 +33,5 @@ export const referenceScenarios = defineReferenceCatalog([
   localDefinitions,
   presentationSections,
   nullablePreferences,
+  advancedPresentation,
 ]);

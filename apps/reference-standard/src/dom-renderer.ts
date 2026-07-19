@@ -16,6 +16,12 @@ import type {
   ItemRuntimeSnapshot,
   NodeRuntimeSnapshot,
   PresentationEntryDefinition,
+  PresentationAccordionDefinition,
+  PresentationGridDefinition,
+  PresentationPanelDefinition,
+  PresentationSectionDefinition,
+  PresentationTabsDefinition,
+  AdvancedPresentationLabelDefinition,
 } from '@rabassoft/schema-engine';
 
 interface FieldBinding {
@@ -37,6 +43,50 @@ function collectCollections(
   }
 }
 
+function setMountedHidden(element: HTMLElement, hidden: boolean): void {
+  element.hidden = hidden;
+  if (hidden) element.setAttribute('inert', '');
+  else element.removeAttribute('inert');
+}
+
+function sectionIdBase(formId: string, sectionId: string): string {
+  return `se-${encodeURIComponent(JSON.stringify([formId, 'section', sectionId]))}`;
+}
+
+function containerIdBase(
+  formId: string,
+  kind: 'tabs' | 'accordion' | 'grid',
+  id: string,
+): string {
+  return `se-${encodeURIComponent(
+    JSON.stringify([formId, 'presentation', kind, id]),
+  )}`;
+}
+
+function panelIdBase(
+  formId: string,
+  ownerKind: 'tabs' | 'accordion',
+  ownerId: string,
+  panelId: string,
+): string {
+  return `se-${encodeURIComponent(
+    JSON.stringify([
+      formId,
+      'presentation',
+      ownerKind,
+      ownerId,
+      'panel',
+      panelId,
+    ]),
+  )}`;
+}
+
+function gridItemIdBase(formId: string, gridId: string, index: number): string {
+  return `se-${encodeURIComponent(
+    JSON.stringify([formId, 'presentation', 'grid', gridId, 'item', index]),
+  )}`;
+}
+
 interface FieldIntentions {
   focus(): void;
   blur(): void;
@@ -53,6 +103,20 @@ interface CollectionBinding {
 
 export interface StandardDomRendererOptions {
   readonly embeddedCollectionControls?: boolean;
+  readonly formId?: string;
+  readonly resolvePresentationLabel?: (
+    label: string,
+    context: Readonly<{
+      formId: string;
+      locale: string;
+      presentation:
+        PresentationSectionDefinition | AdvancedPresentationLabelDefinition;
+    }>,
+  ) => unknown;
+}
+
+interface PresentationLabelBinding {
+  reconcile(locale: string): void;
 }
 
 export class StandardDomRenderer {
@@ -60,6 +124,7 @@ export class StandardDomRenderer {
   private readonly bindings = new Map<string, FieldBinding>();
   private readonly collections = new Map<string, CollectionBinding>();
   private readonly cleanups: Array<() => void> = [];
+  private readonly presentationLabels: PresentationLabelBinding[] = [];
   private disposed = false;
 
   constructor(
@@ -92,6 +157,8 @@ export class StandardDomRenderer {
       if (collection !== undefined)
         binding.reconcile(collection, snapshot.locale);
     }
+    for (const binding of this.presentationLabels)
+      binding.reconcile(snapshot.locale);
   }
 
   getBindingElement(key: string): HTMLElement | undefined {
@@ -105,23 +172,180 @@ export class StandardDomRenderer {
     this.bindings.clear();
     for (const binding of this.collections.values()) binding.dispose();
     this.collections.clear();
+    this.presentationLabels.length = 0;
     for (const cleanup of this.cleanups.splice(0)) cleanup();
     this.host.replaceChildren();
   }
 
   private renderPresentation(entry: PresentationEntryDefinition): HTMLElement {
     if (entry.kind === 'form-node') return this.renderNode(entry.node);
-    const section = document.createElement('section');
+    if (entry.kind === 'section') return this.renderSection(entry);
+    if (entry.kind === 'tabs') return this.renderTabs(entry);
+    if (entry.kind === 'accordion') return this.renderAccordion(entry);
+    return this.renderGrid(entry);
+  }
+
+  private renderSection(entry: PresentationSectionDefinition): HTMLElement {
+    const section = document.createElement('fieldset');
     section.className = 'form-section';
-    const heading = document.createElement('h2');
-    heading.id = domId(`section-${entry.key}`);
-    heading.textContent = entry.label;
-    section.setAttribute('aria-labelledby', heading.id);
-    section.append(heading);
-    for (const child of entry.children) {
+    const legend = document.createElement('legend');
+    legend.id = `${sectionIdBase(this.formId, entry.id)}--legend`;
+    this.bindPresentationLabel(entry, legend);
+    section.append(legend);
+    for (const child of entry.children)
       section.append(this.renderPresentation(child));
-    }
     return section;
+  }
+
+  private renderTabs(entry: PresentationTabsDefinition): HTMLElement {
+    const wrapper = document.createElement('section');
+    wrapper.className = 'presentation-tabs';
+    const tablist = document.createElement('div');
+    tablist.id = `${containerIdBase(this.formId, 'tabs', entry.id)}--tablist`;
+    tablist.setAttribute('role', 'tablist');
+    this.bindPresentationLabel(entry, tablist, 'aria-label');
+    const tabs: HTMLButtonElement[] = [];
+    const panels: HTMLElement[] = [];
+    let activeIndex = 0;
+    const update = (): void => {
+      tabs.forEach((tab, index) => {
+        tab.setAttribute('aria-selected', String(index === activeIndex));
+        tab.tabIndex = index === activeIndex ? 0 : -1;
+      });
+      panels.forEach((panel, index) =>
+        setMountedHidden(panel, index !== activeIndex),
+      );
+    };
+    entry.panels.forEach((panel, index) => {
+      const base = panelIdBase(this.formId, 'tabs', entry.id, panel.id);
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.id = `${base}--tab`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', `${base}--tabpanel`);
+      this.bindPresentationLabel(panel, tab);
+      const region = this.renderPanel(panel);
+      region.id = `${base}--tabpanel`;
+      region.setAttribute('role', 'tabpanel');
+      region.setAttribute('aria-labelledby', tab.id);
+      const activate = (): void => {
+        activeIndex = index;
+        update();
+        tab.focus();
+      };
+      this.listen(tab, 'click', activate);
+      this.listen(tab, 'keydown', (event) => {
+        const keyboard = event as KeyboardEvent;
+        let next: number | undefined;
+        if (keyboard.key === 'ArrowLeft')
+          next = (index - 1 + entry.panels.length) % entry.panels.length;
+        else if (keyboard.key === 'ArrowRight')
+          next = (index + 1) % entry.panels.length;
+        else if (keyboard.key === 'Home') next = 0;
+        else if (keyboard.key === 'End') next = entry.panels.length - 1;
+        if (next === undefined) return;
+        keyboard.preventDefault();
+        tabs[next]?.click();
+      });
+      tabs.push(tab);
+      panels.push(region);
+      tablist.append(tab);
+    });
+    update();
+    wrapper.append(tablist, ...panels);
+    return wrapper;
+  }
+
+  private renderAccordion(entry: PresentationAccordionDefinition): HTMLElement {
+    const group = document.createElement('section');
+    group.className = 'presentation-accordion';
+    group.id = `${containerIdBase(this.formId, 'accordion', entry.id)}--accordion`;
+    group.setAttribute('role', 'group');
+    this.bindPresentationLabel(entry, group, 'aria-label');
+    entry.panels.forEach((panel) => {
+      const base = panelIdBase(this.formId, 'accordion', entry.id, panel.id);
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.id = `${base}--trigger`;
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.setAttribute('aria-controls', `${base}--region`);
+      this.bindPresentationLabel(panel, trigger);
+      const region = this.renderPanel(panel);
+      region.id = `${base}--region`;
+      region.setAttribute('role', 'region');
+      region.setAttribute('aria-labelledby', trigger.id);
+      setMountedHidden(region, true);
+      this.listen(trigger, 'click', () => {
+        const expanded = trigger.getAttribute('aria-expanded') !== 'true';
+        trigger.setAttribute('aria-expanded', String(expanded));
+        setMountedHidden(region, !expanded);
+      });
+      group.append(trigger, region);
+    });
+    return group;
+  }
+
+  private renderGrid(entry: PresentationGridDefinition): HTMLElement {
+    const grid = document.createElement('section');
+    grid.className = 'presentation-grid';
+    grid.id = `${containerIdBase(this.formId, 'grid', entry.id)}--grid`;
+    grid.setAttribute('role', 'group');
+    grid.style.setProperty('--standard-grid-columns', String(entry.columns));
+    this.bindPresentationLabel(entry, grid, 'aria-label');
+    entry.items.forEach((item, index) => {
+      const cell = document.createElement('div');
+      cell.className = 'presentation-grid-cell';
+      cell.id = `${gridItemIdBase(this.formId, entry.id, index)}--cell`;
+      cell.style.setProperty('--standard-grid-span', String(item.span));
+      cell.append(this.renderPresentation(item.child));
+      grid.append(cell);
+    });
+    return grid;
+  }
+
+  private renderPanel(panel: PresentationPanelDefinition): HTMLElement {
+    const region = document.createElement('div');
+    region.className = 'presentation-panel';
+    for (const child of panel.children)
+      region.append(this.renderPresentation(child));
+    return region;
+  }
+
+  private bindPresentationLabel(
+    presentation:
+      PresentationSectionDefinition | AdvancedPresentationLabelDefinition,
+    element: HTMLElement,
+    attribute?: 'aria-label',
+  ): void {
+    const source = presentation.label;
+    let lastLocale: string | undefined;
+    const apply = (locale: string): void => {
+      if (locale === lastLocale) return;
+      lastLocale = locale;
+      let result: unknown;
+      try {
+        result =
+          this.options.resolvePresentationLabel?.(
+            source,
+            Object.freeze({ formId: this.formId, locale, presentation }),
+          ) ?? source;
+      } catch {
+        result = source;
+      }
+      const text =
+        typeof result === 'string' && result.trim().length > 0
+          ? result
+          : source;
+      if (attribute === undefined) element.textContent = text;
+      else element.setAttribute(attribute, text);
+    };
+    const binding = { reconcile: apply };
+    this.presentationLabels.push(binding);
+    apply(this.runtime.getSnapshot().locale);
+  }
+
+  private get formId(): string {
+    return this.options.formId ?? 'reference-standard';
   }
 
   private renderNode(node: FormNodeDefinition): HTMLElement {

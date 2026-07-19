@@ -7,6 +7,7 @@ const scenarios = [
   ['local-definitions', 'Same-document local definitions'],
   ['presentation-sections', 'Static presentation sections'],
   ['nullable-preferences', 'Nullable preferences'],
+  ['advanced-presentation', 'Advanced static presentation'],
 ] as const;
 
 async function selectScenario(page: Page, id: string, heading: string) {
@@ -477,4 +478,45 @@ test('covers nested, collection and nullable keyboard interaction with accessibl
   await expect(
     page.getByText('Missing, null and false are distinct'),
   ).toBeVisible();
+
+  await selectScenario(
+    page,
+    'advanced-presentation',
+    'Advanced static presentation',
+  );
+  await expect(page.getByRole('tab', { name: 'Identity' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await page.getByRole('tab', { name: 'Contact' }).click();
+  await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible();
+  await page.getByRole('button', { name: 'Notifications' }).click();
+  await expect(
+    page.getByRole('checkbox', { name: 'Newsletter' }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Reset scenario' }).click();
+  await expect(page.getByRole('tab', { name: 'Contact' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(
+    page.getByRole('button', { name: 'Notifications' }),
+  ).toHaveAttribute('aria-expanded', 'true');
+  await selectScenario(
+    page,
+    'controlled-primitives',
+    'Controlled primitive fields',
+  );
+  await selectScenario(
+    page,
+    'advanced-presentation',
+    'Advanced static presentation',
+  );
+  await expect(page.getByRole('tab', { name: 'Identity' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(
+    page.getByRole('button', { name: 'Notifications' }),
+  ).toHaveAttribute('aria-expanded', 'false');
 });

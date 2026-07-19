@@ -18,6 +18,7 @@ export type ReferenceFeature =
   | 'object-collections'
   | 'local-references'
   | 'presentation-groups'
+  | 'advanced-layout'
   | 'nullable-leaves';
 
 export type ReferenceExpectedOperation<

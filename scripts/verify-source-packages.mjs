@@ -4,7 +4,12 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { packCandidates, runPnpm } from './release-candidate-utils.mjs';
+import {
+  packCandidates,
+  packReleaseCandidates,
+  runPnpm,
+} from './release-candidate-utils.mjs';
+import { loadM19ReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-source-'));
 
@@ -14,10 +19,16 @@ function extract(tarball, directory) {
   return join(directory, 'package');
 }
 
-function installAndBuild(packageRoot, installArgs = []) {
+function installAndBuild(packageRoot, installArgs = [], offline = false) {
   const harness = join(packageRoot, 'source-build');
   runPnpm(
-    ['install', '--frozen-lockfile', '--ignore-workspace', ...installArgs],
+    [
+      'install',
+      '--frozen-lockfile',
+      '--ignore-workspace',
+      ...(offline ? ['--offline'] : []),
+      ...installArgs,
+    ],
     { cwd: harness, stdio: 'inherit' },
   );
   runPnpm(['run', 'build'], { cwd: harness, stdio: 'inherit' });
@@ -31,7 +42,11 @@ async function loadIndex(packageRoot, output) {
   return import(pathToFileURL(join(packageRoot, output, 'index.js')).href);
 }
 
-function angularBehavior(packageRoot, output) {
+function angularBehavior(
+  packageRoot,
+  output,
+  providerName = 'provideSchemaEngineAngular',
+) {
   const compiler = pathToFileURL(
     join(packageRoot, 'node_modules/@angular/compiler/fesm2022/compiler.mjs'),
   ).href;
@@ -41,7 +56,7 @@ function angularBehavior(packageRoot, output) {
     const api = await import(${JSON.stringify(index)});
     console.log(JSON.stringify({
       keys: Object.keys(api),
-      providerType: typeof api.provideSchemaEngineAngular(),
+      providerType: typeof api[${JSON.stringify(providerName)}](),
     }));
   `;
   return JSON.parse(
@@ -53,6 +68,8 @@ function angularBehavior(packageRoot, output) {
 
 try {
   assert.equal(process.version, 'v22.23.1');
+  const includeAngularAria = process.argv.includes('--include-angular-aria');
+  const offline = process.argv.includes('--offline');
   const coreTarballArgument = process.argv
     .find((argument) => argument.startsWith('--core-tarball='))
     ?.slice('--core-tarball='.length);
@@ -66,14 +83,19 @@ try {
   );
   const tarballs =
     coreTarballArgument === undefined
-      ? packCandidates(temporaryRoot)
+      ? includeAngularAria
+        ? packReleaseCandidates(
+            temporaryRoot,
+            loadM19ReleaseTarget().descriptor,
+          )
+        : packCandidates(temporaryRoot)
       : {
           core: resolve(coreTarballArgument),
           angular: resolve(angularTarballArgument),
         };
 
   const coreRoot = extract(tarballs.core, join(temporaryRoot, 'core'));
-  installAndBuild(coreRoot);
+  installAndBuild(coreRoot, [], offline);
   assert.equal(
     declaration(coreRoot, 'rebuilt-dist'),
     declaration(coreRoot, 'dist'),
@@ -94,7 +116,7 @@ try {
   const angularDirectory = join(temporaryRoot, 'angular');
   mkdirSync(angularDirectory, { recursive: true });
   const angularRoot = extract(tarballs.angular, angularDirectory);
-  installAndBuild(angularRoot, ['--modules-dir', '../node_modules']);
+  installAndBuild(angularRoot, ['--modules-dir', '../node_modules'], offline);
   assert.equal(
     declaration(angularRoot, 'rebuilt-dist'),
     declaration(angularRoot, 'dist'),
@@ -106,8 +128,35 @@ try {
   assert.deepEqual(rebuiltAngular, shippedAngular);
   assert.equal(shippedAngular.providerType, 'object');
 
+  if (includeAngularAria) {
+    assert.notEqual(tarballs.angularAria, undefined);
+    const pilotDirectory = join(temporaryRoot, 'pilot');
+    mkdirSync(pilotDirectory, { recursive: true });
+    const pilotRoot = extract(tarballs.angularAria, pilotDirectory);
+    installAndBuild(pilotRoot, ['--modules-dir', '../node_modules'], offline);
+    assert.equal(
+      declaration(pilotRoot, 'rebuilt-dist'),
+      declaration(pilotRoot, 'dist'),
+      'Angular Aria root declarations differ after source rebuild',
+    );
+    const shippedPilot = angularBehavior(
+      pilotRoot,
+      'dist',
+      'provideSchemaEngineAngularAriaContainers',
+    );
+    const rebuiltPilot = angularBehavior(
+      pilotRoot,
+      'rebuilt-dist',
+      'provideSchemaEngineAngularAriaContainers',
+    );
+    assert.deepEqual(rebuiltPilot, shippedPilot);
+    assert.deepEqual(shippedPilot.keys, [
+      'provideSchemaEngineAngularAriaContainers',
+    ]);
+  }
+
   console.log(
-    'Verified isolated frozen source rebuilds, declarations, exports and behavior.',
+    `Verified isolated frozen source rebuilds, declarations, exports and behavior${includeAngularAria ? ' for the private M18 line' : ''}.`,
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });

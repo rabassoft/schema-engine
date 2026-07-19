@@ -1,6 +1,6 @@
 # PLAN-020: Static advanced presentation layout and Angular Aria pilot
 
-- **Status:** Approved revision 0
+- **Status:** Completed revision 0
 - **Date:** 2026-07-18
 - **Approval date:** 2026-07-18
 - **Complete review:** [`review 103`](../reviews/103-plan-020-review.md) cycle 2
@@ -20,10 +20,24 @@
 - **Implementation authorized:** Yes — checkpoints 1–8 only; checkpoint 5/7
   network actions, publication, external settings, commit and push retain their
   separate gates
-- **Implementation state:** Checkpoint 1 completed after
-  [`review 104`](../reviews/104-plan-020-checkpoint-1-review.md) cycle 3 passed
-  the complete checkpoint review with zero findings; checkpoints 2–8 remain
-  pending
+- **Implementation state:** Checkpoints 1–8 completed after
+  [`review 104`](../reviews/104-plan-020-checkpoint-1-review.md) and
+  [`review 105`](../reviews/105-plan-020-checkpoint-2-review.md), plus
+  [`review 106`](../reviews/106-plan-020-checkpoint-3-review.md), plus
+  [`review 107`](../reviews/107-plan-020-checkpoint-4-review.md) cycle 5, each
+  passed its complete review with zero findings; checkpoint 5 local preparation
+  passed [`review 108`](../reviews/108-plan-020-checkpoint-5-pre-network-review.md)
+  cycle 3 and the resolved gate passed
+  [`review 109`](../reviews/109-plan-020-checkpoint-5-review.md) cycle 1 with zero
+  findings; checkpoint 6 passed
+  [`review 110`](../reviews/110-plan-020-checkpoint-6-review.md) cycle 2 with zero
+  findings; checkpoint 7 local/pre-network preparation passed
+  [`review 111`](../reviews/111-plan-020-checkpoint-7-pre-network-review.md)
+  cycle 3 and its registry-backed completion passed
+  [`review 112`](../reviews/112-plan-020-checkpoint-7-review.md) cycle 1 with zero
+  findings; checkpoint 8 and the complete plan passed
+  [`review 113`](../reviews/113-plan-020-final-implementation-review.md) cycle 2
+  with zero findings
 
 ## 1. Goal and boundary
 
@@ -383,3 +397,49 @@ tests, declarations, packages, artifacts, clean consumers, both reference
 targets, native/Aria lanes, documentation and one final repeated complete review
 pass with zero findings. Completion changes no registry, release, repository or
 Stable-support state.
+
+## 17. Implementation checkpoint 7 local pre-network preparation
+
+The local portion completed on 18 July 2026 after
+[`review 111`](../reviews/111-plan-020-checkpoint-7-pre-network-review.md) cycle
+3 passed its complete applicable review with zero findings. Core/base `0.3.0`
+and pilot `0.1.0` now have explicit package, tarball, SemVer-rewrite, isolation,
+security and frozen Corresponding Source gates. Two clean lower-bound consumers
+independently prove native and pilot lanes at Angular core/forms `22.0.6` and
+exact Aria/CDK `22.0.5` through partial compilation, strict types, DOM, production
+build and Chromium. The published `0.2.0` regression now verifies its frozen
+byte-identical local artifacts rather than trying to relabel private `0.3.0`
+sources.
+
+Checkpoint 7 remains incomplete. `pnpm test:consumer:m18:latest` is implemented
+but has not run: it queries registry metadata, resolves the latest compatible
+Angular 22 tuple and installs it into clean consumers. That command retains the
+separate network authorization gate. No registry query, publication, release
+candidate mutation, commit or push occurred in this local portion.
+
+This paragraph records the checkpoint 7 command behavior at M18 delivery.
+PLAN-021 checkpoint 3 later separates the current local command onto an
+explicit frozen/offline tuple and requires `--tuple-source=registry` only from
+the separately gated live M19 commands; it does not change the historical
+checkpoint 7 evidence.
+
+## 18. Implementation checkpoint 7 completion
+
+Checkpoint 7 completed on 18 July 2026 after the separately authorized registry
+lane resolved Angular core/forms/build/CLI/compiler `22.0.7` and Angular Aria/CDK
+`22.0.5`. Both clean latest-compatible native and pilot consumers passed strict
+peer installation, partial compilation, strict types, DOM, production build and
+Chromium. [`Review 112`](../reviews/112-plan-020-checkpoint-7-review.md) cycle 1
+reconciled that evidence with review 111 and passed the complete checkpoint with
+zero findings. No publication, tag, candidate, commit or push occurred.
+
+## 19. Implementation checkpoint 8 and completion
+
+Checkpoint 8 completed on 18 July 2026 after the frozen offline install and
+entire verification matrix passed. The final
+[`review 113`](../reviews/113-plan-020-final-implementation-review.md) cycle 2
+repeated all fourteen implementation areas, reconciled every one of the 22
+SPEC-008 rows and closed with zero findings. Lower and latest native/pilot clean
+consumers, all package/source/security gates, full workspace regression and both
+independent reference-browser lanes pass. PLAN-020 revision 0 and M18 are
+complete without publication, tag, release, repository, commit or push action.

@@ -1,5 +1,6 @@
 import { access, readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { M19_RELEASE_DESCRIPTOR } from './release-target.mjs';
 
 const root = process.cwd();
 const stableGuidePaths = ['AGENTS.md', 'HANDOFF.md'];
@@ -7,10 +8,9 @@ const onboardingPaths = ['README.md', '.ai-docs/README.md'];
 const statusPath = '.ai-docs/project/STATUS.md';
 const specificationDirectory = '.ai-docs/specs';
 const specificationIndexPath = '.ai-docs/specs/000-index.md';
-const publishableManifestPaths = [
-  'packages/core/package.json',
-  'packages/angular/package.json',
-];
+const publishableManifestPaths = M19_RELEASE_DESCRIPTOR.packages.map(
+  ({ workspacePath }) => `${workspacePath}/package.json`,
+);
 const staleCurrentClaims = [
   {
     path: '.ai-docs/releases/0.1.0.md',
@@ -59,6 +59,61 @@ const staleCurrentClaims = [
     pattern: /sin implementación autorizada/i,
     description: 'pre-completion D-041 ADR index state',
   },
+  {
+    path: 'packages/core/README.md',
+    pattern: /mandatory `latest`/i,
+    description: 'universal initial latest claim',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern: /mandatory `latest`/i,
+    description: 'universal initial latest claim',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern: /pending checkpoint gate/i,
+    description: 'pre-completion M18 compatibility state',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern: /PLAN-020 gates/i,
+    description: 'obsolete pilot publication gate',
+  },
+  {
+    path: 'packages/angular-aria/SOURCE.md',
+    pattern: /The private pilot includes/i,
+    description: 'pre-M19 private pilot source state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /State:\*\* Published/i,
+    description: 'unobserved M19 publication claim',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /\*\*Source commit:\*\* [0-9a-f]{40}/i,
+    description: 'pre-checkpoint-3 selected candidate claim',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /checkpoint 3 local\s+candidate selection remains pending/i,
+    description: 'pre-completion checkpoint 3 state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /No selected tarball hashes or source commit exist yet/i,
+    description: 'pre-candidate checkpoint 3 state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /later checkpoint 3 may represent M19/i,
+    description: 'future checkpoint 3 state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /No hay implementación ni acción externa autorizada/i,
+    description: 'pre-completion M19 implementation state',
+  },
 ];
 const ignoredDirectories = new Set([
   '.git',
@@ -91,58 +146,111 @@ for (const guidePath of stableGuidePaths) {
 }
 
 const status = await read(statusPath);
-const publishableVersions = await Promise.all(
-  publishableManifestPaths.map(
-    async (manifestPath) => JSON.parse(await read(manifestPath)).version,
-  ),
+const publishableManifests = await Promise.all(
+  publishableManifestPaths.map(async (manifestPath) => [
+    manifestPath,
+    JSON.parse(await read(manifestPath)),
+  ]),
 );
-if (new Set(publishableVersions).size !== 1) {
-  fail(
-    `Publishable package versions are not coordinated: ${publishableVersions}`,
-  );
+for (const [
+  index,
+  packageTarget,
+] of M19_RELEASE_DESCRIPTOR.packages.entries()) {
+  const [manifestPath, manifest] = publishableManifests[index];
+  if (manifest.name !== packageTarget.name) {
+    fail(`${manifestPath} does not report ${packageTarget.name}`);
+  }
+  if (manifest.version !== packageTarget.version) {
+    fail(
+      `${manifestPath} reports ${manifest.version}, expected ${packageTarget.version}`,
+    );
+  }
+  if (
+    manifest.license !== 'AGPL-3.0-only' ||
+    manifest.private !== undefined ||
+    manifest.repository !== undefined ||
+    manifest.publishConfig?.access !== 'public' ||
+    manifest.publishConfig?.tag !== M19_RELEASE_DESCRIPTOR.distTag ||
+    manifest.publishConfig?.provenance !== M19_RELEASE_DESCRIPTOR.provenance
+  ) {
+    fail(`${manifestPath} does not match the M19 distribution boundary`);
+  }
 }
-if (publishableVersions[0] === '0.2.0') {
-  const successorStaleClaims = [
-    {
-      path: 'README.md',
-      pattern: /No successor version has been selected/i,
-    },
-    {
-      path: 'packages/core/README.md',
-      pattern: /No successor version has been selected/i,
-    },
-    {
-      path: 'packages/angular/README.md',
-      pattern: /No successor version has been selected/i,
-    },
-    {
-      path: 'packages/angular/README.md',
-      pattern: /\| `0\.1\.x` \| `\^0\.1\.0`/i,
-    },
-  ];
-  for (const claim of successorStaleClaims) {
-    const document = await read(claim.path);
-    const match = document.match(claim.pattern);
-    if (match) {
-      fail(`${claim.path} contains stale active 0.1 release text: ${match[0]}`);
+
+const candidateOnboarding = new Map([
+  ['README.md', M19_RELEASE_DESCRIPTOR.packages],
+  ['.ai-docs/releases/0.3.0.md', M19_RELEASE_DESCRIPTOR.packages],
+  ['packages/core/README.md', [M19_RELEASE_DESCRIPTOR.packages[0]]],
+  ['packages/angular/README.md', M19_RELEASE_DESCRIPTOR.packages.slice(0, 2)],
+  ['packages/angular-aria/README.md', M19_RELEASE_DESCRIPTOR.packages.slice(1)],
+]);
+for (const [onboardingPath, packageTargets] of candidateOnboarding) {
+  const onboarding = await read(onboardingPath);
+  for (const { name, version } of packageTargets) {
+    if (!onboarding.includes(name) || !onboarding.includes(version)) {
+      fail(`${onboardingPath} omits candidate ${name}@${version}`);
     }
   }
-  for (const onboardingPath of [
-    'README.md',
-    'packages/core/README.md',
-    'packages/angular/README.md',
-  ]) {
-    const onboarding = await read(onboardingPath);
-    if (!onboarding.includes('0.2.0')) {
-      fail(`${onboardingPath} does not report the active 0.2.0 target`);
-    }
-    if (/no `latest` (?:tag|alias)/iu.test(onboarding)) {
-      fail(`${onboardingPath} incorrectly denies npm's latest alias`);
-    }
-    if (/npm provenance is (?:available|enabled)/iu.test(onboarding)) {
-      fail(`${onboardingPath} incorrectly claims npm provenance`);
-    }
+  if (/npm provenance is (?:available|enabled)/iu.test(onboarding)) {
+    fail(`${onboardingPath} incorrectly claims npm provenance`);
   }
+}
+
+const m19ReleaseNotePath = '.ai-docs/releases/0.3.0.md';
+const m19ReleaseNote = await read(m19ReleaseNotePath);
+const requiredM19ReleaseFragments = [
+  '@angular/core >=22.0.6 <23.0.0',
+  '@angular/aria >=22.0.5 <23.0.0',
+  '@angular/cdk >=22.0.5 <23.0.0',
+  'Public + Experimental + Active',
+  'private repository',
+  'no advertised repository URL',
+  'npm provenance',
+];
+for (const fragment of requiredM19ReleaseFragments) {
+  if (!m19ReleaseNote.includes(fragment)) {
+    fail(`${m19ReleaseNotePath} omits required M19 contract: ${fragment}`);
+  }
+}
+
+const invalidM19ReleaseClaims = [
+  {
+    pattern:
+      /(?:latest|default)[^\n.]{0,80}(?:promotes?|marks?|means?)\s+(?:the\s+)?(?:API\s+)?Stable/i,
+    description: 'default-channel stability promotion',
+  },
+  {
+    pattern:
+      /pilot[^\n.]{0,80}`latest`[^\n.]{0,80}(?:mandatory|guaranteed|absent)/i,
+    description: 'predicted pilot latest state',
+  },
+  {
+    pattern: /(?:repository is public|public GitHub repository)/i,
+    description: 'unobserved public repository state',
+  },
+  {
+    pattern:
+      /(?:provenance is enabled|with npm provenance|trusted publishing is enabled)/i,
+    description: 'unobserved provenance state',
+  },
+];
+for (const claim of invalidM19ReleaseClaims) {
+  const match = m19ReleaseNote.match(claim.pattern);
+  if (match) {
+    fail(`${m19ReleaseNotePath} contains ${claim.description}: ${match[0]}`);
+  }
+}
+
+const completedM19Publication =
+  /Published packages:[^\n]*0\.3\.0/i.test(status) &&
+  /Published packages:[^\n]*0\.1\.0/i.test(status);
+if (
+  completedM19Publication &&
+  /(?:not published|no registry publication|private source candidate)/i.test(
+    m19ReleaseNote,
+  )
+) {
+  fail(`${m19ReleaseNotePath} retains pre-publication M19 state`);
 }
 const ephemeralGitClaim = status.match(
   /\bcommits? ahead\b|\bcommits? behind\b|no push performed|nothing was pushed/i,

@@ -387,7 +387,10 @@ export function renderReferenceSkeleton(
           formHost,
           state.definition,
           runtime,
-          { embeddedCollectionControls: false },
+          {
+            embeddedCollectionControls: false,
+            formId: `reference-standard-${state.scenario.id}`,
+          },
         );
         renderer = nextRenderer;
         releaseRenderer = application.registerBindingCleanup(() =>

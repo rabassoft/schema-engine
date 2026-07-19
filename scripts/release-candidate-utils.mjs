@@ -34,12 +34,29 @@ function tarballAfterPack(directory, previous) {
   return join(directory, created[0]);
 }
 
-function packWorkspacePackage(directory, workspacePackage) {
+function packWorkspacePackage(directory, workspacePackage, expectedFile) {
   const before = new Set(readdirSync(directory));
   runPnpm(['pack', '--pack-destination', directory], {
     cwd: join(workspaceRoot, workspacePackage),
   });
-  return tarballAfterPack(directory, before);
+  const tarball = tarballAfterPack(directory, before);
+  if (expectedFile !== undefined && tarball !== join(directory, expectedFile)) {
+    throw new Error(
+      `Expected candidate ${expectedFile}, received ${tarball.slice(directory.length + 1)}`,
+    );
+  }
+  return tarball;
+}
+
+export function packReleaseCandidates(directory, descriptor) {
+  return Object.freeze(
+    Object.fromEntries(
+      descriptor.packages.map(({ role, workspacePath, file }) => [
+        role,
+        packWorkspacePackage(directory, workspacePath, file),
+      ]),
+    ),
+  );
 }
 
 export function packCoreCandidate(directory) {

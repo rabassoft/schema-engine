@@ -59,14 +59,13 @@ separado antes de repetir la revisión.
 
 ## Secuencia post-G0
 
-> M7-M13 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-013
+> M7-M18 están completados bajo sus ADR, SPEC y planes aceptados. PLAN-013
 > publicó y verificó core/Angular `0.1.0` bajo gates explícitos, sin promover
 > APIs a Stable ni hacer público GitHub. M14 y PLAN-014 revision 0 están
 > completados localmente. PLAN-015 publicó y verificó core y Angular `0.2.0`;
 > ambos `next` y `latest` resuelven al par coordinado. D-011/D-012 y D-043
-> siguen Deferred. ADR-020 revisión 0 fija la arquitectura M15 y PLAN-016
-> revisión 0 está Approved para sus checkpoints 1–8; D-045 conserva Angular
-> legacy como trabajo Deferred.
+> permanecen Deferred fuera de los slices expresamente promovidos. D-045
+> conserva Angular legacy como trabajo Deferred.
 
 ### M9 — Objetos anidados — completado
 
@@ -148,7 +147,7 @@ separado antes de repetir la revisión.
   with zero findings.
 - Checkpoints 1–7 have accepted local, private-Git, npm identity and live
   publication evidence. Core and Angular `0.1.0` are public with byte-identical
-  verified tarballs; `next` and npm-mandatory `latest` alias the same
+  verified tarballs; `next` and the registry-observed `latest` alias the same
   Experimental versions.
 - The release closes under interactive 2FA with no long-lived repository
   credential, private repository URL, provenance or settings mutation. D-043
@@ -233,7 +232,7 @@ separado antes de repetir la revisión.
   package smoke, builds y Chromium están verificados. Async, formats,
   referencias remotas, publicación, release y core changes permanecen fuera.
 
-### M18 — Layout neutral avanzado — aprobado para implementación
+### M18 — Layout neutral avanzado — completado
 
 - Ricard seleccionó madurar core/Angular/Standard y la portabilidad hacia
   librerías UI antes de iniciar React/Vue.
@@ -248,21 +247,56 @@ separado antes de repetir la revisión.
   fallback nativo y un piloto opcional. ADR-024 revisión 1 está Accepted tras
   review 101 ciclo 4 con cero hallazgos y selecciona Angular Aria 22 como único
   piloto. SPEC-008 v0.1.0 está Accepted tras review 102 ciclo 5 sin hallazgos;
-  PLAN-020 revisión 0 está Approved tras review 103 ciclo 2 sin hallazgos y
-  autoriza sus ocho checkpoints. Checkpoint 1 completa los contratos Public
-  core, compilador y fixtures tras review 104 ciclo 3 sin hallazgos;
-  checkpoints 2–8 permanecen pendientes.
+  PLAN-020 revisión 0 fue Approved tras review 103 ciclo 2 sin hallazgos y
+  autorizó sus ocho checkpoints. Checkpoint 1 completa los contratos Public
+  core, compilador y fixtures tras review 104 ciclo 3 sin hallazgos. Checkpoint
+  2 completa validación manual e invariancia runtime tras review 105 ciclo 3;
+  checkpoint 3 completa el SPI Angular base y la proyección nativa tras review
+  106 ciclo 3; checkpoint 4 completa la proyección Standard independiente y el
+  escenario compartido tras review 107 ciclo 5. La preparación local del
+  checkpoint 5 pasa review 108 ciclo 3 y su resolución exacta Aria/CDK pasa
+  review 109 ciclo 1. Checkpoint 6 completa el piloto aislado tras review 110
+  ciclo 2. La porción local de checkpoint 7 pasa review 111 ciclo 3 y su lane
+  latest-compatible completa el checkpoint tras review 112 ciclo 1. El frozen
+  install y la matriz final pasan; review 113 ciclo 2 repite catorce áreas y
+  las 22 filas sin hallazgos, completando checkpoint 8, PLAN-020 y M18.
 - Wizards, acciones, D-012, D-018, nested/item layout, breakpoints arbitrarios,
-  dependencias UI, React/Vue y release permanecen Deferred.
+  dependencias UI y React/Vue permanecen Deferred. Release quedó fuera de M18;
+  M19 la selecciona después solo para diseño normativo bajo gates propios.
+
+### M19 — Release coordinada Experimental 0.3 — plan aprobado
+
+- Ricard seleccionó publicar el valor completado de M18 antes de acumular otro
+  milestone funcional o framework target.
+- [Review 114](../reviews/114-m19-coordinated-0-3-release-promotion-readiness.md)
+  ciclo 2 pasó doce áreas sin hallazgos y promueve solo la release coordinada de
+  core/base Angular `0.3.0` más el primer piloto Angular Aria `0.1.0` para
+  diseño normativo.
+- SPEC-008 ya fija versiones, peers, exports y contrato observable; ADR-010
+  permite las líneas independientes y no requiere revisión.
+- ADR-018 revisión 4 está Accepted tras review 115 ciclo 4 sin hallazgos. Admite
+  exactamente los tres paquetes, publicación `next` dependency-first,
+  transición `latest` dependent-first, observación del primer tag del piloto y
+  recuperación immutable.
+- PLAN-021 revisión 0 está Approved tras review 116 ciclo 3, que repitió
+  catorce áreas y documentación de cierre sin hallazgos. Autoriza solo sus
+  checkpoints locales 1–3. Checkpoint 1 completa el descriptor desigual de
+  tres paquetes, tooling/evidence y modos consumidores tras review 117 ciclo 2
+  sin hallazgos. Checkpoint 2 completa release notes, onboarding y checks
+  documentales exactos tras review 118 ciclo 3. Checkpoint 3 completa el gate
+  local, los tres candidatos dirty-tree deterministas, dry runs neutrales y las
+  22 filas tras review 119 ciclo 5 sin hallazgos.
+- Repositorio público/OIDC/provenance, D-043, Stable, nuevas capacidades,
+  React/Vue y Angular legacy permanecen fuera. No hay tarea de implementación
+  activa ni acción externa autorizada.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** execute PLAN-020 checkpoint 2 for manual FormDefinition
-   validation and runtime invariance, then repeat its complete checkpoint
-   review until zero findings.
-2. **External gates:** checkpoint 5 dependency resolution and checkpoint 7
-   registry-backed clean consumers require separate execution authorization;
-   publication, commit and push remain separately gated.
+1. **Next action:** stop for explicit PLAN-021 checkpoint 4 authorization to
+   review the scoped diff, commit, push privately and rebuild from that exact
+   clean commit before selecting publication candidates.
+2. **External gates:** checkpoint 4 Git actions, every registry read and every
+   npm mutation remain separately gated.
 3. **Later candidates:** React, Vue and all other capabilities remain
    demand-driven; D-043 and D-033 are not implied by M15/M16.
 

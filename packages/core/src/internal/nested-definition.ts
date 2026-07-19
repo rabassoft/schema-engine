@@ -32,8 +32,16 @@ export type NestedDefinitionReason =
   | 'invalid-presentation-entry'
   | 'invalid-presentation-section'
   | 'invalid-presentation-section-key'
+  | 'invalid-presentation-tabs'
+  | 'invalid-presentation-accordion'
+  | 'invalid-presentation-panel'
+  | 'invalid-presentation-grid'
+  | 'invalid-presentation-grid-item'
+  | 'invalid-presentation-entry-key'
   | 'cyclic-presentation'
   | 'duplicate-presentation-section-id'
+  | 'duplicate-presentation-container-id'
+  | 'duplicate-presentation-panel-id'
   | 'unknown-presented-node'
   | 'duplicate-presented-node'
   | 'missing-presented-node'
@@ -287,13 +295,41 @@ function collectPresentationDefects(
     nodes.filter((node): node is object => isOrdinaryObject(node)),
   );
   const seen = new Set<object>();
-  const ids = new Set<string>();
+  const containerIds = new Set<string>();
   const active = new Set<object>();
-  const defects: NestedDefinitionDefect[] = [];
   type PresentationFrame =
     | { phase: 'enter'; value: unknown; path: readonly number[] }
+    | {
+        phase: 'panel';
+        value: unknown;
+        path: readonly number[];
+        ownerKind: 'tabs' | 'accordion';
+        ownerId: string;
+        panelIds: Set<string>;
+      }
+    | {
+        phase: 'grid-item';
+        value: unknown;
+        path: readonly number[];
+        gridId: string;
+        columns: 1 | 2 | 3 | 4;
+        itemIndex: number;
+      }
     | { phase: 'exit'; value: object };
   const stack: PresentationFrame[] = [];
+  const pushEntries = (
+    entries: readonly unknown[],
+    parentPath: readonly number[],
+  ): void => {
+    for (let index = entries.length - 1; index >= 0; index -= 1) {
+      const child = readOwnDataMember(entries, String(index));
+      stack.push({
+        phase: 'enter',
+        value: child.kind === 'value' ? child.value : undefined,
+        path: Object.freeze([...parentPath, index]),
+      });
+    }
+  };
   for (let index = member.value.length - 1; index >= 0; index -= 1) {
     const entry = readOwnDataMember(member.value, String(index));
     stack.push({
@@ -309,23 +345,133 @@ function collectPresentationDefects(
       active.delete(frame.value);
       continue;
     }
+    if (frame.phase === 'panel') {
+      if (!isOrdinaryObject(frame.value)) {
+        return [
+          makeDefect('invalid-presentation-panel', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      const panel = frame.value;
+      const kind = readOwnDataMember(panel, 'kind');
+      const id = readOwnDataMember(panel, 'id');
+      const key = readOwnDataMember(panel, 'key');
+      const label = readOwnDataMember(panel, 'label');
+      const children = readOwnDataMember(panel, 'children');
+      if (
+        kind.kind !== 'value' ||
+        kind.value !== 'panel' ||
+        !isNonEmptyStringMember(id) ||
+        !isNonBlankStringMember(label) ||
+        !isDenseNonEmptyArrayMember(children)
+      ) {
+        return [
+          makeDefect('invalid-presentation-panel', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (active.has(panel)) {
+        return [
+          makeDefect('cyclic-presentation', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (
+        key.kind !== 'value' ||
+        key.value !==
+          JSON.stringify([frame.ownerKind, frame.ownerId, 'panel', id.value])
+      ) {
+        return [
+          makeDefect('invalid-presentation-entry-key', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (frame.panelIds.has(id.value)) {
+        return [
+          makeDefect('duplicate-presentation-panel-id', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      frame.panelIds.add(id.value);
+      active.add(panel);
+      stack.push({ phase: 'exit', value: panel });
+      pushEntries(children.value, frame.path);
+      continue;
+    }
+    if (frame.phase === 'grid-item') {
+      if (!isOrdinaryObject(frame.value)) {
+        return [
+          makeDefect('invalid-presentation-grid-item', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      const item = frame.value;
+      const kind = readOwnDataMember(item, 'kind');
+      const key = readOwnDataMember(item, 'key');
+      const span = readOwnDataMember(item, 'span');
+      const child = readOwnDataMember(item, 'child');
+      if (
+        kind.kind !== 'value' ||
+        kind.value !== 'grid-item' ||
+        span.kind !== 'value' ||
+        !isGridSpan(span.value, frame.columns) ||
+        child.kind !== 'value' ||
+        !isOrdinaryObject(child.value)
+      ) {
+        return [
+          makeDefect('invalid-presentation-grid-item', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (active.has(item)) {
+        return [
+          makeDefect('cyclic-presentation', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (
+        key.kind !== 'value' ||
+        key.value !==
+          JSON.stringify(['grid', frame.gridId, 'item', frame.itemIndex])
+      ) {
+        return [
+          makeDefect('invalid-presentation-entry-key', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      active.add(item);
+      stack.push({ phase: 'exit', value: item });
+      stack.push({
+        phase: 'enter',
+        value: child.value,
+        path: Object.freeze([...frame.path, 0]),
+      });
+      continue;
+    }
     if (!isOrdinaryObject(frame.value)) {
-      defects.push(
+      return [
         makeDefect('invalid-presentation-entry', {
           presentationIndexPath: frame.path,
         }),
-      );
-      continue;
+      ];
     }
     const entry = frame.value;
     const kind = readOwnDataMember(entry, 'kind');
     if (kind.kind !== 'value') {
-      defects.push(
+      return [
         makeDefect('invalid-presentation-entry', {
           presentationIndexPath: frame.path,
         }),
-      );
-      continue;
+      ];
     }
     if (kind.value === 'form-node') {
       const node = readOwnDataMember(entry, 'node');
@@ -334,92 +480,229 @@ function collectPresentationDefects(
         !isOrdinaryObject(node.value) ||
         !expected.has(node.value)
       ) {
-        defects.push(
+        return [
           makeDefect('unknown-presented-node', {
             presentationIndexPath: frame.path,
           }),
-        );
+        ];
       } else if (seen.has(node.value)) {
-        defects.push(
+        return [
           makeDefect('duplicate-presented-node', {
             presentationIndexPath: frame.path,
           }),
-        );
+        ];
       } else seen.add(node.value);
       continue;
     }
-    if (kind.value !== 'section') {
-      defects.push(
+    if (
+      kind.value !== 'section' &&
+      kind.value !== 'tabs' &&
+      kind.value !== 'accordion' &&
+      kind.value !== 'grid'
+    ) {
+      return [
         makeDefect('invalid-presentation-entry', {
           presentationIndexPath: frame.path,
         }),
-      );
-      continue;
+      ];
     }
     if (active.has(entry)) {
-      defects.push(
+      return [
         makeDefect('cyclic-presentation', {
           presentationIndexPath: frame.path,
         }),
-      );
-      continue;
+      ];
     }
     const id = readOwnDataMember(entry, 'id');
     const key = readOwnDataMember(entry, 'key');
     const label = readOwnDataMember(entry, 'label');
+    if (kind.value === 'tabs' || kind.value === 'accordion') {
+      const panels = readOwnDataMember(entry, 'panels');
+      if (
+        !isNonEmptyStringMember(id) ||
+        !isNonBlankStringMember(label) ||
+        !isDenseNonEmptyArrayMember(panels)
+      ) {
+        return [
+          makeDefect(
+            kind.value === 'tabs'
+              ? 'invalid-presentation-tabs'
+              : 'invalid-presentation-accordion',
+            { presentationIndexPath: frame.path },
+          ),
+        ];
+      }
+      if (
+        key.kind !== 'value' ||
+        key.value !== JSON.stringify([kind.value, id.value])
+      ) {
+        return [
+          makeDefect('invalid-presentation-entry-key', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (containerIds.has(id.value)) {
+        return [
+          makeDefect('duplicate-presentation-container-id', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      containerIds.add(id.value);
+      active.add(entry);
+      stack.push({ phase: 'exit', value: entry });
+      const panelIds = new Set<string>();
+      for (let index = panels.value.length - 1; index >= 0; index -= 1) {
+        const panel = readOwnDataMember(panels.value, String(index));
+        stack.push({
+          phase: 'panel',
+          value: panel.kind === 'value' ? panel.value : undefined,
+          path: Object.freeze([...frame.path, index]),
+          ownerKind: kind.value,
+          ownerId: id.value,
+          panelIds,
+        });
+      }
+      continue;
+    }
+    if (kind.value === 'grid') {
+      const columns = readOwnDataMember(entry, 'columns');
+      const items = readOwnDataMember(entry, 'items');
+      if (
+        !isNonEmptyStringMember(id) ||
+        !isNonBlankStringMember(label) ||
+        columns.kind !== 'value' ||
+        !isGridColumns(columns.value) ||
+        !isDenseNonEmptyArrayMember(items)
+      ) {
+        return [
+          makeDefect('invalid-presentation-grid', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (
+        key.kind !== 'value' ||
+        key.value !== JSON.stringify(['grid', id.value])
+      ) {
+        return [
+          makeDefect('invalid-presentation-entry-key', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      if (containerIds.has(id.value)) {
+        return [
+          makeDefect('duplicate-presentation-container-id', {
+            presentationIndexPath: frame.path,
+          }),
+        ];
+      }
+      containerIds.add(id.value);
+      active.add(entry);
+      stack.push({ phase: 'exit', value: entry });
+      for (let index = items.value.length - 1; index >= 0; index -= 1) {
+        const item = readOwnDataMember(items.value, String(index));
+        stack.push({
+          phase: 'grid-item',
+          value: item.kind === 'value' ? item.value : undefined,
+          path: Object.freeze([...frame.path, index]),
+          gridId: id.value,
+          columns: columns.value,
+          itemIndex: index,
+        });
+      }
+      continue;
+    }
+
     const children = readOwnDataMember(entry, 'children');
     if (
-      id.kind !== 'value' ||
-      typeof id.value !== 'string' ||
-      id.value.length === 0 ||
-      label.kind !== 'value' ||
-      typeof label.value !== 'string' ||
-      label.value.trim().length === 0 ||
-      children.kind !== 'value' ||
-      !Array.isArray(children.value) ||
-      children.value.length === 0
+      !isNonEmptyStringMember(id) ||
+      !isNonBlankStringMember(label) ||
+      !isDenseNonEmptyArrayMember(children)
     ) {
-      defects.push(
+      return [
         makeDefect('invalid-presentation-section', {
           presentationIndexPath: frame.path,
         }),
-      );
-      continue;
+      ];
     }
     if (
       key.kind !== 'value' ||
       key.value !== JSON.stringify(['section', id.value])
     ) {
-      defects.push(
+      return [
         makeDefect('invalid-presentation-section-key', {
           presentationIndexPath: frame.path,
         }),
-      );
-      continue;
+      ];
     }
-    if (ids.has(id.value)) {
-      defects.push(
+    if (containerIds.has(id.value)) {
+      return [
         makeDefect('duplicate-presentation-section-id', {
           presentationIndexPath: frame.path,
         }),
-      );
-      continue;
+      ];
     }
-    ids.add(id.value);
+    containerIds.add(id.value);
     active.add(entry);
     stack.push({ phase: 'exit', value: entry });
-    for (let index = children.value.length - 1; index >= 0; index -= 1) {
-      const child = readOwnDataMember(children.value, String(index));
-      stack.push({
-        phase: 'enter',
-        value: child.kind === 'value' ? child.value : undefined,
-        path: Object.freeze([...frame.path, index]),
-      });
-    }
+    pushEntries(children.value, frame.path);
   }
   if (seen.size !== expected.size)
-    defects.push(makeDefect('missing-presented-node'));
-  return defects;
+    return [makeDefect('missing-presented-node')];
+  return [];
+}
+
+function isDenseNonEmptyArrayMember(
+  member: ReturnType<typeof readOwnDataMember>,
+): member is { readonly kind: 'value'; readonly value: readonly unknown[] } {
+  if (
+    member.kind !== 'value' ||
+    !Array.isArray(member.value) ||
+    member.value.length === 0
+  ) {
+    return false;
+  }
+  for (let index = 0; index < member.value.length; index += 1) {
+    if (readOwnDataMember(member.value, String(index)).kind !== 'value')
+      return false;
+  }
+  return true;
+}
+
+function isNonEmptyStringMember(
+  member: ReturnType<typeof readOwnDataMember>,
+): member is { readonly kind: 'value'; readonly value: string } {
+  return (
+    member.kind === 'value' &&
+    typeof member.value === 'string' &&
+    member.value.length > 0
+  );
+}
+
+function isNonBlankStringMember(
+  member: ReturnType<typeof readOwnDataMember>,
+): member is { readonly kind: 'value'; readonly value: string } {
+  return (
+    member.kind === 'value' &&
+    typeof member.value === 'string' &&
+    member.value.trim().length > 0
+  );
+}
+
+function isGridColumns(value: unknown): value is 1 | 2 | 3 | 4 {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= 1 &&
+    value <= 4
+  );
+}
+
+function isGridSpan(value: unknown, columns: 1 | 2 | 3 | 4): boolean {
+  return isGridColumns(value) && value <= columns;
 }
 
 type InspectedNode =

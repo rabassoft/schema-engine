@@ -430,6 +430,10 @@ code {
 
 .standard-form,
 .form-section,
+.presentation-tabs,
+.presentation-accordion,
+.presentation-panel,
+.presentation-grid,
 .object-group,
 .collection-items,
 .collection-insert {
@@ -438,6 +442,9 @@ code {
 }
 
 .form-section,
+.presentation-tabs,
+.presentation-accordion,
+.presentation-grid,
 .object-group,
 .collection-group,
 .collection-item {
@@ -446,10 +453,44 @@ code {
   border-radius: 0.45rem;
 }
 
-.form-section h2,
+.form-section > legend,
 .collection-group h2 {
   margin: 0;
   font-size: 1rem;
+}
+
+.presentation-tabs [role='tablist'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.presentation-tabs [role='tab'][aria-selected='true'] {
+  border-color: var(--primary);
+}
+
+.presentation-accordion > [id$='--trigger'] {
+  justify-self: start;
+}
+
+.presentation-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--standard-grid-columns), minmax(0, 1fr));
+}
+
+.presentation-grid-cell {
+  grid-column: span var(--standard-grid-span);
+  min-width: 0;
+}
+
+@media (max-width: 40rem) {
+  .presentation-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .presentation-grid-cell {
+    grid-column: span 1;
+  }
 }
 
 .form-field {

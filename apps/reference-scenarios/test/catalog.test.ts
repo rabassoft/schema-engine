@@ -20,6 +20,7 @@ const EXPECTED_SCENARIOS = [
   'local-definitions',
   'presentation-sections',
   'nullable-preferences',
+  'advanced-presentation',
 ] as const;
 
 const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
@@ -34,6 +35,7 @@ const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
   'local-references',
   'presentation-groups',
   'nullable-leaves',
+  'advanced-layout',
 ];
 
 const EXPECTED_TRANSITIONS = {
@@ -62,6 +64,7 @@ const EXPECTED_TRANSITIONS = {
     'null-notifications',
     'clear-volume',
   ],
+  'advanced-presentation': ['change-contact-email'],
 } as const;
 
 function withRuntimeEnvelope(
@@ -91,7 +94,7 @@ function simplifiedIssues(
 }
 
 describe('reference scenario catalog', () => {
-  it('contains exactly the six approved scenarios and unique closed feature evidence', () => {
+  it('contains exactly the seven approved scenarios and unique closed feature evidence', () => {
     expect(referenceScenarios.map(({ id }) => id)).toEqual(EXPECTED_SCENARIOS);
 
     const features = referenceScenarios.flatMap(
@@ -120,6 +123,7 @@ describe('reference scenario catalog', () => {
       'local-definitions': ['local-references'],
       'presentation-sections': ['presentation-groups'],
       'nullable-preferences': ['nullable-leaves'],
+      'advanced-presentation': ['advanced-layout'],
     });
     expect(
       Object.fromEntries(

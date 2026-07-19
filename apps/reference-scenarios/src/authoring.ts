@@ -21,6 +21,7 @@ const FEATURES: ReadonlySet<ReferenceFeature> = new Set([
   'object-collections',
   'local-references',
   'presentation-groups',
+  'advanced-layout',
   'nullable-leaves',
 ]);
 

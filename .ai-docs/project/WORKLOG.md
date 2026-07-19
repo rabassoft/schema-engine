@@ -6,6 +6,370 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-19 — PLAN-021 checkpoint 3 completed
+
+### Completed
+
+- Completed the frozen local M19 matrix: offline install, formatting, docs,
+  lint, types, 668 tests, builds, package/consumer/artifact/source/security,
+  snippets, import boundaries and both independent Chromium lanes.
+- Split frozen local consumer tuples from registry-backed live tuple resolution;
+  lower Angular `22.0.6` and latest-compatible `22.0.7`, both with Aria/CDK
+  `22.0.5`, pass native and pilot lanes offline.
+- Generated the three dirty-tree candidates twice with identical bytes and
+  SHA-512 hashes, rebuilt them from Corresponding Source and passed original
+  plus fresh neutral-directory dry runs. Evidence records `sourceCommit: null`.
+- Made reference E2E execution use the ignored workspace Playwright cache
+  deterministically without tracking browser binaries.
+- Review 119 cycles 1–4 corrected tuple-boundary, neutral-rehearsal, cache,
+  stale-document, formatting and final future-state findings. Cycle 5 repeated fourteen areas and
+  all 22 SPEC-008 rows with zero findings.
+- No Git operation, registry access, authentication, publication or tag/settings
+  mutation occurred.
+
+### Next
+
+- Stop for explicit PLAN-021 checkpoint 4 authorization to review the scoped
+  diff, exclude unrelated changes unless selected, commit, push privately and
+  rebuild/compare from the exact clean commit.
+
+## 2026-07-19 — PLAN-021 checkpoint 2 completed
+
+### Completed
+
+- Added candidate-state `0.3.0` release notes with the exact three-package
+  matrix, complete SPEC-008 Public migration, compatibility, installation,
+  pilot composition/style, licensing/source and exclusion boundaries.
+- Reconciled root, core, Angular and pilot onboarding with the private source
+  candidates while preserving the truthful published `0.2.0` history.
+- Made documentation validation consume the exact M19 descriptor across all
+  three manifests and reject stale candidate, version, publication, provider,
+  provenance and package-surface claims.
+- Review 118 cycle 1 corrected six documentation/validation findings; cycle 2
+  corrected one exact-version/stale-check coverage finding; cycle 3 repeated
+  all ten areas with zero findings.
+- Documentation, formatting, lint, release tooling, artifact, isolation,
+  security, diff and offline frozen source-build checks pass. No candidate was
+  selected and no Git, registry or npm action occurred.
+
+### Next
+
+- Execute PLAN-021 checkpoint 3: complete local gate, deterministic inspected
+  artifacts, neutral-path dry runs and full implementation review. Perform no
+  Git or registry action.
+
+## 2026-07-19 — PLAN-021 checkpoint 1 completed
+
+### Completed
+
+- Added one validated deeply frozen M19 descriptor for exact core/base `0.3.0`
+  and pilot `0.1.0` identities, dependency order, packed peers and filenames.
+- Made packing, artifact/source/security checks, candidate metadata, future
+  live verification and candidate/exact/next/latest/unqualified consumers
+  consume the descriptor and fail on mixed or unexpected lines.
+- Added twelve focused tests and closed candidate evidence to exact toolchain,
+  commit, byte, SHA-512, integrity and non-credential fields.
+- Preserved the historical coordinated tooling and byte-identical public
+  `0.2.0` baseline independently from mutable tags and M19.
+- Review 117 cycle 1 corrected six implementation findings; cycle 2 repeated
+  all ten areas with zero findings. Artifact/source/security checks pass, with
+  source builds using cached content and zero downloads.
+- No production contract, selected candidate, commit, push, registry access or
+  npm mutation occurred.
+
+### Next
+
+- Implement PLAN-021 checkpoint 2 candidate-state `0.3.0` release notes,
+  onboarding/manifests and stale-document checks. Perform no Git or external
+  action.
+
+## 2026-07-19 — PLAN-021 revision 0 approved
+
+### Completed
+
+- Drafted the eleven-checkpoint M19 delivery contract for exact core/base
+  `0.3.0` and pilot `0.1.0` candidates.
+- Separated local preparation, clean Git evidence, dependency-first `next`
+  publication, observed pilot default and dependent-first base/core `latest`.
+- Added exact immutable recovery for every partial package/tag state and full
+  post-write identity, byte, signature, metadata, source and drift checks.
+- Review 116 cycle 1 corrected six registry-baseline, external-read, post-write,
+  first-package-identity, mixed-window and closing-document findings. Cycle 2
+  corrected one stale plan-state header; cycle 3 repeated fourteen areas and
+  closing documentation with zero findings.
+- Approved PLAN-021 revision 0 for local checkpoints 1–3 only. No
+  implementation, commit, push, registry access or npm mutation occurred.
+
+### Next
+
+- Implement PLAN-021 checkpoint 1: validated unequal-version three-package
+  release descriptor and focused tooling tests, preserving the frozen public
+  `0.2.0` regression. Perform no Git or external action.
+
+## 2026-07-19 — ADR-018 revision 4 accepted
+
+### Completed
+
+- Generalized publication architecture from the two original packages to the
+  exact accepted M19 core/base `0.3.0` plus pilot `0.1.0` line.
+- Fixed dependency-first publication under `next`, dependent-first base/core
+  `latest`, first-pilot alias observation and immutable partial recovery.
+- Reconciled current official npm CLI behavior with prior registry evidence:
+  plans must observe rather than assume an initial `latest`.
+- Preserved package-local Corresponding Source, AGPL/commercial rights,
+  write-protected 2FA, private repository/no provenance and immediate approval
+  before every external mutation.
+- Review 115 cycles 1–2 corrected six normative findings; cycles 3–4 corrected
+  closing-state documentation and repeated all thirteen areas with zero
+  findings. ADR-018 revision 4 is Accepted.
+
+### Next
+
+- Draft and completely review PLAN-021. Do not implement, commit, push, access
+  registry state or mutate npm before the plan and its later gates authorize
+  each action.
+
+## 2026-07-19 — M19 release promotion readiness accepted
+
+### Completed
+
+- Selected a coordinated Experimental release of core/base Angular `0.3.0`
+  plus Angular Aria pilot `0.1.0` before another functional milestone.
+- Review 114 cycle 1 found five stale current-state phrases; cycle 2 repeated
+  twelve areas with zero findings and promoted only the exact release boundary
+  for normative design.
+- Confirmed SPEC-008 and ADR-010 already govern versions, peers, behavior and
+  independent SemVer; no new behavioral SPEC or ADR-010 revision is needed.
+- Identified ADR-018 revision 3's exact two-package limitation. Revision 4 must
+  admit the pilot and close dependency order, mandatory `latest`, partial
+  failure and immutable recovery before PLAN-021.
+- Preserved D-043, repository visibility/OIDC/provenance, commit, push and every
+  npm action as separately inactive or gated.
+
+### Next
+
+- Draft and completely review ADR-018 revision 4. Do not prepare PLAN-021 or
+  perform any external action before that ADR is accepted.
+
+## 2026-07-18 — PLAN-020 and M18 completed
+
+### Completed
+
+- Ran the frozen offline install and complete checkpoint-8 verification matrix.
+- Repeated all fourteen final implementation-review areas and reconciled all 22
+  SPEC-008 rows; review 113 cycle 2 closed with zero findings after correcting
+  one current-state wording issue from cycle 1.
+- Verified core 444, validator 7, catalog 38, base Angular 103, Angular
+  reference 25, Standard 50 and pilot 1 tests, plus both reference Chromium
+  lanes and native/pilot lower/latest clean consumers.
+- Marked PLAN-020 revision 0 and M18 complete without publication, tag,
+  repository, commit or push action. The unrelated `angular.json` analytics
+  opt-out remains outside the plan.
+
+### Next
+
+- Select the next demand-driven milestone candidate through a separate
+  prioritization and promotion-readiness decision; no implementation task is
+  active.
+
+## 2026-07-18 — PLAN-020 checkpoint 7 completed
+
+### Completed
+
+- Executed the separately authorized registry-backed latest-compatible gate.
+- Resolved exact Angular core/forms/build/CLI/compiler `22.0.7` and Angular
+  Aria/CDK `22.0.5`, including the exact Aria CDK peer patch.
+- Passed strict install, partial compilation, strict types, DOM, production
+  build and Chromium in independent native and pilot clean consumers.
+- Review 112 cycle 1 reconciled lower/latest, artifacts, source, security,
+  workspace/browser regression and all 22 rows with zero findings.
+
+### Next
+
+- Execute PLAN-020 checkpoint 8 final frozen install, complete repeated review
+  and M18 persistent-state reconciliation; do not publish, commit or push.
+
+## 2026-07-18 — PLAN-020 checkpoint 7 local pre-network gate ready
+
+### Completed
+
+- Added explicit private core/base `0.3.0` plus pilot `0.1.0` artifact,
+  SemVer-rewrite, inventory, isolation, security and Corresponding Source gates.
+- Added a frozen standalone source-build harness for the pilot and proved all
+  three packages rebuild offline with declarations/exports/behavior equal to
+  shipped output.
+- Added separate clean lower-bound native and pilot projects. Both pass exact
+  peer installation, partial compilation, strict types, DOM, production build
+  and Chromium at Angular `22.0.6`; the pilot uses exact Aria/CDK `22.0.5`.
+- Corrected the published `0.2.0` regression so it verifies the frozen
+  byte-identical tarballs instead of attempting to relabel `0.3.0` sources.
+- Review 111 cycles 1–2 found the stale regression and two unformatted
+  persistent-state files; cycle 3 repeated all twelve local areas, the 22-row
+  applicable evidence and complete verification with zero findings.
+
+### Next
+
+- Obtain separate network authorization and run
+  `pnpm test:consumer:m18:latest`; inspect the resolved Angular/Aria/CDK tuple
+  and complete checkpoint 7 only if both latest clean consumers pass.
+
+## 2026-07-18 — PLAN-020 checkpoint 6 completed
+
+### Completed
+
+- Implemented exactly four rank-10/priority-0 pilot registrations behind the
+  sole Public provider function; all implementation classes remain Internal.
+- Composed only tabs with Angular Aria wrap/roving/follow-focus and preserved
+  content. Section, accordion and grid retain native accepted semantics and
+  exact Public base-outlet projection.
+- Added the opt-in host-scoped stylesheet with exactly six Public properties and
+  exact defaults, no reset/global/import/JS side effect and usable unstyled
+  behavior.
+- Review 110 cycle 1 corrected package-smoke formatting; cycle 2 repeated all
+  eleven areas with zero findings. All workspace and pilot build/type/test/
+  package/dependency/boundary/documentation gates pass.
+
+### Next
+
+- Prepare PLAN-020 checkpoint 7 local coordinated artifacts, source/package
+  allowlists and lower-bound clean consumers; stop before registry-backed
+  latest-compatible consumer resolution for separate authorization.
+
+## 2026-07-18 — PLAN-020 checkpoint 5 completed
+
+### Completed
+
+- Resolved only Angular Aria/CDK `22.0.5` for the isolated pilot with scripts
+  disabled; one new lock importer and the exact two package/snapshot entries
+  were added over the existing Angular `22.0.6` toolchain.
+- Verified Aria's exact CDK `22.0.5` peer, MIT licenses, absence of lifecycle
+  scripts and the accepted dependency graph through a repeatable package gate.
+- Review 109 cycle 1 repeated all ten checkpoint areas with zero findings.
+  Formatting, lint, docs, strict types, all builds/tests/package smokes,
+  dependency and boundary gates pass. Pilot behavior remains unimplemented.
+
+### Next
+
+- Execute PLAN-020 checkpoint 6: four rank-10 pilot registrations, selective
+  Angular Aria tabs, native pilot section/accordion/grid and the exact
+  six-property opt-in stylesheet; repeat its complete review to zero findings.
+
+## 2026-07-18 — PLAN-020 checkpoint 5 pre-network gate reached
+
+### Completed
+
+- Moved only core/base source manifests to the coordinated private `0.3.0`
+  candidate line while preserving published/release-facing `0.2.0` state.
+- Added the non-private `@rabassoft/schema-engine-angular-aria@0.1.0` package
+  skeleton with ESM partial compilation, exact root/style export map, peer and
+  runtime metadata, legal/source documents and an intentionally empty Public
+  declaration before checkpoint-6 implementation.
+- Added empty-surface package smoke and extended public import/manifest boundary
+  verification to the third package. Core/base contain no pilot, Aria, CDK or
+  style reference and `pnpm-lock.yaml` remains unchanged.
+- Review 108 cycles 1–2 corrected a trailing LICENSE byte and an explicit Node
+  URL import. Cycle 3 repeated all ten local areas with zero findings.
+- Formatting, lint, docs, strict types, seven-project build, all package smokes,
+  all existing unit suites, 12 boundary self-tests and the live 3-public-package
+  boundary audit pass. No network, dependency resolution, implementation,
+  publication, commit or push occurred.
+
+### Next
+
+- Obtain separate authorization and run the exact PLAN-020 checkpoint 5
+  `pnpm --filter @rabassoft/schema-engine-angular-aria add ...` command, then
+  inspect the one-importer lock diff, exact Aria/CDK graph, peer patch, licenses
+  and lifecycle metadata before completing the checkpoint.
+
+## 2026-07-18 — PLAN-020 checkpoint 4 completed
+
+### Completed
+
+- Added the private `advanced-presentation` catalog scenario composing section,
+  nested tabs, accordion and grid over unchanged controlled data and operations.
+- Added an independent direct-core Standard DOM projection with exact IDs,
+  semantics, keyboard behavior, mounted hidden descendants, target-local state,
+  responsive grid fallback, local text fallback and idempotent teardown.
+- Projected the same authored scenario through the native Angular reference
+  without sharing target components, controllers, CSS or lifecycle behavior.
+- Review 107 cycles 1–4 corrected snapshot-only text re-resolution, an undefined
+  Standard CSS property, incomplete advanced Chromium reset/replacement evidence
+  and one strict-test unused field. Cycle 5 repeated all twelve areas with zero
+  findings.
+- All workspace unit suites pass at core 444, validator 7, catalog 38, base
+  Angular 103, Angular reference 25 and Standard 50 tests. Formatting, lint,
+  strict types, both production builds, package/artifact checks, snippets, 490
+  boundaries and Chromium Standard 6/6 plus Angular 8/8 pass. No package,
+  version, dependency, external action or push entered checkpoint 4.
+
+### Next
+
+- Prepare PLAN-020 checkpoint 5 locally: core/base `0.3.0` manifests and the
+  private-first pilot `0.1.0` package skeleton. Stop before the separately gated
+  Angular Aria/CDK network dependency command.
+
+## 2026-07-18 — PLAN-020 checkpoint 3 completed
+
+### Completed
+
+- Added exactly nine Public Experimental base Angular container-SPI symbols and
+  kept resolver, tokens, context, IDs, host factories and native classes
+  Internal.
+- Added descriptor-safe copied/frozen registration validation, deterministic
+  rank/priority/order selection, four mandatory native fallbacks and complete
+  form-projection blocking for provider configuration defects.
+- Added native section, tabs, accordion and grid hosts with exact immutable
+  models, depth-first cached text resolution, IDs, roles, relationships,
+  keyboard/state behavior, mounted hidden descendants and responsive grid
+  semantics.
+- Added exact-object child claims, completeness audits, later removal/
+  replacement invalidation, nearest panel/container failure ownership,
+  independent sibling continuation and exact-once cleanup.
+- Review 106 cycles 1–2 corrected a runtime import cycle, stale failure tests,
+  advanced text order, post-audit lifecycle enforcement, Internal declaration
+  leakage and packed inventory. Cycle 3 repeated all twelve areas with zero
+  findings.
+- Core remains green at 24 files/444 tests. Base Angular build, strict types,
+  scoped lint/format, package smoke, packed candidates and all 13 files/102
+  tests pass. Full-workspace lint now stops only at the expected pending
+  checkpoint 4 Standard projection branch. The unrelated `angular.json`
+  setting, manifests, versions, dependencies, external actions, commit and push
+  remain untouched.
+
+### Next
+
+- Execute PLAN-020 checkpoint 4: independent Standard projection and one shared
+  Angular/Standard advanced scenario, followed by a complete repeated review to
+  zero findings.
+
+## 2026-07-18 — PLAN-020 checkpoint 2 completed
+
+### Completed
+
+- Extended the shared iterative manual FormDefinition validator with exactly
+  the eight SPEC-008 advanced-presentation reasons and no new Public symbol.
+- Enforced descriptor-safe exact shapes, keys, bounded spans, global container
+  and owner-local panel namespaces, active-cycle detection, presented-node
+  identity and exact numeric index paths with deterministic first-defect
+  precedence.
+- Proved every new reason through both runtime and operation envelopes,
+  including frozen/copied locators and non-invocation of validator, managed-data
+  and effect logic.
+- Proved presentation independence for controlled value/baseline, snapshots,
+  validation inputs/issues, dirty/touched/focused state, scopes, primitive
+  operations and stable collection identity/movement.
+- Review 105 cycles 1–2 found two missing hostile/non-invocation evidence cases;
+  cycle 3 repeated all ten areas with zero findings. Core build, strict types,
+  scoped lint/format, package smoke and diff checks pass; all 24 core files and
+  444 tests pass. Public contracts, Angular, Standard, manifests, versions,
+  dependencies, external actions, commit and push remain untouched.
+
+### Next
+
+- Execute PLAN-020 checkpoint 3: Public base Angular container SPI, provider/
+  claim machinery and mandatory native projection, followed by a complete
+  repeated checkpoint review to zero findings.
+
 ## 2026-07-18 — PLAN-020 checkpoint 1 completed
 
 ### Completed

@@ -6,8 +6,10 @@ import { join } from 'node:path';
 import {
   listTarball,
   packCandidates,
+  packReleaseCandidates,
   readTarballText,
 } from './release-candidate-utils.mjs';
+import { loadM19ReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-security-'));
 const secretPatterns = Object.freeze([
@@ -41,6 +43,7 @@ function assertCleanText(text, label, allowHistoricalLink = false) {
 }
 
 try {
+  const includeAngularAria = process.argv.includes('--include-angular-aria');
   const repositoryFiles = execFileSync('git', [
     'ls-files',
     '-z',
@@ -69,6 +72,7 @@ try {
       '--',
       'packages/core/src',
       'packages/angular/src',
+      ...(includeAngularAria ? ['packages/angular-aria/src'] : []),
     ],
     { encoding: 'utf8' },
   )
@@ -77,7 +81,9 @@ try {
     .filter(Boolean);
   assert.deepEqual([...new Set(authors)], ['Rabassoft <ricard@rabassoft.com>']);
 
-  const tarballs = packCandidates(temporaryRoot);
+  const tarballs = includeAngularAria
+    ? packReleaseCandidates(temporaryRoot, loadM19ReleaseTarget().descriptor)
+    : packCandidates(temporaryRoot);
   for (const [name, tarball] of Object.entries(tarballs)) {
     for (const member of listTarball(tarball)) {
       assert.equal(

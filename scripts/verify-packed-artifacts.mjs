@@ -5,15 +5,16 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   listTarball,
-  packCandidates,
+  packReleaseCandidates,
   readTarballJson,
   readTarballText,
   readWorkspacePackage,
 } from './release-candidate-utils.mjs';
-import { loadReleaseTarget } from './release-target.mjs';
+import { loadM19ReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-artifacts-'));
-const release = loadReleaseTarget();
+const release = loadM19ReleaseTarget();
+const { descriptor } = release;
 
 const CORE_MODULES = Object.freeze([
   'compiler',
@@ -41,10 +42,17 @@ const ANGULAR_MODULES = Object.freeze([
   'native/common',
   'native/number-codec',
   'native/number-renderer',
+  'native/presentation-containers',
   'native/provider',
   'native/string-enum-renderer',
   'native/string-renderer',
   'node-outlet',
+  'presentation-container',
+  'presentation-context',
+  'presentation-host',
+  'presentation-model',
+  'presentation-outlets',
+  'provider',
   'renderer',
   'testing/fake-renderer',
   'text',
@@ -76,7 +84,7 @@ function expectedMembers(modules) {
   ]);
 }
 
-function verifyCommon(tarball, expectedName, modules) {
+function verifyCommon(tarball, expectedName, expectedVersion, modules) {
   const members = listTarball(tarball);
   const files = new Set(members.filter((member) => !member.endsWith('/')));
 
@@ -107,7 +115,7 @@ function verifyCommon(tarball, expectedName, modules) {
 
   const manifest = readTarballJson(tarball, 'package/package.json');
   assert.equal(manifest.name, expectedName);
-  assert.equal(manifest.version, release.version);
+  assert.equal(manifest.version, expectedVersion);
   assert.equal(manifest.private, undefined);
   assert.equal(manifest.type, 'module');
   assert.equal(manifest.sideEffects, false);
@@ -169,15 +177,23 @@ function verifyCommon(tarball, expectedName, modules) {
 
 try {
   assert.equal(readWorkspacePackage().private, true);
-  const tarballs = packCandidates(temporaryRoot);
+  const tarballs = packReleaseCandidates(temporaryRoot, descriptor);
+  const coreTarget = descriptor.packages.find(({ role }) => role === 'core');
+  const angularTarget = descriptor.packages.find(
+    ({ role }) => role === 'angular',
+  );
+  assert.ok(coreTarget);
+  assert.ok(angularTarget);
   const core = verifyCommon(
     tarballs.core,
-    '@rabassoft/schema-engine',
+    coreTarget.name,
+    coreTarget.version,
     CORE_MODULES,
   );
   const angular = verifyCommon(
     tarballs.angular,
-    '@rabassoft/schema-engine-angular',
+    angularTarget.name,
+    angularTarget.version,
     ANGULAR_MODULES,
   );
 
@@ -272,6 +288,15 @@ try {
     'SchemaFieldOutletDirective',
     'AngularControlledFormConfig',
     'provideSchemaTextResolver',
+    'AngularPresentationContainerDefinition',
+    'AngularPresentationContainerRenderModel',
+    'AngularPresentationContainerRenderer',
+    'AngularPresentationContainerRendererType',
+    'AngularPresentationContainerTester',
+    'AngularPresentationContainerRegistration',
+    'SchemaPresentationEntryOutletComponent',
+    'SchemaPresentationPanelOutletComponent',
+    'provideSchemaPresentationContainer',
   ]) {
     assert.ok(
       angularIndex.includes(publicName),
@@ -289,6 +314,11 @@ try {
     'AngularObjectTextSnapshot',
     'AngularCollectionTextSnapshot',
     'FIELD_INSTANCE_CONTEXT',
+    'SCHEMA_PRESENTATION_CONTAINER_REGISTRATIONS',
+    'AngularPresentationContainerResolver',
+    'PresentationContainerHostFactory',
+    'PRESENTATION_ENTRY_CLAIM_CONTEXT',
+    'PRESENTATION_PANEL_CLAIM_CONTEXT',
   ]) {
     assert.equal(
       angularIndex.includes(internalName),
@@ -334,6 +364,32 @@ try {
     outletDeclaration.includes('FieldDefinition | FieldTemplate'),
     'Angular field outlet declaration does not accept item templates',
   );
+  const presentationOutletDeclaration = readTarballText(
+    tarballs.angular,
+    'package/dist/presentation-outlets.d.ts',
+  );
+  assert.ok(
+    presentationOutletDeclaration.includes(
+      'readonly entry: import("@angular/core").InputSignal<PresentationEntryDefinition>;',
+    ),
+    'Angular presentation entry outlet input is missing',
+  );
+  assert.ok(
+    presentationOutletDeclaration.includes(
+      'readonly panel: import("@angular/core").InputSignal<PresentationPanelDefinition>;',
+    ),
+    'Angular presentation panel outlet input is missing',
+  );
+  assert.equal(
+    presentationOutletDeclaration.includes('readonly snapshot:'),
+    false,
+    'Angular presentation outlets expose a snapshot input',
+  );
+  assert.equal(
+    presentationOutletDeclaration.includes('readonly definition:'),
+    false,
+    'Angular presentation outlets expose a definition input',
+  );
 
   assert.equal(core.dependencies, undefined);
   assert.equal(core.devDependencies, undefined);
@@ -344,15 +400,15 @@ try {
   assert.deepEqual(angular.peerDependencies, {
     '@angular/core': '>=22.0.6 <23.0.0',
     '@angular/forms': '>=22.0.6 <23.0.0',
-    '@rabassoft/schema-engine': release.corePeer,
+    ...angularTarget.schemaEnginePeers,
   });
   assert.deepEqual(angular.devDependencies, {
-    '@rabassoft/schema-engine': release.coreDevelopment,
+    ...angularTarget.schemaEngineDevelopment,
   });
   assert.equal(angular.optionalDependencies, undefined);
 
   console.log(
-    `Verified public ${release.version} candidates with licensed Corresponding Source.`,
+    `Verified public ${descriptor.id} core/base candidates with licensed Corresponding Source.`,
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });

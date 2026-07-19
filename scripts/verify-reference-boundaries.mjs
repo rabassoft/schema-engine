@@ -18,7 +18,11 @@ const PRIVATE_PROJECTS = Object.freeze({
   }),
 });
 
-const PUBLIC_PROJECTS = Object.freeze(['packages/core', 'packages/angular']);
+const PUBLIC_PROJECTS = Object.freeze([
+  'packages/core',
+  'packages/angular',
+  'packages/angular-aria',
+]);
 const PRIVATE_PRODUCT_PROJECTS = Object.freeze([
   Object.freeze({
     directory: 'packages/validator-ajv',

@@ -1,0 +1,63 @@
+/* Copyright (C) 2026 Ricardo Rabassó Rodríguez, operating as Rabassoft */
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+schema-aria-presentation-section,
+schema-aria-presentation-tabs,
+schema-aria-presentation-accordion,
+schema-aria-presentation-grid {
+  --se-aria-container-surface: Canvas;
+  --se-aria-container-text: CanvasText;
+  --se-aria-container-border: currentColor;
+  --se-aria-container-accent: LinkText;
+  --se-aria-container-radius: 0.5rem;
+  --se-aria-container-gap: 1rem;
+
+  display: block;
+  color: var(--se-aria-container-text);
+}
+
+schema-aria-presentation-section fieldset,
+schema-aria-presentation-tabs [ngtabs],
+schema-aria-presentation-accordion > [role='group'],
+schema-aria-presentation-grid .se-aria-grid {
+  padding: var(--se-aria-container-gap);
+  border: 1px solid var(--se-aria-container-border);
+  border-radius: var(--se-aria-container-radius);
+  background: var(--se-aria-container-surface);
+}
+
+schema-aria-presentation-tabs [ngtablist] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-aria-container-gap);
+}
+
+schema-aria-presentation-tabs [ngtab][aria-selected='true'] {
+  color: var(--se-aria-container-accent);
+}
+
+schema-aria-presentation-accordion > [role='group'] {
+  display: grid;
+  gap: var(--se-aria-container-gap);
+}
+
+schema-aria-presentation-grid .se-aria-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--se-aria-grid-columns), minmax(0, 1fr));
+  gap: var(--se-aria-container-gap);
+}
+
+schema-aria-presentation-grid .se-aria-grid-cell {
+  min-width: 0;
+  grid-column: span var(--se-aria-grid-span);
+}
+
+@media (max-width: 40rem) {
+  schema-aria-presentation-grid .se-aria-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  schema-aria-presentation-grid .se-aria-grid-cell {
+    grid-column: span 1;
+  }
+}

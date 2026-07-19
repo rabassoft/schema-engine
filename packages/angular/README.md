@@ -5,15 +5,19 @@ Engine.
 
 ## Release status
 
-- Experimental line: `0.2.x` (`0.1.0` remains the immutable pre-M14 release).
+- Private Experimental candidate line: `0.3.x`; published `0.2.0` remains
+  immutable until a separately authorized release.
+- Package manifest: `0.3.0`; no registry publication is implied.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- Recommended channel: npm dist-tag `next` or an explicit version. npm's
-  mandatory `latest` alias remains Experimental and does not imply stability.
+- Recommended channel after publication: npm dist-tag `next` or an explicit
+  version. Any observed `latest` remains Experimental routing and does not
+  imply stability.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 
-Install the Experimental channel:
+The following command resolves the observed registry state; it does not install
+the private `0.3.0` candidate until its later publication is verified:
 
 ```sh
 npm install @rabassoft/schema-engine-angular@next
@@ -24,8 +28,8 @@ npm install @rabassoft/schema-engine-angular@next
 Consumers install both Schema Engine packages and aligned Angular peers:
 
 ```text
-@rabassoft/schema-engine-angular 0.2.x
-@rabassoft/schema-engine ^0.2.0
+@rabassoft/schema-engine-angular 0.3.x
+@rabassoft/schema-engine ^0.3.0
 @angular/core >=22.0.6 <23.0.0
 @angular/forms >=22.0.6 <23.0.0
 ```
@@ -34,18 +38,17 @@ Consumers install both Schema Engine packages and aligned Angular peers:
 version. Supporting Angular packages used by an application must use that same
 version.
 
-| Adapter | Core     | Angular core/forms | Build Angular | Tested Angular endpoints | Status                        |
-| ------- | -------- | ------------------ | ------------- | ------------------------ | ----------------------------- |
-| `0.2.x` | `^0.2.0` | `>=22.0.6 <23.0.0` | `22.0.6`      | `22.0.6` / `22.0.6`      | Experimental; verify registry |
+| Adapter | Core     | Angular core/forms | Build Angular | Tested Angular endpoints | Status                         |
+| ------- | -------- | ------------------ | ------------- | ------------------------ | ------------------------------ |
+| `0.3.x` | `^0.3.0` | `>=22.0.6 <23.0.0` | `22.0.6`      | `22.0.6` / `22.0.7`      | Private Experimental candidate |
 
-The upper stable endpoint resolved on 2026-07-14 from public npm metadata is
-currently the same version as the lower endpoint.
+The latest compatible endpoint verified at M18 closure is Angular `22.0.7`.
+Later patches require fresh evidence and do not change the lower bound.
 
 ## Supported import and boundary
 
-> This README describes the `0.2.x` package content. The immutable published
-> `0.1.0` package predates the nullable-leaf changes below. Registry availability
-> and tags must be verified independently from these immutable package bytes.
+> This README describes the private `0.3.x` source candidate. Published `0.2.0`
+> remains immutable and registry availability/tags must be verified separately.
 
 Import only from `@rabassoft/schema-engine-angular`. Deep imports into `dist`,
 `src`, or other physical paths are unsupported.
@@ -75,9 +78,12 @@ leaves. String enum remains excluded. Manually authored
 `nullValueLabel` strings in addition to `clearLabel`; this is a coordinated
 Experimental source migration with core's required `nullable` member.
 
-Arrays of primitives, arrays inside collection item templates, tuples,
-references, composition, advanced layouts, generated identity, implicit Add
-controls and custom collection renderers remain outside the supported boundary.
+The `0.3.x` candidate projects root-only static sections, tabs, accordions and
+logical grids through a Public Experimental container SPI with mandatory native
+fallback. Arrays of primitives, arrays inside collection item templates,
+tuples, external references, composition, workflow, nested/item layout,
+generated identity, implicit Add controls and custom collection renderers remain
+outside the supported boundary.
 
 ## License and source
 
@@ -88,6 +94,6 @@ support SLA is represented by this package.
 
 The development repository is private pending sanitization. Preferred
 TypeScript source and a frozen package-local build harness are included; see
-`SOURCE.md`. The first public release has no npm provenance because there is no
-matching public repository. External code contributions and a public issue
-tracker are not currently offered.
+`SOURCE.md`. The candidate has no npm provenance because there is no matching
+public repository. External code contributions and a public issue tracker are
+not currently offered.

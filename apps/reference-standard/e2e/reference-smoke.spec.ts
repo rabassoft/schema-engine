@@ -10,6 +10,7 @@ const scenarios = [
   ['local-definitions', 'Same-document local definitions'],
   ['presentation-sections', 'Static presentation sections'],
   ['nullable-preferences', 'Nullable preferences'],
+  ['advanced-presentation', 'Advanced static presentation'],
 ] as const;
 
 test.beforeEach(async ({ page }) => {
@@ -65,11 +66,52 @@ test('navigates all scenarios with normalized accessible interaction', async ({
     'presentation-sections',
     'Static presentation sections',
   );
-  await expect(page.getByRole('heading', { name: 'Identity' })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Identity' })).toBeVisible();
   await selectScenario(page, 'nullable-preferences', 'Nullable preferences');
   await expect(
     page.getByRole('button', { name: 'Set null' }).first(),
   ).toBeVisible();
+
+  await selectScenario(
+    page,
+    'advanced-presentation',
+    'Advanced static presentation',
+  );
+  await expect(page.getByRole('tab', { name: 'Identity' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await page.getByRole('tab', { name: 'Contact' }).click();
+  await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible();
+  await page.getByRole('button', { name: 'Notifications' }).click();
+  await expect(
+    page.getByRole('checkbox', { name: 'Newsletter' }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Reset scenario' }).click();
+  await expect(page.getByRole('tab', { name: 'Contact' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(
+    page.getByRole('button', { name: 'Notifications' }),
+  ).toHaveAttribute('aria-expanded', 'true');
+  await selectScenario(
+    page,
+    'controlled-primitives',
+    'Controlled primitive fields',
+  );
+  await selectScenario(
+    page,
+    'advanced-presentation',
+    'Advanced static presentation',
+  );
+  await expect(page.getByRole('tab', { name: 'Identity' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(
+    page.getByRole('button', { name: 'Notifications' }),
+  ).toHaveAttribute('aria-expanded', 'false');
 });
 
 test('covers controlled decisions, stale pending work, baseline and reset', async ({

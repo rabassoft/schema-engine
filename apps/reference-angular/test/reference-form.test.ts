@@ -426,7 +426,7 @@ describe('ReferenceFormComponent application ownership', () => {
 
     expect(navigation).not.toBeNull();
     expect(selector).toBeInstanceOf(HTMLSelectElement);
-    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(6);
+    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(7);
     expect(
       root.querySelector('label[for="scenario-selector"]')?.textContent,
     ).toBe('Scenario');
@@ -540,7 +540,7 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(root.textContent).toContain('Own state:');
   });
 
-  it('loads all six scenarios through the same focused form component', () => {
+  it('loads all seven scenarios through the same focused form component', () => {
     const fixture = createComponent();
     const component = fixture.componentInstance;
 
@@ -558,6 +558,34 @@ describe('ReferenceFormComponent application ownership', () => {
         scenario.id,
       ).not.toBeNull();
     }
+  });
+
+  it('projects the shared advanced scenario through the independent native Angular lane', () => {
+    const fixture = createComponent();
+    fixture.componentInstance.selectScenario('advanced-presentation');
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+    const form = root.querySelector<HTMLElement>(
+      'form[aria-label="Selected schema form"]',
+    );
+    if (form === null) throw new Error('Advanced form missing.');
+    const tabs = Array.from(form.querySelectorAll<HTMLElement>('[role="tab"]'));
+    const panels = Array.from(
+      form.querySelectorAll<HTMLElement>('[role="tabpanel"]'),
+    );
+    expect(fixture.componentInstance.runtimeDiagnostics()).toEqual([]);
+    expect(tabs.map(({ textContent }) => textContent?.trim())).toEqual([
+      'Identity',
+      'Contact',
+    ]);
+    expect(panels).toHaveLength(2);
+    expect(panels[1]?.hidden).toBe(true);
+    expect(panels[1]?.querySelector('input')).not.toBeNull();
+    expect(form.querySelectorAll('[id$="--trigger"]')).toHaveLength(2);
+    expect(
+      form.querySelectorAll('[data-schema-presentation-grid-cell]'),
+    ).toHaveLength(2);
   });
 
   it('exposes shell-owned collection controls without renderer DOM coupling', () => {

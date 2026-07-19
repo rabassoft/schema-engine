@@ -5,8 +5,6 @@ import {
   Injectable,
   InjectionToken,
   inject,
-  makeEnvironmentProviders,
-  type EnvironmentProviders,
   type InputSignal,
   type OutputEmitterRef,
   type Provider,
@@ -65,15 +63,6 @@ export function provideSchemaRenderer(
     multi: true,
     useValue: registration,
   };
-}
-
-export function provideSchemaEngineAngular(
-  ...registrations: readonly AngularRendererRegistration[]
-): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    AngularRendererResolver,
-    ...registrations.map((registration) => provideSchemaRenderer(registration)),
-  ]);
 }
 
 @Injectable()

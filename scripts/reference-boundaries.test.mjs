@@ -66,6 +66,28 @@ function fixture() {
   );
   write(
     root,
+    'packages/angular-aria/package.json',
+    manifest({
+      ...publicManifest,
+      name: '@rabassoft/schema-engine-angular-aria',
+      files: ['dist', 'styles.css'],
+      exports: {
+        '.': {
+          types: './dist/index.d.ts',
+          import: './dist/index.js',
+          default: './dist/index.js',
+        },
+        './styles.css': './styles.css',
+      },
+    }),
+  );
+  write(
+    root,
+    'packages/angular-aria/src/index.ts',
+    "import '@angular/aria';\nimport '@rabassoft/schema-engine-angular';\n",
+  );
+  write(
+    root,
     'packages/validator-ajv/package.json',
     manifest({
       name: '@rabassoft/schema-engine-validator-ajv',
@@ -173,11 +195,11 @@ test('accepts the exact private reference dependency boundary', () => {
   const root = fixture();
   try {
     assert.deepEqual(verifyReferenceBoundaries(root), {
-      inspectedImports: 22,
-      inspectedManifestTargets: 5,
+      inspectedImports: 24,
+      inspectedManifestTargets: 11,
       privateProjects: 3,
       privateProductProjects: 1,
-      publicProjects: 2,
+      publicProjects: 3,
     });
   } finally {
     rmSync(root, { recursive: true, force: true });

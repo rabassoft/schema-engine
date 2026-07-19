@@ -69,6 +69,19 @@ if (advancedChild?.kind !== 'form-node')
   throw new Error('Missing normalized advanced child');
 assert.equal(advancedChild.node, advancedResult.definition.nodes[0]);
 assert.equal(Object.isFrozen(advancedTabs.panels), true);
+const advancedRuntime = createControlledFormRuntime({
+  formId: 'advanced-smoke',
+  definition: advancedResult.definition,
+  schema: referencedSchema,
+  value: {},
+  baselineValue: {},
+  locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+});
+assert.equal(advancedRuntime.success, true);
+if (!advancedRuntime.success)
+  throw new Error('Advanced presentation runtime creation failed');
+advancedRuntime.runtime.dispose();
 
 const nullableSchema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',

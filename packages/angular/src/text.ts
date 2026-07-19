@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import type {
   ArrayNodeDefinition,
+  AdvancedPresentationLabelDefinition,
   ArrayRuntimeSnapshot,
   CollectionTextMember,
   Diagnostic,
@@ -20,6 +21,7 @@ import type {
   ObjectRuntimeSnapshot,
   ObjectTextMember,
   ItemRuntimeSnapshot,
+  PresentationEntryDefinition,
   PresentationSectionDefinition,
   StringChoiceDefinition,
   TextResolutionContext,
@@ -42,6 +44,10 @@ type CollectionTextResolutionContext = Extract<
 type SectionTextResolutionContext = Extract<
   TextResolutionContext,
   { readonly section: PresentationSectionDefinition }
+>;
+type AdvancedPresentationTextResolutionContext = Extract<
+  TextResolutionContext,
+  { readonly presentation: AdvancedPresentationLabelDefinition }
 >;
 
 export interface AngularFieldTextSnapshot {
@@ -138,6 +144,10 @@ export interface SectionTextProjectionResult {
 export class AngularTextProjector {
   private readonly candidate: unknown = inject(SCHEMA_TEXT_RESOLVER);
   private readonly parsed = parseResolver(this.candidate);
+  private readonly presentationLabels = new WeakMap<
+    object,
+    Map<string, SectionTextProjectionResult>
+  >();
 
   /** @internal */
   projectSection(
@@ -145,6 +155,8 @@ export class AngularTextProjector {
     formId: string,
     locale: string,
   ): SectionTextProjectionResult {
+    const cached = this.cachedPresentationLabel(section, formId, locale);
+    if (cached !== undefined) return cached;
     const diagnostics: Diagnostic[] = [...this.parsed.diagnostics];
     const context: SectionTextResolutionContext = Object.freeze({
       formId,
@@ -179,10 +191,115 @@ export class AngularTextProjector {
       );
       result = section.label;
     }
-    return Object.freeze({
+    return this.storePresentationLabel(section, formId, locale, {
       text: result as string,
       diagnostics: Object.freeze(diagnostics),
     });
+  }
+
+  /** @internal */
+  projectAdvancedPresentation(
+    presentation: AdvancedPresentationLabelDefinition,
+    formId: string,
+    locale: string,
+  ): SectionTextProjectionResult {
+    const cached = this.cachedPresentationLabel(presentation, formId, locale);
+    if (cached !== undefined) return cached;
+    const diagnostics: Diagnostic[] = [...this.parsed.diagnostics];
+    const context: AdvancedPresentationTextResolutionContext = Object.freeze({
+      formId,
+      locale,
+      presentation,
+      member: 'label',
+    });
+    let result: unknown;
+    let reason:
+      'exception' | 'non-string-result' | 'blank-string-result' | undefined;
+    try {
+      result = this.parsed.resolver(presentation.label, context);
+    } catch {
+      reason = 'exception';
+    }
+    if (reason === undefined && typeof result !== 'string')
+      reason = 'non-string-result';
+    if (
+      reason === undefined &&
+      typeof result === 'string' &&
+      result.trim().length === 0
+    )
+      reason = 'blank-string-result';
+    if (reason !== undefined) {
+      diagnostics.push(
+        adapterDiagnostic(
+          'TEXT_RESOLUTION_FAILED',
+          'warning',
+          {
+            presentationKind: presentation.kind,
+            presentationKey: presentation.key,
+            member: 'label',
+            reason,
+          },
+          'Advanced presentation text resolution failed.',
+        ),
+      );
+      result = presentation.label;
+    }
+    return this.storePresentationLabel(presentation, formId, locale, {
+      text: result as string,
+      diagnostics: Object.freeze(diagnostics),
+    });
+  }
+
+  /** @internal */
+  projectPresentationSubtree(
+    entry: PresentationEntryDefinition,
+    formId: string,
+    locale: string,
+  ): void {
+    if (entry.kind === 'form-node') return;
+    if (entry.kind === 'section') {
+      this.projectSection(entry, formId, locale);
+      for (const child of entry.children)
+        this.projectPresentationSubtree(child, formId, locale);
+      return;
+    }
+    this.projectAdvancedPresentation(entry, formId, locale);
+    if (entry.kind === 'grid') {
+      for (const item of entry.items)
+        this.projectPresentationSubtree(item.child, formId, locale);
+      return;
+    }
+    for (const panel of entry.panels) {
+      this.projectAdvancedPresentation(panel, formId, locale);
+      for (const child of panel.children)
+        this.projectPresentationSubtree(child, formId, locale);
+    }
+  }
+
+  private cachedPresentationLabel(
+    definition: object,
+    formId: string,
+    locale: string,
+  ): SectionTextProjectionResult | undefined {
+    return this.presentationLabels
+      .get(definition)
+      ?.get(JSON.stringify([formId, locale]));
+  }
+
+  private storePresentationLabel(
+    definition: object,
+    formId: string,
+    locale: string,
+    result: SectionTextProjectionResult,
+  ): SectionTextProjectionResult {
+    const frozen = Object.freeze(result);
+    let labels = this.presentationLabels.get(definition);
+    if (labels === undefined) {
+      labels = new Map();
+      this.presentationLabels.set(definition, labels);
+    }
+    labels.set(JSON.stringify([formId, locale]), frozen);
+    return frozen;
   }
 
   project(
