@@ -1,8 +1,9 @@
 # PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-19
 - **Approval date:** 2026-07-19
+- **Completion date:** 2026-07-19
 - **Revision:** 0 — initial three-package M19 release plan
 - **Requires:** Accepted
   [`SPEC-008 v0.1.0`](../specs/008-static-advanced-presentation-layout.md),
@@ -18,8 +19,8 @@
   passed all fourteen areas and closing documentation with zero findings
 - **Milestone:** M19 — coordinated Public Experimental `0.3.0` release
 - **Capabilities:** only already completed M18 plus promoted D-034/D-040
-- **Implementation:** Local checkpoints 1–3 authorized by approval; checkpoint
-  4, registry reads and every npm mutation remain separately gated
+- **Implementation:** Checkpoints 1–11 completed under their separate local,
+  Git, registry-read and npm-mutation gates; no later action is authorized
 
 ## 1. Goal and hard boundary
 
@@ -523,3 +524,201 @@ and all 22 SPEC-008
 conformance rows with zero findings. No Git, registry, authentication,
 publication or tag action occurred. Checkpoint 4 is the next separately gated
 action and requires explicit authorization.
+
+### 19.4 Implementation checkpoint 4
+
+Checkpoint 4 completed on 19 July 2026. The reviewed 99-file M18/M19 scope was
+committed as `ce3ef3dd3f9154c95896bcefa22e31b4f293eda0` and pushed to private
+`origin/develop`; the unrelated `angular.json` analytics opt-out remained
+outside the commit. A clean-tree `pnpm prepare:release` then repeated builds,
+artifact/source/security checks and original/neutral dry runs successfully.
+
+Review 120 cycle 1 corrected one closing dirty-state description; cycle 2
+corrected one stale pre-commit verification; cycle 3 passed all eight areas
+with zero findings. All three clean
+candidates are byte-identical to the checkpoint 3 comparison inputs, and their
+ignored evidence records the exact source commit, basenames, bytes, SHA-512,
+integrity and neutral rehearsal. No npm registry read/write, Git tag, GitHub
+Release or repository setting changed. Checkpoint 5 is separately gated before
+its registry preflight, and core publication requires another immediate gate.
+
+### 19.5 Checkpoint 5 pre-publication gate
+
+The checkpoint 5 read-only preflight passed on 19 July 2026 after Ricard
+restored an initially expired npm session. Review 121 cycle 2 verifies npm
+`10.9.8`, the exact registry, `ricardrabasso` identity, `rabassoft` ownership,
+write-protected 2FA, package authority, absence of all three target versions,
+unchanged core/base `0.2.0` versions/tags/bytes and the absent pilot name.
+
+The selected core candidate still matches source commit `ce3ef3d`, exact bytes,
+SHA-512/integrity and a fresh neutral basename-relative dry run. No registry
+write occurred. Checkpoint 5 remains open and stopped for immediate approval of
+only its exact core publish command; no later checkpoint is authorized.
+
+### 19.6 Implementation checkpoint 5
+
+Checkpoint 5 completed on 19 July 2026 after Ricard executed the exact neutral
+core publish command. Review 122 cycle 1 found and corrected one clean-consumer
+runner precondition for the planned live-core/selected-Angular partial state.
+Cycle 2 corrected stale current-state documentation; cycle 3 repeated all nine
+post-publication areas with zero findings.
+
+Unauthenticated registry evidence proves core `0.3.0` public, signed,
+byte-identical to the `ce3ef3d` candidate, without repository/provenance, under
+`next: 0.3.0` with unchanged `latest: 0.2.0`. Exact and `next` core consumers
+pass against the selected base candidate at Angular `22.0.6`/`22.0.7`. Base
+Angular remains wholly at `0.2.0` and the pilot absent. Checkpoint 6 requires
+separate authorization for its read-only preflight and later immediate publish
+gate.
+
+### 19.7 Checkpoint 6 pre-publication gate
+
+The checkpoint 6 read-only preflight passed on 19 July 2026. Review 123 cycle 1
+recovered from the incomplete default pnpm store by selecting the previously
+validated local store. Cycle 2 narrowed one false-positive stale-state check;
+cycle 3 passed all eight areas with zero findings and zero downloads.
+
+Live core remains exact/`next` `0.3.0`; base target `0.3.0` is absent with both
+established tags still at `0.2.0`. The 122,465-byte selected base candidate
+retains exact hash/source commit, core peer `^0.3.0`, Angular peers, license and
+Corresponding Source. Lower `22.0.6` and latest-compatible `22.0.7` consumers
+plus the neutral dry run pass. No registry write occurred. Checkpoint 6 remains
+open and stopped for immediate approval of only its exact base publish command.
+
+### 19.8 Implementation checkpoint 6
+
+Checkpoint 6 completed on 19 July 2026 after Ricard executed the exact neutral
+base Angular publish command. Review 124 cycle 2 passed all nine
+post-publication areas with zero findings.
+
+Unauthenticated registry evidence proves base Angular `0.3.0` public, signed,
+byte-identical to the `ce3ef3d` candidate, with exact dependencies/peers and no
+repository/provenance. Core/base both resolve `next: 0.3.0` and retain
+`latest: 0.2.0`; exact and `next` live native consumers pass at Angular
+`22.0.6`/`22.0.7`. The pilot remains absent. Checkpoint 7 requires separate
+authorization for its read-only preflight and later immediate publish gate.
+
+### 19.9 Checkpoint 7 pre-publication gate
+
+The checkpoint 7 read-only preflight passed on 19 July 2026. Review 125 cycle 1
+added a fail-closed selected-pilot override to the M19 consumer runner and
+recovered the neutral dry run from the unusable global npm cache with an
+isolated temporary cache. Cycle 2 then invalidated its closing checks by running
+them from the neutral directory. Cycle 3 exposed one stale documentation count;
+cycle 4 corrected it but exposed the review's stale findings heading; cycle 5
+reconciled the heading and repeated all nine areas with zero findings.
+
+Live core/base remain byte-identical `0.3.0` under `next` with established
+`latest: 0.2.0`; the pilot name remains absent. The selected 28,192-byte pilot
+retains exact hash, base peer `^0.3.0`, Angular/Aria/CDK constraints, isolated
+styles, license and Corresponding Source. Exact/`next` lower and
+latest-compatible native/pilot consumers pass. No registry write occurred.
+Checkpoint 7 remains open and stopped for immediate approval of only its exact
+pilot publish command.
+
+### 19.10 Implementation checkpoint 7
+
+Checkpoint 7 completed on 19 July 2026 after Ricard executed the exact neutral
+pilot publish command. Review 126 cycle 1 found that the live consumer runner
+incorrectly coupled a frozen Angular tuple to offline package installation;
+candidate mode now remains offline while live exact/`next` modes may resolve
+public metadata. Cycle 2 corrected closing-document formatting. Cycle 3
+corrected one ambiguous public-source line in STATUS. Cycle 4 repeated all nine
+post-publication areas with zero findings.
+
+Unauthenticated evidence proves pilot `0.1.0` public, signed and byte-identical
+to the selected 28,192-byte `ce3ef3d` candidate, with exact peers, exports,
+styles, license/Corresponding Source and no repository/provenance. All three
+packages resolve their inspected versions under `next`; npm also established
+pilot `latest: 0.1.0` automatically, while core/base `latest` remain `0.2.0`.
+Exact and `next` native/pilot consumers pass at Angular `22.0.6`/`22.0.7` with
+Aria/CDK `22.0.5`. No tag/settings or Git mutation occurred. Checkpoint 8 is
+the next separately gated read-only observation and retention decision.
+
+### 19.11 Implementation checkpoint 8
+
+Checkpoint 8 completed on 19 July 2026 through PLAN-021's no-write retention
+branch. Review 127 cycle 1 corrected deferred-register formatting; cycle 2
+repeated all seven areas with zero findings.
+
+Read-only npm evidence confirms pilot `next` and `latest` both resolve to the
+inspected `0.1.0`; exact bytes/integrity/signature, public access, maintainer,
+manifest, peers, exports, styles, source/license and absent repository/
+provenance remain correct. Core/base remain `next: 0.3.0` and
+`latest: 0.2.0`. No tag or other registry/Git mutation occurred. Checkpoint 9's
+base Angular default-transition preflight remains separately gated.
+
+### 19.12 Checkpoint 9 pre-transition gate
+
+The checkpoint 9 read-only preflight passed on 19 July 2026. Review 128 cycle 1
+passed all eight pre-transition areas with zero findings.
+
+Authenticated identity remains `ricardrabasso`; all three exact public
+artifacts match the selected bytes and all three `next` aliases resolve to the
+inspected line. Pilot `latest` is exact `0.1.0`; core/base `latest` remain
+`0.2.0`. Base access, maintainer, integrity/signature, manifest, core/Angular
+peers, source/license and absent repository/provenance pass. Exact and `next`
+lower/latest-compatible native/pilot consumers pass through Chromium. No
+registry write occurred. Checkpoint 9 remains open and stopped for immediate
+approval of only its exact base Angular dist-tag command.
+
+### 19.13 Implementation checkpoint 9
+
+Checkpoint 9 completed on 19 July 2026 after Ricard executed the exact base
+Angular dist-tag command. Review 129 cycle 1 passed all seven post-transition
+areas with zero findings.
+
+Base Angular now resolves `next/latest: 0.3.0` with exact selected bytes,
+integrity/signature, public access, maintainer, metadata, peers, source/license
+and absent repository/provenance. Pilot remains `next/latest: 0.1.0`; core
+remains `next: 0.3.0`, `latest: 0.2.0`. This intentional mixed window is
+documented and no `latest`/unqualified consumer evidence was run or accepted.
+No other registry or Git mutation occurred. Checkpoint 10's core-default
+preflight remains separately gated.
+
+### 19.14 Checkpoint 10 pre-transition gate
+
+The checkpoint 10 read-only preflight passed on 19 July 2026. Review 130 cycle
+1 passed all seven pre-transition areas with zero findings.
+
+Authenticated identity remains `ricardrabasso`; all three exact public
+artifacts match selected bytes. The checkpoint 9 mixed window is unchanged:
+core `next: 0.3.0`, `latest: 0.2.0`; base `next/latest: 0.3.0`; pilot
+`next/latest: 0.1.0`. Core access, maintainer, integrity/signature, manifest,
+source/license and absent repository/provenance pass. The applicable exact/
+`next` consumers already passed before the mixed window, and no invalid
+default-channel evidence was accepted. No registry write occurred. Checkpoint
+10 remains open and stopped for Ricard to execute only its exact core dist-tag
+command manually.
+
+### 19.15 Implementation checkpoint 10
+
+Checkpoint 10 completed on 19 July 2026 after Ricard executed the exact core
+dist-tag command. Review 131 cycle 1 passed all nine post-transition areas with
+zero findings.
+
+Core/base now resolve `next/latest: 0.3.0`; pilot resolves
+`next/latest: 0.1.0`. Exact bytes, integrity/signatures, public access,
+maintainers, metadata, peers, source/license and absent repository/provenance
+remain correct. Lower `22.0.6` and latest-compatible `22.0.7` native/pilot
+consumers pass through `latest` and unqualified resolution, closing the planned
+mixed window. No unrelated registry or Git mutation occurred. Checkpoint 11's
+complete final closure remains separately gated.
+
+### 19.16 Final verified closure
+
+Checkpoint 11 completed on 19 July 2026. Review 132 cycle 1 recovered the exact
+non-interactive frozen install through the validated global offline pnpm store
+and found stale candidate/partial-state language in active onboarding and
+project documents. The corrections added fail-closed documentation checks and
+did not alter any product, package or architectural contract.
+
+Cycle 2 corrected an inaccurate pnpm version in the drafted review. Cycle 3
+found and corrected one stale core/base `latest: 0.2.0` statement in release
+notes and extended the fail-closed check. Cycle 4 repeated the complete
+workspace, artifact, source, security, registry
+metadata/access, exact/`next`/`latest`/unqualified clean-consumer and SPEC-008
+22-row review with zero findings. Core/base remain `next/latest: 0.3.0`; pilot
+remains `next/latest: 0.1.0`. PLAN-021 and M19 are complete. Completion grants
+no commit, push, npm mutation, repository/settings action, later version,
+framework target or deferred capability authority.

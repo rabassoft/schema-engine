@@ -653,6 +653,17 @@ function nestedFormDiagnostic(
       ...(defect.presentationIndexPath === undefined
         ? {}
         : { presentationIndexPath: [...defect.presentationIndexPath] }),
+      ...(defect.presentationOwnerKind === undefined
+        ? {}
+        : { presentationOwnerKind: defect.presentationOwnerKind }),
+      ...(defect.presentationOwnerPath === undefined
+        ? {}
+        : { presentationOwnerPath: [...defect.presentationOwnerPath] }),
+      ...(defect.presentationTemplatePath === undefined
+        ? {}
+        : {
+            presentationTemplatePath: [...defect.presentationTemplatePath],
+          }),
       ...(defect.member === undefined ? {} : { member: defect.member }),
       ...(defect.actualType === undefined
         ? {}

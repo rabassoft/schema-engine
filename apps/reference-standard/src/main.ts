@@ -388,7 +388,8 @@ export function renderReferenceSkeleton(
           state.definition,
           runtime,
           {
-            embeddedCollectionControls: false,
+            embeddedCollectionControls:
+              state.scenario.id === 'recursive-local-presentation',
             formId: `reference-standard-${state.scenario.id}`,
           },
         );

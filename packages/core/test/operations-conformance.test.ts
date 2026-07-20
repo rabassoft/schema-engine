@@ -53,11 +53,37 @@ function rehydrateDefinition(value: unknown): unknown {
       kind?: unknown;
       path?: unknown;
       children?: unknown;
+      presentation?: unknown;
+      item?: unknown;
     };
     if (candidate.kind === 'object' && Array.isArray(candidate.children)) {
       const children = candidate.children as readonly unknown[];
+      candidate.presentation = children.map((child) => ({
+        kind: 'form-node',
+        node: child,
+      }));
       for (let index = children.length - 1; index >= 0; index -= 1) {
         stack.push(children[index]);
+      }
+    } else if (
+      candidate.kind === 'array' &&
+      typeof candidate.item === 'object' &&
+      candidate.item !== null &&
+      !Array.isArray(candidate.item)
+    ) {
+      const item = candidate.item as {
+        children?: unknown;
+        presentation?: unknown;
+      };
+      if (Array.isArray(item.children)) {
+        const children = item.children as readonly unknown[];
+        item.presentation = children.map((child) => ({
+          kind: 'form-node',
+          node: child,
+        }));
+        for (let index = children.length - 1; index >= 0; index -= 1) {
+          stack.push(children[index]);
+        }
       }
     } else if (Array.isArray(candidate.path)) {
       leaves.set(JSON.stringify(candidate.path), node);

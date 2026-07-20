@@ -58,6 +58,57 @@ export const M19_RELEASE_DESCRIPTOR = deepFreeze({
   ],
 });
 
+export const M21_RELEASE_DESCRIPTOR = deepFreeze({
+  id: 'm21',
+  releaseDirectory: '0.4.0',
+  distTag: 'next',
+  provenance: false,
+  consumerModes: ['candidate', 'exact', 'next', 'latest', 'unqualified'],
+  consumerTuples: {
+    lower: { angular: '22.0.6', aria: '22.0.5', cdk: '22.0.5' },
+    latest: { angular: '22.0.7', aria: '22.0.5', cdk: '22.0.5' },
+  },
+  latestOrder: ['angularAria', 'angular', 'core'],
+  packages: [
+    {
+      role: 'core',
+      name: '@rabassoft/schema-engine',
+      workspacePath: 'packages/core',
+      version: '0.4.0',
+      file: 'rabassoft-schema-engine-0.4.0.tgz',
+      schemaEnginePeers: {},
+      schemaEngineDevelopment: {},
+    },
+    {
+      role: 'angular',
+      name: '@rabassoft/schema-engine-angular',
+      workspacePath: 'packages/angular',
+      version: '0.4.0',
+      file: 'rabassoft-schema-engine-angular-0.4.0.tgz',
+      schemaEnginePeers: { '@rabassoft/schema-engine': '^0.4.0' },
+      schemaEngineDevelopment: { '@rabassoft/schema-engine': '0.4.0' },
+    },
+    {
+      role: 'angularAria',
+      name: '@rabassoft/schema-engine-angular-aria',
+      workspacePath: 'packages/angular-aria',
+      version: '0.2.0',
+      file: 'rabassoft-schema-engine-angular-aria-0.2.0.tgz',
+      schemaEnginePeers: {
+        '@rabassoft/schema-engine-angular': '^0.4.0',
+      },
+      schemaEngineDevelopment: {
+        '@rabassoft/schema-engine-angular': '0.4.0',
+      },
+    },
+  ],
+});
+
+export const RELEASE_DESCRIPTORS = deepFreeze({
+  m19: M19_RELEASE_DESCRIPTOR,
+  m21: M21_RELEASE_DESCRIPTOR,
+});
+
 export function argumentValue(args, name) {
   return args
     .find((argument) => argument.startsWith(`--${name}=`))
@@ -121,7 +172,84 @@ export function assertM19ReleaseDescriptor(descriptor, manifests = undefined) {
   return descriptor;
 }
 
+export function assertM21ReleaseDescriptor(descriptor, manifests = undefined) {
+  assert.deepEqual(
+    descriptor,
+    M21_RELEASE_DESCRIPTOR,
+    'M21 release descriptor does not match the accepted contract',
+  );
+
+  const roles = descriptor.packages.map(({ role }) => role);
+  const names = descriptor.packages.map(({ name }) => name);
+  const files = descriptor.packages.map(({ file }) => file);
+  assert.deepEqual(roles, ['core', 'angular', 'angularAria']);
+  assert.deepEqual(descriptor.latestOrder, ['angularAria', 'angular', 'core']);
+  assert.equal(new Set(roles).size, roles.length, 'Duplicate release role');
+  assert.equal(new Set(names).size, names.length, 'Duplicate package name');
+  assert.equal(new Set(files).size, files.length, 'Duplicate candidate file');
+
+  if (manifests !== undefined) {
+    assert.deepEqual(
+      Object.keys(manifests),
+      roles,
+      'Release manifests do not match publication order',
+    );
+    for (const packageTarget of descriptor.packages) {
+      const manifest = manifests[packageTarget.role];
+      assert.ok(manifest, `Missing ${packageTarget.role} manifest`);
+      assert.equal(manifest.name, packageTarget.name);
+      assert.equal(manifest.version, packageTarget.version);
+      assert.equal(manifest.publishConfig?.access, 'public');
+      assert.equal(manifest.publishConfig?.tag, descriptor.distTag);
+      assert.equal(manifest.publishConfig?.provenance, descriptor.provenance);
+      const expectedPeerNames = Object.keys(packageTarget.schemaEnginePeers);
+      const actualPeerNames = Object.keys(
+        manifest.peerDependencies ?? {},
+      ).filter((name) => name.startsWith('@rabassoft/schema-engine'));
+      assert.deepEqual(actualPeerNames, expectedPeerNames);
+      for (const name of expectedPeerNames) {
+        assert.equal(
+          manifest.peerDependencies?.[name],
+          'workspace:^',
+          `${packageTarget.role} must retain a workspace:^ source peer`,
+        );
+      }
+      const expectedDevelopmentNames = Object.keys(
+        packageTarget.schemaEngineDevelopment,
+      );
+      const actualDevelopmentNames = Object.keys(
+        manifest.devDependencies ?? {},
+      ).filter((name) => name.startsWith('@rabassoft/schema-engine'));
+      assert.deepEqual(actualDevelopmentNames, expectedDevelopmentNames);
+      for (const name of expectedDevelopmentNames) {
+        assert.equal(
+          manifest.devDependencies?.[name],
+          'workspace:*',
+          `${packageTarget.role} must retain a workspace:* development link`,
+        );
+      }
+    }
+  }
+
+  return descriptor;
+}
+
+export function assertReleaseDescriptor(descriptor, manifests = undefined) {
+  if (descriptor.id === M19_RELEASE_DESCRIPTOR.id) {
+    return assertM19ReleaseDescriptor(descriptor, manifests);
+  }
+  if (descriptor.id === M21_RELEASE_DESCRIPTOR.id) {
+    return assertM21ReleaseDescriptor(descriptor, manifests);
+  }
+  assert.fail(`Unsupported release descriptor ${descriptor.id}`);
+}
+
 export function assertM19CandidateEvidence(evidence, descriptor) {
+  return assertReleaseCandidateEvidence(evidence, descriptor);
+}
+
+export function assertReleaseCandidateEvidence(evidence, descriptor) {
+  assertReleaseDescriptor(descriptor);
   assert.deepEqual(Object.keys(evidence), [
     'release',
     'releaseDirectory',
@@ -162,7 +290,7 @@ export function assertM19CandidateEvidence(evidence, descriptor) {
       version,
       file,
     })),
-    'Candidate evidence does not match the M19 descriptor',
+    `Candidate evidence does not match the ${descriptor.id} descriptor`,
   );
   for (const candidate of evidence.candidates) {
     assert.deepEqual(Object.keys(candidate), [
@@ -188,7 +316,20 @@ export function m19PackageSpecifier(
   candidateFiles = undefined,
 ) {
   assertM19ReleaseDescriptor(descriptor);
-  assert.ok(descriptor.consumerModes.includes(mode), 'Unsupported M19 mode');
+  return releasePackageSpecifier(descriptor, role, mode, candidateFiles);
+}
+
+export function releasePackageSpecifier(
+  descriptor,
+  role,
+  mode,
+  candidateFiles = undefined,
+) {
+  assertReleaseDescriptor(descriptor);
+  assert.ok(
+    descriptor.consumerModes.includes(mode),
+    `Unsupported ${descriptor.id} mode`,
+  );
   const packageTarget = descriptor.packages.find(
     (candidate) => candidate.role === role,
   );
@@ -205,6 +346,11 @@ export function m19PackageSpecifier(
 
 export function m19FrozenConsumerTuple(descriptor, mode, tupleSource) {
   assertM19ReleaseDescriptor(descriptor);
+  return releaseFrozenConsumerTuple(descriptor, mode, tupleSource);
+}
+
+export function releaseFrozenConsumerTuple(descriptor, mode, tupleSource) {
+  assertReleaseDescriptor(descriptor);
   assert.ok(['lower', 'latest'].includes(mode), 'Unsupported consumer tuple');
   assert.ok(
     ['frozen', 'registry'].includes(tupleSource),
@@ -240,6 +386,28 @@ export function loadM19ReleaseTarget(args = process.argv.slice(2)) {
   assertM19ReleaseDescriptor(M19_RELEASE_DESCRIPTOR, manifests);
   return Object.freeze({
     descriptor: M19_RELEASE_DESCRIPTOR,
+    manifests: Object.freeze(manifests),
+  });
+}
+
+export function loadCoordinatedReleaseTarget(args = process.argv.slice(2)) {
+  const release = argumentValue(args, 'release');
+  const descriptor = RELEASE_DESCRIPTORS[release];
+  assert.ok(descriptor, 'Pass exactly --release=m19 or --release=m21');
+  const manifests = Object.fromEntries(
+    descriptor.packages.map(({ role, workspacePath }) => [
+      role,
+      JSON.parse(
+        readFileSync(
+          join(workspaceRoot, workspacePath, 'package.json'),
+          'utf8',
+        ),
+      ),
+    ]),
+  );
+  assertReleaseDescriptor(descriptor, manifests);
+  return Object.freeze({
+    descriptor,
     manifests: Object.freeze(manifests),
   });
 }

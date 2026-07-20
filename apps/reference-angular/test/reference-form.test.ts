@@ -426,7 +426,7 @@ describe('ReferenceFormComponent application ownership', () => {
 
     expect(navigation).not.toBeNull();
     expect(selector).toBeInstanceOf(HTMLSelectElement);
-    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(7);
+    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(8);
     expect(
       root.querySelector('label[for="scenario-selector"]')?.textContent,
     ).toBe('Scenario');
@@ -540,7 +540,7 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(root.textContent).toContain('Own state:');
   });
 
-  it('loads all seven scenarios through the same focused form component', () => {
+  it('loads all eight scenarios through the same focused form component', () => {
     const fixture = createComponent();
     const component = fixture.componentInstance;
 
@@ -586,6 +586,53 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(
       form.querySelectorAll('[data-schema-presentation-grid-cell]'),
     ).toHaveLength(2);
+  });
+
+  it('projects the shared recursive scenario through stable local native owners', () => {
+    const fixture = createComponent();
+    fixture.componentInstance.selectScenario('recursive-local-presentation');
+    fixture.detectChanges();
+    TestBed.tick();
+    const form = (fixture.nativeElement as HTMLElement).querySelector(
+      'form[aria-label="Selected schema form"]',
+    );
+    if (form === null) throw new Error('Recursive form missing.');
+    const items = Array.from(
+      form.querySelectorAll<HTMLElement>('[data-schema-item-key]'),
+    );
+    expect(items).toHaveLength(2);
+    expect(form.querySelectorAll('[role="tablist"]')).toHaveLength(3);
+    expect(
+      form.querySelectorAll('[data-schema-presentation-grid-cell]'),
+    ).toHaveLength(6);
+    const beta = items[1];
+    if (beta === undefined) throw new Error('Beta item missing.');
+    const tabs = Array.from(
+      beta.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    );
+    tabs[1]?.click();
+    fixture.detectChanges();
+    const tablist = beta.querySelector('[role="tablist"]');
+    expect(tablist?.id).toBe(
+      `se-${encodeURIComponent(
+        JSON.stringify([
+          'reference-recursive-local-presentation',
+          'presentation',
+          ['item', ['rows'], 'beta'],
+          'tabs',
+          'item-tabs',
+        ]),
+      )}--tablist`,
+    );
+    beta.querySelector<HTMLButtonElement>('[id$="--move-earlier"]')?.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(
+      Array.from(form.querySelectorAll('[data-schema-item-key]')).includes(
+        beta,
+      ),
+    ).toBe(true);
+    expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
   });
 
   it('exposes shell-owned collection controls without renderer DOM coupling', () => {

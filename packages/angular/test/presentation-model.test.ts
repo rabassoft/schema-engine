@@ -124,4 +124,60 @@ describe('advanced presentation text and model projection', () => {
     expect(Object.isFrozen(result)).toBe(true);
     expect(Object.isFrozen(result.diagnostics[0]?.parameters)).toBe(true);
   });
+
+  it('qualifies every local container and panel ID with the concrete owner tuple', () => {
+    TestBed.configureTestingModule({});
+    const owner = Object.freeze({
+      kind: 'item' as const,
+      ownerPath: Object.freeze(['rows']),
+      templatePath: Object.freeze([] as const),
+      itemId: 'a/b',
+      address: Object.freeze({
+        collectionPath: Object.freeze(['rows']),
+        itemId: 'a/b',
+      }),
+      staticOwner: Object.freeze([
+        'item-template',
+        Object.freeze(['rows']),
+      ] as const),
+      ownerInstance: Object.freeze([
+        'item',
+        Object.freeze(['rows']),
+        'a/b',
+      ] as const),
+    });
+    const result = projectPresentationContainer(
+      tabs,
+      'form',
+      'en',
+      TestBed.inject(AngularTextProjector),
+      owner,
+    );
+    if (result.model.kind !== 'tabs') throw new Error('tabs model missing');
+    const base = `se-${encodeURIComponent(
+      JSON.stringify([
+        'form',
+        'presentation',
+        ['item', ['rows'], 'a/b'],
+        'tabs',
+        'tabs',
+      ]),
+    )}`;
+    expect(result.model.tablistId).toBe(`${base}--tablist`);
+    expect(result.model.panels[0]?.tabId).toBe(
+      `${id([
+        'form',
+        'presentation',
+        ['item', ['rows'], 'a/b'],
+        'tabs',
+        'tabs',
+        'panel',
+        'first',
+      ])}--tab`,
+    );
+  });
 });
+
+function id(parts: readonly unknown[]): string {
+  return `se-${encodeURIComponent(JSON.stringify(parts))}`;
+}

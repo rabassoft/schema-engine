@@ -444,6 +444,7 @@ describe('deep immutable operations', () => {
     label: 'Address',
     kind: 'object',
     children: [street],
+    presentation: [{ kind: 'form-node', node: street }],
   } as const;
   const profile = {
     key: '["profile"]',
@@ -453,6 +454,7 @@ describe('deep immutable operations', () => {
     label: 'Profile',
     kind: 'object',
     children: [address],
+    presentation: [{ kind: 'form-node', node: address }],
   } as const;
   const nestedDefinition: FormDefinition = withDefaultPresentation({
     nodes: [profile],

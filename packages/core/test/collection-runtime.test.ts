@@ -24,7 +24,7 @@ function collection(
     required: false,
     label: path.at(-1) ?? '',
     identity: { property: identityProperty },
-    item: { kind: 'item-template', children: [], fields: [] },
+    item: { kind: 'item-template', children: [], fields: [], presentation: [] },
   };
 }
 
@@ -167,6 +167,7 @@ describe('M10 defined collection inspection and diagnostics', () => {
           required: false,
           label: 'group',
           children: [first],
+          presentation: [{ kind: 'form-node', node: first }],
         },
         second,
       ],
@@ -207,9 +208,11 @@ describe('M10 defined collection inspection and diagnostics', () => {
             required: false,
             label: 'nested',
             children: [leaf],
+            presentation: [{ kind: 'form-node', node: leaf }],
           },
         ],
         fields: [leaf],
+        presentation: [],
       },
     };
     let invoked = false;
@@ -377,7 +380,12 @@ describe('M10 collection snapshot shell', () => {
     } as const;
     const node: ArrayNodeDefinition = {
       ...collection(['rows']),
-      item: { kind: 'item-template', children: [leaf], fields: [leaf] },
+      item: {
+        kind: 'item-template',
+        children: [leaf],
+        fields: [leaf],
+        presentation: [{ kind: 'form-node', node: leaf }],
+      },
     };
     const baseline = inspectCollectionValue(
       {
@@ -444,7 +452,12 @@ describe('M10 item field snapshots', () => {
     } as const;
     const node: ArrayNodeDefinition = {
       ...collection(['rows']),
-      item: { kind: 'item-template', children: [field], fields: [field] },
+      item: {
+        kind: 'item-template',
+        children: [field],
+        fields: [field],
+        presentation: [{ kind: 'form-node', node: field }],
+      },
     };
     const key = '["item-node",["rows"],"a",["profile","name"]]';
     const snapshots = buildItemFieldSnapshots(
@@ -488,7 +501,12 @@ describe('M10 item field snapshots', () => {
     } as const;
     const node: ArrayNodeDefinition = {
       ...collection(['rows']),
-      item: { kind: 'item-template', children: [field], fields: [field] },
+      item: {
+        kind: 'item-template',
+        children: [field],
+        fields: [field],
+        presentation: [{ kind: 'form-node', node: field }],
+      },
     };
     expect(
       buildItemFieldSnapshots(node, {}, undefined, 'new', 0)[0],
@@ -523,10 +541,16 @@ describe('M10 item snapshot trees', () => {
       required: false,
       label: 'profile',
       children: [leaf],
+      presentation: [{ kind: 'form-node', node: leaf }],
     } as const;
     const node: ArrayNodeDefinition = {
       ...collection(['rows']),
-      item: { kind: 'item-template', children: [object], fields: [leaf] },
+      item: {
+        kind: 'item-template',
+        children: [object],
+        fields: [leaf],
+        presentation: [{ kind: 'form-node', node: object }],
+      },
     };
     const issues = [
       { code: 'item', path: ['rows', 0], parameters: {} },
@@ -576,7 +600,12 @@ describe('M10 item snapshot trees', () => {
     } as const;
     const node: ArrayNodeDefinition = {
       ...collection(['rows']),
-      item: { kind: 'item-template', children: [leaf], fields: [leaf] },
+      item: {
+        kind: 'item-template',
+        children: [leaf],
+        fields: [leaf],
+        presentation: [{ kind: 'form-node', node: leaf }],
+      },
     };
     expect(
       buildItemSnapshot(node, { id: 'new', name: 'Ada' }, undefined, 'new', 0),

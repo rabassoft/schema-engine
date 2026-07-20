@@ -35,6 +35,7 @@ import {
 } from '@rabassoft/schema-engine';
 import { SchemaPresentationOutletComponent } from './node-outlet.js';
 import { AngularPresentationContainerResolver } from './presentation-container.js';
+import type { PresentationProjectionOwner } from './presentation-context.js';
 
 export type AngularControlledFormConfig<TData extends object> = Omit<
   ControlledFormRuntimeOptions<TData>,
@@ -46,7 +47,12 @@ interface ProjectedPresentation {
   readonly entry: PresentationEntryDefinition;
   readonly definition: FormDefinition;
   readonly snapshot: FormRuntimeSnapshot<object>;
+  readonly owner: PresentationProjectionOwner;
+  readonly locale: string;
 }
+const ROOT_PRESENTATION_OWNER: PresentationProjectionOwner = Object.freeze({
+  kind: 'root',
+});
 const runtimeContexts = new WeakMap<
   object,
   Signal<RuntimeContext | undefined>
@@ -71,8 +77,10 @@ export function readRuntimeContext(form: object): RuntimeContext | undefined {
     ) {
       <schema-presentation-outlet
         [entry]="projected.entry"
+        [owner]="projected.owner"
         [definition]="projected.definition"
         [snapshot]="projected.snapshot"
+        [locale]="projected.locale"
       />
     }
     <ng-content />
@@ -112,6 +120,8 @@ export class SchemaFormDirective<TData extends object> {
           entry,
           definition,
           snapshot,
+          owner: ROOT_PRESENTATION_OWNER,
+          locale: snapshot.locale,
         }),
       ),
     );

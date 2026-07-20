@@ -10,10 +10,10 @@ import {
   readTarballText,
   readWorkspacePackage,
 } from './release-candidate-utils.mjs';
-import { loadM19ReleaseTarget } from './release-target.mjs';
+import { loadCoordinatedReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-artifacts-'));
-const release = loadM19ReleaseTarget();
+const release = loadCoordinatedReleaseTarget();
 const { descriptor } = release;
 
 const CORE_MODULES = Object.freeze([
@@ -248,6 +248,7 @@ try {
     'SetItemValueOperation',
     'SectionTextMember',
     'SectionTextResolutionContext',
+    'TemplatePresentationEntryDefinition',
     'UiPresentationEntry',
     'UiSectionSchema',
   ]) {
@@ -370,13 +371,13 @@ try {
   );
   assert.ok(
     presentationOutletDeclaration.includes(
-      'readonly entry: import("@angular/core").InputSignal<PresentationEntryDefinition>;',
+      'readonly entry: import("@angular/core").InputSignal<PresentationEntryDefinition<FormNodeDefinition | FormNodeTemplate>>;',
     ),
     'Angular presentation entry outlet input is missing',
   );
   assert.ok(
     presentationOutletDeclaration.includes(
-      'readonly panel: import("@angular/core").InputSignal<PresentationPanelDefinition>;',
+      'readonly panel: import("@angular/core").InputSignal<PresentationPanelDefinition<FormNodeDefinition | FormNodeTemplate>>;',
     ),
     'Angular presentation panel outlet input is missing',
   );

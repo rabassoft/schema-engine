@@ -1,0 +1,515 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"profile\"]",
+        "name": "profile",
+        "path": ["profile"],
+        "required": false,
+        "label": "profile",
+        "kind": "object",
+        "children": [
+          {
+            "key": "[\"profile\",\"name\"]",
+            "name": "name",
+            "path": ["profile", "name"],
+            "required": false,
+            "nullable": false,
+            "label": "name",
+            "kind": "string",
+            "constraints": {}
+          },
+          {
+            "key": "[\"profile\",\"active\"]",
+            "name": "active",
+            "path": ["profile", "active"],
+            "required": false,
+            "nullable": false,
+            "label": "active",
+            "kind": "boolean"
+          }
+        ],
+        "presentation": [
+          {
+            "kind": "section",
+            "id": "profile-main",
+            "key": "[\"presentation\",[\"object\",[\"profile\"]],\"section\",\"profile-main\"]",
+            "label": "Profile main",
+            "children": [
+              {
+                "kind": "form-node",
+                "node": {
+                  "key": "[\"profile\",\"name\"]",
+                  "name": "name",
+                  "path": ["profile", "name"],
+                  "required": false,
+                  "nullable": false,
+                  "label": "name",
+                  "kind": "string",
+                  "constraints": {}
+                }
+              },
+              {
+                "kind": "form-node",
+                "node": {
+                  "key": "[\"profile\",\"active\"]",
+                  "name": "active",
+                  "path": ["profile", "active"],
+                  "required": false,
+                  "nullable": false,
+                  "label": "active",
+                  "kind": "boolean"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "[\"rows\"]",
+        "name": "rows",
+        "path": ["rows"],
+        "required": false,
+        "label": "rows",
+        "kind": "array",
+        "identity": {
+          "property": "id"
+        },
+        "item": {
+          "kind": "item-template",
+          "children": [
+            {
+              "key": "[\"template\",[\"rows\"],[\"name\"]]",
+              "name": "name",
+              "relativePath": ["name"],
+              "required": false,
+              "nullable": false,
+              "label": "name",
+              "kind": "string",
+              "constraints": {}
+            },
+            {
+              "kind": "object",
+              "key": "[\"template\",[\"rows\"],[\"details\"]]",
+              "name": "details",
+              "relativePath": ["details"],
+              "required": false,
+              "label": "details",
+              "children": [
+                {
+                  "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                  "name": "active",
+                  "relativePath": ["details", "active"],
+                  "required": false,
+                  "nullable": false,
+                  "label": "active",
+                  "kind": "boolean"
+                }
+              ],
+              "presentation": [
+                {
+                  "kind": "grid",
+                  "id": "details-grid",
+                  "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\"]",
+                  "label": "Details grid",
+                  "columns": 2,
+                  "items": [
+                    {
+                      "kind": "grid-item",
+                      "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\",\"item\",0]",
+                      "span": 2,
+                      "child": {
+                        "kind": "form-node",
+                        "node": {
+                          "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                          "name": "active",
+                          "relativePath": ["details", "active"],
+                          "required": false,
+                          "nullable": false,
+                          "label": "active",
+                          "kind": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "fields": [
+            {
+              "key": "[\"template\",[\"rows\"],[\"name\"]]",
+              "name": "name",
+              "relativePath": ["name"],
+              "required": false,
+              "nullable": false,
+              "label": "name",
+              "kind": "string",
+              "constraints": {}
+            },
+            {
+              "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+              "name": "active",
+              "relativePath": ["details", "active"],
+              "required": false,
+              "nullable": false,
+              "label": "active",
+              "kind": "boolean"
+            }
+          ],
+          "presentation": [
+            {
+              "kind": "tabs",
+              "id": "item-tabs",
+              "key": "[\"presentation\",[\"item-template\",[\"rows\"]],\"tabs\",\"item-tabs\"]",
+              "label": "Item tabs",
+              "panels": [
+                {
+                  "kind": "panel",
+                  "id": "summary",
+                  "key": "[\"presentation\",[\"item-template\",[\"rows\"]],\"tabs\",\"item-tabs\",\"panel\",\"summary\"]",
+                  "label": "Summary",
+                  "children": [
+                    {
+                      "kind": "form-node",
+                      "node": {
+                        "key": "[\"template\",[\"rows\"],[\"name\"]]",
+                        "name": "name",
+                        "relativePath": ["name"],
+                        "required": false,
+                        "nullable": false,
+                        "label": "name",
+                        "kind": "string",
+                        "constraints": {}
+                      }
+                    },
+                    {
+                      "kind": "form-node",
+                      "node": {
+                        "kind": "object",
+                        "key": "[\"template\",[\"rows\"],[\"details\"]]",
+                        "name": "details",
+                        "relativePath": ["details"],
+                        "required": false,
+                        "label": "details",
+                        "children": [
+                          {
+                            "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                            "name": "active",
+                            "relativePath": ["details", "active"],
+                            "required": false,
+                            "nullable": false,
+                            "label": "active",
+                            "kind": "boolean"
+                          }
+                        ],
+                        "presentation": [
+                          {
+                            "kind": "grid",
+                            "id": "details-grid",
+                            "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\"]",
+                            "label": "Details grid",
+                            "columns": 2,
+                            "items": [
+                              {
+                                "kind": "grid-item",
+                                "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\",\"item\",0]",
+                                "span": 2,
+                                "child": {
+                                  "kind": "form-node",
+                                  "node": {
+                                    "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                                    "name": "active",
+                                    "relativePath": ["details", "active"],
+                                    "required": false,
+                                    "nullable": false,
+                                    "label": "active",
+                                    "kind": "boolean"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"profile\",\"name\"]",
+        "name": "name",
+        "path": ["profile", "name"],
+        "required": false,
+        "nullable": false,
+        "label": "name",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"profile\",\"active\"]",
+        "name": "active",
+        "path": ["profile", "active"],
+        "required": false,
+        "nullable": false,
+        "label": "active",
+        "kind": "boolean"
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"profile\"]",
+          "name": "profile",
+          "path": ["profile"],
+          "required": false,
+          "label": "profile",
+          "kind": "object",
+          "children": [
+            {
+              "key": "[\"profile\",\"name\"]",
+              "name": "name",
+              "path": ["profile", "name"],
+              "required": false,
+              "nullable": false,
+              "label": "name",
+              "kind": "string",
+              "constraints": {}
+            },
+            {
+              "key": "[\"profile\",\"active\"]",
+              "name": "active",
+              "path": ["profile", "active"],
+              "required": false,
+              "nullable": false,
+              "label": "active",
+              "kind": "boolean"
+            }
+          ],
+          "presentation": [
+            {
+              "kind": "section",
+              "id": "profile-main",
+              "key": "[\"presentation\",[\"object\",[\"profile\"]],\"section\",\"profile-main\"]",
+              "label": "Profile main",
+              "children": [
+                {
+                  "kind": "form-node",
+                  "node": {
+                    "key": "[\"profile\",\"name\"]",
+                    "name": "name",
+                    "path": ["profile", "name"],
+                    "required": false,
+                    "nullable": false,
+                    "label": "name",
+                    "kind": "string",
+                    "constraints": {}
+                  }
+                },
+                {
+                  "kind": "form-node",
+                  "node": {
+                    "key": "[\"profile\",\"active\"]",
+                    "name": "active",
+                    "path": ["profile", "active"],
+                    "required": false,
+                    "nullable": false,
+                    "label": "active",
+                    "kind": "boolean"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"rows\"]",
+          "name": "rows",
+          "path": ["rows"],
+          "required": false,
+          "label": "rows",
+          "kind": "array",
+          "identity": {
+            "property": "id"
+          },
+          "item": {
+            "kind": "item-template",
+            "children": [
+              {
+                "key": "[\"template\",[\"rows\"],[\"name\"]]",
+                "name": "name",
+                "relativePath": ["name"],
+                "required": false,
+                "nullable": false,
+                "label": "name",
+                "kind": "string",
+                "constraints": {}
+              },
+              {
+                "kind": "object",
+                "key": "[\"template\",[\"rows\"],[\"details\"]]",
+                "name": "details",
+                "relativePath": ["details"],
+                "required": false,
+                "label": "details",
+                "children": [
+                  {
+                    "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                    "name": "active",
+                    "relativePath": ["details", "active"],
+                    "required": false,
+                    "nullable": false,
+                    "label": "active",
+                    "kind": "boolean"
+                  }
+                ],
+                "presentation": [
+                  {
+                    "kind": "grid",
+                    "id": "details-grid",
+                    "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\"]",
+                    "label": "Details grid",
+                    "columns": 2,
+                    "items": [
+                      {
+                        "kind": "grid-item",
+                        "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\",\"item\",0]",
+                        "span": 2,
+                        "child": {
+                          "kind": "form-node",
+                          "node": {
+                            "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                            "name": "active",
+                            "relativePath": ["details", "active"],
+                            "required": false,
+                            "nullable": false,
+                            "label": "active",
+                            "kind": "boolean"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "fields": [
+              {
+                "key": "[\"template\",[\"rows\"],[\"name\"]]",
+                "name": "name",
+                "relativePath": ["name"],
+                "required": false,
+                "nullable": false,
+                "label": "name",
+                "kind": "string",
+                "constraints": {}
+              },
+              {
+                "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                "name": "active",
+                "relativePath": ["details", "active"],
+                "required": false,
+                "nullable": false,
+                "label": "active",
+                "kind": "boolean"
+              }
+            ],
+            "presentation": [
+              {
+                "kind": "tabs",
+                "id": "item-tabs",
+                "key": "[\"presentation\",[\"item-template\",[\"rows\"]],\"tabs\",\"item-tabs\"]",
+                "label": "Item tabs",
+                "panels": [
+                  {
+                    "kind": "panel",
+                    "id": "summary",
+                    "key": "[\"presentation\",[\"item-template\",[\"rows\"]],\"tabs\",\"item-tabs\",\"panel\",\"summary\"]",
+                    "label": "Summary",
+                    "children": [
+                      {
+                        "kind": "form-node",
+                        "node": {
+                          "key": "[\"template\",[\"rows\"],[\"name\"]]",
+                          "name": "name",
+                          "relativePath": ["name"],
+                          "required": false,
+                          "nullable": false,
+                          "label": "name",
+                          "kind": "string",
+                          "constraints": {}
+                        }
+                      },
+                      {
+                        "kind": "form-node",
+                        "node": {
+                          "kind": "object",
+                          "key": "[\"template\",[\"rows\"],[\"details\"]]",
+                          "name": "details",
+                          "relativePath": ["details"],
+                          "required": false,
+                          "label": "details",
+                          "children": [
+                            {
+                              "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                              "name": "active",
+                              "relativePath": ["details", "active"],
+                              "required": false,
+                              "nullable": false,
+                              "label": "active",
+                              "kind": "boolean"
+                            }
+                          ],
+                          "presentation": [
+                            {
+                              "kind": "grid",
+                              "id": "details-grid",
+                              "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\"]",
+                              "label": "Details grid",
+                              "columns": 2,
+                              "items": [
+                                {
+                                  "kind": "grid-item",
+                                  "key": "[\"presentation\",[\"item-template-object\",[\"rows\"],[\"details\"]],\"grid\",\"details-grid\",\"item\",0]",
+                                  "span": 2,
+                                  "child": {
+                                    "kind": "form-node",
+                                    "node": {
+                                      "key": "[\"template\",[\"rows\"],[\"details\",\"active\"]]",
+                                      "name": "active",
+                                      "relativePath": ["details", "active"],
+                                      "required": false,
+                                      "nullable": false,
+                                      "label": "active",
+                                      "kind": "boolean"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

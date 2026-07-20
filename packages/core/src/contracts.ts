@@ -64,6 +64,7 @@ export interface ObjectUiSchema {
   readonly tooltip?: string;
   readonly order?: readonly string[];
   readonly fields?: Readonly<Record<string, UiNodeSchema>>;
+  readonly presentation?: readonly UiPresentationEntry[];
 }
 
 export interface ArrayUiSchema {
@@ -77,6 +78,7 @@ export interface ArrayUiSchema {
 export interface ItemUiSchema {
   readonly order?: readonly string[];
   readonly fields?: Readonly<Record<string, UiNodeSchema>>;
+  readonly presentation?: readonly UiPresentationEntry[];
 }
 
 export interface FieldUiSchema {
@@ -98,65 +100,84 @@ export interface FormDefinition {
   readonly presentation: readonly PresentationEntryDefinition[];
 }
 
-export type PresentationEntryDefinition =
-  | PresentedFormNodeDefinition
-  | PresentationSectionDefinition
-  | PresentationTabsDefinition
-  | PresentationAccordionDefinition
-  | PresentationGridDefinition;
+export type PresentationEntryDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> =
+  | PresentedFormNodeDefinition<TNode>
+  | PresentationSectionDefinition<TNode>
+  | PresentationTabsDefinition<TNode>
+  | PresentationAccordionDefinition<TNode>
+  | PresentationGridDefinition<TNode>;
 
-export interface PresentedFormNodeDefinition {
+export interface PresentedFormNodeDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> {
   readonly kind: 'form-node';
-  readonly node: FormNodeDefinition;
+  readonly node: TNode;
 }
 
-export interface PresentationSectionDefinition {
+export interface PresentationSectionDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> {
   readonly kind: 'section';
   readonly id: string;
   readonly key: string;
   readonly label: string;
-  readonly children: readonly PresentationEntryDefinition[];
+  readonly children: readonly PresentationEntryDefinition<TNode>[];
 }
 
-export interface PresentationTabsDefinition {
+export interface PresentationTabsDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> {
   readonly kind: 'tabs';
   readonly id: string;
   readonly key: string;
   readonly label: string;
-  readonly panels: readonly PresentationPanelDefinition[];
+  readonly panels: readonly PresentationPanelDefinition<TNode>[];
 }
 
-export interface PresentationAccordionDefinition {
+export interface PresentationAccordionDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> {
   readonly kind: 'accordion';
   readonly id: string;
   readonly key: string;
   readonly label: string;
-  readonly panels: readonly PresentationPanelDefinition[];
+  readonly panels: readonly PresentationPanelDefinition<TNode>[];
 }
 
-export interface PresentationPanelDefinition {
+export interface PresentationPanelDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> {
   readonly kind: 'panel';
   readonly id: string;
   readonly key: string;
   readonly label: string;
-  readonly children: readonly PresentationEntryDefinition[];
+  readonly children: readonly PresentationEntryDefinition<TNode>[];
 }
 
-export interface PresentationGridDefinition {
+export interface PresentationGridDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> {
   readonly kind: 'grid';
   readonly id: string;
   readonly key: string;
   readonly label: string;
   readonly columns: 1 | 2 | 3 | 4;
-  readonly items: readonly PresentationGridItemDefinition[];
+  readonly items: readonly PresentationGridItemDefinition<TNode>[];
 }
 
-export interface PresentationGridItemDefinition {
+export interface PresentationGridItemDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate = FormNodeDefinition,
+> {
   readonly kind: 'grid-item';
   readonly key: string;
   readonly span: 1 | 2 | 3 | 4;
-  readonly child: PresentationEntryDefinition;
+  readonly child: PresentationEntryDefinition<TNode>;
 }
+
+export type TemplatePresentationEntryDefinition =
+  PresentationEntryDefinition<FormNodeTemplate>;
 
 export interface BaseNodeDefinition {
   readonly key: string;
@@ -172,6 +193,7 @@ export interface BaseNodeDefinition {
 export interface ObjectFieldDefinition extends BaseNodeDefinition {
   readonly kind: 'object';
   readonly children: readonly FormNodeDefinition[];
+  readonly presentation: readonly PresentationEntryDefinition[];
 }
 
 export type FormNodeDefinition =
@@ -236,6 +258,7 @@ export interface BaseNodeTemplate {
 export interface ObjectNodeTemplate extends BaseNodeTemplate {
   readonly kind: 'object';
   readonly children: readonly FormNodeTemplate[];
+  readonly presentation: readonly TemplatePresentationEntryDefinition[];
 }
 
 export type FieldTemplate =
@@ -249,6 +272,7 @@ export interface ObjectItemTemplateDefinition {
   readonly kind: 'item-template';
   readonly children: readonly FormNodeTemplate[];
   readonly fields: readonly FieldTemplate[];
+  readonly presentation: readonly TemplatePresentationEntryDefinition[];
 }
 
 export interface ArrayNodeDefinition extends BaseNodeDefinition {
@@ -432,10 +456,10 @@ export type CollectionTextMember =
 export type SectionTextMember = 'label';
 export type AdvancedPresentationTextMember = 'label';
 export type AdvancedPresentationLabelDefinition =
-  | PresentationTabsDefinition
-  | PresentationAccordionDefinition
-  | PresentationPanelDefinition
-  | PresentationGridDefinition;
+  | PresentationTabsDefinition<FormNodeDefinition | FormNodeTemplate>
+  | PresentationAccordionDefinition<FormNodeDefinition | FormNodeTemplate>
+  | PresentationPanelDefinition<FormNodeDefinition | FormNodeTemplate>
+  | PresentationGridDefinition<FormNodeDefinition | FormNodeTemplate>;
 export type FieldTextResolutionContext =
   | {
       readonly formId: string;
@@ -507,7 +531,9 @@ export type CollectionTextResolutionContext =
 export interface SectionTextResolutionContext {
   readonly formId: string;
   readonly locale: string;
-  readonly section: PresentationSectionDefinition;
+  readonly section: PresentationSectionDefinition<
+    FormNodeDefinition | FormNodeTemplate
+  >;
   readonly member: SectionTextMember;
 }
 export interface AdvancedPresentationTextResolutionContext {

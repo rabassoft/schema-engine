@@ -5,13 +5,19 @@ import {
   assertCoordinatedReleaseVersion,
   assertM19CandidateEvidence,
   assertM19ReleaseDescriptor,
+  assertM21ReleaseDescriptor,
+  assertReleaseCandidateEvidence,
+  loadCoordinatedReleaseTarget,
   m19FrozenConsumerTuple,
   m19PackageSpecifier,
   M19_RELEASE_DESCRIPTOR,
+  M21_RELEASE_DESCRIPTOR,
+  releaseFrozenConsumerTuple,
+  releasePackageSpecifier,
 } from './release-target.mjs';
 
-function mutableDescriptor() {
-  return JSON.parse(JSON.stringify(M19_RELEASE_DESCRIPTOR));
+function mutableDescriptor(descriptor = M19_RELEASE_DESCRIPTOR) {
+  return JSON.parse(JSON.stringify(descriptor));
 }
 
 function copy(value) {
@@ -58,6 +64,73 @@ test('accepts the exact unequal-version M19 publication order', () => {
     ],
   );
 });
+
+test('accepts the exact M21 publication and latest orders', () => {
+  const descriptor = mutableDescriptor(M21_RELEASE_DESCRIPTOR);
+  assert.equal(assertM21ReleaseDescriptor(descriptor), descriptor);
+  assert.deepEqual(
+    descriptor.packages.map(({ role, version }) => ({ role, version })),
+    [
+      { role: 'core', version: '0.4.0' },
+      { role: 'angular', version: '0.4.0' },
+      { role: 'angularAria', version: '0.2.0' },
+    ],
+  );
+  assert.deepEqual(descriptor.latestOrder, ['angularAria', 'angular', 'core']);
+  const target = loadCoordinatedReleaseTarget(['--release=m21']);
+  assert.equal(target.descriptor, M21_RELEASE_DESCRIPTOR);
+  const manifests = copy(target.manifests);
+  manifests.angularAria.peerDependencies['@rabassoft/schema-engine'] =
+    'workspace:^';
+  assert.throws(() =>
+    assertM21ReleaseDescriptor(M21_RELEASE_DESCRIPTOR, manifests),
+  );
+});
+
+for (const [label, mutate] of [
+  ['missing pilot', (value) => value.packages.pop()],
+  [
+    'duplicate package',
+    (value) => {
+      value.packages[2] = copy(value.packages[1]);
+    },
+  ],
+  [
+    'unexpected fourth package',
+    (value) => value.packages.push(copy(value.packages[0])),
+  ],
+  [
+    'wrong pilot version',
+    (value) => {
+      value.packages[2].version = '0.1.0';
+    },
+  ],
+  [
+    'wrong packed peer',
+    (value) => {
+      value.packages[2].schemaEnginePeers['@rabassoft/schema-engine-angular'] =
+        '^0.3.0';
+    },
+  ],
+  [
+    'wrong publication order',
+    (value) => {
+      value.packages.reverse();
+    },
+  ],
+  [
+    'wrong latest order',
+    (value) => {
+      value.latestOrder.reverse();
+    },
+  ],
+]) {
+  test(`rejects M21 ${label}`, () => {
+    const descriptor = mutableDescriptor(M21_RELEASE_DESCRIPTOR);
+    mutate(descriptor);
+    assert.throws(() => assertM21ReleaseDescriptor(descriptor));
+  });
+}
 
 for (const [label, mutate] of [
   ['missing pilot', (value) => value.packages.pop()],
@@ -133,6 +206,40 @@ test('accepts only candidate evidence ordered by the M19 descriptor', () => {
   );
 });
 
+test('accepts only candidate evidence ordered by the M21 descriptor', () => {
+  const evidence = {
+    release: 'm21',
+    releaseDirectory: '0.4.0',
+    node: '22.23.1',
+    npm: '10.9.8',
+    pnpm: '10.28.2',
+    baseCommit: 'b'.repeat(40),
+    sourceCommit: null,
+    distTag: 'next',
+    provenance: false,
+    neutralDryRun: true,
+    candidates: M21_RELEASE_DESCRIPTOR.packages.map(
+      ({ role, name, version, file }) => ({
+        role,
+        name,
+        version,
+        file,
+        bytes: 1,
+        sha512: 'b'.repeat(128),
+        integrity: 'sha512-Yg==',
+      }),
+    ),
+  };
+  assert.equal(
+    assertReleaseCandidateEvidence(evidence, M21_RELEASE_DESCRIPTOR),
+    evidence,
+  );
+  evidence.candidates.reverse();
+  assert.throws(() =>
+    assertReleaseCandidateEvidence(evidence, M21_RELEASE_DESCRIPTOR),
+  );
+});
+
 test('defines isolated candidate, exact, next, latest and unqualified specifiers', () => {
   const candidates = {
     core: '/tmp/core.tgz',
@@ -193,5 +300,20 @@ test('separates frozen checkpoint tuples from registry-backed live resolution', 
   );
   assert.throws(() =>
     m19FrozenConsumerTuple(M19_RELEASE_DESCRIPTOR, 'latest', undefined),
+  );
+});
+
+test('defines M21 specifiers and frozen tuples independently from M19', () => {
+  assert.equal(
+    releasePackageSpecifier(M21_RELEASE_DESCRIPTOR, 'angularAria', 'exact'),
+    '0.2.0',
+  );
+  assert.equal(
+    releasePackageSpecifier(M21_RELEASE_DESCRIPTOR, 'angular', 'next'),
+    'next',
+  );
+  assert.deepEqual(
+    releaseFrozenConsumerTuple(M21_RELEASE_DESCRIPTOR, 'latest', 'frozen'),
+    { angular: '22.0.7', aria: '22.0.5', cdk: '22.0.5' },
   );
 });

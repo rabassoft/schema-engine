@@ -3,11 +3,12 @@
 
 import type {
   FormNodeDefinition,
+  FormNodeTemplate,
   PresentationEntryDefinition,
 } from '../contracts.js';
 
-export function createDefaultPresentation(
-  nodes: readonly FormNodeDefinition[],
-): readonly PresentationEntryDefinition[] {
+export function createDefaultPresentation<
+  TNode extends FormNodeDefinition | FormNodeTemplate,
+>(nodes: readonly TNode[]): readonly PresentationEntryDefinition<TNode>[] {
   return nodes.map((node) => ({ kind: 'form-node' as const, node }));
 }

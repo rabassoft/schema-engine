@@ -7,7 +7,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import {
   packReleaseCandidates,
   readWorkspacePackage,
@@ -16,9 +16,10 @@ import {
 } from './release-candidate-utils.mjs';
 import {
   argumentValue,
-  loadM19ReleaseTarget,
-  m19FrozenConsumerTuple,
-  m19PackageSpecifier,
+  loadCoordinatedReleaseTarget,
+  M19_RELEASE_DESCRIPTOR,
+  releaseFrozenConsumerTuple,
+  releasePackageSpecifier,
 } from './release-target.mjs';
 
 const modeArgument = process.argv.find((argument) =>
@@ -27,12 +28,22 @@ const modeArgument = process.argv.find((argument) =>
 assert.ok(modeArgument, 'Pass exactly --mode=lower or --mode=latest');
 const MODE = modeArgument.slice('--mode='.length);
 assert.ok(['lower', 'latest'].includes(MODE), 'Unsupported consumer mode');
-const { descriptor } = loadM19ReleaseTarget();
+const releaseId = argumentValue(process.argv, 'release');
+const descriptor =
+  releaseId === 'm19'
+    ? M19_RELEASE_DESCRIPTOR
+    : loadCoordinatedReleaseTarget().descriptor;
 const PACKAGE_MODE = argumentValue(process.argv, 'package-mode') ?? 'candidate';
 const TUPLE_SOURCE = argumentValue(process.argv, 'tuple-source');
+const PILOT_TARBALL = argumentValue(process.argv, 'pilot-tarball');
 assert.ok(
   descriptor.consumerModes.includes(PACKAGE_MODE),
-  'Unsupported M19 package mode',
+  `Unsupported ${descriptor.id} package mode`,
+);
+assert.equal(
+  PILOT_TARBALL === undefined || ['exact', 'next'].includes(PACKAGE_MODE),
+  true,
+  '--pilot-tarball requires exact or next package mode',
 );
 const releaseTargets = Object.fromEntries(
   descriptor.packages.map((target) => [target.role, target]),
@@ -65,7 +76,10 @@ function writeJson(path, value) {
 }
 
 function packageSpecifier(role, tarballs) {
-  return m19PackageSpecifier(descriptor, role, PACKAGE_MODE, tarballs);
+  if (role === 'angularAria' && PILOT_TARBALL !== undefined) {
+    return `file:${resolve(PILOT_TARBALL)}`;
+  }
+  return releasePackageSpecifier(descriptor, role, PACKAGE_MODE, tarballs);
 }
 
 async function metadata(name) {
@@ -101,7 +115,7 @@ async function highestAngular22(name, minimum) {
 }
 
 async function resolveTuple() {
-  const frozen = m19FrozenConsumerTuple(descriptor, MODE, TUPLE_SOURCE);
+  const frozen = releaseFrozenConsumerTuple(descriptor, MODE, TUPLE_SOURCE);
   if (frozen !== undefined) return frozen;
   const core = await highestAngular22('@angular/core', '22.0.6');
   for (const name of [
@@ -397,7 +411,7 @@ test('runs the ${label} packed-artifact lane in Chromium', async ({ page }) => {
       '--strict-peer-dependencies',
       '--config.auto-install-peers=false',
       '--ignore-scripts',
-      ...(TUPLE_SOURCE === 'frozen' ? ['--offline'] : []),
+      ...(PACKAGE_MODE === 'candidate' ? ['--offline'] : []),
     ],
     { cwd: directory, env: cleanEnvironment, stdio: 'inherit' },
   );
@@ -445,6 +459,8 @@ try {
       mode: MODE,
       tupleSource: TUPLE_SOURCE,
       packageMode: PACKAGE_MODE,
+      pilotSource:
+        PILOT_TARBALL === undefined ? PACKAGE_MODE : 'selected-tarball',
       ...tuple,
       schemaEngine: releaseTargets.core.version,
       angularAriaPilot: releaseTargets.angularAria.version,

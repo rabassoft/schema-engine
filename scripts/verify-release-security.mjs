@@ -9,7 +9,7 @@ import {
   packReleaseCandidates,
   readTarballText,
 } from './release-candidate-utils.mjs';
-import { loadM19ReleaseTarget } from './release-target.mjs';
+import { loadCoordinatedReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-security-'));
 const secretPatterns = Object.freeze([
@@ -82,7 +82,10 @@ try {
   assert.deepEqual([...new Set(authors)], ['Rabassoft <ricard@rabassoft.com>']);
 
   const tarballs = includeAngularAria
-    ? packReleaseCandidates(temporaryRoot, loadM19ReleaseTarget().descriptor)
+    ? packReleaseCandidates(
+        temporaryRoot,
+        loadCoordinatedReleaseTarget().descriptor,
+      )
     : packCandidates(temporaryRoot);
   for (const [name, tarball] of Object.entries(tarballs)) {
     for (const member of listTarball(tarball)) {

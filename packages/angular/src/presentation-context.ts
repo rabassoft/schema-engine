@@ -7,34 +7,111 @@ import {
   type ViewContainerRef,
 } from '@angular/core';
 import type {
+  CollectionItemAddress,
   FormDefinition,
+  FormNodeDefinition,
+  FormNodeTemplate,
   FormRuntimeSnapshot,
+  ItemRuntimeSnapshot,
+  ObjectFieldDefinition,
+  ObjectItemTemplateDefinition,
+  ObjectNodeTemplate,
+  ObjectRuntimeSnapshot,
   PresentationEntryDefinition,
   PresentationPanelDefinition,
 } from '@rabassoft/schema-engine';
 
 /** @internal */
+export type AngularPresentationNode = FormNodeDefinition | FormNodeTemplate;
+
+/** @internal */
+export type PresentationOwnerDefinition =
+  | FormDefinition
+  | ObjectFieldDefinition
+  | ObjectItemTemplateDefinition
+  | ObjectNodeTemplate;
+
+/** @internal */
+export type PresentationOwnerSnapshot =
+  FormRuntimeSnapshot<object> | ItemRuntimeSnapshot | ObjectRuntimeSnapshot;
+
+/** @internal */
+export type PresentationProjectionOwner =
+  | { readonly kind: 'root' }
+  | {
+      readonly kind: 'object';
+      readonly ownerPath: readonly string[];
+      readonly staticOwner: readonly ['object', readonly string[]];
+      readonly ownerInstance: readonly ['object', readonly string[]];
+    }
+  | {
+      readonly kind: 'item';
+      readonly ownerPath: readonly string[];
+      readonly templatePath: readonly [];
+      readonly itemId: string;
+      readonly address: CollectionItemAddress;
+      readonly staticOwner: readonly ['item-template', readonly string[]];
+      readonly ownerInstance: readonly ['item', readonly string[], string];
+    }
+  | {
+      readonly kind: 'template-object';
+      readonly ownerPath: readonly string[];
+      readonly templatePath: readonly string[];
+      readonly itemId: string;
+      readonly address: CollectionItemAddress;
+      readonly staticOwner: readonly [
+        'item-template-object',
+        readonly string[],
+        readonly string[],
+      ];
+      readonly ownerInstance: readonly [
+        'item-object',
+        readonly string[],
+        string,
+        readonly string[],
+      ];
+    };
+
+/** @internal */
+export function presentationOwnerDiagnosticParameters(
+  owner: PresentationProjectionOwner,
+): Readonly<Record<string, unknown>> {
+  if (owner.kind === 'root') return Object.freeze({});
+  return Object.freeze({
+    presentationOwnerKind: owner.kind,
+    presentationOwnerPath: Object.freeze([...owner.ownerPath]),
+    ...(owner.kind === 'object'
+      ? {}
+      : {
+          presentationTemplatePath: Object.freeze([...owner.templatePath]),
+          itemId: owner.itemId,
+        }),
+  });
+}
+
+/** @internal */
 export interface PresentationProjectionState {
-  readonly definition: () => FormDefinition;
-  readonly snapshot: () => FormRuntimeSnapshot<object>;
+  readonly owner: () => PresentationProjectionOwner;
+  readonly definition: () => PresentationOwnerDefinition;
+  readonly snapshot: () => PresentationOwnerSnapshot;
   render(
-    entry: PresentationEntryDefinition,
+    entry: PresentationEntryDefinition<AngularPresentationNode>,
     container: ViewContainerRef,
   ): ComponentRef<unknown>;
 }
 
 /** @internal */
 export interface PresentationEntryClaimContext extends PresentationProjectionState {
-  claim(entry: PresentationEntryDefinition): void;
-  release(entry: PresentationEntryDefinition): void;
+  claim(entry: PresentationEntryDefinition<AngularPresentationNode>): void;
+  release(entry: PresentationEntryDefinition<AngularPresentationNode>): void;
   audit(): void;
 }
 
 /** @internal */
 export interface PresentationPanelClaimContext extends PresentationProjectionState {
-  claim(panel: PresentationPanelDefinition): void;
-  release(panel: PresentationPanelDefinition): void;
-  fail(panel: PresentationPanelDefinition): void;
+  claim(panel: PresentationPanelDefinition<AngularPresentationNode>): void;
+  release(panel: PresentationPanelDefinition<AngularPresentationNode>): void;
+  fail(panel: PresentationPanelDefinition<AngularPresentationNode>): void;
   audit(): void;
 }
 

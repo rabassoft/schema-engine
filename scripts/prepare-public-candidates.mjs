@@ -17,11 +17,11 @@ import {
   workspaceRoot,
 } from './release-candidate-utils.mjs';
 import {
-  assertM19CandidateEvidence,
-  loadM19ReleaseTarget,
+  assertReleaseCandidateEvidence,
+  loadCoordinatedReleaseTarget,
 } from './release-target.mjs';
 
-const { descriptor } = loadM19ReleaseTarget();
+const { descriptor } = loadCoordinatedReleaseTarget();
 const output = join(workspaceRoot, `.release/${descriptor.releaseDirectory}`);
 const npmVersion = execFileSync('npm', ['--version'], {
   encoding: 'utf8',
@@ -85,7 +85,7 @@ for (const [role, tarball] of Object.entries(tarballs)) {
 }
 
 const neutralDirectory = mkdtempSync(
-  join(tmpdir(), 'schema-engine-m19-neutral-'),
+  join(tmpdir(), `schema-engine-${descriptor.id}-neutral-`),
 );
 try {
   for (const candidate of candidates) {
@@ -136,7 +136,7 @@ const evidence = {
   neutralDryRun: true,
   candidates,
 };
-assertM19CandidateEvidence(evidence, descriptor);
+assertReleaseCandidateEvidence(evidence, descriptor);
 writeFileSync(
   join(output, 'candidates.json'),
   `${JSON.stringify(evidence, null, 2)}\n`,

@@ -5,19 +5,19 @@ for the Schema Engine prototype.
 
 ## Release status
 
-- Private Experimental candidate line: `0.3.x`; published `0.2.0` remains
-  immutable until a separately authorized release.
-- Package manifest: `0.3.0`; no registry publication is implied.
+- Public verified Experimental line: `0.3.x`; exact `0.3.0` is available under
+  both `next` and `latest`.
+- Source package manifest: `0.4.0`; this is a reviewed M21 source target, not a
+  selected candidate or observed npm release.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- Recommended channel after publication: npm dist-tag `next` or an explicit
-  version. Any observed `latest` remains Experimental routing and does not
+- Recommended channel: npm dist-tag `next` or an explicit version. The observed
+  `latest` remains Experimental routing and does not
   imply stability.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 
-The following command resolves the observed registry state; it does not install
-the private `0.3.0` candidate until its later publication is verified:
+The following command installs the verified public Experimental `0.3.0` line:
 
 ```sh
 npm install @rabassoft/schema-engine@next
@@ -40,8 +40,10 @@ supported.
 
 ## Prototype boundary
 
-> This README describes the private `0.3.x` source candidate. Published `0.2.0`
-> remains immutable and registry availability/tags must be verified separately.
+> This README distinguishes the public verified `0.3.x` Experimental line from
+> the local `0.4.x` M21 source target. Exact, `next`, `latest` and unqualified
+> M19 clean-consumer evidence passed; M21 has no selected candidate or live
+> registry evidence yet.
 
 The current runtime supports a root object whose properties may recursively
 contain objects, primitive `string`, `number`, `integer`, and `boolean` leaves,
@@ -65,11 +67,14 @@ operations accept explicit null only when that capability is true.
 
 External/dynamic references, anchors, arrays of primitives, arrays inside
 collection item templates, tuples, composition, generated/editable identity,
-async validation, persistence, workflow, conditional or nested/item layout,
-custom collection renderers, and other deferred capabilities are not included.
-The `0.3.x` candidate adds root-only static sections, tabs, accordions and a
-bounded logical grid as presentation-neutral definitions; core owns no target
-DOM, interaction state or CSS.
+async validation, persistence, workflow, conditional layout, custom collection
+renderers, and other deferred capabilities are not included. The current source
+adds static sections, tabs, accordions and a bounded logical grid at the root
+and on direct nested-object and collection-item template owners as
+presentation-neutral definitions; core owns no target DOM, interaction state or
+CSS. Published `0.3.x` artifacts remain the earlier root-only contract. The
+source manifest's `0.4.0` target includes these local forests but is unavailable
+to consumers until separately published and observed.
 
 ## License and source
 
@@ -80,6 +85,8 @@ support SLA is represented by this package.
 
 The development repository is private pending sanitization. Preferred
 TypeScript source and a frozen package-local build harness are included; see
-`SOURCE.md`. The candidate has no npm provenance because there is no matching
-public repository. External code contributions and a public issue tracker are
-not currently offered.
+`SOURCE.md`.
+
+Package metadata has no npm provenance because there is no matching public
+repository. External code contributions and a public issue tracker are not
+currently offered.

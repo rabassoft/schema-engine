@@ -11,6 +11,7 @@ const scenarios = [
   ['presentation-sections', 'Static presentation sections'],
   ['nullable-preferences', 'Nullable preferences'],
   ['advanced-presentation', 'Advanced static presentation'],
+  ['recursive-local-presentation', 'Recursive local presentation'],
 ] as const;
 
 test.beforeEach(async ({ page }) => {
@@ -112,6 +113,24 @@ test('navigates all scenarios with normalized accessible interaction', async ({
   await expect(
     page.getByRole('button', { name: 'Notifications' }),
   ).toHaveAttribute('aria-expanded', 'false');
+
+  await selectScenario(
+    page,
+    'recursive-local-presentation',
+    'Recursive local presentation',
+  );
+  const beta = page.locator('[data-item-id="beta"]');
+  await beta.getByRole('tab', { name: 'Details' }).click();
+  await beta.getByRole('button', { name: 'State' }).click();
+  await beta.getByRole('button', { name: 'Move earlier' }).click();
+  await expect(beta.getByRole('tab', { name: 'Details' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(beta.getByRole('button', { name: 'State' })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
 });
 
 test('covers controlled decisions, stale pending work, baseline and reset', async ({

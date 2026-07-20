@@ -11,8 +11,8 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
 
-The private development repository contains the completed M1-M13 controlled-form
-runtime and verified public Experimental packages. Its G0 review passed;
+The private development repository contains the completed M1-M20 controlled-form
+ecosystem and verified public Experimental packages. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
 v0.1.1, SPEC-006 v0.1.1 and SPEC-007 v0.1.0 are Accepted. SPEC-007 defines the
 private M17 reusable synchronous Ajv-validator contract. The source checkout implements the M14 contract
@@ -21,15 +21,20 @@ and Angular `0.2.0` packages under both `next` and `latest`. M15 completed a
 private reference platform without changing those Public packages. M18 and
 PLAN-020 revision 0 are complete after final review 113 repeated all fourteen
 areas and all 22 SPEC-008 rows with zero findings. SPEC-008 v0.1.0 is Accepted.
-The implemented narrow boundary is static root-only tabs, accordion and logical
-grid with independent Standard and native Angular projection, an Angular
-presentation-container SPI and Angular Aria 22 as the sole isolated
-Experimental pilot. Broader layout, theming and other targets remain Deferred.
-M19 is selected for the coordinated core/base `0.3.0` and pilot `0.1.0`
-release. ADR-018 revision 4 is Accepted and PLAN-021 revision 0 is Approved
-after review 116 cycle 3 passed with zero findings. Its local checkpoint 1 is
-complete after review 117 cycle 2; checkpoint 2 is next. Git and every registry
-read/write remain separately gated.
+SPEC-009 v0.1.0 and completed PLAN-022 extend those static sections, tabs,
+accordions and logical grids to direct nested-object and collection-item
+template owners. Independent Standard and native Angular projection, the
+Angular presentation-container SPI and Angular Aria 22 pilot pass final review
+144 across all 27 rows. Broader layout, theming and other targets remain
+Deferred.
+M19 and PLAN-021 revision 0 are complete after final review 132 repeated the
+full workspace, artifact, source, security, registry, consumer and SPEC-008
+matrix with zero findings. Core/base `0.3.0` and the Angular Aria pilot `0.1.0`
+are public under both `next` and `latest`; exact, tagged and unqualified clean
+consumers pass. This does not authorize another Git or registry action.
+The current source manifests prepare the separately gated M21 line as core/base
+`0.4.0` and pilot `0.2.0`. Those versions are not selected candidates or live
+npm releases yet; the published and tagged line remains M19.
 The live checkpoint is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
@@ -56,10 +61,12 @@ The implemented boundary is the root object, recursively nested objects,
 primitive leaves and SPEC-003 homogeneous arrays of object items with
 application-owned stable string identity. The SPEC-004 subset resolves static
 same-document fragment-only `$ref` values into root `$defs` at supported
-non-root schema positions. External/dynamic references, anchors, arrays of
+non-root schema positions. Static presentation forests are supported at the
+root and on direct nested-object and collection-item template owners.
+External/dynamic references, anchors, arrays of
 primitives, arrays inside collection item templates, tuples, composition,
-generated identity, async validation, persistence, nested/item layout,
-wizards, workflow, controlled layout state, custom
+generated identity, async validation, persistence, wizards, workflow,
+controlled layout state, custom
 collection renderers and other deferred decisions are not active.
 
 `packages/validator-ajv` is a completed private, unpublished integration package that
@@ -127,16 +134,11 @@ must not be treated as containing these source changes.
 
 ## Experimental packages and licensing
 
-Core and Angular `0.2.0` are public and verified on npm. `next` is the
-recommended Experimental channel. `latest` aliases the same published
-Experimental version; that registry alias does not promote any API to Stable.
-
-Private M19 source candidates are `@rabassoft/schema-engine@0.3.0`,
+`@rabassoft/schema-engine@0.3.0`,
 `@rabassoft/schema-engine-angular@0.3.0` and
-`@rabassoft/schema-engine-angular-aria@0.1.0`. They are not yet published or
-selected from a clean commit. Their release notes and package onboarding
-describe the future exact line without changing the observed `0.2.0` registry
-state.
+`@rabassoft/schema-engine-angular-aria@0.1.0` are public and verified on npm.
+`next` is the recommended Experimental channel and `latest` aliases the same
+coordinated versions. Registry routing does not promote any API to Stable.
 
 Install explicit versions or the Experimental channel:
 
@@ -149,7 +151,13 @@ Prefer `@next` or an explicit version. An unqualified install resolves npm's
 observed `latest` alias but carries the same Public + Experimental + Active
 contract and no support SLA.
 
-Both packages are available under GNU AGPL v3 only (`AGPL-3.0-only`), including
+The workspace manifests currently contain the reviewed M21 source versions
+`0.4.0`, `0.4.0` and `0.2.0`. Do not install or describe them as live until
+their exact packages and aliases have been separately published and observed.
+See the [M21 candidate-state release notes](./.ai-docs/releases/0.4.0.md) for
+the migration, compatibility and immutable-recovery contract.
+
+All three packages are available under GNU AGPL v3 only (`AGPL-3.0-only`), including
 commercial use under its conditions. A separate paid commercial license may be
 available for organizations that do not want to comply with AGPL; contact
 `ricard@rabassoft.com`. No final commercial terms or support SLA are currently

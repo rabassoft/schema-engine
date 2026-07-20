@@ -16,7 +16,7 @@ assert.equal(
   'function',
 );
 assert.equal(manifest.name, '@rabassoft/schema-engine-angular-aria');
-assert.equal(manifest.version, '0.1.0');
+assert.equal(manifest.version, '0.2.0');
 assert.deepEqual(manifest.sideEffects, ['./styles.css']);
 assert.deepEqual(manifest.files, [
   'dist',

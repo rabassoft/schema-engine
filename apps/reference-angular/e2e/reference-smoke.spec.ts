@@ -8,6 +8,7 @@ const scenarios = [
   ['presentation-sections', 'Static presentation sections'],
   ['nullable-preferences', 'Nullable preferences'],
   ['advanced-presentation', 'Advanced static presentation'],
+  ['recursive-local-presentation', 'Recursive local presentation'],
 ] as const;
 
 async function selectScenario(page: Page, id: string, heading: string) {
@@ -519,4 +520,22 @@ test('covers nested, collection and nullable keyboard interaction with accessibl
   await expect(
     page.getByRole('button', { name: 'Notifications' }),
   ).toHaveAttribute('aria-expanded', 'false');
+
+  await selectScenario(
+    page,
+    'recursive-local-presentation',
+    'Recursive local presentation',
+  );
+  const beta = page.locator('[data-schema-item-key]').nth(1);
+  await beta.getByRole('tab', { name: 'Details' }).click();
+  await beta.getByRole('button', { name: 'State' }).click();
+  await beta.locator('[id$="--move-earlier"]').click();
+  await expect(beta.getByRole('tab', { name: 'Details' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(beta.getByRole('button', { name: 'State' })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
 });

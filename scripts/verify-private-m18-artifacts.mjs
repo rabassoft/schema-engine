@@ -9,7 +9,7 @@ import {
   readTarballJson,
   readTarballText,
 } from './release-candidate-utils.mjs';
-import { loadM19ReleaseTarget } from './release-target.mjs';
+import { loadCoordinatedReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(
   join(tmpdir(), 'schema-engine-m18-artifacts-'),
@@ -34,7 +34,7 @@ function assertNoWorkspaceProtocol(manifest, label) {
 }
 
 try {
-  const { descriptor } = loadM19ReleaseTarget();
+  const { descriptor } = loadCoordinatedReleaseTarget();
   const tarballs = packReleaseCandidates(temporaryRoot, descriptor);
   const core = readTarballJson(tarballs.core, 'package/package.json');
   const angular = readTarballJson(tarballs.angular, 'package/package.json');
@@ -84,7 +84,8 @@ try {
     '@angular/aria': '>=22.0.5 <23.0.0',
     '@angular/cdk': '>=22.0.5 <23.0.0',
     '@angular/core': '>=22.0.6 <23.0.0',
-    '@rabassoft/schema-engine-angular': '^0.3.0',
+    '@rabassoft/schema-engine-angular':
+      targets.angularAria.schemaEnginePeers['@rabassoft/schema-engine-angular'],
   });
   assert.deepEqual(pilot.files, [
     'dist',
@@ -154,7 +155,7 @@ try {
   assert.doesNotMatch(pilotJavaScript, /styles\.css/u);
 
   console.log(
-    'Verified private M18 0.3.0/0.1.0 manifests, exact inventories, SemVer rewrites and package isolation.',
+    `Verified private M18 behavior in the ${descriptor.id} manifests, exact inventories, SemVer rewrites and package isolation.`,
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });

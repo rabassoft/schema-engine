@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import {
   compileFormDefinition,
   type Diagnostic,
+  type FormNodeDefinition,
+  type FormNodeTemplate,
   type PresentationEntryDefinition,
   type PresentationPanelDefinition,
   type SchemaValidator,
@@ -151,7 +153,9 @@ const missingSectionDestroyed = vi.fn();
 class DuplicateSectionRenderer implements AngularPresentationContainerRenderer {
   readonly presentation =
     input.required<AngularPresentationContainerRenderModel>();
-  protected readonly child = (): PresentationEntryDefinition => {
+  protected readonly child = (): PresentationEntryDefinition<
+    FormNodeDefinition | FormNodeTemplate
+  > => {
     const model = this.presentation();
     if (model.kind !== 'section' || model.definition.children[0] === undefined)
       throw new Error('invalid test model');
@@ -192,7 +196,9 @@ class ConditionalSectionRenderer implements AngularPresentationContainerRenderer
   readonly presentation =
     input.required<AngularPresentationContainerRenderModel>();
   protected readonly visible = signal(true);
-  protected readonly child = (): PresentationEntryDefinition => {
+  protected readonly child = (): PresentationEntryDefinition<
+    FormNodeDefinition | FormNodeTemplate
+  > => {
     const model = this.presentation();
     if (model.kind !== 'section' || model.definition.children[0] === undefined)
       throw new Error('invalid test model');

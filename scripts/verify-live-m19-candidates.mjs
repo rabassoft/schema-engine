@@ -6,12 +6,13 @@ import { join } from 'node:path';
 import {
   argumentValue,
   assertM19CandidateEvidence,
-  loadM19ReleaseTarget,
+  M19_RELEASE_DESCRIPTOR,
 } from './release-target.mjs';
 import { workspaceRoot } from './release-candidate-utils.mjs';
 
 const REGISTRY = 'https://registry.npmjs.org';
-const { descriptor } = loadM19ReleaseTarget();
+assert.equal(argumentValue(process.argv, 'release'), 'm19');
+const descriptor = M19_RELEASE_DESCRIPTOR;
 const tagMode = argumentValue(process.argv, 'tag-mode') ?? 'none';
 assert.ok(
   ['none', 'next', 'latest', 'both'].includes(tagMode),

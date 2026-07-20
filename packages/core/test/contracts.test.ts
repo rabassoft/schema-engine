@@ -7,6 +7,8 @@ import type {
   FieldTextMember,
   FieldDefinition,
   FieldTemplate,
+  FormNodeDefinition,
+  FormNodeTemplate,
   StringChoiceDefinition,
   StringFieldDefinition,
   TextResolutionContext,
@@ -176,10 +178,10 @@ describe('public advanced presentation contracts', () => {
     expect(context.presentation).toBe(grid);
     expectTypeOf<AdvancedPresentationTextMember>().toEqualTypeOf<'label'>();
     expectTypeOf<AdvancedPresentationLabelDefinition>().toEqualTypeOf<
-      | PresentationTabsDefinition
-      | PresentationAccordionDefinition
-      | PresentationPanelDefinition
-      | PresentationGridDefinition
+      | PresentationTabsDefinition<FormNodeDefinition | FormNodeTemplate>
+      | PresentationAccordionDefinition<FormNodeDefinition | FormNodeTemplate>
+      | PresentationPanelDefinition<FormNodeDefinition | FormNodeTemplate>
+      | PresentationGridDefinition<FormNodeDefinition | FormNodeTemplate>
     >();
     expectTypeOf<
       Extract<TextResolutionContext, { presentation: unknown }>

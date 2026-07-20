@@ -10,9 +10,11 @@
 - [Work log](./project/WORKLOG.md) — append-only history; read selectively.
 - [Coordinated Experimental 0.2.0 release notes](./releases/0.2.0.md) — selected
   clean bytes, source migration and verified public `next`/`latest` state.
-- [M19 coordinated Experimental candidate release notes](./releases/0.3.0.md)
-  — private core/base `0.3.0` plus pilot `0.1.0` candidate contract; no selected
-  clean bytes or registry publication yet.
+- [M19 coordinated Experimental release notes](./releases/0.3.0.md) — completed
+  public core/base `0.3.0` plus pilot `0.1.0` line under `next` and `latest`.
+- [M21 coordinated Experimental release notes](./releases/0.4.0.md) — reviewed
+  local core/base `0.4.0` plus pilot `0.2.0` contract; no selected candidate or
+  live M21 registry state.
 
 ## Specifications
 
@@ -40,6 +42,9 @@
   — Accepted after review 102 cycle 5 passed all twelve areas with zero
   findings; completed PLAN-020 revision 0 delivered its eight bounded
   checkpoints after final review 113 passed with zero findings.
+- [SPEC-009 v0.1.0: Recursive Local Presentation Layout](./specs/009-recursive-local-presentation-layout.md)
+  — Accepted after review 135 cycle 6 passed all fourteen areas with zero
+  findings; completed PLAN-022 implements its 27-row M20 boundary.
 
 ## Acceptance reviews
 
@@ -342,6 +347,93 @@
 - [PLAN-021 checkpoint 3 review](./reviews/119-plan-021-checkpoint-3-review.md)
   — Cycle 5 passes all fourteen local-release areas and all 22 SPEC-008 rows
   with zero findings; checkpoint 4 remains separately gated.
+- [PLAN-021 checkpoint 4 review](./reviews/120-plan-021-checkpoint-4-review.md)
+  — Cycle 3 verifies the scoped private commit/push, clean rebuild and exact
+  three-candidate byte equality with zero findings.
+- [PLAN-021 checkpoint 5 pre-publication review](./reviews/121-plan-021-checkpoint-5-pre-publication-review.md)
+  — Cycle 2 passes identity, 2FA, authority, absence, tags, baseline, selected
+  bytes and neutral-command checks; only core publication awaits approval.
+- [PLAN-021 checkpoint 5 review](./reviews/122-plan-021-checkpoint-5-review.md)
+  — Cycle 3 verifies exact public core bytes/metadata/tags and repeated exact/
+  `next` consumers with zero findings; checkpoint 6 remains separately gated.
+- [PLAN-021 checkpoint 6 pre-publication review](./reviews/123-plan-021-checkpoint-6-pre-publication-review.md)
+  — Cycle 3 passes live-core, selected-base, peer/source, lower/latest consumer
+  and neutral-command checks; only base publication awaits approval.
+- [PLAN-021 checkpoint 6 review](./reviews/124-plan-021-checkpoint-6-review.md)
+  — Cycle 2 verifies exact public base bytes/metadata/tags and repeated exact/
+  `next` native consumers with zero findings; checkpoint 7 remains gated.
+- [PLAN-021 checkpoint 7 pre-publication review](./reviews/125-plan-021-checkpoint-7-pre-publication-review.md)
+  — Cycle 5 passes live core/base, selected pilot, source/style, lower/latest
+  exact/`next` consumers and neutral-command checks; only pilot publication
+  awaits approval.
+- [PLAN-021 checkpoint 7 review](./reviews/126-plan-021-checkpoint-7-review.md)
+  — Cycle 4 verifies exact public pilot bytes/metadata/tags and repeated exact/
+  `next` native/pilot consumers with zero findings; checkpoint 8 remains gated.
+- [PLAN-021 checkpoint 8 review](./reviews/127-plan-021-checkpoint-8-review.md)
+  — Cycle 2 verifies and retains the automatically created pilot
+  `latest: 0.1.0` without mutation; checkpoint 9 remains gated.
+- [PLAN-021 checkpoint 9 pre-transition review](./reviews/128-plan-021-checkpoint-9-pre-transition-review.md)
+  — Cycle 1 passes exact aliases/bytes, base metadata and exact/`next`
+  native/pilot consumers; only the base `latest` command awaits approval.
+- [PLAN-021 checkpoint 9 review](./reviews/129-plan-021-checkpoint-9-review.md)
+  — Cycle 1 verifies the exact base `latest: 0.3.0` mutation and intentional
+  mixed window with zero findings; checkpoint 10 remains gated.
+- [PLAN-021 checkpoint 10 pre-transition review](./reviews/130-plan-021-checkpoint-10-pre-transition-review.md)
+  — Cycle 1 verifies the exact mixed window, core bytes/metadata and manual
+  transition command with zero findings.
+- [PLAN-021 checkpoint 10 review](./reviews/131-plan-021-checkpoint-10-review.md)
+  — Cycle 1 verifies coordinated aliases and complete `latest`/unqualified
+  native/pilot consumers with zero findings.
+- [PLAN-021 final review](./reviews/132-plan-021-final-review.md) — Cycles 1–3
+  correct offline-store recovery, stale active documentation, toolchain
+  evidence and one stale alias statement; cycle 4
+  repeats all eighteen areas and all 22 SPEC-008 rows with zero findings,
+  completing PLAN-021/M19.
+- [D-011/M20 nested-object and collection-item layout promotion readiness](./reviews/133-d011-m20-nested-item-layout-promotion-readiness.md)
+  — Cycle 3 promotes only static local presentation forests for direct object
+  and item-template children and authorizes ADR-025 drafting/review; scopes,
+  workflow, broader theming, later frameworks and implementation stay Deferred.
+- [ADR-025 complete review](./reviews/134-adr-025-review.md) — Cycle 1 corrects
+  text typing/identity, cycle 2 closes diagnostic/review-row defects, cycle 3
+  fixes stale current-state authority and cycle 4 passes all thirteen areas.
+- [SPEC-009 complete review](./reviews/135-spec-009-review.md) — Cycles 1–5
+  correct nine formatting, indexing, contract and current-state findings;
+  cycle 6 repeats all fourteen areas with zero findings and accepts v0.1.0.
+- [PLAN-022 complete review](./reviews/136-plan-022-review.md) — Cycle 1
+  replaces indirect M18/M19 consumer evidence with dedicated lower/latest M20
+  lanes; cycle 2 passes all fifteen areas and approves revision 0.
+- [PLAN-022 checkpoint reviews](./reviews/137-plan-022-checkpoint-1-review.md) —
+  Reviews 137–143 close core, runtime, Angular SPI/native, Standard, Aria and
+  package/consumer delivery after complete correction/review restarts.
+- [PLAN-022 final implementation review](./reviews/144-plan-022-final-implementation-review.md)
+  — Cycles 1–2 correct review-record formatting and one stale active Deferred
+  instruction; cycle 3 repeats the frozen complete matrix and all 27 SPEC-009
+  rows with zero findings, completing PLAN-022 and M20.
+- [Post-M20 milestone-selection review](./reviews/145-post-m20-milestone-selection.md)
+  — Cycle 1 found only review-record formatting; cycle 2 compares the remaining
+  demand-driven candidates with zero findings. Ricard selected option A on 20
+  July and review 146 performs its separate promotion gate.
+- [M21 coordinated M20 release promotion readiness](./reviews/146-m21-coordinated-m20-release-promotion-readiness.md)
+  — Cycle 3 promotes only ADR-018 revision 5 design for core/base `0.4.0` plus
+  pilot `0.2.0`; manifests, plans, Git and external actions remain inactive.
+- [ADR-018 revision 5 complete review](./reviews/147-adr-018-revision-5-review.md)
+  — Cycle 5 accepts the exact M21 three-established-package release decision
+  with zero findings and authorizes PLAN-023 preparation/review only.
+- [PLAN-023 complete review](./reviews/148-plan-023-review.md) — Cycle 1
+  corrected four delivery-contract findings; cycle 2 passed all sixteen areas
+  with zero findings and approves local checkpoints 1–3 only.
+- [PLAN-023 checkpoint 1 review](./reviews/149-plan-023-checkpoint-1-review.md)
+  — Cycle 1 corrected three package/tool/environment findings; cycle 2 passed
+  all twelve areas with zero findings and leaves checkpoint 2 next.
+- [PLAN-023 checkpoint 2 review](./reviews/150-plan-023-checkpoint-2-review.md)
+  — Cycle 1 corrected ROADMAP source truth, exact recovery and semantic
+  manifest/style verification; cycles 2–4 corrected stale candidate wording
+  and its exact artifact marker; cycle 5 passed all twelve areas with zero
+  findings, leaving checkpoint 3 next.
+- [PLAN-023 checkpoint 3 review](./reviews/151-plan-023-checkpoint-3-review.md)
+  — Cycle 1 found only stale pre-candidate active documentation; cycle 2
+  repeated the complete frozen matrix and all 27 SPEC-009 rows with zero
+  findings, leaving checkpoint 4 separately gated.
 
 ## Architecture Decision Records
 
@@ -368,6 +460,9 @@
 - [ADR-024: Angular presentation-container SPI and Angular Aria pilot](./adrs/024-spi-contenedores-angular-y-piloto-angular-aria.md)
   — Accepted revision 1; Angular Aria 22 is the sole Experimental pilot and
   accepted SPEC-008 v0.1.0 completes its normative gate.
+- [ADR-025: Recursive local presentation forests for nested objects and collection items](./adrs/025-bosques-presentacion-locales-objetos-items.md)
+  — Accepted revision 0 after review 134 cycle 4; accepted SPEC-009 v0.1.0
+  and completed PLAN-022 now implement its narrow M20 boundary.
 
 - [ADR-005 revision 2 complete review — Cycles 1–3](./reviews/010-adr-005-revision-2-review.md)
   — Four findings corrected; cycle 3 passed all nine areas with zero findings
@@ -422,7 +517,9 @@
 - [PLAN-018: Private Standard/DOM direct-core reference shell](./plans/018-standard-dom-reference-shell.md) — Completed revision 1 after final review 095 cycle 2 repeated all fourteen areas and the full matrix with zero findings
 - [PLAN-019: Reusable synchronous Ajv validator](./plans/019-reusable-synchronous-ajv-validator.md) — Completed revision 1 after final review 089 cycle 2 repeated the complete matrix with zero findings
 - [PLAN-020: Static advanced presentation layout and Angular Aria pilot](./plans/020-static-advanced-presentation-layout.md) — Completed revision 0 after final review 113 repeated all fourteen areas and 22 rows with zero findings
-- [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Approved revision 0 after review 116 cycle 3 passed all fourteen areas and closing documentation with zero findings
+- [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Completed revision 0 after final review 132 cycle 4 repeated the complete release matrix and all 22 SPEC-008 rows with zero findings
+- [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
+- [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Approved revision 0 after review 148 cycle 2 passed all sixteen areas with zero findings; local checkpoints 1–3 only
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -465,7 +562,27 @@ Review 114 selects M19 only for the coordinated core/base `0.3.0` plus pilot
 PLAN-021 revision 0 is Approved after review 116 cycle 3. Local checkpoint 1 is
 complete after review 117 cycle 2 and checkpoint 2 after review 118 cycle 3;
 checkpoint 3 is complete after review 119 cycle 5. Checkpoint 4 Git/clean-build
-work and every registry read/write retain separate gates.
+work is complete after review 120 cycle 3; checkpoint 5 and every registry
+write retain separate gates. Checkpoint 5 is complete after review 122 cycle 3:
+core `0.3.0` is verified under `next`, while base/pilot and all later writes
+remain separately gated. Checkpoint 6 pre-publication review 123 cycle 3 passes;
+checkpoint 6 is complete after review 124 cycle 2. Checkpoint 7 pre-publication
+review 125 cycle 5 passes and checkpoint 7 completes after review 126 cycle 4.
+Core/base `0.3.0` and pilot `0.1.0` are exact under `next`; npm also established
+pilot `latest: 0.1.0`, which checkpoint 8 retains without mutation after review
+127 cycle 2. Checkpoint 9 pre-transition review 128 cycle 1 passes and the
+transition completes after review 129 cycle 1. Base Angular is
+`next/latest: 0.3.0`, pilot is `next/latest: 0.1.0`, and core remains
+`next: 0.3.0`, `latest: 0.2.0`. Checkpoint 10 pre-transition review 130 cycle 1
+passes and the transition completes after review 131 cycle 1. Core/base are
+`next/latest: 0.3.0`, pilot is `next/latest: 0.1.0`, and both `latest` and
+unqualified consumers pass. Checkpoint 11 and final review 132 cycle 4 repeated
+the complete release matrix and all 22 SPEC-008 rows with zero findings,
+completing PLAN-021/M19 without authorizing another external action.
+SPEC-009 v0.1.0 is Accepted after review 135 cycle 6. PLAN-022 revision 0 and
+M20 are complete after reviews 137–144; final review 144 cycle 3 repeated the
+frozen full matrix and all 27 rows with zero findings. Dependency, version,
+release, Git and external actions remain excluded.
 SPEC-006 v0.1.1 now defines the Accepted M14 nullable-leaf contract;
 PLAN-014 revision 0 and local M14 implementation are complete after final
 review 041 cycle 2 passed with zero findings. Version selection and publication

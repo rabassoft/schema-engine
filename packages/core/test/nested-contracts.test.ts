@@ -45,6 +45,7 @@ function objectNode(
     required: false,
     label: path.at(-1) ?? '',
     children,
+    presentation: children.map((node) => ({ kind: 'form-node', node })),
   };
 }
 

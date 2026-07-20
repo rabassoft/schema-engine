@@ -16,6 +16,8 @@ import {
   type OnDestroy,
 } from '@angular/core';
 import type {
+  FormNodeDefinition,
+  FormNodeTemplate,
   PresentationEntryDefinition,
   PresentationPanelDefinition,
 } from '@rabassoft/schema-engine';
@@ -38,14 +40,19 @@ const panelEntryContexts = new WeakMap<
   template: `<ng-template #container />`,
 })
 export class SchemaPresentationEntryOutletComponent {
-  readonly entry = input.required<PresentationEntryDefinition>();
+  readonly entry =
+    input.required<
+      PresentationEntryDefinition<FormNodeDefinition | FormNodeTemplate>
+    >();
   private readonly context = inject(PRESENTATION_ENTRY_CLAIM_CONTEXT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly container = viewChild.required('container', {
     read: ViewContainerRef,
   });
 
-  private claimed: PresentationEntryDefinition | undefined;
+  private claimed:
+    | PresentationEntryDefinition<FormNodeDefinition | FormNodeTemplate>
+    | undefined;
   private componentRef: ComponentRef<unknown> | undefined;
 
   constructor() {
@@ -90,20 +97,29 @@ export class SchemaPresentationEntryOutletComponent {
 export class SchemaPresentationPanelOutletComponent
   implements AfterViewInit, OnDestroy
 {
-  readonly panel = input.required<PresentationPanelDefinition>();
+  readonly panel =
+    input.required<
+      PresentationPanelDefinition<FormNodeDefinition | FormNodeTemplate>
+    >();
   private readonly parent = inject(PRESENTATION_PANEL_CLAIM_CONTEXT);
   private readonly injector = inject(Injector);
   private readonly container = viewChild.required('container', {
     read: ViewContainerRef,
   });
   private claims:
-    ExactPresentationClaims<PresentationEntryDefinition> | undefined;
-  private claimedPanel: PresentationPanelDefinition | undefined;
+    | ExactPresentationClaims<
+        PresentationEntryDefinition<FormNodeDefinition | FormNodeTemplate>
+      >
+    | undefined;
+  private claimedPanel:
+    | PresentationPanelDefinition<FormNodeDefinition | FormNodeTemplate>
+    | undefined;
   private failed = false;
   private destroying = false;
 
   constructor() {
     panelEntryContexts.set(this, {
+      owner: () => this.parent.owner(),
       definition: () => this.parent.definition(),
       snapshot: () => this.parent.snapshot(),
       render: (entry, container) => this.parent.render(entry, container),

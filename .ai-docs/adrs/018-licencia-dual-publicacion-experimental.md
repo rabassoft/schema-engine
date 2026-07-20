@@ -3,32 +3,41 @@
 - **Status:** Accepted
 - **Date:** 15 July 2026
 - **Revision 3 acceptance date:** 15 July 2026
-- **Revision date:** 19 July 2026
+- **Revision date:** 20 July 2026
 - **Revision 4 acceptance date:** 19 July 2026
-- **Revision:** 4 — repeat releases and the M19 three-package line
+- **Revision 5 acceptance date:** 20 July 2026
+- **Revision:** 5 — repeat release of three established packages for M21
 - **Promotion review:**
   [`review 027`](../reviews/027-d034-d040-publication-licensing-readiness.md)
   cycle 2 passed with zero findings; M19
   [`review 114`](../reviews/114-m19-coordinated-0-3-release-promotion-readiness.md)
-  cycle 2 passed all twelve areas with zero findings
+  cycle 2 passed all twelve areas with zero findings; M21
+  [`review 146`](../reviews/146-m21-coordinated-m20-release-promotion-readiness.md)
+  cycle 3 passed all fourteen areas with zero findings
 - **Related:** [`ADR-009`](./009-politica-api-publica-estabilidad.md),
   [`ADR-010`](./010-versionado-semver-compatibilidad.md),
   [`ADR-013`](./013-preparacion-artefactos-experimentales-0-1.md),
+  [`ADR-025`](./025-bosques-presentacion-locales-objetos-items.md),
+  [`SPEC-009`](../specs/009-recursive-local-presentation-layout.md),
   [`D-034`](../roadmap/deferred-decisions.md#d-034-modelo-comercial-y-licenciamiento),
   [`D-040`](../roadmap/deferred-decisions.md#d-040-publicacion-real-de-paquetes)
   and
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
-- **Milestones:** M13 first public Experimental release and M19 coordinated
-  Experimental `0.3.0` release design
-- **Implementation:** M13 completed by PLAN-013 revision 4; M19 implementation
-  remains unauthorized until PLAN-021 is separately drafted, reviewed and
-  approved
+- **Milestones:** M13 first public Experimental release, M19 coordinated
+  Experimental `0.3.0` release and M21 coordinated M20 delivery design
+- **Implementation:** M13 completed by PLAN-013 revision 4 and M19 completed by
+  PLAN-021 revision 0 after final review 132 cycle 4; Approved PLAN-023 revision
+  0 authorizes only M21 local checkpoints 1–3, while Git and every registry or
+  other external action remain separately gated
 - **Previous complete review:**
   [`review 028`](../reviews/028-adr-018-review.md) cycle 8 passed the complete
   revision 3 review with zero findings; accepted by Ricard
 - **Revision 4 review:**
   [`review 115`](../reviews/115-adr-018-revision-4-review.md) cycle 4 passed all
   thirteen areas with zero findings; accepted under the authorized review rule
+- **Revision 5 review:**
+  [`review 147`](../reviews/147-adr-018-revision-5-review.md) cycle 5 passed all
+  fifteen areas with zero findings; accepted under the authorized review rule
 
 ## 1. Context
 
@@ -59,6 +68,19 @@ was correct for M13 but conflicts with the accepted M19 pilot boundary. Review
 114 therefore promotes revision 4 only to generalize repeat-release/package
 onboarding policy and close the exact three-package publication/tag sequence.
 It does not authorize PLAN-021, code, Git or registry action.
+
+PLAN-021 subsequently completed M19 and established exact public core/base
+`0.3.0` plus pilot `0.1.0` under both `next` and `latest`. PLAN-022/M20 then
+implemented recursive local presentation forests, including incompatible
+Public Experimental core/base declaration changes and required behavior through
+the existing pilot. Review 145 option A and review 146 select delivery of that
+completed value before another functional/framework milestone.
+
+Revision 5 therefore adds only the exact repeat-release architecture for three
+already established package names. It retains revision 4's licensing,
+Corresponding Source, security and immutable-recovery policy, but replaces its
+first-pilot/default-alias assumptions with a three-established-alias sequence.
+It does not authorize a plan, manifest, candidate, Git or registry action.
 
 ## 2. Decision
 
@@ -160,6 +182,22 @@ SPEC-008 remains authoritative for exact Angular/Aria/CDK ranges, exports,
 styles and support tiers. This ADR neither changes those contracts nor admits
 the private Standard/reference workspace as a package.
 
+The exact proposed M21 line is:
+
+| Package                                 | Version | Required Schema Engine peer |
+| --------------------------------------- | ------- | --------------------------- |
+| `@rabassoft/schema-engine`              | `0.4.0` | none                        |
+| `@rabassoft/schema-engine-angular`      | `0.4.0` | core `^0.4.0`               |
+| `@rabassoft/schema-engine-angular-aria` | `0.2.0` | base Angular `^0.4.0`       |
+
+SPEC-009 is authoritative for M20 behavior and migration. Core/base require
+MINOR because their Public Experimental declarations change incompatibly. The
+pilot requires an independent MINOR because its current base `^0.3.0` peer
+cannot admit the M20 base line; its Public provider, export and six style
+properties remain unchanged. Angular core/forms stay
+`>=22.0.6 <23.0.0`; Angular Aria/CDK stay `>=22.0.5 <23.0.0` with their exact
+patch-alignment rule.
+
 ### 2.5 Ownership and contributions
 
 Commercial relicensing requires sufficient rights over all included code.
@@ -259,7 +297,43 @@ an immediate approval. After each write, read-only verification must confirm
 exact bytes/integrity, signature, tags, peers, source/license, absent
 repository/provenance and no unrelated registry drift before the next mutation.
 
-### 2.8 Partial failure and immutable recovery
+### 2.8 M21 publication and tag sequence
+
+M21 has three already established package names and aliases. It therefore uses
+one exact dependency-first publication sequence followed by one deepest-
+dependent-first default-channel transition.
+
+Publication under `next` is:
+
+1. publish and verify exact core `0.4.0` bytes;
+2. publish base Angular `0.4.0` only after live core passes, then verify exact
+   and coordinated core/base `next` native consumers;
+3. publish pilot `0.2.0` only after the live `0.4.0` pair passes, then verify
+   exact/`next` bytes, peers, source, native and pilot consumers; and
+4. accept no consumer evidence from a transient mixed `next` window.
+
+All current `latest` aliases resolve to the completed M19 line before the M21
+transition. Move established defaults deepest-dependent first:
+
+1. move pilot `latest` to `0.2.0` while base/core defaults remain old;
+2. after immediate observation, move base Angular `latest` to `0.4.0` while
+   core default remains old;
+3. after immediate observation, move core `latest` to `0.4.0`; and
+4. only then accept exact, `next`, `latest` and unqualified native/pilot
+   consumer evidence.
+
+The first mixed window has only the pilot/base peer edge unresolved; the second
+has only the base/core edge unresolved. No coordinated evidence is accepted in
+either. Moving base before pilot would temporarily break both its upstream core
+peer and the old pilot's downstream peer; moving core first breaks the old
+base. Pilot, base, core is therefore the minimum-risk order for this chain.
+
+Every publication or tag mutation is a distinct external checkpoint with
+immediate human approval. Post-write read-only verification must confirm exact
+bytes/integrity/signature, tags, peers, source/license, absent repository/
+provenance and no unrelated registry drift before any next mutation.
+
+### 2.9 Partial failure and immutable recovery
 
 Published versions are immutable even when a later M19 step fails:
 
@@ -280,7 +354,27 @@ documentation or advances an unverified dependent. PLAN-021 must define exact
 stop/resume commands and evidence for every checkpoint without embedding
 credentials or OTPs.
 
-### 2.9 Commercial agreement
+For M21 specifically:
+
+- after core only, preserve exact core `0.4.0` and resume from fresh
+  verification;
+- after base, preserve the exact `0.4.0` pair and do not claim coordinated
+  completion;
+- after pilot, preserve exact pilot `0.2.0` and reverify all three `next`
+  aliases before default transitions;
+- after pilot `latest`, either proceed after fresh observation or separately
+  approve a corrective tag to the prior verified pilot version;
+- after base `latest`, preserve the single base/core mixed edge until a
+  separately approved core transition or corrective base tag; and
+- after core `latest`, do not close until the complete exact/`next`/`latest`/
+  unqualified matrix passes.
+
+The general immutable recovery rules above remain authoritative for M19 and
+M21. The next release plan must define the exact stop/resume commands and
+evidence for every M21 checkpoint without embedding credentials, OTPs or
+security-key material.
+
+### 2.10 Commercial agreement
 
 The paid commercial license is a separate contract using Ricardo Rabassó
 Rodríguez's legal identity. Before the first commercial sale, professionally
@@ -305,6 +399,8 @@ real contact and executable agreement.
   behavior.
 - A dependency-first publish and dependent-first default-channel transition
   minimize incompatible default resolution while preserving exact audit stops.
+- M21 closes the source/package gap without combining delivery with a new
+  framework or functional contract.
 
 ### Negative
 
@@ -320,6 +416,8 @@ real contact and executable agreement.
   consumer evidence.
 - A third public package adds independent source, license, peer, tag and
   recovery checks to every coordinated release that includes it.
+- Three established default aliases require two planned mixed windows before
+  the complete M21 chain can resolve unqualified consistently.
 - Trusted publishing and provenance cannot be activated while preserving the
   selected private-repository metadata boundary; future releases remain gated
   until the repository-publication decision is promoted.
@@ -378,6 +476,29 @@ Rejected. Official CLI behavior and prior registry evidence do not justify a
 single precondition. The release must observe and document registry state
 rather than depend on presence, absence or deletion of the default tag.
 
+### Publish M21 core/base without a pilot MINOR
+
+Rejected. The existing pilot peer `^0.3.0` excludes base `0.4.0`, while M20
+requires pilot conformance over the widened behavior. Omitting it would leave
+no installable pilot companion for the new base line.
+
+### Let pilot `0.2.0` support both base `0.3.x` and `0.4.x`
+
+Rejected for M21. It adds an unneeded cross-MINOR compatibility claim and
+doubles declaration/runtime/consumer evidence. Pilot `0.1.x` remains the M19
+companion; `0.2.x` targets M21 base `^0.4.0` exactly.
+
+### Move M21 core or base `latest` before pilot
+
+Rejected. Core-first breaks the old default base peer. Base-first breaks both
+the old pilot/base edge and the base/core edge. Pilot, base, core limits each
+mixed window to one unresolved adjacent peer.
+
+### Combine M21 with React or another functional milestone
+
+Rejected by review-145 option A. M21 exists to deliver the already completed
+M20 contract before new Public surface is accumulated.
+
 ## 5. Out of scope
 
 - Changing runtime behavior, schemas, diagnostics, exports or entry points.
@@ -386,15 +507,15 @@ rather than depend on presence, absence or deletion of the default tag.
 - Drafting final paid-license prices or legal clauses without professional
   review.
 - Accepting external code contributions before a rights policy exists.
-- Automating M19 or future releases while D-043 remains Deferred.
+- Automating M21 or future releases while D-043 remains Deferred.
 - Preparing or configuring trusted publishing, staged publishing, public
   repository metadata, token restrictions or provenance before the repository
   sanitization/publication milestone.
 - Publishing, tagging, creating releases or changing remote visibility merely
   because this ADR is accepted.
-- Preparing PLAN-021 before revision 4 passes a complete review and is
-  accepted.
-- Changing SPEC-008 versions, peers, exports, support tiers or behavior.
+- Preparing the next release plan before revision 5 passes a complete review
+  and is accepted.
+- Changing SPEC-009 behavior, exports, support tiers or framework ranges.
 - Publishing Standard/reference applications, another package, another UI kit
   or any functional Deferred capability.
 
@@ -406,18 +527,17 @@ rather than depend on presence, absence or deletion of the default tag.
    unambiguous.
 3. Corresponding Source is complete and publicly available for each package
    despite the private repository.
-4. Root/private package boundaries, exact three-package M19 inventory,
+4. Root/private package boundaries, exact M19 and M21 three-package inventories,
    independent SemVer, Experimental API and Angular compatibility remain
-   unchanged.
+   explicit and unchanged outside their selected lines.
 5. Contribution rights, third-party code and commercial-contract boundaries
    are explicit.
 6. Registry identity, interactive 2FA, tag, recovery and clean-consumer gates
    complete without credentials in the repository; trusted publishing and
    provenance remain explicitly deferred with repository metadata.
-7. M19 publishes dependency-first under `next`, observes whether the first
-   pilot `latest` exists, then establishes it if required and moves established
-   base/core `latest` dependent-first with no accepted evidence from mixed
-   windows.
+7. M19 history remains exact; M21 publishes core/base/pilot dependency-first
+   under `next`, then moves established pilot/base/core `latest` deepest-
+   dependent first with no accepted evidence from mixed windows.
 8. Every external mutation retains an immediate explicit approval checkpoint
    followed by complete read-only observation.
 9. Partial failure preserves immutable versions and requires explicit
@@ -425,10 +545,11 @@ rather than depend on presence, absence or deletion of the default tag.
    unpublish or deletion of an observed default `latest`.
 10. D-034/D-040 alone are active; D-043 and all functional deferred
     capabilities remain inactive.
-11. M19 may close without a trusted publisher because no matching public
+11. M21 may close without a trusted publisher because no matching public
     repository exists; later automation requires separate promotion and review.
-12. Acceptance authorizes PLAN-021 preparation/review only, not implementation,
-    Git, registry reads/writes, publication or tags.
+12. Acceptance authorizes preparation/review of the next release plan only, not
+    implementation, manifests, candidates, Git, registry reads/writes,
+    publication or tags.
 
 ## 7. References
 

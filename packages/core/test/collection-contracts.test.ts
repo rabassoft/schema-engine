@@ -26,7 +26,10 @@ import {
   validateNestedFormDefinition,
 } from '../src/internal/nested-definition.js';
 import { canonicalDataPathKey } from '../src/internal/path.js';
-import { withDefaultPresentation } from './definition-fixtures.js';
+import {
+  withDefaultNodePresentation,
+  withDefaultPresentation,
+} from './definition-fixtures.js';
 
 function templateLeaf(
   collectionPath: readonly string[],
@@ -77,11 +80,11 @@ describe('M10 public contract foundations', () => {
       collectionPolicies: [policy],
     } satisfies CompileFormDefinitionInput;
     const leaf = templateLeaf(['rows'], ['name']);
-    const template: ObjectItemTemplateDefinition = {
+    const template: ObjectItemTemplateDefinition = withDefaultNodePresentation({
       kind: 'item-template',
       children: [leaf],
       fields: [leaf],
-    };
+    });
     const collection = collectionNode(['rows'], 'id', template);
     const collectionPath = collection.path as readonly string[];
     const address = {
@@ -211,11 +214,15 @@ describe('collection address and key helpers', () => {
 describe('collection definition validation foundations', () => {
   it('validates an identity-linked item template without adding its leaves to the global projection', () => {
     const leaf = templateLeaf(['rows'], ['name']);
-    const collection = collectionNode(['rows'], 'id', {
-      kind: 'item-template',
-      children: [leaf],
-      fields: [leaf],
-    });
+    const collection = collectionNode(
+      ['rows'],
+      'id',
+      withDefaultNodePresentation({
+        kind: 'item-template',
+        children: [leaf],
+        fields: [leaf],
+      }),
+    );
 
     expect(
       validateCollectionFormDefinition(
@@ -232,11 +239,15 @@ describe('collection definition validation foundations', () => {
 
   it('reports identity overlap, nested arrays, cycles, and projection mismatches with safe locators', () => {
     const identityLeaf = templateLeaf(['rows'], ['id']);
-    const overlap = collectionNode(['rows'], 'id', {
-      kind: 'item-template',
-      children: [identityLeaf],
-      fields: [identityLeaf],
-    });
+    const overlap = collectionNode(
+      ['rows'],
+      'id',
+      withDefaultNodePresentation({
+        kind: 'item-template',
+        children: [identityLeaf],
+        fields: [identityLeaf],
+      }),
+    );
     expect(
       validateCollectionFormDefinition({ nodes: [overlap], fields: [] }),
     ).toMatchObject({
@@ -257,11 +268,15 @@ describe('collection definition validation foundations', () => {
       required: false,
       label: 'Nested',
     };
-    const nested = collectionNode(['rows'], 'id', {
-      kind: 'item-template',
-      children: [nestedArray as unknown as FormNodeTemplate],
-      fields: [],
-    });
+    const nested = collectionNode(
+      ['rows'],
+      'id',
+      withDefaultNodePresentation({
+        kind: 'item-template',
+        children: [nestedArray as unknown as FormNodeTemplate],
+        fields: [],
+      }),
+    );
     expect(
       validateCollectionFormDefinition({ nodes: [nested], fields: [] }),
     ).toMatchObject({
@@ -279,11 +294,15 @@ describe('collection definition validation foundations', () => {
       children: [] as unknown[],
     };
     cyclic.children.push(cyclic);
-    const cycle = collectionNode(['rows'], 'id', {
-      kind: 'item-template',
-      children: [cyclic as unknown as FormNodeTemplate],
-      fields: [],
-    });
+    const cycle = collectionNode(
+      ['rows'],
+      'id',
+      withDefaultNodePresentation({
+        kind: 'item-template',
+        children: [cyclic as unknown as FormNodeTemplate],
+        fields: [],
+      }),
+    );
     expect(
       validateCollectionFormDefinition({ nodes: [cycle], fields: [] }),
     ).toMatchObject({
@@ -296,11 +315,15 @@ describe('collection definition validation foundations', () => {
     });
 
     const leaf = templateLeaf(['rows'], ['name']);
-    const mismatch = collectionNode(['rows'], 'id', {
-      kind: 'item-template',
-      children: [leaf],
-      fields: [],
-    });
+    const mismatch = collectionNode(
+      ['rows'],
+      'id',
+      withDefaultNodePresentation({
+        kind: 'item-template',
+        children: [leaf],
+        fields: [],
+      }),
+    );
     expect(
       validateCollectionFormDefinition({ nodes: [mismatch], fields: [] }),
     ).toMatchObject({
@@ -315,11 +338,13 @@ describe('collection definition validation foundations', () => {
 
   it('closes array exterior, identity, item, reuse, and duplicate template reasons', () => {
     const validLeaf = templateLeaf(['rows'], ['name']);
-    const validItem: ObjectItemTemplateDefinition = {
-      kind: 'item-template',
-      children: [validLeaf],
-      fields: [validLeaf],
-    };
+    const validItem: ObjectItemTemplateDefinition = withDefaultNodePresentation(
+      {
+        kind: 'item-template',
+        children: [validLeaf],
+        fields: [validLeaf],
+      },
+    );
     const invalidArray = {
       ...collectionNode(['rows'], 'id', validItem),
       identity: null,
@@ -366,11 +391,15 @@ describe('collection definition validation foundations', () => {
       defect: { reason: 'invalid-item-template', nodeIndexPath: [0] },
     });
 
-    const reused = collectionNode(['rows'], 'id', {
-      kind: 'item-template',
-      children: [validLeaf, validLeaf],
-      fields: [validLeaf, validLeaf],
-    });
+    const reused = collectionNode(
+      ['rows'],
+      'id',
+      withDefaultNodePresentation({
+        kind: 'item-template',
+        children: [validLeaf, validLeaf],
+        fields: [validLeaf, validLeaf],
+      }),
+    );
     expect(
       validateCollectionFormDefinition({ nodes: [reused], fields: [] }),
     ).toMatchObject({
@@ -383,11 +412,15 @@ describe('collection definition validation foundations', () => {
     });
 
     const duplicateLeaf = templateLeaf(['rows'], ['name']);
-    const duplicate = collectionNode(['rows'], 'id', {
-      kind: 'item-template',
-      children: [validLeaf, duplicateLeaf],
-      fields: [validLeaf, duplicateLeaf],
-    });
+    const duplicate = collectionNode(
+      ['rows'],
+      'id',
+      withDefaultNodePresentation({
+        kind: 'item-template',
+        children: [validLeaf, duplicateLeaf],
+        fields: [validLeaf, duplicateLeaf],
+      }),
+    );
     expect(
       validateCollectionFormDefinition({ nodes: [duplicate], fields: [] }),
     ).toMatchObject({

@@ -383,6 +383,57 @@ describe('AngularPresentationContainerResolver', () => {
       ],
     });
   });
+
+  it('adds exact owner context only to local tester and selection diagnostics', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        AngularPresentationContainerResolver,
+        provideSchemaPresentationContainer(registration('none', null)),
+      ],
+    });
+    const owner = Object.freeze({
+      kind: 'template-object' as const,
+      ownerPath: Object.freeze(['rows']),
+      templatePath: Object.freeze(['details']),
+      itemId: '__proto__',
+      address: Object.freeze({
+        collectionPath: Object.freeze(['rows']),
+        itemId: '__proto__',
+      }),
+      staticOwner: Object.freeze([
+        'item-template-object',
+        Object.freeze(['rows']),
+        Object.freeze(['details']),
+      ] as const),
+      ownerInstance: Object.freeze([
+        'item-object',
+        Object.freeze(['rows']),
+        '__proto__',
+        Object.freeze(['details']),
+      ] as const),
+    });
+    expect(
+      TestBed.inject(AngularPresentationContainerResolver).resolve(
+        definition,
+        owner,
+      ),
+    ).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          code: 'NO_PRESENTATION_CONTAINER_MATCH',
+          parameters: {
+            presentationKind: 'tabs',
+            presentationId: 'tabs',
+            presentationOwnerKind: 'template-object',
+            presentationOwnerPath: ['rows'],
+            presentationTemplatePath: ['details'],
+            itemId: '__proto__',
+          },
+        },
+      ],
+    });
+  });
 });
 
 function getDefinition(): AngularPresentationContainerDefinition {

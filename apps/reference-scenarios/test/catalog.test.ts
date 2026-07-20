@@ -21,6 +21,7 @@ const EXPECTED_SCENARIOS = [
   'presentation-sections',
   'nullable-preferences',
   'advanced-presentation',
+  'recursive-local-presentation',
 ] as const;
 
 const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
@@ -36,6 +37,7 @@ const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
   'presentation-groups',
   'nullable-leaves',
   'advanced-layout',
+  'recursive-local-presentation',
 ];
 
 const EXPECTED_TRANSITIONS = {
@@ -65,6 +67,7 @@ const EXPECTED_TRANSITIONS = {
     'clear-volume',
   ],
   'advanced-presentation': ['change-contact-email'],
+  'recursive-local-presentation': ['move-beta-first', 'move-beta-last'],
 } as const;
 
 function withRuntimeEnvelope(
@@ -124,6 +127,7 @@ describe('reference scenario catalog', () => {
       'presentation-sections': ['presentation-groups'],
       'nullable-preferences': ['nullable-leaves'],
       'advanced-presentation': ['advanced-layout'],
+      'recursive-local-presentation': ['recursive-local-presentation'],
     });
     expect(
       Object.fromEntries(
@@ -140,8 +144,8 @@ describe('reference scenario catalog', () => {
     (scenario) => {
       const compiled = compileFormDefinition(scenario.compileInput);
 
-      expect(compiled.success).toBe(true);
       expect(compiled.diagnostics).toEqual([]);
+      expect(compiled.success).toBe(true);
       if (!compiled.success) return;
       expect(Object.isFrozen(compiled.definition)).toBe(true);
     },

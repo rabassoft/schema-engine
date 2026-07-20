@@ -41,6 +41,23 @@
                 "minLength": 1
               }
             }
+          ],
+          "presentation": [
+            {
+              "kind": "form-node",
+              "node": {
+                "key": "[\"template\",[\"rows\"],[\"name\"]]",
+                "name": "name",
+                "relativePath": ["name"],
+                "required": true,
+                "nullable": false,
+                "label": "Full name",
+                "kind": "string",
+                "constraints": {
+                  "minLength": 1
+                }
+              }
+            }
           ]
         }
       }
@@ -86,6 +103,23 @@
                 "kind": "string",
                 "constraints": {
                   "minLength": 1
+                }
+              }
+            ],
+            "presentation": [
+              {
+                "kind": "form-node",
+                "node": {
+                  "key": "[\"template\",[\"rows\"],[\"name\"]]",
+                  "name": "name",
+                  "relativePath": ["name"],
+                  "required": true,
+                  "nullable": false,
+                  "label": "Full name",
+                  "kind": "string",
+                  "constraints": {
+                    "minLength": 1
+                  }
                 }
               }
             ]

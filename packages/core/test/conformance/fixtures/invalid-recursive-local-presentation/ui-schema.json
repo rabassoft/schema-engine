@@ -1,0 +1,6 @@
+{
+  "fields": {
+    "left": { "presentation": ["missing"] },
+    "right": { "presentation": ["value"] }
+  }
+}

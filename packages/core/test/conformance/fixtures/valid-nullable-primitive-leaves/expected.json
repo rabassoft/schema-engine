@@ -108,6 +108,21 @@
             "kind": "string",
             "constraints": {}
           }
+        ],
+        "presentation": [
+          {
+            "kind": "form-node",
+            "node": {
+              "key": "[\"nested\",\"value\"]",
+              "name": "value",
+              "path": ["nested", "value"],
+              "required": false,
+              "nullable": true,
+              "label": "value",
+              "kind": "string",
+              "constraints": {}
+            }
+          }
         ]
       },
       {
@@ -152,6 +167,25 @@
                 "minimum": 0
               },
               "ui": {}
+            }
+          ],
+          "presentation": [
+            {
+              "kind": "form-node",
+              "node": {
+                "key": "[\"template\",[\"rows\"],[\"amount\"]]",
+                "name": "amount",
+                "relativePath": ["amount"],
+                "required": false,
+                "nullable": true,
+                "label": "amount",
+                "kind": "number",
+                "numericType": "number",
+                "constraints": {
+                  "minimum": 0
+                },
+                "ui": {}
+              }
             }
           ]
         }
@@ -390,6 +424,21 @@
               "kind": "string",
               "constraints": {}
             }
+          ],
+          "presentation": [
+            {
+              "kind": "form-node",
+              "node": {
+                "key": "[\"nested\",\"value\"]",
+                "name": "value",
+                "path": ["nested", "value"],
+                "required": false,
+                "nullable": true,
+                "label": "value",
+                "kind": "string",
+                "constraints": {}
+              }
+            }
           ]
         }
       },
@@ -437,6 +486,25 @@
                   "minimum": 0
                 },
                 "ui": {}
+              }
+            ],
+            "presentation": [
+              {
+                "kind": "form-node",
+                "node": {
+                  "key": "[\"template\",[\"rows\"],[\"amount\"]]",
+                  "name": "amount",
+                  "relativePath": ["amount"],
+                  "required": false,
+                  "nullable": true,
+                  "label": "amount",
+                  "kind": "number",
+                  "numericType": "number",
+                  "constraints": {
+                    "minimum": 0
+                  },
+                  "ui": {}
+                }
               }
             ]
           }

@@ -12,6 +12,7 @@ import {
   type Diagnostic,
   type SchemaValidator,
 } from '../../core/dist/index.js';
+import { referenceScenarios } from '../../../apps/reference-scenarios/dist/index.js';
 import { provideSchemaEngineAngularAriaContainers } from '../dist/index.js';
 
 const schema = {
@@ -80,6 +81,17 @@ const value = Object.freeze({
   gridB: 'grid-b',
 });
 
+const recursiveScenario = referenceScenarios.find(
+  ({ id }) => id === 'recursive-local-presentation',
+);
+if (recursiveScenario === undefined)
+  throw new Error('Recursive reference scenario missing.');
+const recursiveCompilation = compileFormDefinition(
+  recursiveScenario.compileInput,
+);
+if (!recursiveCompilation.success)
+  throw new Error('Recursive Aria fixture failed to compile.');
+
 @Component({
   standalone: true,
   imports: [SchemaFormDirective],
@@ -99,6 +111,27 @@ class PilotHost {
     baselineValue: value,
     locale: this.locale(),
     validator,
+  }));
+}
+
+@Component({
+  standalone: true,
+  imports: [SchemaFormDirective],
+  template: `<form [schemaForm]="config()"></form>`,
+})
+class RecursivePilotHost {
+  readonly value = signal<Readonly<object>>(
+    recursiveScenario.initialState.value,
+  );
+  readonly locale = signal('en');
+  readonly config = computed<AngularControlledFormConfig<object>>(() => ({
+    formId: 'aria.local',
+    definition: recursiveCompilation.definition,
+    schema: recursiveScenario.compileInput.schema,
+    value: this.value(),
+    baselineValue: recursiveScenario.initialState.baselineValue,
+    locale: this.locale(),
+    validator: recursiveScenario.validator,
   }));
 }
 
@@ -190,4 +223,107 @@ describe('Angular Aria presentation pilot', () => {
     ).toEqual(['true', 'false']);
     replacement.destroy();
   });
+
+  it('projects the exact shared recursive scenario with stable local Aria state', () => {
+    const fixture = TestBed.createComponent(RecursivePilotHost);
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(
+      root.querySelectorAll('schema-aria-presentation-section'),
+    ).toHaveLength(1);
+    expect(root.querySelectorAll('schema-aria-presentation-tabs')).toHaveLength(
+      3,
+    );
+    expect(
+      root.querySelectorAll('schema-aria-presentation-accordion'),
+    ).toHaveLength(2);
+    expect(root.querySelectorAll('schema-aria-presentation-grid')).toHaveLength(
+      3,
+    );
+
+    const betaTablistId = `${id([
+      'aria.local',
+      'presentation',
+      ['item', ['rows'], 'beta'],
+      'tabs',
+      'item-tabs',
+    ])}--tablist`;
+    const betaTablist = root.querySelector<HTMLElement>(
+      `#${cssEscape(betaTablistId)}`,
+    );
+    if (betaTablist === null) throw new Error('Beta Aria tabs missing.');
+    const betaHost = betaTablist.closest<HTMLElement>('[data-schema-item-key]');
+    if (betaHost === null) throw new Error('Beta Aria item host missing.');
+    const tabs = Array.from(
+      betaTablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    );
+    const trigger =
+      betaHost.querySelector<HTMLButtonElement>('[id$="--trigger"]');
+    tabs[1]?.click();
+    trigger?.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
+    expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+
+    const initial = recursiveScenario.initialState.value as {
+      readonly profile: Readonly<object>;
+      readonly rows: readonly Readonly<Record<string, unknown>>[];
+    };
+    const [alpha, beta] = initial.rows;
+    if (alpha === undefined || beta === undefined)
+      throw new Error('Recursive items missing.');
+    fixture.componentInstance.value.set({
+      profile: initial.profile,
+      rows: [beta, alpha],
+    });
+    fixture.componentInstance.locale.set('es');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(root.querySelector(`#${cssEscape(betaTablistId)}`)).toBe(
+      betaTablist,
+    );
+    expect(tabs[1]?.getAttribute('aria-selected')).toBe('true');
+    expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+    expect(tabs[1]?.textContent?.trim()).toBe('es:Details');
+
+    fixture.componentInstance.value.set({
+      profile: initial.profile,
+      rows: [alpha],
+    });
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(root.querySelector(`#${cssEscape(betaTablistId)}`)).toBeNull();
+    fixture.componentInstance.value.set({
+      profile: initial.profile,
+      rows: [alpha, beta],
+    });
+    fixture.detectChanges();
+    TestBed.tick();
+    const replacement = root.querySelector<HTMLElement>(
+      `#${cssEscape(betaTablistId)}`,
+    );
+    expect(replacement).not.toBe(betaTablist);
+    expect(
+      replacement?.querySelector('[role="tab"]')?.getAttribute('aria-selected'),
+    ).toBe('true');
+
+    fixture.componentInstance.value.set({
+      profile: initial.profile,
+      rows: [{ name: 'Invalid identity' }],
+    });
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(root.querySelectorAll('[data-schema-item-key]')).toHaveLength(0);
+    fixture.destroy();
+  });
 });
+
+function id(parts: readonly unknown[]): string {
+  return `se-${encodeURIComponent(JSON.stringify(parts))}`;
+}
+
+function cssEscape(value: string): string {
+  return CSS.escape(value);
+}

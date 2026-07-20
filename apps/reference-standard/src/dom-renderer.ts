@@ -49,17 +49,32 @@ function setMountedHidden(element: HTMLElement, hidden: boolean): void {
   else element.removeAttribute('inert');
 }
 
-function sectionIdBase(formId: string, sectionId: string): string {
-  return `se-${encodeURIComponent(JSON.stringify([formId, 'section', sectionId]))}`;
+function sectionIdBase(
+  formId: string,
+  sectionId: string,
+  ownerInstance?: readonly unknown[],
+): string {
+  return `se-${encodeURIComponent(
+    JSON.stringify(
+      ownerInstance === undefined
+        ? [formId, 'section', sectionId]
+        : [formId, 'presentation', ownerInstance, 'section', sectionId],
+    ),
+  )}`;
 }
 
 function containerIdBase(
   formId: string,
   kind: 'tabs' | 'accordion' | 'grid',
   id: string,
+  ownerInstance?: readonly unknown[],
 ): string {
   return `se-${encodeURIComponent(
-    JSON.stringify([formId, 'presentation', kind, id]),
+    JSON.stringify(
+      ownerInstance === undefined
+        ? [formId, 'presentation', kind, id]
+        : [formId, 'presentation', ownerInstance, kind, id],
+    ),
   )}`;
 }
 
@@ -68,22 +83,45 @@ function panelIdBase(
   ownerKind: 'tabs' | 'accordion',
   ownerId: string,
   panelId: string,
+  ownerInstance?: readonly unknown[],
 ): string {
   return `se-${encodeURIComponent(
-    JSON.stringify([
-      formId,
-      'presentation',
-      ownerKind,
-      ownerId,
-      'panel',
-      panelId,
-    ]),
+    JSON.stringify(
+      ownerInstance === undefined
+        ? [formId, 'presentation', ownerKind, ownerId, 'panel', panelId]
+        : [
+            formId,
+            'presentation',
+            ownerInstance,
+            ownerKind,
+            ownerId,
+            'panel',
+            panelId,
+          ],
+    ),
   )}`;
 }
 
-function gridItemIdBase(formId: string, gridId: string, index: number): string {
+function gridItemIdBase(
+  formId: string,
+  gridId: string,
+  index: number,
+  ownerInstance?: readonly unknown[],
+): string {
   return `se-${encodeURIComponent(
-    JSON.stringify([formId, 'presentation', 'grid', gridId, 'item', index]),
+    JSON.stringify(
+      ownerInstance === undefined
+        ? [formId, 'presentation', 'grid', gridId, 'item', index]
+        : [
+            formId,
+            'presentation',
+            ownerInstance,
+            'grid',
+            gridId,
+            'item',
+            index,
+          ],
+    ),
   )}`;
 }
 
@@ -101,6 +139,8 @@ interface CollectionBinding {
   dispose(): void;
 }
 
+type StandardPresentationNode = FormNodeDefinition | FormNodeTemplate;
+
 export interface StandardDomRendererOptions {
   readonly embeddedCollectionControls?: boolean;
   readonly formId?: string;
@@ -110,7 +150,8 @@ export interface StandardDomRendererOptions {
       formId: string;
       locale: string;
       presentation:
-        PresentationSectionDefinition | AdvancedPresentationLabelDefinition;
+        | PresentationSectionDefinition<StandardPresentationNode>
+        | AdvancedPresentationLabelDefinition;
     }>,
   ) => unknown;
 }
@@ -125,6 +166,10 @@ export class StandardDomRenderer {
   private readonly collections = new Map<string, CollectionBinding>();
   private readonly cleanups: Array<() => void> = [];
   private readonly presentationLabels: PresentationLabelBinding[] = [];
+  private readonly presentationLabelCache = new WeakMap<
+    object,
+    Map<string, string>
+  >();
   private disposed = false;
 
   constructor(
@@ -138,7 +183,14 @@ export class StandardDomRenderer {
     this.form.setAttribute('aria-label', 'Schema Engine form preview');
     this.listen(this.form, 'submit', (event) => event.preventDefault());
     for (const entry of definition.presentation) {
-      this.form.append(this.renderPresentation(entry));
+      this.form.append(
+        this.renderPresentation(
+          entry,
+          undefined,
+          (node) => this.renderNode(node as FormNodeDefinition),
+          this.cleanups,
+        ),
+      );
     }
     this.host.replaceChildren(this.form);
   }
@@ -177,33 +229,58 @@ export class StandardDomRenderer {
     this.host.replaceChildren();
   }
 
-  private renderPresentation(entry: PresentationEntryDefinition): HTMLElement {
-    if (entry.kind === 'form-node') return this.renderNode(entry.node);
-    if (entry.kind === 'section') return this.renderSection(entry);
-    if (entry.kind === 'tabs') return this.renderTabs(entry);
-    if (entry.kind === 'accordion') return this.renderAccordion(entry);
-    return this.renderGrid(entry);
+  private renderPresentation(
+    entry: PresentationEntryDefinition<StandardPresentationNode>,
+    ownerInstance: readonly unknown[] | undefined,
+    renderNode: (node: StandardPresentationNode) => HTMLElement,
+    cleanups: Array<() => void>,
+  ): HTMLElement {
+    if (entry.kind === 'form-node') return renderNode(entry.node);
+    if (entry.kind === 'section')
+      return this.renderSection(entry, ownerInstance, renderNode, cleanups);
+    if (entry.kind === 'tabs')
+      return this.renderTabs(entry, ownerInstance, renderNode, cleanups);
+    if (entry.kind === 'accordion')
+      return this.renderAccordion(entry, ownerInstance, renderNode, cleanups);
+    return this.renderGrid(entry, ownerInstance, renderNode, cleanups);
   }
 
-  private renderSection(entry: PresentationSectionDefinition): HTMLElement {
+  private renderSection(
+    entry: PresentationSectionDefinition<StandardPresentationNode>,
+    ownerInstance: readonly unknown[] | undefined,
+    renderNode: (node: StandardPresentationNode) => HTMLElement,
+    cleanups: Array<() => void>,
+  ): HTMLElement {
     const section = document.createElement('fieldset');
     section.className = 'form-section';
     const legend = document.createElement('legend');
-    legend.id = `${sectionIdBase(this.formId, entry.id)}--legend`;
-    this.bindPresentationLabel(entry, legend);
+    legend.id = `${sectionIdBase(this.formId, entry.id, ownerInstance)}--legend`;
+    this.bindPresentationLabel(entry, legend, cleanups);
     section.append(legend);
     for (const child of entry.children)
-      section.append(this.renderPresentation(child));
+      section.append(
+        this.renderPresentation(child, ownerInstance, renderNode, cleanups),
+      );
     return section;
   }
 
-  private renderTabs(entry: PresentationTabsDefinition): HTMLElement {
+  private renderTabs(
+    entry: PresentationTabsDefinition<StandardPresentationNode>,
+    ownerInstance: readonly unknown[] | undefined,
+    renderNode: (node: StandardPresentationNode) => HTMLElement,
+    cleanups: Array<() => void>,
+  ): HTMLElement {
     const wrapper = document.createElement('section');
     wrapper.className = 'presentation-tabs';
     const tablist = document.createElement('div');
-    tablist.id = `${containerIdBase(this.formId, 'tabs', entry.id)}--tablist`;
+    tablist.id = `${containerIdBase(
+      this.formId,
+      'tabs',
+      entry.id,
+      ownerInstance,
+    )}--tablist`;
     tablist.setAttribute('role', 'tablist');
-    this.bindPresentationLabel(entry, tablist, 'aria-label');
+    this.bindPresentationLabel(entry, tablist, cleanups, 'aria-label');
     const tabs: HTMLButtonElement[] = [];
     const panels: HTMLElement[] = [];
     let activeIndex = 0;
@@ -217,14 +294,25 @@ export class StandardDomRenderer {
       );
     };
     entry.panels.forEach((panel, index) => {
-      const base = panelIdBase(this.formId, 'tabs', entry.id, panel.id);
+      const base = panelIdBase(
+        this.formId,
+        'tabs',
+        entry.id,
+        panel.id,
+        ownerInstance,
+      );
       const tab = document.createElement('button');
       tab.type = 'button';
       tab.id = `${base}--tab`;
       tab.setAttribute('role', 'tab');
       tab.setAttribute('aria-controls', `${base}--tabpanel`);
-      this.bindPresentationLabel(panel, tab);
-      const region = this.renderPanel(panel);
+      this.bindPresentationLabel(panel, tab, cleanups);
+      const region = this.renderPanel(
+        panel,
+        ownerInstance,
+        renderNode,
+        cleanups,
+      );
       region.id = `${base}--tabpanel`;
       region.setAttribute('role', 'tabpanel');
       region.setAttribute('aria-labelledby', tab.id);
@@ -233,20 +321,25 @@ export class StandardDomRenderer {
         update();
         tab.focus();
       };
-      this.listen(tab, 'click', activate);
-      this.listen(tab, 'keydown', (event) => {
-        const keyboard = event as KeyboardEvent;
-        let next: number | undefined;
-        if (keyboard.key === 'ArrowLeft')
-          next = (index - 1 + entry.panels.length) % entry.panels.length;
-        else if (keyboard.key === 'ArrowRight')
-          next = (index + 1) % entry.panels.length;
-        else if (keyboard.key === 'Home') next = 0;
-        else if (keyboard.key === 'End') next = entry.panels.length - 1;
-        if (next === undefined) return;
-        keyboard.preventDefault();
-        tabs[next]?.click();
-      });
+      this.listen(tab, 'click', activate, cleanups);
+      this.listen(
+        tab,
+        'keydown',
+        (event) => {
+          const keyboard = event as KeyboardEvent;
+          let next: number | undefined;
+          if (keyboard.key === 'ArrowLeft')
+            next = (index - 1 + entry.panels.length) % entry.panels.length;
+          else if (keyboard.key === 'ArrowRight')
+            next = (index + 1) % entry.panels.length;
+          else if (keyboard.key === 'Home') next = 0;
+          else if (keyboard.key === 'End') next = entry.panels.length - 1;
+          if (next === undefined) return;
+          keyboard.preventDefault();
+          tabs[next]?.click();
+        },
+        cleanups,
+      );
       tabs.push(tab);
       panels.push(region);
       tablist.append(tab);
@@ -256,65 +349,122 @@ export class StandardDomRenderer {
     return wrapper;
   }
 
-  private renderAccordion(entry: PresentationAccordionDefinition): HTMLElement {
+  private renderAccordion(
+    entry: PresentationAccordionDefinition<StandardPresentationNode>,
+    ownerInstance: readonly unknown[] | undefined,
+    renderNode: (node: StandardPresentationNode) => HTMLElement,
+    cleanups: Array<() => void>,
+  ): HTMLElement {
     const group = document.createElement('section');
     group.className = 'presentation-accordion';
-    group.id = `${containerIdBase(this.formId, 'accordion', entry.id)}--accordion`;
+    group.id = `${containerIdBase(
+      this.formId,
+      'accordion',
+      entry.id,
+      ownerInstance,
+    )}--accordion`;
     group.setAttribute('role', 'group');
-    this.bindPresentationLabel(entry, group, 'aria-label');
+    this.bindPresentationLabel(entry, group, cleanups, 'aria-label');
     entry.panels.forEach((panel) => {
-      const base = panelIdBase(this.formId, 'accordion', entry.id, panel.id);
+      const base = panelIdBase(
+        this.formId,
+        'accordion',
+        entry.id,
+        panel.id,
+        ownerInstance,
+      );
       const trigger = document.createElement('button');
       trigger.type = 'button';
       trigger.id = `${base}--trigger`;
       trigger.setAttribute('aria-expanded', 'false');
       trigger.setAttribute('aria-controls', `${base}--region`);
-      this.bindPresentationLabel(panel, trigger);
-      const region = this.renderPanel(panel);
+      this.bindPresentationLabel(panel, trigger, cleanups);
+      const region = this.renderPanel(
+        panel,
+        ownerInstance,
+        renderNode,
+        cleanups,
+      );
       region.id = `${base}--region`;
       region.setAttribute('role', 'region');
       region.setAttribute('aria-labelledby', trigger.id);
       setMountedHidden(region, true);
-      this.listen(trigger, 'click', () => {
-        const expanded = trigger.getAttribute('aria-expanded') !== 'true';
-        trigger.setAttribute('aria-expanded', String(expanded));
-        setMountedHidden(region, !expanded);
-      });
+      this.listen(
+        trigger,
+        'click',
+        () => {
+          const expanded = trigger.getAttribute('aria-expanded') !== 'true';
+          trigger.setAttribute('aria-expanded', String(expanded));
+          setMountedHidden(region, !expanded);
+        },
+        cleanups,
+      );
       group.append(trigger, region);
     });
     return group;
   }
 
-  private renderGrid(entry: PresentationGridDefinition): HTMLElement {
+  private renderGrid(
+    entry: PresentationGridDefinition<StandardPresentationNode>,
+    ownerInstance: readonly unknown[] | undefined,
+    renderNode: (node: StandardPresentationNode) => HTMLElement,
+    cleanups: Array<() => void>,
+  ): HTMLElement {
     const grid = document.createElement('section');
     grid.className = 'presentation-grid';
-    grid.id = `${containerIdBase(this.formId, 'grid', entry.id)}--grid`;
+    grid.id = `${containerIdBase(
+      this.formId,
+      'grid',
+      entry.id,
+      ownerInstance,
+    )}--grid`;
     grid.setAttribute('role', 'group');
     grid.style.setProperty('--standard-grid-columns', String(entry.columns));
-    this.bindPresentationLabel(entry, grid, 'aria-label');
+    this.bindPresentationLabel(entry, grid, cleanups, 'aria-label');
     entry.items.forEach((item, index) => {
       const cell = document.createElement('div');
       cell.className = 'presentation-grid-cell';
-      cell.id = `${gridItemIdBase(this.formId, entry.id, index)}--cell`;
+      cell.id = `${gridItemIdBase(
+        this.formId,
+        entry.id,
+        index,
+        ownerInstance,
+      )}--cell`;
       cell.style.setProperty('--standard-grid-span', String(item.span));
-      cell.append(this.renderPresentation(item.child));
+      cell.append(
+        this.renderPresentation(
+          item.child,
+          ownerInstance,
+          renderNode,
+          cleanups,
+        ),
+      );
       grid.append(cell);
     });
     return grid;
   }
 
-  private renderPanel(panel: PresentationPanelDefinition): HTMLElement {
+  private renderPanel(
+    panel: PresentationPanelDefinition<StandardPresentationNode>,
+    ownerInstance: readonly unknown[] | undefined,
+    renderNode: (node: StandardPresentationNode) => HTMLElement,
+    cleanups: Array<() => void>,
+  ): HTMLElement {
     const region = document.createElement('div');
     region.className = 'presentation-panel';
     for (const child of panel.children)
-      region.append(this.renderPresentation(child));
+      region.append(
+        this.renderPresentation(child, ownerInstance, renderNode, cleanups),
+      );
     return region;
   }
 
   private bindPresentationLabel(
     presentation:
-      PresentationSectionDefinition | AdvancedPresentationLabelDefinition,
+      | PresentationSectionDefinition<StandardPresentationNode>
+      | AdvancedPresentationLabelDefinition,
     element: HTMLElement,
+    cleanups: Array<() => void>,
     attribute?: 'aria-label',
   ): void {
     const source = presentation.label;
@@ -322,25 +472,38 @@ export class StandardDomRenderer {
     const apply = (locale: string): void => {
       if (locale === lastLocale) return;
       lastLocale = locale;
-      let result: unknown;
-      try {
-        result =
-          this.options.resolvePresentationLabel?.(
-            source,
-            Object.freeze({ formId: this.formId, locale, presentation }),
-          ) ?? source;
-      } catch {
-        result = source;
+      let cache = this.presentationLabelCache.get(presentation);
+      if (cache === undefined) {
+        cache = new Map();
+        this.presentationLabelCache.set(presentation, cache);
       }
-      const text =
-        typeof result === 'string' && result.trim().length > 0
-          ? result
-          : source;
+      let text = cache.get(locale);
+      if (text === undefined) {
+        let result: unknown;
+        try {
+          result =
+            this.options.resolvePresentationLabel?.(
+              source,
+              Object.freeze({ formId: this.formId, locale, presentation }),
+            ) ?? source;
+        } catch {
+          result = source;
+        }
+        text =
+          typeof result === 'string' && result.trim().length > 0
+            ? result
+            : source;
+        cache.set(locale, text);
+      }
       if (attribute === undefined) element.textContent = text;
       else element.setAttribute(attribute, text);
     };
     const binding = { reconcile: apply };
     this.presentationLabels.push(binding);
+    cleanups.push(() => {
+      const index = this.presentationLabels.indexOf(binding);
+      if (index >= 0) this.presentationLabels.splice(index, 1);
+    });
     apply(this.runtime.getSnapshot().locale);
   }
 
@@ -356,8 +519,17 @@ export class StandardDomRenderer {
       legend.textContent = node.label;
       fieldset.append(legend);
       appendSupportingText(fieldset, node.description, node.hint);
-      for (const child of node.children)
-        fieldset.append(this.renderNode(child));
+      const ownerInstance = ['object', stringPath(node.path)] as const;
+      for (const entry of node.presentation) {
+        fieldset.append(
+          this.renderPresentation(
+            entry,
+            ownerInstance,
+            (child) => this.renderNode(child as FormNodeDefinition),
+            this.cleanups,
+          ),
+        );
+      }
       return fieldset;
     }
     if (node.kind === 'array') {
@@ -365,6 +537,8 @@ export class StandardDomRenderer {
         node,
         this.runtime,
         this.options.embeddedCollectionControls !== false,
+        (entry, ownerInstance, renderNode, cleanups) =>
+          this.renderPresentation(entry, ownerInstance, renderNode, cleanups),
       );
       this.collections.set(node.key, binding);
       return binding.element;
@@ -384,11 +558,19 @@ export class StandardDomRenderer {
     target: EventTarget,
     type: string,
     listener: EventListener,
+    cleanups = this.cleanups,
   ): void {
     target.addEventListener(type, listener);
-    this.cleanups.push(() => target.removeEventListener(type, listener));
+    cleanups.push(() => target.removeEventListener(type, listener));
   }
 }
+
+type RenderStandardPresentation = (
+  entry: PresentationEntryDefinition<StandardPresentationNode>,
+  ownerInstance: readonly unknown[],
+  renderNode: (node: StandardPresentationNode) => HTMLElement,
+  cleanups: Array<() => void>,
+) => HTMLElement;
 
 function createFieldBinding(
   definition: FieldDefinition | FieldTemplate,
@@ -477,7 +659,20 @@ function createFieldBinding(
         }
         return;
       }
-      intentions.set(control.value);
+      const requested = control.value;
+      intentions.set(requested);
+      const confirmed = currentSnapshot?.presence;
+      if (
+        confirmed?.kind !== 'value' ||
+        !Object.is(confirmed.value, requested)
+      ) {
+        control.value =
+          confirmed?.kind === 'value' && typeof confirmed.value === 'string'
+            ? confirmed.value
+            : control instanceof HTMLSelectElement
+              ? MISSING
+              : '';
+      }
     });
   } else if (definition.kind === 'number') {
     control.addEventListener('input', handleNumberInput);
@@ -506,6 +701,7 @@ function createFieldBinding(
   }
 
   function reconcile(snapshot: FieldRuntimeSnapshot, locale: string): void {
+    const previousPresence = currentSnapshot?.presence;
     currentSnapshot = snapshot;
     const value =
       snapshot.presence.kind === 'value' ? snapshot.presence.value : undefined;
@@ -529,9 +725,11 @@ function createFieldBinding(
             : '';
       }
     } else if (control instanceof HTMLSelectElement) {
-      control.value = typeof value === 'string' ? value : MISSING;
+      if (!focused || presenceChanged(previousPresence, snapshot.presence))
+        control.value = typeof value === 'string' ? value : MISSING;
     } else if (control instanceof HTMLInputElement) {
-      control.value = typeof value === 'string' ? value : '';
+      if (!focused || presenceChanged(previousPresence, snapshot.presence))
+        control.value = typeof value === 'string' ? value : '';
     }
 
     issues.replaceChildren(
@@ -562,10 +760,23 @@ function createFieldBinding(
   };
 }
 
+function presenceChanged(
+  previous: FieldRuntimeSnapshot['presence'] | undefined,
+  current: FieldRuntimeSnapshot['presence'],
+): boolean {
+  if (previous === undefined || previous.kind !== current.kind) return true;
+  return (
+    previous.kind === 'value' &&
+    current.kind === 'value' &&
+    !Object.is(previous.value, current.value)
+  );
+}
+
 function createCollectionBinding(
   definition: ArrayNodeDefinition,
   runtime: FormRuntime<object>,
   embeddedControls: boolean,
+  renderPresentation: RenderStandardPresentation,
 ): CollectionBinding {
   const collectionPath = stringPath(definition.path);
   const section = document.createElement('section');
@@ -652,6 +863,7 @@ function createCollectionBinding(
             () => current,
             () => add.focus(),
             embeddedControls,
+            renderPresentation,
           );
           items.set(itemSnapshot.address.itemId, binding);
         }
@@ -675,6 +887,7 @@ function createItemBinding(
   getCollection: () => ArrayRuntimeSnapshot | undefined,
   focusAfterRemove: () => void,
   embeddedControls: boolean,
+  renderPresentation: RenderStandardPresentation,
 ) {
   const fieldset = document.createElement('fieldset');
   fieldset.className = 'collection-item';
@@ -686,8 +899,17 @@ function createItemBinding(
     readonly relativePath: readonly string[];
     readonly binding: FieldBinding;
   }> = [];
-  for (const child of collection.item.children) {
-    fieldset.append(renderItemTemplate(child));
+  const presentationCleanups: Array<() => void> = [];
+  const itemOwner = ['item', collectionPath, itemId] as const;
+  for (const entry of collection.item.presentation) {
+    fieldset.append(
+      renderPresentation(
+        entry,
+        itemOwner,
+        (template) => renderItemTemplate(template as FormNodeTemplate),
+        presentationCleanups,
+      ),
+    );
   }
   const actions = document.createElement('div');
   actions.className = 'field-actions';
@@ -741,8 +963,23 @@ function createItemBinding(
       const groupLegend = document.createElement('legend');
       groupLegend.textContent = template.label;
       group.append(groupLegend);
-      for (const child of template.children)
-        group.append(renderItemTemplate(child));
+      appendSupportingText(group, template.description, template.hint);
+      const owner = [
+        'item-object',
+        collectionPath,
+        itemId,
+        template.relativePath,
+      ] as const;
+      for (const entry of template.presentation) {
+        group.append(
+          renderPresentation(
+            entry,
+            owner,
+            (child) => renderItemTemplate(child as FormNodeTemplate),
+            presentationCleanups,
+          ),
+        );
+      }
       return group;
     }
     const target: CollectionNodeAddress = {
@@ -786,6 +1023,7 @@ function createItemBinding(
       earlier.removeEventListener('click', moveEarlier);
       later.removeEventListener('click', moveLater);
       remove.removeEventListener('click', removeItem);
+      for (const cleanup of presentationCleanups.splice(0)) cleanup();
       for (const { binding } of fieldBindings) binding.dispose();
       fieldset.remove();
     },

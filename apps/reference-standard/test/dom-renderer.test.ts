@@ -281,6 +281,144 @@ describe('StandardDomRenderer', () => {
     application.dispose();
   });
 
+  it('projects recursive local owners with exact stable-item state and fresh reinsertion', () => {
+    const harness = mount('recursive-local-presentation');
+    const root = harness.host;
+    const definition = harness.application.getState().definition;
+    expect(definition).toBeDefined();
+    expect(
+      definition?.presentation.map((entry) =>
+        entry.kind === 'form-node' ? entry.node.name : entry.kind,
+      ),
+    ).toEqual(['profile', 'rows']);
+    expect(root.querySelectorAll('.collection-group')).toHaveLength(1);
+    expect(root.querySelectorAll('.collection-item')).toHaveLength(2);
+    const beta = item(root, 'beta');
+    const betaTabs = Array.from(
+      beta.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    );
+    const betaStatus =
+      beta.querySelector<HTMLButtonElement>('[id$="--trigger"]');
+    expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(3);
+    expect(betaTabs.map(({ textContent }) => textContent)).toEqual([
+      'Summary',
+      'Details',
+    ]);
+    expect(beta.querySelectorAll('.presentation-grid-cell')).toHaveLength(2);
+    expect(beta.querySelector('[data-field-name="id"]')).toBeNull();
+
+    betaTabs[1]?.click();
+    betaStatus?.click();
+    const name = fieldControl(beta, 'name');
+    clickButton(beta, 'Move earlier');
+
+    expect(item(root, 'beta')).toBe(beta);
+    expect(betaTabs[1]?.getAttribute('aria-selected')).toBe('true');
+    expect(betaStatus?.getAttribute('aria-expanded')).toBe('true');
+    expect(name.value).toBe('Beta');
+    expect(readRows(harness.application).map(({ id }) => id)).toEqual([
+      'beta',
+      'alpha',
+    ]);
+
+    clickButton(beta, 'Move later');
+    expect(item(root, 'beta')).toBe(beta);
+    expect(betaTabs[1]?.getAttribute('aria-selected')).toBe('true');
+    const oldTabsId = beta.querySelector('[role="tablist"]')?.id;
+    expect(oldTabsId).toBe(
+      `se-${encodeURIComponent(
+        JSON.stringify([
+          'reference-standard-recursive-local-presentation',
+          'presentation',
+          ['item', ['rows'], 'beta'],
+          'tabs',
+          'item-tabs',
+        ]),
+      )}--tablist`,
+    );
+
+    clickButton(beta, 'Remove item');
+    expect(root.querySelector('[data-item-id="beta"]')).toBeNull();
+    const removedValue = harness.application.getState().value as {
+      readonly profile: Readonly<object>;
+      readonly rows: readonly Readonly<object>[];
+    };
+    harness.application.replaceValue({
+      profile: removedValue.profile,
+      rows: [
+        ...removedValue.rows,
+        {
+          id: 'beta',
+          name: 'Beta fresh',
+          status: 'Draft',
+          details: { role: 'Reviewer', active: false },
+        },
+      ],
+    });
+    const replacement = item(root, 'beta');
+    expect(replacement).not.toBe(beta);
+    expect(
+      replacement.querySelector('[role="tab"]')?.getAttribute('aria-selected'),
+    ).toBe('true');
+    expect(
+      replacement
+        .querySelector('[id$="--trigger"]')
+        ?.getAttribute('aria-expanded'),
+    ).toBe('false');
+    const replacementName = fieldControl(replacement, 'name');
+    const historyBeforeInvalid = harness.application.getState().history.length;
+    harness.application.replaceValue({
+      profile: removedValue.profile,
+      rows: [
+        {
+          name: 'Invalid identity',
+          status: 'Blocked',
+          details: { role: 'Unknown', active: false },
+        },
+      ],
+    });
+    expect(root.querySelectorAll('[data-item-id]')).toHaveLength(0);
+    replacementName.value = 'Ignored after invalidation';
+    replacementName.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(harness.application.getState().history).toHaveLength(
+      historyBeforeInvalid,
+    );
+  });
+
+  it('resolves each recursive static presentation label once per locale', () => {
+    const scenario = referenceScenarios.find(
+      ({ id }) => id === 'recursive-local-presentation',
+    );
+    if (scenario === undefined) throw new Error('Recursive scenario missing.');
+    const application = new StandardReferenceApplication(
+      undefined,
+      scenario.id,
+    );
+    const state = application.getState();
+    const runtime = application.getRuntime();
+    if (state.definition === undefined || runtime === undefined)
+      throw new Error('Recursive runtime missing.');
+    const calls: string[] = [];
+    const host = document.createElement('main');
+    const renderer = new StandardDomRenderer(host, state.definition, runtime, {
+      formId: `reference-standard-${scenario.id}`,
+      resolvePresentationLabel(label) {
+        calls.push(label);
+        return label;
+      },
+    });
+    renderer.reconcile(runtime.getSnapshot());
+    expect(calls).toHaveLength(11);
+    expect(calls.filter((label) => label === 'Item details')).toHaveLength(1);
+    expect(calls.filter((label) => label === 'Detail values')).toHaveLength(1);
+
+    application.setLocale('es');
+    renderer.reconcile(runtime.getSnapshot());
+    expect(calls).toHaveLength(22);
+    renderer.dispose();
+    application.dispose();
+  });
+
   it('keeps null, missing, false and zero visibly distinct', () => {
     const harness = mount('nullable-preferences');
     expect(field(harness.host, 'nickname').querySelector('output')?.value).toBe(
@@ -520,4 +658,14 @@ function readTeam(application: StandardReferenceApplication): Array<{
       }>;
     }
   ).team;
+}
+
+function readRows(application: StandardReferenceApplication): Array<{
+  readonly id: string;
+}> {
+  return (
+    application.getState().value as {
+      readonly rows: Array<{ readonly id: string }>;
+    }
+  ).rows;
 }

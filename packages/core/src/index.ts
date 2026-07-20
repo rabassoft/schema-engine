@@ -88,6 +88,7 @@ export type {
   SubscribeResult,
   TextResolutionContext,
   TextResolver,
+  TemplatePresentationEntryDefinition,
   UiSchema,
   UiNodeSchema,
   UiPresentationEntry,

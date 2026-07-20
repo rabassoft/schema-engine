@@ -22,6 +22,7 @@ const FEATURES: ReadonlySet<ReferenceFeature> = new Set([
   'local-references',
   'presentation-groups',
   'advanced-layout',
+  'recursive-local-presentation',
   'nullable-leaves',
 ]);
 

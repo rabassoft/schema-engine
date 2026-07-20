@@ -11,6 +11,7 @@ import type {
   FieldTemplate,
   FormDefinition,
   FormNodeDefinition,
+  FormNodeTemplate,
   NumberFieldDefinition,
   ObjectItemTemplateDefinition,
   ObjectFieldDefinition,
@@ -178,6 +179,7 @@ interface ParsedGridItem {
 interface ParsedObjectUi extends ParsedFieldUi {
   readonly order: readonly string[];
   readonly fields: ReadonlyMap<string, ParsedNodeUi>;
+  presentation?: readonly ParsedPresentationEntry[];
 }
 
 interface ParsedArrayUi extends ParsedFieldUi {
@@ -3285,15 +3287,39 @@ function inspectRootPresentation(
   ui: Record<string, unknown>,
   nodeNames: readonly string[],
   diagnostics: Diagnostic[],
+  rootDocumentPath: readonly (string | number)[] = [],
+  dataPath?: readonly string[],
+  templatePath?: readonly string[],
 ): readonly ParsedPresentationEntry[] | undefined {
   const presentation = ownDataValue(ui, 'presentation');
   if (!presentation.present) return undefined;
+  const diagnosticsStart = diagnostics.length;
+  const presentationPath = [...rootDocumentPath, 'presentation'];
+  const finish = (
+    value: readonly ParsedPresentationEntry[] | undefined,
+  ): readonly ParsedPresentationEntry[] | undefined => {
+    if (dataPath === undefined) return value;
+    for (let index = diagnosticsStart; index < diagnostics.length; index += 1) {
+      const current = diagnostics[index];
+      if (current === undefined || current.code !== 'INVALID_UI_PRESENTATION')
+        continue;
+      diagnostics[index] = {
+        ...current,
+        dataPath: [...dataPath],
+        parameters:
+          templatePath === undefined
+            ? current.parameters
+            : { ...current.parameters, templatePath: [...templatePath] },
+      };
+    }
+    return value;
+  };
 
   let invalid = false;
   if (ownDataValue(ui, 'order').present) {
     invalid = true;
     diagnostics.push(
-      invalidUiPresentation('order-conflict', ['presentation'], {
+      invalidUiPresentation('order-conflict', presentationPath, {
         member: 'order',
         expected: 'one root ordering authority',
       }),
@@ -3301,20 +3327,20 @@ function inspectRootPresentation(
   }
   if (presentation.accessor) {
     diagnostics.push(
-      invalidUiPresentation('presentation-accessor', ['presentation'], {
+      invalidUiPresentation('presentation-accessor', presentationPath, {
         expected: 'dense array',
       }),
     );
-    return undefined;
+    return finish(undefined);
   }
   if (!Array.isArray(presentation.value)) {
     diagnostics.push(
-      invalidUiPresentation('presentation-not-array', ['presentation'], {
+      invalidUiPresentation('presentation-not-array', presentationPath, {
         expected: 'dense array',
         actualType: actualType(presentation.value),
       }),
     );
-    return undefined;
+    return finish(undefined);
   }
 
   const known = new Set(nodeNames);
@@ -3324,7 +3350,7 @@ function inspectRootPresentation(
   const active = new Map<object, readonly (string | number)[]>();
   const result: ParsedPresentationEntry[] = [];
   const stack: PresentationInspectionFrame[] = [];
-  pushPresentationEntries(presentation.value, ['presentation'], result, stack);
+  pushPresentationEntries(presentation.value, presentationPath, result, stack);
 
   while (stack.length > 0) {
     const frame = stack.pop();
@@ -3369,11 +3395,11 @@ function inspectRootPresentation(
     if (!firstNodes.has(name)) {
       invalid = true;
       diagnostics.push(
-        invalidUiPresentation('missing-node', ['presentation'], { node: name }),
+        invalidUiPresentation('missing-node', presentationPath, { node: name }),
       );
     }
   }
-  return invalid ? undefined : result;
+  return finish(invalid ? undefined : result);
 }
 
 function inspectPresentationEntryFrame(
@@ -4953,24 +4979,6 @@ function inspectNestedUiSchema(
     );
     return result;
   }
-  if (templateArrayPath === undefined) {
-    const presentation = inspectRootPresentation(
-      rawUiSchema,
-      candidates.map(({ name }) => name),
-      diagnostics,
-    );
-    if (presentation !== undefined) result.presentation = presentation;
-  } else if (ownDataValue(rawUiSchema, 'presentation').present) {
-    diagnostics.push(
-      invalidUiPresentation(
-        'unsupported-location',
-        [...rootDocumentPath, 'presentation'],
-        { member: 'presentation', nodeKind: 'item' },
-        templateArrayPath,
-      ),
-    );
-  }
-
   type ContainerFrame =
     | { readonly kind: 'exit'; readonly ui: Record<string, unknown> }
     | {
@@ -4987,6 +4995,7 @@ function inspectNestedUiSchema(
         readonly candidates: readonly NodeCandidate[];
         readonly order: string[];
         readonly fields: Map<string, ParsedNodeUi>;
+        readonly target: ParsedUiSchema | ParsedObjectUi;
         readonly dataPath: readonly string[];
         readonly documentPath: readonly (string | number)[];
       };
@@ -4999,6 +5008,7 @@ function inspectNestedUiSchema(
       candidates,
       order: result.order,
       fields: result.fields,
+      target: result,
       dataPath: [],
       documentPath: rootDocumentPath,
     },
@@ -5078,6 +5088,7 @@ function inspectNestedUiSchema(
           candidates: candidate.children,
           order: objectUi.order as string[],
           fields: objectUi.fields as Map<string, ParsedNodeUi>,
+          target: objectUi,
           dataPath: nodePath,
           documentPath: uiPath,
         });
@@ -5158,7 +5169,7 @@ function inspectNestedUiSchema(
     if (frame.ui !== undefined) {
       if (frame.dataPath.length === 0) {
         for (const key of Object.keys(frame.ui)) {
-          if (key !== 'order' && key !== 'fields') {
+          if (key !== 'order' && key !== 'fields' && key !== 'presentation') {
             diagnostics.push(unknownUiKey(key, [...frame.documentPath, key]));
           }
         }
@@ -5186,6 +5197,19 @@ function inspectNestedUiSchema(
           );
         }
       }
+      const presentation = inspectRootPresentation(
+        frame.ui,
+        frame.candidates.map(({ name }) => name),
+        diagnostics,
+        frame.documentPath,
+        templateArrayPath === undefined
+          ? frame.dataPath.length === 0
+            ? undefined
+            : frame.dataPath
+          : templateArrayPath,
+        templateArrayPath === undefined ? undefined : frame.dataPath,
+      );
+      if (presentation !== undefined) frame.target.presentation = presentation;
       const fieldsValue = ownDataValue(frame.ui, 'fields');
       if (fieldsValue.present) {
         if (isOrdinaryRecord(fieldsValue.value)) {
@@ -5441,6 +5465,7 @@ function inspectNestedNodeUi(
     order?: string[];
     fields?: Map<string, ParsedNodeUi>;
     item?: ParsedUiSchema;
+    presentation?: readonly ParsedPresentationEntry[];
   } = {};
   if (candidate.type === 'object') {
     parsed.order = [];
@@ -5452,7 +5477,7 @@ function inspectNestedNodeUi(
     return parsed;
   }
   if (
-    (candidate.type === 'object' || candidate.type === 'array') &&
+    candidate.type === 'array' &&
     ownDataValue(value, 'presentation').present
   ) {
     diagnostics.push(
@@ -5461,7 +5486,7 @@ function inspectNestedNodeUi(
         [...documentPath, 'presentation'],
         {
           member: 'presentation',
-          nodeKind: candidate.type === 'array' ? 'array' : 'object',
+          nodeKind: 'array',
         },
         dataPath,
       ),
@@ -5874,6 +5899,12 @@ function buildNestedDefinition(
 ): FormDefinition {
   const nodes: FormNodeDefinition[] = [];
   const fields: FieldDefinition[] = [];
+  const pendingObjectPresentations: Array<{
+    readonly parsed: readonly ParsedPresentationEntry[] | undefined;
+    readonly children: FormNodeDefinition[];
+    readonly output: PresentationEntryDefinition<FormNodeDefinition>[];
+    readonly owner: readonly ['object', readonly string[]];
+  }> = [];
   type BuildFrame = {
     readonly candidate: NodeCandidate;
     readonly ui: ParsedNodeUi | undefined;
@@ -5920,6 +5951,8 @@ function buildNestedDefinition(
     } else if (candidate.type === 'object') {
       const objectUi = frame.ui as ParsedObjectUi | undefined;
       const children: FormNodeDefinition[] = [];
+      const presentation: PresentationEntryDefinition<FormNodeDefinition>[] =
+        [];
       const label =
         objectUi?.label ??
         candidate.schemaTitle ??
@@ -5941,8 +5974,15 @@ function buildNestedDefinition(
           : { tooltip: objectUi.tooltip }),
         kind: 'object',
         children,
+        presentation,
       };
       frame.output.push(node);
+      pendingObjectPresentations.push({
+        parsed: objectUi?.presentation,
+        children,
+        output: presentation,
+        owner: ['object', candidate.dataPath],
+      });
       pushBuildFrames(
         candidate.children,
         objectUi ?? { order: [], fields: new Map() },
@@ -5954,6 +5994,15 @@ function buildNestedDefinition(
       frame.output.push(field);
       fields.push(field);
     }
+  }
+  for (const pending of pendingObjectPresentations) {
+    pending.output.push(
+      ...createPresentationDefinition(
+        pending.parsed,
+        pending.children,
+        pending.owner,
+      ),
+    );
   }
   return {
     nodes,
@@ -5968,6 +6017,17 @@ function buildItemTemplate(
 ): ObjectItemTemplateDefinition {
   const children: Array<ObjectNodeTemplate | FieldTemplate> = [];
   const fields: FieldTemplate[] = [];
+  const presentation: PresentationEntryDefinition<FormNodeTemplate>[] = [];
+  const pendingObjectPresentations: Array<{
+    readonly parsed: readonly ParsedPresentationEntry[] | undefined;
+    readonly children: Array<ObjectNodeTemplate | FieldTemplate>;
+    readonly output: PresentationEntryDefinition<FormNodeTemplate>[];
+    readonly owner: readonly [
+      'item-template-object',
+      readonly string[],
+      readonly string[],
+    ];
+  }> = [];
   type Frame = {
     readonly candidate: NodeCandidate;
     readonly ui: ParsedNodeUi | undefined;
@@ -5985,6 +6045,8 @@ function buildItemTemplate(
     if (candidate.type === 'object') {
       const objectUi = frame.ui as ParsedObjectUi | undefined;
       const nestedChildren: Array<ObjectNodeTemplate | FieldTemplate> = [];
+      const nestedPresentation: PresentationEntryDefinition<FormNodeTemplate>[] =
+        [];
       const node: ObjectNodeTemplate = {
         kind: 'object',
         key: JSON.stringify([
@@ -6009,8 +6071,19 @@ function buildItemTemplate(
           ? {}
           : { tooltip: objectUi.tooltip }),
         children: nestedChildren,
+        presentation: nestedPresentation,
       };
       frame.output.push(node);
+      pendingObjectPresentations.push({
+        parsed: objectUi?.presentation,
+        children: nestedChildren,
+        output: nestedPresentation,
+        owner: [
+          'item-template-object',
+          collection.dataPath,
+          candidate.templatePath,
+        ],
+      });
       pushTemplateBuildFrames(
         candidate.children,
         objectUi ?? { order: [], fields: new Map() },
@@ -6027,7 +6100,22 @@ function buildItemTemplate(
       fields.push(field);
     }
   }
-  return { kind: 'item-template', children, fields };
+  for (const pending of pendingObjectPresentations) {
+    pending.output.push(
+      ...createPresentationDefinition(
+        pending.parsed,
+        pending.children,
+        pending.owner,
+      ),
+    );
+  }
+  presentation.push(
+    ...createPresentationDefinition(ui.presentation, children, [
+      'item-template',
+      collection.dataPath,
+    ]),
+  );
+  return { kind: 'item-template', children, fields, presentation };
 }
 
 function pushTemplateBuildFrames(
@@ -6179,23 +6267,31 @@ function buildDefinition(
   };
 }
 
-function createPresentationDefinition(
+type StaticPresentationOwner =
+  | readonly ['object', readonly string[]]
+  | readonly ['item-template', readonly string[]]
+  | readonly ['item-template-object', readonly string[], readonly string[]];
+
+function createPresentationDefinition<
+  TNode extends FormNodeDefinition | FormNodeTemplate,
+>(
   parsed: readonly ParsedPresentationEntry[] | undefined,
-  nodes: readonly FormNodeDefinition[],
-): readonly PresentationEntryDefinition[] {
+  nodes: readonly TNode[],
+  owner?: StaticPresentationOwner,
+): readonly PresentationEntryDefinition<TNode>[] {
   if (parsed === undefined) return createDefaultPresentation(nodes);
   const byName = new Map(nodes.map((node) => [node.name, node] as const));
-  const result: PresentationEntryDefinition[] = [];
+  const result: PresentationEntryDefinition<TNode>[] = [];
   type Frame = {
     readonly entry: ParsedPresentationEntry;
-    readonly output: PresentationEntryDefinition[];
+    readonly output: PresentationEntryDefinition<TNode>[];
   };
   const stack: Frame[] = [];
   const pendingGridItems: Array<{
-    readonly target: Omit<PresentationGridItemDefinition, 'child'> & {
-      child?: PresentationEntryDefinition;
+    readonly target: Omit<PresentationGridItemDefinition<TNode>, 'child'> & {
+      child?: PresentationEntryDefinition<TNode>;
     };
-    readonly childOutput: PresentationEntryDefinition[];
+    readonly childOutput: PresentationEntryDefinition<TNode>[];
   }> = [];
   pushPresentationBuildFrames(parsed, result, stack);
   while (stack.length > 0) {
@@ -6210,11 +6306,14 @@ function createPresentationDefinition(
       continue;
     }
     if (entry.kind === 'section') {
-      const children: PresentationEntryDefinition[] = [];
-      const section: PresentationSectionDefinition = {
+      const children: PresentationEntryDefinition<TNode>[] = [];
+      const section: PresentationSectionDefinition<TNode> = {
         kind: 'section',
         id: entry.id,
-        key: JSON.stringify(['section', entry.id]),
+        key:
+          owner === undefined
+            ? JSON.stringify(['section', entry.id])
+            : JSON.stringify(['presentation', owner, 'section', entry.id]),
         label: entry.label,
         children,
       };
@@ -6223,20 +6322,34 @@ function createPresentationDefinition(
       continue;
     }
     if (entry.kind === 'tabs' || entry.kind === 'accordion') {
-      const panels: PresentationPanelDefinition[] = entry.panels.map(
+      const panels: PresentationPanelDefinition<TNode>[] = entry.panels.map(
         (panel) => ({
           kind: 'panel',
           id: panel.id,
-          key: JSON.stringify([entry.kind, entry.id, 'panel', panel.id]),
+          key:
+            owner === undefined
+              ? JSON.stringify([entry.kind, entry.id, 'panel', panel.id])
+              : JSON.stringify([
+                  'presentation',
+                  owner,
+                  entry.kind,
+                  entry.id,
+                  'panel',
+                  panel.id,
+                ]),
           label: panel.label,
           children: [],
         }),
       );
       const container:
-        PresentationTabsDefinition | PresentationAccordionDefinition = {
+        | PresentationTabsDefinition<TNode>
+        | PresentationAccordionDefinition<TNode> = {
         kind: entry.kind,
         id: entry.id,
-        key: JSON.stringify([entry.kind, entry.id]),
+        key:
+          owner === undefined
+            ? JSON.stringify([entry.kind, entry.id])
+            : JSON.stringify(['presentation', owner, entry.kind, entry.id]),
         label: entry.label,
         panels,
       };
@@ -6248,35 +6361,48 @@ function createPresentationDefinition(
           throw new Error('Internal compiler error: missing panel.');
         pushPresentationBuildFrames(
           parsedPanel.children,
-          panel.children as PresentationEntryDefinition[],
+          panel.children as PresentationEntryDefinition<TNode>[],
           stack,
         );
       }
       continue;
     }
 
-    const items: PresentationGridItemDefinition[] = entry.items.map(
+    const items: PresentationGridItemDefinition<TNode>[] = entry.items.map(
       (item, itemIndex) => {
         const parsedChild = item.child[0];
         if (parsedChild === undefined || item.child.length !== 1)
           throw new Error('Internal compiler error: missing grid item child.');
-        const childOutput: PresentationEntryDefinition[] = [];
+        const childOutput: PresentationEntryDefinition<TNode>[] = [];
         stack.push({ entry: parsedChild, output: childOutput });
-        const target: Omit<PresentationGridItemDefinition, 'child'> & {
-          child?: PresentationEntryDefinition;
+        const target: Omit<PresentationGridItemDefinition<TNode>, 'child'> & {
+          child?: PresentationEntryDefinition<TNode>;
         } = {
           kind: 'grid-item',
-          key: JSON.stringify(['grid', entry.id, 'item', itemIndex]),
+          key:
+            owner === undefined
+              ? JSON.stringify(['grid', entry.id, 'item', itemIndex])
+              : JSON.stringify([
+                  'presentation',
+                  owner,
+                  'grid',
+                  entry.id,
+                  'item',
+                  itemIndex,
+                ]),
           span: item.span,
         };
         pendingGridItems.push({ target, childOutput });
-        return target as PresentationGridItemDefinition;
+        return target as PresentationGridItemDefinition<TNode>;
       },
     );
-    const grid: PresentationGridDefinition = {
+    const grid: PresentationGridDefinition<TNode> = {
       kind: 'grid',
       id: entry.id,
-      key: JSON.stringify(['grid', entry.id]),
+      key:
+        owner === undefined
+          ? JSON.stringify(['grid', entry.id])
+          : JSON.stringify(['presentation', owner, 'grid', entry.id]),
       label: entry.label,
       columns: entry.columns,
       items,
@@ -6292,12 +6418,14 @@ function createPresentationDefinition(
   return result;
 }
 
-function pushPresentationBuildFrames(
+function pushPresentationBuildFrames<
+  TNode extends FormNodeDefinition | FormNodeTemplate,
+>(
   entries: readonly ParsedPresentationEntry[],
-  output: PresentationEntryDefinition[],
+  output: PresentationEntryDefinition<TNode>[],
   stack: Array<{
     readonly entry: ParsedPresentationEntry;
-    readonly output: PresentationEntryDefinition[];
+    readonly output: PresentationEntryDefinition<TNode>[];
   }>,
 ): void {
   for (let index = entries.length - 1; index >= 0; index -= 1) {

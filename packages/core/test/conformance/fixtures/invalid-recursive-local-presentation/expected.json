@@ -1,0 +1,204 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"left\"]",
+        "name": "left",
+        "path": ["left"],
+        "required": false,
+        "label": "left",
+        "kind": "object",
+        "children": [
+          {
+            "key": "[\"left\",\"value\"]",
+            "name": "value",
+            "path": ["left", "value"],
+            "required": false,
+            "nullable": false,
+            "label": "value",
+            "kind": "string",
+            "constraints": {}
+          }
+        ],
+        "presentation": [
+          {
+            "kind": "form-node",
+            "node": {
+              "key": "[\"left\",\"value\"]",
+              "name": "value",
+              "path": ["left", "value"],
+              "required": false,
+              "nullable": false,
+              "label": "value",
+              "kind": "string",
+              "constraints": {}
+            }
+          }
+        ]
+      },
+      {
+        "key": "[\"right\"]",
+        "name": "right",
+        "path": ["right"],
+        "required": false,
+        "label": "right",
+        "kind": "object",
+        "children": [
+          {
+            "key": "[\"right\",\"value\"]",
+            "name": "value",
+            "path": ["right", "value"],
+            "required": false,
+            "nullable": false,
+            "label": "value",
+            "kind": "string",
+            "constraints": {}
+          }
+        ],
+        "presentation": [
+          {
+            "kind": "form-node",
+            "node": {
+              "key": "[\"right\",\"value\"]",
+              "name": "value",
+              "path": ["right", "value"],
+              "required": false,
+              "nullable": false,
+              "label": "value",
+              "kind": "string",
+              "constraints": {}
+            }
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"left\",\"value\"]",
+        "name": "value",
+        "path": ["left", "value"],
+        "required": false,
+        "nullable": false,
+        "label": "value",
+        "kind": "string",
+        "constraints": {}
+      },
+      {
+        "key": "[\"right\",\"value\"]",
+        "name": "value",
+        "path": ["right", "value"],
+        "required": false,
+        "nullable": false,
+        "label": "value",
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"left\"]",
+          "name": "left",
+          "path": ["left"],
+          "required": false,
+          "label": "left",
+          "kind": "object",
+          "children": [
+            {
+              "key": "[\"left\",\"value\"]",
+              "name": "value",
+              "path": ["left", "value"],
+              "required": false,
+              "nullable": false,
+              "label": "value",
+              "kind": "string",
+              "constraints": {}
+            }
+          ],
+          "presentation": [
+            {
+              "kind": "form-node",
+              "node": {
+                "key": "[\"left\",\"value\"]",
+                "name": "value",
+                "path": ["left", "value"],
+                "required": false,
+                "nullable": false,
+                "label": "value",
+                "kind": "string",
+                "constraints": {}
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"right\"]",
+          "name": "right",
+          "path": ["right"],
+          "required": false,
+          "label": "right",
+          "kind": "object",
+          "children": [
+            {
+              "key": "[\"right\",\"value\"]",
+              "name": "value",
+              "path": ["right", "value"],
+              "required": false,
+              "nullable": false,
+              "label": "value",
+              "kind": "string",
+              "constraints": {}
+            }
+          ],
+          "presentation": [
+            {
+              "kind": "form-node",
+              "node": {
+                "key": "[\"right\",\"value\"]",
+                "name": "value",
+                "path": ["right", "value"],
+                "required": false,
+                "nullable": false,
+                "label": "value",
+                "kind": "string",
+                "constraints": {}
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "INVALID_UI_PRESENTATION",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["fields", "left", "presentation", 0],
+      "parameters": {
+        "reason": "unknown-node",
+        "entryIndex": 0,
+        "node": "missing"
+      },
+      "fallbackMessage": "UI presentation is invalid.",
+      "dataPath": ["left"]
+    },
+    {
+      "code": "INVALID_UI_PRESENTATION",
+      "severity": "warning",
+      "source": "ui-schema",
+      "documentPath": ["fields", "left", "presentation"],
+      "parameters": {
+        "reason": "missing-node",
+        "node": "value"
+      },
+      "fallbackMessage": "UI presentation is invalid.",
+      "dataPath": ["left"]
+    }
+  ]
+}

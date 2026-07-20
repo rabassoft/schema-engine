@@ -6,6 +6,698 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-20 — PLAN-023 checkpoint 3 completed
+
+### Completed
+
+- Repeated the frozen workspace, build, 689-test, package, artifact, source,
+  security, reference and lower/latest native/pilot consumer matrix.
+- Mapped all 27 SPEC-009 conformance rows plus its Public/Internal migration
+  inventory without changing the completed M20 contract.
+- Prepared the three ignored M21 dirty-tree candidates twice with identical
+  sizes and SHA-512; evidence records Node/npm/pnpm, exact integrity,
+  `sourceCommit: null` and no local username.
+- Original and fresh neutral-directory basename-relative publish dry runs pass
+  with `--access public --tag next --provenance=false` and no registry write.
+- Review 151 cycle 1 found only stale pre-candidate active documentation; cycle
+  2 repeated the complete applicable review and passed with zero findings.
+- No lockfile, Git, registry, authentication, publication, tag or other external
+  action occurred.
+
+### Next
+
+- Stop for explicit PLAN-023 checkpoint 4 authorization before scoped diff,
+  commit/private push and clean committed-tree byte comparison.
+
+## 2026-07-20 — PLAN-023 checkpoint 2 completed
+
+### Completed
+
+- Added candidate-truthful M21 `0.4.0` release notes with the exact core/base
+  `0.4.0` plus pilot `0.2.0` line, complete SPEC-009 Public migration,
+  compatibility, live-state model and immutable recovery.
+- Reconciled root/package onboarding so source manifests remain distinct from
+  the verified public M19 `0.3.0`/`0.3.0`/`0.1.0` line.
+- Extended documentation checks to fail closed on stale source truth,
+  premature publication/aliases, wrong versions/peers/orders, obsolete
+  compatibility, Stable conflation and public-repository/provenance claims.
+- Review 150 cycle 1 corrected ROADMAP source truth, exact recovery detail and
+  semantic manifest/style verification; cycles 2–4 corrected stale selected-
+  candidate wording and its exact artifact marker; cycle 5 passed all twelve
+  areas with zero findings.
+- Formatting/docs/lint, 23 tooling tests, three package-smoke tests, M19
+  baseline and M21 packed/private-M18 checks pass. No candidate, lockfile, Git,
+  registry or external action occurred.
+
+### Next
+
+- Execute and completely review PLAN-023 checkpoint 3 locally. Checkpoint 4,
+  commit/push and every registry action remain separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 1 completed
+
+### Completed
+
+- Added the exact frozen M21 descriptor, manifest versions and packed peer
+  contract for core/base `0.4.0` and pilot `0.2.0`.
+- Generalized repeat-release evidence, package specifiers, source/security and
+  M20 candidate/live consumer tooling while preserving M19 commands/history.
+- Added a byte-identical M19 artifact/source/security baseline and exact M21
+  candidate, exact, `next`, `latest` and unqualified script surfaces.
+- Review 149 cycle 1 corrected a stale pilot smoke version, peer/link
+  allowlisting and the offline-store execution environment; cycle 2 passed all
+  twelve areas with zero findings.
+- Formatting/docs/lint/typecheck/build, 689 tests, 23 tooling tests, package/
+  dependency/artifact/source/security checks and lower/latest M20 native/pilot
+  consumers pass. No lockfile, candidate, `.release/0.4.0`, Git or npm change
+  occurred.
+
+### Next
+
+- Implement and completely review PLAN-023 checkpoint 2. Candidate preparation,
+  checkpoint 4, Git and every registry action remain out of scope.
+
+## 2026-07-20 — PLAN-023 revision 0 approved
+
+### Completed
+
+- Drafted the exact M21 delivery contract for core/base `0.4.0` and pilot
+  `0.2.0`, preserving completed M20 and immutable M19 history.
+- Fixed local/external authorization zones, dependency-first `next`, pilot/
+  base/core `latest`, exact M19 baseline and credential-free recovery commands.
+- Review 148 cycle 1 corrected four script, recovery, command-format and
+  registry-baseline findings; cycle 2 repeated all sixteen areas and passed
+  with zero findings.
+- Approved local checkpoints 1–3 only. No implementation, manifest, lockfile,
+  candidate, Git, npm or other external state changed.
+
+### Next
+
+- Implement and completely review PLAN-023 checkpoint 1. Checkpoint 4, Git and
+  every registry action remain separately gated.
+
+## 2026-07-20 — ADR-018 revision 5 accepted
+
+### Completed
+
+- Revised ADR-018 only for the exact M21 three-established-package release:
+  core/base `0.4.0`, pilot `0.2.0` and Schema Engine peers `^0.4.0`.
+- Fixed dependency-first `next` and pilot/base/core `latest` ordering with
+  immutable partial-failure and recovery rules.
+- Preserved licensing, Corresponding Source, private-repository metadata, 2FA,
+  Experimental APIs, frozen compatibility ranges and external gates.
+- Review 147 cycles 1–4 corrected authority metadata, credential-free recovery
+  requirements, stale active state and formatting; cycle 5 repeated all
+  fifteen areas and passed with zero findings.
+- No manifest, lockfile, version, peer, dependency, candidate, implementation,
+  Git, npm or other external state changed.
+
+### Next
+
+- Prepare and completely review PLAN-023. Its approval is required before local
+  implementation; Git and npm actions remain separately gated.
+
+## 2026-07-20 — M21 coordinated M20 release design promoted
+
+### Completed
+
+- Ricard selected review-145 option A: deliver completed M20 before another
+  functional or framework milestone.
+- Review 146 cycles 1–2 found six current-state/index gaps, two formatting
+  defects and one stale phase statement; cycle 3 repeated fourteen areas and
+  passed with zero findings.
+- Promoted only ADR-018 revision 5 design for core/base Angular `0.4.0` and
+  Angular Aria `0.2.0`, with Schema Engine peers `^0.4.0` and unchanged
+  Angular/Aria/CDK ranges.
+- Fixed ADR-018's stale M19 implementation-status metadata without changing its
+  accepted revision 4 decision. Reconciled STATUS, ROADMAP, Deferred and
+  indexes with the selected M21 gate.
+- No manifest, lockfile, package, version, dependency, candidate,
+  implementation, Git, npm or other external state changed.
+
+### Next
+
+- Draft and completely review ADR-018 revision 5. A release plan remains
+  unauthorized until the ADR is accepted after a zero-finding pass.
+
+## 2026-07-19 — Post-M20 milestone-selection review prepared
+
+### Completed
+
+- Compared the remaining demand-driven Deferred candidates against accepted
+  contracts, restart conditions, product value, Public/package impact,
+  maintenance cost and external gates.
+- Review 145 cycle 1 found only review-record formatting; cycle 2 repeated the
+  complete selection review and passed ten areas with zero findings, leaving
+  every candidate unpromoted.
+- Identified three coherent leading paths: coordinated Experimental delivery of
+  M20, a first React adapter/reference shell, or a narrow static JSON Schema
+  composition slice.
+- Recommended delivering the already reviewed M20 value first because source
+  Public Experimental behavior currently exceeds the published package line.
+  No version, dependency, architecture, implementation, Git, registry or other
+  external action was selected.
+
+### Next
+
+- Ricard selects path A, B, C or explicitly names another Deferred product
+  priority. The selection authorizes only its promotion-readiness review.
+
+## 2026-07-19 — PLAN-022 and M20 completed
+
+### Completed
+
+- Repeated the entire frozen PLAN-022 matrix under Node 22.23.1/pnpm 10.28.2,
+  including workspace, package/source/artifact/security, M18/M20 lower/latest
+  native/pilot and both independent reference browser lanes.
+- Audited raw/normalized/manual contracts, diagnostics, stable keys/IDs,
+  text/state/lifecycle, Public/Internal boundaries, package manifests, Deferred
+  exclusions and the complete tracked/untracked dirty tree.
+- Review 144 cycle 3 passed fourteen final areas and all 27 SPEC-009 rows with
+  zero findings. Frozen install, 689 workspace tests, 562 focused core/base/
+  Aria tests, 120 reference unit tests and 14 Chromium tests pass.
+- Marked PLAN-022 revision 0 and M20 complete; reconciled SPEC/ADR indexes,
+  ROADMAP, Deferred, onboarding and package README state. No dependency,
+  version, release, Git, registry or other external mutation occurred.
+
+### Next
+
+- Prepare a post-M20 milestone-selection review over remaining demand-driven
+  Deferred candidates; Ricard must choose the next product priority before any
+  promotion, architecture or implementation begins.
+
+## 2026-07-19 — PLAN-022 checkpoint 7 completed
+
+### Completed
+
+- Extended only the exact Public package/declaration allowlists and added a
+  package-importing external Angular renderer consumer over the widened domain.
+- Added dedicated frozen lower/latest M20 native and Angular Aria pilot clean
+  consumers with partial declarations, strict types, DOM, production builds
+  and Chromium from current temporary workspace tarballs.
+- Preserved frozen M18/M19 regressions and added an explicit offline upper
+  version to the general clean-consumer verifier; no registry/release mutation
+  was used as evidence.
+- Review 143 corrected narrowing, stable-identity location, format/lint,
+  allowlist, offline-consumer and review-record formatting defects across four
+  complete applicable restarts; cycle 5 passed all areas and all 27 SPEC-009
+  rows with zero findings.
+- Formatting, docs, lint, types, 689 tests, builds, package/source/artifact/
+  security checks, 8 snippets, 540 boundaries, 120 reference unit tests and 14
+  Chromium tests pass. Manifests, lockfile, versions and release state remain
+  unchanged.
+
+### Next
+
+- Execute and completely review PLAN-022 checkpoint 8: repeat the entire frozen
+  matrix and audit contracts, lifecycle, packages, Deferred scope, docs and the
+  complete dirty-tree diff before completing M20.
+
+## 2026-07-19 — PLAN-022 checkpoint 6 completed
+
+### Completed
+
+- Proved the unchanged four rank-`10` Angular Aria registrations over the exact
+  shared recursive-local scenario and widened object/template domain.
+- Added ordinary/item/template ID, native-equivalent semantics, locale,
+  movement, removal/reinsertion and invalid-identity lifecycle evidence.
+- Added a package-importing external renderer declaration consumer without
+  exposing owner, item, snapshot or runtime state.
+- Review 142 cycle 1 passed ten areas with zero findings. Base/pilot types and
+  partial compilation, two Aria tests, dependency/package gates, snippets and
+  the Angular reference production build pass; Aria production/package/style/
+  lockfile diffs remain empty.
+
+### Next
+
+- Implement and completely review PLAN-022 checkpoint 7: exact Public/package
+  allowlists, dedicated frozen offline M20 consumers and all 27 SPEC rows.
+
+## 2026-07-19 — PLAN-022 checkpoint 5 completed
+
+### Completed
+
+- Added the exact private recursive-local scenario with ordinary object,
+  item-root and nested object-template presentation plus two stable items.
+- Implemented an independent recursive Standard projection with exact concrete
+  IDs, per-item state, static label caching, reconciliation and teardown.
+- Preserved focused Standard buffers across movement while restoring rejected
+  intentions immediately; enabled existing embedded item actions only for the
+  new scenario so browser evidence exercises movement.
+- Added native Angular and Standard unit/DOM/Chromium parity evidence over the
+  same authored input. Review 141 cycle 3 passed ten areas with zero findings;
+  catalog, types, builds, snippets, 79 reference unit tests and 14 Chromium
+  tests pass.
+
+### Next
+
+- Implement and completely review PLAN-022 checkpoint 6: Angular Aria local
+  owner conformance, semantic equivalence and custom-renderer declarations.
+
+## 2026-07-19 — PLAN-022 checkpoints 3–4 completed
+
+### Completed
+
+- Widened the existing Public Angular container definition/model/tester and
+  entry/panel outlet domains to the exact generic core node/template union.
+- Added only Internal static/concrete owner, definition/snapshot, stable address,
+  generic claim, diagnostics and ID plumbing; no Public symbol or provider was
+  introduced.
+- Switched ordinary object, item-root and object-template hosts from direct
+  child loops to their required local forests while preserving their fixed
+  labels, support text, issues and actions.
+- Added exact local IDs, static label-result reuse, local diagnostic context and
+  retained move/remove/reinsert state/lifecycle coverage.
+- Review 139 cycle 1 passed eight checkpoint-3 areas; review 140 cycle 2 passed
+  ten checkpoint-4 areas with zero findings after correcting one semantic test
+  expectation. Base Angular build/types and 106 tests pass.
+
+### Next
+
+- Implement and completely review checkpoint 5: the neutral recursive-local
+  scenario, independent Standard projection and Angular/Standard semantic
+  parity.
+
+## 2026-07-19 — PLAN-022 checkpoints 1–2 completed
+
+### Completed
+
+- Implemented generic core presentation contracts and the explicit template
+  alias while retaining unparameterized root compatibility.
+- Compiled authored/default ordinary object, item-root and object-template
+  forests with exact owner-local diagnostics, fallback, keys and deep freezing.
+- Added valid/invalid serialized fixtures plus programmatic local safety,
+  identity, manual-key, traversal, frozen-context and non-invocation coverage.
+- Migrated repository-authored core manual definitions and generalized manual
+  validation without changing runtime, operation, scope, validation, snapshot,
+  value, baseline or collection-identity contracts.
+- Review 137 cycle 2 passed ten checkpoint-1 areas and review 138 cycle 2 passed
+  eight checkpoint-2 areas with zero findings after complete correction/review
+  restarts. Core types, build, package smoke, 453 tests, conformance and diff
+  checks pass.
+
+### Next
+
+- Implement and completely review PLAN-022 checkpoint 3: widen only the
+  accepted Angular generic SPI and add Internal concrete-owner projection
+  context without switching object/item host projection yet.
+
+## 2026-07-19 — PLAN-022 revision 0 approved
+
+### Completed
+
+- Mapped accepted SPEC-009 to eight bounded core, Angular native, Standard,
+  Angular Aria, package/consumer and final-review checkpoints.
+- Review 136 replaced indirect M18/M19 consumer evidence with dedicated
+  current-workspace lower/latest M20 lanes; cycle 2 passed fifteen areas with
+  zero findings and approved revision 0.
+- Reconciled current-state, roadmap, Deferred and documentation indexes. No
+  code, dependency, version, Git or external action occurred before approval.
+
+### Next
+
+- Implement and completely review PLAN-022 checkpoint 1: generic core
+  contracts, local compiler normalization/diagnostics and fixtures.
+
+## 2026-07-19 — SPEC-009 v0.1.0 accepted
+
+### Completed
+
+- Defined optional local object/item presentation grammar with exact direct
+  ownership, local order conflict, immutable defaults and atomic fallback.
+- Closed the defaulted generic node/template definitions, owner-qualified
+  static keys, manual-definition context and exact concrete stable-item IDs.
+- Specified per-item state/lifecycle, mounted descendants, text-result reuse,
+  minimal Angular SPI migration and mandatory native/Aria/Standard evidence.
+- Review 135 cycle 1 corrected formatting/indexing and three wording defects;
+  cycle 2 corrected accepted SPEC-008/SPEC-009 authority wording; cycle 3
+  corrected stale current-gate language; cycle 4 reconciled root onboarding;
+  cycle 5 corrected stale review authority/evidence wording; cycle 6 repeated
+  all fourteen areas with zero findings and accepted v0.1.0.
+- Reconciled STATUS, ROADMAP, Deferred/SPEC/ADR/documentation indexes and links.
+  No plan, code, dependency, version, Git or external action occurred.
+
+### Next
+
+- Draft and completely review PLAN-022 for the accepted M20 contract before
+  implementation.
+
+## 2026-07-19 — ADR-025 revision 0 accepted
+
+### Completed
+
+- Designed one defaulted generic presentation family with an explicit template
+  specialization and required local forests on nested object/item definitions.
+- Fixed owner-local membership, qualified static keys, stable item-instance
+  DOM/state identity, local fallback/manual validation and static text reuse.
+- Widened only the accepted Angular SPI's generic node domain while retaining
+  all item/snapshot/application authority in its Internal scoped context.
+- Review 134 cycle 1 corrected the template text-definition domain and local
+  section diagnostic identity; cycle 2 closed the provider/tester diagnostic
+  ambiguity and malformed review row; cycle 3 corrected stale STATUS authority;
+  cycle 4 repeated thirteen areas with zero findings and accepted ADR-025
+  revision 0.
+- Reconciled STATUS, ROADMAP, Deferred/ADR/documentation indexes and links. No
+  SPEC, plan, code, dependency, version, Git or external action occurred.
+
+### Next
+
+- Draft and completely review SPEC-009 under accepted ADR-025 before preparing
+  any implementation plan.
+
+## 2026-07-19 — D-011/M20 local-layout promotion accepted
+
+### Completed
+
+- Reviewed the accepted nested-object, collection, presentation and Angular
+  container contracts plus the implemented core/Angular/Standard seams.
+- Accepted review 133 cycle 3 with zero findings, promoting only static local
+  presentation forests over direct nested-object and item-template children.
+- Kept data/runtime/scope authority unchanged and preserved workflow, actions,
+  conditions, general theming, later frameworks and release work as Deferred.
+- Recorded M20 as design-only in STATUS, ROADMAP, the Deferred register and the
+  documentation index; no SPEC, plan, code, Git or external action occurred.
+
+### Next
+
+- Draft and completely review ADR-025, closing the recursive root/template type
+  model, owner-qualified identity/fallback and Angular SPI migration before any
+  SPEC-009 preparation.
+
+## 2026-07-19 — PLAN-021 and M19 completed
+
+### Completed
+
+- Completed checkpoint 11 after review 132 cycle 4 repeated all eighteen
+  final-release areas and all 22 SPEC-008 rows with zero findings.
+- Recovered the exact frozen non-interactive install through the validated
+  global offline pnpm store with zero downloads and no lifecycle scripts.
+- Reconciled stale private/partial M19 language across active onboarding,
+  release, roadmap, deferred and index documents; added fail-closed stale-state
+  checks without rewriting historical WORKLOG entries.
+- Reverified the byte-identical public core/base `0.3.0` and pilot `0.1.0`
+  line, complete local/reference/candidate/live matrices and exact/
+  `next`/`latest`/unqualified resolution without registry or Git mutation.
+- Marked PLAN-021 revision 0 and M19 Completed with no active implementation
+  task.
+
+### Next
+
+- Decide which Deferred capability or framework target, if any, to promote as
+  the next milestone. No implementation, Git or external action is active.
+
+## 2026-07-19 — PLAN-021 checkpoint 10 completed
+
+### Completed
+
+- Ricard moved only core `latest` to the exact inspected `0.3.0`, closing the
+  planned mixed window.
+- Reverified exact three-package bytes, integrity/signatures, public access,
+  maintainers, metadata and coordinated aliases: core/base
+  `next/latest: 0.3.0`, pilot `next/latest: 0.1.0`.
+- Lower `22.0.6` and latest-compatible `22.0.7` native/pilot consumers pass
+  strict installation, partial compilation, types, unit behavior, production
+  build and Chromium through both `latest` and unqualified resolution.
+- Review 131 cycle 1 passed all nine areas with zero findings; no unrelated
+  registry or Git mutation occurred.
+
+### Next
+
+- Stop with no active implementation task for separate authorization of
+  checkpoint 11's read-only complete final closure.
+
+## 2026-07-19 — PLAN-021 checkpoint 10 pre-transition gate passed
+
+### Completed
+
+- Reverified npm identity, exact three-package bytes/integrity/signatures and
+  the exact core default-transition target.
+- Confirmed the checkpoint 9 mixed window remains unchanged: core
+  `next: 0.3.0`, `latest: 0.2.0`; base `next/latest: 0.3.0`; pilot
+  `next/latest: 0.1.0`.
+- Reverified core public access, maintainer, manifest, source/license and absent
+  repository/provenance. Review 130 cycle 1 passed all seven areas with zero
+  findings; no registry mutation occurred.
+
+### Next
+
+- Ricard manually executes only
+  `npm dist-tag add @rabassoft/schema-engine@0.3.0 latest`. After success,
+  verify aliases/bytes before running `latest` and unqualified consumers.
+
+## 2026-07-19 — PLAN-021 checkpoint 9 completed
+
+### Completed
+
+- Ricard moved only base Angular `latest` to the exact inspected `0.3.0`.
+- Reverified base bytes, integrity/signature, access, maintainer, manifest,
+  peers, source/license and absent repository/provenance.
+- Confirmed pilot remains `next/latest: 0.1.0` and core remains
+  `next: 0.3.0`, `latest: 0.2.0`; no unrelated registry drift occurred.
+- Preserved the intentional dependent-first mixed window without running or
+  accepting `latest`/unqualified consumer evidence. Review 129 cycle 1 passed
+  all seven areas with zero findings.
+
+### Next
+
+- Stop with no active implementation task for separate authorization of
+  checkpoint 10's read-only core default-transition preflight.
+
+## 2026-07-19 — PLAN-021 checkpoint 9 pre-transition gate passed
+
+### Completed
+
+- Reverified npm identity, exact three-package bytes/integrity/signatures and
+  the intended dependent-first base Angular transition target.
+- Confirmed all three `next` aliases are exact, pilot `latest` is `0.1.0` and
+  both established core/base `latest` aliases remain `0.2.0`.
+- Reverified base public access, maintainer, manifest, peers, source/license and
+  absent repository/provenance.
+- Exact and `next` lower `22.0.6` and latest-compatible `22.0.7` native/pilot
+  matrices pass through Chromium. Review 128 cycle 1 passed all eight areas
+  with zero findings. No registry mutation occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm dist-tag add @rabassoft/schema-engine-angular@0.3.0 latest`. After
+  success, verify the intentional mixed window before checkpoint 10.
+
+## 2026-07-19 — PLAN-021 checkpoint 8 completed
+
+### Completed
+
+- Reobserved pilot `next` and `latest` resolving to the exact inspected
+  `0.1.0`; selected the no-write retention branch required by PLAN-021.
+- Reverified exact public bytes, integrity, signature, access, maintainer,
+  manifest, peers, root/style exports, license and absent repository/provenance.
+- Confirmed core/base tags remain `next: 0.3.0` and `latest: 0.2.0` with no
+  unrelated registry drift.
+- Review 127 cycle 1 corrected deferred-register formatting; cycle 2 repeated
+  all seven areas with zero findings. No `dist-tag`, publication, settings or
+  Git mutation occurred.
+
+### Next
+
+- Stop with no active implementation task for separate authorization of
+  checkpoint 9's read-only base Angular default-transition preflight.
+
+## 2026-07-19 — PLAN-021 checkpoint 7 completed
+
+### Completed
+
+- Ricard published the exact selected Angular Aria pilot `0.1.0` under `next`.
+- Unauthenticated evidence proves the public 28,192-byte tarball matches source
+  commit `ce3ef3d`, SHA-512/integrity and signature; access, maintainer, peers,
+  exports, six CSS properties, license/source and absent repository/provenance
+  match the reviewed candidate.
+- Observed `next: 0.1.0` and npm's automatically established
+  `latest: 0.1.0` without tag mutation. Core/base stay `next: 0.3.0` and
+  `latest: 0.2.0`.
+- Corrected the live consumer runner so frozen tuple selection does not force
+  offline registry installation; candidate mode remains offline.
+- Exact and `next` lower `22.0.6` and latest-compatible `22.0.7` native/pilot
+  lanes pass partial compilation, types, unit behavior, production build and
+  Chromium. Review 126 cycles 2–3 corrected closing-document formatting and an
+  ambiguous public-source line; cycle 4 repeated all nine areas with zero
+  findings.
+
+### Next
+
+- Stop with no active implementation task for separate authorization of
+  checkpoint 8's read-only pilot `latest` observation and retention branch.
+  No registry or Git mutation is authorized.
+
+## 2026-07-19 — PLAN-021 checkpoint 7 pre-publication gate passed
+
+### Completed
+
+- Reverified authenticated identity, organization ownership,
+  `auth-and-writes` 2FA, live core/base exact bytes and coordinated `next`
+  aliases; both established `latest` aliases remain `0.2.0`.
+- Confirmed the pilot package remains absent and the selected 28,192-byte
+  candidate is byte-reproducible with SHA-512 `4a1be718…58d54b8`, exact peers,
+  root/style exports and six CSS properties.
+- Repeated artifact/isolation/security checks and the offline Corresponding
+  Source rebuild with zero downloads.
+- Extended the consumer runner to accept a selected pilot tarball only in
+  exact/`next` modes, then passed lower `22.0.6` and latest-compatible `22.0.7`
+  native/pilot lanes in both modes through Chromium.
+- Review 125 cycle 1 corrected the missing hybrid runner mode and recovered the
+  neutral dry run from a root-owned global npm cache. Cycle 2 ran closing checks
+  from the wrong directory; cycle 3 then found the stale previous documentation
+  count; cycle 4 then exposed the stale review heading. Cycle 5 reconciled it,
+  separated both contexts and repeated all nine areas with zero findings. No
+  registry write occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm publish ./rabassoft-schema-engine-angular-aria-0.1.0.tgz --access public --tag next --provenance=false`.
+  After success, verify the pilot completely before checkpoint 8.
+
+## 2026-07-19 — PLAN-021 checkpoint 6 completed
+
+### Completed
+
+- Ricard published the exact selected base Angular `0.3.0` candidate under
+  `next`.
+- Unauthenticated verification proves the public 122,465-byte tarball exactly
+  matches source commit `ce3ef3d`, SHA-512/integrity and one npm signature;
+  repository/provenance remain absent and access/maintainer are correct.
+- Core/base both report `next: 0.3.0` and unchanged `latest: 0.2.0`; the Angular
+  Aria pilot package remains absent.
+- Exact and `next` live native consumers pass core execution plus strict base
+  compilation at Angular `22.0.6` and `22.0.7`, including signature audits.
+- Review 124 cycle 1 found and corrected stale current-state publication gates;
+  cycle 2 passed all nine post-publication areas with zero findings. No
+  pilot/tag/settings/GitHub/repository mutation occurred.
+- Closing formatting, 204-file/698-link documentation checks, lint, all 13
+  release-target tests and diff checks pass.
+
+### Next
+
+- Stop for explicit PLAN-021 checkpoint 7 authorization to run only the
+  read-only Angular Aria pilot preflight. Pilot publication remains a later
+  immediate gate.
+
+## 2026-07-19 — PLAN-021 checkpoint 6 pre-publication gate passed
+
+### Completed
+
+- Reverified live core exact/`next` `0.3.0`, unchanged core `latest: 0.2.0`,
+  absent base `0.3.0`, unchanged base tags and absent pilot package.
+- Confirmed the selected 122,465-byte base candidate's SHA-512/integrity,
+  source commit `ce3ef3d`, core peer `^0.3.0`, aligned Angular peers,
+  distribution isolation and license/source contents.
+- Rebuilt core/base Corresponding Source offline with the validated local pnpm
+  store and zero downloads after the incomplete default store was rejected.
+- Repeated clean lower Angular `22.0.6` and latest-compatible `22.0.7`
+  consumers against live core plus the selected base candidate.
+- Repeated the exact neutral basename-relative base dry run. Review 123 cycles
+  1–2 recovered the store and narrowed one stale-state false positive; cycle 3
+  passed all eight pre-publication areas with zero findings.
+- No registry write or tag/access/provenance/GitHub/repository mutation
+  occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm publish ./rabassoft-schema-engine-angular-0.3.0.tgz --access public --tag next --provenance=false`.
+  After success, verify base completely before checkpoint 7.
+
+## 2026-07-19 — PLAN-021 checkpoint 5 completed
+
+### Completed
+
+- Ricard published the exact selected core `0.3.0` candidate under `next`.
+- Unauthenticated verification proves the public 213,647-byte tarball exactly
+  matches source commit `ce3ef3d`, SHA-512/integrity and one npm signature;
+  repository/provenance remain absent and access/maintainer are correct.
+- Core reports `next: 0.3.0` and unchanged `latest: 0.2.0`; base Angular stays
+  wholly at `0.2.0` and the pilot name remains absent.
+- Corrected the clean-consumer runner to permit live core specifiers while base
+  Angular remains a selected tarball, then repeated exact and `next` lanes.
+- Both lanes compile/execute core and base candidate consumers at Angular
+  `22.0.6` and current latest-compatible `22.0.7`.
+- Review 122 cycles 1–2 corrected the live-specifier runner and stale current
+  state; cycle 3 passed all nine post-publication areas with zero findings. No
+  other package, tag, access/provenance, GitHub or repository state changed.
+
+### Next
+
+- Stop for explicit PLAN-021 checkpoint 6 authorization to run the read-only
+  base Angular preflight. Its publication remains a later immediate gate.
+
+## 2026-07-19 — PLAN-021 checkpoint 5 pre-publication gate passed
+
+### Completed
+
+- Resumed after Ricard restored npm authentication; npm `10.9.8`, exact
+  official registry and `ricardrabasso` identity pass.
+- Verified `rabassoft` owner membership, `auth-and-writes` 2FA, read/write
+  existing package authority and ability to create the absent scoped pilot.
+- Confirmed all three target versions absent; core/base contain only `0.1.0`
+  and `0.2.0`, with both `next`/`latest` aliases still at `0.2.0`.
+- Reverified public `0.2.0` bytes against the frozen baseline and selected core
+  `0.3.0` bytes/hash/integrity/source commit `ce3ef3d` locally.
+- Repeated the exact basename-relative neutral core dry run. Review 121 cycle 2
+  passed all nine pre-publication areas with zero findings.
+- No package, tag, access, provenance, GitHub or other external state changed.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm publish ./rabassoft-schema-engine-0.3.0.tgz --access public --tag next --provenance=false`.
+  After success, verify core completely before checkpoint 6.
+
+## 2026-07-19 — PLAN-021 checkpoint 5 preflight paused at authentication
+
+### Observed
+
+- Ricard authorized the external read-only core publication preflight.
+- `npm config get registry` confirmed exactly
+  `https://registry.npmjs.org/`.
+- `npm whoami` returned `E401 Unauthorized`; the preflight stopped fail-closed
+  before organization, ownership, versions, tags or package metadata queries.
+- No login, credential change, publication, dist-tag or other registry write
+  was attempted.
+
+### Next
+
+- Ricard runs `npm login --registry=https://registry.npmjs.org/` locally and
+  confirms completion; then resume the already authorized read-only preflight.
+
+## 2026-07-19 — PLAN-021 checkpoint 4 completed
+
+### Completed
+
+- Reviewed and staged the exact 99-file M18/M19 scope while excluding the
+  unrelated `angular.json` CLI analytics opt-out.
+- Created private source commit `ce3ef3dd3f9154c95896bcefa22e31b4f293eda0`
+  as `Rabassoft <ricard@rabassoft.com>` and pushed it to `origin/develop` after
+  switching GitHub CLI to the `rabassoft` account.
+- Rebuilt from the clean source commit with `pnpm prepare:release`; builds,
+  frozen `0.2.0`, M19 artifacts, offline Corresponding Source, security and
+  original/neutral dry runs pass.
+- Proved all three clean candidates byte-identical to their checkpoint 3
+  inputs and selected the same exact sizes, SHA-512/integrity and neutral
+  basenames with `sourceCommit: ce3ef3d…`.
+- Review 120 cycles 1–2 corrected the closing dirty-state description and one
+  stale pre-commit verification; cycle 3 passed all eight areas with zero
+  findings. No npm registry
+  read/write, publication, tag/settings mutation, Git tag, GitHub Release or
+  repository-setting action occurred.
+- Restored `angular.json` unchanged. Checkpoint 4 closure documentation and its
+  stale-state validation remain uncommitted because no second commit was
+  authorized.
+
+### Next
+
+- Stop for explicit PLAN-021 checkpoint 5 authorization to run the read-only
+  core registry preflight. Core publication requires a separate immediate
+  approval after the preflight passes.
+
 ## 2026-07-19 — PLAN-021 checkpoint 3 completed
 
 ### Completed

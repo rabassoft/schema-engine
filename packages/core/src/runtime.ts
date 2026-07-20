@@ -1531,6 +1531,23 @@ function invalidDefinitionOption(
               ...defect.presentationIndexPath,
             ]),
           }),
+      ...(defect.presentationOwnerKind === undefined
+        ? {}
+        : { presentationOwnerKind: defect.presentationOwnerKind }),
+      ...(defect.presentationOwnerPath === undefined
+        ? {}
+        : {
+            presentationOwnerPath: Object.freeze([
+              ...defect.presentationOwnerPath,
+            ]),
+          }),
+      ...(defect.presentationTemplatePath === undefined
+        ? {}
+        : {
+            presentationTemplatePath: Object.freeze([
+              ...defect.presentationTemplatePath,
+            ]),
+          }),
     },
     'Runtime option "definition" is invalid.',
   );

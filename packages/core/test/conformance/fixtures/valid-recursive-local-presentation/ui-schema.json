@@ -1,0 +1,46 @@
+{
+  "fields": {
+    "profile": {
+      "presentation": [
+        {
+          "kind": "section",
+          "id": "profile-main",
+          "label": "Profile main",
+          "children": ["name", "active"]
+        }
+      ]
+    },
+    "rows": {
+      "item": {
+        "presentation": [
+          {
+            "kind": "tabs",
+            "id": "item-tabs",
+            "label": "Item tabs",
+            "panels": [
+              {
+                "kind": "panel",
+                "id": "summary",
+                "label": "Summary",
+                "children": ["name", "details"]
+              }
+            ]
+          }
+        ],
+        "fields": {
+          "details": {
+            "presentation": [
+              {
+                "kind": "grid",
+                "id": "details-grid",
+                "label": "Details grid",
+                "columns": 2,
+                "items": [{ "span": 2, "child": "active" }]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

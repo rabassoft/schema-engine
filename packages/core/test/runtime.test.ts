@@ -67,6 +67,10 @@ const addressNode: ObjectFieldDefinition = {
   label: 'Address',
   kind: 'object',
   children: [streetField, cityField],
+  presentation: [streetField, cityField].map((node) => ({
+    kind: 'form-node',
+    node,
+  })),
 };
 const profileNode: ObjectFieldDefinition = {
   key: '["profile"]',
@@ -76,6 +80,7 @@ const profileNode: ObjectFieldDefinition = {
   label: 'Profile',
   kind: 'object',
   children: [addressNode],
+  presentation: [{ kind: 'form-node', node: addressNode }],
 };
 const nestedDefinition: FormDefinition = withDefaultPresentation({
   nodes: [profileNode, definitionFields[0] as FieldDefinition],
@@ -639,6 +644,7 @@ describe('controlled runtime', () => {
         label: 'Empty',
         kind: 'object',
         children: [],
+        presentation: [],
       };
       const rt = runtime({
         definition: withDefaultPresentation({ nodes: [empty], fields: [] }),
@@ -948,6 +954,7 @@ describe('controlled runtime', () => {
         label: `Node ${index}`,
         kind: 'object',
         children: [node],
+        presentation: [{ kind: 'form-node', node }],
       };
     }
     const result = createControlledFormRuntime(

@@ -264,7 +264,7 @@ separado antes de repetir la revisión.
   dependencias UI y React/Vue permanecen Deferred. Release quedó fuera de M18;
   M19 la selecciona después solo para diseño normativo bajo gates propios.
 
-### M19 — Release coordinada Experimental 0.3 — plan aprobado
+### M19 — Release coordinada Experimental 0.3 — completada
 
 - Ricard seleccionó publicar el valor completado de M18 antes de acumular otro
   milestone funcional o framework target.
@@ -285,18 +285,104 @@ separado antes de repetir la revisión.
   sin hallazgos. Checkpoint 2 completa release notes, onboarding y checks
   documentales exactos tras review 118 ciclo 3. Checkpoint 3 completa el gate
   local, los tres candidatos dirty-tree deterministas, dry runs neutrales y las
-  22 filas tras review 119 ciclo 5 sin hallazgos.
+  22 filas tras review 119 ciclo 5 sin hallazgos. Checkpoint 4 fija y sube el
+  commit privado `ce3ef3d`, reconstruye limpio y selecciona los tres bytes
+  idénticos tras review 120 ciclo 3. Checkpoint 5 publica/verifica core `0.3.0`
+  bajo `next` tras review 122 ciclo 3; `latest` permanece `0.2.0` y base/piloto
+  siguen sin publicar. Checkpoint 6 publica/verifica base `0.3.0` bajo `next`
+  tras review 124 ciclo 2; ambos `latest` permanecen `0.2.0` y el piloto sigue
+  ausente. Checkpoint 7 pre-publication pasa review 125 ciclo 5 y la publicación
+  exacta del piloto completa checkpoint 7 tras review 126 ciclo 4. Los tres
+  paquetes resuelven la línea inspeccionada bajo `next`; npm creó además
+  `latest: 0.1.0` para el piloto. Checkpoint 8 lo reobserva y retiene sin
+  mutación tras review 127 ciclo 2. Checkpoint 9 pre-transition pasa review 128
+  ciclo 1 y la transición base completa checkpoint 9 tras review 129 ciclo 1.
+  Base queda `next/latest: 0.3.0`, piloto `next/latest: 0.1.0` y core conserva
+  `next: 0.3.0`, `latest: 0.2.0` en la ventana mixta prevista. Checkpoint 10
+  pre-transition pasa review 130 ciclo 1 y la transición core completa
+  checkpoint 10 tras review 131 ciclo 1. Core/base quedan
+  `next/latest: 0.3.0`, piloto `next/latest: 0.1.0`; `latest` y unqualified
+  consumers pasan. Checkpoint 11 repite finalmente workspace, artefactos,
+  source, seguridad, registro, consumers y las 22 filas SPEC-008; review 132
+  ciclo 1 corrige el store offline y documentación activa obsoleta; ciclo 2
+  corrige la versión pnpm del borrador; ciclo 3 corrige una afirmación obsoleta
+  sobre `latest`, y ciclo 4 pasa toda la revisión sin hallazgos, completando
+  PLAN-021/M19.
 - Repositorio público/OIDC/provenance, D-043, Stable, nuevas capacidades,
   React/Vue y Angular legacy permanecen fuera. No hay tarea de implementación
   activa ni acción externa autorizada.
 
+### M20 — Layout estático local en objetos e items — completado
+
+- Ricard seleccionó continuar madurando core/Angular/Standard antes de
+  React/Vue mediante el slice restante de D-011 más próximo al contrato M18:
+  bosques de presentación estáticos dentro de objetos anidados e items de
+  colecciones homogéneas.
+- [Review 133](../reviews/133-d011-m20-nested-item-layout-promotion-readiness.md)
+  ciclo 3 pasó doce áreas sin hallazgos. Promueve solo secciones, tabs,
+  accordions y grid lógico ya aceptados sobre los hijos directos de cada
+  propietario estructural local.
+- Los labels, supporting text, issues y acciones fijas de objeto/colección/item
+  permanecen fuera del bosque. El layout no crea scopes, workflow, condiciones,
+  operaciones, persistencia ni estado controlado.
+- Cada template de item conserva una única definición estática, mientras cada
+  instancia posee estado visual efímero ligado a su ID estable; el movimiento
+  preserva el host y la eliminación lo destruye.
+- ADR-025 revisión 0 está Accepted tras review 134 ciclo 4 sin hallazgos. Fija
+  el modelo genérico con especialización de templates, bosques requeridos,
+  namespaces/keys locales, IDs por instancia estable, fallback local, cache de
+  textos y migración mínima del SPI Angular.
+- SPEC-009 v0.1.0 está Accepted tras review 135 ciclo 6 sin hallazgos. Cierra
+  gramática local, contratos genéricos, diagnósticos/fallback, identidad/estado,
+  ciclo de vida, SPI, native/Aria/Standard y la matriz de conformidad M20.
+- PLAN-022 revisión 0 completó sus ocho checkpoints tras reviews 137–144. La
+  revisión final 144 ciclo 3 repitió la matriz congelada completa y las 27 filas
+  SPEC-009 con cero hallazgos.
+- M20 implementa bosques locales en core, Angular native, Standard y el piloto
+  Angular Aria sin cambiar dependencias, versiones, release, Git ni estado
+  externo. Los artefactos publicados conservan su contrato anterior hasta una
+  release futura separadamente aprobada.
+- Wizards, acciones, slots, D-012, D-018, theming general, React/Vue, Angular
+  legacy, SSR/hydration y layouts responsivos continúan Deferred.
+
+### M21 — Entrega Experimental coordinada de M20 — checkpoints locales
+
+- Ricard seleccionó la opción A de
+  [review 145](../reviews/145-post-m20-milestone-selection.md): entregar M20
+  antes de acumular otro milestone funcional o framework.
+- [Review 146](../reviews/146-m21-coordinated-m20-release-promotion-readiness.md)
+  ciclo 3 pasó catorce áreas sin hallazgos y promueve solo diseño normativo para
+  core/base Angular `0.4.0` y Angular Aria `0.2.0`.
+- Los peers Schema Engine previstos son core `^0.4.0` desde base y base
+  `^0.4.0` desde el piloto. Angular permanece `>=22.0.6 <23.0.0`; Aria/CDK
+  permanecen `>=22.0.5 <23.0.0`.
+- ADR-018 revisión 5 está Accepted tras review 147 ciclo 5 sin hallazgos. Fija
+  los tres paquetes ya existentes, publicación `next` dependency-first,
+  transición `latest` piloto/base/core, fallos parciales y gates.
+- PLAN-023 revisión 0 está Approved tras review 148 ciclo 2 sin hallazgos.
+  Autoriza solo checkpoints locales 1–3; checkpoint 4, Git y toda lectura o
+  mutación de registry permanecen gated.
+- Checkpoint 1 queda completado tras review 149 ciclo 2: descriptor M21,
+  manifests `0.4.0`/`0.4.0`/`0.2.0`, peers empaquetados, tooling y regresiones
+  M19/M20 pasan sin candidato ni acción externa.
+- Checkpoint 2 queda completado tras review 150 ciclo 5: las notas `0.4.0`, el
+  onboarding fuente/live, la migración/compatibilidad, recuperación exacta y
+  checks fail-closed pasan doce áreas sin hallazgos. No se ha seleccionado
+  candidato ni cambiado lockfile, Git, npm, tags, repositorio, D-043 o estado
+  externo.
+- Checkpoint 3 queda completado tras review 151 ciclo 2: la matriz congelada,
+  las 27 filas SPEC-009, artefactos/source/security, consumidores lower/latest,
+  tres candidatos dirty-tree deterministas y dry runs neutrales pasan sin
+  hallazgos. La evidencia conserva `sourceCommit: null`; no son candidatos
+  seleccionados para publicar y no hubo Git, registry ni acción externa.
+
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** stop for explicit PLAN-021 checkpoint 4 authorization to
-   review the scoped diff, commit, push privately and rebuild from that exact
-   clean commit before selecting publication candidates.
-2. **External gates:** checkpoint 4 Git actions, every registry read and every
-   npm mutation remain separately gated.
+1. **Next action:** stop for explicit PLAN-023 checkpoint 4 authorization to
+   review the complete scoped diff, commit/push private `develop`, rebuild from
+   the clean committed tree and compare every candidate byte.
+2. **External gates:** no further npm mutation, Git, GitHub or repository
+   action is implied by M21 normative design selection.
 3. **Later candidates:** React, Vue and all other capabilities remain
    demand-driven; D-043 and D-033 are not implied by M15/M16.
 

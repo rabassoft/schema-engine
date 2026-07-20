@@ -9,7 +9,7 @@ import {
   packReleaseCandidates,
   runPnpm,
 } from './release-candidate-utils.mjs';
-import { loadM19ReleaseTarget } from './release-target.mjs';
+import { loadCoordinatedReleaseTarget } from './release-target.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-source-'));
 
@@ -86,7 +86,7 @@ try {
       ? includeAngularAria
         ? packReleaseCandidates(
             temporaryRoot,
-            loadM19ReleaseTarget().descriptor,
+            loadCoordinatedReleaseTarget().descriptor,
           )
         : packCandidates(temporaryRoot)
       : {
@@ -156,7 +156,7 @@ try {
   }
 
   console.log(
-    `Verified isolated frozen source rebuilds, declarations, exports and behavior${includeAngularAria ? ' for the private M18 line' : ''}.`,
+    `Verified isolated frozen source rebuilds, declarations, exports and behavior${includeAngularAria ? ' for the selected coordinated line' : ''}.`,
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });

@@ -10,7 +10,11 @@ import {
   signal,
   type Provider,
 } from '@angular/core';
-import type { PresentationEntryDefinition } from '@rabassoft/schema-engine';
+import type {
+  FormNodeDefinition,
+  FormNodeTemplate,
+  PresentationEntryDefinition,
+} from '@rabassoft/schema-engine';
 import type {
   AngularPresentationContainerDefinition,
   AngularPresentationContainerRegistration,
@@ -46,7 +50,9 @@ export class NativePresentationSectionComponent implements AngularPresentationCo
     const model = this.presentation();
     return model.kind === 'section' ? model : undefined;
   };
-  protected entryKey(entry: PresentationEntryDefinition): string {
+  protected entryKey(
+    entry: PresentationEntryDefinition<FormNodeDefinition | FormNodeTemplate>,
+  ): string {
     return entry.kind === 'form-node' ? entry.node.key : entry.key;
   }
 }

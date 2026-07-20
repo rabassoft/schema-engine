@@ -1,6 +1,10 @@
 import { access, readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { M19_RELEASE_DESCRIPTOR } from './release-target.mjs';
+import { isDeepStrictEqual } from 'node:util';
+import {
+  M19_RELEASE_DESCRIPTOR,
+  M21_RELEASE_DESCRIPTOR,
+} from './release-target.mjs';
 
 const root = process.cwd();
 const stableGuidePaths = ['AGENTS.md', 'HANDOFF.md'];
@@ -8,9 +12,10 @@ const onboardingPaths = ['README.md', '.ai-docs/README.md'];
 const statusPath = '.ai-docs/project/STATUS.md';
 const specificationDirectory = '.ai-docs/specs';
 const specificationIndexPath = '.ai-docs/specs/000-index.md';
-const publishableManifestPaths = M19_RELEASE_DESCRIPTOR.packages.map(
+const publishableManifestPaths = M21_RELEASE_DESCRIPTOR.packages.map(
   ({ workspacePath }) => `${workspacePath}/package.json`,
 );
+const m21ReleaseNotePath = '.ai-docs/releases/0.4.0.md';
 const staleCurrentClaims = [
   {
     path: '.ai-docs/releases/0.1.0.md',
@@ -114,6 +119,258 @@ const staleCurrentClaims = [
     pattern: /No hay implementación ni acción externa autorizada/i,
     description: 'pre-completion M19 implementation state',
   },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /Reviewed dirty-tree pre-commit candidates/i,
+    description: 'pre-selection checkpoint 4 state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /sourceCommit: null/i,
+    description: 'pre-clean-rebuild candidate evidence state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /PLAN-021 checkpoint 4 authorization/i,
+    description: 'pre-completion checkpoint 4 next action',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /restores the npm session/i,
+    description: 'resolved checkpoint 5 authentication state',
+  },
+  {
+    path: '.ai-docs/README.md',
+    pattern: /paused\s+at `npm whoami` `E401`/i,
+    description: 'resolved checkpoint 5 authentication state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /Selected clean committed candidates; not published/i,
+    description: 'pre-publication checkpoint 5 state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern:
+      /checkpoints 1–4 complete; checkpoint 5 core\s+pre-publication review passed and its exact publish command awaits immediate\s+authorization/i,
+    description: 'pre-publication checkpoint 5 plan state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 5's exact\s+core `0\.3\.0` publication/i,
+    description: 'pre-completion checkpoint 5 next action',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /core publication and every later npm mutation/i,
+    description: 'pre-completion checkpoint 5 external gate',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 6 authorization/i,
+    description: 'pre-preflight checkpoint 6 next action',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern:
+      /checkpoint 6 base Angular\s+preflight requires separate authorization/i,
+    description: 'pre-preflight checkpoint 6 plan state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /base Angular `0\.3\.0` publish command/i,
+    description: 'pre-publication checkpoint 6 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /base\/pilot publication/i,
+    description: 'pre-completion checkpoint 6 external gate',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /checkpoint 7 pilot\s+preflight requires separate authorization/i,
+    description: 'pre-preflight checkpoint 7 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 7 authorization/i,
+    description: 'pre-preflight checkpoint 7 next action',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /pilot remains a selected unpublished candidate/i,
+    description: 'pre-publication checkpoint 7 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /only the exact PLAN-021[\s\S]{0,120}pilot[^\n]*publish command/i,
+    description: 'pre-completion checkpoint 7 next action',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /checkpoint 8[^\n]*remains separately gated/i,
+    description: 'pre-completion checkpoint 8 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 8's[\s\S]{0,80}observation and retention branch/i,
+    description: 'pre-completion checkpoint 8 next action',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern:
+      /checkpoint 9 base Angular[\s\S]{0,80}preflight remains separately gated/i,
+    description: 'pre-preflight checkpoint 9 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 9's[\s\S]{0,80}read-only base Angular/i,
+    description: 'pre-preflight checkpoint 9 next action',
+  },
+  {
+    path: 'README.md',
+    pattern: /Private M19 source candidates/i,
+    description: 'pre-publication root onboarding state',
+  },
+  {
+    path: 'packages/core/README.md',
+    pattern:
+      /Private Experimental candidate|no registry publication is implied/i,
+    description: 'pre-publication core onboarding state',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern:
+      /Private Experimental candidate|no registry publication is implied/i,
+    description: 'pre-publication Angular onboarding state',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern: /Private source candidate|PLAN-021 governs later publication/i,
+    description: 'pre-publication pilot onboarding state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern:
+      /truthful partial state|checkpoint 11[\s\S]{0,80}remains separately gated/i,
+    description: 'pre-completion M19 release state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /Core\/base `latest` remain `0\.2\.0`/i,
+    description: 'stale core/base default aliases after M19 completion',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern: /unsupported by this candidate|This candidate does not add/i,
+    description: 'pre-completion candidate terminology in live release notes',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /checkpoint 11 todavía debe cerrar|authorization of PLAN-021 checkpoint 11/i,
+    description: 'pre-completion M19 roadmap state',
+  },
+  {
+    path: '.ai-docs/README.md',
+    pattern: /Checkpoint 11 final closure remains gated/i,
+    description: 'pre-completion documentation index state',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern:
+      /checkpoint 9[\s\S]{0,100}dist-tag command[\s\S]{0,40}awaits immediate authorization/i,
+    description: 'pre-completion checkpoint 9 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 9's[\s\S]{0,80}exact base Angular `latest`/i,
+    description: 'pre-completion checkpoint 9 next action',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern:
+      /checkpoint 10 core default[\s\S]{0,80}preflight remains separately gated/i,
+    description: 'pre-preflight checkpoint 10 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 10's[\s\S]{0,80}read-only core/i,
+    description: 'pre-preflight checkpoint 10 next action',
+  },
+  {
+    path: '.ai-docs/releases/0.3.0.md',
+    pattern:
+      /checkpoint 10[\s\S]{0,100}core dist-tag command[\s\S]{0,50}manual execution/i,
+    description: 'pre-completion checkpoint 10 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /checkpoint 10's exact[\s\S]{0,80}core `latest`/i,
+    description: 'pre-completion checkpoint 10 next action',
+  },
+  {
+    path: 'packages/core/README.md',
+    pattern: /Package manifest: `0\.3\.0`/i,
+    description: 'M19 version presented as current core source manifest',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern: /Package manifest: `0\.3\.0`/i,
+    description: 'M19 version presented as current Angular source manifest',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern: /Package manifest: `0\.1\.0`/i,
+    description: 'M19 version presented as current pilot source manifest',
+  },
+  {
+    path: 'packages/core/README.md',
+    pattern: /The candidate has no npm provenance/i,
+    description: 'selected-candidate wording before M21 candidate selection',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern: /The candidate has no npm provenance/i,
+    description: 'selected-candidate wording before M21 candidate selection',
+  },
+  {
+    path: m21ReleaseNotePath,
+    pattern: /Current state:\*\* (?:Published|Completed coordinated live)/i,
+    description: 'unobserved completed M21 publication state',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /(?:schema-engine@0\.4\.0|schema-engine-angular@0\.4\.0|schema-engine-angular-aria@0\.2\.0)[^\n]{0,100}(?:public and verified|available on npm)/i,
+    description: 'unobserved M21 root onboarding publication claim',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /No se ha cambiado ningún manifest, versión, peer/i,
+    description: 'pre-checkpoint-1 M21 source state',
+  },
+  {
+    path: m21ReleaseNotePath,
+    pattern: /do not\s+claim that `\.release\/0\.4\.0` exists/i,
+    description: 'pre-checkpoint-3 M21 candidate state',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern: /checkpoint 3 is next/i,
+    description: 'pre-completion M21 checkpoint 3 plan state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /execute and completely review PLAN-023 checkpoint 3/i,
+    description: 'pre-completion M21 checkpoint 3 next action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,400}checkpoint 3 es la siguiente acción/i,
+    description: 'pre-completion M21 checkpoint 3 deferred state',
+  },
 ];
 const ignoredDirectories = new Set([
   '.git',
@@ -130,6 +387,10 @@ async function read(relativePath) {
 
 function fail(message) {
   failures.push(message);
+}
+
+function sameJson(left, right) {
+  return isDeepStrictEqual(left, right);
 }
 
 for (const guidePath of stableGuidePaths) {
@@ -152,10 +413,62 @@ const publishableManifests = await Promise.all(
     JSON.parse(await read(manifestPath)),
   ]),
 );
+const expectedManifestContracts = {
+  core: {
+    exports: {
+      '.': {
+        types: './dist/index.d.ts',
+        import: './dist/index.js',
+        default: './dist/index.js',
+      },
+    },
+    dependencies: {},
+    devDependencies: {},
+    peerDependencies: {},
+  },
+  angular: {
+    exports: {
+      '.': {
+        types: './dist/index.d.ts',
+        import: './dist/index.js',
+        default: './dist/index.js',
+      },
+    },
+    dependencies: { tslib: '^2.8.1' },
+    devDependencies: { '@rabassoft/schema-engine': 'workspace:*' },
+    peerDependencies: {
+      '@angular/core': '>=22.0.6 <23.0.0',
+      '@angular/forms': '>=22.0.6 <23.0.0',
+      '@rabassoft/schema-engine': 'workspace:^',
+    },
+  },
+  angularAria: {
+    exports: {
+      '.': {
+        types: './dist/index.d.ts',
+        import: './dist/index.js',
+        default: './dist/index.js',
+      },
+      './styles.css': './styles.css',
+    },
+    dependencies: { tslib: '^2.8.1' },
+    devDependencies: {
+      '@angular/aria': '22.0.5',
+      '@angular/cdk': '22.0.5',
+      '@rabassoft/schema-engine-angular': 'workspace:*',
+    },
+    peerDependencies: {
+      '@angular/aria': '>=22.0.5 <23.0.0',
+      '@angular/cdk': '>=22.0.5 <23.0.0',
+      '@angular/core': '>=22.0.6 <23.0.0',
+      '@rabassoft/schema-engine-angular': 'workspace:^',
+    },
+  },
+};
 for (const [
   index,
   packageTarget,
-] of M19_RELEASE_DESCRIPTOR.packages.entries()) {
+] of M21_RELEASE_DESCRIPTOR.packages.entries()) {
   const [manifestPath, manifest] = publishableManifests[index];
   if (manifest.name !== packageTarget.name) {
     fail(`${manifestPath} does not report ${packageTarget.name}`);
@@ -170,29 +483,148 @@ for (const [
     manifest.private !== undefined ||
     manifest.repository !== undefined ||
     manifest.publishConfig?.access !== 'public' ||
-    manifest.publishConfig?.tag !== M19_RELEASE_DESCRIPTOR.distTag ||
-    manifest.publishConfig?.provenance !== M19_RELEASE_DESCRIPTOR.provenance
+    manifest.publishConfig?.tag !== M21_RELEASE_DESCRIPTOR.distTag ||
+    manifest.publishConfig?.provenance !== M21_RELEASE_DESCRIPTOR.provenance
   ) {
-    fail(`${manifestPath} does not match the M19 distribution boundary`);
+    fail(`${manifestPath} does not match the M21 distribution boundary`);
+  }
+  if (
+    manifest.author?.name !==
+      'Ricardo Rabassó Rodríguez, operating as Rabassoft' ||
+    manifest.author?.email !== 'ricard@rabassoft.com'
+  ) {
+    fail(`${manifestPath} does not retain the accepted author/contact`);
+  }
+  const expectedManifest = expectedManifestContracts[packageTarget.role];
+  for (const member of [
+    'exports',
+    'dependencies',
+    'devDependencies',
+    'peerDependencies',
+  ]) {
+    if (!sameJson(manifest[member] ?? {}, expectedManifest[member])) {
+      fail(`${manifestPath} has an unexpected M21 ${member} contract`);
+    }
+  }
+  for (const requiredFile of [
+    'dist',
+    'src',
+    'source-build',
+    'README.md',
+    'SOURCE.md',
+    'LICENSE',
+    'NOTICE.md',
+  ]) {
+    if (!manifest.files?.includes(requiredFile)) {
+      fail(`${manifestPath} omits package-local ${requiredFile}`);
+    }
+  }
+  for (const requiredFile of [
+    'LICENSE',
+    'NOTICE.md',
+    'SOURCE.md',
+    'src/index.ts',
+    'source-build/package.json',
+    'source-build/pnpm-lock.yaml',
+    'source-build/tsconfig.json',
+    ...(packageTarget.role === 'angularAria' ? ['styles.css'] : []),
+  ]) {
+    try {
+      await access(path.join(root, packageTarget.workspacePath, requiredFile));
+    } catch {
+      fail(`${packageTarget.workspacePath} is missing ${requiredFile}`);
+    }
   }
 }
 
-const candidateOnboarding = new Map([
+const liveOnboarding = new Map([
   ['README.md', M19_RELEASE_DESCRIPTOR.packages],
   ['.ai-docs/releases/0.3.0.md', M19_RELEASE_DESCRIPTOR.packages],
   ['packages/core/README.md', [M19_RELEASE_DESCRIPTOR.packages[0]]],
   ['packages/angular/README.md', M19_RELEASE_DESCRIPTOR.packages.slice(0, 2)],
   ['packages/angular-aria/README.md', M19_RELEASE_DESCRIPTOR.packages.slice(1)],
 ]);
-for (const [onboardingPath, packageTargets] of candidateOnboarding) {
+for (const [onboardingPath, packageTargets] of liveOnboarding) {
   const onboarding = await read(onboardingPath);
   for (const { name, version } of packageTargets) {
     if (!onboarding.includes(name) || !onboarding.includes(version)) {
-      fail(`${onboardingPath} omits candidate ${name}@${version}`);
+      fail(`${onboardingPath} omits live M19 ${name}@${version}`);
     }
   }
   if (/npm provenance is (?:available|enabled)/iu.test(onboarding)) {
     fail(`${onboardingPath} incorrectly claims npm provenance`);
+  }
+}
+
+const m21Onboarding = new Map([
+  ['README.md', M21_RELEASE_DESCRIPTOR.packages],
+  [m21ReleaseNotePath, M21_RELEASE_DESCRIPTOR.packages],
+  ['packages/core/README.md', [M21_RELEASE_DESCRIPTOR.packages[0]]],
+  ['packages/angular/README.md', M21_RELEASE_DESCRIPTOR.packages.slice(0, 2)],
+  ['packages/angular-aria/README.md', M21_RELEASE_DESCRIPTOR.packages.slice(1)],
+]);
+for (const [onboardingPath, packageTargets] of m21Onboarding) {
+  const onboarding = await read(onboardingPath);
+  for (const { name, version } of packageTargets) {
+    if (!onboarding.includes(name) || !onboarding.includes(version)) {
+      fail(`${onboardingPath} omits reviewed M21 ${name}@${version}`);
+    }
+  }
+  if (/npm provenance is (?:available|enabled)/iu.test(onboarding)) {
+    fail(`${onboardingPath} incorrectly claims npm provenance`);
+  }
+}
+
+const requiredOnboardingFragments = new Map([
+  [
+    'README.md',
+    [
+      'published and tagged line remains M19',
+      'reviewed M21 source versions',
+      'Do not install or describe them as live',
+    ],
+  ],
+  [
+    'packages/core/README.md',
+    [
+      'Public verified Experimental line: `0.3.x`',
+      'Source package manifest: `0.4.0`',
+      'M21 has no selected candidate or live',
+    ],
+  ],
+  [
+    'packages/angular/README.md',
+    [
+      'Public verified Experimental line: `0.3.x`',
+      'Source package manifest: `0.4.0`',
+      '| `0.4.x` | `^0.4.0`',
+      'M21 has no selected candidate or live',
+    ],
+  ],
+  [
+    'packages/angular-aria/README.md',
+    [
+      'Public verified Experimental `0.1.0`',
+      'Source package manifest: `0.2.0`',
+      'pilot `0.2.x` with base Angular\n`^0.4.0`',
+      'unavailable to consumers until',
+    ],
+  ],
+]);
+for (const [onboardingPath, fragments] of requiredOnboardingFragments) {
+  const onboarding = await read(onboardingPath);
+  for (const fragment of fragments) {
+    if (!onboarding.includes(fragment)) {
+      fail(`${onboardingPath} omits candidate/live distinction: ${fragment}`);
+    }
+  }
+  const stabilityClaim = onboarding.match(
+    /(?:latest|default)[^\n.]{0,80}(?:promotes?|marks?|means?)\s+(?:the\s+)?(?:API\s+)?Stable/i,
+  );
+  if (stabilityClaim) {
+    fail(
+      `${onboardingPath} conflates routing with Stable: ${stabilityClaim[0]}`,
+    );
   }
 }
 
@@ -251,6 +683,93 @@ if (
   )
 ) {
   fail(`${m19ReleaseNotePath} retains pre-publication M19 state`);
+}
+
+const m21ReleaseNote = await read(m21ReleaseNotePath);
+const requiredM21ReleaseFragments = [
+  'no publishable candidate is selected',
+  'no M21 package or alias has been',
+  'dirty-tree comparison',
+  'sourceCommit: null',
+  'neutralDryRun: true',
+  'Two consecutive preparations produced identical',
+  'Public + Experimental + Active',
+  'private repository',
+  'no advertised repository URL',
+  'npm provenance',
+  'ObjectUiSchema.presentation',
+  'ItemUiSchema.presentation',
+  'TemplatePresentationEntryDefinition',
+  'ObjectFieldDefinition.presentation',
+  'ObjectNodeTemplate.presentation',
+  'ObjectItemTemplateDefinition.presentation',
+  'TextResolutionContext',
+  'AngularPresentationContainerTester',
+  'node.kind',
+  'provideSchemaEngineAngularAriaContainers()',
+  '@angular/core >=22.0.6 <23.0.0',
+  '@angular/forms >=22.0.6 <23.0.0',
+  '@angular/aria >=22.0.5 <23.0.0',
+  '@angular/cdk >=22.0.5 <23.0.0',
+  'Publication under `next` is dependency-first: core, base Angular, then pilot.',
+  'The established `latest` transition is deepest-dependent-first: pilot, base',
+  'Angular, then core.',
+  'Only observed exact bytes',
+  'never imply Stable',
+  'never overwrite or unpublish immutable bytes',
+];
+for (const fragment of requiredM21ReleaseFragments) {
+  if (!m21ReleaseNote.includes(fragment)) {
+    fail(`${m21ReleaseNotePath} omits required M21 contract: ${fragment}`);
+  }
+}
+
+const invalidM21ReleaseClaims = [
+  {
+    pattern:
+      /(?:M21|0\.4\.0\/0\.4\.0\/0\.2\.0) (?:is|are) (?:published|live|available on npm)/i,
+    description: 'unobserved M21 publication',
+  },
+  {
+    pattern:
+      /(?:next|latest) (?:currently |already )?(?:resolves?|points?) to (?:M21|0\.4\.0)/i,
+    description: 'unobserved M21 alias',
+  },
+  {
+    pattern: /(?:repository is public|public GitHub repository)/i,
+    description: 'unobserved public repository state',
+  },
+  {
+    pattern:
+      /(?:provenance is enabled|with npm provenance|trusted publishing is enabled)/i,
+    description: 'unobserved provenance state',
+  },
+  {
+    pattern:
+      /(?:latest|default)[^\n.]{0,80}(?:promotes?|marks?|means?)\s+(?:the\s+)?(?:API\s+)?Stable/i,
+    description: 'default-channel stability promotion',
+  },
+  {
+    pattern:
+      /schema-engine-angular(?:-aria)?[^\n]{0,80}\^0\.3\.0[^\n]{0,80}(?:M21|0\.4\.0|0\.2\.0)/i,
+    description: 'obsolete Schema Engine peer in the M21 line',
+  },
+  {
+    pattern:
+      /(?:dependency-first|Publication under `next`)[^\n.]{0,100}(?:pilot[^\n.]{0,40}base[^\n.]{0,40}core|base[^\n.]{0,40}core[^\n.]{0,40}pilot)/i,
+    description: 'wrong M21 next order',
+  },
+  {
+    pattern:
+      /(?:deepest-dependent-first|`latest` transition)[^\n.]{0,100}(?:core[^\n.]{0,40}base[^\n.]{0,40}pilot|base[^\n.]{0,40}pilot[^\n.]{0,40}core)/i,
+    description: 'wrong M21 latest order',
+  },
+];
+for (const claim of invalidM21ReleaseClaims) {
+  const match = m21ReleaseNote.match(claim.pattern);
+  if (match) {
+    fail(`${m21ReleaseNotePath} contains ${claim.description}: ${match[0]}`);
+  }
 }
 const ephemeralGitClaim = status.match(
   /\bcommits? ahead\b|\bcommits? behind\b|no push performed|nothing was pushed/i,

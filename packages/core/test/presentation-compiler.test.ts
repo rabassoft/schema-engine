@@ -335,7 +335,7 @@ describe('root UI presentation compilation', () => {
     expect(presentationDiagnostics(hostile)).toEqual([]);
   });
 
-  it('rejects presentation at object, array and item UI locations with exact paths', () => {
+  it('admits object and item presentation while keeping array hosts unsupported', () => {
     const nestedSchema = {
       $schema: dialect,
       type: 'object',
@@ -363,22 +363,13 @@ describe('root UI presentation compilation', () => {
       uiSchema: {
         presentation: ['rows', 'group'],
         fields: {
-          group: { presentation: [] },
-          rows: { presentation: [], item: { presentation: [] } },
+          group: { presentation: ['value'] },
+          rows: { presentation: [], item: { presentation: ['value'] } },
         },
       },
     });
 
     expect(presentationDiagnostics(result)).toMatchObject([
-      {
-        dataPath: ['group'],
-        documentPath: ['fields', 'group', 'presentation'],
-        parameters: {
-          reason: 'unsupported-location',
-          member: 'presentation',
-          nodeKind: 'object',
-        },
-      },
       {
         dataPath: ['rows'],
         documentPath: ['fields', 'rows', 'presentation'],
@@ -386,15 +377,6 @@ describe('root UI presentation compilation', () => {
           reason: 'unsupported-location',
           member: 'presentation',
           nodeKind: 'array',
-        },
-      },
-      {
-        dataPath: ['rows'],
-        documentPath: ['fields', 'rows', 'item', 'presentation'],
-        parameters: {
-          reason: 'unsupported-location',
-          member: 'presentation',
-          nodeKind: 'item',
         },
       },
     ]);
@@ -411,6 +393,22 @@ describe('root UI presentation compilation', () => {
         result.definition.nodes[1],
       );
       expect(result.definition.presentation[0].node.kind).toBe('array');
+    }
+    const group = result.definition.nodes[0];
+    const rows = result.definition.nodes[1];
+    expect(group?.kind).toBe('object');
+    expect(rows?.kind).toBe('array');
+    if (group?.kind === 'object') {
+      expect(group.presentation[0]).toEqual({
+        kind: 'form-node',
+        node: group.children[0],
+      });
+    }
+    if (rows?.kind === 'array') {
+      expect(rows.item.presentation[0]).toEqual({
+        kind: 'form-node',
+        node: rows.item.children[0],
+      });
     }
   });
 });

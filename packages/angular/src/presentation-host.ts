@@ -18,13 +18,7 @@ import {
   type ComponentRef,
   type Injector,
 } from '@angular/core';
-import type {
-  Diagnostic,
-  FormDefinition,
-  FormRuntimeSnapshot,
-  PresentationEntryDefinition,
-  PresentationPanelDefinition,
-} from '@rabassoft/schema-engine';
+import type { Diagnostic } from '@rabassoft/schema-engine';
 import { SchemaFormDirective, readRuntimeContext } from './form.directive.js';
 import {
   AngularPresentationContainerResolver,
@@ -35,9 +29,18 @@ import {
   ExactPresentationClaims,
   PRESENTATION_ENTRY_CLAIM_CONTEXT,
   PRESENTATION_PANEL_CLAIM_CONTEXT,
+  presentationOwnerDiagnosticParameters,
   type PresentationEntryClaimContext,
+  type AngularPresentationNode,
   type PresentationPanelClaimContext,
+  type PresentationOwnerDefinition,
+  type PresentationOwnerSnapshot,
+  type PresentationProjectionOwner,
 } from './presentation-context.js';
+import type {
+  PresentationEntryDefinition,
+  PresentationPanelDefinition,
+} from '@rabassoft/schema-engine';
 import { projectPresentationContainer } from './presentation-model.js';
 import { AngularTextProjector } from './text.js';
 
@@ -49,10 +52,12 @@ export class PresentationContainerHostFactory {
     environmentInjector: EnvironmentInjector,
     injector: Injector,
     presentation: () => AngularPresentationContainerDefinition,
-    definition: () => FormDefinition,
-    snapshot: () => FormRuntimeSnapshot<object>,
+    owner: () => PresentationProjectionOwner,
+    definition: () => PresentationOwnerDefinition,
+    snapshot: () => PresentationOwnerSnapshot,
+    locale: () => string,
     render: (
-      entry: PresentationEntryDefinition,
+      entry: PresentationEntryDefinition<AngularPresentationNode>,
       container: ViewContainerRef,
     ) => ComponentRef<unknown>,
   ): ComponentRef<unknown> {
@@ -63,8 +68,10 @@ export class PresentationContainerHostFactory {
         injector,
         bindings: [
           inputBinding('presentation', presentation),
+          inputBinding('owner', owner),
           inputBinding('definition', definition),
           inputBinding('snapshot', snapshot),
+          inputBinding('locale', locale),
           inputBinding('render', () => render),
         ],
       },
@@ -81,12 +88,14 @@ export class PresentationContainerHostFactory {
 class PresentationContainerAdapterHostComponent {
   readonly presentation =
     input.required<AngularPresentationContainerDefinition>();
-  readonly definition = input.required<FormDefinition>();
-  readonly snapshot = input.required<FormRuntimeSnapshot<object>>();
+  readonly owner = input.required<PresentationProjectionOwner>();
+  readonly definition = input.required<PresentationOwnerDefinition>();
+  readonly snapshot = input.required<PresentationOwnerSnapshot>();
+  readonly locale = input.required<string>();
   readonly render =
     input.required<
       (
-        entry: PresentationEntryDefinition,
+        entry: PresentationEntryDefinition<AngularPresentationNode>,
         container: ViewContainerRef,
       ) => ComponentRef<unknown>
     >();
@@ -105,8 +114,12 @@ class PresentationContainerAdapterHostComponent {
   private componentRef: ComponentRef<unknown> | undefined;
   private childInjector: EnvironmentInjector | undefined;
   private claims:
-    | ExactPresentationClaims<PresentationEntryDefinition>
-    | ExactPresentationClaims<PresentationPanelDefinition>
+    | ExactPresentationClaims<
+        PresentationEntryDefinition<AngularPresentationNode>
+      >
+    | ExactPresentationClaims<
+        PresentationPanelDefinition<AngularPresentationNode>
+      >
     | undefined;
   private selectedDefinition:
     AngularPresentationContainerDefinition | undefined;
@@ -121,22 +134,20 @@ class PresentationContainerAdapterHostComponent {
 
   private synchronize(): void {
     const presentation = this.presentation();
-    const snapshot = this.snapshot();
+    const owner = this.owner();
+    const locale = this.locale();
     const context = readRuntimeContext(this.form);
     const formId = context?.formId ?? '';
-    const projectionIdentity = [presentation, formId, snapshot.locale] as const;
+    const projectionIdentity = [presentation, owner, formId, locale] as const;
     if (!sameIdentity(this.lastProjectionIdentity, projectionIdentity)) {
       this.lastProjectionIdentity = projectionIdentity;
-      this.projector.projectPresentationSubtree(
-        presentation,
-        formId,
-        snapshot.locale,
-      );
+      this.projector.projectPresentationSubtree(presentation, formId, locale);
       const projected = projectPresentationContainer(
         presentation,
         formId,
-        snapshot.locale,
+        locale,
         this.projector,
+        owner,
       );
       this.modelState.set(projected.model);
       this.form.reportDiagnostics(projected.diagnostics);
@@ -146,7 +157,7 @@ class PresentationContainerAdapterHostComponent {
     this.destroySelected();
     this.selectedDefinition = presentation;
     this.hostFailureReported = false;
-    const resolved = this.resolver.resolve(presentation);
+    const resolved = this.resolver.resolve(presentation, owner);
     this.form.reportDiagnostics(resolved.diagnostics);
     if (!resolved.success) return;
 
@@ -182,10 +193,11 @@ class PresentationContainerAdapterHostComponent {
     useValue: PresentationEntryClaimContext | PresentationPanelClaimContext;
   }> {
     const state = {
+      owner: () => this.owner(),
       definition: () => this.definition(),
       snapshot: () => this.snapshot(),
       render: (
-        entry: PresentationEntryDefinition,
+        entry: PresentationEntryDefinition<AngularPresentationNode>,
         container: ViewContainerRef,
       ) => this.render()(entry, container),
     };
@@ -203,7 +215,9 @@ class PresentationContainerAdapterHostComponent {
           provide: PRESENTATION_ENTRY_CLAIM_CONTEXT,
           useValue: {
             ...state,
-            claim: (entry: PresentationEntryDefinition) => {
+            claim: (
+              entry: PresentationEntryDefinition<AngularPresentationNode>,
+            ) => {
               try {
                 claims.claim(entry);
               } catch (error) {
@@ -211,7 +225,9 @@ class PresentationContainerAdapterHostComponent {
                 throw error;
               }
             },
-            release: (entry: PresentationEntryDefinition) => {
+            release: (
+              entry: PresentationEntryDefinition<AngularPresentationNode>,
+            ) => {
               if (lifecycle.active && claims.release(entry))
                 this.failSelected(presentation);
             },
@@ -227,7 +243,9 @@ class PresentationContainerAdapterHostComponent {
         provide: PRESENTATION_PANEL_CLAIM_CONTEXT,
         useValue: {
           ...state,
-          claim: (panel: PresentationPanelDefinition) => {
+          claim: (
+            panel: PresentationPanelDefinition<AngularPresentationNode>,
+          ) => {
             try {
               claims.claim(panel);
             } catch (error) {
@@ -235,13 +253,15 @@ class PresentationContainerAdapterHostComponent {
               throw error;
             }
           },
-          release: (panel: PresentationPanelDefinition) => {
+          release: (
+            panel: PresentationPanelDefinition<AngularPresentationNode>,
+          ) => {
             if (lifecycle.active && claims.release(panel))
               this.failSelected(presentation);
           },
-          fail: (panel: PresentationPanelDefinition) =>
+          fail: (panel: PresentationPanelDefinition<AngularPresentationNode>) =>
             this.form.reportDiagnostics([
-              panelHostDiagnostic(presentation, panel),
+              panelHostDiagnostic(presentation, panel, this.owner()),
             ]),
           audit: () => claims.audit(),
         },
@@ -268,14 +288,17 @@ class PresentationContainerAdapterHostComponent {
     if (this.hostFailureReported) return;
     this.hostFailureReported = true;
     this.destroySelected();
-    this.form.reportDiagnostics([presentationHostDiagnostic(presentation)]);
+    this.form.reportDiagnostics([
+      presentationHostDiagnostic(presentation, this.owner()),
+    ]);
   }
 }
 
 /** @internal */
 export function panelHostDiagnostic(
   owner: AngularPresentationContainerDefinition,
-  panel: PresentationPanelDefinition,
+  panel: PresentationPanelDefinition<AngularPresentationNode>,
+  projectionOwner?: PresentationProjectionOwner,
 ): Diagnostic {
   return Object.freeze({
     code: 'PANEL_HOST_INSTANTIATION_FAILED',
@@ -285,6 +308,9 @@ export function panelHostDiagnostic(
       ownerKind: owner.kind,
       ownerId: owner.id,
       panelId: panel.id,
+      ...(projectionOwner === undefined
+        ? {}
+        : presentationOwnerDiagnosticParameters(projectionOwner)),
     }),
     fallbackMessage: 'Presentation panel host could not be instantiated.',
   });
@@ -293,6 +319,7 @@ export function panelHostDiagnostic(
 /** @internal */
 export function presentationHostDiagnostic(
   definition: AngularPresentationContainerDefinition,
+  owner?: PresentationProjectionOwner,
 ): Diagnostic {
   const common = {
     severity: 'error' as const,
@@ -302,7 +329,12 @@ export function presentationHostDiagnostic(
     return Object.freeze({
       ...common,
       code: 'SECTION_HOST_INSTANTIATION_FAILED',
-      parameters: Object.freeze({ sectionId: definition.id }),
+      parameters: Object.freeze({
+        sectionId: definition.id,
+        ...(owner === undefined
+          ? {}
+          : presentationOwnerDiagnosticParameters(owner)),
+      }),
       fallbackMessage: 'Section host could not be instantiated.',
     });
   }
@@ -324,6 +356,9 @@ export function presentationHostDiagnostic(
     parameters: Object.freeze({
       presentationKind: definition.kind,
       presentationId: definition.id,
+      ...(owner === undefined
+        ? {}
+        : presentationOwnerDiagnosticParameters(owner)),
     }),
     fallbackMessage,
   });

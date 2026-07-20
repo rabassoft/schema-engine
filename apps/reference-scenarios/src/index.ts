@@ -24,6 +24,7 @@ import { localDefinitions } from './scenarios/local-definitions.js';
 import { nestedProfile } from './scenarios/nested-profile.js';
 import { nullablePreferences } from './scenarios/nullable-preferences.js';
 import { presentationSections } from './scenarios/presentation-sections.js';
+import { recursiveLocalPresentation } from './scenarios/recursive-local-presentation.js';
 import { stableTeam } from './scenarios/stable-team.js';
 
 export const referenceScenarios = defineReferenceCatalog([
@@ -34,4 +35,5 @@ export const referenceScenarios = defineReferenceCatalog([
   presentationSections,
   nullablePreferences,
   advancedPresentation,
+  recursiveLocalPresentation,
 ]);

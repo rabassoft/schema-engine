@@ -27,6 +27,13 @@ const ANGULAR_PACKAGES = Object.freeze([
 ]);
 const LOWER_ANGULAR = '22.0.6';
 const REGISTRY_SOURCE = 'https://registry.npmjs.org';
+const OFFLINE = process.argv.includes('--offline');
+const FROZEN_UPPER_ANGULAR = argumentValue(process.argv, 'upper-angular');
+assert.equal(
+  !OFFLINE || FROZEN_UPPER_ANGULAR !== undefined,
+  true,
+  '--offline requires --upper-angular=<frozen-version>',
+);
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'schema-engine-consumers-'));
 const emptyUserConfig = join(temporaryRoot, 'empty-user.npmrc');
 writeFileSync(emptyUserConfig, '');
@@ -58,6 +65,7 @@ function installConsumer(directory) {
       '--strict-peer-dependencies',
       '--config.auto-install-peers=false',
       '--reporter=silent',
+      ...(OFFLINE ? ['--offline'] : []),
     ],
     { cwd: directory, env: cleanEnvironment, stdio: 'inherit' },
   );
@@ -562,9 +570,9 @@ try {
     '--live-version is required exactly when --live-core is used',
   );
   assert.equal(
-    liveSpecifier === undefined || useLiveAngular,
+    liveSpecifier === undefined || useLiveCore,
     true,
-    '--live-specifier requires --live-angular',
+    '--live-specifier requires --live-core',
   );
   const angularTarballArgument = process.argv
     .find((argument) => argument.startsWith('--angular-tarball='))
@@ -606,7 +614,7 @@ try {
         : (liveSpecifier ?? liveVersion)
       : fileSpecifier(packed.angular),
   };
-  const upperAngular = await resolveUpperAngular();
+  const upperAngular = FROZEN_UPPER_ANGULAR ?? (await resolveUpperAngular());
 
   createCoreConsumer(
     packageSources.core,
@@ -639,7 +647,10 @@ try {
         lowerAngular: LOWER_ANGULAR,
         upperAngular,
         resolvedAt: new Date().toISOString(),
-        source: REGISTRY_SOURCE,
+        source:
+          FROZEN_UPPER_ANGULAR === undefined
+            ? REGISTRY_SOURCE
+            : 'frozen-command-input',
         coreSource: useLiveCore
           ? `registry:${liveVersion}`
           : basename(packed.core),

@@ -1,18 +1,20 @@
 # @rabassoft/schema-engine-angular-aria
 
-Angular Aria 22 presentation-container candidate for Schema Engine.
+Angular Aria 22 presentation-container pilot for Schema Engine.
 
 ## Delivery status
 
-- Package manifest: `0.1.0`.
+- Source package manifest: `0.2.0`; this is a reviewed M21 source target, not a
+  selected candidate or observed npm release.
 - API classification: Public + Experimental + Active.
-- Private source candidate; no registry publication is implied.
+- Public verified Experimental `0.1.0`, available under both `next` and
+  `latest`.
 - The only root API is `provideSchemaEngineAngularAriaContainers()`; the only
   style entry point is the explicit `./styles.css` export.
-- PLAN-021 governs later publication. Every registry read, package write and
-  tag mutation retains a separate approval gate.
-- Recommended channel after publication: exact `0.1.0` or `next`. The first
-  observed `latest` state is not predicted and never implies Stable.
+- PLAN-021 completed publication and verification; it authorizes no later
+  registry, repository or Git action.
+- Recommended channel: exact `0.1.0` or `next`. The observed `latest` aliases
+  the same Experimental version and never implies Stable.
 
 ## Fixed compatibility contract
 
@@ -23,6 +25,9 @@ Angular Aria 22 presentation-container candidate for Schema Engine.
 @angular/aria >=22.0.5 <23.0.0
 @angular/cdk >=22.0.5 <23.0.0
 ```
+
+The reviewed, not-yet-live M21 source tuple is pilot `0.2.x` with base Angular
+`^0.4.0`; it retains the same Angular/Aria/CDK ranges and verified endpoints.
 
 Verified tuples use Angular core `22.0.6` and `22.0.7`, with Angular Aria
 `22.0.5` and Angular CDK `22.0.5`. The resolved Aria peer must require the same
@@ -58,6 +63,12 @@ order in one column. Applications own light/dark selectors and may set only:
 
 Tabs use Angular Aria follow-focus/wrapping with preserved content. Section,
 accordion and logical grid intentionally retain native semantics.
+
+The current source also projects the same containers for direct nested-object
+and collection-item template owners under completed PLAN-022. Published `0.1.x`
+artifacts remain the earlier root-only contract. The source manifest's `0.2.0`
+target includes these local forests but is unavailable to consumers until
+separately published and observed.
 
 ## License and source
 

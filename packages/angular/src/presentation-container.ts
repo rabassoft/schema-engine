@@ -11,6 +11,8 @@ import {
 } from '@angular/core';
 import type {
   Diagnostic,
+  FormNodeDefinition,
+  FormNodeTemplate,
   PresentationAccordionDefinition,
   PresentationGridDefinition,
   PresentationGridItemDefinition,
@@ -18,27 +20,37 @@ import type {
   PresentationSectionDefinition,
   PresentationTabsDefinition,
 } from '@rabassoft/schema-engine';
+import {
+  presentationOwnerDiagnosticParameters,
+  type PresentationProjectionOwner,
+} from './presentation-context.js';
 
 export type AngularPresentationContainerDefinition =
-  | PresentationSectionDefinition
-  | PresentationTabsDefinition
-  | PresentationAccordionDefinition
-  | PresentationGridDefinition;
+  | PresentationSectionDefinition<FormNodeDefinition | FormNodeTemplate>
+  | PresentationTabsDefinition<FormNodeDefinition | FormNodeTemplate>
+  | PresentationAccordionDefinition<FormNodeDefinition | FormNodeTemplate>
+  | PresentationGridDefinition<FormNodeDefinition | FormNodeTemplate>;
 
 export type AngularPresentationContainerRenderModel =
   | {
       readonly kind: 'section';
-      readonly definition: PresentationSectionDefinition;
+      readonly definition: PresentationSectionDefinition<
+        FormNodeDefinition | FormNodeTemplate
+      >;
       readonly label: string;
       readonly legendId: string;
     }
   | {
       readonly kind: 'tabs';
-      readonly definition: PresentationTabsDefinition;
+      readonly definition: PresentationTabsDefinition<
+        FormNodeDefinition | FormNodeTemplate
+      >;
       readonly label: string;
       readonly tablistId: string;
       readonly panels: readonly {
-        readonly definition: PresentationPanelDefinition;
+        readonly definition: PresentationPanelDefinition<
+          FormNodeDefinition | FormNodeTemplate
+        >;
         readonly label: string;
         readonly tabId: string;
         readonly tabpanelId: string;
@@ -46,11 +58,15 @@ export type AngularPresentationContainerRenderModel =
     }
   | {
       readonly kind: 'accordion';
-      readonly definition: PresentationAccordionDefinition;
+      readonly definition: PresentationAccordionDefinition<
+        FormNodeDefinition | FormNodeTemplate
+      >;
       readonly label: string;
       readonly accordionId: string;
       readonly panels: readonly {
-        readonly definition: PresentationPanelDefinition;
+        readonly definition: PresentationPanelDefinition<
+          FormNodeDefinition | FormNodeTemplate
+        >;
         readonly label: string;
         readonly triggerId: string;
         readonly regionId: string;
@@ -58,11 +74,15 @@ export type AngularPresentationContainerRenderModel =
     }
   | {
       readonly kind: 'grid';
-      readonly definition: PresentationGridDefinition;
+      readonly definition: PresentationGridDefinition<
+        FormNodeDefinition | FormNodeTemplate
+      >;
       readonly label: string;
       readonly gridId: string;
       readonly items: readonly {
-        readonly definition: PresentationGridItemDefinition;
+        readonly definition: PresentationGridItemDefinition<
+          FormNodeDefinition | FormNodeTemplate
+        >;
         readonly cellId: string;
       }[];
     };
@@ -129,6 +149,7 @@ export class AngularPresentationContainerResolver {
 
   resolve(
     definition: AngularPresentationContainerDefinition,
+    owner?: PresentationProjectionOwner,
   ): PresentationContainerResolutionResult {
     if (!this.ready) {
       return Object.freeze({
@@ -159,6 +180,9 @@ export class AngularPresentationContainerResolver {
               id: registration.id,
               presentationKind: definition.kind,
               presentationId: definition.id,
+              ...(owner === undefined
+                ? {}
+                : presentationOwnerDiagnosticParameters(owner)),
             },
             'Presentation container tester threw an exception.',
           ),
@@ -181,6 +205,9 @@ export class AngularPresentationContainerResolver {
               id: registration.id,
               presentationKind: definition.kind,
               presentationId: definition.id,
+              ...(owner === undefined
+                ? {}
+                : presentationOwnerDiagnosticParameters(owner)),
               ...safeActual(rank),
             },
             'Presentation container tester returned an invalid rank.',
@@ -206,6 +233,9 @@ export class AngularPresentationContainerResolver {
           {
             presentationKind: definition.kind,
             presentationId: definition.id,
+            ...(owner === undefined
+              ? {}
+              : presentationOwnerDiagnosticParameters(owner)),
           },
           'No presentation container renderer matches the definition.',
         ),

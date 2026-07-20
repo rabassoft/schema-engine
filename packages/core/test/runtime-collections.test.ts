@@ -27,7 +27,12 @@ function definition(): FormDefinition {
     required: false,
     label: 'Rows',
     identity: { property: 'id' },
-    item: { kind: 'item-template', children: [name], fields: [name] },
+    item: {
+      kind: 'item-template',
+      children: [name],
+      fields: [name],
+      presentation: [{ kind: 'form-node', node: name }],
+    },
   };
   return withDefaultPresentation({ nodes: [rows], fields: [] });
 }
@@ -68,6 +73,7 @@ function deepDefinition(depth: number): FormDefinition {
       required: false,
       label: objectNames[index] as string,
       children: [child],
+      presentation: [{ kind: 'form-node', node: child }],
     };
   }
   return withDefaultPresentation({
@@ -80,7 +86,12 @@ function deepDefinition(depth: number): FormDefinition {
         required: false,
         label: 'Rows',
         identity: { property: 'id' },
-        item: { kind: 'item-template', children: [child], fields: [leaf] },
+        item: {
+          kind: 'item-template',
+          children: [child],
+          fields: [leaf],
+          presentation: [{ kind: 'form-node', node: child }],
+        },
       },
     ],
     fields: [],
@@ -98,6 +109,21 @@ function nestedCollectionDefinition(): FormDefinition {
     label: 'Name',
     constraints: {},
   } as const;
+  const rows = {
+    kind: 'array',
+    key: '["section","rows"]',
+    name: 'rows',
+    path: ['section', 'rows'],
+    required: false,
+    label: 'Rows',
+    identity: { property: 'id' },
+    item: {
+      kind: 'item-template',
+      children: [name],
+      fields: [name],
+      presentation: [{ kind: 'form-node', node: name }],
+    },
+  } as const;
   return withDefaultPresentation({
     nodes: [
       {
@@ -107,22 +133,8 @@ function nestedCollectionDefinition(): FormDefinition {
         path: ['section'],
         required: false,
         label: 'Section',
-        children: [
-          {
-            kind: 'array',
-            key: '["section","rows"]',
-            name: 'rows',
-            path: ['section', 'rows'],
-            required: false,
-            label: 'Rows',
-            identity: { property: 'id' },
-            item: {
-              kind: 'item-template',
-              children: [name],
-              fields: [name],
-            },
-          },
-        ],
+        children: [rows],
+        presentation: [{ kind: 'form-node', node: rows }],
       },
     ],
     fields: [],
@@ -148,6 +160,7 @@ function nestedItemDefinition(): FormDefinition {
     required: false,
     label: 'Address',
     children: [city],
+    presentation: [{ kind: 'form-node', node: city }],
   } as const;
   return withDefaultPresentation({
     nodes: [
@@ -163,6 +176,7 @@ function nestedItemDefinition(): FormDefinition {
           kind: 'item-template',
           children: [address],
           fields: [city],
+          presentation: [{ kind: 'form-node', node: address }],
         },
       },
     ],
@@ -191,7 +205,12 @@ function simpleCollectionNode(name: string): ArrayNodeDefinition {
     required: false,
     label: name,
     identity: { property: 'id' },
-    item: { kind: 'item-template', children: [field], fields: [field] },
+    item: {
+      kind: 'item-template',
+      children: [field],
+      fields: [field],
+      presentation: [{ kind: 'form-node', node: field }],
+    },
   };
 }
 
@@ -382,6 +401,7 @@ describe('M10 controlled collection runtime integration', () => {
       required: false,
       label: 'Empty',
       children: [],
+      presentation: [],
     } as const;
     const rows: ArrayNodeDefinition = {
       kind: 'array',
@@ -395,6 +415,7 @@ describe('M10 controlled collection runtime integration', () => {
         kind: 'item-template',
         children: [emptyObject],
         fields: [],
+        presentation: [{ kind: 'form-node', node: emptyObject }],
       },
     };
     const getter = vi.fn();

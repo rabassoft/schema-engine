@@ -58,6 +58,9 @@ export interface NestedDefinitionDefect {
   readonly path?: readonly string[];
   readonly relativePath?: readonly string[];
   readonly presentationIndexPath?: readonly number[];
+  readonly presentationOwnerKind?: 'object' | 'item' | 'template-object';
+  readonly presentationOwnerPath?: readonly string[];
+  readonly presentationTemplatePath?: readonly string[];
   readonly member?: 'nullable';
   readonly actualType?: string;
   readonly members?: readonly ['nullable', 'choices'];
@@ -278,14 +281,65 @@ function collectFormDefinitionDefects(
     }
   }
 
-  defects.push(...collectPresentationDefects(value, nodes));
+  if (defects.length === 0) {
+    defects.push(...collectPresentationDefects(value, nodes));
+    defects.push(...collectLocalPresentationDefects(nodes));
+  }
 
   return Object.freeze(defects);
 }
 
+type PresentationOwner =
+  | {
+      readonly kind: 'object';
+      readonly path: readonly string[];
+      readonly key: readonly ['object', readonly string[]];
+    }
+  | {
+      readonly kind: 'item';
+      readonly path: readonly string[];
+      readonly templatePath: readonly [];
+      readonly key: readonly ['item-template', readonly string[]];
+    }
+  | {
+      readonly kind: 'template-object';
+      readonly path: readonly string[];
+      readonly templatePath: readonly string[];
+      readonly key: readonly [
+        'item-template-object',
+        readonly string[],
+        readonly string[],
+      ];
+    };
+
 function collectPresentationDefects(
   definition: object,
   nodes: readonly unknown[],
+  owner?: PresentationOwner,
+): readonly NestedDefinitionDefect[] {
+  const defects = collectUnscopedPresentationDefects(definition, nodes, owner);
+  if (owner === undefined || defects.length === 0) return defects;
+  return Object.freeze(
+    defects.map((defect) => {
+      const { reason, ...locators } = defect;
+      return makeDefect(reason, {
+        ...locators,
+        presentationOwnerKind: owner.kind,
+        presentationOwnerPath: Object.freeze([...owner.path]),
+        ...(owner.kind === 'object'
+          ? {}
+          : {
+              presentationTemplatePath: Object.freeze([...owner.templatePath]),
+            }),
+      });
+    }),
+  );
+}
+
+function collectUnscopedPresentationDefects(
+  definition: object,
+  nodes: readonly unknown[],
+  owner: PresentationOwner | undefined,
 ): readonly NestedDefinitionDefect[] {
   const member = readOwnDataMember(definition, 'presentation');
   if (member.kind !== 'value' || !Array.isArray(member.value)) {
@@ -382,7 +436,12 @@ function collectPresentationDefects(
       if (
         key.kind !== 'value' ||
         key.value !==
-          JSON.stringify([frame.ownerKind, frame.ownerId, 'panel', id.value])
+          presentationEntryKey(owner, [
+            frame.ownerKind,
+            frame.ownerId,
+            'panel',
+            id.value,
+          ])
       ) {
         return [
           makeDefect('invalid-presentation-entry-key', {
@@ -440,7 +499,12 @@ function collectPresentationDefects(
       if (
         key.kind !== 'value' ||
         key.value !==
-          JSON.stringify(['grid', frame.gridId, 'item', frame.itemIndex])
+          presentationEntryKey(owner, [
+            'grid',
+            frame.gridId,
+            'item',
+            frame.itemIndex,
+          ])
       ) {
         return [
           makeDefect('invalid-presentation-entry-key', {
@@ -534,7 +598,7 @@ function collectPresentationDefects(
       }
       if (
         key.kind !== 'value' ||
-        key.value !== JSON.stringify([kind.value, id.value])
+        key.value !== presentationEntryKey(owner, [kind.value, id.value])
       ) {
         return [
           makeDefect('invalid-presentation-entry-key', {
@@ -584,7 +648,7 @@ function collectPresentationDefects(
       }
       if (
         key.kind !== 'value' ||
-        key.value !== JSON.stringify(['grid', id.value])
+        key.value !== presentationEntryKey(owner, ['grid', id.value])
       ) {
         return [
           makeDefect('invalid-presentation-entry-key', {
@@ -630,7 +694,7 @@ function collectPresentationDefects(
     }
     if (
       key.kind !== 'value' ||
-      key.value !== JSON.stringify(['section', id.value])
+      key.value !== presentationEntryKey(owner, ['section', id.value])
     ) {
       return [
         makeDefect('invalid-presentation-section-key', {
@@ -653,6 +717,104 @@ function collectPresentationDefects(
   if (seen.size !== expected.size)
     return [makeDefect('missing-presented-node')];
   return [];
+}
+
+function presentationEntryKey(
+  owner: PresentationOwner | undefined,
+  suffix: readonly (string | number)[],
+): string {
+  return JSON.stringify(
+    owner === undefined ? suffix : ['presentation', owner.key, ...suffix],
+  );
+}
+
+function collectLocalPresentationDefects(
+  nodes: readonly unknown[],
+): readonly NestedDefinitionDefect[] {
+  type OwnerFrame =
+    | { readonly kind: 'node'; readonly value: unknown }
+    | {
+        readonly kind: 'template';
+        readonly value: unknown;
+        readonly collectionPath: readonly string[];
+      };
+  const stack: OwnerFrame[] = [];
+  const defects: NestedDefinitionDefect[] = [];
+  const seen = new Set<object>();
+  const pushNodes = (
+    values: readonly unknown[],
+    kind: OwnerFrame['kind'],
+    collectionPath?: readonly string[],
+  ): void => {
+    for (let index = values.length - 1; index >= 0; index -= 1) {
+      const member = readOwnDataMember(values, String(index));
+      const value = member.kind === 'value' ? member.value : undefined;
+      stack.push(
+        kind === 'node'
+          ? { kind, value }
+          : {
+              kind,
+              value,
+              collectionPath: collectionPath ?? Object.freeze([]),
+            },
+      );
+    }
+  };
+  pushNodes(nodes, 'node');
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined || !isOrdinaryObject(frame.value)) continue;
+    if (seen.has(frame.value)) continue;
+    seen.add(frame.value);
+    const nodeKind = readValue(frame.value, 'kind');
+    const children = readValue(frame.value, 'children');
+    if (frame.kind === 'node' && nodeKind === 'object') {
+      const path = copyStringDataPath(readValue(frame.value, 'path'));
+      if (path === undefined || !Array.isArray(children)) continue;
+      defects.push(
+        ...collectPresentationDefects(frame.value, children, {
+          kind: 'object',
+          path,
+          key: ['object', path],
+        }),
+      );
+      pushNodes(children, 'node');
+      continue;
+    }
+    if (frame.kind === 'node' && nodeKind === 'array') {
+      const path = copyStringDataPath(readValue(frame.value, 'path'));
+      const item = readValue(frame.value, 'item');
+      if (path === undefined || !isOrdinaryObject(item)) continue;
+      const itemChildren = readValue(item, 'children');
+      if (!Array.isArray(itemChildren)) continue;
+      defects.push(
+        ...collectPresentationDefects(item, itemChildren, {
+          kind: 'item',
+          path,
+          templatePath: [],
+          key: ['item-template', path],
+        }),
+      );
+      pushNodes(itemChildren, 'template', path);
+      continue;
+    }
+    if (frame.kind === 'template' && nodeKind === 'object') {
+      const relativePath = copyStringDataPath(
+        readValue(frame.value, 'relativePath'),
+      );
+      if (relativePath === undefined || !Array.isArray(children)) continue;
+      defects.push(
+        ...collectPresentationDefects(frame.value, children, {
+          kind: 'template-object',
+          path: frame.collectionPath,
+          templatePath: relativePath,
+          key: ['item-template-object', frame.collectionPath, relativePath],
+        }),
+      );
+      pushNodes(children, 'template', frame.collectionPath);
+    }
+  }
+  return Object.freeze(defects);
 }
 
 function isDenseNonEmptyArrayMember(

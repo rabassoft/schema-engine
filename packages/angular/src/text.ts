@@ -15,6 +15,8 @@ import type {
   Diagnostic,
   FieldDefinition,
   FieldTemplate,
+  FormNodeDefinition,
+  FormNodeTemplate,
   FieldRuntimeSnapshot,
   FieldTextMember,
   ObjectFieldDefinition,
@@ -43,7 +45,7 @@ type CollectionTextResolutionContext = Extract<
 >;
 type SectionTextResolutionContext = Extract<
   TextResolutionContext,
-  { readonly section: PresentationSectionDefinition }
+  { readonly section: unknown }
 >;
 type AdvancedPresentationTextResolutionContext = Extract<
   TextResolutionContext,
@@ -151,7 +153,9 @@ export class AngularTextProjector {
 
   /** @internal */
   projectSection(
-    section: PresentationSectionDefinition,
+    section: PresentationSectionDefinition<
+      FormNodeDefinition | FormNodeTemplate
+    >,
     formId: string,
     locale: string,
   ): SectionTextProjectionResult {
@@ -185,7 +189,14 @@ export class AngularTextProjector {
         adapterDiagnostic(
           'TEXT_RESOLUTION_FAILED',
           'warning',
-          { sectionId: section.id, member: 'label', reason },
+          {
+            sectionId: section.id,
+            ...(section.key.startsWith('["presentation",')
+              ? { sectionKey: section.key }
+              : {}),
+            member: 'label',
+            reason,
+          },
           'Section text resolution failed.',
         ),
       );
@@ -252,7 +263,7 @@ export class AngularTextProjector {
 
   /** @internal */
   projectPresentationSubtree(
-    entry: PresentationEntryDefinition,
+    entry: PresentationEntryDefinition<FormNodeDefinition | FormNodeTemplate>,
     formId: string,
     locale: string,
   ): void {

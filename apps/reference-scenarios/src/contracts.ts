@@ -19,6 +19,7 @@ export type ReferenceFeature =
   | 'local-references'
   | 'presentation-groups'
   | 'advanced-layout'
+  | 'recursive-local-presentation'
   | 'nullable-leaves';
 
 export type ReferenceExpectedOperation<

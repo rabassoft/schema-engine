@@ -184,8 +184,8 @@ Cada decisión debe registrar:
 
 ## D-011: UI Schema avanzado
 
-- **Estado:** Promoted only for the narrow M18 static neutral layout boundary
-  accepted in review 098; every unlisted capability remains Deferred
+- **Estado:** Implemented only for the narrow completed M18 root-layout and M20
+  nested-object/item boundaries; every unlisted capability remains Deferred
 - **Incluye:** grids, tabs, accordions, secciones, wizards, slots, acciones y layouts responsivos.
 - **Motivo:** Primero se validará la separación entre semántica de datos y presentación básica.
 - **Retomar cuando:** Existan objetos anidados y un contrato de layout neutral.
@@ -217,10 +217,32 @@ Cada decisión debe registrar:
 - **Slice implementado:** PLAN-020 revisión 0 y M18 están Completed tras review
   113 ciclo 2 sin hallazgos; el cierre verifica las 22 filas, native/Aria
   lower/latest, fuentes, artefactos y ambos targets independientes.
+- **Promoción M20 aceptada:**
+  [`review 133`](../reviews/133-d011-m20-nested-item-layout-promotion-readiness.md)
+  ciclo 3 pasó doce áreas sin hallazgos. Promueve únicamente diseño normativo
+  para bosques locales con las clases de contenedor ya aceptadas sobre hijos
+  directos de objetos anidados e items/templates de colección. ADR-025 debe
+  cerrar el modelo de tipos, identidad de propietario/instancia, fallback y
+  migración del SPI antes de cualquier SPEC; no había contrato observable ni
+  implementación M20 activos en ese gate.
+- **Arquitectura M20 aceptada:** ADR-025 revisión 0 cierra el modelo genérico
+  node/template, bosques locales requeridos, namespaces y keys por propietario,
+  IDs/estado por item estable, fallback/diagnósticos locales, textos estáticos y
+  migración del SPI. Review 134 ciclo 4 pasó trece áreas sin hallazgos y
+  autorizó únicamente preparar/revisar SPEC-009.
+- **Contrato M20 aceptado:** SPEC-009 v0.1.0 cierra gramática, tipos genéricos,
+  diagnósticos/fallback, identidad concreta, estado/ciclo de vida, migración
+  Angular SPI, native/Aria/Standard y 27 filas mínimas de conformidad. Review
+  135 ciclo 6 pasó catorce áreas sin hallazgos y autoriza únicamente
+  preparar/revisar PLAN-022 en ese gate; versión y release siguen inactivos.
+- **Slice M20 implementado:** PLAN-022 revisión 0 está Completed tras review 144
+  ciclo 3. Sus ocho checkpoints, las 27 filas, consumidores lower/latest
+  native/pilot y referencias Angular/Standard pasan sin cambiar dependencias,
+  versiones, release, Git ni estado externo.
 - **Permanece Deferred:** wizards, workflow, slots, acciones, scopes,
-  condiciones, layout nested/item, breakpoints arbitrarios, estado controlado o
-  persistido y todo renderer kit salvo la arquitectura estrecha del único
-  piloto Angular Aria 22 aceptada por ADR-024.
+  condiciones, layout nested/item fuera del slice local promovido, breakpoints
+  arbitrarios, estado controlado o persistido y todo renderer kit salvo la
+  arquitectura estrecha del único piloto Angular Aria 22 aceptada por ADR-024.
 
 ## D-012: Scopes declarativos en UI Schema
 
@@ -231,6 +253,10 @@ Cada decisión debe registrar:
 - **Evaluación M12:** La [revisión 022](../reviews/022-m12-advanced-ui-promotion-readiness.md)
   mantiene D-012 Deferred: el contrato avanzado aún no existe y no debe mover
   silenciosamente a UI Schema la autoridad de scopes que posee la aplicación.
+- **Evaluación M20:** La
+  [revisión 133](../reviews/133-d011-m20-nested-item-layout-promotion-readiness.md)
+  mantiene los scopes en la aplicación. Un bosque local no genera, limita,
+  persiste ni secuencia `FormScope`; D-012 continúa íntegramente Deferred.
   Ricard aceptó formalmente este límite el 15 de julio de 2026.
 - **Límite M18:** review 098 no genera scopes desde tabs, panels, accordions ni
   grid; la aplicación conserva toda autoridad de validación y workflow.
@@ -576,14 +602,52 @@ Cada decisión debe registrar:
   tercer nombre y cierra publicación `next` dependency-first, transición
   `latest` dependent-first, observación del primer alias del piloto, fallos
   parciales y recuperación immutable. SPEC-008/ADR-010 no requieren revisión.
-- **Plan M19 aprobado:** PLAN-021 revisión 0 está Approved tras review 116
-  ciclo 3 sin hallazgos. Checkpoint 1 completa el descriptor/tooling de tres
+- **Plan M19 completado:** PLAN-021 revisión 0 está Completed tras review 132
+  ciclo 4 sin hallazgos. Checkpoint 1 completa el descriptor/tooling de tres
   paquetes tras review 117 ciclo 2; checkpoint 2 completa release notes,
   onboarding y checks documentales tras review 118 ciclo 3; checkpoint 3
   completa gate local, candidatos deterministas, dry runs neutrales y las 22
-  filas tras review 119 ciclo 5. Checkpoint 4 queda detenido para autorización
-  explícita de Git y reconstrucción limpia; registry/npm mantienen gates
-  separados. D-043 permanece Deferred.
+  filas tras review 119 ciclo 5. Checkpoint 4 fija/sube el commit privado
+  `ce3ef3d` y selecciona los bytes reconstruidos tras review 120 ciclo 3.
+  Checkpoint 5 completa core `0.3.0` público bajo `next` tras review 122 ciclo 3
+  sin hallazgos; `latest` queda en `0.2.0`. Checkpoint 6 completa base Angular
+  `0.3.0` bajo `next` tras review 124 ciclo 2; ambos `latest` quedan en `0.2.0`
+  y el piloto permanece ausente. Checkpoint 7 pre-publication pasa review 125
+  ciclo 5 y la publicación/verificación piloto completa checkpoint 7 tras
+  review 126 ciclo 4. Los tres `next` son exactos; npm creó automáticamente el
+  `latest: 0.1.0` piloto, pendiente solo de la observación/retención separada de
+  checkpoint 8. Review 127 ciclo 2 completa esa retención sin mutación; D-043
+  permanece Deferred. Checkpoint 9 pre-transition pasa review 128 ciclo 1 y la
+  transición base completa tras review 129 ciclo 1, dejando la ventana mixta
+  prevista con core `latest: 0.2.0`. Checkpoint 10 pre-transition pasa review
+  130 ciclo 1 y la transición core completa tras review 131 ciclo 1. Core/base
+  `next/latest: 0.3.0` y piloto `next/latest: 0.1.0` quedan coordinados.
+  Checkpoint 11 repite la matriz completa y review 132 ciclo 4 pasa sin
+  hallazgos, completando PLAN-021/M19 sin autorizar otra acción externa.
+- **Release M21 seleccionada:** Ricard eligió el 20 de julio de 2026 la opción
+  A de review 145. Review 146 ciclo 3 pasa catorce áreas sin hallazgos y
+  promueve solo ADR-018 revisión 5 para diseñar core/base Angular `0.4.0` y
+  Angular Aria `0.2.0`, con peers `^0.4.0`. No cambia manifests, versiones,
+  candidatos ni estado externo y no autoriza todavía un plan.
+- **Arquitectura M21 aceptada:** ADR-018 revisión 5 está Accepted tras review
+  147 ciclo 5. Fija las versiones/peers exactos, `next` core/base/piloto,
+  transición `latest` piloto/base/core, recuperación immutable y gates. Solo
+  el plan separado puede autorizar implementación.
+- **Plan M21 aprobado:** PLAN-023 revisión 0 está Approved tras review 148
+  ciclo 2. Autoriza únicamente checkpoints locales 1–3; checkpoint 4, Git y
+  toda lectura/escritura de registry permanecen sujetos a gates posteriores.
+- **Checkpoint local 1 completado:** review 149 ciclo 2 valida descriptor,
+  manifests, peers, tooling, baseline M19 y consumidores M20 sin candidato,
+  Git, registry ni estado externo.
+- **Checkpoint local 2 completado:** review 150 ciclo 5 valida notas `0.4.0`,
+  onboarding fuente/live, migración/compatibilidad, recuperación exacta y
+  checks fail-closed sin candidato, lockfile, Git, registry ni estado externo;
+  en ese límite aún faltaba checkpoint 3.
+- **Checkpoint local 3 completado:** review 151 ciclo 2 valida la matriz
+  congelada completa, las 27 filas SPEC-009, tres candidatos dirty-tree
+  deterministas, Corresponding Source, seguridad, consumidores lower/latest y
+  dry runs neutrales. `sourceCommit: null` impide seleccionarlos como evidencia
+  publicable; checkpoint 4, Git, registry y toda acción externa siguen gated.
 - **Arquitectura aceptada:** ADR-018 revision 4 mantiene el repositorio privado,
   exige Corresponding Source público y 2FA por write, y difiere conjuntamente
   metadata pública, trusted publishing y provenance hasta sanear/publicar el
@@ -827,19 +891,27 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M19 release:** ADR-018 revisión 4 está Accepted y PLAN-021 revisión 0 está
-   Approved tras review 116 ciclo 3; checkpoint 1 está completo tras review 117
-   ciclo 2, checkpoint 2 tras review 118 ciclo 3 y checkpoint 3 tras review 119
-   ciclo 4. La siguiente acción es detenerse para autorización explícita del
-   checkpoint 4 Git/reconstrucción limpia; registry/npm siguen separados.
-2. **M18 delivery:** SPEC-008 v0.1.0 y ADR-023/ADR-024 permanecen Accepted;
+1. **M21 release delivery:** PLAN-023 revisión 0 está Approved tras review 148
+   ciclo 2 para core/base `0.4.0` y piloto `0.2.0`; checkpoints 1–3 están
+   Completed tras reviews 149–151. La siguiente acción exacta es detenerse para
+   autorización explícita del checkpoint 4: diff completo, commit/push privado
+   y reconstrucción limpia; Git, registry y toda acción externa siguen sin
+   autorización.
+2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
+   Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
+   M21 pretende entregar sin ampliarlo.
+3. **M19 release:** ADR-018 revisión 4 y PLAN-021 revisión 0 permanecen
+   Completed tras review 132 ciclo 4. Core/base `0.3.0` y piloto `0.1.0` están
+   verificados bajo `next`, `latest` y resolución unqualified. Toda acción
+   externa posterior sigue separada.
+4. **M18 delivery:** SPEC-008 v0.1.0 y ADR-023/ADR-024 permanecen Accepted;
    PLAN-020 revisión 0 y M18 están Completed tras review 113 ciclo 2 sin
    hallazgos.
-3. **D-043:** conserva la publicación del repositorio y automatización como
+5. **D-043:** conserva la publicación del repositorio y automatización como
    trabajo Deferred; no se promueve por D-044.
-4. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
+6. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
    familia de artefactos seleccionada.
-5. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;
+7. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;
    ADR-021 revisión 1 está Accepted y PLAN-018 revisión 1 está Completed tras
    review final 095 ciclo 2 sin hallazgos.
 
@@ -857,6 +929,31 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 20-07-2026 | PLAN-023 checkpoint 3 completa matriz/27 filas/candidatos dirty-tree/dry runs tras review 151 ciclo 2; checkpoint 4 Git queda gated.               |
+| 20-07-2026 | PLAN-023 checkpoint 2 completa notas/onboarding/checks M21 tras review 150 ciclo 5; sin candidato, lockfile, Git, registry ni acción externa.      |
+| 20-07-2026 | PLAN-023 checkpoint 1 completa descriptor/manifests/tooling M21 tras review 149 ciclo 2; no crea candidato ni toca Git/npm.                        |
+| 20-07-2026 | PLAN-023 revisión 0 queda Approved tras review 148 ciclo 2; autoriza solo checkpoints locales 1–3 y mantiene Git/npm gated.                        |
+| 20-07-2026 | ADR-018 revisión 5 queda Accepted tras review 147 ciclo 5; autoriza solo PLAN-023 para M21 `0.4.0`/piloto `0.2.0`.                                 |
+| 20-07-2026 | Review 146 ciclo 3 promueve solo ADR-018 revisión 5 para M21 core/base `0.4.0` y piloto `0.2.0`; todo cambio/acción sigue gated.                   |
+| 19-07-2026 | PLAN-022/M20 completan ocho checkpoints y 27 filas tras review 144 ciclo 3; no cambian dependencia, versión, release, Git ni estado externo.       |
+| 19-07-2026 | PLAN-022 revisión 0 queda Approved tras review 136 ciclo 2; autoriza ocho checkpoints M20 locales sin dependencia, versión, Git ni acción externa. |
+| 19-07-2026 | SPEC-009 v0.1.0 queda Accepted tras review 135 ciclo 6; cierra el contrato local M20 y autoriza únicamente preparar/revisar PLAN-022.              |
+| 19-07-2026 | ADR-025 revisión 0 queda Accepted tras review 134 ciclo 4; autoriza únicamente preparar/revisar SPEC-009 para el slice local D-011/M20.            |
+| 19-07-2026 | Review 133 ciclo 3 promueve solo el diseño D-011/M20 de bosques locales nested/item y autoriza redactar/revisar ADR-025.                           |
+| 19-07-2026 | PLAN-021/M19 completan checkpoint 11 tras review 132 ciclo 4; matriz completa y 22 filas pasan sin hallazgos, sin nueva mutación externa.          |
+| 19-07-2026 | PLAN-021 checkpoint 10 coordina core/base `next/latest: 0.3.0` tras review 131 ciclo 1; `latest`/unqualified pasan y checkpoint 11 sigue gated.    |
+| 19-07-2026 | PLAN-021 checkpoint 10 pre-transition pasa review 130 ciclo 1; solo el dist-tag core `latest` exacto espera ejecución manual de Ricard.            |
+| 19-07-2026 | PLAN-021 checkpoint 9 mueve solo base `latest` a `0.3.0` tras review 129 ciclo 1; core queda `latest: 0.2.0` en la ventana mixta prevista.         |
+| 19-07-2026 | PLAN-021 checkpoint 9 pre-transition pasa review 128 ciclo 1; solo el dist-tag base `latest` exacto espera aprobación inmediata.                   |
+| 19-07-2026 | PLAN-021 checkpoint 8 reobserva y retiene el `latest: 0.1.0` piloto sin mutación tras review 127 ciclo 2; checkpoint 9 sigue gated.                |
+| 19-07-2026 | PLAN-021 checkpoint 7 completa piloto `0.1.0` exacto/`next` tras review 126 ciclo 4; npm creó su `latest`, pendiente de checkpoint 8 read-only.    |
+| 19-07-2026 | PLAN-021 checkpoint 7 pre-publication pasa review 125 ciclo 5; solo el publish piloto exacto espera aprobación inmediata.                          |
+| 19-07-2026 | PLAN-021 checkpoint 6 completa base Angular `0.3.0` bajo `next` tras review 124 ciclo 2; ambos `latest` siguen `0.2.0` y piloto ausente.           |
+| 19-07-2026 | PLAN-021 checkpoint 6 pre-publication pasa review 123 ciclo 3; solo el publish base exacto espera aprobación inmediata.                            |
+| 19-07-2026 | PLAN-021 checkpoint 5 completa core `0.3.0` bajo `next` tras review 122 ciclo 3; `latest` sigue `0.2.0` y checkpoint 6 queda gated.                |
+| 19-07-2026 | PLAN-021 checkpoint 5 pre-publication pasa review 121 ciclo 2; solo el publish core exacto espera aprobación inmediata.                            |
+| 19-07-2026 | PLAN-021 checkpoint 5 read-only se pausa en `npm whoami` `E401`; Ricard debe restaurar la sesión y no se intentó ninguna mutación.                 |
+| 19-07-2026 | PLAN-021 checkpoint 4 fija/sube `ce3ef3d` y selecciona candidatos limpios byte-idénticos tras review 120 ciclo 3; registry sigue gated.            |
 | 19-07-2026 | PLAN-021 checkpoint 3 completa gate local/candidatos/dry runs/22 filas tras review 119 ciclo 5; checkpoint 4 Git queda gated.                      |
 | 19-07-2026 | PLAN-021 checkpoint 2 completa release notes/onboarding/checks M19 tras review 118 ciclo 3; checkpoint local 3 sigue sin Git ni registry.          |
 | 19-07-2026 | PLAN-021 checkpoint 1 completa descriptor/tooling/evidence M19 tras review 117 ciclo 2; checkpoint local 2 sigue sin Git ni acción externa.        |

@@ -30,7 +30,12 @@ function definition(): FormDefinition {
         label: 'Rows',
         kind: 'array',
         identity: { property: 'id' },
-        item: { kind: 'item-template', children: [name], fields: [name] },
+        item: {
+          kind: 'item-template',
+          children: [name],
+          fields: [name],
+          presentation: [{ kind: 'form-node', node: name }],
+        },
       },
     ],
     fields: [],

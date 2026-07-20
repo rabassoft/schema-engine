@@ -27,10 +27,8 @@ import type {
   FieldDefinition,
   FieldTemplate,
   FieldRuntimeSnapshot,
-  FormDefinition,
   FormNodeDefinition,
   FormNodeTemplate,
-  FormRuntimeSnapshot,
   ItemRuntimeSnapshot,
   NodeRuntimeSnapshot,
   ObjectFieldDefinition,
@@ -50,6 +48,12 @@ import {
   PresentationContainerHostFactory,
   presentationHostDiagnostic,
 } from './presentation-host.js';
+import type {
+  AngularPresentationNode,
+  PresentationOwnerDefinition,
+  PresentationOwnerSnapshot,
+  PresentationProjectionOwner,
+} from './presentation-context.js';
 import {
   AngularTextProjector,
   emptyCollectionTextSnapshot,
@@ -59,12 +63,6 @@ import {
   type AngularItemTextSnapshot,
   type AngularObjectTextSnapshot,
 } from './text.js';
-
-interface ProjectedChild {
-  readonly definition: FormNodeDefinition | FormNodeTemplate;
-  readonly snapshot: NodeRuntimeSnapshot;
-  readonly address?: CollectionNodeAddress;
-}
 
 /** @internal */
 @Component({
@@ -213,9 +211,12 @@ export class SchemaNodeOutletComponent {
   template: `<ng-template #container />`,
 })
 export class SchemaPresentationOutletComponent {
-  readonly entry = input.required<PresentationEntryDefinition>();
-  readonly definition = input.required<FormDefinition>();
-  readonly snapshot = input.required<FormRuntimeSnapshot<object>>();
+  readonly entry =
+    input.required<PresentationEntryDefinition<AngularPresentationNode>>();
+  readonly owner = input.required<PresentationProjectionOwner>();
+  readonly definition = input.required<PresentationOwnerDefinition>();
+  readonly snapshot = input.required<PresentationOwnerSnapshot>();
+  readonly locale = input.required<string>();
 
   private readonly form = inject(SchemaFormDirective);
   private readonly environmentInjector = inject(EnvironmentInjector);
@@ -228,7 +229,8 @@ export class SchemaPresentationOutletComponent {
     read: ViewContainerRef,
   });
   private componentRef: ComponentRef<unknown> | undefined;
-  private lastEntry: PresentationEntryDefinition | undefined;
+  private lastEntry:
+    PresentationEntryDefinition<AngularPresentationNode> | undefined;
 
   constructor() {
     effect(() => {
@@ -246,11 +248,8 @@ export class SchemaPresentationOutletComponent {
               injector: this.injector,
               bindings: [
                 inputBinding('definition', () => entry.node),
-                inputBinding('snapshot', () => {
-                  const definition = this.definition();
-                  const index = definition.nodes.indexOf(entry.node);
-                  return this.snapshot().nodes[index];
-                }),
+                inputBinding('snapshot', () => this.nodeSnapshot(entry.node)),
+                inputBinding('address', () => this.nodeAddress(entry.node)),
               ],
             },
           );
@@ -261,34 +260,36 @@ export class SchemaPresentationOutletComponent {
           this.environmentInjector,
           this.injector,
           () => entry,
+          () => this.owner(),
           () => this.definition(),
           () => this.snapshot(),
+          () => this.locale(),
           (child, childContainer) => this.renderEntry(child, childContainer),
         );
       } catch {
         this.destroyComponent(container);
         if (entry.kind !== 'form-node')
-          this.form.reportDiagnostics([presentationHostDiagnostic(entry)]);
+          this.form.reportDiagnostics([
+            presentationHostDiagnostic(entry, this.owner()),
+          ]);
       }
     });
     this.destroyRef.onDestroy(() => this.destroyComponent(this.container()));
   }
 
   private renderEntry(
-    entry: PresentationEntryDefinition,
+    entry: PresentationEntryDefinition<AngularPresentationNode>,
     container: ViewContainerRef,
   ): ComponentRef<unknown> {
     if (entry.kind === 'form-node') {
+      const node = entry.node;
       return container.createComponent(SchemaNodeOutletComponent, {
         environmentInjector: this.environmentInjector,
         injector: this.injector,
         bindings: [
-          inputBinding('definition', () => entry.node),
-          inputBinding('snapshot', () => {
-            const definition = this.definition();
-            const index = definition.nodes.indexOf(entry.node);
-            return this.snapshot().nodes[index];
-          }),
+          inputBinding('definition', () => node),
+          inputBinding('snapshot', () => this.nodeSnapshot(node)),
+          inputBinding('address', () => this.nodeAddress(node)),
         ],
       });
     }
@@ -297,10 +298,43 @@ export class SchemaPresentationOutletComponent {
       this.environmentInjector,
       this.injector,
       () => entry,
+      () => this.owner(),
       () => this.definition(),
       () => this.snapshot(),
+      () => this.locale(),
       (child, childContainer) => this.renderEntry(child, childContainer),
     );
+  }
+
+  private nodeSnapshot(node: AngularPresentationNode): NodeRuntimeSnapshot {
+    const definition = this.definition();
+    const definitions =
+      'nodes' in definition ? definition.nodes : definition.children;
+    const snapshots = this.snapshot();
+    const children =
+      'nodes' in snapshots ? snapshots.nodes : snapshots.children;
+    const index = definitions.indexOf(node as never);
+    const snapshot = children[index];
+    if (snapshot === undefined)
+      throw new Error('Presentation node snapshot is unavailable.');
+    return snapshot;
+  }
+
+  private nodeAddress(
+    node: AngularPresentationNode,
+  ): CollectionNodeAddress | undefined {
+    const owner = this.owner();
+    if (
+      owner.kind === 'root' ||
+      owner.kind === 'object' ||
+      !('relativePath' in node)
+    )
+      return undefined;
+    return Object.freeze({
+      collectionPath: owner.ownerPath,
+      itemId: owner.itemId,
+      relativePath: node.relativePath,
+    });
   }
 
   private destroyComponent(container: ViewContainerRef): void {
@@ -359,7 +393,7 @@ class LeafOutletHostComponent {
 @Component({
   selector: 'schema-object-host',
   standalone: true,
-  imports: [forwardRef(() => SchemaNodeOutletComponent)],
+  imports: [SchemaPresentationOutletComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <fieldset [disabled]="disabled()" [attr.aria-describedby]="describedBy()">
@@ -383,11 +417,16 @@ class LeafOutletHostComponent {
           }
         </ul>
       }
-      @for (child of children(); track child.definition.key) {
-        <schema-node-outlet
-          [definition]="child.definition"
-          [snapshot]="child.snapshot"
-          [address]="child.address"
+      @for (
+        entry of definition().presentation;
+        track entry.kind === 'form-node' ? entry.node.key : entry.key
+      ) {
+        <schema-presentation-outlet
+          [entry]="entry"
+          [owner]="owner()"
+          [definition]="definition()"
+          [snapshot]="snapshot()"
+          [locale]="locale()"
         />
       }
     </fieldset>
@@ -408,6 +447,46 @@ class ObjectHostComponent {
   private lastTextIdentity: readonly unknown[] | undefined;
 
   protected readonly texts = this.textsState.asReadonly();
+  protected readonly locale = computed(
+    () => this.form.snapshot()?.locale ?? '',
+  );
+  protected readonly owner = computed<PresentationProjectionOwner>(() => {
+    const definition = this.definition();
+    if ('path' in definition) {
+      const path = definition.path as readonly string[];
+      return Object.freeze({
+        kind: 'object',
+        ownerPath: path,
+        staticOwner: Object.freeze(['object', path] as const),
+        ownerInstance: Object.freeze(['object', path] as const),
+      });
+    }
+    const address = this.address();
+    if (address === undefined)
+      throw new Error('Template object owner address is unavailable.');
+    const itemAddress = Object.freeze({
+      collectionPath: address.collectionPath,
+      itemId: address.itemId,
+    });
+    return Object.freeze({
+      kind: 'template-object',
+      ownerPath: address.collectionPath,
+      templatePath: definition.relativePath,
+      itemId: address.itemId,
+      address: itemAddress,
+      staticOwner: Object.freeze([
+        'item-template-object',
+        address.collectionPath,
+        definition.relativePath,
+      ] as const),
+      ownerInstance: Object.freeze([
+        'item-object',
+        address.collectionPath,
+        address.itemId,
+        definition.relativePath,
+      ] as const),
+    });
+  });
   protected readonly ids = computed(() => {
     const context = readRuntimeContext(this.form);
     const definition = this.definition();
@@ -451,32 +530,6 @@ class ObjectHostComponent {
         : []),
     ];
     return values.length === 0 ? null : values.join(' ');
-  });
-  protected readonly children = computed<readonly ProjectedChild[]>(() => {
-    const definition = this.definition();
-    const snapshot = this.snapshot();
-    return Object.freeze(
-      definition.children.flatMap((child, index) => {
-        const childSnapshot = snapshot.children[index];
-        if (childSnapshot === undefined) return [];
-        const parentAddress = this.address();
-        const address =
-          parentAddress === undefined || !('relativePath' in child)
-            ? undefined
-            : Object.freeze({
-                collectionPath: parentAddress.collectionPath,
-                itemId: parentAddress.itemId,
-                relativePath: child.relativePath,
-              });
-        return [
-          Object.freeze({
-            definition: child,
-            snapshot: childSnapshot,
-            ...(address === undefined ? {} : { address }),
-          }),
-        ];
-      }),
-    );
   });
 
   constructor() {
@@ -876,7 +929,7 @@ class ItemOutletComponent {
 @Component({
   selector: 'schema-item-host',
   standalone: true,
-  imports: [forwardRef(() => SchemaNodeOutletComponent)],
+  imports: [SchemaPresentationOutletComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <fieldset [attr.data-schema-item-key]="snapshot().key">
@@ -916,11 +969,16 @@ class ItemOutletComponent {
           }
         </ul>
       }
-      @for (child of children(); track child.definition.key) {
-        <schema-node-outlet
-          [definition]="child.definition"
-          [snapshot]="child.snapshot"
-          [address]="child.address"
+      @for (
+        entry of collection().item.presentation;
+        track entry.kind === 'form-node' ? entry.node.key : entry.key
+      ) {
+        <schema-presentation-outlet
+          [entry]="entry"
+          [owner]="owner()"
+          [definition]="collection().item"
+          [snapshot]="snapshot()"
+          [locale]="locale()"
         />
       }
     </fieldset>
@@ -953,6 +1011,24 @@ class ItemHostComponent {
       issueMessages: this.issueTextsState(),
     });
   });
+  protected readonly locale = computed(
+    () => this.form.snapshot()?.locale ?? '',
+  );
+  protected readonly owner = computed<PresentationProjectionOwner>(() => {
+    const collection = this.collection();
+    const snapshot = this.snapshot();
+    const path = collection.path as readonly string[];
+    const itemId = snapshot.address.itemId;
+    return Object.freeze({
+      kind: 'item',
+      ownerPath: path,
+      templatePath: Object.freeze([] as const),
+      itemId,
+      address: Object.freeze({ collectionPath: path, itemId }),
+      staticOwner: Object.freeze(['item-template', path] as const),
+      ownerInstance: Object.freeze(['item', path, itemId] as const),
+    });
+  });
   protected readonly ids = computed(() => {
     const context = readRuntimeContext(this.form);
     const snapshot = this.snapshot();
@@ -969,24 +1045,6 @@ class ItemHostComponent {
       moveLater: `${base}--move-later`,
       issues: `${base}--issues`,
     });
-  });
-  protected readonly children = computed<readonly ProjectedChild[]>(() => {
-    const collection = this.collection();
-    const snapshot = this.snapshot();
-    return Object.freeze(
-      collection.item.children.flatMap((definition, index) => {
-        const childSnapshot = snapshot.children[index];
-        if (childSnapshot === undefined) return [];
-        const address: CollectionNodeAddress = Object.freeze({
-          collectionPath: snapshot.address.collectionPath,
-          itemId: snapshot.address.itemId,
-          relativePath: definition.relativePath,
-        });
-        return [
-          Object.freeze({ definition, snapshot: childSnapshot, address }),
-        ];
-      }),
-    );
   });
 
   constructor() {
