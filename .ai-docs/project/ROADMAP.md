@@ -345,7 +345,7 @@ separado antes de repetir la revisión.
 - Wizards, acciones, slots, D-012, D-018, theming general, React/Vue, Angular
   legacy, SSR/hydration y layouts responsivos continúan Deferred.
 
-### M21 — Entrega Experimental coordinada de M20 — checkpoints locales
+### M21 — Entrega Experimental coordinada de M20 — completado
 
 - Ricard seleccionó la opción A de
   [review 145](../reviews/145-post-m20-milestone-selection.md): entregar M20
@@ -375,14 +375,64 @@ separado antes de repetir la revisión.
   tres candidatos dirty-tree deterministas y dry runs neutrales pasan sin
   hallazgos. La evidencia conserva `sourceCommit: null`; no son candidatos
   seleccionados para publicar y no hubo Git, registry ni acción externa.
+- Checkpoint 4 queda completado tras review 152 ciclo 3: el scope de 128
+  archivos excluye `angular.json`, commit privado `07755b4` está en
+  `origin/develop` y la reconstrucción limpia selecciona tres candidatos
+  byte-idénticos con `sourceCommit` exacto. No hubo registry, publicación, tag
+  ni cambio de settings.
+- El primer intento read-only de checkpoint 5 confirma registry oficial/npm
+  10.9.8 y se pausa fail-closed porque identidad, perfil, organización y acceso
+  devuelven `E401`. No se consultaron paquetes/versiones/tags ni hubo mutación.
+- Ricard restaura la sesión y review 153 ciclo 3 completa el preflight de
+  checkpoint 5 con cero hallazgos: identidad/2FA/autoridad, settings, M19
+  inmutable, ausencia M21 y core seleccionado coinciden. Publicar sigue gated.
+- Ricard publica core `0.4.0`; review 154 ciclo 5 verifica bytes, firma,
+  metadata, source/licencia, `next: 0.4.0`, `latest: 0.3.0` y consumidores
+  exact/`next`. Base/piloto/aliases restantes no cambian.
+- Review 155 ciclo 1 completa el preflight de base Angular `0.4.0`: core live,
+  candidato/peers/source, ausencia, aliases, consumidores lower/latest y dry
+  run neutral pasan sin hallazgos. Publicar base sigue gated.
+- Ricard publica base Angular `0.4.0`; review 156 ciclo 2 verifica bytes, firma,
+  metadata, peers/source/licencia, el par core/base bajo `next` y consumidores
+  exact/`next` lower/latest. Ambos `latest` siguen `0.3.0`; piloto no cambia.
+- Review 157 ciclo 2 completa el preflight del piloto `0.2.0`: autoridad, par
+  core/base live, candidato/peer/source/exports/styles, ausencia, aliases,
+  consumidores lower/latest y dry run neutral pasan sin hallazgos. Publicar el
+  piloto sigue gated.
+- Ricard publica piloto `0.2.0`; review 158 ciclo 2 verifica bytes, firma,
+  metadata, peers/exports/source/licencia, los tres paquetes bajo `next` y las
+  matrices M20 exact/`next` lower/latest. Todos los `latest` quedan sin cambios.
+- Review 159 ciclo 1 completa el preflight read-only de checkpoint 8: identidad/
+  autoridad, M21 exact/`next`, defaults M19, aliases/settings y matrices
+  exact/`next` lower/latest pasan sin hallazgos; no hubo mutación.
+- Ricard mueve solo piloto `latest` a `0.2.0`; review 160 ciclo 3 verifica el
+  alias, bytes/firma/metadata y ausencia de drift. Core/base `latest` siguen
+  `0.3.0`; la ventana mixta no aporta evidencia default coordinada.
+- Review 161 ciclo 1 corrige una expresión obsoleta demasiado amplia de
+  ROADMAP; ciclo 2 corrige el formato del acta, ciclo 3 corrige un marcador
+  documental, ciclo 4 estabiliza el segundo marcador y ciclo 5 repite el
+  preflight read-only completo de checkpoint 9 sin hallazgos ni mutación.
+- Ricard mueve solo base Angular `latest` a `0.4.0`; review 162 ciclo 2
+  verifica el alias, bytes/firma/contrato y ausencia de drift. Base/piloto son
+  M21 bajo `latest`; core `latest` sigue `0.3.0`, por lo que no existe evidencia
+  default coordinada.
+- Antes de completar el preflight separado de checkpoint 10, la primera
+  observación encuentra core `latest: 0.4.0`; no se revierte ni se muta nada
+  más. Review 163 ciclo 3 verifica core/base `next/latest: 0.4.0`, piloto
+  `next/latest: 0.2.0` y las ocho matrices exact/`next`/`latest`/unqualified sin
+  hallazgos.
+- Checkpoint 11 y PLAN-023 revisión 0 quedan completados tras review 164 ciclo 3. La revisión final repite identidad/autoridad npm, bytes y contratos
+  públicos, M19 inmutable, matriz local, 27 filas SPEC-009, regresión M18, los
+  ocho consumidores registrales y toda la documentación con cero hallazgos.
+  M21 queda Public + Experimental + Active sin autorizar otra acción externa.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** stop for explicit PLAN-023 checkpoint 4 authorization to
-   review the complete scoped diff, commit/push private `develop`, rebuild from
-   the clean committed tree and compare every candidate byte.
-2. **External gates:** no further npm mutation, Git, GitHub or repository
-   action is implied by M21 normative design selection.
+1. **Next action:** seleccionar mediante una revisión de priorización el
+   siguiente milestone o capacidad Deferred, sin asumir React, Vue, Angular
+   legacy, D-043 ni trabajo funcional nuevo.
+2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
+   provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain
    demand-driven; D-043 and D-033 are not implied by M15/M16.
 

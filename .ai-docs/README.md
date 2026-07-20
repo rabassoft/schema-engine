@@ -13,8 +13,8 @@
 - [M19 coordinated Experimental release notes](./releases/0.3.0.md) — completed
   public core/base `0.3.0` plus pilot `0.1.0` line under `next` and `latest`.
 - [M21 coordinated Experimental release notes](./releases/0.4.0.md) — reviewed
-  local core/base `0.4.0` plus pilot `0.2.0` contract; no selected candidate or
-  live M21 registry state.
+  coordinated live state: core/base `0.4.0` and pilot `0.2.0` are verified
+  exact, under `next`/`latest` and through unqualified resolution.
 
 ## Specifications
 
@@ -434,6 +434,65 @@
   — Cycle 1 found only stale pre-candidate active documentation; cycle 2
   repeated the complete frozen matrix and all 27 SPEC-009 rows with zero
   findings, leaving checkpoint 4 separately gated.
+- [PLAN-023 checkpoint 4 review](./reviews/152-plan-023-checkpoint-4-review.md)
+  — Cycle 3 verifies the scoped private commit/push and selects byte-identical
+  clean candidates with zero findings; checkpoint 5 registry preflight remains
+  separately gated.
+- [PLAN-023 checkpoint 5 pre-publication review](./reviews/153-plan-023-checkpoint-5-pre-publication-review.md)
+  — Cycle 3 verifies identity, 2FA/authority, immutable M19, absent M21 versions,
+  selected core bytes/source and neutral rehearsal with zero findings; the core
+  publish remains immediately gated.
+- [PLAN-023 checkpoint 5 live core review](./reviews/154-plan-023-checkpoint-5-live-core-review.md)
+  — Cycle 5 verifies exact public bytes, signature, metadata, aliases and
+  exact/`next` consumers with zero findings; checkpoint 6 remains separately
+  gated.
+- [PLAN-023 checkpoint 6 pre-publication review](./reviews/155-plan-023-checkpoint-6-pre-publication-review.md)
+  — Cycle 1 verifies live core, selected base bytes/peers/source, absence,
+  aliases, consumers and neutral rehearsal with zero findings; base publication
+  remains immediately gated.
+- [PLAN-023 checkpoint 6 live Angular review](./reviews/156-plan-023-checkpoint-6-live-angular-review.md)
+  — Cycle 2 verifies exact public bytes, signature, peers, aliases and
+  exact/`next` lower/latest native consumers with zero findings; checkpoint 7
+  remains separately gated.
+- [PLAN-023 checkpoint 7 pre-publication review](./reviews/157-plan-023-checkpoint-7-pre-publication-review.md)
+  — Cycle 1 finds a fixed-port collision in parallel review orchestration;
+  cycle 2 serializes the matrices and verifies authority, live prerequisites,
+  selected pilot, absence, aliases, consumers and rehearsal with zero findings.
+- [PLAN-023 checkpoint 7 live pilot review](./reviews/158-plan-023-checkpoint-7-live-pilot-review.md)
+  — Cycle 1 corrects three stale documentation-check/onboarding rules; cycle 2
+  verifies all three exact/`next` artifacts, pilot metadata/alias and serialized
+  lower/latest M20 native/pilot consumers with zero findings; checkpoint 8
+  remains separately gated.
+- [PLAN-023 checkpoint 8 pre-transition review](./reviews/159-plan-023-checkpoint-8-pre-transition-review.md)
+  — Cycle 1 verifies registry authority, signed M21 exact/`next`, immutable M19
+  defaults, aliases/settings and serialized lower/latest consumers with zero
+  findings; only the pilot `latest` mutation remains immediately gated.
+- [PLAN-023 checkpoint 8 review](./reviews/160-plan-023-checkpoint-8-review.md)
+  — Cycles 1–2 correct an overbroad ROADMAP expression and canonical review
+  marker; cycle 3 verifies the exact pilot `latest` transition, unchanged public
+  bytes/metadata/settings and the planned mixed-window boundary with zero
+  findings; checkpoint 9 remains separately gated.
+- [PLAN-023 checkpoint 9 pre-transition review](./reviews/161-plan-023-checkpoint-9-pre-transition-review.md)
+  — Cycle 1 corrects an overbroad ROADMAP stale-state expression; cycle 2
+  corrects review formatting; cycles 3–4 stabilize release markers; cycle 5
+  verifies identity/authority, signed M21 exact/`next`, the base contract,
+  checkpoint-8 aliases and serialized lower/latest consumers with zero
+  findings; only the exact base `latest` mutation awaits approval.
+- [PLAN-023 checkpoint 9 review](./reviews/162-plan-023-checkpoint-9-review.md)
+  — Cycle 1 reconciles expected stale pre-transition documentation; cycle 2
+  verifies the exact base `latest` transition, unchanged bytes/settings and the
+  intentional mixed-window boundary with zero findings; checkpoint 10 remains
+  separately gated.
+- [PLAN-023 checkpoint 10 review](./reviews/163-plan-023-checkpoint-10-review.md)
+  — Cycle 1 records the core alias arriving before its gated preflight and
+  applies fail-closed recovery; cycle 2 restores explicit pinned M19 history;
+  cycle 3 verifies coordinated exact/`next`/`latest`/unqualified consumers and
+  zero unrelated drift, leaving only the final closure review gated.
+- [PLAN-023 final review](./reviews/164-plan-023-final-review.md) — Cycle 1
+  records the restricted-sandbox Angular build abort and corrects stale active
+  mixed-window onboarding; cycle 2 corrects formatting; cycle 3 repeats all
+  eighteen areas and all 27
+  SPEC-009 rows with zero findings, completing PLAN-023/M21.
 
 ## Architecture Decision Records
 
@@ -519,7 +578,7 @@
 - [PLAN-020: Static advanced presentation layout and Angular Aria pilot](./plans/020-static-advanced-presentation-layout.md) — Completed revision 0 after final review 113 repeated all fourteen areas and 22 rows with zero findings
 - [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Completed revision 0 after final review 132 cycle 4 repeated the complete release matrix and all 22 SPEC-008 rows with zero findings
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
-- [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Approved revision 0 after review 148 cycle 2 passed all sixteen areas with zero findings; local checkpoints 1–3 only
+- [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and

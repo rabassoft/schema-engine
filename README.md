@@ -30,11 +30,13 @@ Deferred.
 M19 and PLAN-021 revision 0 are complete after final review 132 repeated the
 full workspace, artifact, source, security, registry, consumer and SPEC-008
 matrix with zero findings. Core/base `0.3.0` and the Angular Aria pilot `0.1.0`
-are public under both `next` and `latest`; exact, tagged and unqualified clean
-consumers pass. This does not authorize another Git or registry action.
-The current source manifests prepare the separately gated M21 line as core/base
-`0.4.0` and pilot `0.2.0`. Those versions are not selected candidates or live
-npm releases yet; the published and tagged line remains M19.
+remain available as the coordinated exact M19 line.
+PLAN-023 checkpoint 10 has published and byte-verified core/base Angular
+`0.4.0` plus pilot `0.2.0` under both `next` and `latest`. Exact, `next`,
+`latest` and unqualified lower/latest-compatible native/pilot consumers pass;
+the aliases remain Experimental routing and do not imply Stable. All three
+public artifacts are identical to the clean candidates from private source commit
+`07755b4cbe31098f86099db38c65930d52772fb5`.
 The live checkpoint is recorded in
 [project status](./.ai-docs/project/STATUS.md).
 
@@ -134,28 +136,36 @@ must not be treated as containing these source changes.
 
 ## Experimental packages and licensing
 
-`@rabassoft/schema-engine@0.3.0`,
-`@rabassoft/schema-engine-angular@0.3.0` and
-`@rabassoft/schema-engine-angular-aria@0.1.0` are public and verified on npm.
-`next` is the recommended Experimental channel and `latest` aliases the same
-coordinated versions. Registry routing does not promote any API to Stable.
+`@rabassoft/schema-engine@0.4.0`,
+`@rabassoft/schema-engine-angular@0.4.0` and
+`@rabassoft/schema-engine-angular-aria@0.2.0` are public and verified on npm.
+All three `next` aliases resolve to those M21 versions. Core/base `latest`
+and unqualified resolution now select `0.4.0`, while pilot `latest` and
+unqualified resolution select `0.2.0`. This is the verified coordinated
+Experimental line; registry routing does not promote any API to Stable.
 
-Install explicit versions or the Experimental channel:
+Install the verified M21 line from the Experimental channel:
 
 ```sh
-npm install @rabassoft/schema-engine@next
-npm install @rabassoft/schema-engine-angular@next
+npm install @rabassoft/schema-engine@next @rabassoft/schema-engine-angular@next @rabassoft/schema-engine-angular-aria@next
 ```
 
-Prefer `@next` or an explicit version. An unqualified install resolves npm's
-observed `latest` alias but carries the same Public + Experimental + Active
-contract and no support SLA.
+The coordinated M19 three-package line remains available through explicit
+versions:
 
-The workspace manifests currently contain the reviewed M21 source versions
-`0.4.0`, `0.4.0` and `0.2.0`. Do not install or describe them as live until
-their exact packages and aliases have been separately published and observed.
-See the [M21 candidate-state release notes](./.ai-docs/releases/0.4.0.md) for
-the migration, compatibility and immutable-recovery contract.
+```sh
+npm install @rabassoft/schema-engine@0.3.0 @rabassoft/schema-engine-angular@0.3.0 @rabassoft/schema-engine-angular-aria@0.1.0
+```
+
+For M21, prefer exact versions for reproducible installs; coordinated `@next`,
+`@latest` and unqualified installs resolve the same reviewed line. Every
+package remains Public + Experimental + Active with no support SLA.
+
+The workspace manifests contain M21 source versions `0.4.0`, `0.4.0` and
+`0.2.0`; all are public and verified exactly, under `next`/`latest` and through
+unqualified resolution. See the
+[M21 release notes](./.ai-docs/releases/0.4.0.md) for migration, compatibility
+and immutable recovery.
 
 All three packages are available under GNU AGPL v3 only (`AGPL-3.0-only`), including
 commercial use under its conditions. A separate paid commercial license may be

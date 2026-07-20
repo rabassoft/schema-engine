@@ -5,21 +5,22 @@ Engine.
 
 ## Release status
 
-- Public verified Experimental line: `0.3.x`; exact `0.3.0` is available under
-  both `next` and `latest`.
-- Source package manifest: `0.4.0`; this is a reviewed M21 source target, not a
-  selected candidate or observed npm release.
+- Public verified Experimental `0.4.0` is available exactly and under both
+  `next` and `latest` during coordinated delivery.
+- Source package manifest: `0.4.0`; the public bytes are identical to the clean
+  candidate selected from commit `07755b4c`.
+- Required core `0.4.0` is likewise public and verified under `next`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- Recommended channel: npm dist-tag `next` or an explicit version. The observed
-  `latest` remains Experimental routing and does not
-  imply stability.
+- Recommended channel: an explicit version, `next` or `latest`. The observed
+  aliases resolve the same Experimental `0.4.0` and do not imply stability.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 
-The following command installs the verified public Experimental `0.3.0` line:
+The following commands install the verified public Experimental `0.4.0` pair:
 
 ```sh
+npm install @rabassoft/schema-engine@next
 npm install @rabassoft/schema-engine-angular@next
 ```
 
@@ -28,8 +29,8 @@ npm install @rabassoft/schema-engine-angular@next
 Consumers install both Schema Engine packages and aligned Angular peers:
 
 ```text
-@rabassoft/schema-engine-angular 0.3.x
-@rabassoft/schema-engine ^0.3.0
+@rabassoft/schema-engine-angular 0.4.x
+@rabassoft/schema-engine ^0.4.0
 @angular/core >=22.0.6 <23.0.0
 @angular/forms >=22.0.6 <23.0.0
 ```
@@ -41,16 +42,16 @@ version.
 | Adapter | Core     | Angular core/forms | Build Angular | Tested Angular endpoints | Status                       |
 | ------- | -------- | ------------------ | ------------- | ------------------------ | ---------------------------- |
 | `0.3.x` | `^0.3.0` | `>=22.0.6 <23.0.0` | `22.0.6`      | `22.0.6` / `22.0.7`      | Public Experimental verified |
-| `0.4.x` | `^0.4.0` | `>=22.0.6 <23.0.0` | `22.0.6`      | `22.0.6` / `22.0.7`      | Reviewed M21 source target   |
+| `0.4.x` | `^0.4.0` | `>=22.0.6 <23.0.0` | `22.0.6`      | `22.0.6` / `22.0.7`      | Public Experimental verified |
 
-The latest compatible endpoint verified at M18 closure is Angular `22.0.7`.
-Later patches require fresh evidence and do not change the lower bound.
+The latest compatible endpoint verified for public `0.4.0` is Angular
+`22.0.7`. Later patches require fresh evidence and do not change the lower
+bound.
 
 ## Supported import and boundary
 
-> This README distinguishes the public verified `0.3.x` Experimental line from
-> the local `0.4.x` M21 source target. M21 has no selected candidate or live
-> registry evidence yet.
+> Exact base Angular `0.4.0`, `next`, `latest` and unqualified consumers are
+> verified with public core `0.4.0`.
 
 Import only from `@rabassoft/schema-engine-angular`. Deep imports into `dist`,
 `src`, or other physical paths are unsupported.
@@ -83,9 +84,9 @@ Experimental source migration with core's required `nullable` member.
 The current source projects static sections, tabs, accordions and logical grids
 at the root and on direct nested-object and collection-item template owners
 through the Public Experimental container SPI with mandatory native fallback.
-Published `0.3.x` artifacts remain the earlier root-only contract. The source
-manifest's `0.4.0` target includes these local forests but is unavailable to
-consumers until separately published and observed. Arrays of primitives, arrays inside
+Published `0.3.x` artifacts remain the earlier root-only historical contract.
+Published `0.4.0` includes these local forests and is available by exact
+version, `next` or `latest`. Arrays of primitives, arrays inside
 collection item templates, tuples, external references, composition, workflow,
 generated identity, implicit Add controls and custom collection renderers remain
 outside the supported boundary.

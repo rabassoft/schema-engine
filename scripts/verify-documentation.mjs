@@ -340,12 +340,6 @@ const staleCurrentClaims = [
     description: 'unobserved completed M21 publication state',
   },
   {
-    path: 'README.md',
-    pattern:
-      /(?:schema-engine@0\.4\.0|schema-engine-angular@0\.4\.0|schema-engine-angular-aria@0\.2\.0)[^\n]{0,100}(?:public and verified|available on npm)/i,
-    description: 'unobserved M21 root onboarding publication claim',
-  },
-  {
     path: '.ai-docs/project/ROADMAP.md',
     pattern: /No se ha cambiado ningún manifest, versión, peer/i,
     description: 'pre-checkpoint-1 M21 source state',
@@ -370,6 +364,465 @@ const staleCurrentClaims = [
     pattern:
       /M21 release delivery:[\s\S]{0,400}checkpoint 3 es la siguiente acción/i,
     description: 'pre-completion M21 checkpoint 3 deferred state',
+  },
+  {
+    path: 'README.md',
+    pattern: /Those versions are not selected candidates/i,
+    description: 'pre-selection M21 root onboarding state',
+  },
+  {
+    path: 'packages/core/README.md',
+    pattern: /not a\s+selected candidate or observed npm release/i,
+    description: 'pre-selection M21 core onboarding state',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern: /not a\s+selected candidate or observed npm release/i,
+    description: 'pre-selection M21 Angular onboarding state',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern: /not a\s+selected candidate or observed npm release/i,
+    description: 'pre-selection M21 pilot onboarding state',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern: /sourceCommit: null|Reviewed dirty-tree candidate evidence/i,
+    description: 'pre-selection M21 release evidence',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /PLAN-023 checkpoint 4 authorization/i,
+    description: 'pre-completion M21 checkpoint 4 next action',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern: /await separate\s+authorization for PLAN-023 checkpoint 4/i,
+    description: 'pre-completion M21 checkpoint 4 status',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /Restore the npm session interactively|preflight is paused fail-closed|npm session is invalid/i,
+    description: 'paused checkpoint 5 authentication status after recovery',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern: /preflight authorized and paused at npm authentication/i,
+    description: 'paused checkpoint 5 release state after recovery',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,240}(?:restaura[^\n]*sesión npm|reinicia[^\n]*preflight)/i,
+    description: 'paused checkpoint 5 roadmap action after recovery',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern: /M21 release delivery:[\s\S]{0,500}pausado en `E401`/i,
+    description: 'paused checkpoint 5 deferred action after recovery',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await immediate approval[^\n]*core|Selected M21 source:[\s\S]{0,120}three[^\n]*not published/i,
+    description: 'pre-publication core checkpoint 5 status',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern:
+      /no M21 package or alias has been published|The core remains unpublished/i,
+    description: 'pre-publication core release state',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /they are not live npm releases|Do not install or describe them as live until/i,
+    description: 'pre-publication aggregate M21 onboarding state',
+  },
+  {
+    path: 'README.md',
+    pattern: /`latest` aliases the same\s+coordinated versions/i,
+    description: 'pre-publication coordinated M19 channel summary',
+  },
+  {
+    path: 'packages/core/README.md',
+    pattern:
+      /not an observed npm release|no live registry evidence yet|unavailable\s+to consumers until separately published/i,
+    description: 'pre-publication core onboarding state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,220}publicar solo core `0\.4\.0` bajo `next`/i,
+    description: 'pre-publication core roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,500}aprobación inmediata de publicar solo core/i,
+    description: 'pre-publication core deferred action',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern:
+      /\*\*Implementation:\*\*[\s\S]{0,320}publication remains separately gated/i,
+    description: 'pre-publication checkpoint 5 plan header',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await separate\s+authorization for PLAN-023 checkpoint 6's read-only|checkpoint 6 read-only preflight: reprove/i,
+    description: 'pre-preflight checkpoint 6 status',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern: /checkpoint 6 read-only preflight remains separately gated/i,
+    description: 'pre-preflight checkpoint 6 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,220}autorización separada del preflight[\s\S]{0,100}checkpoint 6/i,
+    description: 'pre-preflight checkpoint 6 roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,600}autorización separada del preflight read-only de checkpoint 6/i,
+    description: 'pre-preflight checkpoint 6 deferred action',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await immediate approval[^\n]*base|Selected M21 source:[\s\S]{0,160}clean base and pilot candidates remain unpublished/i,
+    description: 'pre-publication base checkpoint 6 status',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern:
+      /selected base `0\.4\.0` and pilot `0\.2\.0` remain unpublished|Base `0\.4\.0` remains unpublished|Only the first command is currently available/i,
+    description: 'pre-publication base checkpoint 6 release state',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /checkpoint 5 has now published|Base Angular `0\.4\.0` and\s+pilot `0\.2\.0` remain selected clean candidates|Do not mix\s+core `@next` with base Angular `@next`/i,
+    description: 'pre-publication base aggregate onboarding state',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern:
+      /Public verified Experimental line: `0\.3\.x`|not an observed npm release|does not make the base Angular `0\.4\.0` candidate available|base `0\.4\.0` has only|unavailable to\s+consumers until separately published/i,
+    description: 'pre-publication base onboarding state',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern: /neither dependent package in this tuple\s+is live yet/i,
+    description: 'pre-publication base pilot-onboarding state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,220}publicar solo base Angular `0\.4\.0` bajo `next`/i,
+    description: 'pre-publication base roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,650}publicar solo base Angular `0\.4\.0` bajo `next`/i,
+    description: 'pre-publication base deferred action',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern: /\*\*Implementation:\*\* Checkpoints 1–5 completed/i,
+    description: 'pre-completion checkpoint 6 plan header',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await separate\s+authorization for checkpoint 7's read-only|checkpoint 7 read-only pre-publication gate/i,
+    description: 'pre-preflight checkpoint 7 status',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern: /checkpoint 7 pilot preflight remains separately gated/i,
+    description: 'pre-preflight checkpoint 7 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,220}preflight(?: read-only)? de checkpoint 7/i,
+    description: 'pre-preflight checkpoint 7 roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,700}autorización separada del preflight read-only de checkpoint 7/i,
+    description: 'pre-preflight checkpoint 7 deferred action',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await immediate approval[^\n]*pilot|Selected M21 source:[\s\S]{0,180}pilot[^\n]*unpublished/i,
+    description: 'pre-publication pilot checkpoint 7 status',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern:
+      /selected pilot `0\.2\.0` remains unpublished|pilot `0\.2\.0` remains unpublished|pilot publication remains immediately gated|The first two commands are currently available/i,
+    description: 'pre-publication pilot checkpoint 7 release state',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /pilot `0\.2\.0` remains (?:a selected clean candidate|unpublished|unavailable)|Do not mix base Angular `@next` with pilot `@next`/i,
+    description: 'pre-publication pilot aggregate onboarding state',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern:
+      /Public verified Experimental `0\.1\.0`|not an observed npm release|not-yet-live|pilot `0\.2\.0` remains unavailable|Do not combine pilot `@next` with base Angular `@next`/i,
+    description: 'pre-publication pilot onboarding state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,220}publicar solo (?:el )?piloto `0\.2\.0` bajo `next`/i,
+    description: 'pre-publication pilot roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,750}publicar solo (?:el )?piloto `0\.2\.0` bajo `next`/i,
+    description: 'pre-publication pilot deferred action',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern: /\*\*Implementation:\*\* Checkpoints 1–6 completed/i,
+    description: 'pre-completion checkpoint 7 plan header',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await separate\s+authorization for checkpoint 8's read-only|checkpoint 8 read-only pilot-`latest` preflight/i,
+    description: 'pre-preflight checkpoint 8 status',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern: /checkpoint 8 pilot-`latest` preflight remains separately gated/i,
+    description: 'pre-preflight checkpoint 8 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,220}preflight(?: read-only)? de checkpoint 8/i,
+    description: 'pre-preflight checkpoint 8 roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,800}autorización separada[\s\S]{0,100}preflight read-only de checkpoint 8/i,
+    description: 'pre-preflight checkpoint 8 deferred action',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await\s+immediate approval[^\n]*pilot `latest`|Stop for separate immediate approval[\s\S]{0,160}schema-engine-angular-aria@0\.2\.0 latest/i,
+    description: 'pre-transition checkpoint 8 status',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern:
+      /pilot `latest`\s+remains `0\.1\.0`|only the exact pilot `latest` command awaits immediate approval/i,
+    description: 'pre-transition checkpoint 8 release state',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /pilot `latest` remains `0\.1\.0`|coordinated default line under `latest`|M19 three-package line remains available through explicit\s+versions or `latest`/i,
+    description: 'pre-transition checkpoint 8 root onboarding state',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern:
+      /`latest` intentionally remains at `0\.1\.0`|observed `latest` remains\s+Experimental `0\.1\.0`|coordinated M19 default fallback/i,
+    description: 'pre-transition checkpoint 8 pilot onboarding state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern:
+      /Next action:[\s\S]{0,240}dist-tag add @rabassoft\/schema-engine-angular-aria@0\.2\.0 latest/i,
+    description: 'pre-transition checkpoint 8 roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,900}aprobación inmediata[\s\S]{0,120}dist-tag piloto `latest`/i,
+    description: 'pre-transition checkpoint 8 deferred action',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern: /\*\*Implementation:\*\* Checkpoints 1–7 completed/i,
+    description: 'pre-completion checkpoint 8 plan header',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /Exact next action[\s\S]{0,240}checkpoint 9's read-only base Angular/i,
+    description: 'pre-preflight checkpoint 9 status action',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern: /checkpoint 9 base-`latest` preflight remains separately gated/i,
+    description: 'pre-preflight checkpoint 9 release state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /Next action:[\s\S]{0,240}read-only de checkpoint 9/i,
+    description: 'pre-preflight checkpoint 9 roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,1100}siguiente acción exacta[\s\S]{0,180}preflight read-only de checkpoint 9/i,
+    description: 'pre-preflight checkpoint 9 deferred action',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern:
+      /\*\*Implementation:\*\*[\s\S]{0,180}checkpoint 9 remains separately gated/i,
+    description: 'pre-preflight checkpoint 9 plan header',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /Exact next action[\s\S]{0,240}schema-engine-angular@0\.4\.0 latest/i,
+    description: 'pre-transition checkpoint 9 status action',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern:
+      /base-`latest` mutation awaits immediate approval|Only the exact base Angular `latest` command remains gated/i,
+    description: 'pre-transition checkpoint 9 release state',
+  },
+  {
+    path: 'README.md',
+    pattern: /core\/base `latest` remain `0\.3\.0`/i,
+    description: 'pre-transition checkpoint 9 root onboarding state',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern:
+      /`latest` intentionally remains at `0\.3\.0`|`latest` remains the earlier public `0\.3\.0`|`0\.3\.x`[^\n]{0,100}under `latest`/i,
+    description: 'pre-transition checkpoint 9 Angular onboarding state',
+  },
+  {
+    path: 'packages/angular-aria/README.md',
+    pattern: /`0\.1\.x`[^\n]{0,100}under `latest`/i,
+    description: 'stale pilot latest historical statement',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /Next action:[\s\S]{0,240}schema-engine-angular@0\.4\.0 latest/i,
+    description: 'pre-transition checkpoint 9 roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,1200}siguiente acción exacta[\s\S]{0,180}schema-engine-angular@0\.4\.0 latest/i,
+    description: 'pre-transition checkpoint 9 deferred action',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern:
+      /\*\*Implementation:\*\*[\s\S]{0,180}checkpoint 9 pre-transition passed/i,
+    description: 'pre-completion checkpoint 9 plan header',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern: /Exact next action[\s\S]{0,240}checkpoint 10's read-only core/i,
+    description: 'pre-transition checkpoint 10 status action',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern:
+      /checkpoint 10 core-`latest` preflight remains separately gated|while core `latest` remains `0\.3\.0` in the planned mixed window/i,
+    description: 'pre-transition checkpoint 10 release state',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /core `latest` remains `0\.3\.0` in the planned[\s\S]{0,80}mixed window/i,
+    description: 'pre-transition checkpoint 10 root onboarding state',
+  },
+  {
+    path: 'packages/core/README.md',
+    pattern:
+      /`latest` intentionally remains at `0\.3\.0`|unqualified installs intentionally remain on verified M19|`0\.3\.x`[^\n]{0,100}under `latest`/i,
+    description: 'pre-transition checkpoint 10 core onboarding state',
+  },
+  {
+    path: 'packages/angular/README.md',
+    pattern: /Core `latest`[\s\S]{0,80}remains `0\.3\.0`/i,
+    description: 'pre-transition checkpoint 10 Angular onboarding state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /Next action:[\s\S]{0,240}read-only de checkpoint 10/i,
+    description: 'pre-transition checkpoint 10 roadmap action',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,1300}siguiente acción exacta[\s\S]{0,180}preflight read-only de checkpoint 10/i,
+    description: 'pre-transition checkpoint 10 deferred action',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern: /\*\*Implementation:\*\* Checkpoints 1–9 completed/i,
+    description: 'pre-completion checkpoint 10 plan header',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /Core\/base `latest`\s+remain `0\.3\.0`|aliases form the planned mixed\s+window/i,
+    description: 'pre-completion M21 root onboarding state',
+  },
+  {
+    path: '.ai-docs/releases/0.4.0.md',
+    pattern:
+      /checkpoint 11 final closure remains separately gated|Their `latest` and unqualified installs form a planned mixed\s+window/i,
+    description: 'pre-completion M21 release state',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern:
+      /await separate authorization for checkpoint 11|Exact next action[\s\S]{0,240}checkpoint 11/i,
+    description: 'pre-completion M21 status state',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /Next action:[\s\S]{0,240}checkpoint 11/i,
+    description: 'pre-completion M21 roadmap state',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern:
+      /M21 release delivery:[\s\S]{0,1400}siguiente acción exacta[\s\S]{0,180}checkpoint 11/i,
+    description: 'pre-completion M21 deferred state',
+  },
+  {
+    path: '.ai-docs/plans/023-coordinated-experimental-0-4-release.md',
+    pattern:
+      /\*\*Status:\*\* Approved|\*\*Implementation:\*\*[\s\S]{0,180}Checkpoints 1–10 completed/i,
+    description: 'pre-completion M21 plan state',
+  },
+  {
+    path: '.ai-docs/README.md',
+    pattern:
+      /PLAN-023:[^\n]{0,180}Approved revision 0|checkpoint 11 final closure separately gated/i,
+    description: 'pre-completion M21 documentation-index state',
   },
 ];
 const ignoredDirectories = new Set([
@@ -579,35 +1032,43 @@ const requiredOnboardingFragments = new Map([
   [
     'README.md',
     [
-      'published and tagged line remains M19',
-      'reviewed M21 source versions',
-      'Do not install or describe them as live',
+      'core/base Angular\n`0.4.0` plus pilot `0.2.0` under both `next` and `latest`',
+      'Exact, `next`,\n`latest` and unqualified lower/latest-compatible native/pilot consumers pass',
+      'npm install @rabassoft/schema-engine@next @rabassoft/schema-engine-angular@next @rabassoft/schema-engine-angular-aria@next',
     ],
   ],
   [
     'packages/core/README.md',
     [
-      'Public verified Experimental line: `0.3.x`',
+      'Public verified Experimental `0.4.0`',
       'Source package manifest: `0.4.0`',
-      'M21 has no selected candidate or live',
+      'under both\n  `next` and `latest`',
+      'Exact core `0.4.0`, `next`, `latest` and unqualified clean-consumer evidence',
+      'Published core `0.4.0` includes these local forests',
     ],
   ],
   [
     'packages/angular/README.md',
     [
-      'Public verified Experimental line: `0.3.x`',
+      'Public verified Experimental `0.4.0`',
       'Source package manifest: `0.4.0`',
       '| `0.4.x` | `^0.4.0`',
-      'M21 has no selected candidate or live',
+      'Required core `0.4.0` is likewise public and verified under `next`',
+      'under both\n  `next` and `latest`',
+      '`next`, `latest` and unqualified consumers are\n> verified with public core `0.4.0`',
+      'Published `0.4.0` includes these local forests',
     ],
   ],
   [
     'packages/angular-aria/README.md',
     [
-      'Public verified Experimental `0.1.0`',
+      'Public verified Experimental `0.2.0`',
       'Source package manifest: `0.2.0`',
-      'pilot `0.2.x` with base Angular\n`^0.4.0`',
-      'unavailable to consumers until',
+      'selected from commit',
+      'under both\n  `next` and `latest`',
+      'pilot `0.2.x` with base Angular `^0.4.0`',
+      'Core/base Angular `0.4.0`\nand pilot `0.2.0` are public together under both `next` and `latest`',
+      'Published `0.2.0`\nincludes these local forests',
     ],
   ],
 ]);
@@ -687,12 +1148,29 @@ if (
 
 const m21ReleaseNote = await read(m21ReleaseNotePath);
 const requiredM21ReleaseFragments = [
-  'no publishable candidate is selected',
-  'no M21 package or alias has been',
-  'dirty-tree comparison',
-  'sourceCommit: null',
+  'are public and byte-verified under `next`',
+  'planned mixed window',
+  'Selected clean candidate evidence',
+  '07755b4cbe31098f86099db38c65930d52772fb5',
   'neutralDryRun: true',
-  'Two consecutive preparations produced identical',
+  'produced bytes identical to every',
+  'Review 153 cycle 3 passed all nine',
+  'Review 154 cycle 5 verifies the',
+  'Review 155 cycle 1 subsequently verified',
+  'Review 156 cycle 2 proves',
+  'Review 157 cycle 2 reverified',
+  'Review 158 cycle 2 proves',
+  'Review 159 cycle 1 then reverified',
+  'Review 160 cycle 3 verifies',
+  'Review 161 cycle 5 then reverified',
+  'Review 162 cycle 2 verifies',
+  'Review 163 cycle 3 verifies',
+  'final review 164',
+  'PLAN-023 revision 0 and M21 completed',
+  'under both `next` and `latest`',
+  'unqualified lower/latest native/pilot consumers',
+  'No `latest` or unqualified consumer evidence',
+  'All three commands are currently available',
   'Public + Experimental + Active',
   'private repository',
   'no advertised repository URL',
@@ -725,16 +1203,6 @@ for (const fragment of requiredM21ReleaseFragments) {
 }
 
 const invalidM21ReleaseClaims = [
-  {
-    pattern:
-      /(?:M21|0\.4\.0\/0\.4\.0\/0\.2\.0) (?:is|are) (?:published|live|available on npm)/i,
-    description: 'unobserved M21 publication',
-  },
-  {
-    pattern:
-      /(?:next|latest) (?:currently |already )?(?:resolves?|points?) to (?:M21|0\.4\.0)/i,
-    description: 'unobserved M21 alias',
-  },
   {
     pattern: /(?:repository is public|public GitHub repository)/i,
     description: 'unobserved public repository state',

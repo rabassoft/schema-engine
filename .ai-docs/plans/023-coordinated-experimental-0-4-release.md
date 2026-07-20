@@ -1,6 +1,6 @@
 # PLAN-023: Coordinated Experimental M20 delivery
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-20
 - **Approval date:** 2026-07-20
 - **Revision:** 0 — initial M21 three-established-package release plan
@@ -20,9 +20,9 @@
   passed all sixteen areas with zero findings
 - **Milestone:** M21 — coordinated Public Experimental M20 delivery
 - **Capabilities:** only completed M20 plus promoted D-034/D-040
-- **Implementation:** Checkpoints 1–3 completed after
-  [`review 151`](../reviews/151-plan-023-checkpoint-3-review.md) cycle 2;
-  checkpoint 4 remains separately gated
+- **Implementation:** Checkpoints 1–11 completed after final
+  [`review 164`](../reviews/164-plan-023-final-review.md) cycle 3 passed the
+  complete release closure with zero findings
 
 ## 1. Goal and hard boundary
 
@@ -531,3 +531,219 @@ registry, authentication, publication, tag or external action occurred.
 There is no active implementation task. Checkpoint 4 must stop for explicit
 authorization before scoped diff review, commit/private push and clean
 committed-tree byte comparison.
+
+### 19.4 Implementation checkpoint 4
+
+Checkpoint 4 completed on 20 July 2026. The reviewed scope contained 128
+M20/M21 source, reference, package, release-tooling and documentation files.
+The unrelated `angular.json` CLI analytics opt-out was excluded unchanged.
+
+Commit `07755b4cbe31098f86099db38c65930d52772fb5` was created as
+`Rabassoft <ricard@rabassoft.com>` with subject
+`feat: add recursive local presentation and prepare 0.4 release` and pushed to
+private `origin/develop`. A detached clean worktree at that exact commit passed
+the frozen install and complete candidate preparation. Its three artifacts are
+byte-identical to checkpoint-3 inputs and evidence records both `baseCommit`
+and `sourceCommit` as the exact commit plus `neutralDryRun: true`.
+
+Review 152 cycle 1 corrected the clean environment's missing ignored historical
+baselines; cycle 2 completed the clean reconstruction and identified only stale
+pre-selection active documentation; cycle 3 repeated the complete applicable
+evidence, documentation and diff review with zero findings. The clean bytes are
+the only selected M21 candidates. Checkpoint 5 must stop for separate
+authorization before any registry read, and its publish command retains a later
+independent immediate gate.
+
+### 19.5 Checkpoint 5 pre-publication gate
+
+Ricard authorized the read-only preflight on 20 July 2026. The first attempt
+confirmed npm `10.9.8` and exact registry `https://registry.npmjs.org/`, but
+`npm whoami`, profile, organization and access reads returned `E401`. The gate
+stopped before any package metadata, version or tag query. No authentication
+change, publication, dist-tag, package setting or other mutation occurred.
+
+Ricard restored the npm session interactively. Review 153 cycle 2 restarted the
+complete preflight and found only an unusable global npm cache during the
+credential-free neutral dry run. Cycle 3 repeated all nine areas with a fresh
+temporary cache and passed with zero findings: exact registry/npm,
+`ricardrabasso`, verified email, write-protected 2FA, Rabassoft owner/read-write
+authority, public access, M21 version absence, immutable M19 bytes and aliases,
+selected core bytes/source/manifest/license and no unrelated drift all match
+the approved baseline.
+
+No publication, dist-tag, package setting, GitHub, repository or provenance
+mutation occurred. The pre-publication gate is complete; stop for independent
+immediate approval of only the exact core command in section 8.
+
+Ricard ran that exact command on 20 July 2026. Review 154 cycle 1 corrected the
+necessarily stale pre-publication documentation and an unsafe mixed-generation
+root onboarding example. Cycle 2 corrected stale active documentation/link
+counts; cycle 3 corrected two remaining active routing/plan-header phrases;
+cycle 4 removed volatile active document/link counts; cycle 5 repeated all ten
+areas with zero findings.
+The public artifact is byte-identical to the selected 218,187-byte candidate,
+retains exact integrity and an npm registry signature, public access, sole
+expected maintainer, manifest/source/license and no repository/provenance.
+
+Core exact/`next` consumers pass and `next` alone resolves to `0.4.0`; core
+`latest` remains `0.3.0`, base remains `next`/`latest: 0.3.0` and pilot remains
+`next`/`latest: 0.1.0`. Checkpoint 5 is complete. Checkpoint 6 must stop for
+separate authorization before its read-only preflight, and base publication
+retains a later independent immediate gate.
+
+### 19.6 Checkpoint 6 pre-publication gate
+
+Ricard authorized the read-only base Angular preflight on 20 July 2026. Review
+155 cycle 1 passed all nine areas with zero findings: authenticated authority,
+live byte-identical core `0.4.0`, selected base bytes/source, packed core peer
+`^0.4.0`, aligned Angular peers, package source/license, absent base `0.4.0`,
+unchanged aliases/settings, lower/latest native consumers and a credential-free
+neutral dry run all match the approved baseline.
+
+No publication or registry mutation occurred. The pre-publication gate is
+complete; stop for independent immediate approval of only the exact base
+Angular command in section 9.
+
+Ricard ran that exact command on 20 July 2026. Review 156 cycle 1 corrected the
+necessarily stale pre-publication documentation, ambiguous M19/M21 source
+attribution and an outdated Angular-endpoint description. Cycle 2 repeated all
+ten areas with zero findings. The public 126,564-byte artifact is
+byte-identical to the selected candidate, retains exact SHA-512/integrity and
+an npm registry signature, public access, sole expected maintainer, manifest/
+peers/source/license and no repository/provenance metadata.
+
+Exact and `next` clean consumers resolve the public core/base `0.4.0` pair and
+pass at Angular `22.0.6` and `22.0.7`. Core/base `latest` remain `0.3.0`; the
+pilot remains `next`/`latest: 0.1.0`. Checkpoint 6 is complete. Checkpoint 7
+must stop for separate authorization before its read-only pilot preflight, and
+pilot publication retains a later independent immediate gate.
+
+### 19.7 Checkpoint 7 pre-publication gate
+
+Ricard authorized the read-only Angular Aria pilot preflight on 20 July 2026.
+Review 157 cycle 1 found only that the review procedure ran both fixed-port
+Chromium matrices concurrently, causing a port collision. Cycle 2 repeated all
+nine areas with the lower/latest matrices serialized and zero findings:
+authenticated identity/2FA/authority, live byte-identical core/base `0.4.0`,
+selected pilot bytes/source, packed base peer `^0.4.0`, unchanged Angular/Aria/
+CDK ranges, exports/styles/source/license, absent pilot `0.2.0`, unchanged
+aliases/settings, lower/latest native and pilot consumers and a credential-free
+neutral dry run all match the approved baseline.
+
+No publication or registry mutation occurred. The pre-publication gate is
+complete; stop for independent immediate approval of only the exact pilot
+command in section 10.
+
+Ricard ran that exact command on 20 July 2026. Review 158 cycle 1 corrected three
+stale documentation-check/onboarding rules. Cycle 2 repeated all ten areas with
+zero findings. Public pilot `0.2.0` is byte-identical to the selected 28,618-byte
+candidate and retains exact integrity, an npm registry signature, public access,
+sole expected maintainer, manifest/peers/exports/styles/source/license and no
+repository/provenance metadata.
+
+All three exact and `next` packages resolve to inspected M21 bytes. Serialized
+lower/latest native and pilot M20 consumers pass partial compilation, strict
+typecheck, unit tests, production builds and Chromium smoke. Core/base `latest`
+remain `0.3.0` and pilot `latest` remains `0.1.0`. Checkpoint 7 is complete.
+Checkpoint 8 must stop for separate authorization before its read-only pilot
+`latest` preflight, and the dist-tag mutation retains a later independent gate.
+
+### 19.8 Checkpoint 8 pre-transition gate
+
+Ricard authorized the read-only pilot-`latest` preflight on 20 July 2026.
+Review 159 cycle 1 passed all nine areas with zero findings: registry/tool,
+identity/2FA/authority, byte-identical signed M21 exact/`next`, immutable M19
+defaults, manifests/peers/exports/source/license, aliases/settings and
+serialized exact/`next` lower/latest native/pilot consumers all match the
+approved baseline. One transient registry `ENOTFOUND` retried successfully and
+did not change package resolution or evidence.
+
+No dist-tag, package setting, GitHub, repository or provenance mutation
+occurred. The read-only gate is complete; stop for independent immediate
+approval of only the exact pilot `latest` command in section 11. Base/core
+aliases and every other mutation remain separately gated.
+
+Ricard ran that exact command on 20 July 2026. Review 160 cycle 1 corrected one
+overbroad checkpoint-8 ROADMAP stale-state expression. Cycle 2 corrected the
+canonical release-review marker. Cycle 3 repeated all eight post-transition
+areas with zero findings. Pilot resolves
+`next`/`latest: 0.2.0` to its selected signed bytes; core/base remain
+`next: 0.4.0`, `latest: 0.3.0`. Pilot metadata, peers, exports, styles,
+source/license, public access and provenance-disabled boundary remain exact,
+with no unrelated alias/settings drift.
+
+No `latest` or unqualified consumer evidence is accepted in this planned mixed
+window; review 159's exact/`next` evidence remains applicable. Checkpoint 8 is
+complete. At that boundary checkpoint 9 still required separate authorization
+for its read-only base Angular `latest` preflight, while the base dist-tag
+mutation retained a later independent immediate gate.
+
+### 19.9 Checkpoint 9 pre-transition gate
+
+Ricard authorized the read-only base-`latest` preflight on 20 July 2026.
+Review 161 cycle 1 corrected one overbroad ROADMAP stale-state expression.
+Cycle 2 corrected formatting in the new review document. Cycle 3 corrected a
+required-marker line break in the release note. Cycle 4 corrected the second
+literal release marker. Cycle 5 repeated all eight areas with zero findings:
+npm tool,
+registry, identity/2FA/authority, byte-identical signed M21 exact/`next`, exact
+base manifest/peers/exports/source/license, checkpoint-8 aliases and serialized
+exact/`next` lower/latest native/pilot consumers all match the approved
+baseline.
+
+No dist-tag, package setting, GitHub, repository or provenance mutation
+occurred. The read-only gate is complete; stop for independent immediate
+approval of only the exact base Angular `latest` command in section 12. Core
+and every other mutation remain separately gated.
+
+Ricard ran that exact command on 20 July 2026. Review 162 cycle 1 reconciled the
+expected stale pre-transition active documentation. Cycle 2 repeated all eight
+post-transition areas with zero findings. Base resolves
+`next`/`latest: 0.4.0` to its selected signed bytes; pilot remains
+`next`/`latest: 0.2.0`; core remains `next: 0.4.0`, `latest: 0.3.0`. Base
+metadata, peers, exports, source/license, public access and
+provenance-disabled boundary remain exact, with no unrelated alias/settings
+drift.
+
+No `latest` or unqualified consumer evidence is accepted in this planned mixed
+window; review 161's exact/`next` evidence remains applicable. Checkpoint 9 is
+complete. Checkpoint 10 must stop for separate authorization before its
+read-only core `latest` preflight, and the core dist-tag mutation retains a
+later independent immediate gate.
+
+Before that preflight completed, Ricard's subsequent “hecho” corresponded to
+the exact core command in section 13 already having run. The first registry
+observation therefore found core `next/latest: 0.4.0`. No rollback or other
+mutation was attempted; verification switched immediately to the documented
+fail-closed post-transition path.
+
+Review 163 cycle 1 records that procedural deviation and reconciles the
+necessarily stale checkpoint-9 active documentation. Cycle 2 restored the
+explicit pinned M19 core version in onboarding. Cycle 3 repeated all nine
+post-transition areas with zero findings. Core/base resolve
+`next/latest: 0.4.0`; pilot resolves `next/latest: 0.2.0`; all selected bytes,
+signatures, metadata, peers, exports, source/license, public access and settings
+remain exact.
+
+Serialized lower/latest native and pilot consumers pass in exact, `next`,
+`latest` and unqualified modes. The planned mixed window is closed. Checkpoint
+10 is complete; checkpoint 11's complete final closure review remains
+separately gated and no further registry mutation is authorized.
+
+### 19.11 Final verified closure
+
+Checkpoint 11 completed on 20 July 2026. Review 164 cycle 1 recorded the
+restricted-sandbox esbuild abort and corrected two stale active mixed-window
+claims in root onboarding and the release notes. Cycle 2 found and corrected
+closing-document formatting. Cycle 3 restarted the complete review and passed
+all eighteen areas with zero findings.
+
+The final pass reverified npm identity, 2FA and Rabassoft authority; exact
+selected/live M21 bytes, integrity, signatures, access, aliases, manifests,
+peers, exports, Corresponding Source, licensing and no provenance/repository
+metadata; immutable M19 evidence; the frozen workspace and complete package,
+source, security and reference matrix; all 27 SPEC-009 rows and the frozen
+SPEC-008/M18 regression; and all eight exact/`next`/`latest`/unqualified
+lower/latest native/pilot consumers. PLAN-023 revision 0 and M21 are complete.
+No later commit, push, version, registry/settings, GitHub Release, repository
+visibility, provenance, automation or Deferred capability is authorized.

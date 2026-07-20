@@ -648,6 +648,44 @@ Cada decisión debe registrar:
   deterministas, Corresponding Source, seguridad, consumidores lower/latest y
   dry runs neutrales. `sourceCommit: null` impide seleccionarlos como evidencia
   publicable; checkpoint 4, Git, registry y toda acción externa siguen gated.
+- **Checkpoint Git/limpio 4 completado:** review 152 ciclo 3 valida el scope de
+  128 archivos, commit/push privado `07755b4`, reconstrucción limpia y tres
+  candidatos byte-idénticos con `sourceCommit` exacto. `angular.json` sigue
+  excluido; checkpoint 5 y toda lectura/escritura de registry mantienen gates
+  separados.
+- **Checkpoint 5 read-only pausado:** el primer intento autorizado confirma npm
+  10.9.8 y registry oficial, pero identidad, perfil, organización y access
+  devuelven `E401`. Ricard debe restaurar la sesión; no se consultaron
+  paquetes/versiones/tags ni se intentó mutación.
+- **Pre-publicación checkpoint 5 completada:** Ricard restaura la sesión y
+  review 153 ciclo 3 valida nueve áreas sin hallazgos: identidad, 2FA write,
+  autoridad Rabassoft, settings, M19 byte-idéntico, ausencia M21, core
+  seleccionado y dry run neutral. Publicar conserva gate inmediato separado.
+- **Core M21 publicado/verificado:** Ricard ejecuta el publish exacto y review
+  154 ciclo 5 valida core `0.4.0` byte-idéntico, firmado, público, exact/`next`
+  con consumidores lower/latest. `latest: 0.3.0`, base/piloto y settings no
+  cambian; checkpoint 6 conserva gate read-only separado.
+- **Pre-publicación base checkpoint 6 completada:** review 155 ciclo 1 valida
+  core live, candidato base/peers/source, ausencia, aliases/settings,
+  consumidores lower/latest y dry run neutral sin hallazgos. Publicar base
+  conserva gate inmediato independiente.
+- **Base M21 publicada/verificada:** Ricard ejecuta el publish exacto y review
+  156 ciclo 2 valida base Angular `0.4.0` byte-idéntica, firmada, pública y el
+  par core/base exact/`next` con consumidores Angular `22.0.6`/`22.0.7`.
+  Core/base `latest: 0.3.0`, piloto y settings no cambian; checkpoint 7 conserva
+  gate read-only separado.
+- **Piloto M21 publicado/verificado:** reviews 157–158 completan preflight,
+  publicación y verificación exacta del piloto `0.2.0`; los tres paquetes
+  quedan bajo `next` con consumidores exact/`next` lower/latest verdes.
+- **Defaults M21 coordinados:** reviews 159–163 verifican y mueven los aliases
+  en orden piloto/base/core. La llegada anticipada del último alias se recupera
+  fail-closed sin otra mutación; core/base quedan `next/latest: 0.4.0` y piloto
+  `next/latest: 0.2.0`, con ocho matrices registrales verdes.
+- **M21 completado:** PLAN-023 revisión 0 y checkpoint 11 quedan Completed tras
+  review 164 ciclo 3. Identidad/autoridad, bytes/firmas/metadata, M19 inmutable,
+  matriz local, 27 filas SPEC-009, regresión M18, consumidores y documentación
+  pasan la revisión final completa con cero hallazgos. No se autoriza otra
+  versión, acción registral, Git/GitHub, repositorio, provenance o D-043.
 - **Arquitectura aceptada:** ADR-018 revision 4 mantiene el repositorio privado,
   exige Corresponding Source público y 2FA por write, y difiere conjuntamente
   metadata pública, trusted publishing y provenance hasta sanear/publicar el
@@ -891,12 +929,11 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M21 release delivery:** PLAN-023 revisión 0 está Approved tras review 148
-   ciclo 2 para core/base `0.4.0` y piloto `0.2.0`; checkpoints 1–3 están
-   Completed tras reviews 149–151. La siguiente acción exacta es detenerse para
-   autorización explícita del checkpoint 4: diff completo, commit/push privado
-   y reconstrucción limpia; Git, registry y toda acción externa siguen sin
-   autorización.
+1. **M21 release delivery:** PLAN-023 revisión 0 está Completed tras review 164
+   ciclo 3. Core/base `0.4.0` y piloto `0.2.0` son byte-idénticos, firmados y
+   públicos bajo exact/`next`/`latest`/unqualified; las matrices lower/latest
+   native/pilot y las 27 filas SPEC-009 pasan. La siguiente acción exacta es
+   seleccionar separadamente el próximo milestone o capacidad Deferred.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.
@@ -929,6 +966,19 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 20-07-2026 | Review 163 ciclo 3 completa checkpoint 10 tras recuperación: core/base `next/latest: 0.4.0`, piloto `0.2.0` y ocho matrices pasan.                 |
+| 20-07-2026 | Review 162 ciclo 2 completa checkpoint 9: base `latest` pasa a `0.4.0`; piloto permanece `0.2.0`, core `0.3.0` y settings no cambian.              |
+| 20-07-2026 | Review 161 ciclo 5 completa el preflight read-only de checkpoint 9 sin hallazgos; solo el dist-tag base `latest` espera aprobación inmediata.      |
+| 20-07-2026 | Review 160 ciclo 3 completa checkpoint 8: solo piloto `latest` pasa a `0.2.0`; core/base defaults y todo settings permanecen sin cambios.          |
+| 20-07-2026 | Review 159 ciclo 1 completa el preflight read-only de checkpoint 8 sin hallazgos; solo el dist-tag piloto `latest` espera aprobación inmediata.    |
+| 20-07-2026 | Review 158 ciclo 2 completa checkpoint 7: piloto `0.2.0` byte-idéntico bajo `next`; todos los `latest` y settings permanecen sin cambios.          |
+| 20-07-2026 | Review 157 ciclo 2 completa preflight piloto checkpoint 7 sin hallazgos; piloto `0.2.0` sigue sin publicar y conserva gate inmediato separado.     |
+| 20-07-2026 | Review 156 ciclo 2 completa checkpoint 6: base Angular `0.4.0` byte-idéntico bajo `next`; `latest`, piloto y settings permanecen sin cambios.      |
+| 20-07-2026 | Review 155 ciclo 1 completa preflight base checkpoint 6 sin hallazgos; Angular `0.4.0` sigue sin publicar y conserva gate inmediato separado.      |
+| 20-07-2026 | Review 154 ciclo 5 completa checkpoint 5: core `0.4.0` byte-idéntico bajo `next`; `latest`, base, piloto y settings permanecen sin cambios.        |
+| 20-07-2026 | Review 153 ciclo 3 completa preflight checkpoint 5 sin hallazgos; core `0.4.0` sigue sin publicar y conserva aprobación inmediata separada.        |
+| 20-07-2026 | PLAN-023 checkpoint 5 read-only se pausa en identidad/perfil/org/access `E401`; Ricard restaura sesión y no se consultó paquete/tag ni mutó npm.   |
+| 20-07-2026 | PLAN-023 checkpoint 4 fija/sube `07755b4` y selecciona candidatos limpios byte-idénticos tras review 152 ciclo 3; registry sigue gated.            |
 | 20-07-2026 | PLAN-023 checkpoint 3 completa matriz/27 filas/candidatos dirty-tree/dry runs tras review 151 ciclo 2; checkpoint 4 Git queda gated.               |
 | 20-07-2026 | PLAN-023 checkpoint 2 completa notas/onboarding/checks M21 tras review 150 ciclo 5; sin candidato, lockfile, Git, registry ni acción externa.      |
 | 20-07-2026 | PLAN-023 checkpoint 1 completa descriptor/manifests/tooling M21 tras review 149 ciclo 2; no crea candidato ni toca Git/npm.                        |

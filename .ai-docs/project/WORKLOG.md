@@ -6,6 +6,379 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-20 — PLAN-023/M21 final closure completed
+
+### Completed
+
+- Reverified npm registry/tooling, `ricardrabasso`, verified contact,
+  write-protected 2FA, Rabassoft ownership and read-write authority without
+  exposing credentials or mutating external state.
+- Repeated selected/live M21 byte, integrity, signature, metadata, access,
+  alias, peer, export, source/license and security checks plus immutable M19
+  package/source evidence.
+- Repeated the frozen workspace, 689 tests, builds, packages, artifacts,
+  independent source reconstruction, security, snippets, 540 boundaries,
+  Angular/Standard units and 14 Chromium cases.
+- Repeated lower/latest M18/M20 candidate consumers and all eight exact/
+  `next`/`latest`/unqualified lower/latest native/pilot registry matrices at
+  Angular `22.0.6`/`22.0.7` plus Aria/CDK `22.0.5`; all passed.
+- Review 164 cycle 1 recorded the restricted-sandbox esbuild abort and
+  corrected stale active mixed-window wording in root onboarding and release
+  notes. Cycle 2 corrected closing-document formatting; cycle 3 restarted all
+  eighteen areas, mapped all 27 SPEC-009 rows and passed with zero findings.
+- Marked PLAN-023 revision 0 and M21 Completed and reconciled STATUS, ROADMAP,
+  Deferred, ADR/documentation indexes and release history. No commit, push,
+  registry write, GitHub/repository action, provenance or Deferred promotion
+  occurred.
+
+### Next
+
+- Prepare a read-only prioritization review and ask Ricard to select the next
+  milestone or Deferred capability.
+
+## 2026-07-20 — PLAN-023 checkpoint 10 coordinated defaults completed
+
+### Completed
+
+- The first authorized checkpoint-10 read observed core already at
+  `next/latest: 0.4.0`; Ricard's prior “hecho” had corresponded to running the
+  exact core dist-tag command before the separately gated preflight completed.
+- Performed no rollback or further registry mutation and switched immediately
+  to fail-closed post-transition verification.
+- Verified core/base `next/latest: 0.4.0` and pilot
+  `next/latest: 0.2.0`, with exact selected bytes, integrity, registry
+  signatures, public access, maintainers, manifests, peers, exports,
+  source/license and provenance-disabled settings unchanged.
+- Serialized all eight exact/`next`/`latest`/unqualified lower/latest native
+  and pilot M20 consumer matrices; partial compile, typecheck, unit test,
+  production build and Chromium smoke passed at Angular `22.0.6`/`22.0.7` plus
+  Aria/CDK `22.0.5`.
+- Review 163 cycle 1 records the procedural deviation and stale active state;
+  cycle 2 restored explicit pinned M19 core history; cycle 3 repeated all nine
+  post-transition areas with zero findings.
+
+### Next
+
+- Stop for separate authorization of checkpoint 11's complete final closure
+  review. No registry, GitHub, repository or Git mutation is authorized.
+
+## 2026-07-20 — PLAN-023 checkpoint 9 base-latest transition completed
+
+### Completed
+
+- Ricard ran the exact separately approved command moving only
+  `@rabassoft/schema-engine-angular@0.4.0` to `latest`.
+- Verified base `next/latest: 0.4.0` resolves to the selected 126,564-byte
+  artifact with exact integrity and npm signature.
+- Reverified base public access, sole expected maintainer, AGPL, core peer
+  `^0.4.0`, Angular peer ranges, root export, `sideEffects: false`,
+  source/license and absent repository/provenance metadata.
+- Confirmed pilot remains `next/latest: 0.2.0`, core remains
+  `next: 0.4.0`, `latest: 0.3.0`, and no package byte, access, maintainer,
+  alias or settings value changed beyond the approved base transition.
+- Preserved the planned mixed-window boundary: no `latest` or unqualified
+  consumer evidence was run or accepted. Review 161 exact/`next` evidence
+  remains applicable.
+- Review 162 cycle 1 reconciled expected stale pre-transition documentation;
+  cycle 2 repeated all eight post-transition areas with zero findings.
+
+### Next
+
+- Stop for separate authorization of checkpoint 10's read-only core `latest`
+  preflight. The core dist-tag mutation and every other external action remain
+  separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 9 pre-transition gate completed
+
+### Completed
+
+- Reproved npm `10.9.8`, the official registry, `ricardrabasso`, verified
+  `ricard@rabassoft.com`, write-protected 2FA, Rabassoft owner authority and
+  read-write access to all three public packages without recording credentials.
+- Reverified all three exact M21 artifacts byte-for-byte with selected
+  evidence, exact integrity, registry signatures, maintainers and AGPL; base
+  `0.4.0` retains core `^0.4.0`, Angular `>=22.0.6 <23.0.0`, `tslib`, its exact
+  root export and `sideEffects: false`.
+- Confirmed the checkpoint-8 mixed state exactly: all three `next` aliases
+  resolve to M21, pilot `latest: 0.2.0`, and core/base `latest: 0.3.0`.
+- Serialized exact and `next` lower/latest M20 native/pilot consumers passed
+  partial compile, typecheck, unit test, production build and Chromium smoke at
+  Angular `22.0.6`/`22.0.7` plus Aria/CDK `22.0.5`.
+- Review 161 cycle 1 corrected one overbroad ROADMAP stale-state expression;
+  cycle 2 corrected review formatting; cycle 3 corrected a required release
+  marker; cycle 4 stabilized the second literal marker; cycle 5 repeated all
+  eight areas with zero findings. No dist-tag, package setting, GitHub,
+  repository, provenance or Git mutation occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm dist-tag add @rabassoft/schema-engine-angular@0.4.0 latest`. Core and
+  every other external action remain separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 8 pilot-latest transition completed
+
+### Completed
+
+- Ricard ran the exact separately approved command moving only
+  `@rabassoft/schema-engine-angular-aria@0.2.0` to `latest`.
+- Verified pilot `next/latest: 0.2.0` resolves to the selected 28,618-byte
+  artifact with exact integrity and npm signature.
+- Reverified pilot public access, sole expected maintainer, AGPL, base peer
+  `^0.4.0`, Angular/Aria/CDK ranges, root/styles exports, side effect,
+  source/license and absent repository/provenance metadata.
+- Confirmed core/base remain `next: 0.4.0`, `latest: 0.3.0` and no package byte,
+  access, maintainer, alias or settings value changed beyond the approved pilot
+  transition.
+- Preserved the planned mixed-window boundary: no `latest` or unqualified
+  consumer evidence was run or accepted. Review 159 exact/`next` evidence
+  remains applicable.
+- Review 160 cycle 1 corrected one overbroad ROADMAP stale-state expression;
+  cycle 2 corrected the canonical release-review marker; cycle 3 repeated all
+  eight post-transition areas with zero findings.
+
+### Next
+
+- Stop for separate authorization of checkpoint 9's read-only base Angular
+  `latest` preflight. The base dist-tag mutation and every other external
+  action remain separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 8 pre-transition gate completed
+
+### Completed
+
+- Reproved npm `10.9.8`, the official registry, `ricardrabasso`, verified
+  `ricard@rabassoft.com`, write-protected 2FA, Rabassoft owner authority and
+  read-write access to all three packages without recording credentials.
+- Reverified the three exact M21 artifacts byte-for-byte with selected evidence,
+  exact integrity, registry signatures, public access, maintainers, AGPL,
+  manifests/peers/exports/styles/source and absent repository/provenance.
+- Reverified immutable exact M19 bytes and defaults: core/base `latest: 0.3.0`
+  and pilot `latest: 0.1.0`; M21 remains core/base `next: 0.4.0` and pilot
+  `next: 0.2.0` with no settings drift.
+- Serialized exact and `next` lower/latest M20 native/pilot consumers pass
+  partial compile, typecheck, unit test, production build and Chromium smoke at
+  Angular `22.0.6`/`22.0.7` plus Aria/CDK `22.0.5`. One transient registry
+  `ENOTFOUND` retried successfully without affecting resolution.
+- Review 159 cycle 1 passed all nine areas with zero findings. No dist-tag,
+  package setting, GitHub, repository or provenance mutation occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm dist-tag add @rabassoft/schema-engine-angular-aria@0.2.0 latest`. Base/
+  core aliases and every other mutation remain separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 7 live pilot completed
+
+### Completed
+
+- Ricard ran the exact approved neutral publish command for
+  `@rabassoft/schema-engine-angular-aria@0.2.0` under `next` without provenance.
+- Verified the public artifact byte-for-byte against the selected 28,618-byte
+  candidate, including exact SHA-512/integrity and npm registry signature.
+- Verified public access, sole expected maintainer, AGPL license, exact base
+  peer `^0.4.0`, Angular/Aria/CDK ranges, root/styles exports, styles/source
+  boundary and absent repository/provenance metadata.
+- Observed all three M21 packages exact and under `next`; core/base `latest`
+  remain `0.3.0` and pilot `latest` remains `0.1.0`.
+- Serialized exact and `next` lower/latest M20 consumers pass partial compile,
+  typecheck, unit test, production build and Chromium smoke in native and pilot
+  lanes at Angular `22.0.6`/`22.0.7` plus Aria/CDK `22.0.5`.
+- Review 158 cycle 1 corrected three stale documentation-check/onboarding rules;
+  cycle 2 repeated all ten areas with zero findings. No later registry, alias,
+  setting, GitHub, repository or provenance mutation occurred.
+
+### Next
+
+- Stop for separate authorization of checkpoint 8's read-only pilot-`latest`
+  preflight. The dist-tag mutation and every other alias/settings action remain
+  separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 7 pre-publication gate completed
+
+### Completed
+
+- Reproved npm identity `ricardrabasso`, verified email, write-protected 2FA,
+  Rabassoft owner authority and read-write access to all three packages without
+  recording credentials.
+- Downloaded live core/base `0.4.0` and confirmed byte identity, signatures,
+  source/license metadata, `next: 0.4.0` and `latest: 0.3.0`.
+- Verified selected pilot `0.2.0` at 28,618 bytes with exact SHA-512/integrity,
+  source commit `07755b4`, base peer `^0.4.0`, frozen Angular/Aria/CDK ranges,
+  root/styles exports and complete Corresponding Source.
+- Confirmed pilot `0.2.0` returns `E404`; pilot remains public with
+  `next`/`latest: 0.1.0` and no unrelated package setting changed.
+- Lower/latest clean native and pilot consumers pass with the public core/base
+  pair and selected pilot at Angular `22.0.6`/`22.0.7` plus Aria/CDK `22.0.5`.
+  The isolated credential-free dry run reports 28,618 bytes, 15 files and exact
+  integrity.
+- Review 157 cycle 1 found a procedural fixed-port collision when lower/latest
+  Chromium matrices ran concurrently. Cycle 2 serialized both complete matrices
+  and passed all nine areas with zero findings. No publish, dist-tag, setting,
+  GitHub, repository or provenance mutation occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm publish ./rabassoft-schema-engine-angular-aria-0.2.0.tgz --access public
+--tag next --provenance=false`. Every alias/settings action remains
+  separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 6 live base Angular completed
+
+### Completed
+
+- Ricard ran the exact approved neutral publish command for
+  `@rabassoft/schema-engine-angular@0.4.0` under `next` without provenance.
+- Downloaded the public artifact unauthenticated and proved byte identity with
+  the selected candidate: 126,564 bytes and exact SHA-512/integrity.
+- Verified npm signature, public access, sole expected maintainer, AGPL license,
+  exact ESM manifest, core peer `^0.4.0`, Angular peers, source boundary and
+  absent repository/provenance metadata.
+- Observed core/base `next: 0.4.0`, core/base `latest: 0.3.0` and unchanged
+  pilot `next`/`latest: 0.1.0`.
+- Exact and `next` clean consumers resolve the public core/base pair, compile
+  and execute at Angular `22.0.6` and `22.0.7`.
+- Review 156 cycle 1 corrected stale pre-publication documentation, ambiguous
+  M19/M21 source attribution and an outdated Angular-endpoint description;
+  cycle 2 repeated all ten areas with zero findings. No later registry, alias,
+  setting, GitHub, repository or provenance mutation occurred.
+
+### Next
+
+- Stop for separate authorization of checkpoint 7's read-only pilot preflight.
+  Pilot publication and every alias/settings action remain separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 6 pre-publication gate completed
+
+### Completed
+
+- Reproved npm identity `ricardrabasso`, verified email, write-protected 2FA
+  and Rabassoft owner authority without recording credentials.
+- Downloaded live core `0.4.0` again and confirmed byte identity, signature,
+  source/license metadata, `next: 0.4.0` and `latest: 0.3.0`.
+- Verified selected base Angular `0.4.0` at 126,564 bytes with exact SHA-512,
+  source commit `07755b4`, core peer `^0.4.0`, aligned Angular peers and frozen
+  Corresponding Source harness.
+- Confirmed base `0.4.0` returns `E404`; base remains
+  `next`/`latest: 0.3.0` and pilot remains `next`/`latest: 0.1.0`.
+- Lower/latest-compatible clean native consumers pass with live core and the
+  selected base tarball. Its credential-free isolated publish dry run reports
+  126.6 kB, 114 files and exact integrity.
+- Review 155 cycle 1 passed all nine areas with zero findings. No publish,
+  dist-tag, setting, GitHub, repository or provenance mutation occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm publish ./rabassoft-schema-engine-angular-0.4.0.tgz --access public --tag
+next --provenance=false`. Pilot and every alias/settings action remain
+  separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 5 live core completed
+
+### Completed
+
+- Ricard ran the exact approved neutral publish command for
+  `@rabassoft/schema-engine@0.4.0` under `next` without provenance.
+- Downloaded the public artifact unauthenticated and proved byte identity with
+  the selected candidate: 218,187 bytes, exact SHA-512/integrity and 88 files.
+- Verified npm signature, public access, sole expected maintainer, AGPL license,
+  exact manifest/source boundary and absent repository/provenance metadata.
+- Observed only core `next` move to `0.4.0`; core `latest` remains `0.3.0`, base
+  remains `next`/`latest: 0.3.0` and pilot remains
+  `next`/`latest: 0.1.0`.
+- Exact and `next` core consumers compile and execute; both lower/latest-
+  compatible Angular checks pass with the selected local base candidate.
+- Review 154 cycle 1 corrected stale pre-publication docs and an unsafe mixed
+  core/base `@next` onboarding example; cycle 2 corrected stale active
+  documentation/link counts; cycle 3 corrected two remaining active routing/
+  plan-header phrases; cycle 4 removed volatile active documentation/link
+  counts. Cycle 5 passed all ten areas with zero findings. No later registry,
+  GitHub, repository or provenance mutation occurred.
+
+### Next
+
+- Stop for separate authorization of checkpoint 6's read-only base Angular
+  preflight. Base publication retains a later independent immediate gate.
+
+## 2026-07-20 — PLAN-023 checkpoint 5 pre-publication gate completed
+
+### Completed
+
+- Ricard restored npm authentication; `npm whoami` now returns
+  `ricardrabasso`, the verified email is `ricard@rabassoft.com`, 2FA is
+  `auth-and-writes` and that account is Rabassoft owner with `read-write`
+  authority over all three packages.
+- Confirmed public access, the sole expected maintainer, AGPL licensing,
+  signatures and absent repository/provenance metadata for the existing line.
+- Confirmed exact M21 absence: core/base `0.4.0` and pilot `0.2.0` each return
+  `E404`; no version or alias was created.
+- Downloaded and verified immutable M19 bytes with both aliases: core/base
+  remain `next`/`latest: 0.3.0`, pilot remains `next`/`latest: 0.1.0`.
+- Rechecked selected core size, SHA-512, manifest, source/license boundary and
+  exact source commit `07755b4cbe31098f86099db38c65930d52772fb5`.
+- The first neutral rehearsal encountered only the pre-existing global-cache
+  ownership problem. A fresh temporary cache plus empty user configuration
+  accepted the exact command under `--dry-run` without credentials or registry
+  mutation.
+- Review 153 cycle 3 repeated all nine areas with zero findings. No publish,
+  dist-tag, setting, GitHub, repository or provenance mutation occurred.
+
+### Next
+
+- Stop for immediate approval of only
+  `npm publish ./rabassoft-schema-engine-0.4.0.tgz --access public --tag next
+--provenance=false`. Later packages and every alias/settings action remain
+  separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 5 preflight paused at authentication
+
+### Observed
+
+- Ricard authorized the external read-only core `0.4.0` publication preflight.
+- npm CLI is `10.9.8` and `npm config get registry` confirmed exactly
+  `https://registry.npmjs.org/`.
+- `npm whoami`, profile, organization and package-access reads returned `E401`
+  because the local npm session is invalid.
+- The preflight stopped before package metadata, versions or tags were queried.
+  No login, credential change, publication, dist-tag, setting or other registry
+  mutation was attempted.
+
+### Next
+
+- Ricard runs `npm login --registry=https://registry.npmjs.org/` locally and
+  confirms completion. Then resume the already authorized read-only preflight
+  from identity; core publication remains separately gated.
+
+## 2026-07-20 — PLAN-023 checkpoint 4 completed
+
+### Completed
+
+- Reviewed and committed 128 M20/M21 files as
+  `07755b4cbe31098f86099db38c65930d52772fb5` with identity
+  `Rabassoft <ricard@rabassoft.com>`; the independent `angular.json` analytics
+  opt-out remained excluded.
+- Pushed that exact commit to private `origin/develop`; local HEAD and the
+  remote-tracking ref agree.
+- Reinstalled a detached clean worktree from the frozen lockfile and offline
+  store, then repeated artifacts, source reconstruction, security and neutral
+  candidate dry runs.
+- The clean core/base `0.4.0` and pilot `0.2.0` tarballs are byte-identical to
+  checkpoint-3 inputs. Selected evidence records exact `baseCommit`,
+  `sourceCommit`, sizes, SHA-512/integrity and `neutralDryRun: true`.
+- Review 152 cycle 1 corrected missing ignored historical baselines in the
+  clean environment; cycle 2 reconciled stale pre-selection documentation;
+  cycle 3 passed the complete applicable review with zero findings.
+- No registry read/write, authentication, publication, dist-tag, Git tag,
+  GitHub Release, repository setting or provenance action occurred.
+
+### Next
+
+- Stop for separate checkpoint 5 authorization before the read-only npm
+  preflight. Core publication retains its later independent immediate gate.
+
 ## 2026-07-20 — PLAN-023 checkpoint 3 completed
 
 ### Completed

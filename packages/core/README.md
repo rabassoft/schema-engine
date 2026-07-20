@@ -5,19 +5,18 @@ for the Schema Engine prototype.
 
 ## Release status
 
-- Public verified Experimental line: `0.3.x`; exact `0.3.0` is available under
-  both `next` and `latest`.
-- Source package manifest: `0.4.0`; this is a reviewed M21 source target, not a
-  selected candidate or observed npm release.
+- Public verified Experimental `0.4.0` is available exactly and under both
+  `next` and `latest`.
+- Source package manifest: `0.4.0`; the public bytes are identical to the clean
+  candidate selected from commit `07755b4c`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- Recommended channel: npm dist-tag `next` or an explicit version. The observed
-  `latest` remains Experimental routing and does not
-  imply stability.
+- Recommended channel: an explicit version, `next` or `latest`. The observed
+  aliases remain Experimental routing and do not imply stability.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 
-The following command installs the verified public Experimental `0.3.0` line:
+The following command installs verified public Experimental core `0.4.0`:
 
 ```sh
 npm install @rabassoft/schema-engine@next
@@ -40,10 +39,8 @@ supported.
 
 ## Prototype boundary
 
-> This README distinguishes the public verified `0.3.x` Experimental line from
-> the local `0.4.x` M21 source target. Exact, `next`, `latest` and unqualified
-> M19 clean-consumer evidence passed; M21 has no selected candidate or live
-> registry evidence yet.
+> Exact core `0.4.0`, `next`, `latest` and unqualified clean-consumer evidence
+> pass. Routing never changes the Experimental contract.
 
 The current runtime supports a root object whose properties may recursively
 contain objects, primitive `string`, `number`, `integer`, and `boolean` leaves,
@@ -72,9 +69,10 @@ renderers, and other deferred capabilities are not included. The current source
 adds static sections, tabs, accordions and a bounded logical grid at the root
 and on direct nested-object and collection-item template owners as
 presentation-neutral definitions; core owns no target DOM, interaction state or
-CSS. Published `0.3.x` artifacts remain the earlier root-only contract. The
-source manifest's `0.4.0` target includes these local forests but is unavailable
-to consumers until separately published and observed.
+CSS. Published core `0.4.0` includes these local forests and is available by
+exact version, `next` or `latest`; published `0.3.x` remains the earlier
+root-only historical contract. Exact M19 core `0.3.0` remains publicly
+available for pinned historical consumers.
 
 ## License and source
 

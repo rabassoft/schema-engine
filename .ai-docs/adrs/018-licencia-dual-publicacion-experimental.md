@@ -25,10 +25,9 @@
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
 - **Milestones:** M13 first public Experimental release, M19 coordinated
   Experimental `0.3.0` release and M21 coordinated M20 delivery design
-- **Implementation:** M13 completed by PLAN-013 revision 4 and M19 completed by
-  PLAN-021 revision 0 after final review 132 cycle 4; Approved PLAN-023 revision
-  0 authorizes only M21 local checkpoints 1–3, while Git and every registry or
-  other external action remain separately gated
+- **Implementation:** M13 completed by PLAN-013 revision 4, M19 by PLAN-021
+  revision 0 after final review 132 cycle 4, and M21 by PLAN-023 revision 0
+  after final review 164 cycle 3; no later external action is authorized
 - **Previous complete review:**
   [`review 028`](../reviews/028-adr-018-review.md) cycle 8 passed the complete
   revision 3 review with zero findings; accepted by Ricard
