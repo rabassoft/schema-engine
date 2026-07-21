@@ -6,6 +6,83 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 2 completed
+
+### Completed
+
+- Acquired official Gitleaks v8.30.1 and git-filter-repo v2.47.0 outside the
+  repository, verified their release/digest identities and pinned official
+  checkout v7.0.1/setup-node v7.0.0 to full commits.
+- Added isolated tool fixtures proving redacted positive/clean Gitleaks behavior
+  and two identical two-commit rewrites with complete maps, preserved metadata/
+  topology and no unrelated content drift.
+- Added read-only CI and manual protected npm workflows plus twelve focused
+  tests/static guards for triggers, exact pins/counts, permissions, source
+  identity, OIDC isolation, lifecycle-free installs and readiness/publication
+  order.
+- Review 169 cycle 1 corrected four fixture/static-policy findings; cycle 2
+  repeated the complete checkpoint with zero unresolved findings. Default
+  Gitleaks scanned 63 commits/approximately 6.13 MB with no leak.
+- Frozen install, expected history/npm fail-closed modes, docs, format, lint,
+  strict types, complete workspace tests/builds, package/source, release
+  tooling, snippets, boundaries, Angular/Standard units and diff checks pass.
+- No repository remote clone, Git ref/history, GitHub/npm setting, package,
+  commit, push or publication mutation occurred.
+
+### Next
+
+- Present and explicitly authorize PLAN-024 checkpoint 3 before creating the
+  reviewed Rabassoft commit or pushing `develop` to the still-private origin.
+
+## 2026-07-21 — PLAN-024 checkpoint 1 completed
+
+### Completed
+
+- Added public security, contribution and conduct policies plus root onboarding
+  links without opening external code contributions or claiming a support SLA.
+- Added tested prospective-tree and reachable-history policy scanners with
+  redacted findings, stale-documentation guards and a pure fail-closed npm
+  trusted-publishing readiness evaluator.
+- Confirmed the 729-file current candidate tree has zero findings, while the
+  current history intentionally fails exactly once on the already classified
+  historical review-132 local path and current M21 metadata remains incapable
+  of trusted publication.
+- Review 168 cycles 1–2 corrected four scanner/link/lint/history-coverage
+  findings; cycle 3 repeated the complete checkpoint boundary with zero
+  unresolved findings.
+- Full formatting, docs, lint, types, tests/builds, package, release-tooling,
+  snippets, boundaries, Angular/Standard unit and diff checks pass. No workflow,
+  external tool, network, Git/GitHub/npm mutation, commit or push occurred.
+
+### Next
+
+- Obtain explicit PLAN-024 checkpoint-2 authorization before downloading and
+  verifying official Gitleaks/`git-filter-repo`, resolving full action SHAs,
+  adding workflows or running the isolated tool fixtures.
+
+## 2026-07-21 — PLAN-024 approved for M22
+
+### Completed
+
+- Drafted PLAN-024 revision 0 to deliver the selected sanitized public-history
+  architecture without combining repository work with package release work.
+- Split local policies/tooling, pinned-tool acquisition, private commit/push,
+  fresh-mirror audit, deterministic candidate, destructive ref replacement/
+  local adoption, public visibility, GitHub settings and final closure into
+  separately gated checkpoints.
+- Added exact old/new mapping, immutable-package-source, solo-maintainer,
+  workflow non-publish, anonymous verification and post-public incident
+  boundaries.
+- Review 167 cycles 1–2 closed twelve findings; cycle 3 repeated all sixteen areas
+  with zero findings and approved revision 0 under the standing authorization.
+- Performed no implementation, tool download, network/Git/GitHub/npm mutation,
+  commit or push.
+
+### Next
+
+- Execute only PLAN-024 checkpoint 1 locally, complete its review, then stop for
+  explicit checkpoint-2 tool/network authorization.
+
 ## 2026-07-21 — M22 repository architecture accepted
 
 ### Completed

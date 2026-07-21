@@ -426,7 +426,7 @@ separado antes de repetir la revisión.
   ocho consumidores registrales y toda la documentación con cero hallazgos.
   M21 queda Public + Experimental + Active sin autorizar otra acción externa.
 
-### M22 — Repositorio público y releases seguras — arquitectura aceptada
+### M22 — Repositorio público y releases seguras — checkpoint 2 completado
 
 - Ricard seleccionó D-043 como siguiente milestone el 21 de julio de 2026.
 - [Review 165](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
@@ -442,10 +442,21 @@ separado antes de repetir la revisión.
   sin hallazgos. Autorizan preparar/revisar PLAN-024, no implementación,
   reescritura, workflow, cambio de visibilidad/settings, metadata, release,
   commit ni push.
+- PLAN-024 revisión 0 está Approved tras review 167 ciclo 3 sin hallazgos. Solo
+  autorizó checkpoint 1 local.
+- Checkpoint 1 quedó completado tras review 168 ciclo 3 sin hallazgos no
+  resueltos: políticas públicas, guardas del árbol/historial/documentación y
+  preparación npm fail-closed pasan en sus modos esperados. El historial actual
+  conserva exactamente la ruta local histórica ya clasificada.
+- Checkpoint 2 quedó completado tras review 169 ciclo 2: herramientas oficiales
+  verificadas, fixtures redactados/deterministas y workflows con SHA completo,
+  mínimo privilegio y publicación fail-closed pasan sin hallazgos pendientes.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** preparar y revisar PLAN-024 para la entrega acotada de M22.
+1. **Next action:** presentar el diff, autor, asunto y comandos exactos del
+   checkpoint 3 y obtener autorización explícita antes de hacer el commit y el
+   push privado normal de `develop`.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain

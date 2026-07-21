@@ -781,8 +781,9 @@ Cada decisión debe registrar:
 ## D-043: Publicación del repositorio y automatización segura de releases
 
 - **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
-  are Accepted after review 166 cycle 3 passed with zero findings; PLAN-024
-  preparation only is authorized
+  are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved and
+  checkpoints 1–2 are complete after reviews 168–169; checkpoint 3 awaits
+  explicit commit/private-push authorization
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -807,10 +808,15 @@ Cada decisión debe registrar:
   saneamiento y publicar `.ai-docs` solo después de su clasificación y
   saneamiento completos. Publicar el repositorio actual tal cual queda
   rechazado.
-- **Documento siguiente:** PLAN-024 debe separar auditoría/saneamiento,
-  cualquier reescritura, ramas/settings y visibilidad. Metadata de paquetes,
-  npm trusted publishing y la primera release con provenance requieren una
-  promoción/plan de release posterior.
+- **Plan activo:** PLAN-024 separa política/tooling local, adquisición de
+  herramientas, commit/push privado, mirror/auditoría, candidato saneado,
+  sustitución de refs/adopción local, visibilidad y settings. Metadata de
+  paquetes, npm trusted publishing y la primera release con provenance requieren
+  una promoción/plan de release posterior.
+- **Checkpoint actual:** checkpoint 2 completó herramientas, fixtures y
+  workflows locales con pins completos y publicación fail-closed. El árbol
+  candidato pasa; el historial conserva la única ruta local histórica ya
+  clasificada. Checkpoint 3 sigue inactivo.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -938,9 +944,10 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** ADR-026 revisión 0 y ADR-018 revisión 6 están
-   Accepted tras review 166 ciclo 3. La siguiente acción exacta es preparar y
-   revisar PLAN-024; implementación y acciones Git/GitHub/npm siguen inactivas.
+1. **M22 repository delivery:** PLAN-024 checkpoints 1–2 están completos tras
+   reviews 168–169. La siguiente acción exacta es presentar y autorizar el
+   commit/push privado de checkpoint 3; Git remoto, GitHub/npm e historial
+   siguen sin mutación.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

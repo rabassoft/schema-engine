@@ -5,14 +5,14 @@
 
 ## Checkpoint
 
-- **Updated:** 2026-07-21 by Ricard / Codex
+- **Updated:** 2026-07-22 by Ricard / Codex
 - **Branch:** `develop`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
-- **Last implementation plan:** PLAN-023 revision 0, Completed
+- **Last implementation plan:** PLAN-024 revision 0, Approved
 - **Last completed implementation plan:** PLAN-023 revision 0
-- **Active implementation task:** None
+- **Active implementation task:** PLAN-024 checkpoint 3
 - **Last accepted ADR:** ADR-026 revision 0, coordinated with ADR-018 revision 6
 - **Implemented capability:** M1–M21 and G0, including recursive static local
   presentation forests in core, native Angular, independent Standard and
@@ -29,41 +29,48 @@
 
 ## Current objective
 
-Prepare and completely review PLAN-024 for the accepted M22 sanitized-public-
-history delivery without starting implementation or changing external state.
+Create and push the explicitly authorized scoped checkpoint-1/2 baseline commit
+to private `develop`, then verify the exact remote commit from a clean detached
+worktree without changing `main`, visibility, settings or npm.
 
 ## In progress
 
-None.
+PLAN-024 checkpoint 3: final pre-commit checks passed for the reviewed scoped
+diff, Rabassoft identity, expected private repository and normal `develop`
+push. Commit/push and clean detached verification are in progress; no remote
+clone, history rewrite, `main`, visibility, settings or npm mutation is
+authorized.
 
 ## Latest completed work
 
+- Completed PLAN-024 checkpoint 2 after review 169 cycle 2 passed tool trust,
+  redacted/deterministic fixtures, exact Action pins, guarded workflows and the
+  complete local matrix with zero unresolved findings.
+- Completed PLAN-024 checkpoint 1 after review 168 cycle 3 passed the complete
+  local boundary with zero unresolved findings; public policies, candidate-tree/
+  history guards, documentation checks and npm readiness logic are in place.
+- Approved PLAN-024 revision 0 after review 167 cycle 3 passed all sixteen areas
+  with zero findings.
 - Accepted ADR-026 revision 0 and coordinated ADR-018 revision 6 after review
-  166 cycle 3 passed all fourteen areas with zero findings; PLAN-024 preparation
-  is authorized but implementation and external actions remain inactive.
+  166 cycle 3 passed all fourteen areas with zero findings and now governs the
+  ongoing PLAN-024 delivery.
 - Selected preservation of sanitized reachable history with public `.ai-docs`,
   an old/new commit map, solo-maintainer controls and a later separately gated
   OIDC/provenance release transition.
-- Promoted D-043 for M22 normative design after review 165 cycle 2 passed with
-  zero findings; the read-only audit found no heuristic secret, one historical
-  local path, 235 `.ai-docs` files and incomplete public repository governance.
-  Publication as-is is rejected and no implementation is active.
-- Completed PLAN-023 checkpoint 11, PLAN-023 revision 0 and M21 after final
-  review 164 cycle 3 repeated all eighteen areas and all 27 SPEC-009 rows with
-  zero findings.
-- Reverified npm identity, write-protected 2FA, Rabassoft authority, exact
-  selected/live bytes, integrity, signatures, public access, aliases,
-  manifests, peers, exports, Corresponding Source, licensing and absence of
-  repository/provenance metadata for the complete M21 line.
 
 ## Exact next action
 
-Prepare and completely review PLAN-024 for the bounded M22 repository
-sanitization/publication delivery. Do not implement it before approval.
+Present the exact checkpoint-1/2 scoped diff, Rabassoft author identity
+`ricard@rabassoft.com`, commit subject and normal private `develop` push
+command; obtain explicit checkpoint-3 authorization before executing any Git
+mutation.
 
 ## Blockers and conflicts
 
 - No implementation blocker or authoritative documentation conflict remains.
+- The current reachable history deliberately fails the new policy scan on the
+  one already classified local path in historical review 132; sanitizing it is
+  later gated work, not an unexpected blocker.
 - GitHub rulesets are unavailable for the current private repository/plan;
   recheck availability after the visibility or plan transition rather than
   weakening the M22 protection requirement.
@@ -76,47 +83,47 @@ sanitization/publication delivery. Do not implement it before approval.
   warning; Standard emits Vite's 868.50 kB advisory. These are observations,
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
-  Angular remain inactive. D-043 is design-only M22; no implementation or
-  external action is active.
+  Angular remain inactive. M22 checkpoints 1–2 are complete; no external action
+  is active.
 
 ## Open questions
 
-- None for M22 planning. A real scanner, rights or personal-data finding must
-  stop PLAN-024 for explicit resolution.
+- None. A real scanner, rights or personal-data finding must stop PLAN-024 for
+  explicit resolution.
 
 ## Latest verification
 
-- Review 166 cycle 3 repeated all fourteen architecture, security, licensing,
-  history, governance, transition, scope and documentation areas with zero
-  findings. Official npm/GitHub requirements were rechecked; no mutation
-  occurred.
-- Review 165 cycle 2 repeated authority, scope, reachable-history/content,
-  identity, GitHub settings, publication metadata, alternatives and gates with
-  zero findings; no mutation occurred.
-- The reachable-history heuristic scan found no credential/private-key/token
-  pattern or sensitive filename. One local absolute path remains in historical
-  review 132; dedicated scanner evidence is still required before publication.
-- Review 164 cycle 1 recorded the restricted-sandbox build abort and corrected
-  two stale mixed-window claims; cycle 2 corrected closing-document formatting;
-  cycle 3 repeated the complete closure from
-  registry identity through final documentation/diff with zero findings.
-- npm 10.9.8, official registry, `ricardrabasso`, verified
-  `ricard@rabassoft.com`, `auth-and-writes`, Rabassoft owner and all three
-  `read-write` package permissions pass.
+- Review 169 cycle 2 repeated the complete checkpoint-2 boundary with zero
+  unresolved findings. Gitleaks v8.30.1 scanned 63 commits/approximately 6.13
+  MB with no leak; git-filter-repo v2.47.0 produced identical two-commit
+  rewrites and a complete map.
+- Review 168 cycle 3 repeated the complete checkpoint-1 boundary with zero
+  unresolved findings.
+- Twelve policy/readiness/workflow tests, exact Action pins, workflow static
+  verification, tool checksums, frozen lifecycle-free install and the complete
+  workspace/package/source/reference matrix pass.
+- Reachable-history verification fails closed exactly once on the classified
+  historical review-132 macOS path; current M21 npm readiness also fails closed
+  on absent future metadata/authorization, without exposing private content.
+- Documentation/link, formatting, lint, strict types, complete workspace tests/
+  builds, package smoke, release tooling, snippets, boundaries, Angular and
+  Standard reference-unit checks plus `git diff --check` pass. Angular builds
+  were repeated outside the restricted sandbox.
+- Review 167 cycle 3 approved PLAN-024 after all sixteen plan areas passed with
+  zero findings; review 166 cycle 3 accepted its architecture after fourteen
+  areas passed with zero findings.
 - Exact public M21 bytes/signatures and immutable M19 package/source evidence
-  pass; core/base are `next/latest: 0.4.0`, pilot is
-  `next/latest: 0.2.0`, and unqualified resolution selects the same line.
-- Frozen install, format, docs, lint, types, 689 tests, builds, package,
-  artifacts, source, security, snippets, boundaries, units and both browser
-  lanes pass.
-- All 27 SPEC-009 rows, the Public/Internal migration, frozen SPEC-008/M18
-  regression, candidate lower/latest lanes and eight registry consumer
-  matrices pass.
-- `pnpm test:release:tooling`, `pnpm docs:check`, `pnpm format:check`,
-  `pnpm lint` and `git diff --check` pass after final reconciliation.
+  remain unchanged; no network, workflow, Git, GitHub or npm mutation occurred.
 
 ## Task document map
 
+- Approved M22 plan: `.ai-docs/plans/024-sanitized-public-repository.md`
+- M22 checkpoint-2 review:
+  `.ai-docs/reviews/169-plan-024-checkpoint-2-review.md`
+- M22 checkpoint-1 review:
+  `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
+- M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`
+- Public governance: `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`
 - Accepted M22 architecture:
   `.ai-docs/adrs/026-public-repository-and-secure-releases.md`
 - Coordinated licensing/source architecture:

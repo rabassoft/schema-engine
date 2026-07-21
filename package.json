@@ -7,6 +7,8 @@
     "audit:release": "pnpm build && node scripts/verify-release-security.mjs",
     "audit:m18": "node scripts/verify-published-0-3-baseline.mjs && pnpm build && node scripts/verify-release-security.mjs --include-angular-aria --release=m21",
     "build": "pnpm -r --if-present build",
+    "check:public-history": "node scripts/verify-public-history.mjs",
+    "check:public-repository": "node scripts/verify-public-repository.mjs",
     "docs:check": "node scripts/verify-documentation.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -47,11 +49,14 @@
     "test:live:m21:latest": "node scripts/verify-live-coordinated-candidates.mjs --release=m21 --tag-mode=both && node scripts/verify-m20-clean-consumers.mjs --release=m21 --mode=lower --package-mode=latest && node scripts/verify-m20-clean-consumers.mjs --release=m21 --mode=latest --package-mode=latest",
     "test:live:m21:unqualified": "node scripts/verify-live-coordinated-candidates.mjs --release=m21 --tag-mode=both && node scripts/verify-m20-clean-consumers.mjs --release=m21 --mode=lower --package-mode=unqualified && node scripts/verify-m20-clean-consumers.mjs --release=m21 --mode=latest --package-mode=unqualified",
     "test:package": "pnpm build && pnpm -r --if-present test:package",
+    "test:publication-tools": "node scripts/verify-publication-tools.mjs",
+    "test:public-repository": "node --test scripts/public-repository-policy.test.mjs scripts/npm-publish-readiness.test.mjs scripts/workflow-policy.test.mjs",
     "test:release:tooling": "node --test scripts/release-target.test.mjs",
     "test:source": "pnpm build && node scripts/verify-source-packages.mjs",
     "test:source:m18": "node scripts/verify-published-0-3-baseline.mjs && pnpm build && node scripts/verify-source-packages.mjs --include-angular-aria --offline --release=m21",
     "test:source:angular-candidate": "pnpm build && node scripts/verify-source-packages.mjs --core-tarball=.release/0.2.0/rabassoft-schema-engine-0.2.0.tgz --angular-tarball=.release/0.2.0/rabassoft-schema-engine-angular-0.2.0.tgz",
-    "typecheck": "pnpm build && pnpm -r --if-present typecheck"
+    "typecheck": "pnpm build && pnpm -r --if-present typecheck",
+    "verify:workflows": "node scripts/verify-workflows.mjs"
   },
   "devDependencies": {
     "@angular/build": "22.0.6",

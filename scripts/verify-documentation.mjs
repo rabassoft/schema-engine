@@ -9,6 +9,11 @@ import {
 const root = process.cwd();
 const stableGuidePaths = ['AGENTS.md', 'HANDOFF.md'];
 const onboardingPaths = ['README.md', '.ai-docs/README.md'];
+const publicPolicyPaths = [
+  'SECURITY.md',
+  'CONTRIBUTING.md',
+  'CODE_OF_CONDUCT.md',
+];
 const statusPath = '.ai-docs/project/STATUS.md';
 const specificationDirectory = '.ai-docs/specs';
 const specificationIndexPath = '.ai-docs/specs/000-index.md';
@@ -824,6 +829,77 @@ const staleCurrentClaims = [
       /PLAN-023:[^\n]{0,180}Approved revision 0|checkpoint 11 final closure separately gated/i,
     description: 'pre-completion M21 documentation-index state',
   },
+  {
+    path: 'README.md',
+    pattern: /The private development repository/i,
+    description: 'pre-M22 private-repository introduction',
+  },
+  {
+    path: 'README.md',
+    pattern: /PLAN-023 checkpoint 10 has published/i,
+    description: 'pre-completion M21 onboarding state',
+  },
+  {
+    path: 'README.md',
+    pattern:
+      /development repository remains private pending a separate sanitization review/i,
+    description: 'pre-M22 sanitization state',
+  },
+  {
+    path: 'README.md',
+    pattern: /there is no public issue tracker yet/i,
+    description: 'pre-M22 issue-tracker state',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern: /Execute PLAN-024 checkpoint 1 local/i,
+    description: 'pre-completion PLAN-024 checkpoint-1 status',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /ejecutar PLAN-024 checkpoint 1 local/i,
+    description: 'pre-completion PLAN-024 checkpoint-1 roadmap state',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern: /siguiente acción exacta es preparar y\s+revisar PLAN-024/i,
+    description: 'pre-approval PLAN-024 deferred state',
+  },
+  {
+    path: '.ai-docs/README.md',
+    pattern: /implementation remains inactive pending PLAN-024/i,
+    description: 'pre-implementation PLAN-024 documentation-index state',
+  },
+  {
+    path: '.ai-docs/adrs/000-index.md',
+    pattern: /PLAN-024[^\n]{0,160}only local checkpoint 1 authorized/i,
+    description: 'pre-completion PLAN-024 checkpoint-1 ADR-index state',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern: /PLAN-024 checkpoint 2: acquire and verify/i,
+    description: 'in-progress PLAN-024 checkpoint-2 status',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /obtener autorización explícita para el checkpoint 2/i,
+    description: 'pre-completion PLAN-024 checkpoint-2 roadmap state',
+  },
+  {
+    path: '.ai-docs/roadmap/deferred-decisions.md',
+    pattern: /checkpoint 2 is awaiting\s+explicit network\/tool authorization/i,
+    description: 'pre-completion PLAN-024 checkpoint-2 deferred state',
+  },
+  {
+    path: '.ai-docs/README.md',
+    pattern: /checkpoint 2 awaits explicit network\/tool authorization/i,
+    description: 'pre-completion PLAN-024 checkpoint-2 documentation index',
+  },
+  {
+    path: '.ai-docs/adrs/000-index.md',
+    pattern: /checkpoint 2 awaits explicit authorization/i,
+    description: 'pre-completion PLAN-024 checkpoint-2 ADR-index state',
+  },
 ];
 const ignoredDirectories = new Set([
   '.git',
@@ -856,6 +932,20 @@ for (const guidePath of stableGuidePaths) {
     fail(
       `${guidePath} contains volatile project state: ${volatileIdentifier[0]}`,
     );
+  }
+}
+
+for (const policyPath of publicPolicyPaths) {
+  await access(path.join(root, policyPath));
+}
+
+const rootReadme = await read('README.md');
+for (const policyPath of publicPolicyPaths) {
+  if (
+    !rootReadme.includes(`](${policyPath})`) &&
+    !rootReadme.includes(`](./${policyPath})`)
+  ) {
+    fail(`README.md does not link to ${policyPath}`);
   }
 }
 

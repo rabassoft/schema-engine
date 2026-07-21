@@ -20,8 +20,8 @@ accepted from the failed invocation.
 ### R132-F02 — Incomplete workspace-local offline store
 
 The ignored workspace `.pnpm-store` did not contain every locked Angular
-tarball. The frozen install was rerun against the already validated global
-store at `<local-home>/Library/pnpm/store`, with `--offline --ignore-scripts`.
+tarball. The frozen install was rerun against the already validated
+`[LOCAL_PNPM_STORE]`, with `--offline --ignore-scripts`.
 It reused 520 packages and downloaded zero. No lockfile or manifest changed.
 
 ### R132-F03 — Stale active release language

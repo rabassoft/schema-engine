@@ -10,9 +10,13 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
 - [`HANDOFF.md`](./HANDOFF.md): stable context-recovery procedure.
 - [`PROJECT-PHILOSOPHY.md`](.ai-docs/project/PROJECT-PHILOSOPHY.md): Project Philosophy
 - [Architecture documentation](./.ai-docs/README.md).
+- [Security reporting](./SECURITY.md),
+  [contribution policy](./CONTRIBUTING.md) and
+  [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-The private development repository contains the completed M1-M20 controlled-form
-ecosystem and verified public Experimental packages. Its G0 review passed;
+The repository contains the completed M1-M21 controlled-form ecosystem and
+verified public Experimental packages. It remains private while approved
+PLAN-024 prepares its sanitized public history and governance. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
 v0.1.1, SPEC-006 v0.1.1 and SPEC-007 v0.1.0 are Accepted. SPEC-007 defines the
 private M17 reusable synchronous Ajv-validator contract. The source checkout implements the M14 contract
@@ -31,7 +35,7 @@ M19 and PLAN-021 revision 0 are complete after final review 132 repeated the
 full workspace, artifact, source, security, registry, consumer and SPEC-008
 matrix with zero findings. Core/base `0.3.0` and the Angular Aria pilot `0.1.0`
 remain available as the coordinated exact M19 line.
-PLAN-023 checkpoint 10 has published and byte-verified core/base Angular
+Completed PLAN-023 has published and byte-verified core/base Angular
 `0.4.0` plus pilot `0.2.0` under both `next` and `latest`. Exact, `next`,
 `latest` and unqualified lower/latest-compatible native/pilot consumers pass;
 the aliases remain Experimental routing and do not imply Stable. All three
@@ -173,9 +177,14 @@ available for organizations that do not want to comply with AGPL; contact
 `ricard@rabassoft.com`. No final commercial terms or support SLA are currently
 offered.
 
-The development repository remains private pending a separate sanitization
-review. Each package carries its preferred TypeScript source, frozen build
-harness, license and notices so its release can be rebuilt without repository
-access. M19 cannot truthfully carry npm provenance while the matching
-repository is private. External code contributions are not accepted until a
-separately reviewed rights policy exists; there is no public issue tracker yet.
+The repository remains private until PLAN-024 completes its independently gated
+history rewrite, visibility and GitHub-control checkpoints. Each package carries
+its preferred TypeScript source, frozen build harness, license and notices so
+its existing release can be rebuilt without repository access. Existing M19/M21
+versions do not claim repository-backed npm provenance; a future release must
+separately prove OIDC publication from the sanitized public source.
+
+Issues may be used for non-code feedback once publicly accessible. External
+code contributions are not accepted until a separately reviewed rights policy
+exists; see [CONTRIBUTING.md](./CONTRIBUTING.md). Security reports follow
+[SECURITY.md](./SECURITY.md) and must not be opened publicly.
