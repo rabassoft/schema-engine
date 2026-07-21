@@ -20,9 +20,10 @@ the full file is not part of routine task startup.
   tests/static guards for triggers, exact pins/counts, permissions, source
   identity, OIDC isolation, lifecycle-free installs and readiness/publication
   order.
-- Review 169 cycle 1 corrected four fixture/static-policy findings; cycle 2
+- Review 169 cycle 1 corrected four fixture/static-policy findings. Later clean
+  detached verification found and corrected build-before-lint ordering; cycle 3
   repeated the complete checkpoint with zero unresolved findings. Default
-  Gitleaks scanned 63 commits/approximately 6.13 MB with no leak.
+  Gitleaks scanned 64 commits/approximately 6.24 MB with no leak.
 - Frozen install, expected history/npm fail-closed modes, docs, format, lint,
   strict types, complete workspace tests/builds, package/source, release
   tooling, snippets, boundaries, Angular/Standard units and diff checks pass.

@@ -782,8 +782,8 @@ Cada decisión debe registrar:
 
 - **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
   are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved and
-  checkpoints 1–2 are complete after reviews 168–169; checkpoint 3 awaits
-  explicit commit/private-push authorization
+  checkpoints 1–2 are complete after reviews 168–169; checkpoint 3 is in
+  progress after review 170 found one corrected clean-build ordering issue
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -816,7 +816,9 @@ Cada decisión debe registrar:
 - **Checkpoint actual:** checkpoint 2 completó herramientas, fixtures y
   workflows locales con pins completos y publicación fail-closed. El árbol
   candidato pasa; el historial conserva la única ruta local histórica ya
-  clasificada. Checkpoint 3 sigue inactivo.
+  clasificada. Checkpoint 3 publicó su baseline privado; la corrección normal
+  está autorizada y sigue abierto hasta publicarla y repetir la verificación
+  detached.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -945,9 +947,10 @@ Cada decisión debe registrar:
 ## 4. Próximo trabajo de decisión
 
 1. **M22 repository delivery:** PLAN-024 checkpoints 1–2 están completos tras
-   reviews 168–169. La siguiente acción exacta es presentar y autorizar el
-   commit/push privado de checkpoint 3; Git remoto, GitHub/npm e historial
-   siguen sin mutación.
+   reviews 168–169. Checkpoint 3 tiene baseline privado y un candidato corregido
+   tras review 170; su commit/push normal está autorizado y la siguiente acción
+   es ejecutarlo/repetir la matriz detached. `main`, GitHub/npm e historial
+   siguen intactos.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

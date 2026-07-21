@@ -56,6 +56,7 @@ export function evaluateCiWorkflow(workflow) {
   for (const command of [
     'pnpm format:check',
     'pnpm docs:check',
+    'pnpm build',
     'pnpm lint',
     'pnpm typecheck',
     'pnpm test',
@@ -135,6 +136,9 @@ export function evaluateNpmWorkflow(workflow) {
     ) !== 2
   ) {
     findings.push('npm-frozen-install-count-invalid');
+  }
+  if (occurrenceCount(workflow, 'pnpm build') !== 2) {
+    findings.push('npm-build-count-invalid');
   }
   if (
     occurrenceCount(workflow, `actions/checkout@${ACTION_PINS.checkout}`) !==

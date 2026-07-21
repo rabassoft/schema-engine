@@ -48,6 +48,7 @@ jobs:
         run: |
           pnpm format:check
           pnpm docs:check
+          pnpm build
           pnpm lint
           pnpm typecheck
           pnpm test

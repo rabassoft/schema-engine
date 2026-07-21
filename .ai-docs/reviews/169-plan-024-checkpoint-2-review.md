@@ -1,11 +1,11 @@
-# PLAN-024 checkpoint 2 review — Cycles 1–2
+# PLAN-024 checkpoint 2 review — Cycles 1–3
 
 - **Date:** 2026-07-22
 - **Plan:** Approved
   [`PLAN-024 revision 0`](../plans/024-sanitized-public-repository.md)
 - **Checkpoint:** 2 — pinned tools and isolated fixture proof
 - **Authority:** Explicit Ricard authorization after completed checkpoint 1
-- **Outcome:** Cycle 2 passed the complete checkpoint boundary with zero
+- **Outcome:** Cycle 3 passed the complete checkpoint boundary with zero
   unresolved findings
 
 ## Verified acquisition record
@@ -30,7 +30,13 @@ specification is tracked.
 | R169-F03 | The fake PAT initially existed as a contiguous token shape in public fixture source.                | Constructed it only at runtime in the isolated temporary repository; the public candidate tree contains no token shape.     |
 | R169-F04 | Initial workflow checks rejected bad pins but did not fail when required actions/commands vanished. | Added exact action counts, complete command presence, one OIDC grant, two frozen installs and exact source-identity guards. |
 
-## Cycle 2 — complete zero-unresolved-finding pass
+## Cycle 2 follow-up finding and correction
+
+| ID       | Finding                                                                                                       | Correction                                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| R169-F05 | Clean detached verification exposed that both workflows linted before building internal package declarations. | Added an explicit build before lint in CI/npm verification and required both expected npm-workflow builds statically. |
+
+## Cycle 3 — complete zero-unresolved-finding pass
 
 ### 1. Authority and scope
 
@@ -80,7 +86,7 @@ before readiness fail.
 
 ### 7. Current repository evidence
 
-Pass. Gitleaks default history scan covers 63 commits and approximately 6.13 MB
+Pass. Gitleaks default history scan covers 64 commits and approximately 6.24 MB
 with no leak. The independent history policy still fails exactly once on the
 already classified review-132 local path; the candidate tree has zero findings.
 Current npm readiness fails closed on every absent future authorization/
@@ -111,7 +117,8 @@ pass on the final state.
 
 ## Outcome
 
-Checkpoint 2 is complete after the required zero-unresolved-finding pass.
+Checkpoint 2 is complete after the required repeated zero-unresolved-finding
+pass, including clean detached verification with build-before-lint ordering.
 Checkpoint 3 is not authorized: committing these reviewed checkpoint-1/2
 changes and pushing `develop` to the still-private origin require explicit
 approval after presentation of the final scoped diff, author, subject and

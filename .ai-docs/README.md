@@ -48,8 +48,12 @@
 
 ## Acceptance reviews
 
+- [PLAN-024 checkpoint 3 review](./reviews/170-plan-024-checkpoint-3-review.md) —
+  In progress; cycle 1 found a clean-build ordering issue whose corrected
+  candidate passes and whose normal corrective commit/private push is now
+  explicitly authorized.
 - [PLAN-024 checkpoint 2 review](./reviews/169-plan-024-checkpoint-2-review.md) —
-  Cycle 2 passed official tool/pin trust, isolated fixtures, guarded workflows
+  Cycle 3 passed official tool/pin trust, isolated fixtures, guarded workflows
   and the complete matrix with zero unresolved findings.
 - [PLAN-024 checkpoint 1 review](./reviews/168-plan-024-checkpoint-1-review.md) —
   Cycle 3 passed the complete local boundary with zero unresolved findings;
@@ -596,7 +600,7 @@
 - [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Completed revision 0 after final review 132 cycle 4 repeated the complete release matrix and all 22 SPEC-008 rows with zero findings
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
-- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Approved revision 0; checkpoints 1–2 completed after reviews 168–169 and checkpoint 3 awaits explicit commit/private-push authorization
+- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Approved revision 0; checkpoints 1–2 completed after reviews 168–169 and checkpoint 3 remains in progress under review 170
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and

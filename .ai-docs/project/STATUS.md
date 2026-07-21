@@ -29,21 +29,22 @@
 
 ## Current objective
 
-Create and push the explicitly authorized scoped checkpoint-1/2 baseline commit
-to private `develop`, then verify the exact remote commit from a clean detached
-worktree without changing `main`, visibility, settings or npm.
+Complete PLAN-024 checkpoint 3 through a separately authorized normal corrective
+commit/private push for build-before-lint ordering, then repeat exact remote
+verification from a fresh clean detached worktree.
 
 ## In progress
 
-PLAN-024 checkpoint 3: final pre-commit checks passed for the reviewed scoped
-diff, Rabassoft identity, expected private repository and normal `develop`
-push. Commit/push and clean detached verification are in progress; no remote
-clone, history rewrite, `main`, visibility, settings or npm mutation is
-authorized.
+PLAN-024 checkpoint 3: baseline commit
+`300eb78b2bdd3033757b234f2937d66f77ed6f22` is on private `develop`; `main` and
+visibility are unchanged. Review 170 found build-before-lint ordering on a clean
+checkout. The corrected candidate passes completely and its normal corrective
+commit/private push is explicitly authorized and in progress. No remote clone,
+history rewrite, `main`, visibility, settings or npm mutation is authorized.
 
 ## Latest completed work
 
-- Completed PLAN-024 checkpoint 2 after review 169 cycle 2 passed tool trust,
+- Completed PLAN-024 checkpoint 2 after review 169 cycle 3 passed tool trust,
   redacted/deterministic fixtures, exact Action pins, guarded workflows and the
   complete local matrix with zero unresolved findings.
 - Completed PLAN-024 checkpoint 1 after review 168 cycle 3 passed the complete
@@ -60,14 +61,13 @@ authorized.
 
 ## Exact next action
 
-Present the exact checkpoint-1/2 scoped diff, Rabassoft author identity
-`ricard@rabassoft.com`, commit subject and normal private `develop` push
-command; obtain explicit checkpoint-3 authorization before executing any Git
-mutation.
+Create the authorized normal corrective commit as Rabassoft with subject
+`fix: build before lint in clean workflows`, push private `develop`, then repeat
+the complete clean detached review at the exact remote hash.
 
 ## Blockers and conflicts
 
-- No implementation blocker or authoritative documentation conflict remains.
+- No authoritative documentation conflict or implementation blocker remains.
 - The current reachable history deliberately fails the new policy scan on the
   one already classified local path in historical review 132; sanitizing it is
   later gated work, not an unexpected blocker.
@@ -93,10 +93,13 @@ mutation.
 
 ## Latest verification
 
-- Review 169 cycle 2 repeated the complete checkpoint-2 boundary with zero
-  unresolved findings. Gitleaks v8.30.1 scanned 63 commits/approximately 6.13
+- Review 169 cycle 3 repeated the complete checkpoint-2 boundary with zero
+  unresolved findings. Gitleaks v8.30.1 scanned 64 commits/approximately 6.24
   MB with no leak; git-filter-repo v2.47.0 produced identical two-commit
   rewrites and a complete map.
+- Review 170 cycle 1 verified private commit/push and unchanged `main`/
+  visibility, then found build-before-lint ordering in a fresh detached install.
+  The corrected detached candidate now passes the complete matrix.
 - Review 168 cycle 3 repeated the complete checkpoint-1 boundary with zero
   unresolved findings.
 - Twelve policy/readiness/workflow tests, exact Action pins, workflow static
@@ -120,6 +123,8 @@ mutation.
 - Approved M22 plan: `.ai-docs/plans/024-sanitized-public-repository.md`
 - M22 checkpoint-2 review:
   `.ai-docs/reviews/169-plan-024-checkpoint-2-review.md`
+- M22 checkpoint-3 review:
+  `.ai-docs/reviews/170-plan-024-checkpoint-3-review.md`
 - M22 checkpoint-1 review:
   `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
 - M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`

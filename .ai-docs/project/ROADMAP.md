@@ -448,15 +448,19 @@ separado antes de repetir la revisión.
   resueltos: políticas públicas, guardas del árbol/historial/documentación y
   preparación npm fail-closed pasan en sus modos esperados. El historial actual
   conserva exactamente la ruta local histórica ya clasificada.
-- Checkpoint 2 quedó completado tras review 169 ciclo 2: herramientas oficiales
+- Checkpoint 2 quedó completado tras review 169 ciclo 3: herramientas oficiales
   verificadas, fixtures redactados/deterministas y workflows con SHA completo,
   mínimo privilegio y publicación fail-closed pasan sin hallazgos pendientes.
+- Checkpoint 3 publicó el baseline privado `300eb78`; review 170 ciclo 1 detectó
+  que un checkout limpio necesitaba build antes de lint. El candidato corregido
+  pasa la matriz completa y su commit/push normal está autorizado; falta
+  ejecutarlo y repetir la verificación detached antes de cerrar el checkpoint.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** presentar el diff, autor, asunto y comandos exactos del
-   checkpoint 3 y obtener autorización explícita antes de hacer el commit y el
-   push privado normal de `develop`.
+1. **Next action:** ejecutar el commit correctivo normal autorizado de
+   checkpoint 3, hacer push privado de `develop` y repetir la matriz desde el
+   hash remoto detached exacto.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain

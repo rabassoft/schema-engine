@@ -19,7 +19,8 @@
   preparation
 - **Capability:** promoted D-043 repository slice only
 - **Implementation:** Checkpoints 1–2 completed after reviews 168–169;
-  checkpoint 3 awaits explicit commit/private-push authorization
+  checkpoint 3 is in progress with its review-170 clean-build ordering
+  correction and normal commit/private push explicitly authorized
 
 ## 1. Goal and hard boundary
 
@@ -561,7 +562,7 @@ action-SHA resolution.
 
 ### 15.2 Implementation checkpoint 2
 
-Checkpoint 2 completed on 22 July 2026 after review 169 cycle 2 passed the full
+Checkpoint 2 completed on 22 July 2026 after review 169 cycle 3 passed the full
 boundary with zero unresolved findings. Official pinned Gitleaks and
 git-filter-repo tools passed redacted positive/negative and deterministic
 rewrite fixtures outside the repository. CI and guarded npm workflows use full
@@ -574,3 +575,17 @@ descriptor cannot reach `npm publish`. No repository remote was cloned, no Git
 history/ref, GitHub/npm setting or package was mutated, and no commit or push
 occurred. Checkpoint 3 remains unauthorized pending presentation and explicit
 approval of its scoped private commit/push.
+
+### 15.3 Implementation checkpoint 3
+
+The authorized baseline commit `300eb78b2bdd3033757b234f2937d66f77ed6f22`
+was pushed normally to private `develop`. Exact refs, private visibility and
+unchanged `main` were verified. Review 170 cycle 1 then found that the committed
+workflows linted before a clean checkout built internal declarations.
+
+The corrected candidate adds build-before-lint ordering and a static regression
+guard; its complete clean detached matrix passes. Ricard separately authorized
+its normal corrective commit/private push. Checkpoint 3 remains in progress
+until that mutation and a new exact-remote detached review pass with zero
+findings. No amend, force push, rewrite or other external mutation is
+authorized.
