@@ -6,6 +6,81 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 5 completed
+
+### Completed
+
+- Created one owner-only replacement specification for the classified
+  `macos-home-path`, recorded only its SHA-256 and replaced it with
+  `<local-home>/` without printing or committing the private source.
+- Pinned git-filter-repo v2.47.0 produced identical 65-entry maps in two fresh
+  mirrors: 60 IDs unchanged, three exact content substitutions and two
+  parent-only changes with author/date/message/topology preserved.
+- Generated the complete public old/new map and one deterministic
+  self-identifying evidence commit selected by both candidate long-lived refs.
+- Review 172 cycles 1–2 corrected a verifier assumption about parent-only
+  commit changes and the evidence commit's self-inventory. Cycle 3 repeated
+  continuity, scans and the complete clean-clone matrix with zero unresolved
+  findings.
+- Candidate history/tree policies and Gitleaks pass with zero findings; npm
+  remains intentionally fail-closed. Current/remote refs, visibility, settings,
+  packages and npm remain unchanged.
+
+### Next
+
+- Present and immediately authorize PLAN-024 checkpoint 6 before creating its
+  private recovery bundle, cleaning/adopting the current checkout or atomically
+  replacing the two remote refs.
+
+## 2026-07-22 — PLAN-024 checkpoint 4 completed
+
+### Completed
+
+- Cloned the exact private remote into a fresh owner-only mirror, froze
+  `main`/`develop` at `a324d830`/`a594f733` and passed strict Git integrity.
+- Pinned Gitleaks scanned 65 commits/approximately 6.25 MB with full redaction
+  and no leak. Independent path/content checks retained exactly the
+  preclassified review-132 macOS path and found no other prohibited content.
+- Classified intentional loopback development endpoints, public Rabassoft
+  identity, test-only addresses, generated/artifact inventory, largest blobs,
+  binary state, licenses/notices, dependency rights, `.ai-docs`, reference apps
+  and public package boundaries.
+- Froze deterministic parent, commit/tree/author and object/path inventory
+  hashes for 65 commits, 968 trees and 1,745 blobs. Review 171 cycle 1 passed all
+  nine layers with zero unresolved findings.
+- Verified the remote still private with unchanged refs/default branch. No
+  remote write, history rewrite, setting, package or npm mutation occurred.
+
+### Next
+
+- Present and explicitly authorize PLAN-024 checkpoint 5 before creating its
+  owner-only replacement specification or deterministic local sanitized
+  candidate.
+
+## 2026-07-22 — PLAN-024 checkpoint 3 completed
+
+### Completed
+
+- Created and normally pushed private baseline commit `300eb78`, preserving
+  `main`, private visibility, default branch and all GitHub/npm settings.
+- Review 170 cycle 1 reproduced a clean-checkout workflow defect: lint ran
+  before internal declarations existed. Added build-before-lint ordering and a
+  static regression guard in normal corrective commit `a594f73`, without amend
+  or force.
+- Verified exact remote `develop`
+  `a594f7333c99c1eb73fac8089ae68bb495d45bbb` from a new detached worktree.
+  Gitleaks scanned 65 commits/approximately 6.25 MB with no leak; publication
+  tool fixtures, twelve policy tests, expected fail-closed lanes and the full
+  docs/build/lint/types/tests/package/source/reference matrix passed.
+- Review 170 cycle 2 closed with zero unresolved findings. `main` remains
+  `a324d830270cea30ed62b44fdb1af333e7c85a2d`; the repository remains private
+  with `main` as default.
+
+### Next
+
+- Present and explicitly authorize PLAN-024 checkpoint 4 before creating a
+  fresh remote mirror clone or running its bounded read-only audit.
+
 ## 2026-07-22 — PLAN-024 checkpoint 2 completed
 
 ### Completed

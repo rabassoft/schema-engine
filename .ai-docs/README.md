@@ -8,6 +8,8 @@
 - [Stable handoff](../HANDOFF.md) — context-recovery procedure, never current
   status.
 - [Work log](./project/WORKLOG.md) — append-only history; read selectively.
+- [Sanitized history map](./project/HISTORY-REWRITE-MAP.md) — public one-way
+  continuity from private pre-sanitization commits to the reviewed lineage.
 - [Coordinated Experimental 0.2.0 release notes](./releases/0.2.0.md) — selected
   clean bytes, source migration and verified public `next`/`latest` state.
 - [M19 coordinated Experimental release notes](./releases/0.3.0.md) — completed
@@ -48,10 +50,18 @@
 
 ## Acceptance reviews
 
+- [PLAN-024 checkpoint 5 review](./reviews/172-plan-024-checkpoint-5-review.md) —
+  Cycles 1–2 corrected one parent-only continuity assumption and the evidence
+  commit's self-inventory; cycle 3 verified the deterministic sanitized
+  candidate, complete map and clean-clone matrix with zero unresolved findings.
+- [PLAN-024 checkpoint 4 review](./reviews/171-plan-024-checkpoint-4-review.md) —
+  Cycle 1 passed all nine fresh-mirror audit layers with zero unresolved
+  findings; only the preclassified review-132 path remains for later gated
+  replacement.
 - [PLAN-024 checkpoint 3 review](./reviews/170-plan-024-checkpoint-3-review.md) —
-  In progress; cycle 1 found a clean-build ordering issue whose corrected
-  candidate passes and whose normal corrective commit/private push is now
-  explicitly authorized.
+  Cycle 1 found a clean-build ordering issue; cycle 2 verified the normal
+  correction at the exact private remote hash and passed the complete detached
+  matrix with zero unresolved findings.
 - [PLAN-024 checkpoint 2 review](./reviews/169-plan-024-checkpoint-2-review.md) —
   Cycle 3 passed official tool/pin trust, isolated fixtures, guarded workflows
   and the complete matrix with zero unresolved findings.
@@ -600,7 +610,7 @@
 - [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Completed revision 0 after final review 132 cycle 4 repeated the complete release matrix and all 22 SPEC-008 rows with zero findings
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
-- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Approved revision 0; checkpoints 1–2 completed after reviews 168–169 and checkpoint 3 remains in progress under review 170
+- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Approved revision 0; checkpoints 1–5 completed after reviews 168–172 and checkpoint 6 remains separately gated
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and

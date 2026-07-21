@@ -18,9 +18,9 @@
 - **Milestone:** M22 — sanitized public repository and secure-release
   preparation
 - **Capability:** promoted D-043 repository slice only
-- **Implementation:** Checkpoints 1–2 completed after reviews 168–169;
-  checkpoint 3 is in progress with its review-170 clean-build ordering
-  correction and normal commit/private push explicitly authorized
+- **Implementation:** Checkpoints 1–5 completed after reviews 168–172;
+  checkpoint 6's private bundle, atomic remote replacement and local adoption
+  remain separately and immediately gated
 
 ## 1. Goal and hard boundary
 
@@ -584,8 +584,42 @@ unchanged `main` were verified. Review 170 cycle 1 then found that the committed
 workflows linted before a clean checkout built internal declarations.
 
 The corrected candidate adds build-before-lint ordering and a static regression
-guard; its complete clean detached matrix passes. Ricard separately authorized
-its normal corrective commit/private push. Checkpoint 3 remains in progress
-until that mutation and a new exact-remote detached review pass with zero
-findings. No amend, force push, rewrite or other external mutation is
-authorized.
+guard. Ricard separately authorized normal corrective commit
+`a594f7333c99c1eb73fac8089ae68bb495d45bbb`, which was pushed to private
+`develop` without amend or force. Review 170 cycle 2 recreated a clean detached
+worktree at that exact remote hash and passed the complete matrix with zero
+unresolved findings. Checkpoint 3 is complete; checkpoint 4's remote mirror
+clone/read-only audit remains separately gated.
+
+### 15.4 Implementation checkpoint 4
+
+Checkpoint 4 completed on 22 July 2026 after review 171 cycle 1 passed every
+nine-layer audit area with zero unresolved findings. A fresh owner-only mirror
+froze exact private `main`/`develop` refs, passed strict integrity and contained
+65 commits, 968 trees and 1,745 blobs under one intentional Rabassoft identity.
+Pinned Gitleaks found no leak; independent scans found only the already
+classified review-132 macOS path selected for later replacement. Local
+endpoints, fixture identities, rights/licenses, generated/binary inventory,
+largest blobs, `.ai-docs`, reference applications and public boundaries were
+classified without a broad allowlist.
+
+No remote ref, history, visibility, setting, package or npm state changed.
+Checkpoint 5's owner-only replacement specification and deterministic local
+sanitized candidate remain separately gated.
+
+### 15.5 Implementation checkpoint 5
+
+Checkpoint 5 completed on 22 July 2026 after review 172 cycle 3 passed the
+complete boundary with zero unresolved findings. Two owner-only mirrors used
+one private specification checksum and pinned git-filter-repo v2.47.0 to
+produce identical 65-entry maps: 60 IDs remain unchanged, three change through
+the exact one-path content substitution and two change only through mapped
+parents. Authors, dates, messages, parents and all other tree content remain
+equivalent.
+
+One deterministic evidence commit contains the normalized public map and
+checkpoint state; both candidate long-lived refs select that self-identifying
+object. Gitleaks and independent tree/history policy pass with zero findings,
+npm remains fail-closed and a fresh ordinary clone passes the complete matrix.
+The remote/current refs remain unchanged. Checkpoint 6's recovery bundle,
+atomic exact-lease replacement and local adoption remain separately gated.

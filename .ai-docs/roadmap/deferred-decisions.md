@@ -782,8 +782,9 @@ Cada decisión debe registrar:
 
 - **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
   are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved and
-  checkpoints 1–2 are complete after reviews 168–169; checkpoint 3 is in
-  progress after review 170 found one corrected clean-build ordering issue
+  checkpoints 1–5 are complete after reviews 168–172; checkpoint 6's private
+  bundle, atomic remote ref replacement and local adoption remain separately
+  and immediately gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -813,12 +814,10 @@ Cada decisión debe registrar:
   sustitución de refs/adopción local, visibilidad y settings. Metadata de
   paquetes, npm trusted publishing y la primera release con provenance requieren
   una promoción/plan de release posterior.
-- **Checkpoint actual:** checkpoint 2 completó herramientas, fixtures y
-  workflows locales con pins completos y publicación fail-closed. El árbol
-  candidato pasa; el historial conserva la única ruta local histórica ya
-  clasificada. Checkpoint 3 publicó su baseline privado; la corrección normal
-  está autorizada y sigue abierto hasta publicarla y repetir la verificación
-  detached.
+- **Checkpoint actual:** checkpoint 5 está completado. Review 172 ciclo 3
+  verifica dos reescrituras/mapas idénticos, sustitución mínima, un commit de
+  evidencia determinista y la matriz completa sin hallazgos. El remoto y refs
+  actuales siguen intactos; checkpoint 6 conserva su gate inmediato separado.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -946,11 +945,10 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** PLAN-024 checkpoints 1–2 están completos tras
-   reviews 168–169. Checkpoint 3 tiene baseline privado y un candidato corregido
-   tras review 170; su commit/push normal está autorizado y la siguiente acción
-   es ejecutarlo/repetir la matriz detached. `main`, GitHub/npm e historial
-   siguen intactos.
+1. **M22 repository delivery:** PLAN-024 checkpoints 1–5 están completos tras
+   reviews 168–172. Existe un único candidato determinista saneado; la siguiente
+   acción es presentar/autorizar checkpoint 6 para bundle, reemplazo remoto
+   atómico y adopción local. GitHub/npm y los refs remotos siguen intactos.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

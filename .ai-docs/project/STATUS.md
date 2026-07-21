@@ -12,7 +12,7 @@
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-024 revision 0, Approved
 - **Last completed implementation plan:** PLAN-023 revision 0
-- **Active implementation task:** PLAN-024 checkpoint 3
+- **Active implementation task:** None
 - **Last accepted ADR:** ADR-026 revision 0, coordinated with ADR-018 revision 6
 - **Implemented capability:** M1–M21 and G0, including recursive static local
   presentation forests in core, native Angular, independent Standard and
@@ -29,21 +29,26 @@
 
 ## Current objective
 
-Complete PLAN-024 checkpoint 3 through a separately authorized normal corrective
-commit/private push for build-before-lint ordering, then repeat exact remote
-verification from a fresh clean detached worktree.
+Await immediate explicit authorization for PLAN-024 checkpoint 6: create the
+private recovery bundle, atomically replace both remote refs with the selected
+sanitized baseline and adopt the verified lineage locally.
 
 ## In progress
 
-PLAN-024 checkpoint 3: baseline commit
-`300eb78b2bdd3033757b234f2937d66f77ed6f22` is on private `develop`; `main` and
-visibility are unchanged. Review 170 found build-before-lint ordering on a clean
-checkout. The corrected candidate passes completely and its normal corrective
-commit/private push is explicitly authorized and in progress. No remote clone,
-history rewrite, `main`, visibility, settings or npm mutation is authorized.
+None. PLAN-024 checkpoint 5 is complete. Checkpoint 6's bundle, local cleanup,
+atomic exact-lease ref replacement and local adoption are not authorized yet.
 
 ## Latest completed work
 
+- Completed PLAN-024 checkpoint 5 after review 172 cycle 3 produced one
+  deterministic self-identifying evidence commit in two mirrors, mapped all 65
+  old commits and passed the complete sanitized-history/clean-clone matrix.
+- Completed PLAN-024 checkpoint 4 after review 171 cycle 1 passed all nine
+  fresh-mirror audit layers with zero unresolved findings and froze exact
+  ref/object/rights/content evidence without remote mutation.
+- Completed PLAN-024 checkpoint 3 after review 170 cycle 2 verified private
+  `develop` at `a594f7333c99c1eb73fac8089ae68bb495d45bbb`, unchanged `main` and
+  visibility, then passed the complete fresh detached matrix with zero findings.
 - Completed PLAN-024 checkpoint 2 after review 169 cycle 3 passed tool trust,
   redacted/deterministic fixtures, exact Action pins, guarded workflows and the
   complete local matrix with zero unresolved findings.
@@ -61,16 +66,17 @@ history rewrite, `main`, visibility, settings or npm mutation is authorized.
 
 ## Exact next action
 
-Create the authorized normal corrective commit as Rabassoft with subject
-`fix: build before lint in clean workflows`, push private `develop`, then repeat
-the complete clean detached review at the exact remote hash.
+Present checkpoint 6's exact selected candidate hash, verified private-bundle
+strategy, atomic two-ref exact-lease push and reversible local cleanup/adoption
+commands; obtain immediate explicit authorization before any of them runs.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
-- The current reachable history deliberately fails the new policy scan on the
-  one already classified local path in historical review 132; sanitizing it is
-  later gated work, not an unexpected blocker.
+- The current checkout/remote lineage still contains the one classified
+  historical review-132 path; the isolated checkpoint-5 candidate removes it
+  and passes full history policy. Replacing the current/remote lineage remains
+  the separately gated checkpoint-6 action.
 - GitHub rulesets are unavailable for the current private repository/plan;
   recheck availability after the visibility or plan transition rather than
   weakening the M22 protection requirement.
@@ -83,7 +89,7 @@ the complete clean detached review at the exact remote hash.
   warning; Standard emits Vite's 868.50 kB advisory. These are observations,
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
-  Angular remain inactive. M22 checkpoints 1–2 are complete; no external action
+  Angular remain inactive. M22 checkpoints 1–5 are complete; no external action
   is active.
 
 ## Open questions
@@ -93,13 +99,25 @@ the complete clean detached review at the exact remote hash.
 
 ## Latest verification
 
+- Review 172 cycle 3 verified two identical rewrites and one deterministic
+  evidence commit, a complete 65-entry map, exact one-path substitution,
+  preserved metadata/parents, 66-commit Gitleaks and public-history scans with
+  zero findings plus the complete clean-clone matrix.
+- Review 171 cycle 1 audited a fresh owner-only private mirror across all nine
+  required layers. Gitleaks found no leak; only the preclassified review-132
+  path requires later replacement; 65 commits, 968 trees and 1,745 blobs plus
+  rights, identity, binaries, artifacts and public boundaries passed with zero
+  unresolved findings.
+- Review 170 cycle 2 verified exact remote `develop`
+  `a594f7333c99c1eb73fac8089ae68bb495d45bbb`, unchanged `main`/private
+  visibility and a clean detached lifecycle-free install. Gitleaks scanned 65
+  commits/approximately 6.25 MB with no leak; tool fixtures, expected
+  fail-closed lanes and the complete build-before-lint matrix passed with zero
+  unresolved findings.
 - Review 169 cycle 3 repeated the complete checkpoint-2 boundary with zero
   unresolved findings. Gitleaks v8.30.1 scanned 64 commits/approximately 6.24
   MB with no leak; git-filter-repo v2.47.0 produced identical two-commit
   rewrites and a complete map.
-- Review 170 cycle 1 verified private commit/push and unchanged `main`/
-  visibility, then found build-before-lint ordering in a fresh detached install.
-  The corrected detached candidate now passes the complete matrix.
 - Review 168 cycle 3 repeated the complete checkpoint-1 boundary with zero
   unresolved findings.
 - Twelve policy/readiness/workflow tests, exact Action pins, workflow static
@@ -120,11 +138,16 @@ the complete clean detached review at the exact remote hash.
 
 ## Task document map
 
+- Sanitized history map: `.ai-docs/project/HISTORY-REWRITE-MAP.md`
 - Approved M22 plan: `.ai-docs/plans/024-sanitized-public-repository.md`
 - M22 checkpoint-2 review:
   `.ai-docs/reviews/169-plan-024-checkpoint-2-review.md`
 - M22 checkpoint-3 review:
   `.ai-docs/reviews/170-plan-024-checkpoint-3-review.md`
+- M22 checkpoint-4 review:
+  `.ai-docs/reviews/171-plan-024-checkpoint-4-review.md`
+- M22 checkpoint-5 review:
+  `.ai-docs/reviews/172-plan-024-checkpoint-5-review.md`
 - M22 checkpoint-1 review:
   `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
 - M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`

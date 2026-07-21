@@ -426,7 +426,7 @@ separado antes de repetir la revisión.
   ocho consumidores registrales y toda la documentación con cero hallazgos.
   M21 queda Public + Experimental + Active sin autorizar otra acción externa.
 
-### M22 — Repositorio público y releases seguras — checkpoint 2 completado
+### M22 — Repositorio público y releases seguras — checkpoint 5 completado
 
 - Ricard seleccionó D-043 como siguiente milestone el 21 de julio de 2026.
 - [Review 165](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
@@ -452,15 +452,24 @@ separado antes de repetir la revisión.
   verificadas, fixtures redactados/deterministas y workflows con SHA completo,
   mínimo privilegio y publicación fail-closed pasan sin hallazgos pendientes.
 - Checkpoint 3 publicó el baseline privado `300eb78`; review 170 ciclo 1 detectó
-  que un checkout limpio necesitaba build antes de lint. El candidato corregido
-  pasa la matriz completa y su commit/push normal está autorizado; falta
-  ejecutarlo y repetir la verificación detached antes de cerrar el checkpoint.
+  que un checkout limpio necesitaba build antes de lint. El commit correctivo
+  normal `a594f73` quedó en private `develop`; ciclo 2 verificó ese hash remoto
+  exacto desde un worktree detached limpio y pasó la matriz completa sin
+  hallazgos. `main`, visibilidad y settings permanecen sin cambios.
+- Checkpoint 4 quedó completado tras review 171 ciclo 1: el mirror privado
+  owner-only congeló refs y 2.778 objetos; las nueve capas de secretos, rutas,
+  identidad, artefactos, binarios, derechos, contenido e inventario pasaron sin
+  hallazgos pendientes. Solo permanece la ruta histórica ya clasificada que
+  checkpoint 5 deberá reemplazar localmente si se autoriza.
+- Checkpoint 5 quedó completado tras review 172 ciclo 3: dos mirrors producen
+  la misma reescritura/mapa de 65 commits y el mismo commit de evidencia; solo
+  cambia la ruta clasificada, el historial saneado y la matriz completa pasan
+  sin hallazgos y el remoto continúa intacto.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** ejecutar el commit correctivo normal autorizado de
-   checkpoint 3, hacer push privado de `develop` y repetir la matriz desde el
-   hash remoto detached exacto.
+1. **Next action:** presentar y autorizar inmediatamente checkpoint 6: bundle
+   privado verificado, push atómico con leases exactos y adopción local.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain
