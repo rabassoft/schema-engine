@@ -686,11 +686,11 @@ Cada decisión debe registrar:
   matriz local, 27 filas SPEC-009, regresión M18, consumidores y documentación
   pasan la revisión final completa con cero hallazgos. No se autoriza otra
   versión, acción registral, Git/GitHub, repositorio, provenance o D-043.
-- **Arquitectura aceptada:** ADR-018 revision 4 mantiene el repositorio privado,
-  exige Corresponding Source público y 2FA por write, y difiere conjuntamente
-  metadata pública, trusted publishing y provenance hasta sanear/publicar el
-  repositorio; `next` es recomendado y todo `latest` observado no implica
-  Stable.
+- **Arquitectura actual:** ADR-018 revisión 6 y ADR-026 conservan el
+  Corresponding Source histórico, 2FA y los aliases ya verificados, y separan
+  PLAN-024 de cualquier futura metadata/publicación OIDC. El repositorio sigue
+  privado hasta completar los gates M22; `next` es recomendado y todo `latest`
+  observado no implica Stable.
 - **Estado de entrega:** PLAN-013 revision 4 publicó y verificó byte a byte core
   y Angular `0.1.0`; ambos exponen `next` y el alias Experimental observado
   `latest`. Checkpoint 7 y M13 cierran con publicación interactiva/2FA, sin
@@ -780,7 +780,9 @@ Cada decisión debe registrar:
 
 ## D-043: Publicación del repositorio y automatización segura de releases
 
-- **Estado:** Deferred
+- **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
+  are Accepted after review 166 cycle 3 passed with zero findings; PLAN-024
+  preparation only is authorized
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -797,11 +799,18 @@ Cada decisión debe registrar:
 - **Excluye:** cambiar runtime/API/SPEC, publicar otra versión, hacer público el
   repositorio, crear workflows o cambiar settings por la mera existencia de
   esta entrada.
-- **Retomar cuando:** Ricard promueva explícitamente el saneamiento/publicación
-  del repositorio o autorice diseñar la automatización de una versión futura.
-- **Documento esperado:** revisión de preparación, ADR y plan con gates
-  separados para reescritura/saneamiento, visibilidad GitHub, metadata de
-  paquetes y cada setting npm.
+- **Frontera promovida:** diseño normativo de saneamiento/historial y contenido
+  público, topología/protecciones, políticas comunitarias y de seguridad,
+  metadata futura, trusted publishing OIDC y provenance. No promueve SPEC,
+  implementación, versión, release ni mutación local/externa.
+- **Resolución:** Ricard seleccionó conservar el historial alcanzable tras
+  saneamiento y publicar `.ai-docs` solo después de su clasificación y
+  saneamiento completos. Publicar el repositorio actual tal cual queda
+  rechazado.
+- **Documento siguiente:** PLAN-024 debe separar auditoría/saneamiento,
+  cualquier reescritura, ramas/settings y visibilidad. Metadata de paquetes,
+  npm trusted publishing y la primera release con provenance requieren una
+  promoción/plan de release posterior.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -929,11 +938,9 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M21 release delivery:** PLAN-023 revisión 0 está Completed tras review 164
-   ciclo 3. Core/base `0.4.0` y piloto `0.2.0` son byte-idénticos, firmados y
-   públicos bajo exact/`next`/`latest`/unqualified; las matrices lower/latest
-   native/pilot y las 27 filas SPEC-009 pasan. La siguiente acción exacta es
-   seleccionar separadamente el próximo milestone o capacidad Deferred.
+1. **M22 repository delivery:** ADR-026 revisión 0 y ADR-018 revisión 6 están
+   Accepted tras review 166 ciclo 3. La siguiente acción exacta es preparar y
+   revisar PLAN-024; implementación y acciones Git/GitHub/npm siguen inactivas.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.
@@ -944,8 +951,9 @@ Cada decisión debe registrar:
 4. **M18 delivery:** SPEC-008 v0.1.0 y ADR-023/ADR-024 permanecen Accepted;
    PLAN-020 revisión 0 y M18 están Completed tras review 113 ciclo 2 sin
    hallazgos.
-5. **D-043:** conserva la publicación del repositorio y automatización como
-   trabajo Deferred; no se promueve por D-044.
+5. **D-043:** está promovida solo para M22. PLAN-024 termina tras preparar,
+   sanear, publicar y configurar el repositorio; metadata npm y la primera
+   release OIDC/provenance requieren una promoción posterior.
 6. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
    familia de artefactos seleccionada.
 7. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;

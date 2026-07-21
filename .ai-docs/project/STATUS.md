@@ -5,7 +5,7 @@
 
 ## Checkpoint
 
-- **Updated:** 2026-07-20 by Ricard / Codex
+- **Updated:** 2026-07-21 by Ricard / Codex
 - **Branch:** `develop`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
@@ -13,7 +13,7 @@
 - **Last implementation plan:** PLAN-023 revision 0, Completed
 - **Last completed implementation plan:** PLAN-023 revision 0
 - **Active implementation task:** None
-- **Last accepted ADR:** ADR-018 revision 5
+- **Last accepted ADR:** ADR-026 revision 0, coordinated with ADR-018 revision 6
 - **Implemented capability:** M1–M21 and G0, including recursive static local
   presentation forests in core, native Angular, independent Standard and
   Angular Aria, delivered as the coordinated Experimental M21 line
@@ -29,8 +29,8 @@
 
 ## Current objective
 
-Preserve the completed M21 baseline and choose the next milestone or Deferred
-capability through a separate prioritization review.
+Prepare and completely review PLAN-024 for the accepted M22 sanitized-public-
+history delivery without starting implementation or changing external state.
 
 ## In progress
 
@@ -38,6 +38,16 @@ None.
 
 ## Latest completed work
 
+- Accepted ADR-026 revision 0 and coordinated ADR-018 revision 6 after review
+  166 cycle 3 passed all fourteen areas with zero findings; PLAN-024 preparation
+  is authorized but implementation and external actions remain inactive.
+- Selected preservation of sanitized reachable history with public `.ai-docs`,
+  an old/new commit map, solo-maintainer controls and a later separately gated
+  OIDC/provenance release transition.
+- Promoted D-043 for M22 normative design after review 165 cycle 2 passed with
+  zero findings; the read-only audit found no heuristic secret, one historical
+  local path, 235 `.ai-docs` files and incomplete public repository governance.
+  Publication as-is is rejected and no implementation is active.
 - Completed PLAN-023 checkpoint 11, PLAN-023 revision 0 and M21 after final
   review 164 cycle 3 repeated all eighteen areas and all 27 SPEC-009 rows with
   zero findings.
@@ -45,25 +55,18 @@ None.
   selected/live bytes, integrity, signatures, public access, aliases,
   manifests, peers, exports, Corresponding Source, licensing and absence of
   repository/provenance metadata for the complete M21 line.
-- Repeated the frozen workspace, 689 tests, builds, package/artifact/source/
-  security checks, snippets, 540 boundaries, Angular/Standard units and 14
-  browser cases; all pass outside the documented esbuild sandbox limitation.
-- Repeated frozen lower/latest M18/M20 candidate regressions and all eight
-  exact/`next`/`latest`/unqualified lower/latest native/pilot consumers at
-  Angular `22.0.6`/`22.0.7` plus Aria/CDK `22.0.5`; all pass.
-- Corrected stale active mixed-window wording in root onboarding and M21
-  release notes, then reconciled PLAN, ROADMAP, Deferred, indexes and history.
 
 ## Exact next action
 
-Prepare a read-only prioritization review of the remaining Deferred
-capabilities and framework targets, then ask Ricard to select the next
-milestone. Do not infer React, Vue, Angular legacy, D-043 or a new functional
-contract without that decision.
+Prepare and completely review PLAN-024 for the bounded M22 repository
+sanitization/publication delivery. Do not implement it before approval.
 
 ## Blockers and conflicts
 
 - No implementation blocker or authoritative documentation conflict remains.
+- GitHub rulesets are unavailable for the current private repository/plan;
+  recheck availability after the visibility or plan transition rather than
+  weakening the M22 protection requirement.
 - Angular application builds require execution outside the restricted sandbox
   because esbuild IPC aborts inside it; Node 22.23.1 is compatible and the
   official builds pass.
@@ -72,15 +75,27 @@ contract without that decision.
 - Angular emits an initial-bundle warning at 989.78 kB plus Ajv's CommonJS
   warning; Standard emits Vite's 868.50 kB advisory. These are observations,
   not blockers.
-- React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035, D-043 and
-  D-045 legacy Angular remain inactive until separately promoted.
+- React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
+  Angular remain inactive. D-043 is design-only M22; no implementation or
+  external action is active.
 
 ## Open questions
 
-- Which milestone or Deferred capability should be evaluated next?
+- None for M22 planning. A real scanner, rights or personal-data finding must
+  stop PLAN-024 for explicit resolution.
 
 ## Latest verification
 
+- Review 166 cycle 3 repeated all fourteen architecture, security, licensing,
+  history, governance, transition, scope and documentation areas with zero
+  findings. Official npm/GitHub requirements were rechecked; no mutation
+  occurred.
+- Review 165 cycle 2 repeated authority, scope, reachable-history/content,
+  identity, GitHub settings, publication metadata, alternatives and gates with
+  zero findings; no mutation occurred.
+- The reachable-history heuristic scan found no credential/private-key/token
+  pattern or sensitive filename. One local absolute path remains in historical
+  review 132; dedicated scanner evidence is still required before publication.
 - Review 164 cycle 1 recorded the restricted-sandbox build abort and corrected
   two stale mixed-window claims; cycle 2 corrected closing-document formatting;
   cycle 3 repeated the complete closure from
@@ -102,6 +117,15 @@ contract without that decision.
 
 ## Task document map
 
+- Accepted M22 architecture:
+  `.ai-docs/adrs/026-public-repository-and-secure-releases.md`
+- Coordinated licensing/source architecture:
+  `.ai-docs/adrs/018-licencia-dual-publicacion-experimental.md`
+- M22 ADR review:
+  `.ai-docs/reviews/166-adr-026-adr-018-revision-6-review.md`
+- M22 promotion review:
+  `.ai-docs/reviews/165-d043-m22-repository-publication-promotion-readiness.md`
+- M22 Deferred source: `.ai-docs/roadmap/deferred-decisions.md#d-043`
 - Final M21 review: `.ai-docs/reviews/164-plan-023-final-review.md`
 - Completed M21 plan:
   `.ai-docs/plans/023-coordinated-experimental-0-4-release.md`

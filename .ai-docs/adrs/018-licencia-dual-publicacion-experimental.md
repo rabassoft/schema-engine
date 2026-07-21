@@ -3,17 +3,21 @@
 - **Status:** Accepted
 - **Date:** 15 July 2026
 - **Revision 3 acceptance date:** 15 July 2026
-- **Revision date:** 20 July 2026
+- **Revision date:** 21 July 2026
 - **Revision 4 acceptance date:** 19 July 2026
 - **Revision 5 acceptance date:** 20 July 2026
-- **Revision:** 5 — repeat release of three established packages for M21
+- **Revision 6 acceptance date:** 21 July 2026
+- **Revision:** 6 — sanitized public repository transition coordinated with
+  ADR-026
 - **Promotion review:**
   [`review 027`](../reviews/027-d034-d040-publication-licensing-readiness.md)
   cycle 2 passed with zero findings; M19
   [`review 114`](../reviews/114-m19-coordinated-0-3-release-promotion-readiness.md)
   cycle 2 passed all twelve areas with zero findings; M21
   [`review 146`](../reviews/146-m21-coordinated-m20-release-promotion-readiness.md)
-  cycle 3 passed all fourteen areas with zero findings
+  cycle 3 passed all fourteen areas with zero findings; M22
+  [`review 165`](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
+  cycle 2 passed with zero findings and Ricard selected option A
 - **Related:** [`ADR-009`](./009-politica-api-publica-estabilidad.md),
   [`ADR-010`](./010-versionado-semver-compatibilidad.md),
   [`ADR-013`](./013-preparacion-artefactos-experimentales-0-1.md),
@@ -23,8 +27,11 @@
   [`D-040`](../roadmap/deferred-decisions.md#d-040-publicacion-real-de-paquetes)
   and
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
+- **Repository architecture:**
+  [`ADR-026`](./026-public-repository-and-secure-releases.md)
 - **Milestones:** M13 first public Experimental release, M19 coordinated
-  Experimental `0.3.0` release and M21 coordinated M20 delivery design
+  Experimental `0.3.0` release, M21 coordinated M20 delivery and M22 public
+  repository design
 - **Implementation:** M13 completed by PLAN-013 revision 4, M19 by PLAN-021
   revision 0 after final review 132 cycle 4, and M21 by PLAN-023 revision 0
   after final review 164 cycle 3; no later external action is authorized
@@ -37,6 +44,10 @@
 - **Revision 5 review:**
   [`review 147`](../reviews/147-adr-018-revision-5-review.md) cycle 5 passed all
   fifteen areas with zero findings; accepted under the authorized review rule
+- **Revision 6 review:**
+  [`review 166`](../reviews/166-adr-026-adr-018-revision-6-review.md) cycle 3
+  passed all fourteen areas with zero findings; accepted under the authorized
+  review rule
 
 ## 1. Context
 
@@ -80,6 +91,13 @@ already established package names. It retains revision 4's licensing,
 Corresponding Source, security and immutable-recovery policy, but replaces its
 first-pilot/default-alias assumptions with a three-established-alias sequence.
 It does not authorize a plan, manifest, candidate, Git or registry action.
+
+M21 is now complete. Review 165 subsequently promoted D-043 for M22 design and
+Ricard selected preservation of sanitized reachable history with public
+`.ai-docs`. Revision 6 coordinates this licensing/source decision with ADR-026:
+the repository is still private until PLAN-024 completes, but the accepted
+future boundary is no longer permanently private. No package version or release
+is selected.
 
 ## 2. Decision
 
@@ -127,9 +145,10 @@ telemetry, feature distinction or network call is introduced.
 
 ### 2.3 Repository and Corresponding Source
 
-The GitHub repository remains private until a separate D-043 sanitization
-review checks its entire reachable history, secrets, personal data and internal
-documentation. Neither a package release nor this revision makes it public.
+The GitHub repository remains private until PLAN-024 implements and verifies
+ADR-026's complete reachable-history sanitization, public-content policy,
+branch/governance controls and explicit visibility gate. Accepting this
+revision does not make it public.
 
 Because a private repository is not a public source offer, every public binary
 package must provide the preferred TypeScript form and all scripts/configuration
@@ -138,13 +157,16 @@ plan must define a deterministic package-local source layout or an immutable
 public source archive, verify it from a clean environment and reject private or
 incomplete source URLs.
 
-Source publication excludes `.ai-docs`, repository history and unrelated
-workspace material unless a later repository-sanitization decision makes them
-public. Exclusion must not remove material required as Corresponding Source.
+Existing immutable packages continue to use package-local Corresponding Source.
+After M22 implementation, the sanitized repository history and `.ai-docs` are
+public under ADR-026; generated/unrelated material remains excluded. A public
+old-to-new commit map explains rewritten source identities without modifying or
+granting retroactive provenance to published bytes.
 
 ### 2.4 Package and release shape
 
-- The workspace root stays private and is never published.
+- The workspace root stays private as an npm package and is never published to
+  the registry; this does not make its source secret after M22.
 - A package may become publishable only when an Accepted SPEC/ADR inventories
   its exact public name, exports, peers, source/license boundary and initial
   version, followed by a separately approved release plan.
@@ -201,9 +223,9 @@ patch-alignment rule.
 
 Commercial relicensing requires sufficient rights over all included code.
 Until a separately reviewed CLA or copyright-assignment policy exists, the
-project does not accept external code contributions. Issues, discussions or
-non-code feedback do not grant code rights and may be enabled later under a
-separate public-repository policy.
+project does not accept external code contributions. Under ADR-026, Issues and
+non-code feedback may be public, but they do not grant code rights; unsolicited
+pull requests are not merged.
 
 Every release plan must audit included third-party code and licenses and must
 not dual-license material for which Ricardo Rabassó Rodríguez lacks the
@@ -224,8 +246,9 @@ Before every publication, the plan must verify:
    packed metadata; every observed tag must resolve to inspected bytes and
    documentation must not present it as Stable;
 5. no trusted publisher, workflow or public repository metadata while GitHub
-   remains private; OIDC, staged publishing, token restrictions and provenance
-   move together to the separately promoted repository-publication milestone;
+   remains private; ADR-026 and PLAN-024 govern repository preparation, while a
+   later release plan governs future package metadata and the first OIDC/
+   provenance publication;
 6. license, notices, Corresponding Source and complete tarball inventories;
 7. the frozen install, full test/build/package matrix and clean consumers; and
 8. a final human approval checkpoint immediately before each external mutation.
@@ -246,12 +269,13 @@ the accepted package metadata boundary. M13 and later manual releases therefore
 use verified interactive 2FA and no long-lived credential in the repository.
 They do not prepare a non-functional workflow or change npm package settings.
 
-A later repository-publication decision must jointly review full-history
-sanitization, public repository metadata, contribution/security/community
-boundaries, a GitHub-hosted OIDC workflow, stage-only permissions, interactive
-2FA approval, traditional-token restrictions and truthful provenance. Until
-then, every registry write requires a separately accepted release plan and
-immediate human approval; no completed release authorizes the next one.
+ADR-026 now fixes full-history sanitization, public repository content,
+contribution/security/community boundaries, a GitHub-hosted least-privilege
+OIDC workflow, protected human approval, traditional-token transition and
+truthful provenance. Until that architecture is implemented and a future
+release plan proves trusted publishing, every registry write still requires a
+separately accepted release plan and immediate human approval; no completed
+release authorizes the next one.
 
 ### 2.7 M19 publication and tag sequence
 
@@ -418,8 +442,9 @@ real contact and executable agreement.
 - Three established default aliases require two planned mixed windows before
   the complete M21 chain can resolve unqualified consistently.
 - Trusted publishing and provenance cannot be activated while preserving the
-  selected private-repository metadata boundary; future releases remain gated
-  until the repository-publication decision is promoted.
+  current private-repository metadata boundary; ADR-026 selects the later
+  transition, but future releases remain gated until repository preparation and
+  a separate release plan complete.
 - Commercial agreements, tax handling and enforcement need professional work
   outside the software implementation.
 
@@ -448,8 +473,8 @@ Source delivery for public recipients.
 
 ### Make the existing repository public immediately
 
-Deferred to D-043. Its history and persistent internal documentation require a
-separate sanitization review before visibility changes.
+Rejected. ADR-026 instead preserves its lineage only after deterministic
+sanitization, public-content review and separately approved visibility gates.
 
 ### Keep ADR-018 restricted to the two original packages
 
@@ -502,18 +527,18 @@ M20 contract before new Public surface is accumulated.
 
 - Changing runtime behavior, schemas, diagnostics, exports or entry points.
 - Promoting any API to Stable or releasing `1.0.0`.
-- Making the GitHub repository public.
+- Making the GitHub repository public merely by accepting this revision.
 - Drafting final paid-license prices or legal clauses without professional
   review.
 - Accepting external code contributions before a rights policy exists.
-- Automating M21 or future releases while D-043 remains Deferred.
-- Preparing or configuring trusted publishing, staged publishing, public
-  repository metadata, token restrictions or provenance before the repository
-  sanitization/publication milestone.
+- Automating a future release without completed M22 repository preparation and
+  a separately accepted release plan.
+- Preparing package metadata, configuring npm trusted publishing or publishing
+  provenance as part of PLAN-024.
 - Publishing, tagging, creating releases or changing remote visibility merely
   because this ADR is accepted.
-- Preparing the next release plan before revision 5 passes a complete review
-  and is accepted.
+- Preparing PLAN-024 before revision 6 and ADR-026 pass a complete coordinated
+  review and are accepted.
 - Changing SPEC-009 behavior, exports, support tiers or framework ranges.
 - Publishing Standard/reference applications, another package, another UI kit
   or any functional Deferred capability.
@@ -524,16 +549,17 @@ M20 contract before new Public surface is accumulated.
    use is not charged or restricted beyond AGPL.
 2. The legal holder, exact notice, SPDX identifier and license text are
    unambiguous.
-3. Corresponding Source is complete and publicly available for each package
-   despite the private repository.
+3. Corresponding Source remains complete for immutable historical packages;
+   future repository/source claims follow ADR-026's sanitized public lineage.
 4. Root/private package boundaries, exact M19 and M21 three-package inventories,
    independent SemVer, Experimental API and Angular compatibility remain
    explicit and unchanged outside their selected lines.
 5. Contribution rights, third-party code and commercial-contract boundaries
    are explicit.
 6. Registry identity, interactive 2FA, tag, recovery and clean-consumer gates
-   complete without credentials in the repository; trusted publishing and
-   provenance remain explicitly deferred with repository metadata.
+   complete without credentials in the repository; future package metadata,
+   trusted publishing and provenance remain gated by ADR-026 implementation
+   and a separate release plan.
 7. M19 history remains exact; M21 publishes core/base/pilot dependency-first
    under `next`, then moves established pilot/base/core `latest` deepest-
    dependent first with no accepted evidence from mixed windows.
@@ -542,12 +568,13 @@ M20 contract before new Public surface is accumulated.
 9. Partial failure preserves immutable versions and requires explicit
    stop/resume or corrective-tag evidence; it never assumes overwrite,
    unpublish or deletion of an observed default `latest`.
-10. D-034/D-040 alone are active; D-043 and all functional deferred
-    capabilities remain inactive.
-11. M21 may close without a trusted publisher because no matching public
-    repository exists; later automation requires separate promotion and review.
-12. Acceptance authorizes preparation/review of the next release plan only, not
-    implementation, manifests, candidates, Git, registry reads/writes,
+10. D-043 is active only for M22 repository preparation; all unrelated
+    functional deferred capabilities remain inactive.
+11. M21 remains valid without a trusted publisher because no matching public
+    repository existed; later automation requires completed M22 preparation and
+    a separate release review.
+12. Acceptance authorizes preparation/review of PLAN-024 only, not
+    implementation, manifests, candidates, Git, GitHub/npm changes,
     publication or tags.
 
 ## 7. References

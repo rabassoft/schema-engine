@@ -426,15 +426,30 @@ separado antes de repetir la revisión.
   ocho consumidores registrales y toda la documentación con cero hallazgos.
   M21 queda Public + Experimental + Active sin autorizar otra acción externa.
 
+### M22 — Repositorio público y releases seguras — arquitectura aceptada
+
+- Ricard seleccionó D-043 como siguiente milestone el 21 de julio de 2026.
+- [Review 165](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
+  ciclo 2 promueve únicamente diseño normativo y rechaza publicar el repositorio
+  actual tal cual.
+- La auditoría inicial observa 62 commits alcanzables con una sola identidad,
+  ningún secreto por heurística y una ruta local histórica; los 235 documentos
+  `.ai-docs`, ramas, políticas y settings requieren clasificación y saneamiento
+  fail-closed.
+- Ricard seleccionó conservar el historial tras saneamiento y publicar
+  `.ai-docs` solo después de su clasificación/saneamiento completos.
+- ADR-026 revision 0 y ADR-018 revisión 6 están Accepted tras review 166 ciclo 3
+  sin hallazgos. Autorizan preparar/revisar PLAN-024, no implementación,
+  reescritura, workflow, cambio de visibilidad/settings, metadata, release,
+  commit ni push.
+
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** seleccionar mediante una revisión de priorización el
-   siguiente milestone o capacidad Deferred, sin asumir React, Vue, Angular
-   legacy, D-043 ni trabajo funcional nuevo.
+1. **Next action:** preparar y revisar PLAN-024 para la entrega acotada de M22.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain
-   demand-driven; D-043 and D-033 are not implied by M15/M16.
+   demand-driven; M22 does not imply D-033 or functional work.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

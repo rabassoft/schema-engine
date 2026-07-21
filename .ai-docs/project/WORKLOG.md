@@ -6,6 +6,56 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-21 — M22 repository architecture accepted
+
+### Completed
+
+- Recorded Ricard's selection of review-165 option A: preserve sanitized
+  reachable history and publish `.ai-docs` after complete classification and
+  sanitization.
+- Drafted ADR-026 revision 0 and coordinated ADR-018 revision 6 without
+  changing runtime, packages, versions, history or remote state.
+- Fixed public-content, old/new commit mapping, branch/governance,
+  solo-maintainer approval, least-privilege Actions, OIDC/provenance and
+  fail-closed plan boundaries against current official npm/GitHub requirements.
+- Review 166 cycles 1–2 closed nine findings; cycle 3 repeated all fourteen
+  areas with zero findings and accepted both ADRs under the standing review
+  authorization.
+- Preserved the unrelated `angular.json` analytics opt-out and performed no
+  implementation, commit, push, rewrite, workflow, visibility/settings or npm
+  mutation.
+
+### Next
+
+- Prepare and completely review PLAN-024. Implementation and every destructive,
+  Git or external action remain inactive.
+
+## 2026-07-21 — D-043 promoted for M22 normative design
+
+### Completed
+
+- Accepted D-043 as the next milestone candidate and reviewed its preparation
+  boundary without changing GitHub, npm, history, packages or implementation.
+- Inspected all 62 reachable commits, author identity, branch/tag topology,
+  sensitive filenames, largest blobs and credential patterns; the heuristic
+  scan found no secret material but did identify one historical local path.
+- Classified the 235 tracked `.ai-docs` files, stale default branch, absent
+  public policy files, unprotected branches and permissive Actions settings as
+  explicit sanitization/governance inputs rather than publication blockers to
+  bypass.
+- Review 165 cycle 1 recorded three documentation/readiness findings; cycle 2
+  repeated the full boundary with zero findings and promoted only M22 normative
+  design. Publication as-is is rejected.
+- Preserved the unrelated `angular.json` analytics opt-out and performed no
+  commit, push, history rewrite, workflow, visibility/settings or registry
+  mutation.
+
+### Next
+
+- Ricard selects review-165 option A (preserve sanitized history, recommended)
+  or B (clean public lineage); then draft ADR-026 with a coordinated ADR-018
+  revision.
+
 ## 2026-07-20 — PLAN-023/M21 final closure completed
 
 ### Completed

@@ -48,6 +48,12 @@
 
 ## Acceptance reviews
 
+- [ADR-026 and ADR-018 revision 6 complete review](./reviews/166-adr-026-adr-018-revision-6-review.md)
+  — Cycle 3 passed all fourteen areas with zero findings and accepted the
+  coordinated M22 architecture.
+- [D-043/M22 repository publication promotion-readiness review](./reviews/165-d043-m22-repository-publication-promotion-readiness.md)
+  — Cycle 2 passed with zero findings; Ricard later selected option A and review
+  166 completed its normative follow-up.
 - [G0: SPEC-001 acceptance evidence](./reviews/001-spec-001-acceptance.md) —
   Passed; 22/22 criteria, consumer, complete verification, and repeated
   end-to-end review passed. SPEC-001 v0.1.15 is Accepted.
@@ -497,6 +503,9 @@
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)
+- [ADR-026: Sanitized public history and secure release automation](./adrs/026-public-repository-and-secure-releases.md)
+  — Accepted revision 0 with ADR-018 revision 6 after review 166 cycle 3;
+  implementation remains inactive pending PLAN-024.
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
   — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
   normative contract; SPEC-004 v0.1.1 and completed PLAN-011 implement that
@@ -588,10 +597,13 @@ Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 zero findings; [final review 070](./reviews/070-plan-017-final-implementation-review.md)
 passed cycle 1 with zero findings and completed PLAN-017.
 
-Accepted publication architecture: [ADR-018 revision 4](./adrs/018-licencia-dual-publicacion-experimental.md)
-selects dual AGPL/commercial licensing and public Experimental packages while
-keeping the repository private pending sanitization. Completed PLAN-013
-published and verified core and Angular `0.1.0` without promoting Stable APIs.
+Accepted publication architecture:
+[ADR-018 revision 6](./adrs/018-licencia-dual-publicacion-experimental.md)
+and [ADR-026](./adrs/026-public-repository-and-secure-releases.md) preserve dual
+AGPL/commercial licensing and select a sanitized public-history transition.
+The repository remains private until PLAN-024 completes its separately gated
+work. Completed PLAN-013 published and verified core and Angular `0.1.0`
+without promoting Stable APIs.
 
 M1-M13 and G0 are completed, and SPEC-001 v0.1.15 is Accepted. ADR-012 and
 PLAN-007 revision 2 govern the completed explicit native field-clearing
