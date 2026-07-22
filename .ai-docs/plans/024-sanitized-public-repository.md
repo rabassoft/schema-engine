@@ -20,7 +20,8 @@
 - **Capability:** promoted D-043 repository slice only
 - **Implementation:** Checkpoints 1–7 completed after reviews 168–175; review
   175 cycle 6 verified the corrective public closure with zero findings.
-  Checkpoint 8 settings remain independently gated
+  Checkpoint 8 settings passed review 176 cycle 7 and await their separately
+  gated protected branch/PR publication
 
 ## 1. Goal and hard boundary
 
@@ -686,3 +687,17 @@ exact anonymous refs, 70-commit Gitleaks, 743-file tree policy,
 70-commit/1,817-path-blob history policy, 266 documents/877 links and unchanged
 GitHub/npm state with zero unresolved findings. Checkpoint 7 is complete;
 checkpoint 8 setting groups remain independently gated.
+
+### 15.9 Implementation checkpoint 8 settings
+
+Ricard independently authorized each mutation group on 22 July 2026. Review
+176 cycles 1–7 record the read-only preflight, active no-bypass branch ruleset,
+already-satisfied workflow defaults, owner-only local documentation boundary,
+exact selected-actions/full-SHA policy, protected `npm-publish` environment,
+Private Vulnerability Reporting and final merge settings.
+
+The complete read-only pass finds all accepted checkpoint-8 targets exact with
+zero unresolved findings and no npm/release mutation. The settings are live;
+checkpoint 8 remains active until this state is committed on a short-lived
+branch, passes CI and is merged to `develop` then `main` through the new
+protections, with `main` reconciled back into `develop` as PLAN-024 requires.

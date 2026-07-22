@@ -956,6 +956,7 @@ const staleCurrentClaims = [
 ];
 const ignoredDirectories = new Set([
   '.git',
+  '.local-docs',
   '.pnpm-store',
   'coverage',
   'dist',

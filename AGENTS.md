@@ -120,6 +120,19 @@ volatile state into `AGENTS.md` or `HANDOFF.md`.
 - `deferred-decisions.md`: intentionally postponed work.
 - `HANDOFF.md`: stable context-recovery procedure.
 
+## Local operator documentation
+
+`.local-docs/` is an optional ignored directory for owner-only operational
+notes that must not enter public history. It is not canonical project state and
+must not duplicate public configuration, decisions, verification evidence or
+the exact next action from `STATUS.md`.
+
+Never store tokens, passwords, OTPs, private keys or recovery codes there; use
+the owner's password manager. Local notes may contain private filesystem
+locations, credential-entry references, recovery procedures and other
+operator-specific context. Agents must not read `.local-docs/` unless the user
+explicitly authorizes that access for the current task.
+
 Keep code, public APIs, diagnostics, and technical identifiers in English.
 Existing architecture documentation may remain in Spanish unless translation is
 explicitly requested.

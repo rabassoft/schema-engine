@@ -6,6 +6,158 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 8 local evidence verified
+
+### Completed
+
+- Corrected review 176's authority summary to cover the separately authorized
+  settings groups without broadening any authorization.
+- Repeated the complete applicable local matrix: build, lint, strict types,
+  workspace/reference tests, package/source smoke tests, release/publication
+  tooling, public-tree policy, snippets, boundaries, docs, formatting,
+  workflows and diff checks pass.
+- Review 176 cycle 8 passes the complete settings and local evidence boundary
+  with zero unresolved findings; npm and external settings were not mutated.
+
+### Next
+
+- Obtain explicit approval for the short-lived branch, reviewed commit/push and
+  protected PR into `develop`; checkpoint 8 remains active until its evidence is
+  published through the accepted protected flow.
+
+## 2026-07-22 — PLAN-024 checkpoint 8 settings verified
+
+### Completed
+
+- Retained merge commits and squash merge, disabled rebase merge and enabled
+  automatic deletion of merged short-lived branches under explicit approval.
+- Reobserved the complete checkpoint-8 target: public/default/ref state,
+  effective long-lived-branch rules, Actions/workflow permissions, protected
+  environment without secrets, private reporting and merge topology.
+- Review 176 cycle 7 passes the complete settings boundary with zero unresolved
+  findings. No npm, trusted publisher, package, credential or release changed.
+
+### Next
+
+- Obtain explicit approval for the short-lived branch, reviewed commit/push and
+  protected PR into `develop`; checkpoint 8 remains active until its evidence is
+  published through the accepted protected flow.
+
+## 2026-07-22 — PLAN-024 checkpoint 8 private reporting enabled
+
+### Completed
+
+- Reobserved disabled private vulnerability reporting plus exact refs, ruleset,
+  Actions and environment state before the authorized mutation.
+- Enabled only Private Vulnerability Reporting and verified it read-only.
+- Confirmed Issues enabled and Discussions disabled already satisfy PLAN-024
+  without mutation; every previous control and npm remain unchanged.
+- Review 176 cycle 6 passes with zero unresolved findings.
+
+### Next
+
+- Obtain explicit approval for the final merge-settings group: retain merge and
+  squash, disable rebase and delete merged short-lived branches.
+
+## 2026-07-22 — PLAN-024 checkpoint 8 environment protected
+
+### Completed
+
+- Reobserved exact refs/ruleset/Actions controls, zero environments and sole
+  eligible administrator `rabassoft`/`304027868` before the authorized mutation.
+- Created `npm-publish` environment `18549660922` with required Rabassoft review,
+  self-review allowed, zero delay and custom branch restrictions.
+- Added exactly one deployment branch policy `55295302` for `main`; verified no
+  environment secret or variable exists.
+- Recorded GitHub's standard administrator-bypass availability without claiming
+  or changing it; review 176 cycle 5 verifies zero unrelated drift.
+
+### Next
+
+- Obtain explicit approval to enable private vulnerability reporting; Issues
+  and Discussions already match the accepted target without mutation.
+
+## 2026-07-22 — PLAN-024 checkpoint 8 Actions restricted
+
+### Completed
+
+- Reobserved exact refs, active ruleset, workflow permissions and all six
+  workflow action uses before the authorized mutation.
+- Retained Actions enabled, changed to selected-use only and required full-SHA
+  pinning.
+- Disabled broad GitHub-owned and verified-creator allowances; allowed only the
+  reviewed exact checkout/setup-node SHA identities used by both workflows.
+- Review 176 cycle 4 verified exact policy/allowlist and zero drift in refs,
+  ruleset, workflow permissions, repository features, environments, security or
+  npm.
+
+### Next
+
+- Prepare and obtain explicit approval for the protected `npm-publish`
+  environment group; apply and verify no other setting.
+
+## 2026-07-22 — Local operator-documentation boundary established
+
+### Completed
+
+- Kept non-secret GitHub settings, rules/check IDs, action SHAs and verification
+  evidence in public project documentation for reproducibility.
+- Added ignored `.local-docs/` for optional owner-specific paths, recovery
+  procedures and password-manager/security-key references; prohibited real
+  credentials, OTPs, private keys and recovery codes.
+- Added the stable agent rule that local notes are non-canonical and require
+  explicit task-scoped authorization before reading.
+- Added a public-tree policy regression that rejects `.local-docs/` if tracked;
+  excluded it from routine documentation traversal and verified its starter
+  runbook is ignored with `0700`/`0600` permissions.
+
+### Next
+
+- Resume the separately gated Actions selected-use/full-SHA mutation after this
+  documentation boundary passes its complete review.
+
+## 2026-07-22 — PLAN-024 checkpoint 8 branch protection applied
+
+### Completed
+
+- Reobserved exact refs/check identity and zero existing rulesets immediately
+  before the explicitly authorized mutation.
+- Created active repository ruleset `19534784`, targeting only `main` and
+  `develop` with required PR, strict GitHub Actions `verify`, resolved
+  conversations, zero approvals, merge/squash only and no deletion,
+  force-push or bypass.
+- Verified identical effective rules on both branches, unchanged exact refs and
+  no drift in repository, Actions, environment, vulnerability or npm state.
+- Confirmed workflow defaults already meet PLAN-024's read-only/no-PR-approval
+  target without mutation. Review 176 cycle 2 passes with zero findings.
+
+### Next
+
+- Obtain explicit approval to restrict Actions to selected GitHub-owned actions
+  with full-SHA pinning; apply and verify only that next group.
+
+## 2026-07-22 — PLAN-024 checkpoint 8 read-only preflight
+
+### Completed
+
+- Published checkpoint-7 state commit `64a1d15` atomically to public
+  `main`/`develop`; both resulting GitHub CI runs passed completely.
+- Observed zero repository rulesets and no classic protection on either branch.
+  Confirmed exact successful check `verify` from GitHub Actions integration
+  `15368` and current ruleset availability for the public organization repo.
+- Observed read-only workflow defaults with PR approvals disabled, Actions still
+  allowing all actions without SHA enforcement, zero environments, disabled
+  private vulnerability reporting and unchanged repository/merge features.
+- Review 176 cycle 1 passed the full preflight with zero findings and selected
+  one ruleset for both long-lived branches as the strongest available first
+  mutation. No setting or npm mutation occurred.
+
+### Next
+
+- Obtain explicit approval for the exact
+  `long-lived-branch-protection` ruleset, apply only that mutation and verify its
+  effective rules before any later checkpoint-8 group.
+
 ## 2026-07-22 — PLAN-024 checkpoint 7 corrective closure completed
 
 ### Completed
