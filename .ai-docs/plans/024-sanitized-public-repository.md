@@ -18,9 +18,9 @@
 - **Milestone:** M22 — sanitized public repository and secure-release
   preparation
 - **Capability:** promoted D-043 repository slice only
-- **Implementation:** Checkpoints 1–5 completed after reviews 168–172;
-  checkpoint 6's private bundle, atomic remote replacement and local adoption
-  remain separately and immediately gated
+- **Implementation:** Checkpoints 1–6 completed after reviews 168–173;
+  checkpoint 7's public-visibility mutation remains separately and immediately
+  gated
 
 ## 1. Goal and hard boundary
 
@@ -621,5 +621,24 @@ One deterministic evidence commit contains the normalized public map and
 checkpoint state; both candidate long-lived refs select that self-identifying
 object. Gitleaks and independent tree/history policy pass with zero findings,
 npm remains fail-closed and a fresh ordinary clone passes the complete matrix.
-The remote/current refs remain unchanged. Checkpoint 6's recovery bundle,
-atomic exact-lease replacement and local adoption remain separately gated.
+At checkpoint 5 closure, the remote/current refs remained unchanged and
+checkpoint 6's recovery bundle, atomic exact-lease replacement and local
+adoption remained separately gated.
+
+### 15.6 Implementation checkpoint 6
+
+Ricard explicitly authorized the destructive transition on 22 July 2026. An
+owner-only verified bundle preserves the complete old `main`/`develop` history
+under recorded SHA-256. One atomic exact-lease push moved both private remote
+branches to sanitized baseline `1431e45baecd6ca8e8ef10f75d299e29a8b737a9`;
+GitHub then reported both exact refs, zero tags, private visibility and
+unchanged default `main`. Credential-free Git access remained unavailable.
+
+The local branches adopted only their verified remote equivalents and returned
+to tracking `develop`. Review 173 cycle 4 repeated Gitleaks, public tree/history
+policies, fail-closed npm readiness and the complete clean-clone matrix from a
+fresh remote clone with zero unresolved findings. No visibility, setting or npm
+state changed. Ricard authorized the single closure commit; it was atomically
+fast-forwarded to both private branches from exact baseline `1431e45` and
+readopted locally. Checkpoint 6 is complete; checkpoint 7 remains separately
+gated.

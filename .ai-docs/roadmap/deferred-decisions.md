@@ -781,10 +781,9 @@ Cada decisión debe registrar:
 ## D-043: Publicación del repositorio y automatización segura de releases
 
 - **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
-  are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved and
-  checkpoints 1–5 are complete after reviews 168–172; checkpoint 6's private
-  bundle, atomic remote ref replacement and local adoption remain separately
-  and immediately gated
+  are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved,
+  checkpoints 1–6 are complete after review 173 cycle 4; checkpoint 7's sole
+  visibility mutation remains separately and immediately gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -814,10 +813,10 @@ Cada decisión debe registrar:
   sustitución de refs/adopción local, visibilidad y settings. Metadata de
   paquetes, npm trusted publishing y la primera release con provenance requieren
   una promoción/plan de release posterior.
-- **Checkpoint actual:** checkpoint 5 está completado. Review 172 ciclo 3
-  verifica dos reescrituras/mapas idénticos, sustitución mínima, un commit de
-  evidencia determinista y la matriz completa sin hallazgos. El remoto y refs
-  actuales siguen intactos; checkpoint 6 conserva su gate inmediato separado.
+- **Checkpoint actual:** checkpoint 6 está completado. Review 173 ciclo 4
+  verifica bundle privado, reemplazo/adopción del linaje saneado, clon/matriz
+  completos y commit de cierre/fast-forward atómico sin hallazgos. Checkpoint 7
+  conserva su gate inmediato de visibilidad separado.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -945,10 +944,9 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** PLAN-024 checkpoints 1–5 están completos tras
-   reviews 168–172. Existe un único candidato determinista saneado; la siguiente
-   acción es presentar/autorizar checkpoint 6 para bundle, reemplazo remoto
-   atómico y adopción local. GitHub/npm y los refs remotos siguen intactos.
+1. **M22 repository delivery:** PLAN-024 checkpoints 1–6 están completos tras
+   review 173 ciclo 4. La siguiente acción es presentar/autorizar checkpoint 7
+   para cambiar solo visibilidad a public; settings y npm permanecen gated.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

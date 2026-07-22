@@ -465,11 +465,17 @@ separado antes de repetir la revisión.
   la misma reescritura/mapa de 65 commits y el mismo commit de evidencia; solo
   cambia la ruta clasificada, el historial saneado y la matriz completa pasan
   sin hallazgos y el remoto continúa intacto.
+- Checkpoint 6 ejecutó el bundle privado verificado, reemplazo atómico con
+  leases exactos y adopción local sobre `1431e45`; reviews 173 ciclos 1–2
+  corrigieron frases activas obsoletas y el ciclo 3 repitió el clon remoto,
+  saneamiento y matriz completa sin hallazgos. El ciclo 4 verifica el commit de
+  cierre/fast-forward atómico autorizado y completa el checkpoint; visibilidad
+  permanece private.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** presentar y autorizar inmediatamente checkpoint 6: bundle
-   privado verificado, push atómico con leases exactos y adopción local.
+1. **Next action:** presentar y autorizar inmediatamente checkpoint 7: cambiar
+   únicamente la visibilidad GitHub de private a public.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain

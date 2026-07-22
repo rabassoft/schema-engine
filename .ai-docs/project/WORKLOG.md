@@ -6,6 +6,34 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 6 transition verified
+
+### Completed
+
+- Reobserved exact old remote leases, private/default-main state, authenticated
+  Rabassoft authority and deterministic sanitized baseline `1431e45`.
+- Created and verified an owner-only complete old-lineage bundle with SHA-256
+  `5815447d5f19edddaa4988ae8be1cc0c12d767bbc1e0d80f28952374ae3c1b4e`;
+  preserved the dirty checkpoint reversibly outside public refs.
+- Atomically replaced only remote `main`/`develop` under their exact leases;
+  both now select `1431e45`, with zero tags, private visibility and unchanged
+  default `main`. Anonymous Git access remains unavailable.
+- Adopted the verified remote lineage locally. Review 173 cycle 1 repeated
+  Gitleaks, public tree/history, workflow/tool/readiness checks and the complete
+  matrix from a fresh remote clone, then corrected one stale active plan-index
+  phrase. Cycle 2 corrected two stale pre-transition STATUS claims; cycle 3
+  repeated the complete applicable review with zero unresolved findings.
+- No visibility, GitHub setting, npm package/alias, trusted publisher or
+  provenance state changed.
+- Ricard authorized the single closure commit and its atomic fast-forward;
+  review 173 cycle 4 verifies both private long-lived branches and the local
+  checkout at that closure, completing checkpoint 6.
+
+### Next
+
+- Present and explicitly authorize checkpoint 7 before changing only repository
+  visibility from private to public; all settings and npm remain gated.
+
 ## 2026-07-22 — PLAN-024 checkpoint 5 completed
 
 ### Completed

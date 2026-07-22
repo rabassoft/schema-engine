@@ -29,17 +29,19 @@
 
 ## Current objective
 
-Await immediate explicit authorization for PLAN-024 checkpoint 6: create the
-private recovery bundle, atomically replace both remote refs with the selected
-sanitized baseline and adopt the verified lineage locally.
+Await immediate explicit authorization for PLAN-024 checkpoint 7's sole
+visibility mutation from private to public.
 
 ## In progress
 
-None. PLAN-024 checkpoint 5 is complete. Checkpoint 6's bundle, local cleanup,
-atomic exact-lease ref replacement and local adoption are not authorized yet.
+None. PLAN-024 checkpoint 6 is complete after its authorized closure commit was
+published atomically to both private long-lived branches and readopted locally.
 
 ## Latest completed work
 
+- Completed PLAN-024 checkpoint 6 after review 173 cycle 4 verified the private
+  recovery bundle, atomic sanitized-lineage replacement/adoption, complete
+  clean-clone matrix and authorized closure fast-forward with zero findings.
 - Completed PLAN-024 checkpoint 5 after review 172 cycle 3 produced one
   deterministic self-identifying evidence commit in two mirrors, mapped all 65
   old commits and passed the complete sanitized-history/clean-clone matrix.
@@ -52,31 +54,19 @@ atomic exact-lease ref replacement and local adoption are not authorized yet.
 - Completed PLAN-024 checkpoint 2 after review 169 cycle 3 passed tool trust,
   redacted/deterministic fixtures, exact Action pins, guarded workflows and the
   complete local matrix with zero unresolved findings.
-- Completed PLAN-024 checkpoint 1 after review 168 cycle 3 passed the complete
-  local boundary with zero unresolved findings; public policies, candidate-tree/
-  history guards, documentation checks and npm readiness logic are in place.
-- Approved PLAN-024 revision 0 after review 167 cycle 3 passed all sixteen areas
-  with zero findings.
-- Accepted ADR-026 revision 0 and coordinated ADR-018 revision 6 after review
-  166 cycle 3 passed all fourteen areas with zero findings and now governs the
-  ongoing PLAN-024 delivery.
-- Selected preservation of sanitized reachable history with public `.ai-docs`,
-  an old/new commit map, solo-maintainer controls and a later separately gated
-  OIDC/provenance release transition.
 
 ## Exact next action
 
-Present checkpoint 6's exact selected candidate hash, verified private-bundle
-strategy, atomic two-ref exact-lease push and reversible local cleanup/adoption
-commands; obtain immediate explicit authorization before any of them runs.
+Present checkpoint 7's exact GitHub visibility mutation and obtain immediate
+explicit authorization before changing `rabassoft/schema-engine` from private
+to public.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
-- The current checkout/remote lineage still contains the one classified
-  historical review-132 path; the isolated checkpoint-5 candidate removes it
-  and passes full history policy. Replacing the current/remote lineage remains
-  the separately gated checkpoint-6 action.
+- Current and remote long-lived lineage is sanitized and passes full history
+  policy. The verified private old-lineage bundle and reversible pre-adoption
+  stash remain retained outside public refs through M22 closure.
 - GitHub rulesets are unavailable for the current private repository/plan;
   recheck availability after the visibility or plan transition rather than
   weakening the M22 protection requirement.
@@ -89,8 +79,8 @@ commands; obtain immediate explicit authorization before any of them runs.
   warning; Standard emits Vite's 868.50 kB advisory. These are observations,
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
-  Angular remain inactive. M22 checkpoints 1–5 are complete; no external action
-  is active.
+  Angular remain inactive. M22 checkpoints 1–6 are complete; checkpoint 7's
+  visibility mutation remains separately gated.
 
 ## Open questions
 
@@ -99,6 +89,11 @@ commands; obtain immediate explicit authorization before any of them runs.
 
 ## Latest verification
 
+- Review 173 cycle 4 verified the owner-only recovery bundle, atomic exact-lease
+  two-ref replacement, private/default-main state, local adoption and a fresh
+  remote clone plus the authorized closure fast-forward. Gitleaks,
+  66-commit/1,784-path-blob history policy and the complete clean-clone matrix
+  passed with zero unresolved findings.
 - Review 172 cycle 3 verified two identical rewrites and one deterministic
   evidence commit, a complete 65-entry map, exact one-path substitution,
   preserved metadata/parents, 66-commit Gitleaks and public-history scans with
@@ -123,9 +118,8 @@ commands; obtain immediate explicit authorization before any of them runs.
 - Twelve policy/readiness/workflow tests, exact Action pins, workflow static
   verification, tool checksums, frozen lifecycle-free install and the complete
   workspace/package/source/reference matrix pass.
-- Reachable-history verification fails closed exactly once on the classified
-  historical review-132 macOS path; current M21 npm readiness also fails closed
-  on absent future metadata/authorization, without exposing private content.
+- Current/remote sanitized reachable history passes with zero findings; current
+  M21 npm readiness still fails closed on absent future metadata/authorization.
 - Documentation/link, formatting, lint, strict types, complete workspace tests/
   builds, package smoke, release tooling, snippets, boundaries, Angular and
   Standard reference-unit checks plus `git diff --check` pass. Angular builds
@@ -134,7 +128,8 @@ commands; obtain immediate explicit authorization before any of them runs.
   zero findings; review 166 cycle 3 accepted its architecture after fourteen
   areas passed with zero findings.
 - Exact public M21 bytes/signatures and immutable M19 package/source evidence
-  remain unchanged; no network, workflow, Git, GitHub or npm mutation occurred.
+  remain unchanged. Only the authorized atomic Git ref replacement/local
+  adoption occurred; visibility, workflows/settings and npm were not mutated.
 
 ## Task document map
 
@@ -148,6 +143,8 @@ commands; obtain immediate explicit authorization before any of them runs.
   `.ai-docs/reviews/171-plan-024-checkpoint-4-review.md`
 - M22 checkpoint-5 review:
   `.ai-docs/reviews/172-plan-024-checkpoint-5-review.md`
+- M22 checkpoint-6 review:
+  `.ai-docs/reviews/173-plan-024-checkpoint-6-review.md`
 - M22 checkpoint-1 review:
   `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
 - M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`
