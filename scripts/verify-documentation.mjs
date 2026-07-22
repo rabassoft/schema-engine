@@ -932,6 +932,27 @@ const staleCurrentClaims = [
     pattern: /It remains private until every\s+pre-visibility gate/i,
     description: 'pre-checkpoint-7 private ADR-026 state',
   },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern: /Obtain separate approval for one checkpoint-7 closure commit/i,
+    description: 'pre-completion checkpoint-7 status action',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /autorizar el commit de cierre de checkpoint 7/i,
+    description: 'pre-completion checkpoint-7 roadmap action',
+  },
+  {
+    path: '.ai-docs/adrs/026-public-repository-and-secure-releases.md',
+    pattern: /its closure commit\s+remains separately gated/i,
+    description: 'pre-completion checkpoint-7 ADR state',
+  },
+  {
+    path: '.ai-docs/README.md',
+    pattern:
+      /checkpoint 7's public transition is verified and its closure commit remains/i,
+    description: 'pre-completion checkpoint-7 documentation-index state',
+  },
 ];
 const ignoredDirectories = new Set([
   '.git',

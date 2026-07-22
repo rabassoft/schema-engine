@@ -16,10 +16,9 @@
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
 - **Milestone:** M22 repository sanitization/publication and secure-release
   preparation
-- **Implementation:** PLAN-024 revision 0 is Approved; checkpoints 1–6 are
-  complete after reviews 168–173 and checkpoint 7's authorized visibility
-  transition passed anonymous verification in review 175; its closure commit
-  remains separately gated
+- **Implementation:** PLAN-024 revision 0 is Approved; checkpoints 1–7 are
+  complete after reviews 168–175, with checkpoint 7's corrective public closure
+  verified by review 175 cycle 6; checkpoint 8 settings remain separately gated
 
 ## 1. Context
 

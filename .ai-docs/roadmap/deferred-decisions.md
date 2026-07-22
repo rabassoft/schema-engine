@@ -782,8 +782,8 @@ Cada decisión debe registrar:
 
 - **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
   are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved,
-  checkpoints 1–6 are complete after review 173 cycle 4; checkpoint 7's public
-  transition passed review 175 and awaits its separately gated closure commit
+  checkpoints 1–7 are complete after review 175 cycle 6; checkpoint 8 settings
+  remain independently gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -945,9 +945,10 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** PLAN-024 checkpoints 1–6 están completos.
-   Checkpoint 7 ya es público y pasó review 175; la siguiente acción es autorizar
-   su commit de cierre/fast-forward atómico. Settings/npm permanecen gated.
+1. **M22 repository delivery:** PLAN-024 checkpoints 1–7 están completos tras
+   review 175 ciclo 6. La siguiente acción es reobservar en modo read-only las
+   capacidades/settings de checkpoint 8 y presentar cada mutación por separado;
+   settings/npm permanecen gated.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

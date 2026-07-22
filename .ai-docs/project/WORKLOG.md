@@ -6,6 +6,28 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 7 corrective closure completed
+
+### Completed
+
+- Atomically fast-forwarded authorized closure commit `4b729df` to public
+  `main`/`develop`; both hosted CI runs exposed only the same 5-second timeout
+  in the iterative deep-collection stress test.
+- Applied the approved targeted 15-second timeout without changing test depth
+  or assertions. Five focused repetitions and the complete local matrix passed;
+  corrective commit `329d1a4` was atomically published to both aligned refs.
+- Corrected GitHub CI runs `29883272610` and `29883272641` passed. A fresh
+  credential-free clone selected exact `329d1a4`; Gitleaks scanned 70 commits,
+  public-tree/history policies passed 743 files and 1,817 path/blob pairs, and
+  documentation passed 266 files/877 links with zero findings.
+- Review 175 cycle 6 closes checkpoint 7. Repository settings/features and npm
+  bytes, aliases and absent repository metadata did not drift.
+
+### Next
+
+- Perform checkpoint 8's read-only capability/settings preflight, then present
+  each setting mutation group independently for explicit approval.
+
 ## 2026-07-22 — PLAN-024 checkpoint 7 public transition verified
 
 ### Completed

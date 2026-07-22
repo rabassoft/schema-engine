@@ -18,9 +18,9 @@
 - **Milestone:** M22 — sanitized public repository and secure-release
   preparation
 - **Capability:** promoted D-043 repository slice only
-- **Implementation:** Checkpoints 1–6 completed after reviews 168–173;
-  checkpoint 7's authorized public transition passed review 175 and awaits its
-  separately gated closure commit/atomic fast-forward
+- **Implementation:** Checkpoints 1–7 completed after reviews 168–175; review
+  175 cycle 6 verified the corrective public closure with zero findings.
+  Checkpoint 8 settings remain independently gated
 
 ## 1. Goal and hard boundary
 
@@ -672,3 +672,17 @@ npm integrity, aliases and absent repository/provenance claims; and the complete
 clean-clone matrix with zero unresolved findings. Checkpoint 7 is not complete
 until its separately approved closure commit is atomically fast-forwarded to
 both still-unprotected public branches and reverified anonymously.
+
+Ricard authorized that closure. Commit `4b729dff555d506b594d5d35bbbdefaaf47bfc13`
+was atomically fast-forwarded to both public branches, but both hosted CI runs
+exposed the same non-product finding: the iterative deep-collection stress test
+exceeded Vitest's default 5-second limit. The approved correction changed only
+that test's timeout to 15 seconds, retained its depth and assertions, passed
+five focused repetitions plus the complete local matrix, and was published as
+`329d1a45c93c17b014b77a9d9a7d8ad247c2da18` to both aligned refs.
+
+Review 175 cycle 6 observes successful corrected CI on `main` and `develop`,
+exact anonymous refs, 70-commit Gitleaks, 743-file tree policy,
+70-commit/1,817-path-blob history policy, 266 documents/877 links and unchanged
+GitHub/npm state with zero unresolved findings. Checkpoint 7 is complete;
+checkpoint 8 setting groups remain independently gated.

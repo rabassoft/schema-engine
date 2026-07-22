@@ -426,7 +426,7 @@ separado antes de repetir la revisión.
   ocho consumidores registrales y toda la documentación con cero hallazgos.
   M21 queda Public + Experimental + Active sin autorizar otra acción externa.
 
-### M22 — Repositorio público y releases seguras — checkpoint 7 en cierre
+### M22 — Repositorio público y releases seguras — checkpoint 8 pendiente
 
 - Ricard seleccionó D-043 como siguiente milestone el 21 de julio de 2026.
 - [Review 165](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
@@ -473,13 +473,17 @@ separado antes de repetir la revisión.
 - Checkpoint 7 ejecutó solo la transición autorizada a visibilidad pública tras
   publicar la corrección de review 174. El acceso Git/HTTP anónimo, las refs
   exactas, el linaje saneado, las políticas, npm sin cambios y la matriz completa
-  desde un clon público pasan review 175 ciclo 4 sin hallazgos. Su commit de
-  cierre/fast-forward continúa separado y gated; settings siguen en checkpoint 8.
+  desde un clon público pasan review 175 ciclo 4 sin hallazgos. El cierre
+  `4b729df` expuso solo un timeout de stress en ambos CI; la corrección dirigida
+  `329d1a4` conserva profundidad/aserciones y pasa ambos CI. Review 175 ciclo 6
+  repite refs anónimas, scans, políticas y documentación sin hallazgos, completa
+  checkpoint 7 y mantiene todos los settings en checkpoint 8.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** autorizar el commit de cierre de checkpoint 7 y su
-   fast-forward atómico a ambas ramas públicas aún sin protección.
+1. **Next action:** reobservar en modo read-only las capacidades y settings
+   disponibles para checkpoint 8 y presentar la primera mutación de protección
+   de ramas para aprobación explícita.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain
