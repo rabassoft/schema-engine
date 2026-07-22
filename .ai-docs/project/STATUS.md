@@ -12,7 +12,7 @@
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-024 revision 0, Approved
 - **Last completed implementation plan:** PLAN-023 revision 0
-- **Active implementation task:** PLAN-024 checkpoint 8 protected publication
+- **Active implementation task:** None
 - **Last accepted ADR:** ADR-026 revision 0, coordinated with ADR-018 revision 6
 - **Implemented capability:** M1–M21 and G0, including recursive static local
   presentation forests in core, native Angular, independent Standard and
@@ -29,18 +29,19 @@
 
 ## Current objective
 
-Complete checkpoint 8's protected promotion to `main` and reconcile its merge
-ancestry back into `develop` without entering future npm release work.
+Await explicit authorization for PLAN-024 checkpoint 9's final public-repository
+closure review without entering future npm release work.
 
 ## In progress
 
-Review 176 cycle 10 verifies the state follow-up on protected
-`develop@5ffee20` and both successful hosted checks. The exact protected
-integration tip is ready for separately authorized promotion to `main` and
-subsequent ancestry reconciliation back into `develop`.
+None. Review 176 cycle 11 verifies checkpoint 8's protected promotion and
+reconciliation with zero findings; checkpoint 9 has not started.
 
 ## Latest completed work
 
+- Completed PLAN-024 checkpoint 8: PR #4 promoted `develop` to
+  `main@bed5dfd` by merge commit; PR #5 reconciled that ancestry into
+  `develop@c9b60f9`; required and post-merge CI all passed.
 - Published the cycle-9 state through PR #2: required run `29916192003` passed,
   GitHub squash-merged protected `develop@5ffee20`, deleted the remote branch
   and passed post-merge push CI `29916533160`.
@@ -52,22 +53,17 @@ subsequent ancestry reconciliation back into `develop`.
   verifies the complete checkpoint-8 settings boundary with zero findings.
 - Enabled and verified Private Vulnerability Reporting with zero drift; Issues
   enabled and Discussions disabled already satisfy PLAN-024 without mutation.
-- Restricted Actions to exact full-SHA `actions/checkout` and
-  `actions/setup-node` patterns, with all broad GitHub-owned/verified allowances
-  disabled; review 176 cycle 4 verifies zero unrelated drift.
 
 ## Exact next action
 
-Obtain explicit approval to publish this cycle-10 closure follow-up, then
-promote the resulting exact `develop` tip to `main` with a protected merge
-commit and reconcile `main` ancestry back into `develop`.
+Obtain explicit approval to begin PLAN-024 checkpoint 9's complete final
+public-repository closure review.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
 - Repository visibility is public and checkpoint-8 settings are live/exact;
-  protected publication and state closure into `develop` passed, while `main`
-  promotion and reconciliation remain gated.
+  protected publication, promotion and reconciliation all passed.
 - Current and remote long-lived lineage is sanitized and passes full history
   policy. The verified private old-lineage bundle and reversible pre-adoption
   stash remain retained outside public refs through M22 closure.
@@ -82,9 +78,8 @@ commit and reconcile `main` ancestry back into `develop`.
   warning; Standard emits Vite's 868.50 kB advisory. These are observations,
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
-  Angular remain inactive. M22 checkpoints 1–7 are complete; checkpoint 8 is
-  pending only its state follow-up, protected `main` promotion, reconciliation
-  and final verification.
+  Angular remain inactive. M22 checkpoints 1–8 are complete; checkpoint 9 is
+  pending explicit authorization.
 
 ## Open questions
 
@@ -93,6 +88,10 @@ commit and reconcile `main` ancestry back into `develop`.
 
 ## Latest verification
 
+- Review 176 cycle 11 verifies PRs #3–#5 and all required/post-merge runs;
+  protected `main@bed5dfd` and `develop@c9b60f9` have identical tree
+  `edbbff34`, `main` is an ancestor of `develop`, and no short-lived branch
+  remains.
 - Review 176 cycle 10 verifies protected PR #2, successful required run
   `29916192003`, exact squash `develop@5ffee20`, deleted short-lived remote
   branch and successful push run `29916533160` with zero unresolved findings.

@@ -21,7 +21,8 @@
 - **Implementation:** Checkpoints 1–7 completed after reviews 168–175; review
   175 cycle 6 verified the corrective public closure with zero findings.
   Checkpoint 8 settings passed review 176 cycle 7 and protected publication into
-  `develop` passed review 176 cycle 9; promotion/reconciliation remain gated
+  `develop`, promotion to `main` and reconciliation passed review 176 cycle 11;
+  checkpoint 9 remains separately gated
 
 ## 1. Goal and hard boundary
 
@@ -699,7 +700,8 @@ Private Vulnerability Reporting and final merge settings.
 The complete read-only pass finds all accepted checkpoint-8 targets exact with
 zero unresolved findings and no npm/release mutation. Review 176 cycle 9 records
 successful PR and push CI around protected squash `develop@59f7122`; its remote
-short-lived branch was deleted. Checkpoint 8 remains active until this state
-follow-up passes the same protected flow, the resulting exact `develop` tip is
-merged to `main`, and `main` is reconciled back into `develop` as PLAN-024
-requires.
+short-lived branch was deleted. Cycles 10–11 then verify the protected state
+closure, merge-commit promotion to `main@bed5dfd`, ancestry reconciliation into
+`develop@c9b60f9` and every required/post-merge CI with zero findings. Both refs
+have identical trees and `main` is an ancestor of `develop`. Checkpoint 8 is
+complete; checkpoint 9 remains unstarted and separately gated.

@@ -44,7 +44,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 23. [ADR 023: Static neutral tabs, accordion and logical-grid containers](./023-contenedores-layout-neutral-estatico.md) — **Accepted revision 1 after review 099 cycle 3 passed ten areas with zero findings; review 100 and accepted ADR-024 completed its separate Angular-kit architecture gate.**
 24. [ADR 024: Angular presentation-container SPI and Angular Aria pilot](./024-spi-contenedores-angular-y-piloto-angular-aria.md) — **Accepted revision 1 after review 101 cycle 4 passed eleven areas with zero findings; SPEC-008 remains authoritative and completed PLAN-020/review 113 delivered M18.**
 25. [ADR 025: Recursive local presentation forests for nested objects and collection items](./025-bosques-presentacion-locales-objetos-items.md) — **Accepted revision 0 after review 134 cycle 4; accepted SPEC-009 v0.1.0 and completed PLAN-022 now implement the narrow M20 decision after final review 144 cycle 3.**
-26. [ADR 026: Sanitized public history and secure release automation](./026-public-repository-and-secure-releases.md) — **Accepted revision 0 after review 166 cycle 3; PLAN-024 checkpoints 1–7 are complete, and checkpoint 8 protected `develop` publication passed review 176 cycle 9 before promotion/reconciliation.**
+26. [ADR 026: Sanitized public history and secure release automation](./026-public-repository-and-secure-releases.md) — **Accepted revision 0 after review 166 cycle 3; PLAN-024 checkpoints 1–8 are complete after review 176 cycle 11, and checkpoint 9 remains separately gated.**
 
 ## 4. ADRs específicos de Angular
 

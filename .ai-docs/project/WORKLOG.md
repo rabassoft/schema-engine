@@ -6,6 +6,25 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 8 completed
+
+### Completed
+
+- Published the cycle-10 closure through protected PR #3 and successful required
+  and post-merge CI.
+- Promoted `develop` through PR #4 using merge commit `bed5dfd`; required run
+  `29933833612` and main push run `29934258635` passed.
+- Reconciled `main` ancestry through PR #5 into `develop@c9b60f9`; required run
+  `29934607607` and final push run `29935020561` passed.
+- Verified identical long-lived trees, `main` ancestry inside `develop`, deleted
+  short-lived branches and zero npm/settings/package/runtime drift. Review 176
+  cycle 11 passes checkpoint 8 with zero unresolved findings.
+
+### Next
+
+- Obtain explicit authorization before beginning PLAN-024 checkpoint 9's full
+  public-repository closure review.
+
 ## 2026-07-22 — PLAN-024 checkpoint 8 develop state closed
 
 ### Completed
