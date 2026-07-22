@@ -12,7 +12,7 @@
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-024 revision 0, Approved
 - **Last completed implementation plan:** PLAN-023 revision 0
-- **Active implementation task:** None
+- **Active implementation task:** PLAN-024 checkpoint 8 protected publication
 - **Last accepted ADR:** ADR-026 revision 0, coordinated with ADR-018 revision 6
 - **Implemented capability:** M1–M21 and G0, including recursive static local
   presentation forests in core, native Angular, independent Standard and
@@ -29,49 +29,50 @@
 
 ## Current objective
 
-Prepare checkpoint 8's read-only capability/settings preflight without mutating
-GitHub settings or entering future npm release work.
+Complete checkpoint 8's protected promotion to `main` and reconcile its merge
+ancestry back into `develop` without entering future npm release work.
 
 ## In progress
 
-None. PLAN-024 checkpoints 1–7 are complete; no checkpoint-8 setting or npm
-mutation is active.
+Review 176 cycle 10 verifies the state follow-up on protected
+`develop@5ffee20` and both successful hosted checks. The exact protected
+integration tip is ready for separately authorized promotion to `main` and
+subsequent ancestry reconciliation back into `develop`.
 
 ## Latest completed work
 
-- Completed PLAN-024 checkpoint 7 after review 175 cycle 6: corrected closure
-  commit `329d1a45c93c17b014b77a9d9a7d8ad247c2da18` passes CI on public `main`
-  and `develop`; anonymous refs, Gitleaks, tree/history policies, docs and npm
-  non-drift all pass with zero unresolved findings.
-- Executed checkpoint 7's authorized sole visibility mutation and completed
-  review 175 cycle 4: anonymous Git/API/HTTP, sanitized history/tree, public
-  policy/source/docs, unchanged npm and the clean-clone matrix passed with zero
-  unresolved findings before the separately authorized closure.
-- Completed checkpoint-7 corrective preflight review 174 cycle 2, published
-  corrective commit `3b415350627fbac423ce806231315e475de98f72` to both private
-  branches and observed successful CI on both before visibility changed.
-- Completed PLAN-024 checkpoint 6 after review 173 cycle 4 verified the private
-  recovery bundle, atomic sanitized-lineage replacement/adoption, complete
-  clean-clone matrix and authorized closure fast-forward with zero findings.
-- Completed PLAN-024 checkpoint 5 after review 172 cycle 3 produced one
-  deterministic self-identifying evidence commit in two mirrors, mapped all 65
-  old commits and passed the complete sanitized-history/clean-clone matrix.
+- Published the cycle-9 state through PR #2: required run `29916192003` passed,
+  GitHub squash-merged protected `develop@5ffee20`, deleted the remote branch
+  and passed post-merge push CI `29916533160`.
+- Published checkpoint-8 evidence through PR #1: required PR check
+  `29905263489` passed, GitHub squash-merged protected `develop@59f7122`, deleted
+  the short-lived remote branch and passed push CI `29912959904`.
+- Applied final repository merge settings: merge/squash retained, rebase
+  disabled and merged short-lived branch deletion enabled; review 176 cycle 7
+  verifies the complete checkpoint-8 settings boundary with zero findings.
+- Enabled and verified Private Vulnerability Reporting with zero drift; Issues
+  enabled and Discussions disabled already satisfy PLAN-024 without mutation.
+- Restricted Actions to exact full-SHA `actions/checkout` and
+  `actions/setup-node` patterns, with all broad GitHub-owned/verified allowances
+  disabled; review 176 cycle 4 verifies zero unrelated drift.
 
 ## Exact next action
 
-Perform a read-only checkpoint-8 capability/settings preflight and present the
-first branch-protection mutation group for explicit approval.
+Obtain explicit approval to publish this cycle-10 closure follow-up, then
+promote the resulting exact `develop` tip to `main` with a protected merge
+commit and reconcile `main` ancestry back into `develop`.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
-- Repository visibility is public. Checkpoint 8 branch/Actions/environment/
-  security settings remain independently gated and have not changed.
+- Repository visibility is public and checkpoint-8 settings are live/exact;
+  protected publication and state closure into `develop` passed, while `main`
+  promotion and reconciliation remain gated.
 - Current and remote long-lived lineage is sanitized and passes full history
   policy. The verified private old-lineage bundle and reversible pre-adoption
   stash remain retained outside public refs through M22 closure.
-- GitHub ruleset/protection availability must now be reobserved before proposing
-  the first checkpoint-8 mutation; no checkpoint-8 control is pre-authorized.
+- Active ruleset `19534784` protects both long-lived branches without bypass;
+  no further checkpoint-8 settings group remains pending.
 - Angular application builds require execution outside the restricted sandbox
   because esbuild IPC aborts inside it; Node 22.23.1 is compatible and the
   official builds pass.
@@ -82,7 +83,8 @@ first branch-protection mutation group for explicit approval.
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
   Angular remain inactive. M22 checkpoints 1–7 are complete; checkpoint 8 is
-  pending its read-only preflight and independently approved setting groups.
+  pending only its state follow-up, protected `main` promotion, reconciliation
+  and final verification.
 
 ## Open questions
 
@@ -91,6 +93,39 @@ first branch-protection mutation group for explicit approval.
 
 ## Latest verification
 
+- Review 176 cycle 10 verifies protected PR #2, successful required run
+  `29916192003`, exact squash `develop@5ffee20`, deleted short-lived remote
+  branch and successful push run `29916533160` with zero unresolved findings.
+- Review 176 cycle 9 verifies protected PR #1, successful required run
+  `29905263489`, exact squash `develop@59f7122`, deleted short-lived remote
+  branch and successful push run `29912959904` with zero unresolved findings.
+- Review 176 cycle 8 passes the complete settings and local evidence boundary:
+  build, lint, types, workspace/reference tests, package/source smoke tests,
+  release/publication tooling, public policy, snippets, boundaries, docs,
+  formatting, workflow policy and diff checks report zero unresolved findings.
+- Review 176 cycle 7 observes the complete checkpoint-8 target together with
+  zero findings: aligned refs, effective branch rules, Actions, environment,
+  reporting, feature and merge settings all match PLAN-024.
+- Review 176 cycle 6 observes Private Vulnerability Reporting enabled, Issues
+  enabled, Discussions disabled and zero drift in every previous control.
+- Review 176 cycle 5 observes environment `18549660922`, required reviewer
+  `rabassoft`/`304027868`, self-review allowed, exact `main` policy `55295302`,
+  zero secrets/variables and zero unrelated drift.
+- Review 176 cycle 4 observes `allowed_actions: selected`, full-SHA enforcement,
+  exactly two reviewed action patterns, no broad GitHub-owned/verified allowance
+  and zero ruleset/ref/workflow/repository/environment/security drift.
+- Review 176 cycle 3 verifies `.local-docs/` ignore/policy isolation, owner-only
+  `0700`/`0600` permissions, stable agent access rules and public documentation
+  consistency with zero findings.
+- Review 176 cycle 2 verifies ruleset `19534784` and its four effective rules
+  on both branches, no bypass, unchanged exact refs and zero unrelated setting
+  drift. The workflow-default target was already satisfied without mutation.
+- Review 176 cycle 1 observed no rulesets/protections, exact successful check
+  `verify` from GitHub Actions integration `15368`, read-only workflow defaults,
+  all-actions/no-SHA-pin policy, zero environments, disabled private
+  vulnerability reporting and unchanged merge/features settings.
+- Checkpoint-7 state commit `64a1d15` is exact on local/remote `main` and
+  `develop`; GitHub CI runs `29899936584` and `29899936641` passed.
 - Review 175 cycle 6 passed the corrected complete public checkpoint-7 boundary
   with zero unresolved findings. GitHub CI runs `29883272610` (`develop`) and
   `29883272641` (`main`) are successful at `329d1a4`; anonymous refs are exact,
@@ -121,8 +156,8 @@ first branch-protection mutation group for explicit approval.
   Standard reference-unit checks plus `git diff --check` pass. Angular builds
   were repeated outside the restricted sandbox.
 - Exact public M21 bytes/signatures and immutable M19 package/source evidence
-  remain unchanged. GitHub visibility is public; checkpoint-8 settings and npm
-  were not mutated.
+  remain unchanged. GitHub visibility/checkpoint-8 settings are exact; npm was
+  not mutated.
 
 ## Task document map
 
@@ -142,6 +177,8 @@ first branch-protection mutation group for explicit approval.
   `.ai-docs/reviews/174-plan-024-checkpoint-7-preflight-review.md`
 - M22 checkpoint-7 public review:
   `.ai-docs/reviews/175-plan-024-checkpoint-7-public-review.md`
+- M22 checkpoint-8 preflight review:
+  `.ai-docs/reviews/176-plan-024-checkpoint-8-preflight-review.md`
 - M22 checkpoint-1 review:
   `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
 - M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`

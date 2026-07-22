@@ -23,6 +23,7 @@ test-results/
 .env
 .env.*
 !.env.example
+.local-docs/
 
 # Debug logs
 *.log

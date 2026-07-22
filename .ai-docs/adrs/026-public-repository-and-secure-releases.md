@@ -18,7 +18,9 @@
   preparation
 - **Implementation:** PLAN-024 revision 0 is Approved; checkpoints 1–7 are
   complete after reviews 168–175, with checkpoint 7's corrective public closure
-  verified by review 175 cycle 6; checkpoint 8 settings remain separately gated
+  verified by review 175 cycle 6; checkpoint 8 settings passed review 176 cycle
+  7 and protected `develop` publication passed cycle 9; promotion and
+  reconciliation remain gated
 
 ## 1. Context
 
