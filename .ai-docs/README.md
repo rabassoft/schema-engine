@@ -57,7 +57,8 @@
   policy; cycle 5 verified protected environment `npm-publish` with zero
   findings; cycle 6 verified private reporting; cycle 7 verified the complete
   settings boundary; cycle 8 verified the local matrix; cycle 9 verified
-  protected publication into `develop`. Promotion/reconciliation remain gated.
+  protected publication into `develop`; cycles 10–11 verified state closure,
+  promotion and reconciliation. Checkpoint 9 remains gated.
 - [PLAN-024 checkpoint 7 public verification](./reviews/175-plan-024-checkpoint-7-public-review.md)
   — Cycle 1 reconciled current public-state documentation; cycle 2 clarified the
   retained local-stash audit domain; cycle 3 isolated the ignored browser cache;
@@ -552,8 +553,8 @@
 - [ADR index](./adrs/000-index.md)
 - [ADR-026: Sanitized public history and secure release automation](./adrs/026-public-repository-and-secure-releases.md)
   — Accepted revision 0 with ADR-018 revision 6 after review 166 cycle 3;
-  checkpoints 1–7 are complete and checkpoint 8 protected `develop`
-  publication passed review 176 cycle 9 before promotion/reconciliation.
+  checkpoints 1–8 are complete after review 176 cycle 11; checkpoint 9 remains
+  separately gated.
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
   — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
   normative contract; SPEC-004 v0.1.1 and completed PLAN-011 implement that
@@ -636,7 +637,7 @@
 - [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Completed revision 0 after final review 132 cycle 4 repeated the complete release matrix and all 22 SPEC-008 rows with zero findings
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
-- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Approved revision 0; checkpoints 1–7 are complete and checkpoint 8 protected `develop` publication passed review 176 cycle 9 before promotion/reconciliation
+- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Approved revision 0; checkpoints 1–8 are complete after review 176 cycle 11 and checkpoint 9 remains separately gated
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and

@@ -1,4 +1,4 @@
-# PLAN-024 checkpoint 8 settings review — Cycles 1–10
+# PLAN-024 checkpoint 8 settings review — Cycles 1–11
 
 - **Date:** 2026-07-22
 - **Plan:** Approved
@@ -6,9 +6,9 @@
 - **Checkpoint:** 8 — protected branches, Actions, environment and security
 - **Authority:** Read-only preflight plus Ricard's separate explicit
   authorization of each completed checkpoint-8 settings group
-- **Outcome:** Cycle 10 verified the protected state follow-up on `develop`
-  with zero unresolved findings; promotion to `main` and reconciliation remain
-  separately gated
+- **Outcome:** Cycle 11 verified protected promotion and reconciliation with
+  zero unresolved findings; checkpoint 8 is complete when this final state
+  record reaches both protected branches
 
 ## Exact public baseline
 
@@ -267,3 +267,26 @@ tree. No setting, npm, package, tag, release or runtime behavior changed. Cycle
 10 passes the protected `develop` state-closure boundary with zero unresolved
 findings. Checkpoint 8 remains active only for its separately authorized
 `develop`-to-`main` promotion and subsequent ancestry reconciliation.
+
+## Cycle 11 — protected promotion and ancestry reconciliation
+
+Ricard authorized the complete remaining checkpoint-8 sequence. The cycle-10
+record passed PR [#3](https://github.com/rabassoft/schema-engine/pull/3) run
+`29932921899`, squash-merged as protected `develop@d2a6e7e` and passed push run
+`29933367841`.
+
+Promotion PR [#4](https://github.com/rabassoft/schema-engine/pull/4) then passed
+run `29933833612` and merged `develop` into `main` with required merge commit
+`bed5dfdb9f09ebde4a1ea57d1e2674a7c6ad26fb`; main push run `29934258635`
+passed. Reconciliation PR
+[#5](https://github.com/rabassoft/schema-engine/pull/5) passed run `29934607607`
+and merged `main` ancestry back into `develop` as merge commit
+`c9b60f983828f4ce9369e3feae492c3df80e6907`; final develop push run
+`29935020561` passed.
+
+Both protected refs select identical tree `edbbff34a60ea79e456b2a9d9cf525ecca631db5`,
+`main` is an ancestor of `develop`, all checkpoint short-lived remote branches
+are deleted and the local checkout is exact/clean on `develop`. No npm,
+settings, tag, release, package or runtime behavior changed. Cycle 11 passes
+with zero unresolved findings and supplies the final checkpoint-8 state record;
+checkpoint 9 remains unstarted and requires separate explicit authorization.
