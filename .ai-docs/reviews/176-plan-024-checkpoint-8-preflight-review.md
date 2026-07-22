@@ -1,4 +1,4 @@
-# PLAN-024 checkpoint 8 settings review — Cycles 1–8
+# PLAN-024 checkpoint 8 settings review — Cycles 1–9
 
 - **Date:** 2026-07-22
 - **Plan:** Approved
@@ -6,9 +6,9 @@
 - **Checkpoint:** 8 — protected branches, Actions, environment and security
 - **Authority:** Read-only preflight plus Ricard's separate explicit
   authorization of each completed checkpoint-8 settings group
-- **Outcome:** Cycle 8 verified the complete settings and local evidence
-  boundary with zero unresolved findings; protected branch/PR publication
-  remains separately gated
+- **Outcome:** Cycle 9 verified protected publication into `develop` with zero
+  unresolved findings; promotion to `main` and reconciliation remain separately
+  gated
 
 ## Exact public baseline
 
@@ -233,3 +233,21 @@ Standard's existing Vite chunk advisory, remain observations rather than
 failures. No npm operation or external setting mutation occurred during this
 cycle. Cycle 8 passes the complete applicable review with zero unresolved
 findings and leaves only the separately authorized protected publication flow.
+
+## Cycle 9 — protected publication into develop
+
+Ricard authorized the reviewed branch, commit, push and protected pull request,
+then separately authorized readiness and squash merge. Branch
+`codex/plan-024-checkpoint-8` published Rabassoft-authored commit `e6bb6b5` and
+opened PR [#1](https://github.com/rabassoft/schema-engine/pull/1) into
+`develop`. Required check `verify` passed in run `29905263489` before GitHub
+allowed the protected merge.
+
+GitHub created squash commit
+`59f7122b24a7c9f9a5d6e1280c608232978923da` on protected `develop`, deleted the
+remote short-lived branch and triggered push run `29912959904`; its complete
+`verify` job passed in 4m58s. The local checkout fast-forwarded to the exact
+remote commit with a clean tree before this state-only follow-up. No setting,
+npm, package, tag, release or source behavior changed. Cycle 9 passes the
+protected `develop` publication boundary with zero unresolved findings;
+`main` promotion and reconciliation remain unexecuted and separately gated.

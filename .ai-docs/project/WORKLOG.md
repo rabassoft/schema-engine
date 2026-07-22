@@ -6,6 +6,23 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 8 published to protected develop
+
+### Completed
+
+- Published reviewed checkpoint-8 evidence as Rabassoft commit `e6bb6b5` on
+  short-lived branch `codex/plan-024-checkpoint-8` and opened protected PR #1.
+- Required PR run `29905263489` passed; after separate authorization GitHub
+  squash-merged exact `develop@59f7122` and deleted the remote source branch.
+- Push run `29912959904` passed its complete `verify` job in 4m58s. Review 176
+  cycle 9 reports zero unresolved findings and no npm or setting mutation.
+
+### Next
+
+- Publish this state-only follow-up through a new protected PR into `develop`,
+  then promote the exact integration tip to `main` and reconcile its merge
+  ancestry back into `develop` under separate authorization.
+
 ## 2026-07-22 — PLAN-024 checkpoint 8 local evidence verified
 
 ### Completed

@@ -29,20 +29,21 @@
 
 ## Current objective
 
-Publish checkpoint 8's reviewed evidence through the newly protected branch/CI/
-PR flow without entering future npm release work.
+Complete checkpoint 8's protected promotion to `main` and reconcile its merge
+ancestry back into `develop` without entering future npm release work.
 
 ## In progress
 
-Checkpoint 8 review 176 cycle 8 verifies active ruleset `19534784`, the
-already-satisfied workflow defaults and the public/local operator-documentation
-boundary, exact selected-actions/SHA-pinning and protected `npm-publish`
-environment, private vulnerability reporting, final merge settings and the
-complete local matrix. Its protected branch/CI/PR publication remains
-separately gated.
+Review 176 cycle 9 verifies the settings/evidence squash on protected
+`develop@59f7122` and both successful hosted checks. This state-only follow-up
+must pass the same short-lived branch/PR flow before the exact protected
+`develop` tip is promoted to `main` and reconciled back.
 
 ## Latest completed work
 
+- Published checkpoint-8 evidence through PR #1: required PR check
+  `29905263489` passed, GitHub squash-merged protected `develop@59f7122`, deleted
+  the short-lived remote branch and passed push CI `29912959904`.
 - Applied final repository merge settings: merge/squash retained, rebase
   disabled and merged short-lived branch deletion enabled; review 176 cycle 7
   verifies the complete checkpoint-8 settings boundary with zero findings.
@@ -54,20 +55,19 @@ separately gated.
 - Restricted Actions to exact full-SHA `actions/checkout` and
   `actions/setup-node` patterns, with all broad GitHub-owned/verified allowances
   disabled; review 176 cycle 4 verifies zero unrelated drift.
-- Established the accepted `.local-docs/` owner-only boundary: ignored,
-  non-canonical, unread by agents without explicit authorization and prohibited
-  from tracked public content by a focused policy regression.
 
 ## Exact next action
 
-Obtain explicit approval to create a short-lived checkpoint-8 branch, commit the
-reviewed evidence, push it and open the protected PR into `develop`.
+Obtain explicit approval to commit and publish this cycle-9 state-only follow-up
+through a new short-lived PR into `develop` before promoting `develop` to
+`main`.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
 - Repository visibility is public and checkpoint-8 settings are live/exact;
-  only their protected branch/CI/PR evidence publication remains gated.
+  protected publication into `develop` passed, while state closure, `main`
+  promotion and reconciliation remain gated.
 - Current and remote long-lived lineage is sanitized and passes full history
   policy. The verified private old-lineage bundle and reversible pre-adoption
   stash remain retained outside public refs through M22 closure.
@@ -83,7 +83,8 @@ reviewed evidence, push it and open the protected PR into `develop`.
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
   Angular remain inactive. M22 checkpoints 1–7 are complete; checkpoint 8 is
-  pending only protected evidence publication and verification.
+  pending only its state follow-up, protected `main` promotion, reconciliation
+  and final verification.
 
 ## Open questions
 
@@ -92,6 +93,9 @@ reviewed evidence, push it and open the protected PR into `develop`.
 
 ## Latest verification
 
+- Review 176 cycle 9 verifies protected PR #1, successful required run
+  `29905263489`, exact squash `develop@59f7122`, deleted short-lived remote
+  branch and successful push run `29912959904` with zero unresolved findings.
 - Review 176 cycle 8 passes the complete settings and local evidence boundary:
   build, lint, types, workspace/reference tests, package/source smoke tests,
   release/publication tooling, public policy, snippets, boundaries, docs,
