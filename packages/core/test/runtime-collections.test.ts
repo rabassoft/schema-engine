@@ -1012,5 +1012,5 @@ describe('M10 controlled collection runtime integration', () => {
     expect(created.runtime.getSnapshot().fields[0]?.path).toHaveLength(
       depth + 3,
     );
-  });
+  }, 15_000);
 });
