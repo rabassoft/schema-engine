@@ -20,8 +20,8 @@
 - **Capability:** promoted D-043 repository slice only
 - **Implementation:** Checkpoints 1–7 completed after reviews 168–175; review
   175 cycle 6 verified the corrective public closure with zero findings.
-  Checkpoint 8 settings passed review 176 cycle 7 and await their separately
-  gated protected branch/PR publication
+  Checkpoint 8 settings passed review 176 cycle 7 and protected publication into
+  `develop` passed review 176 cycle 9; promotion/reconciliation remain gated
 
 ## 1. Goal and hard boundary
 
@@ -697,7 +697,9 @@ exact selected-actions/full-SHA policy, protected `npm-publish` environment,
 Private Vulnerability Reporting and final merge settings.
 
 The complete read-only pass finds all accepted checkpoint-8 targets exact with
-zero unresolved findings and no npm/release mutation. The settings are live;
-checkpoint 8 remains active until this state is committed on a short-lived
-branch, passes CI and is merged to `develop` then `main` through the new
-protections, with `main` reconciled back into `develop` as PLAN-024 requires.
+zero unresolved findings and no npm/release mutation. Review 176 cycle 9 records
+successful PR and push CI around protected squash `develop@59f7122`; its remote
+short-lived branch was deleted. Checkpoint 8 remains active until this state
+follow-up passes the same protected flow, the resulting exact `develop` tip is
+merged to `main`, and `main` is reconciled back into `develop` as PLAN-024
+requires.

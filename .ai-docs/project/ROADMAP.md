@@ -481,13 +481,15 @@ separado antes de repetir la revisión.
 - Checkpoint 8 aplicó por grupos independientes el ruleset sin bypass, permisos
   Actions mínimos, allowlist con SHA completo, entorno `npm-publish`, reporte
   privado y topología merge/squash. Review 176 ciclo 7 verifica el boundary
-  completo sin hallazgos; queda publicar la evidencia mediante rama corta y PRs
-  protegidas antes de completar el checkpoint.
+  completo sin hallazgos. PR #1 y ambos CI publican la evidencia en
+  `develop@59f7122`; queda cerrar este estado y promover/reconciliar mediante
+  PRs protegidas antes de completar el checkpoint.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** autorizar rama corta, commit y push de la evidencia revisada;
-   después exigir CI y PR protegida a `develop` antes de promover a `main`.
+1. **Next action:** publicar el follow-up de estado de review 176 ciclo 9 por
+   rama corta/CI/PR a `develop`; después promover el tip exacto a `main` y
+   reconciliarlo bajo las protecciones activas.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain
