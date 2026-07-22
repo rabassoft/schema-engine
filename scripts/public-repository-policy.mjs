@@ -81,12 +81,15 @@ export function trackedPathFinding(relativePath) {
   if (forbiddenBasenames.has(basename)) return 'credential-file';
   if (forbiddenExtensions.has(extension)) return 'generated-or-secret-file';
   if (
+    normalized.startsWith('.local-docs/') ||
     normalized.startsWith('.release/') ||
     normalized.startsWith('coverage/') ||
     normalized.startsWith('playwright-report/') ||
     normalized.startsWith('test-results/')
   ) {
-    return 'generated-directory';
+    return normalized.startsWith('.local-docs/')
+      ? 'operator-local-directory'
+      : 'generated-directory';
   }
   return undefined;
 }

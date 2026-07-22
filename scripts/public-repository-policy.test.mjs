@@ -21,6 +21,10 @@ test('rejects credential and generated paths while allowing env example', () => 
   assert.equal(trackedPathFinding('.env.local'), 'environment-file');
   assert.equal(trackedPathFinding('.npmrc'), 'credential-file');
   assert.equal(
+    trackedPathFinding('.local-docs/OPERATIONS.md'),
+    'operator-local-directory',
+  );
+  assert.equal(
     trackedPathFinding('.release/package.tgz'),
     'generated-or-secret-file',
   );
