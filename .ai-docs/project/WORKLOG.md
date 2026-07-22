@@ -6,6 +6,24 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 7 corrective preflight
+
+### Completed
+
+- Ricard authorized checkpoint 7's sole private-to-public visibility mutation.
+- The private preflight stopped before mutation because accepted ADR-026 still
+  carried its obsolete pre-PLAN-024 implementation-authorization header.
+- Ricard authorized the corrective commit/push. Updated only the ADR status and
+  added an exact stale-claim regression to `docs:check`.
+- Review 174 cycle 2 repeated authority, refs/privacy, policies, package/npm
+  gates, documentation, workflows, public-tree and diff checks with zero
+  unresolved findings. Visibility, settings and npm remain unchanged.
+
+### Next
+
+- Atomically publish the corrective commit to both aligned private branches,
+  reobserve it, then execute the already authorized sole visibility mutation.
+
 ## 2026-07-22 — PLAN-024 checkpoint 6 transition verified
 
 ### Completed

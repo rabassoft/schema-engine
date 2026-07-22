@@ -16,8 +16,9 @@
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
 - **Milestone:** M22 repository sanitization/publication and secure-release
   preparation
-- **Implementation:** Not authorized; a separately reviewed PLAN-024 is
-  required
+- **Implementation:** PLAN-024 revision 0 is Approved; checkpoints 1–6 are
+  complete after reviews 168–173 and checkpoint 7's visibility mutation is
+  explicitly authorized after its corrective preflight
 
 ## 1. Context
 

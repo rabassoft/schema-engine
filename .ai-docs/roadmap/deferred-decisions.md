@@ -783,7 +783,7 @@ Cada decisión debe registrar:
 - **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
   are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved,
   checkpoints 1–6 are complete after review 173 cycle 4; checkpoint 7's sole
-  visibility mutation remains separately and immediately gated
+  visibility mutation is authorized after corrective preflight review 174
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -816,7 +816,7 @@ Cada decisión debe registrar:
 - **Checkpoint actual:** checkpoint 6 está completado. Review 173 ciclo 4
   verifica bundle privado, reemplazo/adopción del linaje saneado, clon/matriz
   completos y commit de cierre/fast-forward atómico sin hallazgos. Checkpoint 7
-  conserva su gate inmediato de visibilidad separado.
+  está autorizado; review 174 corrige el conflicto ADR antes de visibilidad.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -944,9 +944,10 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** PLAN-024 checkpoints 1–6 están completos tras
-   review 173 ciclo 4. La siguiente acción es presentar/autorizar checkpoint 7
-   para cambiar solo visibilidad a public; settings y npm permanecen gated.
+1. **M22 repository delivery:** PLAN-024 checkpoints 1–6 están completos.
+   Checkpoint 7 está autorizado tras review 174; la siguiente acción es publicar
+   su corrección privada y cambiar solo visibilidad a public. Settings/npm
+   permanecen gated.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

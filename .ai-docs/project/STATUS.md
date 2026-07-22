@@ -29,16 +29,20 @@
 
 ## Current objective
 
-Await immediate explicit authorization for PLAN-024 checkpoint 7's sole
-visibility mutation from private to public.
+Publish the authorized checkpoint-7 corrective preflight commit to both private
+branches, then execute the already authorized sole visibility mutation.
 
 ## In progress
 
-None. PLAN-024 checkpoint 6 is complete after its authorized closure commit was
-published atomically to both private long-lived branches and readopted locally.
+PLAN-024 checkpoint 7 is active. Visibility remains private until the reviewed
+ADR-026 status correction and regression guard are atomically published to both
+aligned branches.
 
 ## Latest completed work
 
+- Completed checkpoint-7 corrective preflight review 174 cycle 2 after fixing
+  one stale accepted-ADR authorization header and adding its documentation
+  regression guard; the visibility mutation has not run yet.
 - Completed PLAN-024 checkpoint 6 after review 173 cycle 4 verified the private
   recovery bundle, atomic sanitized-lineage replacement/adoption, complete
   clean-clone matrix and authorized closure fast-forward with zero findings.
@@ -51,15 +55,12 @@ published atomically to both private long-lived branches and readopted locally.
 - Completed PLAN-024 checkpoint 3 after review 170 cycle 2 verified private
   `develop` at `a594f7333c99c1eb73fac8089ae68bb495d45bbb`, unchanged `main` and
   visibility, then passed the complete fresh detached matrix with zero findings.
-- Completed PLAN-024 checkpoint 2 after review 169 cycle 3 passed tool trust,
-  redacted/deterministic fixtures, exact Action pins, guarded workflows and the
-  complete local matrix with zero unresolved findings.
 
 ## Exact next action
 
-Present checkpoint 7's exact GitHub visibility mutation and obtain immediate
-explicit authorization before changing `rabassoft/schema-engine` from private
-to public.
+Create and atomically fast-forward one corrective private commit from exact
+lease `713f6ae19cc318ef0c44d386f0a49d446f3ce284`; reobserve it, then change only
+`rabassoft/schema-engine` visibility from private to public.
 
 ## Blockers and conflicts
 
@@ -80,7 +81,8 @@ to public.
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
   Angular remain inactive. M22 checkpoints 1–6 are complete; checkpoint 7's
-  visibility mutation remains separately gated.
+  visibility mutation is authorized but paused for its corrective preflight
+  commit.
 
 ## Open questions
 
@@ -89,6 +91,10 @@ to public.
 
 ## Latest verification
 
+- Review 174 cycle 2 passed the corrected checkpoint-7 preflight with zero
+  unresolved findings; ADR-026 state, stale-claim regression, policies,
+  documentation, workflows and public-tree checks pass while visibility stays
+  private.
 - Review 173 cycle 4 verified the owner-only recovery bundle, atomic exact-lease
   two-ref replacement, private/default-main state, local adoption and a fresh
   remote clone plus the authorized closure fast-forward. Gitleaks,
@@ -145,6 +151,8 @@ to public.
   `.ai-docs/reviews/172-plan-024-checkpoint-5-review.md`
 - M22 checkpoint-6 review:
   `.ai-docs/reviews/173-plan-024-checkpoint-6-review.md`
+- M22 checkpoint-7 corrective preflight review:
+  `.ai-docs/reviews/174-plan-024-checkpoint-7-preflight-review.md`
 - M22 checkpoint-1 review:
   `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
 - M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`

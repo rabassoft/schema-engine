@@ -19,8 +19,8 @@
   preparation
 - **Capability:** promoted D-043 repository slice only
 - **Implementation:** Checkpoints 1–6 completed after reviews 168–173;
-  checkpoint 7's public-visibility mutation remains separately and immediately
-  gated
+  checkpoint 7's public-visibility mutation is explicitly authorized after
+  corrective preflight review 174 and awaits its private correction commit
 
 ## 1. Goal and hard boundary
 
@@ -642,3 +642,17 @@ state changed. Ricard authorized the single closure commit; it was atomically
 fast-forwarded to both private branches from exact baseline `1431e45` and
 readopted locally. Checkpoint 6 is complete; checkpoint 7 remains separately
 gated.
+
+### 15.7 Implementation checkpoint 7 corrective preflight
+
+Ricard explicitly authorized the visibility mutation on 22 July 2026. Before
+mutation, review 174 cycle 1 found that ADR-026's implementation-status header
+still described the pre-PLAN-024 authorization gate. Visibility remained
+private. The header now reports the approved/completed state and `docs:check`
+rejects the exact obsolete wording.
+
+Review 174 cycle 2 repeated the complete corrected preflight with zero
+unresolved findings. The correction must be committed and atomically
+fast-forwarded to both still-private aligned branches before executing the
+already authorized sole visibility mutation. Settings, npm and the later
+checkpoint-7 closure commit remain separately gated.

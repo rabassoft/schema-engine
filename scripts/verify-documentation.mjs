@@ -900,6 +900,12 @@ const staleCurrentClaims = [
     pattern: /checkpoint 2 awaits explicit authorization/i,
     description: 'pre-completion PLAN-024 checkpoint-2 ADR-index state',
   },
+  {
+    path: '.ai-docs/adrs/026-public-repository-and-secure-releases.md',
+    pattern:
+      /\*\*Implementation:\*\*\s+Not authorized; a separately reviewed PLAN-024 is\s+required/i,
+    description: 'pre-PLAN-024 ADR-026 implementation gate',
+  },
 ];
 const ignoredDirectories = new Set([
   '.git',

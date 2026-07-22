@@ -471,11 +471,15 @@ separado antes de repetir la revisión.
   saneamiento y matriz completa sin hallazgos. El ciclo 4 verifica el commit de
   cierre/fast-forward atómico autorizado y completa el checkpoint; visibilidad
   permanece private.
+- Checkpoint 7 queda autorizado. Review 174 ciclo 1 corrige el header obsoleto
+  de ADR-026 antes de exposición y añade su guarda documental; ciclo 2 repite
+  el preflight privado sin hallazgos. La corrección debe llegar a ambas ramas
+  privadas antes de ejecutar solo la visibilidad.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** presentar y autorizar inmediatamente checkpoint 7: cambiar
-   únicamente la visibilidad GitHub de private a public.
+1. **Next action:** publicar atómicamente la corrección privada de review 174 y
+   ejecutar la visibilidad checkpoint 7 ya autorizada.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain
