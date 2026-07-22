@@ -1,4 +1,4 @@
-# PLAN-024 checkpoint 8 settings review — Cycles 1–9
+# PLAN-024 checkpoint 8 settings review — Cycles 1–10
 
 - **Date:** 2026-07-22
 - **Plan:** Approved
@@ -6,9 +6,9 @@
 - **Checkpoint:** 8 — protected branches, Actions, environment and security
 - **Authority:** Read-only preflight plus Ricard's separate explicit
   authorization of each completed checkpoint-8 settings group
-- **Outcome:** Cycle 9 verified protected publication into `develop` with zero
-  unresolved findings; promotion to `main` and reconciliation remain separately
-  gated
+- **Outcome:** Cycle 10 verified the protected state follow-up on `develop`
+  with zero unresolved findings; promotion to `main` and reconciliation remain
+  separately gated
 
 ## Exact public baseline
 
@@ -251,3 +251,19 @@ remote commit with a clean tree before this state-only follow-up. No setting,
 npm, package, tag, release or source behavior changed. Cycle 9 passes the
 protected `develop` publication boundary with zero unresolved findings;
 `main` promotion and reconciliation remain unexecuted and separately gated.
+
+## Cycle 10 — protected develop state closure
+
+Under Ricard's bundled authorization, Rabassoft-authored commit `1b8d48e`
+published the cycle-9 state through ready PR
+[#2](https://github.com/rabassoft/schema-engine/pull/2). Required PR run
+`29916192003` passed in 4m55s before the authorized squash merge. GitHub created
+exact protected `develop@5ffee201988b2907b340d6b172c638664038cec7`, deleted
+the remote short-lived branch and passed post-merge push run `29916533160` in
+3m49s.
+
+The local checkout fast-forwarded to that exact remote commit with a clean
+tree. No setting, npm, package, tag, release or runtime behavior changed. Cycle
+10 passes the protected `develop` state-closure boundary with zero unresolved
+findings. Checkpoint 8 remains active only for its separately authorized
+`develop`-to-`main` promotion and subsequent ancestry reconciliation.

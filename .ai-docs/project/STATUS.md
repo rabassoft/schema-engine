@@ -34,13 +34,16 @@ ancestry back into `develop` without entering future npm release work.
 
 ## In progress
 
-Review 176 cycle 9 verifies the settings/evidence squash on protected
-`develop@59f7122` and both successful hosted checks. This state-only follow-up
-must pass the same short-lived branch/PR flow before the exact protected
-`develop` tip is promoted to `main` and reconciled back.
+Review 176 cycle 10 verifies the state follow-up on protected
+`develop@5ffee20` and both successful hosted checks. The exact protected
+integration tip is ready for separately authorized promotion to `main` and
+subsequent ancestry reconciliation back into `develop`.
 
 ## Latest completed work
 
+- Published the cycle-9 state through PR #2: required run `29916192003` passed,
+  GitHub squash-merged protected `develop@5ffee20`, deleted the remote branch
+  and passed post-merge push CI `29916533160`.
 - Published checkpoint-8 evidence through PR #1: required PR check
   `29905263489` passed, GitHub squash-merged protected `develop@59f7122`, deleted
   the short-lived remote branch and passed push CI `29912959904`.
@@ -49,24 +52,21 @@ must pass the same short-lived branch/PR flow before the exact protected
   verifies the complete checkpoint-8 settings boundary with zero findings.
 - Enabled and verified Private Vulnerability Reporting with zero drift; Issues
   enabled and Discussions disabled already satisfy PLAN-024 without mutation.
-- Created and verified protected `npm-publish` environment `18549660922` with
-  required `rabassoft` review, self-review allowed, no delay/secrets/variables
-  and exactly one deployment branch policy for `main`.
 - Restricted Actions to exact full-SHA `actions/checkout` and
   `actions/setup-node` patterns, with all broad GitHub-owned/verified allowances
   disabled; review 176 cycle 4 verifies zero unrelated drift.
 
 ## Exact next action
 
-Obtain explicit approval to commit and publish this cycle-9 state-only follow-up
-through a new short-lived PR into `develop` before promoting `develop` to
-`main`.
+Obtain explicit approval to publish this cycle-10 closure follow-up, then
+promote the resulting exact `develop` tip to `main` with a protected merge
+commit and reconcile `main` ancestry back into `develop`.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
 - Repository visibility is public and checkpoint-8 settings are live/exact;
-  protected publication into `develop` passed, while state closure, `main`
+  protected publication and state closure into `develop` passed, while `main`
   promotion and reconciliation remain gated.
 - Current and remote long-lived lineage is sanitized and passes full history
   policy. The verified private old-lineage bundle and reversible pre-adoption
@@ -93,6 +93,9 @@ through a new short-lived PR into `develop` before promoting `develop` to
 
 ## Latest verification
 
+- Review 176 cycle 10 verifies protected PR #2, successful required run
+  `29916192003`, exact squash `develop@5ffee20`, deleted short-lived remote
+  branch and successful push run `29916533160` with zero unresolved findings.
 - Review 176 cycle 9 verifies protected PR #1, successful required run
   `29905263489`, exact squash `develop@59f7122`, deleted short-lived remote
   branch and successful push run `29912959904` with zero unresolved findings.
