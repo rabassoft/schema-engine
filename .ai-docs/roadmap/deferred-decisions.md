@@ -784,7 +784,8 @@ Cada decisión debe registrar:
   are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved,
   checkpoints 1–7 are complete after review 175 cycle 6; checkpoint 8 settings
   passed review 176 cycle 7 and protected `develop` publication passed cycle 9;
-  state closure, promotion and reconciliation remain gated
+  closure, promotion and reconciliation passed cycle 11; checkpoint 9 remains
+  separately gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -948,8 +949,8 @@ Cada decisión debe registrar:
 
 1. **M22 repository delivery:** PLAN-024 checkpoints 1–7 están completos.
    Checkpoint 8 settings pasan review 176 ciclo 7 y `develop` publication pasa
-   ciclo 9; la siguiente acción es cerrar el estado y promover/reconciliar por
-   PRs protegidas. npm permanece gated.
+   ciclo 9; cierre/promoción/reconciliación pasan ciclo 11. La siguiente acción
+   es autorizar checkpoint 9. npm permanece gated.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.
