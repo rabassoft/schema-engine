@@ -12,7 +12,7 @@
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-024 revision 0, Approved
 - **Last completed implementation plan:** PLAN-023 revision 0
-- **Active implementation task:** None
+- **Active implementation task:** PLAN-024 checkpoint 7 closure documentation
 - **Last accepted ADR:** ADR-026 revision 0, coordinated with ADR-018 revision 6
 - **Implemented capability:** M1–M21 and G0, including recursive static local
   presentation forests in core, native Angular, independent Standard and
@@ -29,20 +29,24 @@
 
 ## Current objective
 
-Publish the authorized checkpoint-7 corrective preflight commit to both private
-branches, then execute the already authorized sole visibility mutation.
+Close the verified checkpoint-7 public transition without entering checkpoint
+8 settings or future npm release work.
 
 ## In progress
 
-PLAN-024 checkpoint 7 is active. Visibility remains private until the reviewed
-ADR-026 status correction and regression guard are atomically published to both
-aligned branches.
+PLAN-024 checkpoint 7 is active only for its reviewed closure documentation and
+separately gated atomic fast-forward. The sanitized repository is public; no
+checkpoint-8 setting or npm mutation is active.
 
 ## Latest completed work
 
-- Completed checkpoint-7 corrective preflight review 174 cycle 2 after fixing
-  one stale accepted-ADR authorization header and adding its documentation
-  regression guard; the visibility mutation has not run yet.
+- Executed checkpoint 7's authorized sole visibility mutation and completed
+  review 175 cycle 4: anonymous Git/API/HTTP, sanitized history/tree, public
+  policy/source/docs, unchanged npm and the clean-clone matrix pass with zero
+  unresolved findings; the closure commit remains separately gated.
+- Completed checkpoint-7 corrective preflight review 174 cycle 2, published
+  corrective commit `3b415350627fbac423ce806231315e475de98f72` to both private
+  branches and observed successful CI on both before visibility changed.
 - Completed PLAN-024 checkpoint 6 after review 173 cycle 4 verified the private
   recovery bundle, atomic sanitized-lineage replacement/adoption, complete
   clean-clone matrix and authorized closure fast-forward with zero findings.
@@ -52,25 +56,23 @@ aligned branches.
 - Completed PLAN-024 checkpoint 4 after review 171 cycle 1 passed all nine
   fresh-mirror audit layers with zero unresolved findings and froze exact
   ref/object/rights/content evidence without remote mutation.
-- Completed PLAN-024 checkpoint 3 after review 170 cycle 2 verified private
-  `develop` at `a594f7333c99c1eb73fac8089ae68bb495d45bbb`, unchanged `main` and
-  visibility, then passed the complete fresh detached matrix with zero findings.
 
 ## Exact next action
 
-Create and atomically fast-forward one corrective private commit from exact
-lease `713f6ae19cc318ef0c44d386f0a49d446f3ce284`; reobserve it, then change only
-`rabassoft/schema-engine` visibility from private to public.
+Obtain separate approval for one checkpoint-7 closure commit, then atomically
+fast-forward public `main` and `develop` from exact lease
+`3b415350627fbac423ce806231315e475de98f72` and reverify anonymously.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
+- Repository visibility is public. Checkpoint 8 branch/Actions/environment/
+  security settings remain independently gated and have not changed.
 - Current and remote long-lived lineage is sanitized and passes full history
   policy. The verified private old-lineage bundle and reversible pre-adoption
   stash remain retained outside public refs through M22 closure.
-- GitHub rulesets are unavailable for the current private repository/plan;
-  recheck availability after the visibility or plan transition rather than
-  weakening the M22 protection requirement.
+- GitHub ruleset/protection availability must be reobserved only after
+  checkpoint 7 closes; no checkpoint-8 control is pre-authorized.
 - Angular application builds require execution outside the restricted sandbox
   because esbuild IPC aborts inside it; Node 22.23.1 is compatible and the
   official builds pass.
@@ -80,9 +82,8 @@ lease `713f6ae19cc318ef0c44d386f0a49d446f3ce284`; reobserve it, then change only
   warning; Standard emits Vite's 868.50 kB advisory. These are observations,
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
-  Angular remain inactive. M22 checkpoints 1–6 are complete; checkpoint 7's
-  visibility mutation is authorized but paused for its corrective preflight
-  commit.
+  Angular remain inactive. M22 checkpoints 1–6 are complete; checkpoint 7 awaits
+  only its separately authorized closure commit/fast-forward.
 
 ## Open questions
 
@@ -91,10 +92,15 @@ lease `713f6ae19cc318ef0c44d386f0a49d446f3ce284`; reobserve it, then change only
 
 ## Latest verification
 
-- Review 174 cycle 2 passed the corrected checkpoint-7 preflight with zero
-  unresolved findings; ADR-026 state, stale-claim regression, policies,
-  documentation, workflows and public-tree checks pass while visibility stays
-  private.
+- Review 175 cycle 4 passed the complete public checkpoint-7 boundary with zero
+  unresolved findings. Anonymous Git/API/HTTP access, exact public refs, zero
+  tags, 68-commit Gitleaks, 742-file tree policy, 1,802-path/blob history
+  policy, governance/source/docs and the full clean-clone matrix pass.
+- npm preserves the recorded M21 integrity and exact/`next`/`latest` aliases,
+  exposes no repository/homepage/bugs metadata and received no mutation.
+- Review 174 cycle 2 passed the corrected private preflight; corrective commit
+  `3b415350627fbac423ce806231315e475de98f72` then passed CI on both branches
+  before the authorized visibility transition.
 - Review 173 cycle 4 verified the owner-only recovery bundle, atomic exact-lease
   two-ref replacement, private/default-main state, local adoption and a fresh
   remote clone plus the authorized closure fast-forward. Gitleaks,
@@ -134,8 +140,8 @@ lease `713f6ae19cc318ef0c44d386f0a49d446f3ce284`; reobserve it, then change only
   zero findings; review 166 cycle 3 accepted its architecture after fourteen
   areas passed with zero findings.
 - Exact public M21 bytes/signatures and immutable M19 package/source evidence
-  remain unchanged. Only the authorized atomic Git ref replacement/local
-  adoption occurred; visibility, workflows/settings and npm were not mutated.
+  remain unchanged. GitHub visibility is now public; workflows/settings and npm
+  were not mutated.
 
 ## Task document map
 
@@ -153,6 +159,8 @@ lease `713f6ae19cc318ef0c44d386f0a49d446f3ce284`; reobserve it, then change only
   `.ai-docs/reviews/173-plan-024-checkpoint-6-review.md`
 - M22 checkpoint-7 corrective preflight review:
   `.ai-docs/reviews/174-plan-024-checkpoint-7-preflight-review.md`
+- M22 checkpoint-7 public review:
+  `.ai-docs/reviews/175-plan-024-checkpoint-7-public-review.md`
 - M22 checkpoint-1 review:
   `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
 - M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`

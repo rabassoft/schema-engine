@@ -6,6 +6,33 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 7 public transition verified
+
+### Completed
+
+- Published corrective commit `3b415350` atomically to aligned private
+  `main`/`develop`; both GitHub CI runs passed before exposure.
+- Changed only `rabassoft/schema-engine` visibility from private to public under
+  Ricard's explicit checkpoint-7 authorization. Exact refs, default branch,
+  tags, repository features, merge settings and Actions settings did not drift.
+- Verified anonymous API/HTTP/Git access and a fresh credential-free clone.
+  Gitleaks scanned 68 commits with no leak; public tree/history policies passed
+  742 files and 1,802 path/blob pairs with zero findings.
+- Verified root AGPL/governance, `.ai-docs`, references, 265 documents/875 links,
+  unchanged M21 npm integrity/aliases/metadata and the complete clean-clone
+  workspace/package/source/reference matrix.
+- Review 175 cycle 1 reconciled stale current private-state documentation and
+  added regression guards; cycle 2 clarified that local recovery-stash objects
+  are not public refs; cycle 3 isolated ignored browser-cache signatures; cycle
+  4 repeated the complete public boundary with zero unresolved findings.
+
+### Next
+
+- Obtain separate approval for the checkpoint-7 closure commit and atomic
+  fast-forward of both still-unprotected public branches from exact lease
+  `3b415350627fbac423ce806231315e475de98f72`; then reverify anonymously and stop
+  before checkpoint 8 settings.
+
 ## 2026-07-22 — PLAN-024 checkpoint 7 corrective preflight
 
 ### Completed

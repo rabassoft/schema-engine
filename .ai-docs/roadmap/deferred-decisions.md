@@ -782,8 +782,8 @@ Cada decisión debe registrar:
 
 - **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
   are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved,
-  checkpoints 1–6 are complete after review 173 cycle 4; checkpoint 7's sole
-  visibility mutation is authorized after corrective preflight review 174
+  checkpoints 1–6 are complete after review 173 cycle 4; checkpoint 7's public
+  transition passed review 175 and awaits its separately gated closure commit
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -813,10 +813,11 @@ Cada decisión debe registrar:
   sustitución de refs/adopción local, visibilidad y settings. Metadata de
   paquetes, npm trusted publishing y la primera release con provenance requieren
   una promoción/plan de release posterior.
-- **Checkpoint actual:** checkpoint 6 está completado. Review 173 ciclo 4
-  verifica bundle privado, reemplazo/adopción del linaje saneado, clon/matriz
-  completos y commit de cierre/fast-forward atómico sin hallazgos. Checkpoint 7
-  está autorizado; review 174 corrige el conflicto ADR antes de visibilidad.
+- **Checkpoint actual:** checkpoint 6 está completado. Review 174 corrigió el
+  conflicto ADR antes de visibilidad. Checkpoint 7 cambió únicamente la
+  visibilidad a pública; review 175 ciclo 4 verifica acceso anónimo, linaje,
+  políticas, npm aislado y matriz completa sin hallazgos. Su commit de cierre
+  continúa gated; settings/npm permanecen fuera de esta transición.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -945,9 +946,8 @@ Cada decisión debe registrar:
 ## 4. Próximo trabajo de decisión
 
 1. **M22 repository delivery:** PLAN-024 checkpoints 1–6 están completos.
-   Checkpoint 7 está autorizado tras review 174; la siguiente acción es publicar
-   su corrección privada y cambiar solo visibilidad a public. Settings/npm
-   permanecen gated.
+   Checkpoint 7 ya es público y pasó review 175; la siguiente acción es autorizar
+   su commit de cierre/fast-forward atómico. Settings/npm permanecen gated.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

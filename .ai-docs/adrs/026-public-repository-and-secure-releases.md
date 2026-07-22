@@ -17,13 +17,14 @@
 - **Milestone:** M22 repository sanitization/publication and secure-release
   preparation
 - **Implementation:** PLAN-024 revision 0 is Approved; checkpoints 1–6 are
-  complete after reviews 168–173 and checkpoint 7's visibility mutation is
-  explicitly authorized after its corrective preflight
+  complete after reviews 168–173 and checkpoint 7's authorized visibility
+  transition passed anonymous verification in review 175; its closure commit
+  remains separately gated
 
 ## 1. Context
 
-Schema Engine packages are public under AGPL-3.0-only/commercial dual
-licensing, but their repository remains private. Existing releases therefore
+Schema Engine packages were published under AGPL-3.0-only/commercial dual
+licensing while their repository was private. Existing releases therefore
 carry package-local Corresponding Source and intentionally omit repository and
 provenance metadata. Publishing the repository can improve source
 traceability, issue reporting and future supply-chain evidence, but it also
@@ -46,9 +47,9 @@ approval for every destructive or external action.
 
 ### 2.1 Canonical repository and retained lineage
 
-The canonical public source repository will be
-`https://github.com/rabassoft/schema-engine`. It remains private until every
-pre-visibility gate in this ADR and the approved plan passes.
+The canonical public source repository is
+`https://github.com/rabassoft/schema-engine`. Its visibility changed only after
+every pre-visibility gate in this ADR and the approved plan passed.
 
 The public repository preserves the existing reachable lineage, subject to a
 minimal deterministic rewrite of material that violates the public-content

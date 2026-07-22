@@ -19,8 +19,8 @@
   preparation
 - **Capability:** promoted D-043 repository slice only
 - **Implementation:** Checkpoints 1–6 completed after reviews 168–173;
-  checkpoint 7's public-visibility mutation is explicitly authorized after
-  corrective preflight review 174 and awaits its private correction commit
+  checkpoint 7's authorized public transition passed review 175 and awaits its
+  separately gated closure commit/atomic fast-forward
 
 ## 1. Goal and hard boundary
 
@@ -652,7 +652,23 @@ private. The header now reports the approved/completed state and `docs:check`
 rejects the exact obsolete wording.
 
 Review 174 cycle 2 repeated the complete corrected preflight with zero
-unresolved findings. The correction must be committed and atomically
-fast-forwarded to both still-private aligned branches before executing the
-already authorized sole visibility mutation. Settings, npm and the later
-checkpoint-7 closure commit remain separately gated.
+unresolved findings. The correction was committed and atomically fast-forwarded
+to both still-private aligned branches before executing the already authorized
+sole visibility mutation. Settings, npm and the later checkpoint-7 closure
+commit remain separately gated.
+
+### 15.8 Implementation checkpoint 7 public transition
+
+Corrective commit `3b415350627fbac423ce806231315e475de98f72` passed CI on
+both aligned private branches. The authorized mutation then changed only
+`rabassoft/schema-engine` visibility from private to public. Default `main`,
+exact `main`/`develop` refs, zero tags and all observed repository/Actions
+settings remained unchanged.
+
+Review 175 cycle 4 verifies unauthenticated API, HTTP and Git access; a fresh
+anonymous clone; Gitleaks and independent public-tree/history policies; root
+license, governance, docs/links and reference sources; unchanged immutable M21
+npm integrity, aliases and absent repository/provenance claims; and the complete
+clean-clone matrix with zero unresolved findings. Checkpoint 7 is not complete
+until its separately approved closure commit is atomically fast-forwarded to
+both still-unprotected public branches and reverified anonymously.

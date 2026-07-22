@@ -906,6 +906,32 @@ const staleCurrentClaims = [
       /\*\*Implementation:\*\*\s+Not authorized; a separately reviewed PLAN-024 is\s+required/i,
     description: 'pre-PLAN-024 ADR-026 implementation gate',
   },
+  {
+    path: 'README.md',
+    pattern:
+      /The repository remains private until PLAN-024 completes its independently gated/i,
+    description: 'pre-checkpoint-7 private repository onboarding state',
+  },
+  {
+    path: '.ai-docs/README.md',
+    pattern: /The repository remains private until PLAN-024 completes/i,
+    description: 'pre-checkpoint-7 private documentation-index state',
+  },
+  {
+    path: '.ai-docs/project/STATUS.md',
+    pattern: /Visibility remains private until the reviewed/i,
+    description: 'pre-checkpoint-7 private project status',
+  },
+  {
+    path: '.ai-docs/project/ROADMAP.md',
+    pattern: /visibilidad\s+permanece private/i,
+    description: 'pre-checkpoint-7 private roadmap state',
+  },
+  {
+    path: '.ai-docs/adrs/026-public-repository-and-secure-releases.md',
+    pattern: /It remains private until every\s+pre-visibility gate/i,
+    description: 'pre-checkpoint-7 private ADR-026 state',
+  },
 ];
 const ignoredDirectories = new Set([
   '.git',

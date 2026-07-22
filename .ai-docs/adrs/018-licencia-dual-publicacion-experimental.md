@@ -94,10 +94,10 @@ It does not authorize a plan, manifest, candidate, Git or registry action.
 
 M21 is now complete. Review 165 subsequently promoted D-043 for M22 design and
 Ricard selected preservation of sanitized reachable history with public
-`.ai-docs`. Revision 6 coordinates this licensing/source decision with ADR-026:
-the repository is still private until PLAN-024 completes, but the accepted
-future boundary is no longer permanently private. No package version or release
-is selected.
+`.ai-docs`. Revision 6 coordinates this licensing/source decision with ADR-026.
+PLAN-024 checkpoint 7 has now made the sanitized repository public; GitHub
+controls and secure-release preparation remain separately gated. No package
+version or release is selected.
 
 ## 2. Decision
 
@@ -145,10 +145,10 @@ telemetry, feature distinction or network call is introduced.
 
 ### 2.3 Repository and Corresponding Source
 
-The GitHub repository remains private until PLAN-024 implements and verifies
-ADR-026's complete reachable-history sanitization, public-content policy,
-branch/governance controls and explicit visibility gate. Accepting this
-revision does not make it public.
+The GitHub repository remained private until PLAN-024 implemented and verified
+ADR-026's complete reachable-history sanitization, public-content policy and
+explicit visibility gate. Checkpoint 7 has now made that sanitized lineage
+public; branch/governance controls remain independently gated.
 
 Because a private repository is not a public source offer, every public binary
 package must provide the preferred TypeScript form and all scripts/configuration
@@ -245,10 +245,10 @@ Before every publication, the plan must verify:
 4. registry access, requested `next`, actual `latest` and public visibility from
    packed metadata; every observed tag must resolve to inspected bytes and
    documentation must not present it as Stable;
-5. no trusted publisher, workflow or public repository metadata while GitHub
-   remains private; ADR-026 and PLAN-024 govern repository preparation, while a
-   later release plan governs future package metadata and the first OIDC/
-   provenance publication;
+5. no trusted publisher or public repository metadata in existing immutable
+   releases; ADR-026 and PLAN-024 govern repository preparation, while a later
+   release plan governs future package metadata and the first OIDC/provenance
+   publication;
 6. license, notices, Corresponding Source and complete tarball inventories;
 7. the frozen install, full test/build/package matrix and clean consumers; and
 8. a final human approval checkpoint immediately before each external mutation.
@@ -257,10 +257,10 @@ No ADR or plan approval itself authorizes `npm publish`, Git tags, GitHub
 releases, repository visibility changes or credential operations. Those
 actions require the final explicit checkpoint described by the plan.
 
-npm provenance is not claimed while the repository is private: npm requires a public
-repository matching `package.json#repository`, while the selected repository
-remains private. The release documentation records that limitation. Provenance
-becomes a required follow-up gate when a sanitized public repository exists;
+npm provenance was not claimed while the repository was private: npm requires a
+public repository matching `package.json#repository`. Existing immutable
+releases retain that truthful limitation. Now that the sanitized repository is
+public, provenance and matching metadata remain a required future release gate;
 the project must not publish a misleading or unverifiable provenance URL.
 
 npm trusted publishing also requires `package.json#repository` to match the
@@ -416,8 +416,8 @@ real contact and executable agreement.
 
 - Schema Engine remains genuine Open Source under an OSI-approved license.
 - Organizations can choose reciprocal AGPL use or negotiate proprietary terms.
-- The public package has auditable license and source material even while the
-  development repository remains private.
+- Published packages retain auditable license and source material independently
+  of later repository visibility.
 - Experimental publication does not silently stabilize API or change product
   behavior.
 - A dependency-first publish and dependent-first default-channel transition
@@ -430,7 +430,7 @@ real contact and executable agreement.
 - Strong copyleft may reduce adoption among proprietary consumers.
 - Dual licensing constrains how external contributions can be accepted.
 - Publishing complete buildable source inside release artifacts increases
-  package/release complexity while the repository remains private.
+  package/release complexity.
 - Any observed `latest` alias means an unqualified install resolves that
   Experimental version; documentation must recommend `next` or an exact
   version and explicitly deny any stability implication.

@@ -177,14 +177,16 @@ available for organizations that do not want to comply with AGPL; contact
 `ricard@rabassoft.com`. No final commercial terms or support SLA are currently
 offered.
 
-The repository remains private until PLAN-024 completes its independently gated
-history rewrite, visibility and GitHub-control checkpoints. Each package carries
-its preferred TypeScript source, frozen build harness, license and notices so
-its existing release can be rebuilt without repository access. Existing M19/M21
-versions do not claim repository-backed npm provenance; a future release must
-separately prove OIDC publication from the sanitized public source.
+The sanitized source repository is public at
+[`rabassoft/schema-engine`](https://github.com/rabassoft/schema-engine). PLAN-024
+still gates its GitHub controls and secure-release preparation independently.
+Each package carries its preferred TypeScript source, frozen build harness,
+license and notices so its existing release can be rebuilt independently.
+Existing M19/M21 versions do not claim repository-backed npm provenance; a
+future release must separately prove OIDC publication from the sanitized public
+source.
 
-Issues may be used for non-code feedback once publicly accessible. External
-code contributions are not accepted until a separately reviewed rights policy
-exists; see [CONTRIBUTING.md](./CONTRIBUTING.md). Security reports follow
+Issues may be used for non-code feedback. External code contributions are not
+accepted until a separately reviewed rights policy exists; see
+[CONTRIBUTING.md](./CONTRIBUTING.md). Security reports follow
 [SECURITY.md](./SECURITY.md) and must not be opened publicly.

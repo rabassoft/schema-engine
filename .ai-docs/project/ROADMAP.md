@@ -426,7 +426,7 @@ separado antes de repetir la revisión.
   ocho consumidores registrales y toda la documentación con cero hallazgos.
   M21 queda Public + Experimental + Active sin autorizar otra acción externa.
 
-### M22 — Repositorio público y releases seguras — checkpoint 5 completado
+### M22 — Repositorio público y releases seguras — checkpoint 7 en cierre
 
 - Ricard seleccionó D-043 como siguiente milestone el 21 de julio de 2026.
 - [Review 165](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
@@ -469,17 +469,17 @@ separado antes de repetir la revisión.
   leases exactos y adopción local sobre `1431e45`; reviews 173 ciclos 1–2
   corrigieron frases activas obsoletas y el ciclo 3 repitió el clon remoto,
   saneamiento y matriz completa sin hallazgos. El ciclo 4 verifica el commit de
-  cierre/fast-forward atómico autorizado y completa el checkpoint; visibilidad
-  permanece private.
-- Checkpoint 7 queda autorizado. Review 174 ciclo 1 corrige el header obsoleto
-  de ADR-026 antes de exposición y añade su guarda documental; ciclo 2 repite
-  el preflight privado sin hallazgos. La corrección debe llegar a ambas ramas
-  privadas antes de ejecutar solo la visibilidad.
+  cierre/fast-forward atómico autorizado y completa el checkpoint.
+- Checkpoint 7 ejecutó solo la transición autorizada a visibilidad pública tras
+  publicar la corrección de review 174. El acceso Git/HTTP anónimo, las refs
+  exactas, el linaje saneado, las políticas, npm sin cambios y la matriz completa
+  desde un clon público pasan review 175 ciclo 4 sin hallazgos. Su commit de
+  cierre/fast-forward continúa separado y gated; settings siguen en checkpoint 8.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** publicar atómicamente la corrección privada de review 174 y
-   ejecutar la visibilidad checkpoint 7 ya autorizada.
+1. **Next action:** autorizar el commit de cierre de checkpoint 7 y su
+   fast-forward atómico a ambas ramas públicas aún sin protección.
 2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
    provenance ni cambios de settings.
 3. **Later candidates:** React, Vue and all other capabilities remain
