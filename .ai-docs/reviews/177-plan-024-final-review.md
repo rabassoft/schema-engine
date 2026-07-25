@@ -7,8 +7,8 @@
 - **Authority:** Ricard explicitly authorized checkpoint 9's external read-only
   review
 - **Outcome:** Cycle 3 passed the complete corrected closure boundary with zero
-  unresolved findings; the completion record still requires the separately
-  approved protected branch/commit/PR/promotion/reconciliation flow
+  unresolved findings; protected PRs #9–#11 subsequently published, promoted
+  and reconciled this exact record with successful required and post-merge CI
 
 ## Public lineage, content and recovery
 
@@ -120,7 +120,11 @@ formatting and diff review with zero unresolved findings.
 
 No commit, branch, push, PR, merge, package, tag, release, registry setting or
 GitHub setting was changed by checkpoint 9 review. PLAN-024/M22 completion
-becomes canonical only when this exact reviewed record passes the protected
-publication flow to `develop`, promotion to `main` and reconciliation back into
-`develop`. Backup deletion and future package metadata/OIDC release work remain
-separately gated.
+became canonical when this exact reviewed record passed protected PR #9 into
+`develop@049160e8`, PR #10 into
+`main@7f22dbd03680f1195c5309427b5002bf447aace4` and PR #11 back into
+`develop@d4d44d43fcba4692baa0fdef6026793f4f93122f`. Required and post-merge
+runs `30145579253`, `30146726717`, `30147039530`, `30147280131`,
+`30147475634` and `30147686444` all passed. The final branch trees are
+identical and `main` is an ancestor of `develop`. Backup deletion and future
+package metadata/OIDC release work remain separately gated.

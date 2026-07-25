@@ -6,6 +6,29 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-25 — PLAN-024/M22 protected closure published
+
+### Completed
+
+- Published the reviewed checkpoint-9 record through protected PR #9, squash
+  `develop@049160e8`, required CI `30145579253` and post-merge CI
+  `30146726717`.
+- Promoted it through PR #10 and merge commit
+  `main@7f22dbd03680f1195c5309427b5002bf447aace4`; required CI `30147039530`
+  and post-merge CI `30147280131` passed.
+- Reconciled `main` into `develop` through PR #11 and merge commit
+  `develop@d4d44d43fcba4692baa0fdef6026793f4f93122f`; required CI
+  `30147475634` and final push CI `30147686444` passed.
+- Verified that `main` is an ancestor of `develop`, both branches have identical
+  trees and the local `develop` baseline matched the exact remote head before
+  this state-only documentation update. PLAN-024/M22 is now canonically
+  complete. Package metadata, npm trusted publishing/provenance and
+  private-backup deletion remain separately gated.
+
+### Next
+
+- Select and explicitly promote the next milestone or Deferred decision.
+
 ## 2026-07-22 — PLAN-024 checkpoint 9 and M22 completed locally
 
 ### Completed

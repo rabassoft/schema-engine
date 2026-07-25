@@ -493,18 +493,20 @@ separado antes de repetir la revisión.
   Review 177 ciclo 1 corrige el onboarding privado obsoleto y la resolución de
   parches Angular publicados de forma escalonada; ciclo 2 corrige la invocación
   final y el selector E2E posicional; ciclo 3 repite la revisión completa sin
-  hallazgos y completa PLAN-024/M22.
+  hallazgos. PR #9 publica el registro en `develop@049160e8`, PR #10 lo
+  promueve a `main@7f22dbd` y PR #11 reconcilia `main` en
+  `develop@d4d44d4`; los seis CI requeridos/post-merge pasan, ambos árboles son
+  idénticos y `main` es ancestro de `develop`. PLAN-024/M22 queda
+  canónicamente completado.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** publicar el registro final revisado mediante rama corta y
-   PR protegido a `develop`; tras su CI, promover a `main` y reconciliar su
-   ancestry en `develop`, cada mutación bajo autorización Git explícita.
+1. **Next action:** seleccionar y promover explícitamente el siguiente milestone
+   o decisión Deferred.
 2. **External gates:** M22 no autoriza metadata de paquetes, trusted publishing
    npm, provenance, GitHub Release, tag Git ni eliminación del backup privado.
 3. **Later candidates:** React, Vue and all other capabilities remain
-   demand-driven; after canonical M22 publication, select the next milestone
-   explicitly. M22 does not imply D-033 or functional work.
+   demand-driven. M22 does not imply D-033 or functional work.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

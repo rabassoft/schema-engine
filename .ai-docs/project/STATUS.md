@@ -5,7 +5,7 @@
 
 ## Checkpoint
 
-- **Updated:** 2026-07-22 by Ricard / Codex
+- **Updated:** 2026-07-25 by Ricard / Codex
 - **Branch:** `develop`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
@@ -29,43 +29,44 @@
 
 ## Current objective
 
-Await explicit Git authorization to publish the reviewed PLAN-024/M22 closure
-through protected `develop`/`main` flow and reconcile ancestry, without
-activating future npm metadata/OIDC release work.
+Select and explicitly promote the next milestone or Deferred decision without
+implicitly activating package metadata, npm OIDC/provenance release work or any
+other deferred capability.
 
 ## In progress
 
-None. PLAN-024/M22 completed after review 177 cycle 3 repeated the corrected
-final public-repository closure with zero unresolved findings.
+None. PLAN-024/M22 is canonically complete after its reviewed record passed the
+protected `develop`/`main` publication, promotion and ancestry-reconciliation
+flow with successful required and post-merge CI.
 
 ## Latest completed work
 
-- Completed PLAN-024 checkpoint 9 and M22 after review 177 cycle 3 repeated the
-  corrected anonymous public-history/content, GitHub-control, npm-isolation and
-  complete verification matrix with zero findings.
+- Published the reviewed checkpoint-9 closure through PR #9, squash
+  `develop@049160e8`, required CI `30145579253` and successful post-merge CI
+  `30146726717`.
+- Promoted the closure through PR #10 and merge commit
+  `main@7f22dbd03680f1195c5309427b5002bf447aace4`; required CI `30147039530`
+  and post-merge CI `30147280131` passed.
+- Reconciled `main` into `develop` through PR #11 and merge commit
+  `develop@d4d44d43fcba4692baa0fdef6026793f4f93122f`; required CI
+  `30147475634` and final push CI `30147686444` passed. Both branches have
+  identical trees and `main` is an ancestor of `develop`.
 - Corrected live Angular tuple discovery to tolerate staggered package patch
   publication by selecting the highest coherent stable tuple, with regression
   coverage for the observed `22.0.8`/`22.0.7` split; stabilized the reorder E2E
   assertion on Beta's exact normalized identity.
-- Verified public `main@9da5c8b` and `develop@46c982d`, identical tree
-  `8a90fef`, protected ancestry, 79-commit/1,862-path-blob history policy and
-  approximately 6.37 MB Gitleaks scan with zero findings.
-- Reverified M19 exact immutable bytes and the complete M21 exact/`next`/
-  `latest`/unqualified native/pilot matrix without npm mutation.
 - Retained and verified the owner-only private recovery bundle and reversible
   stash outside public refs; deletion remains separately gated.
 
 ## Exact next action
 
-Obtain explicit approval for the short-lived branch, commit, push and protected
-PR into `develop`; after its required CI passes, separately authorize promotion
-to `main` and reconciliation back into `develop`.
+Select and explicitly promote the next milestone or Deferred decision.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
-- Repository visibility is public and checkpoint-8 settings are live/exact;
-  protected publication, promotion and reconciliation all passed.
+- Repository visibility is public, checkpoint-8 settings are live/exact and
+  checkpoint-9 publication, promotion and reconciliation all passed.
 - Current and remote long-lived lineage is sanitized and passes full history
   policy. The verified private old-lineage bundle and reversible pre-adoption
   stash remain retained outside public refs pending a separately authorized
@@ -86,14 +87,18 @@ to `main` and reconciliation back into `develop`.
 
 ## Open questions
 
-- None. A real scanner, rights or personal-data finding must stop PLAN-024 for
-  explicit resolution.
+- None.
 
 ## Latest verification
 
 - Review 177 cycle 3 passes the corrected complete checkpoint-9 boundary with
   zero unresolved findings across authority/scope, anonymous public history and
   content, recovery, GitHub controls/CI, npm isolation and the full matrix.
+- Protected PRs #9–#11 published, promoted and reconciled that exact record.
+  Required/post-merge runs `30145579253`, `30146726717`, `30147039530`,
+  `30147280131`, `30147475634` and `30147686444` all completed successfully.
+  Remote `main@7f22dbd` is an ancestor of `develop@d4d44d4`, and their trees
+  are identical.
 - Fresh anonymous evidence passes strict Git integrity, approximately 6.37 MB
   Gitleaks, 744-file tree policy, 79-commit/1,862-path-blob history policy and
   the complete 65-entry mapped-commit check.
