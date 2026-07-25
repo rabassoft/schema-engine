@@ -816,8 +816,11 @@ Cada decisión debe registrar:
   una promoción/plan de release posterior.
 - **Cierre M22:** checkpoints 1–9 están completos. Review 177 ciclo 3 verifica
   el clon anónimo, historial/contenido saneado, mapa, recuperación, controles
-  GitHub, aislamiento npm y matriz completa sin hallazgos. El residual de
-  metadata/OIDC/provenance requiere una promoción y plan de release futuros.
+  GitHub, aislamiento npm y matriz completa sin hallazgos. PRs protegidas
+  #9–#11 publicaron, promovieron y reconciliaron el registro exacto; todos sus
+  CI pasaron, los árboles finales son idénticos y `main` es ancestro de
+  `develop`. El residual de metadata/OIDC/provenance requiere una promoción y
+  plan de release futuros.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -945,9 +948,9 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** PLAN-024 y checkpoints 1–9 están completados
-   localmente tras review 177 ciclo 3. El registro final debe recorrer aún el
-   flujo protegido `develop`/`main` y reconciliarse; npm metadata/OIDC/
+1. **M22 repository delivery:** PLAN-024 y checkpoints 1–9 están canónicamente
+   completados tras review 177 ciclo 3 y PRs protegidas #9–#11. El siguiente
+   milestone debe seleccionarse/promoverse explícitamente; npm metadata/OIDC/
    provenance y el backup privado permanecen gated.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
