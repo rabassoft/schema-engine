@@ -426,7 +426,7 @@ separado antes de repetir la revisión.
   ocho consumidores registrales y toda la documentación con cero hallazgos.
   M21 queda Public + Experimental + Active sin autorizar otra acción externa.
 
-### M22 — Repositorio público y releases seguras — checkpoint 9 pendiente
+### M22 — Repositorio público y preparación de releases seguras — completado
 
 - Ricard seleccionó D-043 como siguiente milestone el 21 de julio de 2026.
 - [Review 165](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
@@ -488,16 +488,23 @@ separado antes de repetir la revisión.
   commit a `main@bed5dfd`, reconciliación en `develop@c9b60f9`, árboles idénticos
   y todos los CI correctos. Checkpoint 8 queda completo; checkpoint 9 no ha
   empezado y exige autorización independiente.
+- Checkpoint 9 repite desde un clon anónimo todos los scans, mapa/historial,
+  acceso público, controles GitHub, aislamiento npm y la matriz completa.
+  Review 177 ciclo 1 corrige el onboarding privado obsoleto y la resolución de
+  parches Angular publicados de forma escalonada; ciclo 2 corrige la invocación
+  final y el selector E2E posicional; ciclo 3 repite la revisión completa sin
+  hallazgos y completa PLAN-024/M22.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** obtener autorización explícita para iniciar checkpoint 9 y
-   repetir la revisión pública final completa desde clones anónimos y APIs
-   read-only.
-2. **External gates:** el cierre M21 no autoriza GitHub Release, tag Git,
-   provenance ni cambios de settings.
+1. **Next action:** publicar el registro final revisado mediante rama corta y
+   PR protegido a `develop`; tras su CI, promover a `main` y reconciliar su
+   ancestry en `develop`, cada mutación bajo autorización Git explícita.
+2. **External gates:** M22 no autoriza metadata de paquetes, trusted publishing
+   npm, provenance, GitHub Release, tag Git ni eliminación del backup privado.
 3. **Later candidates:** React, Vue and all other capabilities remain
-   demand-driven; M22 does not imply D-033 or functional work.
+   demand-driven; after canonical M22 publication, select the next milestone
+   explicitly. M22 does not imply D-033 or functional work.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

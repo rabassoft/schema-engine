@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { workspaceRoot } from './release-candidate-utils.mjs';
 
 const VERSION_PATTERN = /^0\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/u;
+const ANGULAR_22_VERSION_PATTERN = /^22\.(\d+)\.(\d+)$/u;
 
 function deepFreeze(value) {
   if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -364,6 +365,40 @@ export function releaseFrozenConsumerTuple(descriptor, mode, tupleSource) {
     );
   }
   return tupleSource === 'frozen' ? descriptor.consumerTuples[mode] : undefined;
+}
+
+export function highestCommonAngular22Version(manifests, minimum) {
+  const parsedMinimum = ANGULAR_22_VERSION_PATTERN.exec(minimum);
+  assert.ok(parsedMinimum, 'Invalid minimum Angular 22 version');
+  const minimumTuple = [Number(parsedMinimum[1]), Number(parsedMinimum[2])];
+  const entries = Object.entries(manifests);
+  assert.ok(entries.length > 0, 'Angular package metadata is required');
+
+  const candidates = Object.keys(entries[0][1].versions ?? {})
+    .flatMap((version) => {
+      const parsed = ANGULAR_22_VERSION_PATTERN.exec(version);
+      return parsed
+        ? [{ version, tuple: [Number(parsed[1]), Number(parsed[2])] }]
+        : [];
+    })
+    .filter(
+      ({ tuple }) =>
+        tuple[0] > minimumTuple[0] ||
+        (tuple[0] === minimumTuple[0] && tuple[1] >= minimumTuple[1]),
+    )
+    .sort(
+      (left, right) =>
+        right.tuple[0] - left.tuple[0] || right.tuple[1] - left.tuple[1],
+    );
+
+  const selected = candidates.find(({ version }) =>
+    entries.every(([, manifest]) => {
+      const candidate = manifest.versions?.[version];
+      return candidate !== undefined && candidate.deprecated === undefined;
+    }),
+  );
+  assert.ok(selected, 'No coherent non-deprecated Angular 22 tuple');
+  return selected.version;
 }
 
 export function loadM19ReleaseTarget(args = process.argv.slice(2)) {

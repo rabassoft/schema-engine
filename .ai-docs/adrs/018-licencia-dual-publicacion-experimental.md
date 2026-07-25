@@ -33,8 +33,9 @@
   Experimental `0.3.0` release, M21 coordinated M20 delivery and M22 public
   repository design
 - **Implementation:** M13 completed by PLAN-013 revision 4, M19 by PLAN-021
-  revision 0 after final review 132 cycle 4, and M21 by PLAN-023 revision 0
-  after final review 164 cycle 3; no later external action is authorized
+  revision 0 after final review 132 cycle 4, M21 by PLAN-023 revision 0 after
+  final review 164 cycle 3 and the M22 repository slice by completed PLAN-024
+  after review 177 cycle 3; no later release action is authorized
 - **Previous complete review:**
   [`review 028`](../reviews/028-adr-018-review.md) cycle 8 passed the complete
   revision 3 review with zero findings; accepted by Ricard
@@ -95,9 +96,10 @@ It does not authorize a plan, manifest, candidate, Git or registry action.
 M21 is now complete. Review 165 subsequently promoted D-043 for M22 design and
 Ricard selected preservation of sanitized reachable history with public
 `.ai-docs`. Revision 6 coordinates this licensing/source decision with ADR-026.
-PLAN-024 checkpoint 7 has now made the sanitized repository public; GitHub
-controls and secure-release preparation remain separately gated. No package
-version or release is selected.
+Completed PLAN-024 has now made the sanitized repository public and verified
+its GitHub controls plus fail-closed secure-release preparation. Package
+metadata, trusted publishing, provenance and any later release remain
+separately gated. No package version or release is selected.
 
 ## 2. Decision
 

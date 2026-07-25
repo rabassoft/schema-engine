@@ -16,6 +16,7 @@ import {
 } from './release-candidate-utils.mjs';
 import {
   argumentValue,
+  highestCommonAngular22Version,
   loadCoordinatedReleaseTarget,
   M19_RELEASE_DESCRIPTOR,
   releaseFrozenConsumerTuple,
@@ -117,8 +118,8 @@ async function highestAngular22(name, minimum) {
 async function resolveTuple() {
   const frozen = releaseFrozenConsumerTuple(descriptor, MODE, TUPLE_SOURCE);
   if (frozen !== undefined) return frozen;
-  const core = await highestAngular22('@angular/core', '22.0.6');
-  for (const name of [
+  const angularNames = [
+    '@angular/core',
     '@angular/build',
     '@angular/cli',
     '@angular/common',
@@ -126,18 +127,13 @@ async function resolveTuple() {
     '@angular/compiler-cli',
     '@angular/forms',
     '@angular/platform-browser',
-  ]) {
-    const candidate = await metadata(name);
-    assert.ok(
-      candidate.versions[core.version],
-      `${name}@${core.version} missing`,
-    );
-    assert.equal(
-      candidate.versions[core.version].deprecated,
-      undefined,
-      `${name}@${core.version} is deprecated`,
-    );
-  }
+  ];
+  const angularManifests = Object.fromEntries(
+    await Promise.all(
+      angularNames.map(async (name) => [name, await metadata(name)]),
+    ),
+  );
+  const angular = highestCommonAngular22Version(angularManifests, '22.0.6');
   const aria = await highestAngular22('@angular/aria', '22.0.5');
   const ariaManifest = aria.metadata.versions[aria.version];
   const cdk = ariaManifest.peerDependencies?.['@angular/cdk'];
@@ -145,7 +141,7 @@ async function resolveTuple() {
   const cdkMetadata = await metadata('@angular/cdk');
   assert.ok(cdkMetadata.versions[cdk], `CDK peer ${cdk} is unavailable`);
   assert.equal(cdkMetadata.versions[cdk].deprecated, undefined);
-  return { angular: core.version, aria: aria.version, cdk };
+  return { angular, aria: aria.version, cdk };
 }
 
 function installedVersion(directory, name) {

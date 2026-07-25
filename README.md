@@ -14,9 +14,9 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
   [contribution policy](./CONTRIBUTING.md) and
   [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-The repository contains the completed M1-M21 controlled-form ecosystem and
-verified public Experimental packages. It remains private while approved
-PLAN-024 prepares its sanitized public history and governance. Its G0 review passed;
+The repository contains the completed M1-M22 controlled-form ecosystem,
+verified public Experimental packages and the sanitized public history,
+governance and protected controls completed by PLAN-024. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
 v0.1.1, SPEC-006 v0.1.1 and SPEC-007 v0.1.0 are Accepted. SPEC-007 defines the
 private M17 reusable synchronous Ajv-validator contract. The source checkout implements the M14 contract
@@ -179,7 +179,7 @@ offered.
 
 The sanitized source repository is public at
 [`rabassoft/schema-engine`](https://github.com/rabassoft/schema-engine). PLAN-024
-still gates its GitHub controls and secure-release preparation independently.
+has completed its GitHub controls and fail-closed secure-release preparation.
 Each package carries its preferred TypeScript source, frozen build harness,
 license and notices so its existing release can be rebuilt independently.
 Existing M19/M21 versions do not claim repository-backed npm provenance; a
