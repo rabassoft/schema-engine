@@ -7,6 +7,7 @@ import {
   assertM19ReleaseDescriptor,
   assertM21ReleaseDescriptor,
   assertReleaseCandidateEvidence,
+  highestCommonAngular22Version,
   loadCoordinatedReleaseTarget,
   m19FrozenConsumerTuple,
   m19PackageSpecifier,
@@ -301,6 +302,21 @@ test('separates frozen checkpoint tuples from registry-backed live resolution', 
   assert.throws(() =>
     m19FrozenConsumerTuple(M19_RELEASE_DESCRIPTOR, 'latest', undefined),
   );
+});
+
+test('selects the highest coherent Angular patch during staggered publication', () => {
+  const manifests = {
+    core: { versions: { '22.0.7': {}, '22.0.8': {} } },
+    build: { versions: { '22.0.7': {} } },
+    forms: {
+      versions: {
+        '22.0.7': {},
+        '22.0.8': { deprecated: 'withdrawn fixture' },
+      },
+    },
+  };
+  assert.equal(highestCommonAngular22Version(manifests, '22.0.6'), '22.0.7');
+  assert.throws(() => highestCommonAngular22Version(manifests, '22.0.8'));
 });
 
 test('defines M21 specifiers and frozen tuples independently from M19', () => {

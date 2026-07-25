@@ -23,6 +23,12 @@ const publishableManifestPaths = M21_RELEASE_DESCRIPTOR.packages.map(
 const m21ReleaseNotePath = '.ai-docs/releases/0.4.0.md';
 const staleCurrentClaims = [
   {
+    path: 'README.md',
+    pattern:
+      /It remains private while approved\s+PLAN-024 prepares its sanitized public history and governance/i,
+    description: 'pre-completion M22 private repository onboarding state',
+  },
+  {
     path: '.ai-docs/releases/0.1.0.md',
     pattern: /completed M1[–-]M9 and G0 plus PLAN-010 checkpoints\s+1[–-]6/i,
     description: 'pre-completion M10 release scope',

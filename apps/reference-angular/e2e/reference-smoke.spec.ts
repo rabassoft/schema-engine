@@ -526,7 +526,9 @@ test('covers nested, collection and nullable keyboard interaction with accessibl
     'recursive-local-presentation',
     'Recursive local presentation',
   );
-  const beta = page.locator('[data-schema-item-key]').nth(1);
+  const beta = page.locator(
+    '[data-schema-item-key=\'["item",["rows"],"beta"]\']',
+  );
   await beta.getByRole('tab', { name: 'Details' }).click();
   await beta.getByRole('button', { name: 'State' }).click();
   await beta.locator('[id$="--move-earlier"]').click();

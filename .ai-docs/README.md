@@ -50,6 +50,12 @@
 
 ## Acceptance reviews
 
+- [PLAN-024 final public-repository closure](./reviews/177-plan-024-final-review.md)
+  — Cycle 1 corrected stale public onboarding, staggered Angular patch
+  resolution and audit preconditions; cycle 2 corrected the closing invocation
+  and positional reorder E2E selector; cycle 3 repeated the complete anonymous
+  history/content, GitHub-control, npm-isolation and workspace/browser matrix
+  with zero unresolved findings, completing PLAN-024/M22.
 - [PLAN-024 checkpoint 8 settings preflight](./reviews/176-plan-024-checkpoint-8-preflight-review.md)
   — Cycle 1 observed exact refs/checks and every current GitHub control; cycle 2
   verified active ruleset `19534784`; cycle 3 verified the public/local operator
@@ -58,7 +64,7 @@
   findings; cycle 6 verified private reporting; cycle 7 verified the complete
   settings boundary; cycle 8 verified the local matrix; cycle 9 verified
   protected publication into `develop`; cycles 10–11 verified state closure,
-  promotion and reconciliation. Checkpoint 9 remains gated.
+  promotion and reconciliation, completing checkpoint 8.
 - [PLAN-024 checkpoint 7 public verification](./reviews/175-plan-024-checkpoint-7-public-review.md)
   — Cycle 1 reconciled current public-state documentation; cycle 2 clarified the
   retained local-stash audit domain; cycle 3 isolated the ignored browser cache;
@@ -552,9 +558,9 @@
 
 - [ADR index](./adrs/000-index.md)
 - [ADR-026: Sanitized public history and secure release automation](./adrs/026-public-repository-and-secure-releases.md)
-  — Accepted revision 0 with ADR-018 revision 6 after review 166 cycle 3;
-  checkpoints 1–8 are complete after review 176 cycle 11; checkpoint 9 remains
-  separately gated.
+  — Accepted revision 0 with ADR-018 revision 6; completed PLAN-024 passes its
+  corrected final closure after review 177 cycle 3. Future package metadata,
+  OIDC/provenance and backup deletion remain separately gated.
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
   — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
   normative contract; SPEC-004 v0.1.1 and completed PLAN-011 implement that
@@ -637,7 +643,7 @@
 - [PLAN-021: Coordinated Experimental 0.3 release and Angular Aria pilot](./plans/021-coordinated-experimental-0-3-release.md) — Completed revision 0 after final review 132 cycle 4 repeated the complete release matrix and all 22 SPEC-008 rows with zero findings
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
-- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Approved revision 0; checkpoints 1–8 are complete after review 176 cycle 11 and checkpoint 9 remains separately gated
+- [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Completed revision 0 after review 177 cycle 3 repeated the corrected final closure with zero unresolved findings
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -651,8 +657,9 @@ Accepted publication architecture:
 [ADR-018 revision 6](./adrs/018-licencia-dual-publicacion-experimental.md)
 and [ADR-026](./adrs/026-public-repository-and-secure-releases.md) preserve dual
 AGPL/commercial licensing and select a sanitized public-history transition.
-The sanitized repository is public after PLAN-024 checkpoint 7's independently
-gated transition. GitHub controls and secure-release preparation remain gated.
+The sanitized repository is public and PLAN-024/M22 completed its governance,
+GitHub controls and fail-closed secure-release preparation after review 177.
+Future package metadata and OIDC/provenance release activation remain gated.
 Completed PLAN-013 published and verified core and Angular `0.1.0` without
 promoting Stable APIs.
 

@@ -780,12 +780,11 @@ Cada decisión debe registrar:
 
 ## D-043: Publicación del repositorio y automatización segura de releases
 
-- **Estado:** Promoted; ADR-026 revision 0 and coordinated ADR-018 revision 6
-  are Accepted after review 166 cycle 3; PLAN-024 revision 0 is Approved,
-  checkpoints 1–7 are complete after review 175 cycle 6; checkpoint 8 settings
-  passed review 176 cycle 7 and protected `develop` publication passed cycle 9;
-  closure, promotion and reconciliation passed cycle 11; checkpoint 9 remains
-  separately gated
+- **Estado:** Partially implemented; ADR-026 revision 0 and coordinated ADR-018
+  revision 6 are Accepted. Completed PLAN-024/review 177 cycle 3 deliver the promoted
+  M22 repository sanitization, publication, governance, protected controls and
+  fail-closed workflow preparation. Package metadata, npm trusted-publisher
+  activation, provenance release and backup deletion remain Deferred
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -810,16 +809,15 @@ Cada decisión debe registrar:
   saneamiento y publicar `.ai-docs` solo después de su clasificación y
   saneamiento completos. Publicar el repositorio actual tal cual queda
   rechazado.
-- **Plan activo:** PLAN-024 separa política/tooling local, adquisición de
+- **Plan completado:** PLAN-024 separó política/tooling local, adquisición de
   herramientas, commit/push privado, mirror/auditoría, candidato saneado,
   sustitución de refs/adopción local, visibilidad y settings. Metadata de
   paquetes, npm trusted publishing y la primera release con provenance requieren
   una promoción/plan de release posterior.
-- **Checkpoint actual:** checkpoint 6 está completado. Review 174 corrigió el
-  conflicto ADR antes de visibilidad. Checkpoint 7 cambió únicamente la
-  visibilidad a pública; review 175 ciclo 4 verifica acceso anónimo, linaje,
-  políticas, npm aislado y matriz completa sin hallazgos. Su commit de cierre
-  continúa gated; settings/npm permanecen fuera de esta transición.
+- **Cierre M22:** checkpoints 1–9 están completos. Review 177 ciclo 3 verifica
+  el clon anónimo, historial/contenido saneado, mapa, recuperación, controles
+  GitHub, aislamiento npm y matriz completa sin hallazgos. El residual de
+  metadata/OIDC/provenance requiere una promoción y plan de release futuros.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -947,10 +945,10 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** PLAN-024 checkpoints 1–7 están completos.
-   Checkpoint 8 settings pasan review 176 ciclo 7 y `develop` publication pasa
-   ciclo 9; cierre/promoción/reconciliación pasan ciclo 11. La siguiente acción
-   es autorizar checkpoint 9. npm permanece gated.
+1. **M22 repository delivery:** PLAN-024 y checkpoints 1–9 están completados
+   localmente tras review 177 ciclo 3. El registro final debe recorrer aún el
+   flujo protegido `develop`/`main` y reconciliarse; npm metadata/OIDC/
+   provenance y el backup privado permanecen gated.
 2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.

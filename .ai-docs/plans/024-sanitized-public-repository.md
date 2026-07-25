@@ -1,6 +1,6 @@
 # PLAN-024: Sanitized public repository and secure-release preparation
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-21
 - **Approval date:** 2026-07-21
 - **Revision:** 0 — initial M22 delivery plan
@@ -21,8 +21,9 @@
 - **Implementation:** Checkpoints 1–7 completed after reviews 168–175; review
   175 cycle 6 verified the corrective public closure with zero findings.
   Checkpoint 8 settings passed review 176 cycle 7 and protected publication into
-  `develop`, promotion to `main` and reconciliation passed review 176 cycle 11;
-  checkpoint 9 remains separately gated
+  `develop`, promotion to `main` and reconciliation passed review 176 cycle 11.
+  Checkpoint 9's corrected complete closure passed review 177 cycle 3 with zero
+  unresolved findings
 
 ## 1. Goal and hard boundary
 
@@ -705,3 +706,21 @@ closure, merge-commit promotion to `main@bed5dfd`, ancestry reconciliation into
 `develop@c9b60f9` and every required/post-merge CI with zero findings. Both refs
 have identical trees and `main` is an ancestor of `develop`. Checkpoint 8 is
 complete; checkpoint 9 remains unstarted and separately gated.
+
+### 15.10 Implementation checkpoint 9 final closure
+
+Ricard authorized the external read-only final review on 22 July 2026. A fresh
+anonymous clone and unauthenticated APIs repeated the full public history,
+content, secret, rights, mapping, branch, policy and link audit. Authenticated
+read-only APIs verified CI, ruleset, Actions, environment, stored-credential
+absence, security/community and merge controls without mutation.
+
+Review 177 cycle 1 corrected stale root onboarding, made registry-backed Angular
+resolution robust to staggered patch publication and fixed two audit invocation
+preconditions. Cycle 2 corrected the final command alias and the positional
+Angular reorder E2E selector. Cycle 3 repeated the complete workspace, package,
+source, reference, Chromium, npm immutability/isolation, documentation and diff
+matrix with zero unresolved findings. PLAN-024/M22 are complete when this exact
+record is published through the required protected flow; package metadata,
+trusted publishing, provenance, release work and private-backup deletion remain
+gated.
