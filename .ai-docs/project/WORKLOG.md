@@ -6,6 +6,33 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-22 — PLAN-024 checkpoint 9 and M22 completed locally
+
+### Completed
+
+- Repeated the final public-repository closure from a fresh anonymous clone and
+  read-only APIs: sanitized history/content, Gitleaks, mapping, public access,
+  GitHub controls, npm isolation and the complete verification matrix pass.
+- Corrected live Angular tuple discovery to select the highest stable patch
+  published coherently across all required Angular packages; added regression
+  coverage for the observed staggered `22.0.8`/`22.0.7` publication.
+- Reverified immutable M19 exact packages and all M21 exact/`next`/`latest`/
+  unqualified consumers without npm or GitHub mutation. Stabilized the Angular
+  reorder E2E on Beta's exact normalized identity after the closing matrix
+  exposed its positional selector. Review 177 cycle 3 passes the corrected
+  complete boundary with zero unresolved findings.
+- Marked PLAN-024/M22 Completed with no active implementation task. The private
+  recovery bundle and stash remain retained outside public refs; deletion and
+  future package metadata/OIDC/provenance work remain separately gated.
+
+### Next
+
+- Publish this exact reviewed closure through the protected branch/PR flow to
+  `develop`, promote it to `main` and reconcile `main` ancestry back into
+  `develop`, each under its required explicit Git authorization.
+- After protected publication, select and promote the next milestone or
+  Deferred decision explicitly.
+
 ## 2026-07-22 — PLAN-024 checkpoint 8 completed
 
 ### Completed

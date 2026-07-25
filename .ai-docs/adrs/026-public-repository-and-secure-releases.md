@@ -16,11 +16,10 @@
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
 - **Milestone:** M22 repository sanitization/publication and secure-release
   preparation
-- **Implementation:** PLAN-024 revision 0 is Approved; checkpoints 1–7 are
-  complete after reviews 168–175, with checkpoint 7's corrective public closure
-  verified by review 175 cycle 6; checkpoint 8 settings passed review 176 cycle
-  7 and protected publication/promotion/reconciliation passed cycle 11;
-  checkpoint 9 remains separately gated
+- **Implementation:** Completed by PLAN-024 revision 0 after review 177 cycle 3
+  repeated the corrected complete final closure with zero unresolved findings;
+  future package metadata/OIDC release activation and backup deletion remain
+  separately gated
 
 ## 1. Context
 
