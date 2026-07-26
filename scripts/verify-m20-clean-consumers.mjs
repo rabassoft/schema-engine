@@ -16,7 +16,7 @@ import {
 } from './release-candidate-utils.mjs';
 import {
   argumentValue,
-  loadCoordinatedReleaseTarget,
+  loadReleaseDescriptor,
   releasePackageSpecifier,
 } from './release-target.mjs';
 
@@ -24,7 +24,7 @@ const mode = process.argv.find((argument) => argument.startsWith('--mode='));
 assert.ok(mode, 'Pass exactly --mode=lower or --mode=latest');
 const MODE = mode.slice('--mode='.length);
 assert.ok(['lower', 'latest'].includes(MODE), 'Unsupported M20 consumer mode');
-const { descriptor } = loadCoordinatedReleaseTarget();
+const descriptor = loadReleaseDescriptor();
 const PACKAGE_MODE = argumentValue(process.argv, 'package-mode') ?? 'candidate';
 assert.ok(
   descriptor.consumerModes.includes(PACKAGE_MODE),

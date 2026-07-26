@@ -9,6 +9,9 @@ const target = loadCoordinatedReleaseTarget(args);
 const findings = evaluateNpmPublishReadiness({
   ...target,
   sourceCommit: argumentValue(args, 'source-commit'),
+  githubSha: process.env.GITHUB_SHA,
+  githubRef: process.env.GITHUB_REF,
+  environment: process.env,
 });
 
 if (findings.length > 0) {

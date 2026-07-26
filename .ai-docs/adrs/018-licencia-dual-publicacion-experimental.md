@@ -3,12 +3,12 @@
 - **Status:** Accepted
 - **Date:** 15 July 2026
 - **Revision 3 acceptance date:** 15 July 2026
-- **Revision date:** 21 July 2026
 - **Revision 4 acceptance date:** 19 July 2026
 - **Revision 5 acceptance date:** 20 July 2026
 - **Revision 6 acceptance date:** 21 July 2026
-- **Revision:** 6 — sanitized public repository transition coordinated with
-  ADR-026
+- **Revision 7 acceptance date:** 25 July 2026
+- **Revision date:** 25 July 2026
+- **Revision:** 7 — M23 stage-only provenance PATCH coordinated with ADR-026
 - **Promotion review:**
   [`review 027`](../reviews/027-d034-d040-publication-licensing-readiness.md)
   cycle 2 passed with zero findings; M19
@@ -17,6 +17,8 @@
   [`review 146`](../reviews/146-m21-coordinated-m20-release-promotion-readiness.md)
   cycle 3 passed all fourteen areas with zero findings; M22
   [`review 165`](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
+  cycle 2 passed with zero findings and Ricard selected option A; M23
+  [`review 178`](../reviews/178-d043-m23-trusted-publication-promotion-readiness.md)
   cycle 2 passed with zero findings and Ricard selected option A
 - **Related:** [`ADR-009`](./009-politica-api-publica-estabilidad.md),
   [`ADR-010`](./010-versionado-semver-compatibilidad.md),
@@ -28,10 +30,10 @@
   and
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
 - **Repository architecture:**
-  [`ADR-026`](./026-public-repository-and-secure-releases.md)
+  accepted [`ADR-026 revision 1`](./026-public-repository-and-secure-releases.md)
 - **Milestones:** M13 first public Experimental release, M19 coordinated
   Experimental `0.3.0` release, M21 coordinated M20 delivery and M22 public
-  repository design
+  repository design, plus M23 first stage-only provenance PATCH
 - **Implementation:** M13 completed by PLAN-013 revision 4, M19 by PLAN-021
   revision 0 after final review 132 cycle 4, M21 by PLAN-023 revision 0 after
   final review 164 cycle 3 and the M22 repository slice by completed PLAN-024
@@ -49,6 +51,10 @@
   [`review 166`](../reviews/166-adr-026-adr-018-revision-6-review.md) cycle 3
   passed all fourteen areas with zero findings; accepted under the authorized
   review rule
+- **Revision 7 review:**
+  [`review 179`](../reviews/179-adr-026-revision-1-adr-018-revision-7-review.md)
+  cycle 2 passed all sixteen areas with zero findings; accepted under the
+  standing zero-finding review rule
 
 ## 1. Context
 
@@ -97,9 +103,16 @@ M21 is now complete. Review 165 subsequently promoted D-043 for M22 design and
 Ricard selected preservation of sanitized reachable history with public
 `.ai-docs`. Revision 6 coordinates this licensing/source decision with ADR-026.
 Completed PLAN-024 has now made the sanitized repository public and verified
-its GitHub controls plus fail-closed secure-release preparation. Package
-metadata, trusted publishing, provenance and any later release remain
-separately gated. No package version or release is selected.
+its GitHub controls plus fail-closed secure-release preparation. At that M22
+closure, package metadata, trusted publishing, provenance and every later
+release remained separately gated; no version had been selected.
+
+Review 178 subsequently compared direct OIDC publication, stage-only trusted
+publication and deferral. Ricard selected option A. Revision 7 therefore adds
+only the exact metadata/security PATCH line, preserved peer floors, stage and
+2FA approval sequence, provenance verification, aliases and immutable recovery
+for M23. It does not authorize PLAN-025, manifests, workflow changes, Git,
+GitHub or npm actions.
 
 ## 2. Decision
 
@@ -150,7 +163,8 @@ telemetry, feature distinction or network call is introduced.
 The GitHub repository remained private until PLAN-024 implemented and verified
 ADR-026's complete reachable-history sanitization, public-content policy and
 explicit visibility gate. Checkpoint 7 has now made that sanitized lineage
-public; branch/governance controls remain independently gated.
+public; completed checkpoints 8–9 subsequently verified protected branch,
+governance and release-preparation controls.
 
 Because a private repository is not a public source offer, every public binary
 package must provide the preferred TypeScript form and all scripts/configuration
@@ -221,6 +235,20 @@ properties remain unchanged. Angular core/forms stay
 `>=22.0.6 <23.0.0`; Angular Aria/CDK stay `>=22.0.5 <23.0.0` with their exact
 patch-alignment rule.
 
+The exact proposed M23 line is:
+
+| Package                                 | Version | Preserved Schema Engine peer floor |
+| --------------------------------------- | ------- | ---------------------------------- |
+| `@rabassoft/schema-engine`              | `0.4.1` | none                               |
+| `@rabassoft/schema-engine-angular`      | `0.4.1` | core `^0.4.0`                      |
+| `@rabassoft/schema-engine-angular-aria` | `0.2.1` | base Angular `^0.4.0`              |
+
+M23 changes only truthful repository metadata and release security. PATCH is
+valid under ADR-010 because no intentional incompatibility, API, behavior,
+dependency or framework-range change is introduced. Explicit
+`workspace:^0.4.0` source peers preserve the accepted packed floors instead of
+narrowing them to `^0.4.1`.
+
 ### 2.5 Ownership and contributions
 
 Commercial relicensing requires sufficient rights over all included code.
@@ -248,22 +276,23 @@ Before every publication, the plan must verify:
    packed metadata; every observed tag must resolve to inspected bytes and
    documentation must not present it as Stable;
 5. no trusted publisher or public repository metadata in existing immutable
-   releases; ADR-026 and PLAN-024 govern repository preparation, while a later
-   release plan governs future package metadata and the first OIDC/provenance
-   publication;
+   releases; ADR-026 and PLAN-024 govern repository preparation, while M23 and
+   a later approved PLAN-025 govern new package metadata and the first
+   OIDC/provenance publication;
 6. license, notices, Corresponding Source and complete tarball inventories;
 7. the frozen install, full test/build/package matrix and clean consumers; and
 8. a final human approval checkpoint immediately before each external mutation.
 
-No ADR or plan approval itself authorizes `npm publish`, Git tags, GitHub
-releases, repository visibility changes or credential operations. Those
-actions require the final explicit checkpoint described by the plan.
+No ADR or plan approval itself authorizes `npm publish`, `npm stage publish`,
+stage approval/rejection, dist-tags, Git tags, GitHub releases, repository
+visibility changes or credential operations. Those actions require the final
+explicit checkpoint described by the plan.
 
 npm provenance was not claimed while the repository was private: npm requires a
 public repository matching `package.json#repository`. Existing immutable
 releases retain that truthful limitation. Now that the sanitized repository is
-public, provenance and matching metadata remain a required future release gate;
-the project must not publish a misleading or unverifiable provenance URL.
+public, M23 makes provenance and matching metadata a required release gate; the
+project must not publish a misleading or unverifiable provenance URL.
 
 npm trusted publishing also requires `package.json#repository` to match the
 GitHub repository. Advertising that inaccessible private URL would contradict
@@ -271,13 +300,11 @@ the accepted package metadata boundary. M13 and later manual releases therefore
 use verified interactive 2FA and no long-lived credential in the repository.
 They do not prepare a non-functional workflow or change npm package settings.
 
-ADR-026 now fixes full-history sanitization, public repository content,
-contribution/security/community boundaries, a GitHub-hosted least-privilege
-OIDC workflow, protected human approval, traditional-token transition and
-truthful provenance. Until that architecture is implemented and a future
-release plan proves trusted publishing, every registry write still requires a
-separately accepted release plan and immediate human approval; no completed
-release authorizes the next one.
+ADR-026 revision 1 fixes full-history sanitization, public repository content,
+contribution/security/community boundaries and the M23 GitHub-hosted,
+least-privilege, stage-only OIDC workflow. Until PLAN-025 proves trusted
+publication, every registry write still requires a separately accepted plan
+and immediate human approval; no completed release authorizes the next one.
 
 ### 2.7 M19 publication and tag sequence
 
@@ -358,7 +385,32 @@ immediate human approval. Post-write read-only verification must confirm exact
 bytes/integrity/signature, tags, peers, source/license, absent repository/
 provenance and no unrelated registry drift before any next mutation.
 
-### 2.9 Partial failure and immutable recovery
+### 2.9 M23 stage, approval and tag sequence
+
+M23 uses one protected workflow to stage the exact three candidates under
+`next` in dependency order: core `0.4.1`, base Angular `0.4.1`, then pilot
+`0.2.1`. Each npm trust relation binds `rabassoft/schema-engine`,
+`npm-publish.yml` and environment `npm-publish`, and permits only
+`npm stage publish`.
+
+Staging does not make a version public. Every staged tarball is downloaded and
+compared with the selected candidate before Ricard separately authorizes its
+2FA approval. Approvals remain dependency-first, with exact bytes, metadata,
+signature, provenance and live consumers verified after each approval before
+the next dependent may become public.
+
+Once all three exact and `next` lines pass, move `latest` deepest-dependent
+first: pilot `0.2.1`, base Angular `0.4.1`, then core `0.4.1`. OIDC does not
+authorize dist-tags. Each alias mutation is interactive, separately authorized
+and immediately observed; no accepted consumer evidence comes from either
+mixed window.
+
+Only after exact/`next`/`latest`/unqualified consumers and all three provenance
+attestations pass may a separately authorized checkpoint disallow traditional
+publish tokens. Human 2FA remains required for stage approval, dist-tags and
+recovery.
+
+### 2.10 Partial failure and immutable recovery
 
 Published versions are immutable even when a later M19 step fails:
 
@@ -399,7 +451,24 @@ M21. The next release plan must define the exact stop/resume commands and
 evidence for every M21 checkpoint without embedding credentials, OTPs or
 security-key material.
 
-### 2.10 Commercial agreement
+For M23:
+
+- before staging, stop without registry mutation;
+- after partial staging, preserve valid stages or reject only after explicit
+  approval; never assume a rejected/reserved version may be silently reused;
+- after partial approval, preserve immutable published bytes and resume only
+  after fresh provenance and consumer verification;
+- provenance absence/mismatch stops before dependent approval or alias changes;
+- a bad published package requires deprecation and/or a new PATCH, never
+  overwrite or assumed unpublish; and
+- mixed `latest` recovery uses only a separately authorized corrective tag
+  followed by complete observation.
+
+PLAN-025 must define exact stage identifiers, download/compare evidence,
+approval/rejection, stop/resume and tag recovery without recording OTPs,
+security keys or authentication material.
+
+### 2.11 Commercial agreement
 
 The paid commercial license is a separate contract using Ricardo Rabassó
 Rodríguez's legal identity. Before the first commercial sale, professionally
@@ -443,10 +512,11 @@ real contact and executable agreement.
   recovery checks to every coordinated release that includes it.
 - Three established default aliases require two planned mixed windows before
   the complete M21 chain can resolve unqualified consistently.
-- Trusted publishing and provenance cannot be activated while preserving the
-  current private-repository metadata boundary; ADR-026 selects the later
-  transition, but future releases remain gated until repository preparation and
-  a separate release plan complete.
+- Trusted publishing and provenance required a public repository and remain
+  gated by ADR-026 revision 1 plus an approved release plan even after M22
+  completed repository preparation.
+- Stage-only M23 adds a staged-artifact lifecycle and package-by-package 2FA
+  approval before public availability.
 - Commercial agreements, tax handling and enforcement need professional work
   outside the software implementation.
 
@@ -525,6 +595,18 @@ mixed window to one unresolved adjacent peer.
 Rejected by review-145 option A. M21 exists to deliver the already completed
 M20 contract before new Public surface is accumulated.
 
+### Direct OIDC publication for M23
+
+Rejected after review 178 option A. It would grant `npm publish` when the
+narrower stage-only action preserves OIDC and adds package-by-package 2FA proof
+of presence.
+
+### Defer provenance to the next functional release
+
+Rejected by the M23 selection. It would leave the prepared secure path unproven
+and default installations without repository/provenance metadata while new
+scope accumulates.
+
 ## 5. Out of scope
 
 - Changing runtime behavior, schemas, diagnostics, exports or entry points.
@@ -533,14 +615,13 @@ M20 contract before new Public surface is accumulated.
 - Drafting final paid-license prices or legal clauses without professional
   review.
 - Accepting external code contributions before a rights policy exists.
-- Automating a future release without completed M22 repository preparation and
-  a separately accepted release plan.
-- Preparing package metadata, configuring npm trusted publishing or publishing
-  provenance as part of PLAN-024.
+- Implementing M23 without accepted ADR-026 revision 1, this revision and a
+  separately approved PLAN-025.
 - Publishing, tagging, creating releases or changing remote visibility merely
   because this ADR is accepted.
-- Preparing PLAN-024 before revision 6 and ADR-026 pass a complete coordinated
-  review and are accepted.
+- Manifest/workflow changes, candidate preparation, Git/GitHub/npm settings,
+  staging, approval, dist-tags or token restrictions merely because this
+  revision is accepted.
 - Changing SPEC-009 behavior, exports, support tiers or framework ranges.
 - Publishing Standard/reference applications, another package, another UI kit
   or any functional Deferred capability.
@@ -558,10 +639,8 @@ M20 contract before new Public surface is accumulated.
    explicit and unchanged outside their selected lines.
 5. Contribution rights, third-party code and commercial-contract boundaries
    are explicit.
-6. Registry identity, interactive 2FA, tag, recovery and clean-consumer gates
-   complete without credentials in the repository; future package metadata,
-   trusted publishing and provenance remain gated by ADR-026 implementation
-   and a separate release plan.
+6. Registry identity, stage-only OIDC, interactive 2FA approval, tag, recovery
+   and clean-consumer gates complete without credentials in the repository.
 7. M19 history remains exact; M21 publishes core/base/pilot dependency-first
    under `next`, then moves established pilot/base/core `latest` deepest-
    dependent first with no accepted evidence from mixed windows.
@@ -570,14 +649,18 @@ M20 contract before new Public surface is accumulated.
 9. Partial failure preserves immutable versions and requires explicit
    stop/resume or corrective-tag evidence; it never assumes overwrite,
    unpublish or deletion of an observed default `latest`.
-10. D-043 is active only for M22 repository preparation; all unrelated
-    functional deferred capabilities remain inactive.
+10. D-043 is active for completed M22 and M23's exact three-package
+    metadata/security PATCH only; all unrelated functional capabilities remain
+    inactive.
 11. M21 remains valid without a trusted publisher because no matching public
     repository existed; later automation requires completed M22 preparation and
     a separate release review.
-12. Acceptance authorizes preparation/review of PLAN-024 only, not
-    implementation, manifests, candidates, Git, GitHub/npm changes,
-    publication or tags.
+12. M23 preserves `^0.4.0` peer floors, stages core/base `0.4.1` and pilot
+    `0.2.1` under `next`, approves dependency-first, then moves `latest`
+    pilot/base/core after provenance verification.
+13. Acceptance authorizes preparation/review of PLAN-025 only, not
+    implementation, manifests, candidates, Git, GitHub/npm changes, staging,
+    approval or tags.
 
 ## 7. References
 
@@ -589,4 +672,6 @@ M20 contract before new Public surface is accumulated.
 - [npm dist-tags](https://docs.npmjs.com/cli/commands/npm-dist-tag/)
 - [npm registry package metadata](https://github.com/npm/registry/blob/master/docs/responses/package-metadata.md)
 - [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
+- [npm staged publishing](https://docs.npmjs.com/staged-publishing/)
+- [npm stage CLI](https://docs.npmjs.com/cli/v11/commands/npm-stage/)
 - [npm provenance requirements](https://docs.npmjs.com/generating-provenance-statements/)

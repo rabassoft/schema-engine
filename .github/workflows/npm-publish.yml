@@ -39,7 +39,7 @@ jobs:
           test -z "$(printf '%s' "$REQUESTED_SOURCE" | tr -d '0-9a-f')"
       - name: Activate reviewed package tooling
         run: |
-          npm install --global npm@11.5.1
+          npm install --global npm@11.18.0
           corepack enable
           corepack prepare pnpm@10.28.2 --activate
       - name: Install the frozen workspace without lifecycle scripts
@@ -57,9 +57,13 @@ jobs:
           pnpm test:release:tooling
           pnpm test:public-repository
           pnpm check:public-repository
+          pnpm reference:snippets:check
+          pnpm reference:test:boundaries
+          pnpm reference:test:unit
+          pnpm reference:standard:test:unit
 
-  publish:
-    name: publish
+  stage:
+    name: stage
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -78,7 +82,7 @@ jobs:
           node-version: 22.23.1
       - name: Activate reviewed package tooling
         run: |
-          npm install --global npm@11.5.1
+          npm install --global npm@11.18.0
           corepack enable
           corepack prepare pnpm@10.28.2 --activate
       - name: Install the frozen workspace without lifecycle scripts
@@ -93,8 +97,10 @@ jobs:
           pnpm build
           pnpm test:package
           pnpm test:source
-      - name: Publish the reviewed dependency-first package sequence
+      - name: Prepare deterministic M23 candidates
+        run: node scripts/prepare-public-candidates.mjs --release=m23
+      - name: Stage the reviewed dependency-first tarball sequence
         run: |
-          npm publish packages/core --access public --tag next
-          npm publish packages/angular --access public --tag next
-          npm publish packages/angular-aria --access public --tag next
+          npm stage publish .release/0.4.1/rabassoft-schema-engine-0.4.1.tgz --access public --tag next
+          npm stage publish .release/0.4.1/rabassoft-schema-engine-angular-0.4.1.tgz --access public --tag next
+          npm stage publish .release/0.4.1/rabassoft-schema-engine-angular-aria-0.2.1.tgz --access public --tag next

@@ -1,12 +1,17 @@
 {
   "name": "@rabassoft/schema-engine",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "type": "module",
   "sideEffects": false,
   "license": "AGPL-3.0-only",
   "author": {
     "name": "Ricardo Rabassó Rodríguez, operating as Rabassoft",
     "email": "ricard@rabassoft.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabassoft/schema-engine.git",
+    "directory": "packages/core"
   },
   "files": [
     "dist",
@@ -26,8 +31,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "next",
-    "provenance": false
+    "tag": "next"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

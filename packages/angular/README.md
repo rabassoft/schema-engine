@@ -7,8 +7,9 @@ Engine.
 
 - Public verified Experimental `0.4.0` is available exactly and under both
   `next` and `latest` during coordinated delivery.
-- Source package manifest: `0.4.0`; the public bytes are identical to the clean
-  candidate selected from commit `07755b4c`.
+- Source package manifest: proposed metadata-only `0.4.1`; it is not generated,
+  staged or public. Verified public `0.4.0` remains the installable line and is
+  identical to the clean candidate selected from commit `07755b4c`.
 - Required core `0.4.0` is likewise public and verified under `next`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
@@ -98,10 +99,12 @@ commercial use under its conditions. A separate paid commercial license may be
 available; contact `ricard@rabassoft.com`. No final commercial agreement or
 support SLA is represented by this package.
 
-The development repository is private pending sanitization. Preferred
-TypeScript source and a frozen package-local build harness are included; see
-`SOURCE.md`.
+The sanitized development repository is public at
+`https://github.com/rabassoft/schema-engine`. Preferred TypeScript source and a
+frozen package-local build harness are included; see `SOURCE.md`.
 
-Package metadata has no npm provenance because there is no matching public
-repository. External code contributions and a public issue tracker are not
-currently offered.
+The proposed `0.4.1` source metadata names that repository, but npm provenance
+is not claimed until a later stage-only trusted publication is approved and
+verified. Existing `0.4.0` has no retroactive repository/provenance claim.
+Issues may be used for non-code feedback; external code contributions are not
+currently accepted.

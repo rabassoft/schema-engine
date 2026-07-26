@@ -6,6 +6,184 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-27 — PLAN-025 checkpoint 4 delivery authorized
+
+### In progress
+
+- Ricard authorized the checkpoint-4 short-lived branch, scoped commit, push
+  and protected PR; merge and the clean post-merge rebuild remain separately
+  gated.
+- Created `codex/m23-stage-only-publication` from the exact remote M22 squash
+  `origin/develop@490c67a`.
+- Confirmed that local `acc0d6c` and remote `490c67a` have the same tree, so the
+  M23 branch preserves the reviewed worktree without duplicating the M22
+  closure commit.
+- Reviewed the exact 42-file scope against `origin/develop`; it contains only
+  the accepted M23 documents, manifests, workflow and release tooling.
+- Passed diff/format, 276-document/909-link documentation, workflow/public-tree
+  policy, lint, 39 release tests, 23 public/readiness/workflow tests,
+  metadata-only package comparison, packed-source verification and release
+  security.
+- Committed the exact scope as `38e3e07`, pushed
+  `codex/m23-stage-only-publication` and opened draft PR #13 into protected
+  `develop`.
+- The first push correctly failed closed while GitHub CLI was using
+  `Ricard-Rabasso`; switched the active account to `rabassoft` as prescribed
+  and the authorized push succeeded.
+
+### Next
+
+- Wait for required PR #13 CI to pass, then obtain separate authorization for
+  ready transition and merge before the exact clean `develop` rebuild.
+
+## 2026-07-25 — Isolated M22 closure delivered
+
+### Completed
+
+- Created `codex/m22-canonical-closure` at existing commit `acc0d6c` without
+  switching away from the dirty M23 workspace.
+- Pushed only that branch and opened draft PR #12 into protected `develop`.
+- Verified that the PR contains the six M22 canonical-closure documentation
+  files; no M23 worktree change was staged, committed or pushed.
+- Required CI run `30168309902` passed in 5m10s; Ricard separately authorized
+  ready transition and squash merge.
+- PR #12 merged as `develop@490c67a`; post-merge CI `30168530231` passed in
+  4m52s.
+- Fetched the remote result and verified its tree exactly equals local
+  `acc0d6c`. The M23 worktree remains uncommitted and unchanged.
+
+### Next
+
+- Obtain separate authorization for PLAN-025 checkpoint 4 branch, scoped
+  commit, push and protected PR from `origin/develop@490c67a`.
+
+## 2026-07-25 — PLAN-025 checkpoint 3 completed
+
+### Completed
+
+- Provisioned exact npm `11.18.0` and passed frozen offline installation against
+  the populated global store; the restricted sandbox's implicit local store
+  cannot materialize content and is not canonical project state.
+- Ran the complete workspace, source, package, reference, browser and policy
+  matrix before candidate generation.
+- Generated core/base `0.4.1` and pilot `0.2.1` comparison candidates twice
+  with identical SHA-512 values and `sourceCommit: null`.
+- Generalized historical package/security verifiers for M23 and added an exact
+  metadata-only comparison against selected M21 candidates. Inventories and
+  every non-README/non-manifest byte remain identical.
+- Rebuilt all three packages from Corresponding Source and passed lower/current
+  native/pilot consumers, SPEC-009 behavior, M18 regressions, secrets/rights
+  audit and workspace/neutral credential-free stage dry runs.
+- Review 183 cycle 1 corrected four verifier/environment findings; cycle 2
+  passed all sixteen checkpoint areas with zero unresolved findings.
+- Performed no Git operation, real stage, registry write, GitHub action,
+  approval, publication or provenance claim.
+
+### Next
+
+- Resolve the pre-existing local M22 closure commit `acc0d6c` through a
+  separately authorized protected PR, then begin PLAN-025 checkpoint 4 from
+  reconciled `develop`.
+
+## 2026-07-25 — PLAN-025 checkpoint 2 completed
+
+### Completed
+
+- Prepared exact source-only core/base `0.4.1` and pilot `0.2.1` manifests,
+  package-specific repository metadata, explicit peer floors and unchanged
+  runtime/package contracts.
+- Added truthful M23 release/onboarding state and made documentation checks
+  reject wrong manifests, peers, repository paths and premature live
+  provenance/publication claims.
+- Converted the guarded GitHub workflow to exact npm `11.18.0`, complete verify
+  coverage and deterministic tarball-only `npm stage publish`; direct publish,
+  token fallback, cache and explicit provenance flags fail closed.
+- Review 182 cycle 1 corrected five findings; cycle 2 passed all fourteen areas
+  with zero unresolved findings. Formatting, docs, workflows, focused tests,
+  public-tree policy, lint, package tests and typecheck pass.
+- Generated no candidate and performed no Git/GitHub/npm mutation.
+
+### Next
+
+- After explicit external authorization, provision npm `11.18.0` and the
+  missing pnpm offline-store material, then execute PLAN-025 checkpoint 3.
+
+## 2026-07-25 — PLAN-025 checkpoint 1 completed
+
+### Completed
+
+- Added the frozen M23 package/tool/trust/order contract while preserving
+  immutable M19/M21 descriptors and commands.
+- Extended readiness and workflow policy for exact protected-main runtime
+  identity, stage-only trust, no token fallback, exact tarballs and current
+  manifests/workflow failing closed.
+- Added deterministic future M23 dry-run preparation plus credential-free
+  stage inspection, tarball hash/integrity, provenance/signature and no-drift
+  evidence helpers.
+- Review 181 cycle 1 corrected four policy/evidence/contract findings; cycle 2
+  passed all twelve areas with zero unresolved findings. Focused tests,
+  workflows, formatting, documentation, public-tree and diff checks pass.
+
+### Next
+
+- Implement and completely review PLAN-025 checkpoint 2 without generating
+  candidates or performing Git/external actions.
+
+## 2026-07-25 — PLAN-025 approved; checkpoint 1 started
+
+### Completed
+
+- Review 180 cycle 1 corrected five issues: exact-tarball staging,
+  protected-main candidate selection, separate environment approval, the
+  impossible source-SHA self-reference and missing executable M19/M21 live
+  regressions.
+- Cycle 2 repeated all eighteen areas with zero unresolved findings. PLAN-025
+  revision 0 is Approved under the standing zero-finding rule.
+- Approval authorizes only local checkpoint 1. No manifest, version, lockfile,
+  workflow, candidate, Git, GitHub or npm action was authorized or performed.
+
+### Next
+
+- Implement and completely review PLAN-025 checkpoint 1.
+
+## 2026-07-25 — M23 architecture accepted
+
+### Completed
+
+- Recorded Ricard's review-178 option A selection, promoting only M23 normative
+  design.
+- Drafted ADR-026 revision 1 and ADR-018 revision 7 for exact core/base `0.4.1`
+  and pilot `0.2.1`, preserved `^0.4.0` peer floors, stage-only trust,
+  dependency-first 2FA approvals, provenance and dependent-first aliases.
+- Review 179 cycle 1 corrected four metadata/temporal/gate findings; cycle 2
+  repeated all sixteen areas with zero unresolved findings. Both ADR revisions
+  are Accepted under the standing zero-finding rule.
+- No implementation, manifest, workflow, Git, GitHub or npm action was
+  authorized or performed.
+
+### Next
+
+- Prepare and completely review PLAN-025.
+
+## 2026-07-25 — D-043/M23 trusted-publication readiness reviewed
+
+### Completed
+
+- Compared the current fail-closed npm workflow, three public manifests and
+  accepted ADR-010/018/026 boundaries with current official npm/GitHub/pnpm
+  requirements.
+- Review 178 cycle 2 passes with zero unresolved findings. It recommends
+  option A: core/base `0.4.1` and pilot `0.2.1` as metadata-only PATCH releases,
+  preserving `^0.4.0` peer floors and using a stage-only trusted publisher,
+  package-by-package 2FA approval and automatic provenance.
+- Kept options B (direct OIDC PATCH) and C (defer to a functional release)
+  explicit. No option, version, ADR revision, manifest/workflow change,
+  implementation or external action is promoted.
+
+### Next
+
+- Ricard selects review 178 option A, B or C. Option A is recommended.
+
 ## 2026-07-25 — PLAN-024/M22 protected closure published
 
 ### Completed

@@ -17,7 +17,7 @@ import {
 import {
   argumentValue,
   highestCommonAngular22Version,
-  loadCoordinatedReleaseTarget,
+  loadReleaseDescriptor,
   M19_RELEASE_DESCRIPTOR,
   releaseFrozenConsumerTuple,
   releasePackageSpecifier,
@@ -31,9 +31,7 @@ const MODE = modeArgument.slice('--mode='.length);
 assert.ok(['lower', 'latest'].includes(MODE), 'Unsupported consumer mode');
 const releaseId = argumentValue(process.argv, 'release');
 const descriptor =
-  releaseId === 'm19'
-    ? M19_RELEASE_DESCRIPTOR
-    : loadCoordinatedReleaseTarget().descriptor;
+  releaseId === 'm19' ? M19_RELEASE_DESCRIPTOR : loadReleaseDescriptor();
 const PACKAGE_MODE = argumentValue(process.argv, 'package-mode') ?? 'candidate';
 const TUPLE_SOURCE = argumentValue(process.argv, 'tuple-source');
 const PILOT_TARBALL = argumentValue(process.argv, 'pilot-tarball');

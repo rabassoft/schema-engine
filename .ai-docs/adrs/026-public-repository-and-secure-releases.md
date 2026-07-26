@@ -3,23 +3,31 @@
 - **Status:** Accepted
 - **Date:** 21 July 2026
 - **Acceptance date:** 21 July 2026
-- **Revision:** 0
+- **Revision 1 acceptance date:** 25 July 2026
+- **Revision date:** 25 July 2026
+- **Revision:** 1 — stage-only trusted publication for M23
 - **Promotion review:**
   [`review 165`](../reviews/165-d043-m22-repository-publication-promotion-readiness.md)
   cycle 2 passed with zero findings; Ricard then selected option A
 - **Decision review:**
   [`review 166`](../reviews/166-adr-026-adr-018-revision-6-review.md) cycle 3
-  passed all fourteen areas with zero findings
+  passed all fourteen areas with zero findings for revision 0;
+  [`review 179`](../reviews/179-adr-026-revision-1-adr-018-revision-7-review.md)
+  cycle 2 passed all sixteen areas with zero findings for revision 1
+- **M23 promotion review:**
+  [`review 178`](../reviews/178-d043-m23-trusted-publication-promotion-readiness.md)
+  cycle 2 passed with zero findings; Ricard selected option A
 - **Related:** [`ADR-009`](./009-politica-api-publica-estabilidad.md),
   [`ADR-010`](./010-versionado-semver-compatibilidad.md),
-  [`ADR-018 revision 6`](./018-licencia-dual-publicacion-experimental.md),
+  accepted
+  [`ADR-018 revision 7`](./018-licencia-dual-publicacion-experimental.md),
   [`D-043`](../roadmap/deferred-decisions.md#d-043-publicacion-del-repositorio-y-automatizacion-segura-de-releases)
-- **Milestone:** M22 repository sanitization/publication and secure-release
-  preparation
+- **Milestones:** M22 repository sanitization/publication and secure-release
+  preparation; M23 first stage-only trusted publication
 - **Implementation:** Completed by PLAN-024 revision 0 after review 177 cycle 3
   repeated the corrected complete final closure with zero unresolved findings;
-  future package metadata/OIDC release activation and backup deletion remain
-  separately gated
+  M23 implementation, package metadata/OIDC activation and backup deletion
+  remain separately gated
 
 ## 1. Context
 
@@ -42,6 +50,14 @@ Ricard selected review-165 option A: preserve the existing reachable history
 after sanitization and make `.ai-docs` public after complete classification and
 sanitization. This decision fixes that architecture while retaining separate
 approval for every destructive or external action.
+
+PLAN-024 subsequently completed M22 and made the sanitized repository,
+governance and protected release skeleton canonical. Review 178 rechecked the
+remaining D-043 boundary against current npm/GitHub behavior. Ricard selected
+its option A: a metadata-only three-package PATCH staged through a trusted
+publisher that may run `npm stage publish` but not direct `npm publish`.
+Revision 1 adds only that M23 architecture; it does not authorize
+implementation or any external action.
 
 ## 2. Decision
 
@@ -164,15 +180,15 @@ GitHub Actions is deny-by-default for release authority:
 
 The release workflow is manually dispatched from an exact commit on protected
 `main`, references a protected `npm-publish` environment and rebuilds/verifies
-the selected release descriptor before any publish step. The environment
+the selected release descriptor before any staging step. The environment
 requires authenticated human approval. With one maintainer, self-approval may
 remain possible; disabling self-review is deferred until a second authorized
 reviewer exists.
 
-Workflow approval is not npm OTP authentication. npm account write-protected
-2FA remains enabled, while the publish job authenticates only through the
-short-lived OIDC token. No npm automation token, OTP or long-lived write token
-is stored in GitHub or the repository.
+Workflow approval is not npm 2FA. The staging job authenticates only through
+the short-lived OIDC token; each later stage approval requires Ricard's
+interactive npm 2FA. No npm automation token, OTP or long-lived write token is
+stored in GitHub or the repository.
 
 ### 2.6 Package metadata, trusted publishing and provenance
 
@@ -194,34 +210,71 @@ original metadata and are not described as repository-backed or provenance-
 bearing.
 
 Trusted publishing is configured separately for every npm package, binding the
-exact Rabassoft repository and reviewed workflow filename. Before configuration
-or use, the plan rechecks current official npm/GitHub requirements. As of this
-decision, npm requires a matching `repository.url`, GitHub-hosted execution,
-Node 22.14.0 or later, npm CLI 11.5.1 or later and `id-token: write`. These are
-minimum observed prerequisites, not permanent version pins.
+exact Rabassoft repository, reviewed workflow filename and protected
+`npm-publish` environment. Each trust relation permits only
+`npm stage publish`; direct `npm publish` and a dual publish/stage grant are
+disabled. Before configuration or use, the plan rechecks current official
+npm/GitHub requirements. At revision 1, trusted publishing requires a matching
+`repository.url`, GitHub-hosted execution, Node 22.14.0 or later, npm CLI
+11.5.1 or later and `id-token: write`; staged publishing additionally requires
+npm CLI 11.15.0 or later. These are observed minimums, not permanent pins.
 
 The safe migration order is:
 
 1. publish and verify the sanitized public repository and exact workflow;
 2. prepare a future package version with truthful repository metadata;
-3. configure that package's exact npm trusted publisher;
-4. use a separately approved release plan to publish through OIDC and verify
-   exact bytes, metadata, signature and automatic provenance; and
-5. only after successful trusted publication, disable/revoke traditional
+3. configure that package's exact stage-only npm trusted publisher;
+4. use a separately approved release plan to stage through OIDC;
+5. download and verify each staged artifact before Ricard separately approves
+   it with npm 2FA in dependency order;
+6. verify exact bytes, metadata, signature and automatic provenance after each
+   approval; and
+7. only after the complete trusted release, disable/revoke traditional
    automation tokens according to observed npm controls.
 
-Manual interactive 2FA remains the recovery path until the first successful
-OIDC publication. Token restrictions must not be tightened early enough to
-remove the only proven recovery route. After OIDC succeeds, any traditional
+Manual interactive 2FA remains the stage-approval, dist-tag and recovery path.
+Token restrictions must not be tightened early enough to remove the only proven
+recovery route. After the complete M23 trusted release succeeds, any traditional
 write-token exception requires a separate time-bounded incident decision.
 
 npm trusted publishing generates provenance automatically only when its
 current conditions are satisfied, including public repository and public
 package. The workflow must not add `--provenance=false`, fabricate an
-attestation or claim provenance before registry verification. A future release
-plan, not this ADR, chooses versions, packages, tags and publication order.
+attestation or claim provenance before registry verification.
 
-### 2.7 Fail-closed implementation gates
+### 2.7 M23 stage-only trusted release
+
+M23 selects only these new immutable metadata/security PATCH versions:
+
+| Package                                 | Version | Preserved Schema Engine peer floor |
+| --------------------------------------- | ------- | ---------------------------------- |
+| `@rabassoft/schema-engine`              | `0.4.1` | none                               |
+| `@rabassoft/schema-engine-angular`      | `0.4.1` | core `^0.4.0`                      |
+| `@rabassoft/schema-engine-angular-aria` | `0.2.1` | base Angular `^0.4.0`              |
+
+The packages add their exact public repository URL/directory and remove the
+explicit provenance opt-out. They do not change runtime behavior, exports,
+dependencies, framework ranges or compatibility. Source peers use explicit
+`workspace:^0.4.0` so packing preserves the accepted floors rather than
+narrowing them to the PATCH versions.
+
+One protected workflow may stage the three candidates under `next` in
+dependency order: core, base Angular, pilot. Staging is not public completion.
+Each staged tarball is downloaded and compared with the selected candidate
+before a separately authorized 2FA approval. Approvals and live verification
+remain dependency-first.
+
+After all three exact/`next` packages and provenance attestations pass,
+`latest` moves deepest-dependent first: pilot, base Angular, core. OIDC does not
+authorize dist-tags; every alias mutation is interactive, separately authorized
+and immediately verified. No coordinated evidence is accepted from a mixed
+window.
+
+Token publishing is restricted only after the complete exact/`next`/`latest`/
+unqualified and provenance matrix succeeds. The private recovery bundle is
+unrelated and remains separately gated.
+
+### 2.8 Fail-closed implementation gates
 
 PLAN-024 must separate at least these checkpoints:
 
@@ -244,6 +297,12 @@ Package metadata, trusted-publisher npm settings and the first provenance-
 bearing release require a later release promotion and plan. They are not
 implementation checkpoints of PLAN-024 merely because their architecture is
 defined here.
+
+For M23, PLAN-025 must independently gate local tooling/manifests/candidates,
+protected Git publication and promotion, read-only preflight, three npm trust
+relations, workflow dispatch, each 2FA stage approval, each `latest` mutation,
+token restriction and final review. No earlier checkpoint authorizes the next
+external mutation.
 
 Every checkpoint observes actual state before and after mutation. Unexpected
 remote drift, scan finding, unsupported setting, branch mismatch, failed check
@@ -276,6 +335,8 @@ ref outside the approved map.
   observed rather than assumed.
 - OIDC cannot be proven end to end without publishing a new immutable version,
   so repository preparation and release migration close separately.
+- Stage-only publication adds a second human approval layer and creates staged
+  versions that require explicit accept/reject recovery.
 
 ## 4. Alternatives considered
 
@@ -306,12 +367,19 @@ transition/recovery mechanism until trusted publishing succeeds.
 Rejected. A tag alone does not replace the accepted release descriptor,
 complete verification and authenticated environment approval.
 
+### Direct OIDC publication
+
+Rejected for M23. It grants `npm publish` when the narrower
+`npm stage publish` action can preserve OIDC while requiring package-by-package
+2FA proof of presence.
+
 ## 5. Out of scope
 
 - Any repository/history/settings mutation or public visibility change.
-- PLAN-024 implementation, commit, push, force update or external write.
-- A package version, release sequence, npm publication, dist-tag, Git tag or
-  GitHub Release.
+- PLAN-024 or M23 implementation, commit, push or external write.
+- Manifest/workflow changes, candidate preparation, npm trust configuration,
+  staging, stage approval, dist-tag, token restriction, Git tag or GitHub
+  Release.
 - Runtime/API/SPEC behavior, Stable promotion or framework compatibility.
 - External code contributions, CLA terms, commercial contract terms or SLA.
 - Hosting the reference applications or publishing another package.
@@ -334,12 +402,17 @@ complete verification and authenticated environment approval.
    and token transition are verified in the required safe order.
 8. Every destructive/external action is independently approved and followed by
    read-only observation with fail-closed recovery.
-9. No runtime, API, SPEC, version, package or release is selected.
-10. Acceptance authorizes preparation/review of PLAN-024 only.
+9. M23 selects only core/base `0.4.1` and pilot `0.2.1`, preserving `^0.4.0`
+   peer floors and all runtime/API/SPEC behavior.
+10. Each package trust grants stage-only authority; staged bytes are reviewed
+    before separately authorized 2FA approval and provenance verification.
+11. Acceptance authorizes preparation/review of PLAN-025 only.
 
 ## 7. References
 
 - [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
+- [npm staged publishing](https://docs.npmjs.com/staged-publishing/)
+- [npm stage CLI](https://docs.npmjs.com/cli/v11/commands/npm-stage/)
 - [npm provenance statements](https://docs.npmjs.com/generating-provenance-statements/)
 - [GitHub OIDC reference](https://docs.github.com/en/actions/reference/security/oidc)
 - [GitHub deployment environments](https://docs.github.com/en/actions/concepts/workflows-and-actions/deployment-environments)

@@ -499,12 +499,33 @@ separado antes de repetir la revisión.
   idénticos y `main` es ancestro de `develop`. PLAN-024/M22 queda
   canónicamente completado.
 
+### M23 — Publicación trusted stage-only con provenance — checkpoints 1–3 completos
+
+- Review 178 ciclo 2 pasa sin hallazgos y Ricard selecciona opción A.
+- ADR-026 revisión 1 y ADR-018 revisión 7 quedan Accepted tras review 179 ciclo
+  2 pasar dieciséis áreas sin hallazgos.
+- La frontera selecciona solo core/base `0.4.1` y piloto `0.2.1`, metadata
+  pública exacta, peer floors `^0.4.0`, trusted publisher stage-only,
+  aprobaciones 2FA por paquete, provenance automática y transición `latest`
+  piloto/base/core.
+- PLAN-025 revisión 0 queda Approved tras review 180 ciclo 2 sin hallazgos.
+  Checkpoint 1 completa descriptor y tooling fail-closed tras review 181 ciclo
+  2 sin hallazgos. Checkpoint 2 completa manifests, onboarding y workflow
+  stage-only tras review 182 ciclo 2 sin hallazgos. Checkpoint 3 completa la
+  matriz local, candidatos deterministas metadata-only, source rebuilds,
+  consumidores y auditoría tras review 183 ciclo 2 sin hallazgos.
+- Los candidatos conservan `sourceCommit: null`; Git/GitHub/npm, staging,
+  aprobaciones, aliases y restricciones de tokens permanecen inactivos.
+  Checkpoint 4 requiere autorización separada para rama, commit, push y PR
+  protegida hacia `develop`.
+
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** seleccionar y promover explícitamente el siguiente milestone
-   o decisión Deferred.
-2. **External gates:** M22 no autoriza metadata de paquetes, trusted publishing
-   npm, provenance, GitHub Release, tag Git ni eliminación del backup privado.
+1. **Next action:** autorizar por separado PLAN-025 checkpoint 4 para entregar
+   el alcance revisado a `develop` y reconstruir desde su merge limpio.
+2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
+   trusted publishing npm, staging/aprobaciones, provenance live, aliases,
+   GitHub Release, tag Git ni eliminación del backup privado.
 3. **Later candidates:** React, Vue and all other capabilities remain
    demand-driven. M22 does not imply D-033 or functional work.
 

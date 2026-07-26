@@ -17,6 +17,10 @@
 - [M21 coordinated Experimental release notes](./releases/0.4.0.md) — reviewed
   coordinated live state: core/base `0.4.0` and pilot `0.2.0` are verified
   exact, under `next`/`latest` and through unqualified resolution.
+- [M23 stage-only metadata release notes](./releases/0.4.1.md) — deterministic
+  local comparison candidates for core/base `0.4.1` and pilot `0.2.1`;
+  `sourceCommit` remains null and no stage, approval, publication or provenance
+  is claimed.
 
 ## Specifications
 
@@ -50,6 +54,28 @@
 
 ## Acceptance reviews
 
+- [PLAN-025 checkpoint 3 review](./reviews/183-plan-025-checkpoint-3-review.md)
+  — Cycle 1 corrected M21-only artifact/security assumptions and a lint finding;
+  cycle 2 passed the complete local candidate gate with zero unresolved
+  findings.
+- [PLAN-025 checkpoint 2 review](./reviews/182-plan-025-checkpoint-2-review.md)
+  — Cycle 1 corrected five onboarding/historical-verifier/workflow/test
+  findings; cycle 2 passed all fourteen areas with zero unresolved findings and
+  completed source candidate preparation without generating artifacts.
+- [PLAN-025 checkpoint 1 review](./reviews/181-plan-025-checkpoint-1-review.md)
+  — Cycle 1 corrected four policy/evidence/contract findings; cycle 2 passed
+  all twelve areas with zero unresolved findings and completed checkpoint 1.
+- [PLAN-025 complete review](./reviews/180-plan-025-review.md) — Cycle 1
+  corrected exact-tarball staging, protected-main evidence selection, external
+  environment approval, source-SHA self-reference and frozen M19/M21 live
+  regressions; cycle 2 passed all eighteen areas with zero unresolved findings
+  and approved local checkpoint 1 only.
+- [ADR-026 revision 1 and ADR-018 revision 7 coordinated review](./reviews/179-adr-026-revision-1-adr-018-revision-7-review.md)
+  — Cycle 2 passes all sixteen areas with zero unresolved findings and accepts
+  M23's stage-only trusted-publication architecture.
+- [D-043/M23 trusted-publication promotion readiness](./reviews/178-d043-m23-trusted-publication-promotion-readiness.md)
+  — Cycle 2 passes the complete release-security boundary with zero unresolved
+  findings; Ricard selected option A, a stage-only coordinated metadata PATCH.
 - [PLAN-024 final public-repository closure](./reviews/177-plan-024-final-review.md)
   — Cycle 1 corrected stale public onboarding, staggered Angular patch
   resolution and audit preconditions; cycle 2 corrected the closing invocation
@@ -644,6 +670,7 @@
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
 - [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Completed revision 0 after review 177 cycle 3 repeated the corrected final closure with zero unresolved findings
+- [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Approved revision 0; checkpoints 1–2 completed after reviews 181–182 cycle 2 passed with zero unresolved findings, and checkpoint 3 awaits exact local tooling/cache provisioning
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -654,12 +681,15 @@ zero findings; [final review 070](./reviews/070-plan-017-final-implementation-re
 passed cycle 1 with zero findings and completed PLAN-017.
 
 Accepted publication architecture:
-[ADR-018 revision 6](./adrs/018-licencia-dual-publicacion-experimental.md)
-and [ADR-026](./adrs/026-public-repository-and-secure-releases.md) preserve dual
+[ADR-018 revision 7](./adrs/018-licencia-dual-publicacion-experimental.md)
+and [ADR-026 revision 1](./adrs/026-public-repository-and-secure-releases.md)
+preserve dual
 AGPL/commercial licensing and select a sanitized public-history transition.
 The sanitized repository is public and PLAN-024/M22 completed its governance,
 GitHub controls and fail-closed secure-release preparation after review 177.
-Future package metadata and OIDC/provenance release activation remain gated.
+M23's stage-only metadata/provenance PATCH design is Accepted after review 179;
+PLAN-025 revision 0 is Approved after review 180 and authorizes local
+checkpoint 1 only. External activation remains gated.
 Completed PLAN-013 published and verified core and Angular `0.1.0` without
 promoting Stable APIs.
 

@@ -5,15 +5,16 @@
 
 ## Checkpoint
 
-- **Updated:** 2026-07-25 by Ricard / Codex
-- **Branch:** `develop`
+- **Updated:** 2026-07-27 by Ricard / Codex
+- **Branch:** `codex/m23-stage-only-publication`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
-- **Last implementation plan:** PLAN-024 revision 0, Completed
+- **Last implementation plan:** PLAN-025 revision 0, Approved
 - **Last completed implementation plan:** PLAN-024 revision 0
-- **Active implementation task:** None
-- **Last accepted ADR:** ADR-026 revision 0, coordinated with ADR-018 revision 6
+- **Active implementation task:** PLAN-025 checkpoint 4 protected `develop`
+  delivery
+- **Last accepted ADR:** ADR-026 revision 1, coordinated with ADR-018 revision 7
 - **Implemented capability:** M1–M22 and G0, including the coordinated
   Experimental M21 line plus sanitized public history, governance, protected
   GitHub controls and fail-closed secure-release preparation
@@ -29,42 +30,50 @@
 
 ## Current objective
 
-Select and explicitly promote the next milestone or Deferred decision without
-implicitly activating package metadata, npm OIDC/provenance release work or any
-other deferred capability.
+Deliver the reviewed M23 scope through a protected PR into `develop`, then stop
+for separate merge authorization before the clean post-merge rebuild.
 
 ## In progress
 
-None. PLAN-024/M22 is canonically complete after its reviewed record passed the
-protected `develop`/`main` publication, promotion and ancestry-reconciliation
-flow with successful required and post-merge CI.
+PLAN-025 checkpoint 4 protected delivery is open as draft PR #13 from
+`codex/m23-stage-only-publication` into `develop`. Required CI is pending;
+merge and the clean post-merge rebuild remain separately gated.
 
 ## Latest completed work
 
-- Published the reviewed checkpoint-9 closure through PR #9, squash
-  `develop@049160e8`, required CI `30145579253` and successful post-merge CI
-  `30146726717`.
-- Promoted the closure through PR #10 and merge commit
-  `main@7f22dbd03680f1195c5309427b5002bf447aace4`; required CI `30147039530`
-  and post-merge CI `30147280131` passed.
-- Reconciled `main` into `develop` through PR #11 and merge commit
-  `develop@d4d44d43fcba4692baa0fdef6026793f4f93122f`; required CI
-  `30147475634` and final push CI `30147686444` passed. Both branches have
-  identical trees and `main` is an ancestor of `develop`.
-- Corrected live Angular tuple discovery to tolerate staggered package patch
-  publication by selecting the highest coherent stable tuple, with regression
-  coverage for the observed `22.0.8`/`22.0.7` split; stabilized the reorder E2E
-  assertion on Beta's exact normalized identity.
-- Retained and verified the owner-only private recovery bundle and reversible
-  stash outside public refs; deletion remains separately gated.
+- Published the isolated M22 closure commit `acc0d6c` on
+  `codex/m22-canonical-closure`, passed required CI `30168309902`, merged PR #12
+  as `develop@490c67a` and passed post-merge CI `30168530231`. The local and
+  remote M22 trees are identical.
+- Completed PLAN-025 checkpoint 3 after review 183 cycle 2 passed all sixteen
+  local candidate areas with zero findings. The three deterministic
+  metadata-only candidates pass source rebuilds, lower/current consumers,
+  security and neutral dry runs; all retain `sourceCommit: null`.
+- Completed PLAN-025 checkpoint 2 after review 182 cycle 2 passed all fourteen
+  manifest/onboarding/workflow/historical-regression areas with zero findings.
+  M23 source is prepared without candidate, stage or live provenance claims.
+- Completed PLAN-025 checkpoint 1 after review 181 cycle 2 passed all twelve
+  descriptor/readiness/workflow/evidence areas with zero unresolved findings.
+  Current manifests and workflow still fail closed for M23.
+- Approved PLAN-025 revision 0 after review 180 cycle 2 passed all eighteen
+  areas with zero unresolved findings. The review corrected exact-tarball
+  staging, protected-main evidence selection, separate environment approval,
+  impossible source-SHA self-reference and explicit M19/M21 live regressions.
 
 ## Exact next action
 
-Select and explicitly promote the next milestone or Deferred decision.
+Wait for required PR #13 CI to pass, then request separate authorization to
+mark the PR ready and merge it before the exact clean `develop` rebuild.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
+- The M22 delivery-order precondition is closed. Local `acc0d6c` and remote
+  squash `490c67a` have identical trees; checkpoint 4 must branch from the
+  remote squash so the M23 PR does not duplicate the M22 commit.
+- Exact npm `11.18.0` is provisioned. Frozen offline install passes outside the
+  restricted sandbox with the populated global pnpm store; the ignored
+  workspace-local store cannot materialize content under sandbox restrictions.
 - Repository visibility is public, checkpoint-8 settings are live/exact and
   checkpoint-9 publication, promotion and reconciliation all passed.
 - Current and remote long-lived lineage is sanitized and passes full history
@@ -87,78 +96,60 @@ Select and explicitly promote the next milestone or Deferred decision.
 
 ## Open questions
 
-- None.
+- Authorize ready transition and merge only after required PR #13 CI passes?
 
 ## Latest verification
 
-- Review 177 cycle 3 passes the corrected complete checkpoint-9 boundary with
-  zero unresolved findings across authority/scope, anonymous public history and
-  content, recovery, GitHub controls/CI, npm isolation and the full matrix.
-- Protected PRs #9–#11 published, promoted and reconciled that exact record.
-  Required/post-merge runs `30145579253`, `30146726717`, `30147039530`,
-  `30147280131`, `30147475634` and `30147686444` all completed successfully.
-  Remote `main@7f22dbd` is an ancestor of `develop@d4d44d4`, and their trees
-  are identical.
-- Fresh anonymous evidence passes strict Git integrity, approximately 6.37 MB
-  Gitleaks, 744-file tree policy, 79-commit/1,862-path-blob history policy and
-  the complete 65-entry mapped-commit check.
-- Frozen install, formatting, documentation/links, workflow/publication policy,
-  lint, strict types, all builds/tests, package/source verification, snippets,
-  boundaries and Angular/Standard unit plus Chromium lanes pass.
-- The final closure candidate passes 268 Markdown documents, 881 local links
-  and 745 current public-tree candidates with zero findings.
-- M19 exact and M21 exact/`next`/`latest`/unqualified bytes, metadata and native/
-  pilot clean consumers pass; npm readiness fails closed on the exact expected
-  future authorization/repository/provenance gaps.
-- GitHub controls remain exact with zero stored Actions/environment secrets or
-  variables. The verified private bundle retains its recorded checksum and
-  owner-only permissions outside public refs.
+- Checkpoint-4 pre-commit scope has 42 M23-only files and passes diff/format,
+  276-document/909-link documentation, workflow/public-tree policy, lint, 39
+  release tests, 23 public/readiness/workflow tests, M23 metadata-only package
+  comparison, packed-source verification and release security. No unrelated
+  path is present.
+- Review 183 cycle 2 passes all sixteen checkpoint-3 areas with zero unresolved
+  findings. Frozen offline install, complete workspace/reference matrix,
+  deterministic packaging, metadata-only comparison, source rebuilds,
+  lower/current consumers, security and neutral dry runs pass. The final tree
+  passes 276 documents, 909 links, 756 public files, 62 focused tests, 689
+  workspace tests and 14 Chromium E2E tests.
+- Review 182 cycle 2 passes all fourteen checkpoint-2 areas with zero unresolved
+  findings. Formatting, 275-document/907-link documentation, workflow policy,
+  39 release-target/evidence tests, 23 public/readiness/workflow tests,
+  754-file public-tree policy, lint, package tests and typecheck pass.
+- Review 181 cycle 2 passes all twelve checkpoint-1 areas with zero unresolved
+  findings. All 39 release-target/evidence tests and 22 readiness/public/
+  workflow-policy tests pass; current M23 manifests/workflow fail closed.
+- Review 180 cycle 2 passes all eighteen PLAN-025 areas with zero unresolved
+  findings and approves only local checkpoint 1. Formatting, documentation
+  links, public-tree policy and diff checks pass with 271 Markdown files, 898
+  links and 748 public-tree candidates before checkpoint-1 implementation.
+- Review 179 cycle 2 passes all sixteen coordinated ADR areas with zero
+  unresolved findings; ADR-026 revision 1 and ADR-018 revision 7 are Accepted.
 
 ## Task document map
 
-- Sanitized history map: `.ai-docs/project/HISTORY-REWRITE-MAP.md`
+- Approved M23 plan:
+  `.ai-docs/plans/025-stage-only-trusted-publication.md`
+- M23 checkpoint-3 review:
+  `.ai-docs/reviews/183-plan-025-checkpoint-3-review.md`
+- M23 checkpoint-1 review:
+  `.ai-docs/reviews/181-plan-025-checkpoint-1-review.md`
+- M23 checkpoint-2 review:
+  `.ai-docs/reviews/182-plan-025-checkpoint-2-review.md`
+- M23 plan review: `.ai-docs/reviews/180-plan-025-review.md`
+- M23 candidate release notes: `.ai-docs/releases/0.4.1.md`
 - Completed M22 plan: `.ai-docs/plans/024-sanitized-public-repository.md`
 - M22 final review: `.ai-docs/reviews/177-plan-024-final-review.md`
-- M22 checkpoint-2 review:
-  `.ai-docs/reviews/169-plan-024-checkpoint-2-review.md`
-- M22 checkpoint-3 review:
-  `.ai-docs/reviews/170-plan-024-checkpoint-3-review.md`
-- M22 checkpoint-4 review:
-  `.ai-docs/reviews/171-plan-024-checkpoint-4-review.md`
-- M22 checkpoint-5 review:
-  `.ai-docs/reviews/172-plan-024-checkpoint-5-review.md`
-- M22 checkpoint-6 review:
-  `.ai-docs/reviews/173-plan-024-checkpoint-6-review.md`
-- M22 checkpoint-7 corrective preflight review:
-  `.ai-docs/reviews/174-plan-024-checkpoint-7-preflight-review.md`
-- M22 checkpoint-7 public review:
-  `.ai-docs/reviews/175-plan-024-checkpoint-7-public-review.md`
-- M22 checkpoint-8 preflight review:
-  `.ai-docs/reviews/176-plan-024-checkpoint-8-preflight-review.md`
-- M22 checkpoint-1 review:
-  `.ai-docs/reviews/168-plan-024-checkpoint-1-review.md`
-- M22 plan review: `.ai-docs/reviews/167-plan-024-review.md`
 - Public governance: `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`
-- Accepted M22 architecture:
+- Accepted M22/M23 architecture:
   `.ai-docs/adrs/026-public-repository-and-secure-releases.md`
 - Coordinated licensing/source architecture:
   `.ai-docs/adrs/018-licencia-dual-publicacion-experimental.md`
-- M22 ADR review:
-  `.ai-docs/reviews/166-adr-026-adr-018-revision-6-review.md`
-- M22 promotion review:
-  `.ai-docs/reviews/165-d043-m22-repository-publication-promotion-readiness.md`
-- M22 Deferred source: `.ai-docs/roadmap/deferred-decisions.md#d-043`
-- Final M21 review: `.ai-docs/reviews/164-plan-023-final-review.md`
-- Completed M21 plan:
-  `.ai-docs/plans/023-coordinated-experimental-0-4-release.md`
+- Proposed M23 promotion review:
+  `.ai-docs/reviews/178-d043-m23-trusted-publication-promotion-readiness.md`
+- Accepted M23 ADR review:
+  `.ai-docs/reviews/179-adr-026-revision-1-adr-018-revision-7-review.md`
+- M22/M23 Deferred source:
+  `.ai-docs/roadmap/deferred-decisions.md#d-043`
 - M21 release notes: `.ai-docs/releases/0.4.0.md`
-- Accepted M21 publication architecture:
-  `.ai-docs/adrs/018-licencia-dual-publicacion-experimental.md`
-- Accepted M20 specification:
-  `.ai-docs/specs/009-recursive-local-presentation-layout.md`
-- Completed M20 plan: `.ai-docs/plans/022-recursive-local-presentation-layout.md`
-- Final M20 review:
-  `.ai-docs/reviews/144-plan-022-final-implementation-review.md`
-- Final M19 review: `.ai-docs/reviews/132-plan-021-final-review.md`
 - Deferred capability register: `.ai-docs/roadmap/deferred-decisions.md`
 - Current roadmap: `.ai-docs/project/ROADMAP.md`

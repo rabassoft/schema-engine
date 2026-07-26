@@ -6,12 +6,12 @@ import { join } from 'node:path';
 import {
   argumentValue,
   assertReleaseCandidateEvidence,
-  loadCoordinatedReleaseTarget,
+  loadReleaseDescriptor,
 } from './release-target.mjs';
 import { workspaceRoot } from './release-candidate-utils.mjs';
 
 const REGISTRY = 'https://registry.npmjs.org';
-const { descriptor } = loadCoordinatedReleaseTarget();
+const descriptor = loadReleaseDescriptor();
 const tagMode = argumentValue(process.argv, 'tag-mode') ?? 'none';
 assert.ok(
   ['none', 'next', 'latest', 'both'].includes(tagMode),
