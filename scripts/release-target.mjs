@@ -105,9 +105,119 @@ export const M21_RELEASE_DESCRIPTOR = deepFreeze({
   ],
 });
 
+export const M23_RELEASE_DESCRIPTOR = deepFreeze({
+  id: 'm23',
+  releaseDirectory: '0.4.1',
+  distTag: 'next',
+  provenance: true,
+  npmVersion: '11.18.0',
+  consumerModes: ['candidate', 'exact', 'next', 'latest', 'unqualified'],
+  consumerTuples: {
+    lower: { angular: '22.0.6', aria: '22.0.5', cdk: '22.0.5' },
+    latest: { angular: '22.0.7', aria: '22.0.5', cdk: '22.0.5' },
+  },
+  stageOrder: ['core', 'angular', 'angularAria'],
+  approvalOrder: ['core', 'angular', 'angularAria'],
+  latestOrder: ['angularAria', 'angular', 'core'],
+  trustedPublishing: {
+    enabled: true,
+    provider: 'github-actions',
+    owner: 'rabassoft',
+    repository: 'schema-engine',
+    workflow: 'npm-publish.yml',
+    environment: 'npm-publish',
+    allowedActions: ['stage-publish'],
+  },
+  packages: [
+    {
+      role: 'core',
+      name: '@rabassoft/schema-engine',
+      workspacePath: 'packages/core',
+      version: '0.4.1',
+      file: 'rabassoft-schema-engine-0.4.1.tgz',
+      schemaEnginePeers: {},
+      schemaEngineSourcePeers: {},
+      schemaEngineDevelopment: {},
+      runtimeDependencies: {},
+      frameworkPeers: {},
+      frameworkDevelopment: {},
+      exports: {
+        '.': {
+          types: './dist/index.d.ts',
+          import: './dist/index.js',
+          default: './dist/index.js',
+        },
+      },
+      sideEffects: false,
+    },
+    {
+      role: 'angular',
+      name: '@rabassoft/schema-engine-angular',
+      workspacePath: 'packages/angular',
+      version: '0.4.1',
+      file: 'rabassoft-schema-engine-angular-0.4.1.tgz',
+      schemaEnginePeers: { '@rabassoft/schema-engine': '^0.4.0' },
+      schemaEngineSourcePeers: {
+        '@rabassoft/schema-engine': 'workspace:^0.4.0',
+      },
+      schemaEngineDevelopment: { '@rabassoft/schema-engine': '0.4.1' },
+      runtimeDependencies: { tslib: '^2.8.1' },
+      frameworkPeers: {
+        '@angular/core': '>=22.0.6 <23.0.0',
+        '@angular/forms': '>=22.0.6 <23.0.0',
+      },
+      frameworkDevelopment: {},
+      exports: {
+        '.': {
+          types: './dist/index.d.ts',
+          import: './dist/index.js',
+          default: './dist/index.js',
+        },
+      },
+      sideEffects: false,
+    },
+    {
+      role: 'angularAria',
+      name: '@rabassoft/schema-engine-angular-aria',
+      workspacePath: 'packages/angular-aria',
+      version: '0.2.1',
+      file: 'rabassoft-schema-engine-angular-aria-0.2.1.tgz',
+      schemaEnginePeers: {
+        '@rabassoft/schema-engine-angular': '^0.4.0',
+      },
+      schemaEngineSourcePeers: {
+        '@rabassoft/schema-engine-angular': 'workspace:^0.4.0',
+      },
+      schemaEngineDevelopment: {
+        '@rabassoft/schema-engine-angular': '0.4.1',
+      },
+      runtimeDependencies: { tslib: '^2.8.1' },
+      frameworkPeers: {
+        '@angular/aria': '>=22.0.5 <23.0.0',
+        '@angular/cdk': '>=22.0.5 <23.0.0',
+        '@angular/core': '>=22.0.6 <23.0.0',
+      },
+      frameworkDevelopment: {
+        '@angular/aria': '22.0.5',
+        '@angular/cdk': '22.0.5',
+      },
+      exports: {
+        '.': {
+          types: './dist/index.d.ts',
+          import: './dist/index.js',
+          default: './dist/index.js',
+        },
+        './styles.css': './styles.css',
+      },
+      sideEffects: ['./styles.css'],
+    },
+  ],
+});
+
 export const RELEASE_DESCRIPTORS = deepFreeze({
   m19: M19_RELEASE_DESCRIPTOR,
   m21: M21_RELEASE_DESCRIPTOR,
+  m23: M23_RELEASE_DESCRIPTOR,
 });
 
 export function argumentValue(args, name) {
@@ -235,12 +345,109 @@ export function assertM21ReleaseDescriptor(descriptor, manifests = undefined) {
   return descriptor;
 }
 
+export function assertM23ReleaseDescriptor(descriptor, manifests = undefined) {
+  assert.deepEqual(
+    descriptor,
+    M23_RELEASE_DESCRIPTOR,
+    'M23 release descriptor does not match the accepted contract',
+  );
+
+  const roles = descriptor.packages.map(({ role }) => role);
+  const names = descriptor.packages.map(({ name }) => name);
+  const files = descriptor.packages.map(({ file }) => file);
+  assert.deepEqual(roles, ['core', 'angular', 'angularAria']);
+  assert.deepEqual(descriptor.stageOrder, roles);
+  assert.deepEqual(descriptor.approvalOrder, roles);
+  assert.deepEqual(descriptor.latestOrder, ['angularAria', 'angular', 'core']);
+  assert.equal(new Set(names).size, names.length, 'Duplicate package name');
+  assert.equal(new Set(files).size, files.length, 'Duplicate candidate file');
+
+  if (manifests !== undefined) {
+    assert.deepEqual(
+      Object.keys(manifests),
+      roles,
+      'Release manifests do not match publication order',
+    );
+    for (const packageTarget of descriptor.packages) {
+      const manifest = manifests[packageTarget.role];
+      assert.ok(manifest, `Missing ${packageTarget.role} manifest`);
+      assert.equal(manifest.name, packageTarget.name);
+      assert.equal(manifest.version, packageTarget.version);
+      assert.equal(manifest.publishConfig?.access, 'public');
+      assert.equal(manifest.publishConfig?.tag, descriptor.distTag);
+      assert.notEqual(manifest.publishConfig?.provenance, false);
+      assert.deepEqual(manifest.repository, {
+        type: 'git',
+        url: 'git+https://github.com/rabassoft/schema-engine.git',
+        directory: packageTarget.workspacePath,
+      });
+      assert.deepEqual(
+        manifest.dependencies ?? {},
+        packageTarget.runtimeDependencies,
+      );
+      assert.deepEqual(manifest.exports, packageTarget.exports);
+      assert.deepEqual(manifest.sideEffects, packageTarget.sideEffects);
+
+      const expectedPeerNames = Object.keys(packageTarget.schemaEnginePeers);
+      const peerDependencies = manifest.peerDependencies ?? {};
+      const actualPeerNames = Object.keys(peerDependencies).filter((name) =>
+        name.startsWith('@rabassoft/schema-engine'),
+      );
+      assert.deepEqual(actualPeerNames, expectedPeerNames);
+      assert.deepEqual(
+        Object.fromEntries(
+          Object.entries(peerDependencies).filter(
+            ([name]) => !name.startsWith('@rabassoft/schema-engine'),
+          ),
+        ),
+        packageTarget.frameworkPeers,
+      );
+      for (const name of expectedPeerNames) {
+        assert.equal(
+          manifest.peerDependencies?.[name],
+          packageTarget.schemaEngineSourcePeers[name],
+          `${packageTarget.role} must preserve its explicit source peer floor`,
+        );
+      }
+
+      const expectedDevelopmentNames = Object.keys(
+        packageTarget.schemaEngineDevelopment,
+      );
+      const devDependencies = manifest.devDependencies ?? {};
+      const actualDevelopmentNames = Object.keys(devDependencies).filter(
+        (name) => name.startsWith('@rabassoft/schema-engine'),
+      );
+      assert.deepEqual(actualDevelopmentNames, expectedDevelopmentNames);
+      assert.deepEqual(
+        Object.fromEntries(
+          Object.entries(devDependencies).filter(
+            ([name]) => !name.startsWith('@rabassoft/schema-engine'),
+          ),
+        ),
+        packageTarget.frameworkDevelopment,
+      );
+      for (const name of expectedDevelopmentNames) {
+        assert.equal(
+          manifest.devDependencies?.[name],
+          'workspace:*',
+          `${packageTarget.role} must retain a workspace:* development link`,
+        );
+      }
+    }
+  }
+
+  return descriptor;
+}
+
 export function assertReleaseDescriptor(descriptor, manifests = undefined) {
   if (descriptor.id === M19_RELEASE_DESCRIPTOR.id) {
     return assertM19ReleaseDescriptor(descriptor, manifests);
   }
   if (descriptor.id === M21_RELEASE_DESCRIPTOR.id) {
     return assertM21ReleaseDescriptor(descriptor, manifests);
+  }
+  if (descriptor.id === M23_RELEASE_DESCRIPTOR.id) {
+    return assertM23ReleaseDescriptor(descriptor, manifests);
   }
   assert.fail(`Unsupported release descriptor ${descriptor.id}`);
 }
@@ -270,7 +477,11 @@ export function assertReleaseCandidateEvidence(evidence, descriptor) {
   assert.equal(evidence.provenance, descriptor.provenance);
   assert.equal(evidence.neutralDryRun, true);
   assert.match(evidence.node, /^22\.\d+\.\d+$/u);
-  assert.match(evidence.npm, /^10\.\d+\.\d+$/u);
+  if (descriptor.npmVersion === undefined) {
+    assert.match(evidence.npm, /^10\.\d+\.\d+$/u);
+  } else {
+    assert.equal(evidence.npm, descriptor.npmVersion);
+  }
   assert.equal(evidence.pnpm, '10.28.2');
   assert.match(evidence.baseCommit, /^[0-9a-f]{40}$/u);
   assert.ok(
@@ -343,6 +554,65 @@ export function releasePackageSpecifier(
   if (mode === 'exact') return packageTarget.version;
   if (mode === 'unqualified') return '*';
   return mode;
+}
+
+export function releaseCandidateDryRunArgs(
+  descriptor,
+  packageSpecifier,
+  neutral = false,
+) {
+  assertReleaseDescriptor(descriptor);
+  assert.ok(packageSpecifier, 'Candidate package specifier is required');
+  return [
+    ...(descriptor.id === 'm23' ? ['stage', 'publish'] : ['publish']),
+    neutral ? `./${packageSpecifier}` : packageSpecifier,
+    '--dry-run',
+    '--access',
+    'public',
+    '--tag',
+    descriptor.distTag,
+    ...(descriptor.id === 'm23'
+      ? []
+      : [`--provenance=${descriptor.provenance}`]),
+  ];
+}
+
+export function m23StagePublishArgs(descriptor, packageTarget) {
+  assertM23ReleaseDescriptor(descriptor);
+  assert.ok(
+    descriptor.packages.includes(packageTarget),
+    'Unknown M23 package target',
+  );
+  return [
+    'stage',
+    'publish',
+    `.release/${descriptor.releaseDirectory}/${packageTarget.file}`,
+    '--access',
+    'public',
+    '--tag',
+    descriptor.distTag,
+  ];
+}
+
+export function m23ReadOnlyEvidenceCommands(
+  descriptor,
+  packageTarget,
+  stageId,
+) {
+  assertM23ReleaseDescriptor(descriptor);
+  assert.ok(
+    descriptor.packages.includes(packageTarget),
+    'Unknown M23 package target',
+  );
+  assert.match(stageId, /^[A-Za-z0-9_-]+$/u, 'Unsafe npm stage identifier');
+  const exact = `${packageTarget.name}@${packageTarget.version}`;
+  return Object.freeze({
+    stageList: ['npm', 'stage', 'list', packageTarget.name, '--json'],
+    stageView: ['npm', 'stage', 'view', stageId, '--json'],
+    stageDownload: ['npm', 'stage', 'download', stageId],
+    registryMetadata: ['npm', 'view', exact, '--json'],
+    provenance: ['npm', 'audit', 'signatures'],
+  });
 }
 
 export function m19FrozenConsumerTuple(descriptor, mode, tupleSource) {
@@ -425,10 +695,18 @@ export function loadM19ReleaseTarget(args = process.argv.slice(2)) {
   });
 }
 
-export function loadCoordinatedReleaseTarget(args = process.argv.slice(2)) {
+export function loadReleaseDescriptor(args = process.argv.slice(2)) {
   const release = argumentValue(args, 'release');
   const descriptor = RELEASE_DESCRIPTORS[release];
-  assert.ok(descriptor, 'Pass exactly --release=m19 or --release=m21');
+  assert.ok(
+    descriptor,
+    'Pass exactly --release=m19, --release=m21 or --release=m23',
+  );
+  return descriptor;
+}
+
+export function loadCoordinatedReleaseTarget(args = process.argv.slice(2)) {
+  const descriptor = loadReleaseDescriptor(args);
   const manifests = Object.fromEntries(
     descriptor.packages.map(({ role, workspacePath }) => [
       role,

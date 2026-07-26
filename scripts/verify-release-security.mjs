@@ -23,19 +23,19 @@ const identityPatterns = Object.freeze([
   /\b[XYZ][0-9]{7}[A-Z]\b/u,
   /\b(?:Calle|Carrer|Avenida|Avinguda|Street)\s+[^\n]{0,80}\d/iu,
 ]);
-const privateRepository = [
-  'https://github.com',
-  'rabassoft/schema-engine',
-].join('/');
+const publicRepository = ['https://github.com', 'rabassoft/schema-engine'].join(
+  '/',
+);
 const allowedHistoricalPrivateLink = '.ai-docs/project/WORKLOG.md';
+const { descriptor } = loadCoordinatedReleaseTarget();
 
 function assertCleanText(text, label, allowHistoricalLink = false) {
   for (const pattern of [...secretPatterns, ...identityPatterns]) {
     assert.equal(pattern.test(text), false, `${label} matches ${pattern}`);
   }
-  if (!allowHistoricalLink) {
+  if (descriptor.id !== 'm23' && !allowHistoricalLink) {
     assert.equal(
-      text.includes(privateRepository),
+      text.includes(publicRepository),
       false,
       `${label} exposes the private repository`,
     );
@@ -82,10 +82,7 @@ try {
   assert.deepEqual([...new Set(authors)], ['Rabassoft <ricard@rabassoft.com>']);
 
   const tarballs = includeAngularAria
-    ? packReleaseCandidates(
-        temporaryRoot,
-        loadCoordinatedReleaseTarget().descriptor,
-      )
+    ? packReleaseCandidates(temporaryRoot, descriptor)
     : packCandidates(temporaryRoot);
   for (const [name, tarball] of Object.entries(tarballs)) {
     for (const member of listTarball(tarball)) {

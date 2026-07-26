@@ -1,6 +1,6 @@
 {
   "name": "@rabassoft/schema-engine-angular-aria",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "sideEffects": [
     "./styles.css"
@@ -9,6 +9,11 @@
   "author": {
     "name": "Ricardo Rabassó Rodríguez, operating as Rabassoft",
     "email": "ricard@rabassoft.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabassoft/schema-engine.git",
+    "directory": "packages/angular-aria"
   },
   "files": [
     "dist",
@@ -30,8 +35,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "next",
-    "provenance": false
+    "tag": "next"
   },
   "scripts": {
     "build": "ngc -p tsconfig.build.json",
@@ -52,6 +56,6 @@
     "@angular/aria": ">=22.0.5 <23.0.0",
     "@angular/cdk": ">=22.0.5 <23.0.0",
     "@angular/core": ">=22.0.6 <23.0.0",
-    "@rabassoft/schema-engine-angular": "workspace:^"
+    "@rabassoft/schema-engine-angular": "workspace:^0.4.0"
   }
 }

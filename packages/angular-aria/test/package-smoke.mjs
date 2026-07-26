@@ -16,7 +16,7 @@ assert.equal(
   'function',
 );
 assert.equal(manifest.name, '@rabassoft/schema-engine-angular-aria');
-assert.equal(manifest.version, '0.2.0');
+assert.equal(manifest.version, '0.2.1');
 assert.deepEqual(manifest.sideEffects, ['./styles.css']);
 assert.deepEqual(manifest.files, [
   'dist',
@@ -41,7 +41,7 @@ assert.deepEqual(manifest.peerDependencies, {
   '@angular/aria': '>=22.0.5 <23.0.0',
   '@angular/cdk': '>=22.0.5 <23.0.0',
   '@angular/core': '>=22.0.6 <23.0.0',
-  '@rabassoft/schema-engine-angular': 'workspace:^',
+  '@rabassoft/schema-engine-angular': 'workspace:^0.4.0',
 });
 assert.deepEqual(manifest.devDependencies, {
   '@angular/aria': '22.0.5',
