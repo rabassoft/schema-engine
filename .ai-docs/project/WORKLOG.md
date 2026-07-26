@@ -24,11 +24,17 @@ the full file is not part of routine task startup.
   policy, lint, 39 release tests, 23 public/readiness/workflow tests,
   metadata-only package comparison, packed-source verification and release
   security.
+- Committed the exact scope as `38e3e07`, pushed
+  `codex/m23-stage-only-publication` and opened draft PR #13 into protected
+  `develop`.
+- The first push correctly failed closed while GitHub CLI was using
+  `Ricard-Rabasso`; switched the active account to `rabassoft` as prescribed
+  and the authorized push succeeded.
 
 ### Next
 
-- Complete the scoped review and local verification, commit and push the
-  reviewed M23 scope, then open the protected PR into `develop`.
+- Wait for required PR #13 CI to pass, then obtain separate authorization for
+  ready transition and merge before the exact clean `develop` rebuild.
 
 ## 2026-07-25 — Isolated M22 closure delivered
 

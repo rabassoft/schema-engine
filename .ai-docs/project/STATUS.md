@@ -35,10 +35,9 @@ for separate merge authorization before the clean post-merge rebuild.
 
 ## In progress
 
-PLAN-025 checkpoint 4 protected delivery is authorized: create the short-lived
-M23 branch from `origin/develop@490c67a`, commit the reviewed scope, push and
-open a protected PR into `develop`. Merge and clean post-merge rebuild remain
-separately gated.
+PLAN-025 checkpoint 4 protected delivery is open as draft PR #13 from
+`codex/m23-stage-only-publication` into `develop`. Required CI is pending;
+merge and the clean post-merge rebuild remain separately gated.
 
 ## Latest completed work
 
@@ -63,9 +62,8 @@ separately gated.
 
 ## Exact next action
 
-Complete the scoped diff review and local verification, commit the reviewed M23
-scope, push `codex/m23-stage-only-publication` and open a protected PR into
-`develop`.
+Wait for required PR #13 CI to pass, then request separate authorization to
+mark the PR ready and merge it before the exact clean `develop` rebuild.
 
 ## Blockers and conflicts
 
@@ -98,8 +96,7 @@ scope, push `codex/m23-stage-only-publication` and open a protected PR into
 
 ## Open questions
 
-- None until the protected PR is open and required CI has completed. Merge
-  remains separately gated.
+- Authorize ready transition and merge only after required PR #13 CI passes?
 
 ## Latest verification
 
