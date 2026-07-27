@@ -55,6 +55,12 @@
 
 ## Acceptance reviews
 
+- [R189-F01 protected-main promotion readiness](./reviews/192-r189-f01-protected-main-promotion-readiness.md)
+  — Cycle 1 corrects stale evidence-delivery state; cycle 2 corrects formatting;
+  cycle 3 corrects one ambiguous phrase; cycle 4 corrects its table formatting;
+  cycle 5 corrects the evidence-delivery order; cycle 6 verifies exact
+  protected refs, CI, branch controls, promotion payload and boundaries with
+  zero findings. Promotion and npm remain separately gated.
 - [R189-F01 protected-develop rebuild review](./reviews/191-r189-f01-protected-develop-rebuild-review.md)
   — Cycle 1 corrects two stale/oversized STATUS sections; cycle 2 passes
   merge/CI, two clean deterministic generations, exact source evidence,

@@ -544,13 +544,18 @@ separado antes de repetir la revisión.
   evidencia con `sourceCommit` exacto, dry-runs neutrales, Corresponding Source
   de los tres paquetes y seguridad sin hallazgos. Promoción a `main`, selección
   publicable y rechazo de stages permanecen separados.
+- PR #19 entrega esa evidencia a `develop@e99193b`; CI requerida y post-merge
+  pasan. Review 192 ciclo 6 verifica refs, protección, payload y límites sin
+  hallazgos. Su evidencia documental debe entregarse primero a `develop` y
+  reobservarse el nuevo SHA; la promoción protegida a `main` requiere después
+  una decisión separada.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** obtener autorización explícita para el commit, push y PR
-   protegida del registro de reconstrucción limpia en `develop`; después
-   decidir por separado la promoción a `main`. Ningún stage se rechaza sin
-   autorización separada.
+1. **Next action:** obtener autorización para el commit, push y PR
+   documentación-only de review 192 a `develop`; tras CI/merge, reobservar el
+   SHA exacto y decidir por separado su promoción a `main`. Ningún stage se
+   rechaza sin autorización separada.
 2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
    trusted publishing npm, staging/aprobaciones, provenance live, aliases,
    GitHub Release, tag Git ni eliminación del backup privado.
