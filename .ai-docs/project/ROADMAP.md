@@ -539,12 +539,18 @@ separado antes de repetir la revisión.
   exactos y `fflate@0.8.3` MIT queda fijada solo como herramienta de desarrollo,
   no empaquetada. Entrega protegida, reselección, rechazo de los tres stages y
   nuevo staging permanecen separados.
+- PR #18 entrega la corrección a `develop@5e60796`; CI requerida y post-merge
+  pasan. Review 191 ciclo 2 valida dos generaciones limpias byte-idénticas,
+  evidencia con `sourceCommit` exacto, dry-runs neutrales, Corresponding Source
+  de los tres paquetes y seguridad sin hallazgos. Promoción a `main`, selección
+  publicable y rechazo de stages permanecen separados.
 
 ### Orden de dependencias a más largo plazo
 
 1. **Next action:** obtener autorización explícita para el commit, push y PR
-   protegida de la corrección R189-F01; después reconstruir/reseleccionar desde
-   refs protegidas. Ningún stage se rechaza sin autorización separada.
+   protegida del registro de reconstrucción limpia en `develop`; después
+   decidir por separado la promoción a `main`. Ningún stage se rechaza sin
+   autorización separada.
 2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
    trusted publishing npm, staging/aprobaciones, provenance live, aliases,
    GitHub Release, tag Git ni eliminación del backup privado.
