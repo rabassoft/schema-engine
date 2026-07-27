@@ -493,18 +493,45 @@ separado antes de repetir la revisión.
   Review 177 ciclo 1 corrige el onboarding privado obsoleto y la resolución de
   parches Angular publicados de forma escalonada; ciclo 2 corrige la invocación
   final y el selector E2E posicional; ciclo 3 repite la revisión completa sin
-  hallazgos y completa PLAN-024/M22.
+  hallazgos. PR #9 publica el registro en `develop@049160e8`, PR #10 lo
+  promueve a `main@7f22dbd` y PR #11 reconcilia `main` en
+  `develop@d4d44d4`; los seis CI requeridos/post-merge pasan, ambos árboles son
+  idénticos y `main` es ancestro de `develop`. PLAN-024/M22 queda
+  canónicamente completado.
+
+### M23 — Publicación trusted stage-only con provenance — checkpoints 1–4 completos
+
+- Review 178 ciclo 2 pasa sin hallazgos y Ricard selecciona opción A.
+- ADR-026 revisión 1 y ADR-018 revisión 7 quedan Accepted tras review 179 ciclo
+  2 pasar dieciséis áreas sin hallazgos.
+- La frontera selecciona solo core/base `0.4.1` y piloto `0.2.1`, metadata
+  pública exacta, peer floors `^0.4.0`, trusted publisher stage-only,
+  aprobaciones 2FA por paquete, provenance automática y transición `latest`
+  piloto/base/core.
+- PLAN-025 revisión 0 queda Approved tras review 180 ciclo 2 sin hallazgos.
+  Checkpoint 1 completa descriptor y tooling fail-closed tras review 181 ciclo
+  2 sin hallazgos. Checkpoint 2 completa manifests, onboarding y workflow
+  stage-only tras review 182 ciclo 2 sin hallazgos. Checkpoint 3 completa la
+  matriz local, candidatos deterministas metadata-only, source rebuilds,
+  consumidores y auditoría tras review 183 ciclo 2 sin hallazgos.
+- Checkpoint 4 entrega el alcance mediante PR protegida #13, pasa CI requerida
+  y post-merge, y reconstruye dos veces desde `develop@39a0d60` tras review 184
+  ciclo 1 sin hallazgos. Los candidatos son byte-idénticos a checkpoint 3 y
+  registran ese `sourceCommit` limpio.
+- `main`, npm, staging, aprobaciones, aliases y restricciones de tokens
+  permanecen inactivos. Checkpoint 5 requiere autorización separada para
+  promoción protegida a `main`, reconciliación y rebuild exacto.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** publicar el registro final revisado mediante rama corta y
-   PR protegido a `develop`; tras su CI, promover a `main` y reconciliar su
-   ancestry en `develop`, cada mutación bajo autorización Git explícita.
-2. **External gates:** M22 no autoriza metadata de paquetes, trusted publishing
-   npm, provenance, GitHub Release, tag Git ni eliminación del backup privado.
+1. **Next action:** autorizar por separado PLAN-025 checkpoint 5 para promover
+   `develop` a `main`, reconciliar `main` en `develop` y reconstruir desde el
+   commit protegido exacto.
+2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
+   trusted publishing npm, staging/aprobaciones, provenance live, aliases,
+   GitHub Release, tag Git ni eliminación del backup privado.
 3. **Later candidates:** React, Vue and all other capabilities remain
-   demand-driven; after canonical M22 publication, select the next milestone
-   explicitly. M22 does not imply D-033 or functional work.
+   demand-driven. M22 does not imply D-033 or functional work.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

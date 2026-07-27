@@ -6,8 +6,12 @@ Angular Aria 22 presentation-container pilot for Schema Engine.
 
 - Public verified Experimental `0.2.0` is available exactly and under both
   `next` and `latest` during the planned dependent-first transition.
-- Source package manifest: `0.2.0`; the public bytes are identical to the clean
-  candidate selected from commit `07755b4c`.
+- Source package manifest: proposed metadata-only `0.2.1`; it is not generated,
+  staged or public. Verified public `0.2.0` remains the installable line and is
+  identical to the clean candidate selected from commit `07755b4c`.
+- Its proposed base source is
+  `@rabassoft/schema-engine-angular@0.4.1`, while the preserved packed peer
+  floor remains `^0.4.0`; neither proposed version is live.
 - API classification: Public + Experimental + Active.
 - The only root API is `provideSchemaEngineAngularAriaContainers()`; the only
   style entry point is the explicit `./styles.css` export.
@@ -82,5 +86,8 @@ commercial use under its conditions. A separate paid commercial license may be
 available; contact `ricard@rabassoft.com`. No final commercial agreement or
 support SLA is represented by this package.
 
-Preferred TypeScript source is included in `src/`; see `SOURCE.md`. There is no
-npm provenance while the development repository remains private.
+Preferred TypeScript source is included in `src/`; see `SOURCE.md`. The
+sanitized repository is public at `https://github.com/rabassoft/schema-engine`.
+The proposed `0.2.1` source metadata names that repository, but npm provenance
+is not claimed until a later stage-only trusted publication is approved and
+verified. Existing `0.2.0` has no retroactive repository/provenance claim.

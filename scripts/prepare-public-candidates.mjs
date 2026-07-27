@@ -19,6 +19,7 @@ import {
 import {
   assertReleaseCandidateEvidence,
   loadCoordinatedReleaseTarget,
+  releaseCandidateDryRunArgs,
 } from './release-target.mjs';
 
 const { descriptor } = loadCoordinatedReleaseTarget();
@@ -27,7 +28,7 @@ const npmVersion = execFileSync('npm', ['--version'], {
   encoding: 'utf8',
 }).trim();
 assert.equal(process.version, 'v22.23.1');
-assert.equal(npmVersion, '10.9.8');
+assert.equal(npmVersion, descriptor.npmVersion ?? '10.9.8');
 
 rmSync(output, { recursive: true, force: true });
 mkdirSync(output, { recursive: true });
@@ -57,21 +58,20 @@ for (const [role, tarball] of Object.entries(tarballs)) {
   assert.equal(manifest.version, packageTarget.version);
   assert.equal(manifest.publishConfig.access, 'public');
   assert.equal(manifest.publishConfig.tag, 'next');
-  assert.equal(manifest.publishConfig.provenance, false);
-  execFileSync(
-    'npm',
-    [
-      'publish',
-      tarball,
-      '--dry-run',
-      '--access',
-      'public',
-      '--tag',
-      descriptor.distTag,
-      `--provenance=${descriptor.provenance}`,
-    ],
-    { env: cleanEnvironment, stdio: 'inherit' },
-  );
+  if (descriptor.id === 'm23') {
+    assert.notEqual(manifest.publishConfig.provenance, false);
+    assert.deepEqual(manifest.repository, {
+      type: 'git',
+      url: 'git+https://github.com/rabassoft/schema-engine.git',
+      directory: packageTarget.workspacePath,
+    });
+  } else {
+    assert.equal(manifest.publishConfig.provenance, false);
+  }
+  execFileSync('npm', releaseCandidateDryRunArgs(descriptor, tarball), {
+    env: cleanEnvironment,
+    stdio: 'inherit',
+  });
   const bytes = readFileSync(tarball);
   candidates.push({
     role,
@@ -100,16 +100,7 @@ try {
     );
     execFileSync(
       'npm',
-      [
-        'publish',
-        `./${candidate.file}`,
-        '--dry-run',
-        '--access',
-        'public',
-        '--tag',
-        descriptor.distTag,
-        `--provenance=${descriptor.provenance}`,
-      ],
+      releaseCandidateDryRunArgs(descriptor, candidate.file, true),
       { cwd: neutralDirectory, env: cleanEnvironment, stdio: 'inherit' },
     );
   }

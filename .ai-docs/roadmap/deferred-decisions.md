@@ -780,11 +780,14 @@ Cada decisión debe registrar:
 
 ## D-043: Publicación del repositorio y automatización segura de releases
 
-- **Estado:** Partially implemented; ADR-026 revision 0 and coordinated ADR-018
-  revision 6 are Accepted. Completed PLAN-024/review 177 cycle 3 deliver the promoted
-  M22 repository sanitization, publication, governance, protected controls and
-  fail-closed workflow preparation. Package metadata, npm trusted-publisher
-  activation, provenance release and backup deletion remain Deferred
+- **Estado:** Promoted for M23 delivery; ADR-026 revision 1 and
+  coordinated ADR-018 revision 7 are Accepted after review 179 cycle 2.
+  Completed PLAN-024/review 177 deliver M22 repository sanitization,
+  publication, governance, protected controls and fail-closed workflow
+  preparation. PLAN-025 revision 0 is Approved after review 180 cycle 2;
+  checkpoints 1–4 are complete after reviews 181–184. Checkpoint 5 protected
+  `main` promotion/reconciliation, trusted-publisher activation, provenance
+  release and backup deletion remain gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -816,8 +819,23 @@ Cada decisión debe registrar:
   una promoción/plan de release posterior.
 - **Cierre M22:** checkpoints 1–9 están completos. Review 177 ciclo 3 verifica
   el clon anónimo, historial/contenido saneado, mapa, recuperación, controles
-  GitHub, aislamiento npm y matriz completa sin hallazgos. El residual de
-  metadata/OIDC/provenance requiere una promoción y plan de release futuros.
+  GitHub, aislamiento npm y matriz completa sin hallazgos. PRs protegidas
+  #9–#11 publicaron, promovieron y reconciliaron el registro exacto; todos sus
+  CI pasaron, los árboles finales son idénticos y `main` es ancestro de
+  `develop`. El residual de metadata/OIDC/provenance requiere una promoción y
+  plan de release futuros.
+- **Preparación M23:** [`review 178`](../reviews/178-d043-m23-trusted-publication-promotion-readiness.md)
+  ciclo 2 pasa sin hallazgos; Ricard seleccionó la opción A: PATCH coordinado
+  core/base `0.4.1` y piloto `0.2.1`, peer floors `^0.4.0` preservados, trusted
+  publisher stage-only, aprobaciones 2FA por paquete y provenance automática.
+  [`ADR-026 revision 1`](../adrs/026-public-repository-and-secure-releases.md) y
+  [`ADR-018 revision 7`](../adrs/018-licencia-dual-publicacion-experimental.md)
+  quedan Accepted tras review 179 ciclo 2. PLAN-025 revisión 0 queda Approved
+  tras review 180 ciclo 2; checkpoints 1–3 quedan completos tras reviews
+  181–183 ciclo 2. Checkpoint 4 entrega PR #13 a `develop@39a0d60`, pasa CI
+  requerida/post-merge y review 184 ciclo 1, y produce candidatos limpios
+  byte-idénticos con ese `sourceCommit`. Checkpoint 5, `main`, npm y toda acción
+  externa posterior permanecen inactivos.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -945,26 +963,27 @@ Cada decisión debe registrar:
 
 ## 4. Próximo trabajo de decisión
 
-1. **M22 repository delivery:** PLAN-024 y checkpoints 1–9 están completados
-   localmente tras review 177 ciclo 3. El registro final debe recorrer aún el
-   flujo protegido `develop`/`main` y reconciliarse; npm metadata/OIDC/
-   provenance y el backup privado permanecen gated.
-2. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
+1. **M22 repository delivery:** PLAN-024 y checkpoints 1–9 están canónicamente
+   completados tras review 177 ciclo 3 y PRs protegidas #9–#11.
+2. **M23 design:** review 178 option A y las revisiones Accepted ADR-026 r1 /
+   ADR-018 r7 fijan el PATCH stage-only. El siguiente gate es preparar y revisar
+   PLAN-025; implementación, npm y el backup privado permanecen gated.
+3. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.
-3. **M19 release:** ADR-018 revisión 4 y PLAN-021 revisión 0 permanecen
+4. **M19 release:** ADR-018 revisión 4 y PLAN-021 revisión 0 permanecen
    Completed tras review 132 ciclo 4. Core/base `0.3.0` y piloto `0.1.0` están
    verificados bajo `next`, `latest` y resolución unqualified. Toda acción
    externa posterior sigue separada.
-4. **M18 delivery:** SPEC-008 v0.1.0 y ADR-023/ADR-024 permanecen Accepted;
+5. **M18 delivery:** SPEC-008 v0.1.0 y ADR-023/ADR-024 permanecen Accepted;
    PLAN-020 revisión 0 y M18 están Completed tras review 113 ciclo 2 sin
    hallazgos.
-5. **D-043:** está promovida solo para M22. PLAN-024 termina tras preparar,
-   sanear, publicar y configurar el repositorio; metadata npm y la primera
-   release OIDC/provenance requieren una promoción posterior.
-6. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
+6. **D-043:** M22 está completado y M23 tiene diseño normativo Accepted.
+   PLAN-025, metadata npm y la primera release OIDC/provenance requieren sus
+   gates posteriores.
+7. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
    familia de artefactos seleccionada.
-7. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;
+8. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;
    ADR-021 revisión 1 está Accepted y PLAN-018 revisión 1 está Completed tras
    review final 095 ciclo 2 sin hallazgos.
 
@@ -982,6 +1001,7 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 27-07-2026 | PLAN-025 checkpoint 4 entrega PR #13 a `develop@39a0d60`; review 184 valida rebuild limpio byte-idéntico y deja `main`/npm gated.                  |
 | 20-07-2026 | Review 163 ciclo 3 completa checkpoint 10 tras recuperación: core/base `next/latest: 0.4.0`, piloto `0.2.0` y ocho matrices pasan.                 |
 | 20-07-2026 | Review 162 ciclo 2 completa checkpoint 9: base `latest` pasa a `0.4.0`; piloto permanece `0.2.0`, core `0.3.0` y settings no cambian.              |
 | 20-07-2026 | Review 161 ciclo 5 completa el preflight read-only de checkpoint 9 sin hallazgos; solo el dist-tag base `latest` espera aprobación inmediata.      |

@@ -4,6 +4,7 @@ import { isDeepStrictEqual } from 'node:util';
 import {
   M19_RELEASE_DESCRIPTOR,
   M21_RELEASE_DESCRIPTOR,
+  M23_RELEASE_DESCRIPTOR,
 } from './release-target.mjs';
 
 const root = process.cwd();
@@ -17,10 +18,11 @@ const publicPolicyPaths = [
 const statusPath = '.ai-docs/project/STATUS.md';
 const specificationDirectory = '.ai-docs/specs';
 const specificationIndexPath = '.ai-docs/specs/000-index.md';
-const publishableManifestPaths = M21_RELEASE_DESCRIPTOR.packages.map(
+const publishableManifestPaths = M23_RELEASE_DESCRIPTOR.packages.map(
   ({ workspacePath }) => `${workspacePath}/package.json`,
 );
 const m21ReleaseNotePath = '.ai-docs/releases/0.4.0.md';
+const m23ReleaseNotePath = '.ai-docs/releases/0.4.1.md';
 const staleCurrentClaims = [
   {
     path: 'README.md',
@@ -1016,62 +1018,32 @@ const publishableManifests = await Promise.all(
     JSON.parse(await read(manifestPath)),
   ]),
 );
-const expectedManifestContracts = {
-  core: {
-    exports: {
-      '.': {
-        types: './dist/index.d.ts',
-        import: './dist/index.js',
-        default: './dist/index.js',
+const expectedManifestContracts = Object.fromEntries(
+  M23_RELEASE_DESCRIPTOR.packages.map((packageTarget) => [
+    packageTarget.role,
+    {
+      exports: packageTarget.exports,
+      dependencies: packageTarget.runtimeDependencies,
+      devDependencies: {
+        ...packageTarget.frameworkDevelopment,
+        ...Object.fromEntries(
+          Object.keys(packageTarget.schemaEngineDevelopment).map((name) => [
+            name,
+            'workspace:*',
+          ]),
+        ),
+      },
+      peerDependencies: {
+        ...packageTarget.frameworkPeers,
+        ...packageTarget.schemaEngineSourcePeers,
       },
     },
-    dependencies: {},
-    devDependencies: {},
-    peerDependencies: {},
-  },
-  angular: {
-    exports: {
-      '.': {
-        types: './dist/index.d.ts',
-        import: './dist/index.js',
-        default: './dist/index.js',
-      },
-    },
-    dependencies: { tslib: '^2.8.1' },
-    devDependencies: { '@rabassoft/schema-engine': 'workspace:*' },
-    peerDependencies: {
-      '@angular/core': '>=22.0.6 <23.0.0',
-      '@angular/forms': '>=22.0.6 <23.0.0',
-      '@rabassoft/schema-engine': 'workspace:^',
-    },
-  },
-  angularAria: {
-    exports: {
-      '.': {
-        types: './dist/index.d.ts',
-        import: './dist/index.js',
-        default: './dist/index.js',
-      },
-      './styles.css': './styles.css',
-    },
-    dependencies: { tslib: '^2.8.1' },
-    devDependencies: {
-      '@angular/aria': '22.0.5',
-      '@angular/cdk': '22.0.5',
-      '@rabassoft/schema-engine-angular': 'workspace:*',
-    },
-    peerDependencies: {
-      '@angular/aria': '>=22.0.5 <23.0.0',
-      '@angular/cdk': '>=22.0.5 <23.0.0',
-      '@angular/core': '>=22.0.6 <23.0.0',
-      '@rabassoft/schema-engine-angular': 'workspace:^',
-    },
-  },
-};
+  ]),
+);
 for (const [
   index,
   packageTarget,
-] of M21_RELEASE_DESCRIPTOR.packages.entries()) {
+] of M23_RELEASE_DESCRIPTOR.packages.entries()) {
   const [manifestPath, manifest] = publishableManifests[index];
   if (manifest.name !== packageTarget.name) {
     fail(`${manifestPath} does not report ${packageTarget.name}`);
@@ -1084,12 +1056,16 @@ for (const [
   if (
     manifest.license !== 'AGPL-3.0-only' ||
     manifest.private !== undefined ||
-    manifest.repository !== undefined ||
+    !sameJson(manifest.repository, {
+      type: 'git',
+      url: 'git+https://github.com/rabassoft/schema-engine.git',
+      directory: packageTarget.workspacePath,
+    }) ||
     manifest.publishConfig?.access !== 'public' ||
-    manifest.publishConfig?.tag !== M21_RELEASE_DESCRIPTOR.distTag ||
-    manifest.publishConfig?.provenance !== M21_RELEASE_DESCRIPTOR.provenance
+    manifest.publishConfig?.tag !== M23_RELEASE_DESCRIPTOR.distTag ||
+    manifest.publishConfig?.provenance === false
   ) {
-    fail(`${manifestPath} does not match the M21 distribution boundary`);
+    fail(`${manifestPath} does not match the M23 source distribution boundary`);
   }
   if (
     manifest.author?.name !==
@@ -1099,6 +1075,9 @@ for (const [
     fail(`${manifestPath} does not retain the accepted author/contact`);
   }
   const expectedManifest = expectedManifestContracts[packageTarget.role];
+  if (!sameJson(manifest.sideEffects, packageTarget.sideEffects)) {
+    fail(`${manifestPath} has unexpected M23 side effects`);
+  }
   for (const member of [
     'exports',
     'dependencies',
@@ -1106,7 +1085,7 @@ for (const [
     'peerDependencies',
   ]) {
     if (!sameJson(manifest[member] ?? {}, expectedManifest[member])) {
-      fail(`${manifestPath} has an unexpected M21 ${member} contract`);
+      fail(`${manifestPath} has an unexpected M23 ${member} contract`);
     }
   }
   for (const requiredFile of [
@@ -1178,6 +1157,22 @@ for (const [onboardingPath, packageTargets] of m21Onboarding) {
   }
 }
 
+const m23SourceOnboarding = new Map([
+  ['README.md', M23_RELEASE_DESCRIPTOR.packages],
+  [m23ReleaseNotePath, M23_RELEASE_DESCRIPTOR.packages],
+  ['packages/core/README.md', [M23_RELEASE_DESCRIPTOR.packages[0]]],
+  ['packages/angular/README.md', M23_RELEASE_DESCRIPTOR.packages.slice(0, 2)],
+  ['packages/angular-aria/README.md', M23_RELEASE_DESCRIPTOR.packages.slice(1)],
+]);
+for (const [onboardingPath, packageTargets] of m23SourceOnboarding) {
+  const onboarding = await read(onboardingPath);
+  for (const { name, version } of packageTargets) {
+    if (!onboarding.includes(name) || !onboarding.includes(version)) {
+      fail(`${onboardingPath} omits proposed M23 ${name}@${version}`);
+    }
+  }
+}
+
 const requiredOnboardingFragments = new Map([
   [
     'README.md',
@@ -1191,7 +1186,7 @@ const requiredOnboardingFragments = new Map([
     'packages/core/README.md',
     [
       'Public verified Experimental `0.4.0`',
-      'Source package manifest: `0.4.0`',
+      'Source package manifest: proposed metadata-only `0.4.1`',
       'under both\n  `next` and `latest`',
       'Exact core `0.4.0`, `next`, `latest` and unqualified clean-consumer evidence',
       'Published core `0.4.0` includes these local forests',
@@ -1201,7 +1196,7 @@ const requiredOnboardingFragments = new Map([
     'packages/angular/README.md',
     [
       'Public verified Experimental `0.4.0`',
-      'Source package manifest: `0.4.0`',
+      'Source package manifest: proposed metadata-only `0.4.1`',
       '| `0.4.x` | `^0.4.0`',
       'Required core `0.4.0` is likewise public and verified under `next`',
       'under both\n  `next` and `latest`',
@@ -1213,7 +1208,7 @@ const requiredOnboardingFragments = new Map([
     'packages/angular-aria/README.md',
     [
       'Public verified Experimental `0.2.0`',
-      'Source package manifest: `0.2.0`',
+      'Source package manifest: proposed metadata-only `0.2.1`',
       'selected from commit',
       'under both\n  `next` and `latest`',
       'pilot `0.2.x` with base Angular `^0.4.0`',
@@ -1387,6 +1382,41 @@ for (const claim of invalidM21ReleaseClaims) {
   const match = m21ReleaseNote.match(claim.pattern);
   if (match) {
     fail(`${m21ReleaseNotePath} contains ${claim.description}: ${match[0]}`);
+  }
+}
+
+const m23ReleaseNote = await read(m23ReleaseNotePath);
+for (const fragment of [
+  'deterministic clean `develop` comparison candidates',
+  'core `0.4.1`',
+  'base Angular `0.4.1`',
+  'pilot `0.2.1`',
+  'ordinary `^0.4.0`',
+  'sourceCommit: 39a0d60abd34d399855995aa4375d60fb52c7873',
+  'All non-metadata bytes and inventories are identical',
+  '182aeb23087bb9b6d02c097aecda7acb239ed4d86b8b3c7854eb58f3232d510a0113b01f0790fc03ed4b8042d95ba59feb0d0b160702e088cf23d243f15e59bb',
+  '51d95d98075b7ff63be1cafa5b39a42f9a93ce9a41a5147cd086330ceada6bf851b8d23725e87ec8077e4647b0c8874b70966dc3974d73ef9c7909aecc0b8bea',
+  'dae08ca2d1c2716ed397ceabb8ba9c8af637e54710a4a47cf3f74d2461f69d3fb928aa6aa3c29effd2846f0832b6a1e34cd77dfe0783996d3177a1f80f82d937',
+  'dependency order',
+  'separate Ricard 2FA approval',
+  'deepest-dependent-first',
+  'npm stage publish',
+  'exact npm `11.18.0`',
+  'npm provenance remains unobserved',
+  'Never fall back from OIDC',
+]) {
+  if (!m23ReleaseNote.includes(fragment)) {
+    fail(`${m23ReleaseNotePath} omits required M23 source state: ${fragment}`);
+  }
+}
+for (const claim of [
+  /M23 (?:is|is now) (?:public|published|staged)/iu,
+  /provenance is (?:available|enabled|verified)/iu,
+  /0\.4\.1[^\n.]{0,80}(?:is available|may be installed)/iu,
+]) {
+  const match = m23ReleaseNote.match(claim);
+  if (match) {
+    fail(`${m23ReleaseNotePath} contains premature M23 state: ${match[0]}`);
   }
 }
 const ephemeralGitClaim = status.match(

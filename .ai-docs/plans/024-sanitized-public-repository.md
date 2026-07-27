@@ -23,7 +23,8 @@
   Checkpoint 8 settings passed review 176 cycle 7 and protected publication into
   `develop`, promotion to `main` and reconciliation passed review 176 cycle 11.
   Checkpoint 9's corrected complete closure passed review 177 cycle 3 with zero
-  unresolved findings
+  unresolved findings and was published, promoted and reconciled through
+  protected PRs #9–#11
 
 ## 1. Goal and hard boundary
 
@@ -720,7 +721,12 @@ resolution robust to staggered patch publication and fixed two audit invocation
 preconditions. Cycle 2 corrected the final command alias and the positional
 Angular reorder E2E selector. Cycle 3 repeated the complete workspace, package,
 source, reference, Chromium, npm immutability/isolation, documentation and diff
-matrix with zero unresolved findings. PLAN-024/M22 are complete when this exact
-record is published through the required protected flow; package metadata,
-trusted publishing, provenance, release work and private-backup deletion remain
-gated.
+matrix with zero unresolved findings. This exact record then passed the required
+protected flow: PR #9 published it to
+`develop@049160e8`; PR #10 promoted it to
+`main@7f22dbd03680f1195c5309427b5002bf447aace4`; and PR #11 reconciled
+`main` into `develop@d4d44d43fcba4692baa0fdef6026793f4f93122f`. All six
+required/post-merge CI runs passed, both final trees are identical and `main`
+is an ancestor of `develop`. PLAN-024/M22 is therefore canonically complete.
+Package metadata, trusted publishing, provenance, release work and
+private-backup deletion remain gated.

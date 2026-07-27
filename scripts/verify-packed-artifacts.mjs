@@ -84,7 +84,9 @@ function expectedMembers(modules) {
   ]);
 }
 
-function verifyCommon(tarball, expectedName, expectedVersion, modules) {
+function verifyCommon(tarball, packageTarget, modules) {
+  const expectedName = packageTarget.name;
+  const expectedVersion = packageTarget.version;
   const members = listTarball(tarball);
   const files = new Set(members.filter((member) => !member.endsWith('/')));
 
@@ -133,12 +135,24 @@ function verifyCommon(tarball, expectedName, expectedVersion, modules) {
     name: 'Ricardo Rabassó Rodríguez, operating as Rabassoft',
     email: 'ricard@rabassoft.com',
   });
-  assert.deepEqual(manifest.publishConfig, {
-    access: 'public',
-    tag: 'next',
-    provenance: false,
-  });
-  assert.equal(manifest.repository, undefined);
+  if (descriptor.id === 'm23') {
+    assert.deepEqual(manifest.publishConfig, {
+      access: 'public',
+      tag: 'next',
+    });
+    assert.deepEqual(manifest.repository, {
+      type: 'git',
+      url: 'git+https://github.com/rabassoft/schema-engine.git',
+      directory: packageTarget.workspacePath,
+    });
+  } else {
+    assert.deepEqual(manifest.publishConfig, {
+      access: 'public',
+      tag: 'next',
+      provenance: false,
+    });
+    assert.equal(manifest.repository, undefined);
+  }
   assert.deepEqual(manifest.exports, {
     '.': {
       types: './dist/index.d.ts',
@@ -162,8 +176,15 @@ function verifyCommon(tarball, expectedName, expectedVersion, modules) {
   const readme = readTarballText(tarball, 'package/README.md');
   assert.ok(readme.includes('@next'));
   assert.ok(readme.includes('AGPL-3.0-only'));
-  assert.ok(readme.includes('no npm provenance'));
-  assert.equal(readme.includes('github.com/rabassoft/schema-engine'), false);
+  if (descriptor.id === 'm23') {
+    assert.ok(readme.includes('npm provenance'));
+    assert.ok(readme.includes('github.com/rabassoft/schema-engine'));
+    assert.ok(readme.includes('is not claimed until'));
+    assert.ok(readme.includes('stage-only trusted publication'));
+  } else {
+    assert.ok(readme.includes('no npm provenance'));
+    assert.equal(readme.includes('github.com/rabassoft/schema-engine'), false);
+  }
   const notice = readTarballText(tarball, 'package/NOTICE.md');
   assert.ok(notice.includes('ricard@rabassoft.com'));
   assert.ok(notice.includes('not itself a commercial offer'));
@@ -184,16 +205,10 @@ try {
   );
   assert.ok(coreTarget);
   assert.ok(angularTarget);
-  const core = verifyCommon(
-    tarballs.core,
-    coreTarget.name,
-    coreTarget.version,
-    CORE_MODULES,
-  );
+  const core = verifyCommon(tarballs.core, coreTarget, CORE_MODULES);
   const angular = verifyCommon(
     tarballs.angular,
-    angularTarget.name,
-    angularTarget.version,
+    angularTarget,
     ANGULAR_MODULES,
   );
 

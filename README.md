@@ -184,7 +184,10 @@ Each package carries its preferred TypeScript source, frozen build harness,
 license and notices so its existing release can be rebuilt independently.
 Existing M19/M21 versions do not claim repository-backed npm provenance; a
 future release must separately prove OIDC publication from the sanitized public
-source.
+source. The workspace now prepares metadata-only M23 source versions core/base
+`0.4.1` and pilot `0.2.1`, exact package repository directories and a
+stage-only workflow. They are not generated, staged or public; verified M21
+remains the installable line.
 
 Issues may be used for non-code feedback. External code contributions are not
 accepted until a separately reviewed rights policy exists; see
