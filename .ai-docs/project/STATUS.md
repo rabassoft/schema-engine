@@ -12,7 +12,7 @@
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-025 revision 0, Approved
 - **Last completed implementation plan:** PLAN-024 revision 0
-- **Active implementation task:** R189-F01 protected Git delivery
+- **Active implementation task:** None
 - **Last accepted ADR:** ADR-026 revision 1, coordinated with ADR-018 revision 7
 - **Implemented capability:** M1–M22 and G0, plus M23 metadata/OIDC source
   preparation through selected protected-`main` candidates and three
@@ -35,13 +35,15 @@ branches, then rebuild and reselect exact candidates.
 
 ## In progress
 
-Scoped Rabassoft commit `efd8edf` is pushed and draft PR #18 targets protected
-`develop`. Review 190 cycle 3 accepts the local correction with zero findings.
-Required CI is pending; all three existing stages remain unapproved and
-unrejected.
+None. Draft PR #18 targets protected `develop`; exact head `2765df1` is clean
+against the base and required CI passed in 5m08s. All three existing stages
+remain unapproved and unrejected.
 
 ## Latest completed work
 
+- Delivered the R189-F01 correction as Rabassoft commits `efd8edf`/`2765df1`
+  through draft PR #18. Exact required CI run `30310547997` passed in 5m08s;
+  the PR has clean merge state against protected `develop`.
 - Completed the local R189-F01 correction after review 190 cycle 3 passed with
   zero findings. Pure-JavaScript gzip normalization preserves exact TAR bytes;
   two full generations and normalized protected candidates are byte-identical.
@@ -64,8 +66,8 @@ unrejected.
 
 ## Exact next action
 
-Observe required CI on draft PR #18. Do not merge, reject a stage or dispatch
-without its separate authorization.
+Decide formal acceptance of draft PR #18 and whether to authorize its protected
+merge. Do not merge, reject a stage or dispatch without separate authorization.
 
 ## Blockers and conflicts
 
@@ -76,6 +78,8 @@ without its separate authorization.
 - Review 190 resolves R189-F01 locally with deterministic pure-JavaScript gzip
   generation, but the correction is not yet delivered or selected from
   protected source.
+- Draft PR #18 is ready for a separate acceptance/merge decision after required
+  CI passed. The correction is not yet present on protected `develop`.
 - Review 186 cycle 3 resolves the previous execution-contract conflict without
   runtime, package, alias or API change.
 - GitHub/npm identities and authenticated observations are exact. All three
@@ -112,11 +116,14 @@ without its separate authorization.
 
 ## Open questions
 
-- None. Protected Git delivery and each stage rejection remain separately
-  gated actions.
+- Whether to accept draft PR #18 and authorize its protected merge. Each stage
+  rejection remains a later separately gated action.
 
 ## Latest verification
 
+- Draft PR #18 exact head `2765df143c7f06c1e2c0ca58c8feee34e38d684f`
+  has clean merge state against `develop`; required CI run
+  `30310547997`/job `90124902584` passed in 5m08s.
 - Review 190 cycles 1–2 corrected documentation-evidence link and public-tree
   counts. Cycle 3 passes with zero findings: frozen offline install, formatting,
   283-document/924-link documentation, lint, full build/typecheck,

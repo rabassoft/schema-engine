@@ -6,6 +6,23 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-28 — R189-F01 draft PR required CI passed
+
+### Completed
+
+- Draft PR #18 exact head
+  `2765df143c7f06c1e2c0ca58c8feee34e38d684f` is two commits ahead and zero
+  behind protected `develop`, with clean merge state.
+- Required CI run `30310547997`, job `90124902584`, passed in 5m08s.
+- The remote scope contains exactly the 21 reviewed M23/R186–R190 files. No
+  merge or npm mutation occurred.
+
+### Next
+
+- Decide formal acceptance of draft PR #18 and whether to authorize its
+  protected merge. Stage rejection, rebuild/reselection and another workflow
+  dispatch remain separate later gates.
+
 ## 2026-07-28 — R189-F01 draft PR opened
 
 ### Completed
