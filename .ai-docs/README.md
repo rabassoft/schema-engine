@@ -55,6 +55,11 @@
 
 ## Acceptance reviews
 
+- [R189-F01 protected-develop rebuild review](./reviews/191-r189-f01-protected-develop-rebuild-review.md)
+  — Cycle 1 corrects two stale/oversized STATUS sections; cycle 2 passes
+  merge/CI, two clean deterministic generations, exact source evidence,
+  dry-runs, source rebuilds and security with zero findings; `main` and npm
+  remain gated.
 - [R189-F01 deterministic-gzip correction review](./reviews/190-r189-f01-deterministic-gzip-correction-review.md)
   — Cycles 1–2 correct two documentation-evidence counts; cycle 3 passes the
   complete local correction review with zero findings;

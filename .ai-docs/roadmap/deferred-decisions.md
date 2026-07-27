@@ -794,8 +794,10 @@ Cada decisión debe registrar:
   cycle 1 blocks because staged gzip bytes differ from selected candidates
   despite exact TAR/content. Ricard selects exact `.tgz` preservation and
   review 190 cycle 3 validates the local platform-independent gzip correction
-  with zero findings; protected delivery, reselection, stage rejection,
-  approvals, provenance release and backup deletion remain gated
+  with zero findings. PR #18 merges it into protected `develop@5e60796`, and
+  review 191 cycle 2 validates the clean deterministic rebuild with zero
+  findings; protected `main` promotion, selection, stage rejection, approvals,
+  provenance release and backup deletion remain gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -854,7 +856,9 @@ Cada decisión debe registrar:
   TAR y contenido son exactos. Ricard selecciona preservar identidad `.tgz`;
   review 190 ciclo 3 valida sin hallazgos la corrección gzip determinista local
   y deja entrega protegida, reselección, rechazo de stages y nuevo staging bajo
-  sus gates separados.
+  sus gates separados. PR #18 entrega a `develop@5e60796`; review 191 ciclo 2
+  valida sin hallazgos dos generaciones limpias, evidencia de source exacta,
+  source rebuilds y seguridad. `main` y npm permanecen gated.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 

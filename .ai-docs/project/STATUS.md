@@ -6,13 +6,13 @@
 ## Checkpoint
 
 - **Updated:** 2026-07-28 by Ricard / Codex
-- **Branch:** `codex/m23-checkpoint5-closure`
+- **Branch:** `codex/m23-r189-develop-evidence`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-025 revision 0, Approved
 - **Last completed implementation plan:** PLAN-024 revision 0
-- **Active implementation task:** None
+- **Active implementation task:** Review 191 evidence protected delivery
 - **Last accepted ADR:** ADR-026 revision 1, coordinated with ADR-018 revision 7
 - **Implemented capability:** M1–M22 and G0, plus M23 metadata/OIDC source
   preparation through selected protected-`main` candidates and three
@@ -35,12 +35,17 @@ branches, then rebuild and reselect exact candidates.
 
 ## In progress
 
-None. Draft PR #18 targets protected `develop`; exact head `2765df1` is clean
-against the base and required CI passed in 5m08s. All three existing stages
-remain unapproved and unrejected.
+Ricard authorized autonomous scoped commit, push and draft PR delivery of
+review 191 evidence into protected `develop`. All three existing stages remain
+unapproved and unrejected.
 
 ## Latest completed work
 
+- Completed the R189-F01 clean protected-`develop` rebuild after review 191
+  cycle 2 passed with zero findings. Two generations, exact source evidence,
+  neutral dry-runs, three Corresponding Source rebuilds and security pass.
+- Merged accepted PR #18 through protected `develop@5e60796`. Post-merge CI run
+  `30311703680`/job `90128528176` passed the complete workflow in 4m56s.
 - Delivered the R189-F01 correction as Rabassoft commits `efd8edf`/`2765df1`
   through draft PR #18. Exact required CI run `30310547997` passed in 5m08s;
   the PR has clean merge state against protected `develop`.
@@ -50,24 +55,11 @@ remain unapproved and unrejected.
 - Completed exact workflow run `30304490264`: verify passed in 4m44s and stage
   passed in 2m4s after separate environment approval. Three unapproved stages
   with automatic provenance exist.
-- Completed the checkpoint-8 read-only pre-dispatch gate after review 188 cycle
-  2 passed all ten areas with zero findings. Exact protected source, workflow,
-  environment, trust relations, candidate bytes and empty registry state pass.
-- Completed PLAN-025 checkpoint 7 after review 187 cycle 1 passed all seven
-  areas with zero findings. All three packages have exactly one stage-only
-  relation; stages and M23 versions remain absent.
-- Completed PLAN-025 checkpoint 6 after review 186 cycle 5 passed the complete
-  read-only GitHub/npm preflight and corrected historical live matrix with zero
-  findings. All three package trust lists are empty; no mutation occurred.
-- Completed PLAN-025 checkpoint 5 after review 185 cycle 4 passed all fifteen
-  areas with zero findings. Protected `main@4bcb6ea` and reconciled
-  `develop@6d00ed0` have the same tree; selected candidates are deterministic,
-  byte-identical and bound to exact protected `main`.
 
 ## Exact next action
 
-Decide formal acceptance of draft PR #18 and whether to authorize its protected
-merge. Do not merge, reject a stage or dispatch without separate authorization.
+Deliver review 191 evidence through a draft PR to protected `develop` and
+observe required CI. Do not promote to `main`, reject a stage or dispatch.
 
 ## Blockers and conflicts
 
@@ -76,19 +68,20 @@ merge. Do not merge, reject a stage or dispatch without separate authorization.
   selected candidates on all three packages. Extracted files and uncompressed
   TAR bytes are exact; macOS/Linux gzip output is not.
 - Review 190 resolves R189-F01 locally with deterministic pure-JavaScript gzip
-  generation, but the correction is not yet delivered or selected from
-  protected source.
-- Draft PR #18 is ready for a separate acceptance/merge decision after required
-  CI passed. The correction is not yet present on protected `develop`.
+  generation. PR #18 delivers it to protected `develop`; it is not yet promoted
+  to or selected from protected `main`.
+- PR #18 is merged and the correction is present on protected `develop`; clean
+  rebuild evidence passes review 191, but corrected candidates are not yet
+  selected from protected `main`.
 - Review 186 cycle 3 resolves the previous execution-contract conflict without
   runtime, package, alias or API change.
 - GitHub/npm identities and authenticated observations are exact. All three
   package trust lists were empty at checkpoint 6. Core now has exactly one
   stage-only relation, base Angular has exactly one stage-only relation and
   Angular Aria has exactly one stage-only relation.
-- Protected M23 delivery to `develop` is complete. The current clean
-  candidates are selected publishable evidence from protected `main`; the
-  configured trust relations do not imply any stage or release.
+- The original pre-correction M23 delivery reached protected `main`, but its
+  selected candidates cannot match cross-platform staged gzip bytes. Corrected
+  candidates currently have only protected-`develop` comparison evidence.
 - Exact npm `11.18.0` is provisioned. Frozen offline install passes outside the
   restricted sandbox with the populated global pnpm store; the ignored
   workspace-local store cannot materialize content under sandbox restrictions.
@@ -116,11 +109,18 @@ merge. Do not merge, reject a stage or dispatch without separate authorization.
 
 ## Open questions
 
-- Whether to accept draft PR #18 and authorize its protected merge. Each stage
-  rejection remains a later separately gated action.
+- None. Evidence delivery, promotion to `main` and each stage rejection remain
+  separately gated actions.
 
 ## Latest verification
 
+- Review 191 cycle 1 corrected stale delivery wording and the oversized
+  latest-completed list. Cycle 2 passes the exact protected-`develop` rebuild
+  with zero findings. Two candidate generations match canonical bytes; evidence
+  records `sourceCommit: 5e60796`, three neutral dry-runs, three Corresponding
+  Source rebuilds, security/rights and focused policy checks pass.
+- PR #18 merged at exact `develop@5e60796ac694f1d610e449683284707e1774571b`.
+  Post-merge CI run `30311703680`/job `90128528176` passed all steps in 4m56s.
 - Draft PR #18 exact head `2765df143c7f06c1e2c0ca58c8feee34e38d684f`
   has clean merge state against `develop`; required CI run
   `30310547997`/job `90124902584` passed in 5m08s.
@@ -177,6 +177,8 @@ merge. Do not merge, reject a stage or dispatch without separate authorization.
   `.ai-docs/reviews/189-plan-025-checkpoint-8-staged-byte-review.md`
 - Accepted R189-F01 local correction review:
   `.ai-docs/reviews/190-r189-f01-deterministic-gzip-correction-review.md`
+- Accepted R189-F01 protected-develop rebuild review:
+  `.ai-docs/reviews/191-r189-f01-protected-develop-rebuild-review.md`
 - Accepted M23 checkpoint-8 pre-dispatch review:
   `.ai-docs/reviews/188-plan-025-checkpoint-8-pre-dispatch-review.md`
 - Completed M23 checkpoint-7 review:

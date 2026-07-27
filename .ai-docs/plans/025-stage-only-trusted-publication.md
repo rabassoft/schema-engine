@@ -29,7 +29,10 @@
   exact run `30304490264` passed verify/stage; review 189 cycle 1 blocks on
   cross-platform gzip byte mismatch, with all three stages unapproved; review
   190 cycle 3 passes the local deterministic-gzip correction with zero findings
-  and leaves protected delivery plus stage rejection separately gated
+  and leaves protected delivery plus stage rejection separately gated; PR #18
+  merges the correction into protected `develop@5e60796`, post-merge CI passes
+  and review 191 cycle 2 accepts the clean deterministic rebuild with zero
+  findings
 
 ## 1. Goal and hard boundary
 

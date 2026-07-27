@@ -6,6 +6,62 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-28 — Review 191 evidence delivery authorized
+
+### In progress
+
+- Ricard authorized autonomous scoped commit, push and draft PR delivery of
+  review 191 evidence into protected `develop`.
+- The scope is documentation-only: review 191 and reconciled STATUS, WORKLOG,
+  ROADMAP, Deferred, release notes, plan and documentation index.
+- Promotion to `main` and every npm mutation remain excluded.
+
+### Next
+
+- Commit with Rabassoft authorship, push
+  `codex/m23-r189-develop-evidence`, open its draft PR to `develop` and observe
+  required CI without promoting `main`.
+
+## 2026-07-28 — R189-F01 protected develop rebuild accepted
+
+### Completed
+
+- Review 191 cycle 1 corrected stale delivery wording and compacted STATUS.
+  Cycle 2 passes with zero findings from exact protected `develop@5e60796`.
+- Two complete generations are byte-identical and equal review 190's canonical
+  values. Candidate evidence records exact `sourceCommit`; all three neutral
+  dry-runs pass.
+- Frozen offline install, complete build, three-package Corresponding Source,
+  security/rights, formatting, documentation, lint, 41 release tests, 23
+  public tests, public-tree, workflow and diff checks pass.
+- No push, `main` promotion or npm mutation occurred. All three stages remain
+  unapproved and unrejected.
+
+### Next
+
+- Obtain explicit authorization for the scoped commit, push and protected PR of
+  this evidence into `develop`. Promotion to `main` remains a later separate
+  gate.
+
+## 2026-07-28 — R189-F01 protected develop rebuild started
+
+### In progress
+
+- Ricard accepted PR #18 and authorized its protected merge. It merged as
+  `develop@5e60796ac694f1d610e449683284707e1774571b`.
+- Post-merge CI run `30311703680`, job `90128528176`, passed every step in
+  4m56s.
+- Local branch `codex/m23-r189-develop-evidence` starts from that exact
+  protected commit for two clean deterministic candidate generations.
+- All three npm stages remain unapproved and unrejected. `main`, stage state
+  and the registry remain untouched.
+
+### Next
+
+- Generate and compare two clean M23 candidate sets from exact protected
+  `develop`, then repeat the scoped local review. Promotion to `main` remains a
+  separate gate.
+
 ## 2026-07-28 — R189-F01 draft PR required CI passed
 
 ### Completed
