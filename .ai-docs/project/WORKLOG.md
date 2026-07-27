@@ -16,11 +16,14 @@ the full file is not part of routine task startup.
 - Identified the checkpoint-4 closure documents and review 184 as a required
   protected-`develop` delivery precondition so the promoted source contains
   its own canonical state.
+- Committed the exact eight-file closure as `7ff42dc`, pushed
+  `codex/m23-checkpoint4-closure` and opened draft PR #14 into protected
+  `develop`.
 
 ### Next
 
-- Commit and push `codex/m23-checkpoint4-closure`, open its protected PR into
-  `develop` and pass required/post-merge CI before starting the promotion PR.
+- Pass required CI for PR #14, mark it ready, merge it and pass post-merge CI
+  before starting the promotion PR.
 
 ## 2026-07-27 — PLAN-025 checkpoint 4 completed
 

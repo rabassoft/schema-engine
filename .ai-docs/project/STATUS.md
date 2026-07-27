@@ -35,9 +35,9 @@ exact clean rebuild without any npm action.
 
 ## In progress
 
-Checkpoint 5 is authorized. The checkpoint-4 closure documents and review 184
-must first enter protected `develop`; then `develop` may be promoted to `main`,
-reconciled back and rebuilt from the exact protected source. npm remains gated.
+Checkpoint 5 is authorized. Draft PR #14 carries the checkpoint-4 closure into
+protected `develop`; after its required/post-merge CI, `develop` may be
+promoted to `main`, reconciled back and rebuilt. npm remains gated.
 
 ## Latest completed work
 
@@ -66,9 +66,8 @@ reconciled back and rebuilt from the exact protected source. npm remains gated.
 
 ## Exact next action
 
-Commit and push `codex/m23-checkpoint4-closure`, open its protected PR into
-`develop` and pass required/post-merge CI before opening the checkpoint-5
-promotion PR.
+Pass required CI for PR #14, mark it ready, merge it and pass post-merge CI
+before opening the checkpoint-5 promotion PR.
 
 ## Blockers and conflicts
 
@@ -101,7 +100,7 @@ promotion PR.
 
 ## Open questions
 
-- None until the checkpoint-4 closure PR reaches a green mergeable state.
+- None until PR #14 reaches a green mergeable state.
 
 ## Latest verification
 
