@@ -32,7 +32,10 @@
   and leaves protected delivery plus stage rejection separately gated; PR #18
   merges the correction into protected `develop@5e60796`, post-merge CI passes
   and review 191 cycle 2 accepts the clean deterministic rebuild with zero
-  findings
+  findings; PR #19 delivers that evidence to protected `develop@e99193b`, its
+  required/post-merge CI passes and review 192 cycle 6 accepts protected-main
+  promotion readiness subject to delivering its documentation-only evidence
+  and reobserving exact `develop`; promotion and npm remain unauthorized
 
 ## 1. Goal and hard boundary
 

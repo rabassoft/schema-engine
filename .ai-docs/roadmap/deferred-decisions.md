@@ -796,8 +796,11 @@ Cada decisión debe registrar:
   review 190 cycle 3 validates the local platform-independent gzip correction
   with zero findings. PR #18 merges it into protected `develop@5e60796`, and
   review 191 cycle 2 validates the clean deterministic rebuild with zero
-  findings; protected `main` promotion, selection, stage rejection, approvals,
-  provenance release and backup deletion remain gated
+  findings. PR #19 delivers that evidence to protected `develop@e99193b`; its
+  required/post-merge CI and review 192 cycle 6 pass. Review evidence delivery
+  and exact-head reobservation precede the separately gated protected `main`
+  promotion; selection, stage rejection, approvals, provenance release and
+  backup deletion remain gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -858,7 +861,10 @@ Cada decisión debe registrar:
   y deja entrega protegida, reselección, rechazo de stages y nuevo staging bajo
   sus gates separados. PR #18 entrega a `develop@5e60796`; review 191 ciclo 2
   valida sin hallazgos dos generaciones limpias, evidencia de source exacta,
-  source rebuilds y seguridad. `main` y npm permanecen gated.
+  source rebuilds y seguridad. PR #19 entrega la evidencia a
+  `develop@e99193b`; su CI requerida/post-merge y review 192 ciclo 6 pasan sin
+  hallazgos. La evidencia de review debe llegar primero a `develop` y
+  reobservarse su SHA; `main` y npm permanecen gated.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 

@@ -6,6 +6,28 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-28 — R189-F01 protected-main promotion readiness accepted
+
+### Completed
+
+- PR #19 merged exact head `80916f8` as protected `develop@e99193b`; required
+  CI run `30312801163`/job `90131912990` passed in 4m52s and post-merge run
+  `30313179969`/job `90133059320` passed in 4m53s.
+- Review 192 cycle 1 corrected stale evidence-delivery state and cycle 2
+  corrected formatting. Cycle 3 corrected one ambiguous phrase and cycle 4
+  corrected its table formatting. Cycle 5 corrected the evidence-delivery
+  order. Cycle 6 verifies exact refs, seven-commit promotion payload, active
+  no-bypass ruleset, CI, contract boundaries and documentation with zero
+  findings.
+- No `main` PR, promotion, reconciliation or npm mutation occurred. All three
+  existing stages remain unapproved and unrejected.
+
+### Next
+
+- Obtain authorization for the documentation-only commit, push and PR of review
+  192 evidence to `develop`. After CI/merge, reobserve its exact head and
+  decide protected-main promotion separately. npm remains separate.
+
 ## 2026-07-28 — Review 191 evidence delivery authorized
 
 ### In progress
