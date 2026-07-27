@@ -6,6 +6,23 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-28 — R189-F01 draft PR opened
+
+### Completed
+
+- Created Rabassoft commit `efd8edf` with the reviewed M23/R186–R190 scope and
+  pushed branch `codex/m23-checkpoint5-closure`.
+- Opened draft PR #18 against protected `develop`. The PR records the
+  cross-platform gzip root cause, tooling-only impact and complete local
+  verification.
+- No merge or npm mutation occurred. All three stages remain unapproved and
+  unrejected.
+
+### Next
+
+- Observe required CI on draft PR #18. Merge, stage rejection,
+  rebuild/reselection and another workflow dispatch retain separate gates.
+
 ## 2026-07-28 — R189-F01 protected delivery authorized
 
 ### In progress

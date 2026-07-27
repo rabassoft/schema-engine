@@ -35,9 +35,10 @@ branches, then rebuild and reselect exact candidates.
 
 ## In progress
 
-Ricard authorized the scoped Rabassoft commit, push and draft PR to protected
+Scoped Rabassoft commit `efd8edf` is pushed and draft PR #18 targets protected
 `develop`. Review 190 cycle 3 accepts the local correction with zero findings.
-All three existing stages remain unapproved and unrejected.
+Required CI is pending; all three existing stages remain unapproved and
+unrejected.
 
 ## Latest completed work
 
@@ -63,8 +64,8 @@ All three existing stages remain unapproved and unrejected.
 
 ## Exact next action
 
-Observe required CI on the R189-F01 protected delivery PR. Do not merge, reject
-a stage or dispatch without its separate authorization.
+Observe required CI on draft PR #18. Do not merge, reject a stage or dispatch
+without its separate authorization.
 
 ## Blockers and conflicts
 
