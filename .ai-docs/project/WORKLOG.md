@@ -6,9 +6,28 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
-## 2026-07-27 — PLAN-025 checkpoint 4 delivery authorized
+## 2026-07-27 — PLAN-025 checkpoint 5 authorized
 
 ### In progress
+
+- Ricard authorized protected `develop`-to-`main` promotion, protected
+  reconciliation back into `develop` and the exact clean rebuild; npm remains
+  outside the authorization.
+- Identified the checkpoint-4 closure documents and review 184 as a required
+  protected-`develop` delivery precondition so the promoted source contains
+  its own canonical state.
+- Committed the exact eight-file closure as `7ff42dc`, pushed
+  `codex/m23-checkpoint4-closure` and opened draft PR #14 into protected
+  `develop`.
+
+### Next
+
+- Pass required CI for PR #14, mark it ready, merge it and pass post-merge CI
+  before starting the promotion PR.
+
+## 2026-07-27 — PLAN-025 checkpoint 4 completed
+
+### Completed
 
 - Ricard authorized the checkpoint-4 short-lived branch, scoped commit, push
   and protected PR; merge and the clean post-merge rebuild remain separately
@@ -27,14 +46,28 @@ the full file is not part of routine task startup.
 - Committed the exact scope as `38e3e07`, pushed
   `codex/m23-stage-only-publication` and opened draft PR #13 into protected
   `develop`.
+- Added persistent delivery state as `1c9f14f`; required CI run `30223029548`
+  passed at that PR head in 4m52s.
 - The first push correctly failed closed while GitHub CLI was using
   `Ricard-Rabasso`; switched the active account to `rabassoft` as prescribed
   and the authorized push succeeded.
+- Ricard separately authorized the ready transition and merge. PR #13 merged
+  by squash as exact `develop@39a0d60`; post-merge CI run `30223266446` passed
+  in 5m3s.
+- Rebuilt from a clean checkout of the exact merge twice under Node `22.23.1`,
+  npm `11.18.0` and pnpm `10.28.2`. Both clean generations and all three
+  tarballs are byte-identical to checkpoint 3; evidence records the exact
+  merge as both `baseCommit` and `sourceCommit`.
+- Rebuilt all three Corresponding Source packages and passed lower/current
+  native and Aria consumers, M20/SPEC-009 lanes, Chromium, packed-source,
+  security, documentation, workflow and public-tree checks.
+- Review 184 cycle 1 passed all twelve checkpoint areas with zero findings and
+  completed checkpoint 4 without any `main` or npm action.
 
 ### Next
 
-- Wait for required PR #13 CI to pass, then obtain separate authorization for
-  ready transition and merge before the exact clean `develop` rebuild.
+- Obtain separate authorization for PLAN-025 checkpoint 5 protected `main`
+  promotion, reconciliation and exact clean rebuild; npm remains gated.
 
 ## 2026-07-25 — Isolated M22 closure delivered
 

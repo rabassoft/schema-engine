@@ -785,9 +785,9 @@ Cada decisión debe registrar:
   Completed PLAN-024/review 177 deliver M22 repository sanitization,
   publication, governance, protected controls and fail-closed workflow
   preparation. PLAN-025 revision 0 is Approved after review 180 cycle 2;
-  checkpoints 1–3 are complete after reviews 181–183 cycle 2. Checkpoint 4
-  protected Git delivery, trusted-publisher activation, provenance release and
-  backup deletion remain gated
+  checkpoints 1–4 are complete after reviews 181–184. Checkpoint 5 protected
+  `main` promotion/reconciliation, trusted-publisher activation, provenance
+  release and backup deletion remain gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -832,9 +832,10 @@ Cada decisión debe registrar:
   [`ADR-018 revision 7`](../adrs/018-licencia-dual-publicacion-experimental.md)
   quedan Accepted tras review 179 ciclo 2. PLAN-025 revisión 0 queda Approved
   tras review 180 ciclo 2; checkpoints 1–3 quedan completos tras reviews
-  181–183 ciclo 2. Los candidatos locales deterministas conservan
-  `sourceCommit: null`; checkpoint 4, Git y toda acción externa permanecen
-  inactivos.
+  181–183 ciclo 2. Checkpoint 4 entrega PR #13 a `develop@39a0d60`, pasa CI
+  requerida/post-merge y review 184 ciclo 1, y produce candidatos limpios
+  byte-idénticos con ese `sourceCommit`. Checkpoint 5, `main`, npm y toda acción
+  externa posterior permanecen inactivos.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -1000,6 +1001,7 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 27-07-2026 | PLAN-025 checkpoint 4 entrega PR #13 a `develop@39a0d60`; review 184 valida rebuild limpio byte-idéntico y deja `main`/npm gated.                  |
 | 20-07-2026 | Review 163 ciclo 3 completa checkpoint 10 tras recuperación: core/base `next/latest: 0.4.0`, piloto `0.2.0` y ocho matrices pasan.                 |
 | 20-07-2026 | Review 162 ciclo 2 completa checkpoint 9: base `latest` pasa a `0.4.0`; piloto permanece `0.2.0`, core `0.3.0` y settings no cambian.              |
 | 20-07-2026 | Review 161 ciclo 5 completa el preflight read-only de checkpoint 9 sin hallazgos; solo el dist-tag base `latest` espera aprobación inmediata.      |

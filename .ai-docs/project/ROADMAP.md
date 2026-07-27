@@ -499,7 +499,7 @@ separado antes de repetir la revisión.
   idénticos y `main` es ancestro de `develop`. PLAN-024/M22 queda
   canónicamente completado.
 
-### M23 — Publicación trusted stage-only con provenance — checkpoints 1–3 completos
+### M23 — Publicación trusted stage-only con provenance — checkpoints 1–4 completos
 
 - Review 178 ciclo 2 pasa sin hallazgos y Ricard selecciona opción A.
 - ADR-026 revisión 1 y ADR-018 revisión 7 quedan Accepted tras review 179 ciclo
@@ -514,15 +514,19 @@ separado antes de repetir la revisión.
   stage-only tras review 182 ciclo 2 sin hallazgos. Checkpoint 3 completa la
   matriz local, candidatos deterministas metadata-only, source rebuilds,
   consumidores y auditoría tras review 183 ciclo 2 sin hallazgos.
-- Los candidatos conservan `sourceCommit: null`; Git/GitHub/npm, staging,
-  aprobaciones, aliases y restricciones de tokens permanecen inactivos.
-  Checkpoint 4 requiere autorización separada para rama, commit, push y PR
-  protegida hacia `develop`.
+- Checkpoint 4 entrega el alcance mediante PR protegida #13, pasa CI requerida
+  y post-merge, y reconstruye dos veces desde `develop@39a0d60` tras review 184
+  ciclo 1 sin hallazgos. Los candidatos son byte-idénticos a checkpoint 3 y
+  registran ese `sourceCommit` limpio.
+- `main`, npm, staging, aprobaciones, aliases y restricciones de tokens
+  permanecen inactivos. Checkpoint 5 requiere autorización separada para
+  promoción protegida a `main`, reconciliación y rebuild exacto.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** autorizar por separado PLAN-025 checkpoint 4 para entregar
-   el alcance revisado a `develop` y reconstruir desde su merge limpio.
+1. **Next action:** autorizar por separado PLAN-025 checkpoint 5 para promover
+   `develop` a `main`, reconciliar `main` en `develop` y reconstruir desde el
+   commit protegido exacto.
 2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
    trusted publishing npm, staging/aprobaciones, provenance live, aliases,
    GitHub Release, tag Git ni eliminación del backup privado.
