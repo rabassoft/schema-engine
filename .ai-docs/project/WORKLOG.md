@@ -19,11 +19,16 @@ the full file is not part of routine task startup.
 - Committed the exact eight-file closure as `7ff42dc`, pushed
   `codex/m23-checkpoint4-closure` and opened draft PR #14 into protected
   `develop`.
+- Required CI `30250908564` passed in 3m51s; PR #14 then merged by squash as
+  `develop@3ec69f3` and post-merge CI `30251210671` passed in 4m50s.
+- Verified `main@7f22dbd` is an ancestor of exact `develop@3ec69f3` and opened
+  draft promotion PR #15 with the required merge-commit topology.
 
 ### Next
 
-- Pass required CI for PR #14, mark it ready, merge it and pass post-merge CI
-  before starting the promotion PR.
+- Pass required CI for the protected promotion, merge it using the accepted
+  merge-commit topology, pass post-merge CI and reconcile `main` into
+  `develop`.
 
 ## 2026-07-27 — PLAN-025 checkpoint 4 completed
 

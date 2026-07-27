@@ -6,7 +6,7 @@
 ## Checkpoint
 
 - **Updated:** 2026-07-27 by Ricard / Codex
-- **Branch:** `codex/m23-checkpoint4-closure`
+- **Branch:** `develop`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
@@ -35,9 +35,9 @@ exact clean rebuild without any npm action.
 
 ## In progress
 
-Checkpoint 5 is authorized. Draft PR #14 carries the checkpoint-4 closure into
-protected `develop`; after its required/post-merge CI, `develop` may be
-promoted to `main`, reconciled back and rebuilt. npm remains gated.
+Checkpoint 4 closure is canonical on protected `develop`. Checkpoint 5
+protected promotion to `main` is in progress; reconciliation and the exact
+clean rebuild follow only after required/post-merge CI. npm remains gated.
 
 ## Latest completed work
 
@@ -66,8 +66,9 @@ promoted to `main`, reconciled back and rebuilt. npm remains gated.
 
 ## Exact next action
 
-Pass required CI for PR #14, mark it ready, merge it and pass post-merge CI
-before opening the checkpoint-5 promotion PR.
+Pass required CI for the protected `develop`-to-`main` promotion, merge it with
+the accepted merge-commit topology, pass post-merge CI and then reconcile
+`main` back into `develop`.
 
 ## Blockers and conflicts
 
@@ -100,7 +101,7 @@ before opening the checkpoint-5 promotion PR.
 
 ## Open questions
 
-- None until PR #14 reaches a green mergeable state.
+- None while the protected promotion PR is under required CI.
 
 ## Latest verification
 
@@ -109,6 +110,8 @@ before opening the checkpoint-5 promotion PR.
   `develop@39a0d60` are byte-identical to checkpoint 3, carry exact source
   evidence, rebuild from Corresponding Source and pass lower/current native,
   Aria and M20/SPEC-009 consumers plus security/policy checks.
+- Checkpoint-4 closure PR #14 required CI `30250908564` passed in 3m51s; it
+  merged as `develop@3ec69f3` and post-merge CI `30251210671` passed in 4m50s.
 - Checkpoint-4 pre-commit scope has 42 M23-only files and passes diff/format,
   276-document/909-link documentation, workflow/public-tree policy, lint, 39
   release tests, 23 public/readiness/workflow tests, M23 metadata-only package
