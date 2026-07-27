@@ -6,14 +6,14 @@
 ## Checkpoint
 
 - **Updated:** 2026-07-27 by Ricard / Codex
-- **Branch:** `codex/m23-stage-only-publication`
+- **Branch:** `codex/m23-checkpoint4-closure`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-025 revision 0, Approved
 - **Last completed implementation plan:** PLAN-024 revision 0
-- **Active implementation task:** PLAN-025 checkpoint 4 protected `develop`
-  delivery
+- **Active implementation task:** PLAN-025 checkpoint 5 protected `main`
+  promotion and reconciliation
 - **Last accepted ADR:** ADR-026 revision 1, coordinated with ADR-018 revision 7
 - **Implemented capability:** M1–M22 and G0, including the coordinated
   Experimental M21 line plus sanitized public history, governance, protected
@@ -30,17 +30,21 @@
 
 ## Current objective
 
-Deliver the reviewed M23 scope through a protected PR into `develop`, then stop
-for separate merge authorization before the clean post-merge rebuild.
+Execute PLAN-025 checkpoint 5 protected `main` promotion, reconciliation and
+exact clean rebuild without any npm action.
 
 ## In progress
 
-PLAN-025 checkpoint 4 protected delivery is open as draft PR #13 from
-`codex/m23-stage-only-publication` into `develop`. Required CI is pending;
-merge and the clean post-merge rebuild remain separately gated.
+Checkpoint 5 is authorized. The checkpoint-4 closure documents and review 184
+must first enter protected `develop`; then `develop` may be promoted to `main`,
+reconciled back and rebuilt from the exact protected source. npm remains gated.
 
 ## Latest completed work
 
+- Completed PLAN-025 checkpoint 4 after review 184 cycle 1 passed all twelve
+  areas with zero findings. PR #13 merged as `develop@39a0d60`, required and
+  post-merge CI passed, and two clean generations are byte-identical to
+  checkpoint 3 with exact `sourceCommit` evidence.
 - Published the isolated M22 closure commit `acc0d6c` on
   `codex/m22-canonical-closure`, passed required CI `30168309902`, merged PR #12
   as `develop@490c67a` and passed post-merge CI `30168530231`. The local and
@@ -62,15 +66,16 @@ merge and the clean post-merge rebuild remain separately gated.
 
 ## Exact next action
 
-Wait for required PR #13 CI to pass, then request separate authorization to
-mark the PR ready and merge it before the exact clean `develop` rebuild.
+Commit and push `codex/m23-checkpoint4-closure`, open its protected PR into
+`develop` and pass required/post-merge CI before opening the checkpoint-5
+promotion PR.
 
 ## Blockers and conflicts
 
 - No authoritative documentation conflict or implementation blocker remains.
-- The M22 delivery-order precondition is closed. Local `acc0d6c` and remote
-  squash `490c67a` have identical trees; checkpoint 4 must branch from the
-  remote squash so the M23 PR does not duplicate the M22 commit.
+- Protected M23 delivery to `develop` is complete. The current clean
+  comparison candidates are not publishable evidence until the separately
+  gated protected `main` promotion/reconciliation and rebuild complete.
 - Exact npm `11.18.0` is provisioned. Frozen offline install passes outside the
   restricted sandbox with the populated global pnpm store; the ignored
   workspace-local store cannot materialize content under sandbox restrictions.
@@ -96,15 +101,21 @@ mark the PR ready and merge it before the exact clean `develop` rebuild.
 
 ## Open questions
 
-- Authorize ready transition and merge only after required PR #13 CI passes?
+- None until the checkpoint-4 closure PR reaches a green mergeable state.
 
 ## Latest verification
 
+- Review 184 cycle 1 passes all twelve checkpoint-4 areas with zero findings.
+  PR #13 required CI and post-merge CI pass; two clean generations from exact
+  `develop@39a0d60` are byte-identical to checkpoint 3, carry exact source
+  evidence, rebuild from Corresponding Source and pass lower/current native,
+  Aria and M20/SPEC-009 consumers plus security/policy checks.
 - Checkpoint-4 pre-commit scope has 42 M23-only files and passes diff/format,
   276-document/909-link documentation, workflow/public-tree policy, lint, 39
   release tests, 23 public/readiness/workflow tests, M23 metadata-only package
   comparison, packed-source verification and release security. No unrelated
   path is present.
+- Required PR #13 CI run `30223029548` passed in 4m52s at head `1c9f14f`.
 - Review 183 cycle 2 passes all sixteen checkpoint-3 areas with zero unresolved
   findings. Frozen offline install, complete workspace/reference matrix,
   deterministic packaging, metadata-only comparison, source rebuilds,
@@ -129,6 +140,8 @@ mark the PR ready and merge it before the exact clean `develop` rebuild.
 
 - Approved M23 plan:
   `.ai-docs/plans/025-stage-only-trusted-publication.md`
+- M23 checkpoint-4 review:
+  `.ai-docs/reviews/184-plan-025-checkpoint-4-review.md`
 - M23 checkpoint-3 review:
   `.ai-docs/reviews/183-plan-025-checkpoint-3-review.md`
 - M23 checkpoint-1 review:

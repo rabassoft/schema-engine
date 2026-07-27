@@ -18,9 +18,9 @@
   coordinated live state: core/base `0.4.0` and pilot `0.2.0` are verified
   exact, under `next`/`latest` and through unqualified resolution.
 - [M23 stage-only metadata release notes](./releases/0.4.1.md) — deterministic
-  local comparison candidates for core/base `0.4.1` and pilot `0.2.1`;
-  `sourceCommit` remains null and no stage, approval, publication or provenance
-  is claimed.
+  clean `develop` comparison candidates for core/base `0.4.1` and pilot
+  `0.2.1`; exact source is `39a0d60`, while `main` selection, stage, approval,
+  publication and provenance remain unclaimed.
 
 ## Specifications
 
@@ -54,6 +54,9 @@
 
 ## Acceptance reviews
 
+- [PLAN-025 checkpoint 4 review](./reviews/184-plan-025-checkpoint-4-review.md)
+  — Cycle 1 passed protected delivery, post-merge CI, two clean generations,
+  byte comparison, source rebuilds, consumers and security with zero findings.
 - [PLAN-025 checkpoint 3 review](./reviews/183-plan-025-checkpoint-3-review.md)
   — Cycle 1 corrected M21-only artifact/security assumptions and a lint finding;
   cycle 2 passed the complete local candidate gate with zero unresolved
@@ -670,7 +673,7 @@
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
 - [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Completed revision 0 after review 177 cycle 3 repeated the corrected final closure with zero unresolved findings
-- [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Approved revision 0; checkpoints 1–2 completed after reviews 181–182 cycle 2 passed with zero unresolved findings, and checkpoint 3 awaits exact local tooling/cache provisioning
+- [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Approved revision 0; checkpoints 1–4 completed after reviews 181–184 passed their complete zero-finding gates
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -689,7 +692,9 @@ The sanitized repository is public and PLAN-024/M22 completed its governance,
 GitHub controls and fail-closed secure-release preparation after review 177.
 M23's stage-only metadata/provenance PATCH design is Accepted after review 179;
 PLAN-025 revision 0 is Approved after review 180 and authorizes local
-checkpoint 1 only. External activation remains gated.
+checkpoints plus separately gated protected delivery. Checkpoint 4 is complete
+after review 184; protected `main` promotion and all npm activation remain
+gated.
 Completed PLAN-013 published and verified core and Angular `0.1.0` without
 promoting Stable APIs.
 
