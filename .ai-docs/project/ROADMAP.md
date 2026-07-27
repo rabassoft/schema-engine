@@ -549,13 +549,16 @@ separado antes de repetir la revisión.
   hallazgos. Su evidencia documental debe entregarse primero a `develop` y
   reobservarse el nuevo SHA; la promoción protegida a `main` requiere después
   una decisión separada.
+- PR #20 entrega review 192 a `develop@84d72f9`; CI requerida y post-merge
+  pasan. Review 193 ciclo 2 reconcilia el estado durable: tras entregar esta
+  evidencia y reobservar el SHA exacto, la promoción a `main` es la siguiente
+  decisión separada.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** obtener autorización para el commit, push y PR
-   documentación-only de review 192 a `develop`; tras CI/merge, reobservar el
-   SHA exacto y decidir por separado su promoción a `main`. Ningún stage se
-   rechaza sin autorización separada.
+1. **Next action:** tras entregar review 193 a `develop` y pasar su CI,
+   reobservar los refs exactos y decidir si se autoriza la promoción protegida
+   a `main`. Ningún stage se rechaza sin autorización separada.
 2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
    trusted publishing npm, staging/aprobaciones, provenance live, aliases,
    GitHub Release, tag Git ni eliminación del backup privado.

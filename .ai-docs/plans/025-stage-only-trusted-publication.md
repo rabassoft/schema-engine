@@ -35,7 +35,9 @@
   findings; PR #19 delivers that evidence to protected `develop@e99193b`, its
   required/post-merge CI passes and review 192 cycle 6 accepts protected-main
   promotion readiness subject to delivering its documentation-only evidence
-  and reobserving exact `develop`; promotion and npm remain unauthorized
+  and reobserving exact `develop`; PR #20 delivers that evidence as protected
+  `develop@84d72f9`, both CI gates pass and review 193 cycle 2 reconciles the
+  durable promotion decision without authorizing promotion or npm
 
 ## 1. Goal and hard boundary
 

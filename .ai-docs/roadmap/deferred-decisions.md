@@ -798,9 +798,10 @@ Cada decisión debe registrar:
   review 191 cycle 2 validates the clean deterministic rebuild with zero
   findings. PR #19 delivers that evidence to protected `develop@e99193b`; its
   required/post-merge CI and review 192 cycle 6 pass. Review evidence delivery
-  and exact-head reobservation precede the separately gated protected `main`
-  promotion; selection, stage rejection, approvals, provenance release and
-  backup deletion remain gated
+  completes through PR #20 as protected `develop@84d72f9`; both CI gates and
+  review 193 cycle 2 pass. Fresh exact-head reobservation precedes the
+  separately gated protected `main` promotion; selection, stage rejection,
+  approvals, provenance release and backup deletion remain gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -863,8 +864,9 @@ Cada decisión debe registrar:
   valida sin hallazgos dos generaciones limpias, evidencia de source exacta,
   source rebuilds y seguridad. PR #19 entrega la evidencia a
   `develop@e99193b`; su CI requerida/post-merge y review 192 ciclo 6 pasan sin
-  hallazgos. La evidencia de review debe llegar primero a `develop` y
-  reobservarse su SHA; `main` y npm permanecen gated.
+  hallazgos. PR #20 entrega esa evidencia a `develop@84d72f9`; ambas CI y
+  review 193 ciclo 2 pasan. Tras entregar esta reconciliación, se reobserva el
+  SHA exacto; `main` y npm permanecen gated.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 

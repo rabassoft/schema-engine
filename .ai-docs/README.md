@@ -55,6 +55,10 @@
 
 ## Acceptance reviews
 
+- [R189-F01 post-delivery protected-main promotion gate](./reviews/193-r189-f01-post-delivery-promotion-gate.md)
+  — Cycle 1 corrects the stale evidence-delivery next action; cycle 2 verifies
+  PR #20 delivery, exact refs, CI and the durable promotion boundary with zero
+  findings. `main` and npm remain separately gated.
 - [R189-F01 protected-main promotion readiness](./reviews/192-r189-f01-protected-main-promotion-readiness.md)
   — Cycle 1 corrects stale evidence-delivery state; cycle 2 corrects formatting;
   cycle 3 corrects one ambiguous phrase; cycle 4 corrects its table formatting;
