@@ -6,9 +6,252 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
-## 2026-07-27 — PLAN-025 checkpoint 5 authorized
+## 2026-07-28 — R189-F01 protected delivery authorized
 
 ### In progress
+
+- Ricard authorized the scoped Rabassoft commit, push and draft PR to protected
+  `develop` for the accumulated reviewed M23/R186–R190 correction.
+- The delivery includes historical-consumer verification fixes, exact
+  checkpoint state/evidence, deterministic gzip tooling/tests and its accepted
+  review. No unrelated runtime or API change is included.
+- All three npm stages remain unapproved and unrejected. Merge, stage rejection,
+  rebuild/reselection and another workflow dispatch remain separate gates.
+
+### Next
+
+- Commit as `Rabassoft <ricard@rabassoft.com>`, push the current branch, open
+  the draft PR to `develop` and observe required CI without merging.
+
+## 2026-07-27 — R189-F01 local correction reviewed
+
+### Completed
+
+- Candidate packing now preserves the `pnpm pack` TAR and replaces only its
+  platform-specific gzip wrapper with deterministic pure-JavaScript output.
+- Added exact `fflate@0.8.3` as an MIT-licensed development-only tool and a
+  regression covering platform variants, fixed header metadata, payload
+  preservation and idempotence.
+- Two full temporary M23 generations are byte-identical. Normalized copies of
+  the prior protected-main candidates equal new local output for all three
+  packages, proving exact TAR preservation.
+- Review 190 cycles 1–2 corrected documentation-evidence link and public-tree
+  counts. Cycle 3 passes with zero findings: frozen offline install,
+  formatting, documentation, lint, build, typecheck, 689 workspace tests, 41
+  release tests, 23 public tests, package/source/security, 764-file public-tree,
+  workflow and diff checks pass.
+- All three npm stages remain unapproved and unrejected. No selected evidence,
+  commit, push, PR, workflow, package, alias, token or settings mutation
+  occurred.
+
+### Next
+
+- Obtain explicit authorization for scoped commit, push and protected PR of the
+  correction. Rebuild/reselection and every stage rejection remain separately
+  gated.
+
+## 2026-07-27 — R189-F01 deterministic gzip correction started
+
+### In progress
+
+- Ricard selected the recommended recovery: preserve exact `.tgz` byte identity
+  and make candidate gzip generation platform-independent.
+- Local tooling/tests/review are authorized. Stage rejection, commit, push,
+  protected delivery and another workflow dispatch remain separately gated.
+- All three current stages remain unapproved and unrejected.
+
+### Next
+
+- Implement deterministic gzip normalization, add cross-platform regression
+  fixtures and repeat the complete local release-tooling review.
+
+## 2026-07-27 — PLAN-025 checkpoint 8 blocked by gzip byte drift
+
+### Observed
+
+- Ricard separately authorized environment `npm-publish`; exact run
+  `30304490264` then passed stage job `90106410134` in 2m4s.
+- Three stages exist for core/base `0.4.1` and pilot `0.2.1`, created by GitHub
+  Actions trusted automation with automatic provenance. None is approved or
+  rejected.
+- Authenticated views/downloads prove every staged `.tgz` differs in compressed
+  size and SHA-512 from the selected candidate.
+- Extracted trees and uncompressed TAR bytes are exact across every pair. The
+  mismatch is isolated to macOS/Linux gzip compression; the workflow log proves
+  it generated the bytes npm retained.
+- Review 189 cycle 1 records R189-F01 and blocks checkpoint 8 before any package
+  approval.
+- Final formatting, 282-document/921-link documentation, 762-file public-tree
+  and diff checks pass with the blocked state recorded.
+
+### Next
+
+- Decide the recovery. Recommendation: preserve exact byte identity, reject
+  stages only after separate authorization, normalize gzip generation across
+  platforms, deliver/reselect through protected branches and repeat staging.
+
+## 2026-07-27 — PLAN-025 checkpoint 8 exact workflow dispatched
+
+### In progress
+
+- Ricard separately authorized and launched only the reviewed workflow
+  dispatch.
+- GitHub run `30304490264` uses exact
+  `main@4bcb6eabed76d8bc2fa877236d10b7831cbb6f00`; `verify-release`
+  job `90105269180` passed in 4m44s.
+- Stage job `90106410134` is waiting on the only pending deployment,
+  environment `npm-publish@18549660922`, with reviewer `rabassoft` and no wait
+  timer.
+- No environment approval, stage, package approval, publication, alias or token
+  mutation is authorized yet.
+
+### Next
+
+- Obtain Ricard's separate immediate approval for only the pending
+  `npm-publish` environment deployment. npm stage approvals remain later gates.
+
+## 2026-07-27 — PLAN-025 checkpoint 8 pre-dispatch gate passed
+
+### Verified
+
+- Review 188 cycle 1 found only formatting drift in
+  `deferred-decisions.md`; it was corrected and the complete review restarted.
+- Cycle 2 verifies exact remote `main@4bcb6ea` and `develop@6d00ed0`, common
+  tree `45da570`, active protected-main workflow blob `4287042`, exact
+  `npm-publish` reviewer/branch policy and all three stage-only trust relations.
+- All selected candidate tarballs match their exact protected-main evidence;
+  readiness passes, all stage lists remain `[]`, package access remains only
+  `ricardrabasso: read-write` and all M23 versions remain absent with E404.
+- Formatting, 281-document/919-link documentation, lint, 40 release tests, 23
+  public tests, 761-file public-tree, workflow, readiness, three
+  tarball-evidence and diff checks pass.
+- No workflow dispatch, environment approval, stage, package approval,
+  publication, alias or token mutation occurred.
+
+### Next
+
+- Obtain separate immediate authorization for only the exact M23 workflow
+  dispatch. Environment approval remains a later separate external action.
+
+## 2026-07-27 — PLAN-025 checkpoint 7 completed
+
+### Completed
+
+- Ricard authorized only the Angular Aria stage-only trusted-publisher relation
+  and reports that the exact command completed.
+- Core and base Angular were already post-observed with their exact stage-only
+  relations. No staging or other npm mutation is authorized.
+- Ricard repeated all three trust observations. Every package matches the exact
+  repository, workflow, environment and stage-only permission; none permits
+  direct publication.
+- External read-only checks confirm all stage lists remain `[]`, all package
+  access remains only `ricardrabasso: read-write`, and core/base `0.4.1` plus
+  pilot `0.2.1` remain absent with E404.
+- Review 187 cycle 1 passes the complete seven-area checkpoint boundary with
+  zero findings. Checkpoint 7 is complete; no stage, approval, publication,
+  alias, token, GitHub setting or repository mutation occurred beyond the
+  three separately authorized trust relations.
+
+### Next
+
+- Complete the read-only checkpoint-8 pre-dispatch gate, then request separate
+  authorization for the exact workflow dispatch.
+
+## 2026-07-27 — PLAN-025 checkpoint 7 base Angular relation verified
+
+### Completed
+
+- Ricard authorized only the base Angular stage-only trusted-publisher
+  relation and reports that the exact command completed.
+- Core was already post-observed with its exact stage-only relation. No Angular
+  Aria trust mutation is authorized.
+- Ricard completed all three post-observations. Core and base Angular match
+  their exact repository, workflow, environment and stage-only permission;
+  Angular Aria remains `[]`.
+- No unrelated package or setting drift was reported.
+
+### Next
+
+- Obtain separate immediate authorization for only the Angular Aria stage-only
+  trusted-publisher relation.
+
+## 2026-07-27 — PLAN-025 checkpoint 7 core relation verified
+
+### Completed
+
+- Ricard authorized only the core-package stage-only trusted-publisher
+  relation and reports that the exact `npm trust github` command completed.
+- Repeated agent reads wait indefinitely for a fresh interactive 2FA
+  confirmation and were cancelled without mutation.
+- Ricard completed the three mandatory post-observations. Core matches the
+  exact repository, workflow, environment and stage-only permission; base
+  Angular and Angular Aria remain `[]`.
+- No base Angular or Angular Aria trust mutation is authorized, and no
+  unrelated package or setting drift was reported.
+
+### Next
+
+- Obtain separate immediate authorization for only the base Angular
+  stage-only trusted-publisher relation.
+
+## 2026-07-27 — PLAN-025 checkpoint 6 completed
+
+### Observed
+
+- Ricard authorized the external read-only npm/GitHub preflight; no trust,
+  stage, approval, publication, alias, token or repository mutation was
+  authorized or performed.
+- Official npm requirements remain Node `22.14.0`/npm `11.5.1` for trusted
+  publishing and npm `11.15.0` for staged publishing; exact Node `22.23.1` and
+  npm `11.18.0` remain sufficient.
+- GitHub is public with default `main`; remote refs remain exact at
+  `main@4bcb6ea` and `develop@6d00ed0`, and the protected-main release workflow
+  retains its exact stage-only OIDC shape.
+- Anonymous npm reads return E404 for core/base `0.4.1` and pilot `0.2.1`.
+- M19 exact immutable bytes and consumers pass. All M21 artifact verifiers
+  confirm exact bytes/signatures/metadata and current aliases before reaching
+  a local harness assertion.
+
+### Corrected and verified
+
+- Initial local `gh` and npm sessions required reauthentication before the
+  authenticated preflight could continue.
+- Review 186 cycle 1 found that PLAN-025's M19 alias commands conflicted with
+  the accepted M21 alias transition, while the M21 consumer harness incorrectly
+  required historical versions in current M23-prepared workspace manifests.
+- Ricard approved the narrow correction. Candidate mode retains strict current
+  manifest equality; registry-backed historical modes are independent, and the
+  plan no longer treats moved M19 aliases as immutable M19 state.
+- A first parallel retry collided on shared E2E port 4173. The complete
+  corrected matrix was then restarted sequentially.
+- Review 186 cycle 3 passes M19 exact plus M21 exact/`next`/`latest`/
+  unqualified across bytes, signatures, aliases, lower/current native/pilot
+  consumers, builds, tests and Chromium. Both contract findings are resolved.
+- Ricard reauthenticated exact GitHub/npm identities. Cycle 4 verifies public
+  package ownership/access, account 2FA, zero tokens/stages, exact aliases,
+  ruleset/Actions/environment settings and zero Actions secrets/variables.
+- Each `npm trust list` read requires a separate browser/2FA confirmation. One
+  agent-started core query waited without approval and was cancelled without
+  mutation.
+- Ricard then ran all three package-specific trust reads sequentially with
+  browser/security-key confirmation; core, base Angular and Angular Aria each
+  returned exact `[]`.
+- Review 186 cycle 5 repeated the complete checkpoint boundary with zero
+  findings, resolved R186-F01 and accepted checkpoint 6. No trust, stage,
+  approval, publication, alias, token, GitHub setting or repository mutation
+  occurred.
+- Final formatting, 279-document/915-link documentation, lint, 40 release
+  tests, 23 public tests, 759-file public-tree, workflow and diff checks pass.
+
+### Next
+
+- Obtain immediate authorization for only the core-package checkpoint-7
+  stage-only trusted-publisher relation. The other two packages remain
+  separately gated.
+
+## 2026-07-27 — PLAN-025 checkpoint 5 completed
+
+### Completed
 
 - Ricard authorized protected `develop`-to-`main` promotion, protected
   reconciliation back into `develop` and the exact clean rebuild; npm remains
@@ -23,12 +266,29 @@ the full file is not part of routine task startup.
   `develop@3ec69f3` and post-merge CI `30251210671` passed in 4m50s.
 - Verified `main@7f22dbd` is an ancestor of exact `develop@3ec69f3` and opened
   draft promotion PR #15 with the required merge-commit topology.
+- Detected that the promoted `STATUS.md` would have described PR #14 as
+  pending. Kept PR #15 draft, delivered the durable correction through PR #16
+  as `develop@e1b8349`, and passed required/post-merge CI.
+- PR #15 reran required CI at the corrected head and merged with merge-commit
+  topology as `main@4bcb6ea`; post-merge CI passed.
+- PR #17 passed required CI and reconciled `main` into
+  `develop@6d00ed0` with merge-commit topology; post-merge CI passed.
+- Verified `main` is an ancestor of `develop` and both refs have exact tree
+  `45da57055ade2bfb34d6b5acafbe1fd0d3d16a94`.
+- Generated selected candidates twice from a clean checkout of exact protected
+  `main@4bcb6ea`. Both generations and checkpoint-3/4 tarballs are
+  byte-identical; evidence records that exact source commit.
+- Corresponding Source, packed metadata/source, security, formatting,
+  277-document/911-link documentation, workflow/public-tree policy, lint, 39
+  release tests and 23 public/readiness/workflow tests pass.
+- Review 185 cycle 1 recorded the corrected stale-state finding; closure
+  validation found and corrected formatting drift; cycle 4 repeated all
+  fifteen areas with zero findings and completed checkpoint 5.
 
 ### Next
 
-- Pass required CI for the protected promotion, merge it using the accepted
-  merge-commit topology, pass post-merge CI and reconcile `main` into
-  `develop`.
+- Obtain separate authorization for PLAN-025 checkpoint 6 read-only npm/GitHub
+  preflight; no registry or repository mutation is authorized.
 
 ## 2026-07-27 — PLAN-025 checkpoint 4 completed
 

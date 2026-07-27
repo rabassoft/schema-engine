@@ -499,7 +499,7 @@ separado antes de repetir la revisión.
   idénticos y `main` es ancestro de `develop`. PLAN-024/M22 queda
   canónicamente completado.
 
-### M23 — Publicación trusted stage-only con provenance — checkpoints 1–4 completos
+### M23 — Publicación trusted stage-only con provenance — checkpoint 8 bloqueado
 
 - Review 178 ciclo 2 pasa sin hallazgos y Ricard selecciona opción A.
 - ADR-026 revisión 1 y ADR-018 revisión 7 quedan Accepted tras review 179 ciclo
@@ -519,14 +519,32 @@ separado antes de repetir la revisión.
   ciclo 1 sin hallazgos. Los candidatos son byte-idénticos a checkpoint 3 y
   registran ese `sourceCommit` limpio.
 - `main`, npm, staging, aprobaciones, aliases y restricciones de tokens
-  permanecen inactivos. Checkpoint 5 requiere autorización separada para
-  promoción protegida a `main`, reconciliación y rebuild exacto.
+  permanecen inactivos. Checkpoint 5 promueve mediante PR #15/merge commit a
+  `main@4bcb6ea`, reconcilia mediante PR #17 a `develop@6d00ed0` y selecciona
+  candidatos byte-idénticos tras review 185 ciclo 4 sin hallazgos.
+- Checkpoint 6 completa las observaciones públicas y autenticadas sin mutación.
+  Review 186 ciclo 3 corrige y valida la matriz histórica acumulativa; ciclo 5
+  confirma las tres listas trust vacías y repite el boundary completo sin
+  hallazgos.
+- Checkpoint 7 configura y post-observa las relaciones stage-only de core y
+  base Angular y Angular Aria por separado. Review 187 ciclo 1 repite las siete
+  áreas sin hallazgos; los tres stages y las versiones M23 siguen ausentes.
+- Review 188 ciclo 2 completa el gate read-only previo a checkpoint 8 sin
+  hallazgos; source, workflow, entorno, trust, candidatos y registro son
+  exactos. Run `30304490264` pasa verify/stage, pero review 189 ciclo 1 bloquea
+  checkpoint 8: los TAR son exactos y los `.tgz` difieren por gzip macOS/Linux.
+- Ricard selecciona conservar identidad `.tgz` exacta. Review 190 ciclo 3
+  valida sin hallazgos la normalización gzip pura JavaScript, determinista e
+  independiente de plataforma. La corrección conserva los TAR protegidos
+  exactos y `fflate@0.8.3` MIT queda fijada solo como herramienta de desarrollo,
+  no empaquetada. Entrega protegida, reselección, rechazo de los tres stages y
+  nuevo staging permanecen separados.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** autorizar por separado PLAN-025 checkpoint 5 para promover
-   `develop` a `main`, reconciliar `main` en `develop` y reconstruir desde el
-   commit protegido exacto.
+1. **Next action:** obtener autorización explícita para el commit, push y PR
+   protegida de la corrección R189-F01; después reconstruir/reseleccionar desde
+   refs protegidas. Ningún stage se rechaza sin autorización separada.
 2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
    trusted publishing npm, staging/aprobaciones, provenance live, aliases,
    GitHub Release, tag Git ni eliminación del backup privado.

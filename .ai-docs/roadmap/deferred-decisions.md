@@ -785,9 +785,17 @@ Cada decisión debe registrar:
   Completed PLAN-024/review 177 deliver M22 repository sanitization,
   publication, governance, protected controls and fail-closed workflow
   preparation. PLAN-025 revision 0 is Approved after review 180 cycle 2;
-  checkpoints 1–4 are complete after reviews 181–184. Checkpoint 5 protected
-  `main` promotion/reconciliation, trusted-publisher activation, provenance
-  release and backup deletion remain gated
+  checkpoints 1–6 are complete after reviews 181–186. Review 186 cycle 5
+  verifies the complete read-only preflight with all three trust lists empty
+  and zero findings. Checkpoint 7 configures and post-observes all three
+  stage-only relations, and review 187 cycle 1 passes with zero findings;
+  review 188 cycle 2 passes the checkpoint-8 read-only pre-dispatch gate, while
+  exact run `30304490264` passes verify/stage on protected `main`. Review 189
+  cycle 1 blocks because staged gzip bytes differ from selected candidates
+  despite exact TAR/content. Ricard selects exact `.tgz` preservation and
+  review 190 cycle 3 validates the local platform-independent gzip correction
+  with zero findings; protected delivery, reselection, stage rejection,
+  approvals, provenance release and backup deletion remain gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -834,8 +842,19 @@ Cada decisión debe registrar:
   tras review 180 ciclo 2; checkpoints 1–3 quedan completos tras reviews
   181–183 ciclo 2. Checkpoint 4 entrega PR #13 a `develop@39a0d60`, pasa CI
   requerida/post-merge y review 184 ciclo 1, y produce candidatos limpios
-  byte-idénticos con ese `sourceCommit`. Checkpoint 5, `main`, npm y toda acción
-  externa posterior permanecen inactivos.
+  byte-idénticos con ese `sourceCommit`. Checkpoint 5 promueve a
+  `main@4bcb6ea`, reconcilia a `develop@6d00ed0` y selecciona candidatos
+  byte-idénticos tras review 185 ciclo 4. Review 186 ciclo 3 corrige la matriz
+  histórica y ciclo 5 verifica el preflight completo, incluidas las tres
+  listas trust vacías, sin hallazgos; checkpoint 6 queda completo y toda acción
+  npm permanece inactiva. Checkpoint 7 configura y post-observa core, base
+  Angular y Angular Aria por separado; review 187 ciclo 1 pasa sin hallazgos y
+  review 188 ciclo 2 pasa el gate read-only previo al dispatch. Todo staging
+  queda bloqueado por review 189 R189-F01: gzip difiere entre macOS/Linux aunque
+  TAR y contenido son exactos. Ricard selecciona preservar identidad `.tgz`;
+  review 190 ciclo 3 valida sin hallazgos la corrección gzip determinista local
+  y deja entrega protegida, reselección, rechazo de stages y nuevo staging bajo
+  sus gates separados.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -1001,6 +1020,16 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 27-07-2026 | Review 189 bloquea checkpoint 8: tres stages sin aprobar tienen TAR/contenido exactos, pero `.tgz` distinto por gzip macOS/Linux.                  |
+| 27-07-2026 | Run M23 `30304490264` pasa verify en 4m44s y espera aprobación separada de `npm-publish`; stage aún no inicia.                                     |
+| 27-07-2026 | PLAN-025 checkpoint 8 lanza run exacto `30304490264` en `main@4bcb6ea`; aprobación de entorno y staging siguen gated.                              |
+| 27-07-2026 | Review 188 ciclo 2 pasa el gate read-only previo al dispatch M23; source, workflow, entorno, trust, candidatos y registro son exactos.             |
+| 27-07-2026 | Review 187 ciclo 1 completa checkpoint 7 con las tres relaciones stage-only exactas; stages y versiones M23 siguen ausentes.                       |
+| 27-07-2026 | PLAN-025 checkpoint 7 configura y post-observa la relación stage-only de base Angular; core no deriva y Angular Aria sigue vacía.                  |
+| 27-07-2026 | PLAN-025 checkpoint 7 configura y post-observa solo la relación trusted publisher stage-only de core; ambas relaciones Angular siguen vacías.      |
+| 27-07-2026 | Review 186 ciclo 5 confirma las tres listas trust vacías y completa checkpoint 6 sin hallazgos ni mutación.                                        |
+| 27-07-2026 | Review 186 ciclo 4 verifica el preflight autenticado salvo tres lecturas trust con 2FA; sin mutación externa.                                      |
+| 27-07-2026 | PLAN-025 checkpoint 5 promueve/reconcilia ramas protegidas y review 185 selecciona candidatos exactos de `main@4bcb6ea`; npm sigue gated.          |
 | 27-07-2026 | PLAN-025 checkpoint 4 entrega PR #13 a `develop@39a0d60`; review 184 valida rebuild limpio byte-idéntico y deja `main`/npm gated.                  |
 | 20-07-2026 | Review 163 ciclo 3 completa checkpoint 10 tras recuperación: core/base `next/latest: 0.4.0`, piloto `0.2.0` y ocho matrices pasan.                 |
 | 20-07-2026 | Review 162 ciclo 2 completa checkpoint 9: base `latest` pasa a `0.4.0`; piloto permanece `0.2.0`, core `0.3.0` y settings no cambian.              |

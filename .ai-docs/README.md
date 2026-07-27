@@ -18,9 +18,10 @@
   coordinated live state: core/base `0.4.0` and pilot `0.2.0` are verified
   exact, under `next`/`latest` and through unqualified resolution.
 - [M23 stage-only metadata release notes](./releases/0.4.1.md) — deterministic
-  clean `develop` comparison candidates for core/base `0.4.1` and pilot
-  `0.2.1`; exact source is `39a0d60`, while `main` selection, stage, approval,
-  publication and provenance remain unclaimed.
+  clean protected-`main` candidates selected for core/base `0.4.1` and pilot
+  `0.2.1`; exact source is `4bcb6ea`. Three stages exist but are blocked on
+  gzip byte drift; review 190 validates the local deterministic correction,
+  while stage approval, publication and live provenance remain unclaimed.
 
 ## Specifications
 
@@ -54,6 +55,27 @@
 
 ## Acceptance reviews
 
+- [R189-F01 deterministic-gzip correction review](./reviews/190-r189-f01-deterministic-gzip-correction-review.md)
+  — Cycles 1–2 correct two documentation-evidence counts; cycle 3 passes the
+  complete local correction review with zero findings;
+  protected delivery and all stage mutations remain separately gated.
+- [PLAN-025 checkpoint 8 staged-byte review](./reviews/189-plan-025-checkpoint-8-staged-byte-review.md)
+  — Cycle 1 blocks on macOS/Linux gzip byte drift; three stages remain
+  unapproved and unrejected.
+- [PLAN-025 checkpoint 8 pre-dispatch review](./reviews/188-plan-025-checkpoint-8-pre-dispatch-review.md)
+  — Cycle 2 passes protected source, workflow, environment, trust, candidate
+  and empty-registry verification with zero findings; dispatch remains gated.
+- [PLAN-025 checkpoint 7 review](./reviews/187-plan-025-checkpoint-7-review.md) —
+  Cycle 1 passes all stage-only trust, isolation and no-drift areas with zero
+  findings; workflow staging remains separately gated.
+- [PLAN-025 checkpoint 6 review](./reviews/186-plan-025-checkpoint-6-review.md) —
+  Cycle 3 resolves the accumulated-release verification contract and cycle 5
+  passes the complete read-only preflight with zero findings; no external
+  mutation occurred.
+- [PLAN-025 checkpoint 5 review](./reviews/185-plan-025-checkpoint-5-review.md)
+  — Cycle 1 corrected stale promotion state; cycle 4 passed protected
+  promotion/reconciliation, selected rebuild and source evidence with zero
+  findings.
 - [PLAN-025 checkpoint 4 review](./reviews/184-plan-025-checkpoint-4-review.md)
   — Cycle 1 passed protected delivery, post-merge CI, two clean generations,
   byte comparison, source rebuilds, consumers and security with zero findings.
@@ -673,7 +695,7 @@
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
 - [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Completed revision 0 after review 177 cycle 3 repeated the corrected final closure with zero unresolved findings
-- [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Approved revision 0; checkpoints 1–4 completed after reviews 181–184 passed their complete zero-finding gates
+- [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Approved revision 0; checkpoints 1–7 completed after reviews 181–187
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -692,9 +714,9 @@ The sanitized repository is public and PLAN-024/M22 completed its governance,
 GitHub controls and fail-closed secure-release preparation after review 177.
 M23's stage-only metadata/provenance PATCH design is Accepted after review 179;
 PLAN-025 revision 0 is Approved after review 180 and authorizes local
-checkpoints plus separately gated protected delivery. Checkpoint 4 is complete
-after review 184; protected `main` promotion and all npm activation remain
-gated.
+checkpoints plus separately gated protected delivery. Checkpoint 8's
+pre-dispatch gate passes after review 188 cycle 2; exact run `30304490264`
+creates three stages, but review 189 blocks them on gzip byte drift.
 Completed PLAN-013 published and verified core and Angular `0.1.0` without
 promoting Stable APIs.
 
