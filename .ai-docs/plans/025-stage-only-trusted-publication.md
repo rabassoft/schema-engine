@@ -21,8 +21,15 @@
   areas with zero unresolved findings
 - **Milestone:** M23 — first stage-only trusted publication with provenance
 - **Capability:** promoted D-043 metadata/OIDC/provenance slice only
-- **Implementation:** Checkpoints 1–3 completed after reviews 181–183 cycle 2;
-  checkpoint 4 not started
+- **Implementation:** Checkpoints 1–6 completed after reviews 181–186;
+  checkpoint 6 corrected the accumulated-release verification semantics and
+  passed its complete review in cycle 5 with zero findings; checkpoint 7
+  completed after review 187 cycle 1 passed all trust areas with zero findings;
+  checkpoint 8 pre-dispatch review 188 cycle 2 passed with zero findings and
+  exact run `30304490264` passed verify/stage; review 189 cycle 1 blocks on
+  cross-platform gzip byte mismatch, with all three stages unapproved; review
+  190 cycle 3 passes the local deterministic-gzip correction with zero findings
+  and leaves protected delivery plus stage rejection separately gated
 
 ## 1. Goal and hard boundary
 
@@ -252,14 +259,17 @@ Also run all frozen live M19/M21 regressions:
 
 ```text
 pnpm test:live:m19:exact
-pnpm test:live:m19:next
-pnpm test:live:m19:latest
-pnpm test:live:m19:unqualified
 pnpm test:live:m21:exact
 pnpm test:live:m21:next
 pnpm test:live:m21:latest
 pnpm test:live:m21:unqualified
 ```
+
+M19 is an immutable historical exact-byte/source/consumer regression. Its
+former `next`/`latest` aliases are not M19 invariants after accepted M21 moved
+them to `0.4.0`. Registry-backed historical consumers must also remain
+independent from later prepared workspace manifest versions; only candidate
+mode asserts equality with current workspace manifests.
 
 Unexpected trust, stage, version, alias, access, credential, source or tool
 state stops before settings mutation.

@@ -17,6 +17,7 @@ import {
 import {
   argumentValue,
   loadReleaseDescriptor,
+  releaseConsumerUsesWorkspaceManifests,
   releasePackageSpecifier,
 } from './release-target.mjs';
 
@@ -453,15 +454,17 @@ try {
     runPnpm(['--version']).trim(),
     workspacePackage.packageManager.replace(/^pnpm@/u, ''),
   );
-  for (const target of descriptor.packages) {
-    const manifest = JSON.parse(
-      readFileSync(
-        join(workspaceRoot, target.workspacePath, 'package.json'),
-        'utf8',
-      ),
-    );
-    assert.equal(manifest.name, target.name);
-    assert.equal(manifest.version, target.version);
+  if (releaseConsumerUsesWorkspaceManifests(descriptor, PACKAGE_MODE)) {
+    for (const target of descriptor.packages) {
+      const manifest = JSON.parse(
+        readFileSync(
+          join(workspaceRoot, target.workspacePath, 'package.json'),
+          'utf8',
+        ),
+      );
+      assert.equal(manifest.name, target.name);
+      assert.equal(manifest.version, target.version);
+    }
   }
   const tarballs =
     PACKAGE_MODE === 'candidate'

@@ -1387,12 +1387,12 @@ for (const claim of invalidM21ReleaseClaims) {
 
 const m23ReleaseNote = await read(m23ReleaseNotePath);
 for (const fragment of [
-  'deterministic clean `develop` comparison candidates',
+  'deterministic clean protected-`main` candidates selected',
   'core `0.4.1`',
   'base Angular `0.4.1`',
   'pilot `0.2.1`',
   'ordinary `^0.4.0`',
-  'sourceCommit: 39a0d60abd34d399855995aa4375d60fb52c7873',
+  'sourceCommit: 4bcb6eabed76d8bc2fa877236d10b7831cbb6f00',
   'All non-metadata bytes and inventories are identical',
   '182aeb23087bb9b6d02c097aecda7acb239ed4d86b8b3c7854eb58f3232d510a0113b01f0790fc03ed4b8042d95ba59feb0d0b160702e088cf23d243f15e59bb',
   '51d95d98075b7ff63be1cafa5b39a42f9a93ce9a41a5147cd086330ceada6bf851b8d23725e87ec8077e4647b0c8874b70966dc3974d73ef9c7909aecc0b8bea',
