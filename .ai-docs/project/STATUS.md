@@ -6,13 +6,13 @@
 ## Checkpoint
 
 - **Updated:** 2026-07-28 by Ricard / Codex
-- **Branch:** `codex/m23-r189-main-readiness`
+- **Branch:** `codex/m23-main-promotion-decision`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-025 revision 0, Approved
 - **Last completed implementation plan:** PLAN-024 revision 0
-- **Active implementation task:** None; review 192 promotion readiness complete
+- **Active implementation task:** None; review 193 state reconciliation complete
 - **Last accepted ADR:** ADR-026 revision 1, coordinated with ADR-018 revision 7
 - **Implemented capability:** M1–M22 and G0, plus M23 metadata/OIDC source
   preparation through selected protected-`main` candidates and three
@@ -35,39 +35,40 @@ Promote the reviewed R189-F01 deterministic-gzip correction through protected
 
 ## In progress
 
-None. Review 192 completed the read-only promotion-readiness gate. Protected
-`main`, all three existing stages and npm remain unchanged.
+None. Review 193 reconciles the durable post-delivery gate. Protected `main`,
+all three existing stages and npm remain unchanged.
 
 ## Latest completed work
 
+- Accepted review 193 cycle 2 with zero findings: PR #20 delivery, exact refs,
+  CI, contracts and the durable post-delivery promotion boundary are
+  reconciled.
+- Merged review 192 evidence through PR #20 as protected
+  `develop@84d72f9`. Required run `30314144955` and post-merge run
+  `30314737637` passed.
 - Accepted review 192 cycle 6 with zero findings: exact protected refs, branch
-  controls, seven-commit promotion payload, CI, contracts and documentation
-  are ready for a separately authorized `main` promotion.
+  controls, promotion payload, CI, contracts and documentation are ready for a
+  separately authorized `main` promotion.
 - Merged review 191 evidence through PR #19 as protected
   `develop@e99193b`. Required run `30312801163` and post-merge run
   `30313179969` passed.
 - Completed the R189-F01 clean protected-`develop` rebuild after review 191
   cycle 2 passed with zero findings. Two generations, exact source evidence,
   neutral dry-runs, three Corresponding Source rebuilds and security pass.
-- Merged accepted PR #18 through protected `develop@5e60796`. Post-merge CI run
-  `30311703680`/job `90128528176` passed the complete workflow in 4m56s.
-- Completed the local R189-F01 correction after review 190 cycle 3 passed with
-  zero findings. Pure-JavaScript gzip normalization preserves exact TAR bytes;
-  two full generations and normalized protected candidates are byte-identical.
 
 ## Exact next action
 
-Obtain explicit authorization for the documentation-only commit, push and PR
-of review 192 evidence to protected `develop`. After CI/merge, reobserve its
-exact head and decide protected-main promotion separately. Do not mutate npm.
+After this reconciliation reaches protected `develop` and its CI passes,
+reobserve the exact `develop`/`main` refs and decide whether to authorize the
+protected merge-commit promotion to `main`. Do not mutate npm.
 
 ## Blockers and conflicts
 
 - No implementation or documentation blocker remains. No runtime, package-byte
   or public-API drift has been observed.
-- Review 192 evidence is local and must reach protected `develop` before
-  promotion. Its scoped commit, push and PR require Ricard's authorization;
-  protected-main promotion remains a later separate checkpoint-5 decision.
+- Review 193 reconciliation must reach protected `develop` before promotion.
+  Its scoped commit, push and PR require Ricard's authorization; protected-main
+  promotion remains a later separate checkpoint-5 decision.
 - Review 189 still blocks reuse or approval of the three existing stages:
   their compressed bytes differ from corrected deterministic candidates.
   Extracted files and uncompressed TAR bytes are exact.
@@ -99,11 +100,14 @@ exact head and decide protected-main promotion separately. Do not mutate npm.
 
 ## Open questions
 
-- Authorize or defer the documentation-only commit, push and PR of review 192
-  evidence to protected `develop`. This does not authorize `main` or npm.
+- After review 193 reaches protected `develop`, authorize or defer the exact
+  protected-main promotion. This does not include npm.
 
 ## Latest verification
 
+- Review 193 cycle 1 corrected the stale evidence-delivery next action. Cycle 2
+  passes exact refs, PR #20 CI, contract boundaries, current documentation and
+  focused policy checks with zero findings.
 - Review 192 cycle 1 corrected stale evidence-delivery state, cycle 2 corrected
   formatting, cycle 3 corrected one ambiguous phrase and cycle 4 corrected its
   table formatting. Cycle 5 corrected the evidence-delivery order. Cycle 6
@@ -131,6 +135,8 @@ exact head and decide protected-main promotion separately. Do not mutate npm.
 
 - Approved M23 plan:
   `.ai-docs/plans/025-stage-only-trusted-publication.md`
+- Accepted R189-F01 post-delivery promotion gate:
+  `.ai-docs/reviews/193-r189-f01-post-delivery-promotion-gate.md`
 - Accepted R189-F01 protected-main promotion readiness:
   `.ai-docs/reviews/192-r189-f01-protected-main-promotion-readiness.md`
 - Blocked M23 checkpoint-8 staged-byte review:
