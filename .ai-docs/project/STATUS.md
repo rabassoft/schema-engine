@@ -6,18 +6,19 @@
 ## Checkpoint
 
 - **Updated:** 2026-07-28 by Ricard / Codex
-- **Branch:** `codex/m23-main-promotion-decision`
+- **Branch:** `codex/m23-main-reselection-evidence`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-025 revision 0, Approved
 - **Last completed implementation plan:** PLAN-024 revision 0
-- **Active implementation task:** None; review 193 state reconciliation complete
+- **Active implementation task:** None; review 194 protected-main reselection
+  complete
 - **Last accepted ADR:** ADR-026 revision 1, coordinated with ADR-018 revision 7
 - **Implemented capability:** M1–M22 and G0, plus M23 metadata/OIDC source
-  preparation through selected protected-`main` candidates and three
-  stage-only trust relations; three M23 stages are blocked and no M23 version
-  is published
+  preparation through corrected deterministic candidates selected from exact
+  protected `main` and three stage-only trust relations; three obsolete M23
+  stages are blocked and no M23 version is published
 - **Published packages:** core/base Angular `0.4.0` and Angular Aria pilot
   `0.2.0` are verified exact, under `next`/`latest` and through unqualified
   resolution; all remain Public + Experimental + Active
@@ -30,51 +31,55 @@
 
 ## Current objective
 
-Promote the reviewed R189-F01 deterministic-gzip correction through protected
-`main`, then reconcile and reselect exact candidates from that source.
+Replace the three obsolete R189-F01 stages with the corrected deterministic
+candidate bytes selected from exact protected `main`, preserving every
+per-package npm authorization gate.
 
 ## In progress
 
-None. Review 193 reconciles the durable post-delivery gate. Protected `main`,
-all three existing stages and npm remain unchanged.
+None. Review 194 cycle 3 accepts the protected-`main` candidate reselection with
+zero findings. All three obsolete stages remain unapproved and unrejected; npm
+remains unchanged.
 
 ## Latest completed work
 
+- Accepted review 194 cycle 3 with zero findings: two clean generations from
+  exact protected `main@028a98c` reproduce the corrected bytes; package,
+  source, lower/current consumer, security and policy checks pass.
+- Reconciled `main@028a98c` through PR #23 as protected `develop@0933924`.
+  Required run `30318254173` and post-merge run `30318718752` passed; the
+  protected trees are identical and `main` is an ancestor of `develop`.
+- Promoted exact `develop@ed1cd2d` through PR #22 as protected
+  `main@028a98c`. Required run `30317202034` and post-merge run `30317547283`
+  passed.
+- Merged review 193 reconciliation through PR #21 as protected
+  `develop@ed1cd2d`; required and post-merge CI passed.
 - Accepted review 193 cycle 2 with zero findings: PR #20 delivery, exact refs,
-  CI, contracts and the durable post-delivery promotion boundary are
+  CI, contracts and the durable post-delivery promotion boundary were
   reconciled.
-- Merged review 192 evidence through PR #20 as protected
-  `develop@84d72f9`. Required run `30314144955` and post-merge run
-  `30314737637` passed.
-- Accepted review 192 cycle 6 with zero findings: exact protected refs, branch
-  controls, promotion payload, CI, contracts and documentation are ready for a
-  separately authorized `main` promotion.
-- Merged review 191 evidence through PR #19 as protected
-  `develop@e99193b`. Required run `30312801163` and post-merge run
-  `30313179969` passed.
-- Completed the R189-F01 clean protected-`develop` rebuild after review 191
-  cycle 2 passed with zero findings. Two generations, exact source evidence,
-  neutral dry-runs, three Corresponding Source rebuilds and security pass.
 
 ## Exact next action
 
-After this reconciliation reaches protected `develop` and its CI passes,
-reobserve the exact `develop`/`main` refs and decide whether to authorize the
-protected merge-commit promotion to `main`. Do not mutate npm.
+Obtain authorization for the scoped documentation-only commit, push and draft
+PR that deliver review 194 evidence to protected `develop`. After its CI and
+merge pass, reobserve exact refs, restore npm authentication and present
+rejection of the obsolete core stage
+`a748719f-7fe6-4c79-ac23-61e3ee8ffb25` as a separate immediate npm decision.
 
 ## Blockers and conflicts
 
 - No implementation or documentation blocker remains. No runtime, package-byte
   or public-API drift has been observed.
-- Review 193 reconciliation must reach protected `develop` before promotion.
-  Its scoped commit, push and PR require Ricard's authorization; protected-main
-  promotion remains a later separate checkpoint-5 decision.
+- Review 194 documentation evidence is local. Its scoped commit, push and PR
+  require Ricard's authorization; this delivery authorizes no npm mutation.
+- Authenticated `npm stage list` currently returns `E401`; Ricard must run
+  `npm login` before the next read-only stage reobservation or any rejection.
 - Review 189 still blocks reuse or approval of the three existing stages:
   their compressed bytes differ from corrected deterministic candidates.
   Extracted files and uncompressed TAR bytes are exact.
-- Corrected candidates currently have only protected-`develop` comparison
-  evidence. They require promotion and two exact protected-`main` generations
-  before selection.
+- Corrected candidates are selected evidence from exact protected
+  `main@028a98cfb1c96c821b6233c82f688a416e987656`; two independent generations
+  reproduce the same accepted bytes.
 - Each package retains exactly one stage-only trusted-publisher relation. All
   three stages remain unapproved and unrejected; publication, aliases,
   provenance verification and token restrictions remain separately gated.
@@ -100,14 +105,24 @@ protected merge-commit promotion to `main`. Do not mutate npm.
 
 ## Open questions
 
-- After review 193 reaches protected `develop`, authorize or defer the exact
-  protected-main promotion. This does not include npm.
+- After review 194 evidence reaches protected `develop`, authorize or defer
+  rejection of the exact obsolete core stage. Rejection does not authorize the
+  base/pilot rejections or replacement workflow dispatch.
 
 ## Latest verification
 
-- Review 193 cycle 1 corrected the stale evidence-delivery next action. Cycle 2
-  passes exact refs, PR #20 CI, contract boundaries, current documentation and
-  focused policy checks with zero findings.
+- Review 194 cycle 1 found the isolated clone's missing ignored Playwright
+  browser and corrected the test environment without changing source. Cycle 2
+  corrected a broad stale-action guard match. Cycle 3 passes two exact
+  candidate generations, protected refs and four CI gates,
+  formatting, 287-document/936-link documentation, lint, full
+  build/typecheck, 689 workspace tests, 41 release tests, 23 public tests,
+  package/source/lower-current consumer/security checks, 768-file public-tree,
+  workflow and diff checks with zero findings.
+- PR #22 merged exact `develop@ed1cd2d` as `main@028a98c`; required run
+  `30317202034` and post-merge run `30317547283` passed. PR #23 reconciled it as
+  `develop@0933924`; required run `30318254173` and post-merge run
+  `30318718752` passed.
 - Review 192 cycle 1 corrected stale evidence-delivery state, cycle 2 corrected
   formatting, cycle 3 corrected one ambiguous phrase and cycle 4 corrected its
   table formatting. Cycle 5 corrected the evidence-delivery order. Cycle 6
@@ -133,6 +148,8 @@ protected merge-commit promotion to `main`. Do not mutate npm.
 
 ## Task document map
 
+- Accepted R189-F01 protected-main reselection:
+  `.ai-docs/reviews/194-r189-f01-protected-main-reselection-review.md`
 - Approved M23 plan:
   `.ai-docs/plans/025-stage-only-trusted-publication.md`
 - Accepted R189-F01 post-delivery promotion gate:

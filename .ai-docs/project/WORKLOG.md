@@ -6,6 +6,32 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-07-28 — Corrected protected-main candidates selected
+
+### Completed
+
+- PR #21 delivered review 193 as protected `develop@ed1cd2d`. PR #22 promoted
+  it as `main@028a98c`; required run `30317202034` and post-merge run
+  `30317547283` passed.
+- PR #23 reconciled `main` as protected `develop@0933924`; required run
+  `30318254173` and post-merge run `30318718752` passed. The protected trees
+  are identical and `main` is an ancestor of `develop`.
+- Review 194 cycle 1 corrected the isolated Playwright browser setup and cycle
+  2 corrected a broad stale-action guard match. Cycle 3 passes two clean
+  generations from exact protected `main`, full
+  package/source/lower-current consumer/security evidence and policy checks
+  with zero findings.
+- The corrected candidates are selected publishable evidence. No stage was
+  approved or rejected and no npm mutation occurred.
+- A final read-only `npm stage list` returned `E401`; a fresh `npm login` is
+  required before stage reobservation or rejection.
+
+### Next
+
+- Deliver review 194 documentation to protected `develop`; after CI, reobserve
+  exact refs, restore npm authentication and decide rejection of the obsolete
+  core stage separately.
+
 ## 2026-07-28 — Review 192 evidence delivered; promotion gate reconciled
 
 ### Completed

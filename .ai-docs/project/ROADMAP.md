@@ -553,12 +553,18 @@ separado antes de repetir la revisión.
   pasan. Review 193 ciclo 2 reconcilia el estado durable: tras entregar esta
   evidencia y reobservar el SHA exacto, la promoción a `main` es la siguiente
   decisión separada.
+- PR #21 entrega review 193 como `develop@ed1cd2d`; PR #22 promueve mediante
+  merge commit a `main@028a98c` y PR #23 reconcilia a `develop@0933924`. Las
+  cuatro CI requerida/post-merge pasan. Review 194 ciclo 3 reproduce dos veces
+  los bytes corregidos desde el `main` exacto y los selecciona sin hallazgos.
+  Los tres stages obsoletos permanecen sin aprobar ni rechazar.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Next action:** tras entregar review 193 a `develop` y pasar su CI,
-   reobservar los refs exactos y decidir si se autoriza la promoción protegida
-   a `main`. Ningún stage se rechaza sin autorización separada.
+1. **Immediate gate:** entregar la evidencia de review 194 a `develop`; después de
+   su CI, reobservar los refs exactos, restaurar la sesión npm y decidir por
+   separado si se rechaza el stage obsoleto de core. Ningún stage se rechaza
+   por la aceptación de la revisión.
 2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
    trusted publishing npm, staging/aprobaciones, provenance live, aliases,
    GitHub Release, tag Git ni eliminación del backup privado.

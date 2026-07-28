@@ -37,7 +37,13 @@
   promotion readiness subject to delivering its documentation-only evidence
   and reobserving exact `develop`; PR #20 delivers that evidence as protected
   `develop@84d72f9`, both CI gates pass and review 193 cycle 2 reconciles the
-  durable promotion decision without authorizing promotion or npm
+  durable promotion decision without authorizing promotion or npm; PR #21
+  delivers that reconciliation as `develop@ed1cd2d`; PR #22 promotes it as
+  protected `main@028a98c`, PR #23 reconciles it as
+  `develop@0933924`, all four required/post-merge CI gates pass and review 194
+  cycle 3 selects the corrected deterministic candidates from exact protected
+  `main` with zero findings; rejection of the three obsolete stages remains
+  separately gated
 
 ## 1. Goal and hard boundary
 

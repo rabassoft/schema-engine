@@ -19,9 +19,9 @@
   exact, under `next`/`latest` and through unqualified resolution.
 - [M23 stage-only metadata release notes](./releases/0.4.1.md) — deterministic
   clean protected-`main` candidates selected for core/base `0.4.1` and pilot
-  `0.2.1`; exact source is `4bcb6ea`. Three stages exist but are blocked on
-  gzip byte drift; review 190 validates the local deterministic correction,
-  while stage approval, publication and live provenance remain unclaimed.
+  `0.2.1`; corrected exact source is `028a98c`. Three obsolete stages exist but
+  remain blocked on gzip byte drift; stage rejection, replacement staging,
+  publication and live provenance remain unclaimed.
 
 ## Specifications
 
@@ -55,6 +55,12 @@
 
 ## Acceptance reviews
 
+- [R189-F01 protected-main reselection](./reviews/194-r189-f01-protected-main-reselection-review.md)
+  — Cycle 1 corrects the isolated browser setup; cycle 2 corrects a broad
+  stale-action guard match; cycle 3 verifies protected
+  promotion/reconciliation, two exact deterministic generations, package,
+  source, lower/current consumer, security and policy evidence with zero
+  findings. The corrected candidates are selected; npm remains gated.
 - [R189-F01 post-delivery protected-main promotion gate](./reviews/193-r189-f01-post-delivery-promotion-gate.md)
   — Cycle 1 corrects the stale evidence-delivery next action; cycle 2 verifies
   PR #20 delivery, exact refs, CI and the durable promotion boundary with zero
