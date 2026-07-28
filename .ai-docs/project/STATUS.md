@@ -5,19 +5,19 @@
 
 ## Checkpoint
 
-- **Updated:** 2026-07-27 by Ricard / Codex
-- **Branch:** `develop`
+- **Updated:** 2026-07-28 by Ricard / Codex
+- **Branch:** `codex/m23-main-promotion-decision`
 - **Accepted specifications:** SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0 and SPEC-009 v0.1.0
 - **Last implementation plan:** PLAN-025 revision 0, Approved
 - **Last completed implementation plan:** PLAN-024 revision 0
-- **Active implementation task:** PLAN-025 checkpoint 5 protected `main`
-  promotion and reconciliation
+- **Active implementation task:** None; review 193 state reconciliation complete
 - **Last accepted ADR:** ADR-026 revision 1, coordinated with ADR-018 revision 7
-- **Implemented capability:** M1–M22 and G0, including the coordinated
-  Experimental M21 line plus sanitized public history, governance, protected
-  GitHub controls and fail-closed secure-release preparation
+- **Implemented capability:** M1–M22 and G0, plus M23 metadata/OIDC source
+  preparation through selected protected-`main` candidates and three
+  stage-only trust relations; three M23 stages are blocked and no M23 version
+  is published
 - **Published packages:** core/base Angular `0.4.0` and Angular Aria pilot
   `0.2.0` are verified exact, under `next`/`latest` and through unqualified
   resolution; all remain Public + Experimental + Active
@@ -30,118 +30,129 @@
 
 ## Current objective
 
-Execute PLAN-025 checkpoint 5 protected `main` promotion, reconciliation and
-exact clean rebuild without any npm action.
+Promote the reviewed R189-F01 deterministic-gzip correction through protected
+`main`, then reconcile and reselect exact candidates from that source.
 
 ## In progress
 
-Checkpoint 4 closure is canonical on protected `develop`. Checkpoint 5
-protected promotion to `main` is in progress; reconciliation and the exact
-clean rebuild follow only after required/post-merge CI. npm remains gated.
+None. Review 193 reconciles the durable post-delivery gate. Protected `main`,
+all three existing stages and npm remain unchanged.
 
 ## Latest completed work
 
-- Completed PLAN-025 checkpoint 4 after review 184 cycle 1 passed all twelve
-  areas with zero findings. PR #13 merged as `develop@39a0d60`, required and
-  post-merge CI passed, and two clean generations are byte-identical to
-  checkpoint 3 with exact `sourceCommit` evidence.
-- Published the isolated M22 closure commit `acc0d6c` on
-  `codex/m22-canonical-closure`, passed required CI `30168309902`, merged PR #12
-  as `develop@490c67a` and passed post-merge CI `30168530231`. The local and
-  remote M22 trees are identical.
-- Completed PLAN-025 checkpoint 3 after review 183 cycle 2 passed all sixteen
-  local candidate areas with zero findings. The three deterministic
-  metadata-only candidates pass source rebuilds, lower/current consumers,
-  security and neutral dry runs; all retain `sourceCommit: null`.
-- Completed PLAN-025 checkpoint 2 after review 182 cycle 2 passed all fourteen
-  manifest/onboarding/workflow/historical-regression areas with zero findings.
-  M23 source is prepared without candidate, stage or live provenance claims.
-- Completed PLAN-025 checkpoint 1 after review 181 cycle 2 passed all twelve
-  descriptor/readiness/workflow/evidence areas with zero unresolved findings.
-  Current manifests and workflow still fail closed for M23.
-- Approved PLAN-025 revision 0 after review 180 cycle 2 passed all eighteen
-  areas with zero unresolved findings. The review corrected exact-tarball
-  staging, protected-main evidence selection, separate environment approval,
-  impossible source-SHA self-reference and explicit M19/M21 live regressions.
+- Accepted review 193 cycle 2 with zero findings: PR #20 delivery, exact refs,
+  CI, contracts and the durable post-delivery promotion boundary are
+  reconciled.
+- Merged review 192 evidence through PR #20 as protected
+  `develop@84d72f9`. Required run `30314144955` and post-merge run
+  `30314737637` passed.
+- Accepted review 192 cycle 6 with zero findings: exact protected refs, branch
+  controls, promotion payload, CI, contracts and documentation are ready for a
+  separately authorized `main` promotion.
+- Merged review 191 evidence through PR #19 as protected
+  `develop@e99193b`. Required run `30312801163` and post-merge run
+  `30313179969` passed.
+- Completed the R189-F01 clean protected-`develop` rebuild after review 191
+  cycle 2 passed with zero findings. Two generations, exact source evidence,
+  neutral dry-runs, three Corresponding Source rebuilds and security pass.
 
 ## Exact next action
 
-Pass required CI for the protected `develop`-to-`main` promotion, merge it with
-the accepted merge-commit topology, pass post-merge CI and then reconcile
-`main` back into `develop`.
+After this reconciliation reaches protected `develop` and its CI passes,
+reobserve the exact `develop`/`main` refs and decide whether to authorize the
+protected merge-commit promotion to `main`. Do not mutate npm.
 
 ## Blockers and conflicts
 
-- No authoritative documentation conflict or implementation blocker remains.
-- Protected M23 delivery to `develop` is complete. The current clean
-  comparison candidates are not publishable evidence until the separately
-  gated protected `main` promotion/reconciliation and rebuild complete.
+- No implementation or documentation blocker remains. No runtime, package-byte
+  or public-API drift has been observed.
+- Review 193 reconciliation must reach protected `develop` before promotion.
+  Its scoped commit, push and PR require Ricard's authorization; protected-main
+  promotion remains a later separate checkpoint-5 decision.
+- Review 189 still blocks reuse or approval of the three existing stages:
+  their compressed bytes differ from corrected deterministic candidates.
+  Extracted files and uncompressed TAR bytes are exact.
+- Corrected candidates currently have only protected-`develop` comparison
+  evidence. They require promotion and two exact protected-`main` generations
+  before selection.
+- Each package retains exactly one stage-only trusted-publisher relation. All
+  three stages remain unapproved and unrejected; publication, aliases,
+  provenance verification and token restrictions remain separately gated.
 - Exact npm `11.18.0` is provisioned. Frozen offline install passes outside the
   restricted sandbox with the populated global pnpm store; the ignored
   workspace-local store cannot materialize content under sandbox restrictions.
-- Repository visibility is public, checkpoint-8 settings are live/exact and
-  checkpoint-9 publication, promotion and reconciliation all passed.
 - Current and remote long-lived lineage is sanitized and passes full history
   policy. The verified private old-lineage bundle and reversible pre-adoption
   stash remain retained outside public refs pending a separately authorized
   destructive housekeeping decision.
 - Active ruleset `19534784` protects both long-lived branches without bypass;
-  no further checkpoint-8 settings group remains pending.
+  pull requests, resolved conversations and strict `verify` are required.
 - Angular application builds require execution outside the restricted sandbox
   because esbuild IPC aborts inside it; Node 22.23.1 is compatible and the
   official builds pass.
-- This machine uses an ignored workspace-local Playwright cache because its
-  default global cache is owned by another user; no browser binary is tracked.
 - Angular emits an initial-bundle warning at 989.78 kB plus Ajv's CommonJS
   warning; Standard emits Vite's 868.50 kB advisory. These are observations,
   not blockers.
 - React, Vue, remaining D-011/D-025 scope, D-012, D-026, D-035 and D-045 legacy
-  Angular remain inactive. Package metadata, npm trusted publishing,
-  provenance and another release remain separately gated.
+  Angular remain inactive. Stage rejection/approval, package publication,
+  provenance verification, aliases and token restrictions remain separately
+  gated.
 
 ## Open questions
 
-- None while the protected promotion PR is under required CI.
+- After review 193 reaches protected `develop`, authorize or defer the exact
+  protected-main promotion. This does not include npm.
 
 ## Latest verification
 
-- Review 184 cycle 1 passes all twelve checkpoint-4 areas with zero findings.
-  PR #13 required CI and post-merge CI pass; two clean generations from exact
-  `develop@39a0d60` are byte-identical to checkpoint 3, carry exact source
-  evidence, rebuild from Corresponding Source and pass lower/current native,
-  Aria and M20/SPEC-009 consumers plus security/policy checks.
-- Checkpoint-4 closure PR #14 required CI `30250908564` passed in 3m51s; it
-  merged as `develop@3ec69f3` and post-merge CI `30251210671` passed in 4m50s.
-- Checkpoint-4 pre-commit scope has 42 M23-only files and passes diff/format,
-  276-document/909-link documentation, workflow/public-tree policy, lint, 39
-  release tests, 23 public/readiness/workflow tests, M23 metadata-only package
-  comparison, packed-source verification and release security. No unrelated
-  path is present.
-- Required PR #13 CI run `30223029548` passed in 4m52s at head `1c9f14f`.
-- Review 183 cycle 2 passes all sixteen checkpoint-3 areas with zero unresolved
-  findings. Frozen offline install, complete workspace/reference matrix,
-  deterministic packaging, metadata-only comparison, source rebuilds,
-  lower/current consumers, security and neutral dry runs pass. The final tree
-  passes 276 documents, 909 links, 756 public files, 62 focused tests, 689
-  workspace tests and 14 Chromium E2E tests.
-- Review 182 cycle 2 passes all fourteen checkpoint-2 areas with zero unresolved
-  findings. Formatting, 275-document/907-link documentation, workflow policy,
-  39 release-target/evidence tests, 23 public/readiness/workflow tests,
-  754-file public-tree policy, lint, package tests and typecheck pass.
-- Review 181 cycle 2 passes all twelve checkpoint-1 areas with zero unresolved
-  findings. All 39 release-target/evidence tests and 22 readiness/public/
-  workflow-policy tests pass; current M23 manifests/workflow fail closed.
-- Review 180 cycle 2 passes all eighteen PLAN-025 areas with zero unresolved
-  findings and approves only local checkpoint 1. Formatting, documentation
-  links, public-tree policy and diff checks pass with 271 Markdown files, 898
-  links and 748 public-tree candidates before checkpoint-1 implementation.
-- Review 179 cycle 2 passes all sixteen coordinated ADR areas with zero
-  unresolved findings; ADR-026 revision 1 and ADR-018 revision 7 are Accepted.
+- Review 193 cycle 1 corrected the stale evidence-delivery next action. Cycle 2
+  passes exact refs, PR #20 CI, contract boundaries, current documentation and
+  focused policy checks with zero findings.
+- Review 192 cycle 1 corrected stale evidence-delivery state, cycle 2 corrected
+  formatting, cycle 3 corrected one ambiguous phrase and cycle 4 corrected its
+  table formatting. Cycle 5 corrected the evidence-delivery order. Cycle 6
+  passes exact refs, seven-commit payload, no-bypass branch protection,
+  contract boundaries, current documentation and focused policy checks with
+  zero findings. Formatting, 285-document/930-link documentation, lint, 41
+  release tests, 23 public tests, 766-file public-tree, workflow and diff
+  checks pass.
+- PR #19 merged exact head `80916f8` as
+  `develop@e99193b2ec71788c4bbc1149a4056fbf4d74747c`. Required CI run
+  `30312801163`/job `90131912990` passed in 4m52s; post-merge run
+  `30313179969`/job `90133059320` passed all steps in 4m53s.
+- Review 191 cycle 2 passes the exact protected-`develop` rebuild with zero
+  findings. Two candidate generations match canonical bytes; evidence records
+  `sourceCommit: 5e60796`, three neutral dry-runs, three Corresponding Source
+  rebuilds, security/rights and focused policy checks pass.
+- Review 190 cycles 1–2 corrected documentation-evidence link and public-tree
+  counts. Cycle 3 passes with zero findings: frozen offline install, formatting,
+  283-document/924-link documentation, lint, full build/typecheck,
+  689 workspace tests, 41 release tests, 23 public tests, package/source/
+  security checks, two deterministic candidate generations, protected-TAR
+  preservation, 764-file public-tree, workflow and diff checks pass.
 
 ## Task document map
 
 - Approved M23 plan:
   `.ai-docs/plans/025-stage-only-trusted-publication.md`
+- Accepted R189-F01 post-delivery promotion gate:
+  `.ai-docs/reviews/193-r189-f01-post-delivery-promotion-gate.md`
+- Accepted R189-F01 protected-main promotion readiness:
+  `.ai-docs/reviews/192-r189-f01-protected-main-promotion-readiness.md`
+- Blocked M23 checkpoint-8 staged-byte review:
+  `.ai-docs/reviews/189-plan-025-checkpoint-8-staged-byte-review.md`
+- Accepted R189-F01 local correction review:
+  `.ai-docs/reviews/190-r189-f01-deterministic-gzip-correction-review.md`
+- Accepted R189-F01 protected-develop rebuild review:
+  `.ai-docs/reviews/191-r189-f01-protected-develop-rebuild-review.md`
+- Accepted M23 checkpoint-8 pre-dispatch review:
+  `.ai-docs/reviews/188-plan-025-checkpoint-8-pre-dispatch-review.md`
+- Completed M23 checkpoint-7 review:
+  `.ai-docs/reviews/187-plan-025-checkpoint-7-review.md`
+- Completed M23 checkpoint-6 review:
+  `.ai-docs/reviews/186-plan-025-checkpoint-6-review.md`
+- M23 checkpoint-5 review:
+  `.ai-docs/reviews/185-plan-025-checkpoint-5-review.md`
 - M23 checkpoint-4 review:
   `.ai-docs/reviews/184-plan-025-checkpoint-4-review.md`
 - M23 checkpoint-3 review:

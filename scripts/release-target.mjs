@@ -556,6 +556,15 @@ export function releasePackageSpecifier(
   return mode;
 }
 
+export function releaseConsumerUsesWorkspaceManifests(descriptor, mode) {
+  assertReleaseDescriptor(descriptor);
+  assert.ok(
+    descriptor.consumerModes.includes(mode),
+    `Unsupported ${descriptor.id} mode`,
+  );
+  return mode === 'candidate';
+}
+
 export function releaseCandidateDryRunArgs(
   descriptor,
   packageSpecifier,

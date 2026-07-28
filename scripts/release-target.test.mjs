@@ -24,6 +24,7 @@ import {
   M19_RELEASE_DESCRIPTOR,
   M21_RELEASE_DESCRIPTOR,
   M23_RELEASE_DESCRIPTOR,
+  releaseConsumerUsesWorkspaceManifests,
   releaseFrozenConsumerTuple,
   releaseCandidateDryRunArgs,
   releasePackageSpecifier,
@@ -555,6 +556,28 @@ test('defines isolated candidate, exact, next, latest and unqualified specifiers
   );
   assert.throws(() =>
     m19PackageSpecifier(M19_RELEASE_DESCRIPTOR, 'core', 'mixed'),
+  );
+});
+
+test('requires current workspace manifests only for candidate consumers', () => {
+  for (const descriptor of [
+    M19_RELEASE_DESCRIPTOR,
+    M21_RELEASE_DESCRIPTOR,
+    M23_RELEASE_DESCRIPTOR,
+  ]) {
+    assert.equal(
+      releaseConsumerUsesWorkspaceManifests(descriptor, 'candidate'),
+      true,
+    );
+    for (const mode of ['exact', 'next', 'latest', 'unqualified']) {
+      assert.equal(
+        releaseConsumerUsesWorkspaceManifests(descriptor, mode),
+        false,
+      );
+    }
+  }
+  assert.throws(() =>
+    releaseConsumerUsesWorkspaceManifests(M21_RELEASE_DESCRIPTOR, 'unknown'),
   );
 });
 

@@ -1,7 +1,8 @@
 import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import { gzipSync, gunzipSync } from 'fflate';
 
 export const workspaceRoot = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -34,6 +35,13 @@ function tarballAfterPack(directory, previous) {
   return join(directory, created[0]);
 }
 
+export function normalizeTarballGzip(tarball) {
+  const tar = gunzipSync(new Uint8Array(readFileSync(tarball)));
+  const normalized = gzipSync(tar, { level: 9, mtime: 0 });
+  writeFileSync(tarball, normalized);
+  return tarball;
+}
+
 function packWorkspacePackage(directory, workspacePackage, expectedFile) {
   const before = new Set(readdirSync(directory));
   runPnpm(['pack', '--pack-destination', directory], {
@@ -45,7 +53,7 @@ function packWorkspacePackage(directory, workspacePackage, expectedFile) {
       `Expected candidate ${expectedFile}, received ${tarball.slice(directory.length + 1)}`,
     );
   }
-  return tarball;
+  return normalizeTarballGzip(tarball);
 }
 
 export function packReleaseCandidates(directory, descriptor) {
