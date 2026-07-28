@@ -799,8 +799,11 @@ Cada decisión debe registrar:
   findings. PR #19 delivers that evidence to protected `develop@e99193b`; its
   required/post-merge CI and review 192 cycle 6 pass. Review evidence delivery
   completes through PR #20 as protected `develop@84d72f9`; both CI gates and
-  review 193 cycle 2 pass. Fresh exact-head reobservation precedes the
-  separately gated protected `main` promotion; selection, stage rejection,
+  review 193 cycle 2 pass. PR #21 delivers that reconciliation as
+  `develop@ed1cd2d`; PR #22 promotes it as protected `main@028a98c` and PR #23
+  reconciles it as `develop@0933924`, with all required/post-merge CI passing.
+  Review 194 cycle 3 selects corrected deterministic candidates from exact
+  protected `main` with zero findings; stage rejection, replacement staging,
   approvals, provenance release and backup deletion remain gated
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
@@ -865,8 +868,12 @@ Cada decisión debe registrar:
   source rebuilds y seguridad. PR #19 entrega la evidencia a
   `develop@e99193b`; su CI requerida/post-merge y review 192 ciclo 6 pasan sin
   hallazgos. PR #20 entrega esa evidencia a `develop@84d72f9`; ambas CI y
-  review 193 ciclo 2 pasan. Tras entregar esta reconciliación, se reobserva el
-  SHA exacto; `main` y npm permanecen gated.
+  review 193 ciclo 2 pasan. PR #21 entrega la reconciliación como
+  `develop@ed1cd2d`; PR #22 promueve a `main@028a98c` y PR #23 reconcilia a
+  `develop@0933924`, con todas las CI requeridas/post-merge superadas. Review
+  194 ciclo 3 selecciona desde ese `main` los bytes deterministas corregidos
+  sin hallazgos. El rechazo de los stages obsoletos y todo npm posterior
+  permanecen gated.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
