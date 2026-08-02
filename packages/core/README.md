@@ -5,11 +5,9 @@ for the Schema Engine prototype.
 
 ## Release status
 
-- Public verified Experimental `0.4.0` is available exactly and under both
-  `next` and `latest`.
-- Source package manifest: proposed metadata-only `0.4.1`; it is not generated,
-  staged or public. Verified public `0.4.0` remains the installable line and is
-  identical to the clean candidate selected from commit `07755b4c`.
+- Public verified Experimental `0.4.1` is available exactly and under `next`,
+  `latest` and unqualified resolution from protected commit `028a98c`, with
+  repository-backed npm provenance.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
 - Recommended channel: an explicit version, `next` or `latest`. The observed
@@ -17,7 +15,7 @@ for the Schema Engine prototype.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 
-The following command installs verified public Experimental core `0.4.0`:
+The following command installs verified public Experimental core `0.4.1`:
 
 ```sh
 npm install @rabassoft/schema-engine@next
@@ -40,8 +38,8 @@ supported.
 
 ## Prototype boundary
 
-> Exact core `0.4.0`, `next`, `latest` and unqualified clean-consumer evidence
-> pass. Routing never changes the Experimental contract.
+> Exact core `0.4.1`, `next`, `latest` and unqualified clean-consumer evidence
+> pass; routing never changes the Experimental contract.
 
 The current runtime supports a root object whose properties may recursively
 contain objects, primitive `string`, `number`, `integer`, and `boolean` leaves,
@@ -62,6 +60,19 @@ templates always require `nullable: boolean`; manually authored definitions
 must add `nullable: false` for scalar leaves and may use `true` only for the
 accepted nullable capability. Definition-aware direct/deep and item-relative
 operations accept explicit null only when that capability is true.
+
+Current source additionally normalizes `email`, `date` and `date-time` as
+optional semantic annotations on string definitions and templates. Core does
+not validate, parse, trim or canonicalize those values; assertion remains the
+responsibility of a replaceable validator.
+
+Primitive schema leaves may also declare JSON Schema `const`. Core copies an
+exact compatible scalar value to the normalized definition as the optional
+`fixedValue: string | number | boolean | null` presentation capability,
+including empty string, false, zero and negative zero. It does not infer a
+field type, insert the value into application state, enforce it in operations,
+or replace validator assertion. For scalar strings, a valid fixed value must
+belong to a simultaneously declared valid `enum`.
 
 External/dynamic references, anchors, arrays of primitives, arrays inside
 collection item templates, tuples, composition, generated/editable identity,
@@ -86,8 +97,8 @@ The sanitized development repository is public at
 `https://github.com/rabassoft/schema-engine`. Preferred TypeScript source and a
 frozen package-local build harness are included; see `SOURCE.md`.
 
-The proposed `0.4.1` source metadata names that repository, but npm provenance
-is not claimed until a later stage-only trusted publication is approved and
-verified. Existing `0.4.0` has no retroactive repository/provenance claim.
-Issues may be used for non-code feedback; external code contributions are not
-currently accepted.
+Public `0.4.1` carries verified npm provenance bound to
+`rabassoft/schema-engine`, `.github/workflows/npm-publish.yml` and protected
+commit `028a98c`. Existing `0.4.0` has no retroactive repository/provenance
+claim. Issues may be used for non-code feedback; external code contributions
+are not currently accepted.

@@ -168,621 +168,660 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
       aria-labelledby="reference-scenario-heading"
     >
       <header class="reference-card scenario-card">
-        <h2 class="eyebrow" id="reference-scenario-heading">
-          Reference scenario
-        </h2>
-        <nav class="scenario-navigation" aria-label="Reference scenarios">
-          <label for="scenario-selector">Scenario</label>
-          <select
-            id="scenario-selector"
-            aria-describedby="scenario-summary"
-            [value]="selectedScenario().id"
-            (change)="selectFromEvent($event)"
-          >
-            @for (scenario of scenarios; track scenario.id) {
-              <option [value]="scenario.id">{{ scenario.title }}</option>
-            }
-          </select>
-          <p id="scenario-summary">{{ selectedScenario().summary }}</p>
-          <div class="explanation-grid">
-            @for (entry of selectedScenario().explanation; track entry.id) {
-              <article>
-                <h3>{{ entry.title }}</h3>
-                <p>{{ entry.body }}</p>
-              </article>
-            }
-          </div>
-        </nav>
+        <details class="card-disclosure" open>
+          <summary class="collapsible-card-summary">
+            <h2 class="eyebrow" id="reference-scenario-heading">
+              Reference scenario
+            </h2>
+          </summary>
+          <div class="collapsible-card-content scenario-card-content">
+            <nav class="scenario-navigation" aria-label="Reference scenarios">
+              <label for="scenario-selector">Scenario</label>
+              <select
+                id="scenario-selector"
+                aria-describedby="scenario-summary"
+                [value]="selectedScenario().id"
+                (change)="selectFromEvent($event)"
+              >
+                @for (scenario of scenarios; track scenario.id) {
+                  <option [value]="scenario.id">{{ scenario.title }}</option>
+                }
+              </select>
+              <p id="scenario-summary">{{ selectedScenario().summary }}</p>
+              <div class="explanation-grid">
+                @for (entry of selectedScenario().explanation; track entry.id) {
+                  <article>
+                    <h3>{{ entry.title }}</h3>
+                    <p>{{ entry.body }}</p>
+                  </article>
+                }
+              </div>
+            </nav>
 
-        <p
-          class="state-pill"
-          role="status"
-          aria-live="polite"
-          data-testid="reference-state"
-        >
-          <span>{{ dirty() ? 'Modified' : 'Matches baseline' }}</span>
-          <span>locale {{ locale() }}</span>
-          <span>{{ validationVisibility() }} validation</span>
-          <span>{{ pendingEntries().length }} pending</span>
-        </p>
+            <p
+              class="state-pill"
+              role="status"
+              aria-live="polite"
+              data-testid="reference-state"
+            >
+              <span>{{ dirty() ? 'Modified' : 'Matches baseline' }}</span>
+              <span>locale {{ locale() }}</span>
+              <span>{{ validationVisibility() }} validation</span>
+              <span>{{ pendingEntries().length }} pending</span>
+            </p>
+          </div>
+        </details>
       </header>
 
-      <section
-        class="reference-card consumer-workspace"
-        aria-labelledby="interactive-consumer-heading"
-      >
-        <div class="card-heading">
-          <h2 class="eyebrow" id="interactive-consumer-heading">
-            Interactive consumer
-          </h2>
-        </div>
-        <div class="workspace-split">
-          <section
-            class="workspace-panel preview-workspace"
-            aria-labelledby="form-preview-heading"
-          >
-            <section
-              class="application-controls"
-              aria-labelledby="application-controls-heading"
-            >
-              <div>
-                <h4 id="application-controls-heading">Application controls</h4>
-                <p class="scope-guidance">
-                  Reset keeps the applied configuration and unapplied editor
-                  text while restoring scenario and shell state.
-                </p>
-              </div>
-              <div class="button-row">
-                <button type="button" (click)="resetScenario()">
-                  Reset scenario
-                </button>
-                <button type="button" (click)="commitBaseline()">
-                  Commit baseline
-                </button>
-                <button
-                  type="button"
-                  [attr.aria-pressed]="locale() === 'en'"
-                  (click)="setLocale('en')"
-                >
-                  Locale en
-                </button>
-                <button
-                  type="button"
-                  [attr.aria-pressed]="locale() === 'es'"
-                  (click)="setLocale('es')"
-                >
-                  Locale es
-                </button>
-                <button
-                  type="button"
-                  [attr.aria-pressed]="validationVisibility() === 'touched'"
-                  (click)="setValidationVisibility('touched')"
-                >
-                  Touched issues
-                </button>
-                <button
-                  type="button"
-                  [attr.aria-pressed]="validationVisibility() === 'all'"
-                  (click)="setValidationVisibility('all')"
-                >
-                  All issues
-                </button>
-              </div>
-            </section>
-
-            <div class="preview-heading">
-              <div>
-                <h4 id="form-preview-heading">Form preview</h4>
-              </div>
-              <fieldset class="decision-control">
-                <legend>Operation decision</legend>
-                <button
-                  type="button"
-                  data-testid="decision-confirm"
-                  [attr.aria-pressed]="decisionMode() === 'confirm'"
-                  (click)="setDecisionMode('confirm')"
-                >
-                  Confirm
-                </button>
-                <button
-                  type="button"
-                  data-testid="decision-reject"
-                  [attr.aria-pressed]="decisionMode() === 'reject'"
-                  (click)="setDecisionMode('reject')"
-                >
-                  Reject
-                </button>
-                <button
-                  type="button"
-                  data-testid="decision-pending"
-                  [attr.aria-pressed]="decisionMode() === 'pending'"
-                  (click)="setDecisionMode('pending')"
-                >
-                  Pending
-                </button>
-              </fieldset>
-            </div>
-
-            @if (selectedScenario().id === 'stable-team') {
-              <fieldset class="collection-controls">
-                <legend>Team collection controls</legend>
-                <div class="field-grid">
-                  <label for="team-item-id">New member ID</label>
-                  <input
-                    id="team-item-id"
-                    [value]="collectionDraftId()"
-                    (input)="updateCollectionDraftId($event)"
-                  />
-                  <label for="team-item-name">New member name</label>
-                  <input
-                    id="team-item-name"
-                    [value]="collectionDraftName()"
-                    (input)="updateCollectionDraftName($event)"
-                  />
-                </div>
-                <div class="button-row">
-                  <button type="button" (click)="insertTeamMember()">
-                    Insert member at end
-                  </button>
-                  <button
-                    type="button"
-                    [disabled]="teamMembers().length < 2"
-                    (click)="moveFirstTeamMemberLater()"
-                  >
-                    Move first member after second
-                  </button>
-                  <button
-                    type="button"
-                    [disabled]="teamMembers().length === 0"
-                    (click)="removeLastTeamMember()"
-                  >
-                    Remove last member
-                  </button>
-                </div>
-              </fieldset>
-            }
-
-            <div class="form-surface">
-              @for (mount of formMounts(); track mount.epoch) {
-                <!-- reference-snippet:start controlled-form-template -->
-                <form
-                  aria-label="Selected schema form"
-                  [schemaForm]="mount.config"
-                  (schemaOperation)="handleOperation($event)"
-                  (schemaDiagnostics)="recordRuntimeDiagnostics($event)"
-                ></form>
-                <!-- reference-snippet:end controlled-form-template -->
-              } @empty {
-                <p role="alert">The selected scenario could not be compiled.</p>
-              }
-            </div>
-
-            @if (pendingEntries().length > 0) {
+      <div class="consumer-workspace">
+        <section
+          class="reference-card consumer-card"
+          aria-labelledby="interactive-consumer-heading"
+        >
+          <details class="card-disclosure" open>
+            <summary class="collapsible-card-summary">
+              <h2 class="eyebrow" id="interactive-consumer-heading">
+                Interactive consumer
+              </h2>
+            </summary>
+            <div class="collapsible-card-content">
               <section
-                class="pending-card"
-                aria-labelledby="pending-heading"
-                data-testid="pending-list"
+                class="workspace-panel preview-workspace"
+                aria-labelledby="form-preview-heading"
               >
-                <h4 id="pending-heading">Pending intentions</h4>
-                @for (entry of pendingEntries(); track entry.id) {
-                  <p>
-                    {{ entry.operation.type }}
-                    <button
-                      type="button"
-                      [attr.aria-label]="
-                        'Confirm pending operation ' +
-                        entry.id +
-                        ': ' +
-                        entry.operation.type
-                      "
-                      (click)="resolvePending(entry.id, 'confirm')"
-                    >
-                      Confirm pending
+                <section
+                  class="application-controls"
+                  aria-labelledby="application-controls-heading"
+                >
+                  <div>
+                    <h4 id="application-controls-heading">
+                      Application controls
+                    </h4>
+                    <p class="scope-guidance">
+                      Reset keeps the applied configuration and unapplied editor
+                      text while restoring scenario and shell state.
+                    </p>
+                  </div>
+                  <div class="button-row">
+                    <button type="button" (click)="resetScenario()">
+                      Reset scenario
+                    </button>
+                    <button type="button" (click)="commitBaseline()">
+                      Commit baseline
                     </button>
                     <button
                       type="button"
-                      [attr.aria-label]="
-                        'Reject pending operation ' +
-                        entry.id +
-                        ': ' +
-                        entry.operation.type
-                      "
-                      (click)="resolvePending(entry.id, 'reject')"
+                      [attr.aria-pressed]="locale() === 'en'"
+                      (click)="setLocale('en')"
                     >
-                      Reject pending
+                      Locale en
                     </button>
-                  </p>
-                }
-              </section>
-            }
-          </section>
-          <section
-            class="workspace-panel schema-workspace"
-            aria-labelledby="schemas-heading"
-          >
-            <div class="schema-heading">
-              <h4 id="schemas-heading">Schemas</h4>
-              <p>
-                Edit, validate and apply JSON Schema and UI Schema while the
-                form preview remains visible alongside.
-              </p>
-            </div>
-            <reference-tabs
-              tabSetId="configuration"
-              label="Schema documents"
-              [tabs]="configurationTabs"
-              [activeId]="configurationTab()"
-              (activeIdChange)="setConfigurationTab($event)"
-            />
+                    <button
+                      type="button"
+                      [attr.aria-pressed]="locale() === 'es'"
+                      (click)="setLocale('es')"
+                    >
+                      Locale es
+                    </button>
+                    <button
+                      type="button"
+                      [attr.aria-pressed]="validationVisibility() === 'touched'"
+                      (click)="setValidationVisibility('touched')"
+                    >
+                      Touched issues
+                    </button>
+                    <button
+                      type="button"
+                      [attr.aria-pressed]="validationVisibility() === 'all'"
+                      (click)="setValidationVisibility('all')"
+                    >
+                      All issues
+                    </button>
+                  </div>
+                </section>
 
-            <div
-              #configurationStatus
-              class="configuration-status"
-              aria-live="polite"
-              tabindex="-1"
-            >
-              <span
-                class="status-badge"
-                [attr.data-status]="draftResult().status"
-              >
-                {{ draftStatusLabel() }}
-              </span>
-              @if (draftModified()) {
-                <span>Modified draft</span>
-              } @else {
-                <span>Matches applied configuration</span>
-              }
-            </div>
-            <div class="button-row configuration-actions">
-              <button type="button" (click)="validateConfiguration()">
-                Validate configuration
-              </button>
-              <button
-                type="button"
-                [disabled]="!draftModified()"
-                (click)="applyConfiguration($event.currentTarget)"
-              >
-                Apply configuration
-              </button>
-              <button
-                type="button"
-                [disabled]="!draftModified()"
-                (click)="cancelConfigurationChanges()"
-              >
-                Cancel changes
-              </button>
-              <button
-                type="button"
-                [disabled]="!canRestoreOriginalConfiguration()"
-                (click)="restoreScenarioConfiguration($event.currentTarget)"
-              >
-                Restore scenario configuration
-              </button>
-            </div>
-            <p class="scope-guidance">
-              Cancel restores only the last applied editor text. Restore
-              reinstalls the scenario's original configuration and resets the
-              form and shell state.
-            </p>
-
-            @if (pendingConfigurationAction(); as action) {
-              <section
-                #configurationConfirmation
-                class="configuration-confirmation"
-                role="alertdialog"
-                aria-labelledby="configuration-confirmation-heading"
-                aria-describedby="configuration-confirmation-description"
-                aria-modal="false"
-                tabindex="-1"
-              >
-                <h4 id="configuration-confirmation-heading">
-                  Confirm configuration reset
-                </h4>
-                <p id="configuration-confirmation-description">
-                  @if (action === 'apply') {
-                    Applying this configuration will reset the form value,
-                    baseline, operation history and shell controls.
-                  } @else {
-                    Restoring the scenario will discard active configuration,
-                    draft text and current form state.
-                  }
-                </p>
-                <div class="button-row">
-                  <button type="button" (click)="confirmConfigurationAction()">
-                    {{
-                      action === 'apply'
-                        ? 'Apply and reset form'
-                        : 'Restore scenario'
-                    }}
-                  </button>
-                  <button type="button" (click)="cancelConfigurationAction()">
-                    Keep current state
-                  </button>
+                <div class="preview-heading">
+                  <div>
+                    <h4 id="form-preview-heading">Form preview</h4>
+                  </div>
+                  <fieldset class="decision-control">
+                    <legend>Operation decision</legend>
+                    <button
+                      type="button"
+                      data-testid="decision-confirm"
+                      [attr.aria-pressed]="decisionMode() === 'confirm'"
+                      (click)="setDecisionMode('confirm')"
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="decision-reject"
+                      [attr.aria-pressed]="decisionMode() === 'reject'"
+                      (click)="setDecisionMode('reject')"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="decision-pending"
+                      [attr.aria-pressed]="decisionMode() === 'pending'"
+                      (click)="setDecisionMode('pending')"
+                    >
+                      Pending
+                    </button>
+                  </fieldset>
                 </div>
-              </section>
-            }
 
-            @if (
-              draftResult().syntaxIssues.length > 0 ||
-              draftResult().diagnostics.length > 0
-            ) {
-              <section
-                class="draft-diagnostics"
-                aria-labelledby="draft-diagnostics-heading"
-              >
-                <h4 id="draft-diagnostics-heading">
-                  Configuration diagnostics
-                </h4>
-                <ol>
-                  @for (
-                    issue of draftResult().syntaxIssues;
-                    track issue.document
-                  ) {
-                    <li class="diagnostic-row diagnostic-row--error">
-                      <span class="diagnostic-severity">Error</span>
-                      <code>JSON syntax</code>
-                      <span>{{ issue.message }}</span>
+                @if (selectedScenario().id === 'stable-team') {
+                  <fieldset class="collection-controls">
+                    <legend>Team collection controls</legend>
+                    <div class="field-grid">
+                      <label for="team-item-id">New member ID</label>
+                      <input
+                        id="team-item-id"
+                        [value]="collectionDraftId()"
+                        (input)="updateCollectionDraftId($event)"
+                      />
+                      <label for="team-item-name">New member name</label>
+                      <input
+                        id="team-item-name"
+                        [value]="collectionDraftName()"
+                        (input)="updateCollectionDraftName($event)"
+                      />
+                    </div>
+                    <div class="button-row">
+                      <button type="button" (click)="insertTeamMember()">
+                        Insert member at end
+                      </button>
                       <button
                         type="button"
-                        (click)="focusConfigurationDocument(issue.document)"
+                        [disabled]="teamMembers().length < 2"
+                        (click)="moveFirstTeamMemberLater()"
                       >
-                        Focus
-                        {{
-                          issue.document === 'schema'
-                            ? 'JSON Schema'
-                            : 'UI Schema'
-                        }}
-                        editor
+                        Move first member after second
                       </button>
-                    </li>
+                      <button
+                        type="button"
+                        [disabled]="teamMembers().length === 0"
+                        (click)="removeLastTeamMember()"
+                      >
+                        Remove last member
+                      </button>
+                    </div>
+                  </fieldset>
+                }
+
+                <div class="form-surface">
+                  @for (mount of formMounts(); track mount.epoch) {
+                    <!-- reference-snippet:start controlled-form-template -->
+                    <form
+                      aria-label="Selected schema form"
+                      [schemaForm]="mount.config"
+                      (schemaOperation)="handleOperation($event)"
+                      (schemaDiagnostics)="recordRuntimeDiagnostics($event)"
+                    ></form>
+                    <!-- reference-snippet:end controlled-form-template -->
+                  } @empty {
+                    <p role="alert">
+                      The selected scenario could not be compiled.
+                    </p>
                   }
-                  @for (diagnostic of draftResult().diagnostics; track $index) {
-                    <li
-                      class="diagnostic-row"
-                      [class.diagnostic-row--error]="
-                        diagnostic.severity === 'error'
-                      "
-                      [class.diagnostic-row--warning]="
-                        diagnostic.severity === 'warning'
-                      "
-                    >
-                      <span class="diagnostic-severity">
-                        {{ diagnostic.severity }}
-                      </span>
-                      <code>{{ diagnostic.code }}</code>
-                      <span>{{ diagnosticMessage(diagnostic) }}</span>
-                      @if (diagnostic.documentPath; as path) {
-                        <span>Document path {{ formatPath(path) }}</span>
-                      }
-                      @if (diagnostic.dataPath; as path) {
-                        <span>Data path {{ formatPath(path) }}</span>
-                      }
-                      @if (diagnostic.source !== 'runtime') {
+                </div>
+
+                @if (pendingEntries().length > 0) {
+                  <section
+                    class="pending-card"
+                    aria-labelledby="pending-heading"
+                    data-testid="pending-list"
+                  >
+                    <h4 id="pending-heading">Pending intentions</h4>
+                    @for (entry of pendingEntries(); track entry.id) {
+                      <p>
+                        {{ entry.operation.type }}
                         <button
                           type="button"
-                          (click)="
-                            focusConfigurationDocument(diagnostic.source)
+                          [attr.aria-label]="
+                            'Confirm pending operation ' +
+                            entry.id +
+                            ': ' +
+                            entry.operation.type
                           "
+                          (click)="resolvePending(entry.id, 'confirm')"
                         >
-                          Focus {{ diagnostic.source }} editor
+                          Confirm pending
                         </button>
-                      }
-                    </li>
-                  }
-                </ol>
+                        <button
+                          type="button"
+                          [attr.aria-label]="
+                            'Reject pending operation ' +
+                            entry.id +
+                            ': ' +
+                            entry.operation.type
+                          "
+                          (click)="resolvePending(entry.id, 'reject')"
+                        >
+                          Reject pending
+                        </button>
+                      </p>
+                    }
+                  </section>
+                }
               </section>
-            }
-            @switch (configurationTab()) {
-              @case ('schema') {
-                <section
-                  class="tab-panel"
-                  id="configuration-panel-schema"
-                  role="tabpanel"
-                  aria-labelledby="configuration-tab-schema"
-                  tabindex="0"
+            </div>
+          </details>
+        </section>
+
+        <section
+          class="reference-card tool-card tool-card--configuration schema-workspace"
+          aria-labelledby="schemas-heading"
+        >
+          <details class="card-disclosure" open>
+            <summary class="collapsible-card-summary">
+              <h2 class="eyebrow" id="schemas-heading">Schemas</h2>
+            </summary>
+            <div class="collapsible-card-content">
+              <div class="schema-heading">
+                <p>
+                  Edit, validate and apply JSON Schema and UI Schema while the
+                  form preview remains visible alongside.
+                </p>
+              </div>
+              <div
+                #configurationStatus
+                class="configuration-status"
+                aria-live="polite"
+                tabindex="-1"
+              >
+                <span
+                  class="status-badge"
+                  [attr.data-status]="draftResult().status"
                 >
-                  <h4>JSON Schema draft</h4>
-                  <p id="schema-editor-help">
-                    Edit JSON, then validate or apply the complete
-                    configuration.
+                  {{ draftStatusLabel() }}
+                </span>
+                @if (draftModified()) {
+                  <span>Modified draft</span>
+                } @else {
+                  <span>Matches applied configuration</span>
+                }
+              </div>
+              <div class="button-row configuration-actions">
+                <button type="button" (click)="validateConfiguration()">
+                  Validate configuration
+                </button>
+                <button
+                  type="button"
+                  [disabled]="!draftModified()"
+                  (click)="applyConfiguration($event.currentTarget)"
+                >
+                  Apply configuration
+                </button>
+                <button
+                  type="button"
+                  [disabled]="!draftModified()"
+                  (click)="cancelConfigurationChanges()"
+                >
+                  Cancel changes
+                </button>
+                <button
+                  type="button"
+                  [disabled]="!canRestoreOriginalConfiguration()"
+                  (click)="restoreScenarioConfiguration($event.currentTarget)"
+                >
+                  Restore scenario configuration
+                </button>
+              </div>
+              <p class="scope-guidance">
+                Cancel restores only the last applied editor text. Restore
+                reinstalls the scenario's original configuration and resets the
+                form and shell state.
+              </p>
+
+              @if (pendingConfigurationAction(); as action) {
+                <section
+                  #configurationConfirmation
+                  class="configuration-confirmation"
+                  role="alertdialog"
+                  aria-labelledby="configuration-confirmation-heading"
+                  aria-describedby="configuration-confirmation-description"
+                  aria-modal="false"
+                  tabindex="-1"
+                >
+                  <h4 id="configuration-confirmation-heading">
+                    Confirm configuration reset
+                  </h4>
+                  <p id="configuration-confirmation-description">
+                    @if (action === 'apply') {
+                      Applying this configuration will reset the form value,
+                      baseline, operation history and shell controls.
+                    } @else {
+                      Restoring the scenario will discard active configuration,
+                      draft text and current form state.
+                    }
                   </p>
-                  <reference-json-editor
-                    #schemaEditor
-                    label="JSON Schema editor"
-                    instructionsId="schema-editor-help"
-                    [value]="schemaDraft()"
-                    (valueChange)="updateSchemaDraft($event)"
-                  />
+                  <div class="button-row">
+                    <button
+                      type="button"
+                      (click)="confirmConfigurationAction()"
+                    >
+                      {{
+                        action === 'apply'
+                          ? 'Apply and reset form'
+                          : 'Restore scenario'
+                      }}
+                    </button>
+                    <button type="button" (click)="cancelConfigurationAction()">
+                      Keep current state
+                    </button>
+                  </div>
                 </section>
               }
-              @case ('ui-schema') {
+
+              @if (
+                draftResult().syntaxIssues.length > 0 ||
+                draftResult().diagnostics.length > 0
+              ) {
                 <section
-                  class="tab-panel"
-                  id="configuration-panel-ui-schema"
-                  role="tabpanel"
-                  aria-labelledby="configuration-tab-ui-schema"
-                  tabindex="0"
+                  class="draft-diagnostics"
+                  aria-labelledby="draft-diagnostics-heading"
                 >
-                  <h4>UI Schema draft</h4>
-                  <p id="ui-schema-editor-help">
-                    Presentation metadata is compiled together with the current
-                    JSON Schema draft.
-                  </p>
-                  <reference-json-editor
-                    #uiSchemaEditor
-                    label="UI Schema editor"
-                    instructionsId="ui-schema-editor-help"
-                    [value]="uiSchemaDraft()"
-                    (valueChange)="updateUiSchemaDraft($event)"
-                  />
+                  <h4 id="draft-diagnostics-heading">
+                    Configuration diagnostics
+                  </h4>
+                  <ol>
+                    @for (
+                      issue of draftResult().syntaxIssues;
+                      track issue.document
+                    ) {
+                      <li class="diagnostic-row diagnostic-row--error">
+                        <span class="diagnostic-severity">Error</span>
+                        <code>JSON syntax</code>
+                        <span>{{ issue.message }}</span>
+                        <button
+                          type="button"
+                          (click)="focusConfigurationDocument(issue.document)"
+                        >
+                          Focus
+                          {{
+                            issue.document === 'schema'
+                              ? 'JSON Schema'
+                              : 'UI Schema'
+                          }}
+                          editor
+                        </button>
+                      </li>
+                    }
+                    @for (
+                      diagnostic of draftResult().diagnostics;
+                      track $index
+                    ) {
+                      <li
+                        class="diagnostic-row"
+                        [class.diagnostic-row--error]="
+                          diagnostic.severity === 'error'
+                        "
+                        [class.diagnostic-row--warning]="
+                          diagnostic.severity === 'warning'
+                        "
+                      >
+                        <span class="diagnostic-severity">
+                          {{ diagnostic.severity }}
+                        </span>
+                        <code>{{ diagnostic.code }}</code>
+                        <span>{{ diagnosticMessage(diagnostic) }}</span>
+                        @if (diagnostic.documentPath; as path) {
+                          <span>Document path {{ formatPath(path) }}</span>
+                        }
+                        @if (diagnostic.dataPath; as path) {
+                          <span>Data path {{ formatPath(path) }}</span>
+                        }
+                        @if (diagnostic.source !== 'runtime') {
+                          <button
+                            type="button"
+                            (click)="
+                              focusConfigurationDocument(diagnostic.source)
+                            "
+                          >
+                            Focus {{ diagnostic.source }} editor
+                          </button>
+                        }
+                      </li>
+                    }
+                  </ol>
                 </section>
               }
-            }
-          </section>
-        </div>
-      </section>
+              <div class="tab-interface tab-interface--configuration">
+                <reference-tabs
+                  tabSetId="configuration"
+                  label="Schema documents"
+                  [tabs]="configurationTabs"
+                  [activeId]="configurationTab()"
+                  (activeIdChange)="setConfigurationTab($event)"
+                />
+
+                @switch (configurationTab()) {
+                  @case ('schema') {
+                    <section
+                      class="tab-panel"
+                      id="configuration-panel-schema"
+                      role="tabpanel"
+                      aria-labelledby="configuration-tab-schema"
+                      tabindex="0"
+                    >
+                      <h4>JSON Schema draft</h4>
+                      <p id="schema-editor-help">
+                        Edit JSON, then validate or apply the complete
+                        configuration.
+                      </p>
+                      <reference-json-editor
+                        #schemaEditor
+                        label="JSON Schema editor"
+                        instructionsId="schema-editor-help"
+                        [value]="schemaDraft()"
+                        (valueChange)="updateSchemaDraft($event)"
+                      />
+                    </section>
+                  }
+                  @case ('ui-schema') {
+                    <section
+                      class="tab-panel"
+                      id="configuration-panel-ui-schema"
+                      role="tabpanel"
+                      aria-labelledby="configuration-tab-ui-schema"
+                      tabindex="0"
+                    >
+                      <h4>UI Schema draft</h4>
+                      <p id="ui-schema-editor-help">
+                        Presentation metadata is compiled together with the
+                        current JSON Schema draft.
+                      </p>
+                      <reference-json-editor
+                        #uiSchemaEditor
+                        label="UI Schema editor"
+                        instructionsId="ui-schema-editor-help"
+                        [value]="uiSchemaDraft()"
+                        (valueChange)="updateUiSchemaDraft($event)"
+                      />
+                    </section>
+                  }
+                }
+              </div>
+            </div>
+          </details>
+        </section>
+      </div>
 
       <section
         class="reference-card tool-card tool-card--evidence"
         aria-labelledby="observable-evidence-heading"
       >
-        <div class="card-heading">
-          <h2 class="eyebrow" id="observable-evidence-heading">
-            Observable evidence
-          </h2>
-        </div>
-        <reference-tabs
-          tabSetId="evidence"
-          label="Evidence views"
-          [tabs]="evidenceTabs"
-          [activeId]="evidenceTab()"
-          (activeIdChange)="setEvidenceTab($event)"
-        />
+        <details class="card-disclosure" open>
+          <summary class="collapsible-card-summary">
+            <h2 class="eyebrow" id="observable-evidence-heading">
+              Observable evidence
+            </h2>
+          </summary>
+          <div class="collapsible-card-content">
+            <div class="tab-interface tab-interface--evidence">
+              <reference-tabs
+                tabSetId="evidence"
+                label="Evidence views"
+                [tabs]="evidenceTabs"
+                [activeId]="evidenceTab()"
+                (activeIdChange)="setEvidenceTab($event)"
+              />
 
-        @switch (evidenceTab()) {
-          @case ('state') {
-            <section
-              class="tab-panel"
-              id="evidence-panel-state"
-              role="tabpanel"
-              aria-labelledby="evidence-tab-state"
-              tabindex="0"
-            >
-              <reference-inspector-panel
-                label="Value"
-                testId="inspector-value"
-                [expanded]="true"
-                [value]="value()"
-              />
-              <reference-inspector-panel
-                label="Baseline value"
-                testId="inspector-baseline"
-                [value]="baselineValue()"
-              />
-            </section>
-          }
-          @case ('definition') {
-            <section
-              class="tab-panel"
-              id="evidence-panel-definition"
-              role="tabpanel"
-              aria-labelledby="evidence-tab-definition"
-              tabindex="0"
-            >
-              <reference-inspector-panel
-                label="Normalized definition"
-                testId="inspector-definition"
-                [value]="definition()"
-              />
-            </section>
-          }
-          @case ('runtime') {
-            <section
-              class="tab-panel"
-              id="evidence-panel-runtime"
-              role="tabpanel"
-              aria-labelledby="evidence-tab-runtime"
-              tabindex="0"
-            >
-              <reference-inspector-panel
-                label="Runtime snapshot"
-                testId="inspector-snapshot"
-                [value]="runtimeSnapshot()"
-              />
-              <reference-inspector-panel
-                label="Operation history"
-                testId="inspector-history"
-                [value]="history()"
-              />
-            </section>
-          }
-          @case ('diagnostics') {
-            <section
-              class="tab-panel diagnostics-panel"
-              id="evidence-panel-diagnostics"
-              role="tabpanel"
-              aria-labelledby="evidence-tab-diagnostics"
-              tabindex="0"
-            >
-              <reference-inspector-panel
-                label="Compiler diagnostics"
-                testId="inspector-compiler-diagnostics"
-                [value]="compilerDiagnostics()"
-              />
-              <reference-inspector-panel
-                label="Runtime diagnostics"
-                testId="inspector-runtime-diagnostics"
-                [value]="runtimeDiagnostics()"
-              />
-              <reference-inspector-panel
-                label="JSON Schema validation issues"
-                testId="inspector-issues"
-                [value]="validationIssues()"
-              />
-              @if (activeConfigurationDiffersFromOriginal()) {
-                <p class="validation-caveat" role="note">
-                  The active configuration differs from the scenario original.
-                  These issues come from the active Draft 2020-12 schema through
-                  the reusable synchronous Ajv integration.
-                </p>
-              }
-            </section>
-          }
-          @case ('integration') {
-            <section
-              class="tab-panel integration-panel"
-              id="evidence-panel-integration"
-              role="tabpanel"
-              aria-labelledby="evidence-tab-integration"
-              tabindex="0"
-            >
-              <h4 id="snippets-heading">Build-checked integration excerpts</h4>
-              <p>
-                These excerpts are generated from marked regions in the compiled
-                reference-form source. Read them in order to follow the
-                controlled integration from application-owned state, through
-                operation decisions, to the Angular template boundary.
-              </p>
-              <ol
-                class="integration-flow"
-                aria-label="Angular integration flow"
-              >
-                <li>
-                  <strong>Own state:</strong> keep value and baseline in the
-                  application.
-                </li>
-                <li>
-                  <strong>Decide operations:</strong> confirm, reject or defer
-                  every request.
-                </li>
-                <li>
-                  <strong>Bind the form:</strong> pass configuration in and
-                  receive events out.
-                </li>
-              </ol>
-              @defer {
-                @for (snippet of snippets; track snippet.id) {
-                  <article [attr.data-testid]="'snippet-' + snippet.id">
-                    <h5>{{ snippet.label }}</h5>
-                    <dl class="snippet-explanation">
-                      <dt>What it demonstrates</dt>
-                      <dd>{{ snippet.purpose }}</dd>
-                      <dt>Application responsibility</dt>
-                      <dd>{{ snippet.responsibility }}</dd>
-                    </dl>
-                    <reference-code-example
-                      [label]="snippet.label"
-                      [language]="snippet.language"
-                      [source]="snippet.source"
+              @switch (evidenceTab()) {
+                @case ('state') {
+                  <section
+                    class="tab-panel"
+                    id="evidence-panel-state"
+                    role="tabpanel"
+                    aria-labelledby="evidence-tab-state"
+                    tabindex="0"
+                  >
+                    <reference-inspector-panel
+                      label="Value"
+                      testId="inspector-value"
+                      [expanded]="true"
+                      [value]="value()"
                     />
-                  </article>
+                    <reference-inspector-panel
+                      label="Baseline value"
+                      testId="inspector-baseline"
+                      [value]="baselineValue()"
+                    />
+                  </section>
                 }
-              } @placeholder {
-                <p>Loading highlighted integration excerpts…</p>
+                @case ('definition') {
+                  <section
+                    class="tab-panel"
+                    id="evidence-panel-definition"
+                    role="tabpanel"
+                    aria-labelledby="evidence-tab-definition"
+                    tabindex="0"
+                  >
+                    <reference-inspector-panel
+                      label="Normalized definition"
+                      testId="inspector-definition"
+                      [value]="definition()"
+                    />
+                  </section>
+                }
+                @case ('runtime') {
+                  <section
+                    class="tab-panel"
+                    id="evidence-panel-runtime"
+                    role="tabpanel"
+                    aria-labelledby="evidence-tab-runtime"
+                    tabindex="0"
+                  >
+                    <reference-inspector-panel
+                      label="Runtime snapshot"
+                      testId="inspector-snapshot"
+                      [value]="runtimeSnapshot()"
+                    />
+                    <reference-inspector-panel
+                      label="Operation history"
+                      testId="inspector-history"
+                      [value]="history()"
+                    />
+                  </section>
+                }
+                @case ('diagnostics') {
+                  <section
+                    class="tab-panel diagnostics-panel"
+                    id="evidence-panel-diagnostics"
+                    role="tabpanel"
+                    aria-labelledby="evidence-tab-diagnostics"
+                    tabindex="0"
+                  >
+                    <reference-inspector-panel
+                      label="Compiler diagnostics"
+                      testId="inspector-compiler-diagnostics"
+                      [value]="compilerDiagnostics()"
+                    />
+                    <reference-inspector-panel
+                      label="Runtime diagnostics"
+                      testId="inspector-runtime-diagnostics"
+                      [value]="runtimeDiagnostics()"
+                    />
+                    <reference-inspector-panel
+                      label="JSON Schema validation issues"
+                      testId="inspector-issues"
+                      [value]="validationIssues()"
+                    />
+                    @if (activeConfigurationDiffersFromOriginal()) {
+                      <p class="validation-caveat" role="note">
+                        The active configuration differs from the scenario
+                        original. These issues come from the active Draft
+                        2020-12 schema through the reusable synchronous Ajv
+                        integration.
+                      </p>
+                    }
+                  </section>
+                }
+                @case ('integration') {
+                  <section
+                    class="tab-panel integration-panel"
+                    id="evidence-panel-integration"
+                    role="tabpanel"
+                    aria-labelledby="evidence-tab-integration"
+                    tabindex="0"
+                  >
+                    <h4 id="snippets-heading">
+                      Build-checked integration excerpts
+                    </h4>
+                    <p>
+                      These excerpts are generated from marked regions in the
+                      compiled reference-form source. Read them in order to
+                      follow the controlled integration from application-owned
+                      state, through operation decisions, to the Angular
+                      template boundary.
+                    </p>
+                    <ol
+                      class="integration-flow"
+                      aria-label="Angular integration flow"
+                    >
+                      <li>
+                        <strong>Own state:</strong> keep value and baseline in
+                        the application.
+                      </li>
+                      <li>
+                        <strong>Decide operations:</strong> confirm, reject or
+                        defer every request.
+                      </li>
+                      <li>
+                        <strong>Bind the form:</strong> pass configuration in
+                        and receive events out.
+                      </li>
+                    </ol>
+                    @defer {
+                      @for (snippet of snippets; track snippet.id) {
+                        <article [attr.data-testid]="'snippet-' + snippet.id">
+                          <h5>{{ snippet.label }}</h5>
+                          <dl class="snippet-explanation">
+                            <dt>What it demonstrates</dt>
+                            <dd>{{ snippet.purpose }}</dd>
+                            <dt>Application responsibility</dt>
+                            <dd>{{ snippet.responsibility }}</dd>
+                          </dl>
+                          <reference-code-example
+                            [label]="snippet.label"
+                            [language]="snippet.language"
+                            [source]="snippet.source"
+                          />
+                        </article>
+                      }
+                    } @placeholder {
+                      <p>Loading highlighted integration excerpts…</p>
+                    }
+                  </section>
+                }
               }
-            </section>
-          }
-        }
+            </div>
+          </div>
+        </details>
       </section>
     </section>
   `,

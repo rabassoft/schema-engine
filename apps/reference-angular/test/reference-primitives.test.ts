@@ -36,6 +36,7 @@ describe('reference application presentation primitives', () => {
       root.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
     );
     expect(tabList?.getAttribute('aria-label')).toBe('Configuration views');
+    expect(getComputedStyle(tabList as Element).overflowY).toBe('hidden');
     expect(tabs).toHaveLength(3);
     expect(tabs[0]?.id).toBe(referenceTabId('configuration', 'controls'));
     expect(tabs[0]?.getAttribute('aria-controls')).toBe(
@@ -137,6 +138,13 @@ describe('reference application presentation primitives', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('.cm-gutters'),
     ).not.toBeNull();
+    expect(
+      Array.from(document.head.querySelectorAll('style')).some(
+        (style) =>
+          style.textContent?.includes('.cm-selectionBackground') === true &&
+          style.textContent.includes('var(--color-editor-selection)'),
+      ),
+    ).toBe(true);
 
     const view = EditorView.findFromDOM(content as HTMLElement);
     expect(view).not.toBeNull();
@@ -195,6 +203,13 @@ describe('reference application presentation primitives', () => {
       Array.from(content?.querySelectorAll('span') ?? []).some(
         ({ textContent, className }) =>
           textContent === 'const' && className.length > 0,
+      ),
+    ).toBe(true);
+    expect(
+      Array.from(document.head.querySelectorAll('style')).some(
+        (style) =>
+          style.textContent?.includes('.cm-selectionBackground') === true &&
+          style.textContent.includes('var(--color-code-selection)'),
       ),
     ).toBe(true);
     root

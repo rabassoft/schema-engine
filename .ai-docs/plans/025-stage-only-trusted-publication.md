@@ -1,6 +1,6 @@
 # PLAN-025: Stage-only trusted publication with provenance
 
-- **Status:** Approved
+- **Status:** Completed
 - **Date:** 2026-07-25
 - **Revision:** 0 — initial M23 delivery plan
 - **Approval date:** 2026-07-25
@@ -42,8 +42,59 @@
   protected `main@028a98c`, PR #23 reconciles it as
   `develop@0933924`, all four required/post-merge CI gates pass and review 194
   cycle 3 selects the corrected deterministic candidates from exact protected
-  `main` with zero findings; rejection of the three obsolete stages remains
-  separately gated
+  `main` with zero findings; Ricard separately authorizes and completes
+  rejection of all three obsolete stages; review 195 cycle 2 repeats the
+  replacement checkpoint-8 pre-dispatch gate with zero findings, while the
+  exact dispatch remains separately gated; Ricard authorizes exact replacement
+  run `30377052519`, its `verify-release` job passes on protected
+  `main@028a98c` and its stage job waits for the separately gated
+  `npm-publish` environment approval; after Ricard approves that environment,
+  the run succeeds and review 196 cycle 1 verifies all three downloaded stages
+  byte-identical to selected candidates with zero findings, completing
+  checkpoint 8; Ricard separately approves only the core stage and review 197
+  cycle 2 verifies exact public bytes, signature, provenance, repository,
+  source and exact/`next` consumers with zero findings, completing checkpoint
+  9; Ricard separately approves only the base stage and review 198 cycle 1
+  verifies exact bytes, packed peer, signature, provenance, repository, source
+  and exact/`next` native consumers with zero findings, completing checkpoint
+  10; Ricard separately approves only the pilot stage and review 199 cycle 2
+  verifies exact bytes, exports/styles, peers, signature, provenance, source
+  and the complete exact/`next` native/pilot matrix with zero findings,
+  completing checkpoint 11 while every `latest` transition remains separately
+  gated; Ricard separately authorizes checkpoint 12's read-only preflight and
+  review 200 cycle 1 verifies the exact three-package line, signatures,
+  provenance, aliases, access and mixed-window boundary with zero findings,
+  while the pilot `latest` mutation remains separately gated; after Ricard
+  authorizes only that target, fresh observation finds it already active before
+  the command is executed, so no duplicate mutation occurs; review 201 cycle 1
+  corrects three stale documentation/policy claims, cycle 2 corrects two final
+  current-state claims and cycle 3 verifies exact pilot `latest` bytes and the
+  unchanged core/base aliases with zero findings, completing checkpoint 12;
+  Ricard then executes only the separately authorized base Angular `latest`
+  transition; review 202 cycles 1–2 correct two stale documentation/current
+  claims and cycle 3 verifies exact bytes, aliases and the mixed window with
+  zero findings, completing checkpoint 13; Ricard then executes only the
+  separately authorized core `latest` transition; review 203 cycles 1–2 correct
+  four stale onboarding/review/current-state claims and cycle 3 repeats the
+  exact-byte, coordinated-routing, signature/attestation and consumer review
+  with zero findings, completing checkpoint 14; Ricard separately authorizes
+  checkpoint 15's read-only preflight and review 204 cycle 3 verifies all three
+  public package policies, exact stage-only trusted publishers, account 2FA and
+  zero tokens with no mutation and zero findings; each stronger package policy
+  remains separately gated; Ricard then completes only the core
+  `mfa=publish` transition and review 205 cycle 1 verifies the stronger core
+  policy, unchanged stage-only trust, public access, empty token inventory,
+  aliases and unchanged Angular policies with zero findings; base and pilot
+  remain separately gated; Ricard then completes only base Angular
+  `mfa=publish` and review 206 cycle 2 verifies core/base strict policies,
+  unchanged stage-only trust/access/aliases, zero tokens and the unchanged
+  pilot policy with zero findings; pilot remains separately gated; Ricard then
+  completes only pilot `mfa=publish` and review 207 cycle 1 verifies all three
+  strict policies, unchanged stage-only trust/access/aliases and zero tokens
+  with zero findings, completing checkpoint 15; review 208 cycle 1 corrects
+  four final verification/reproducibility findings and cycle 2 repeats the
+  complete checkpoint-16 matrix with zero findings, completing PLAN-025
+  revision 0 and M23
 
 ## 1. Goal and hard boundary
 
@@ -408,9 +459,10 @@ Repeat:
 
 1. exact selected/live bytes, integrity, signatures, repository metadata and
    provenance for all M23 packages;
-2. immutable M19/M21 bytes, metadata and historical absence of retroactive
-   provenance, rerunning every `test:live:m19:*` and `test:live:m21:*`
-   exact/`next`/`latest`/unqualified command named by checkpoint 6;
+2. immutable M19/M21 exact-version bytes, metadata and historical absence of
+   retroactive provenance, rerunning `test:live:m19:exact` and
+   `test:live:m21:exact`; their former moving aliases are not historical
+   invariants after the planned M23 transitions;
 3. exact trust relations, token policies, Actions/environment and no stored
    release credential;
 4. exact/`next`/`latest`/unqualified lower/current native and pilot consumers;
@@ -480,6 +532,7 @@ Git tag/GitHub Release, backup deletion or external action.
 
 ## 24. Review and approval state
 
-PLAN-025 revision 0 is Approved after review 180 cycle 2 passed all eighteen
-areas with zero unresolved findings. Approval authorizes checkpoint 1 only;
-every later checkpoint retains the gates above.
+PLAN-025 revision 0 was Approved after review 180 cycle 2 passed all eighteen
+areas with zero unresolved findings. Review 208 cycle 4 completes it after the
+final corrected review passes with zero findings. Completion grants no
+additional authority beyond the accomplished checkpoints.

@@ -67,6 +67,14 @@ import { ReferenceCopyButtonComponent } from './reference-copy-button.component.
       background: var(--color-primary-soft);
     }
 
+    reference-json-editor .reference-json-editor .cm-selectionBackground {
+      background: var(--color-editor-selection) !important;
+    }
+
+    reference-json-editor .reference-json-editor .cm-content ::selection {
+      background: var(--color-editor-selection);
+    }
+
     reference-json-editor .reference-json-editor .cm-scroller {
       overflow: auto;
       font-family: ui-monospace, SFMono-Regular, Consolas, monospace;

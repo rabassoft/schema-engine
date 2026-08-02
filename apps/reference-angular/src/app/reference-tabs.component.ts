@@ -47,27 +47,54 @@ export function referenceTabPanelId(tabSetId: string, tabId: string): string {
     </div>
   `,
   styles: `
+    :host {
+      display: block;
+      min-width: 0;
+    }
+
     .reference-tabs {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem;
+      gap: 0;
       max-width: 100%;
-      padding: 0.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0 0.35rem;
+      border-bottom: 1px solid var(--color-border);
+      scrollbar-width: thin;
     }
 
     button {
-      flex: 1 1 auto;
-      margin: 0;
+      position: relative;
+      z-index: 0;
+      flex: 0 0 auto;
+      min-height: 2.7rem;
+      margin: 0 0 -1px;
+      padding: 0.6rem 0.95rem 0.65rem;
       border: 1px solid transparent;
-      border-radius: 0.4rem;
+      border-bottom-color: var(--color-border);
+      border-radius: var(--radius-small) var(--radius-small) 0 0;
       background: transparent;
-      white-space: normal;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    button:hover:not(:disabled):not([aria-selected='true']) {
+      border-bottom-color: var(--tab-accent, var(--color-primary));
+      background: transparent;
+      color: var(--color-text);
     }
 
     button[aria-selected='true'] {
-      border-color: var(--color-primary);
-      background: var(--color-primary-soft);
-      color: var(--color-primary-strong);
+      z-index: 1;
+      border-color: var(--color-border) var(--color-border)
+        var(--color-surface-muted);
+      background: var(--color-surface-muted);
+      color: var(--tab-accent, var(--color-primary-strong));
+      box-shadow: inset 0 0.2rem 0 var(--tab-accent, var(--color-primary));
+    }
+
+    button:focus-visible {
+      z-index: 2;
     }
   `,
 })

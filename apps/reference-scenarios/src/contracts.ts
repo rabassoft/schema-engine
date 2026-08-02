@@ -20,7 +20,8 @@ export type ReferenceFeature =
   | 'presentation-groups'
   | 'advanced-layout'
   | 'recursive-local-presentation'
-  | 'nullable-leaves';
+  | 'nullable-leaves'
+  | 'semantic-formats';
 
 export type ReferenceExpectedOperation<
   TOperation extends FormOperation = FormOperation,

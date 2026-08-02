@@ -14,15 +14,20 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
   [contribution policy](./CONTRIBUTING.md) and
   [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-The repository contains the completed M1-M22 controlled-form ecosystem,
+The repository contains the completed M1-M24 controlled-form ecosystem,
 verified public Experimental packages and the sanitized public history,
 governance and protected controls completed by PLAN-024. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
-v0.1.1, SPEC-006 v0.1.1 and SPEC-007 v0.1.0 are Accepted. SPEC-007 defines the
-private M17 reusable synchronous Ajv-validator contract. The source checkout implements the M14 contract
-under completed PLAN-014. PLAN-015 published and verified byte-identical core
-and Angular `0.2.0` packages under both `next` and `latest`. M15 completed a
-private reference platform without changing those Public packages. M18 and
+v0.1.1, SPEC-006 v0.1.1, SPEC-007 v0.1.0, SPEC-008 v0.1.0, SPEC-009 v0.1.0
+SPEC-010 v0.1.0 and SPEC-011 v0.1.0 are Accepted. SPEC-007 defines the private
+M17 reusable synchronous Ajv-validator contract. SPEC-011 defines the bounded
+M25 primitive-`const` contract; approved PLAN-027 revision 0 authorizes only
+its six local implementation checkpoints and has not started. The source
+checkout implements the M14 contract under completed PLAN-014. PLAN-015
+published and verified
+byte-identical core and Angular `0.2.0` packages under both `next` and `latest`.
+M15 completed a private reference platform without changing those Public
+packages. M18 and
 PLAN-020 revision 0 are complete after final review 113 repeated all fourteen
 areas and all 22 SPEC-008 rows with zero findings. SPEC-008 v0.1.0 is Accepted.
 SPEC-009 v0.1.0 and completed PLAN-022 extend those static sections, tabs,
@@ -77,7 +82,10 @@ collection renderers and other deferred decisions are not active.
 
 `packages/validator-ajv` is a completed private, unpublished integration package that
 implements the replaceable validation port with Ajv Draft 2020-12. It is used
-by the reference shells and does not make Ajv a core dependency.
+by the reference shells and does not make Ajv a core dependency. Current source
+normalizes the selected semantic string formats `email`, `date` and
+`date-time`, asserts them in this replaceable validator and projects
+timezone-preserving native controls independently in Angular and Standard.
 
 ## Private reference platform
 
@@ -140,15 +148,13 @@ must not be treated as containing these source changes.
 
 ## Experimental packages and licensing
 
-`@rabassoft/schema-engine@0.4.0`,
-`@rabassoft/schema-engine-angular@0.4.0` and
-`@rabassoft/schema-engine-angular-aria@0.2.0` are public and verified on npm.
-All three `next` aliases resolve to those M21 versions. Core/base `latest`
-and unqualified resolution now select `0.4.0`, while pilot `latest` and
-unqualified resolution select `0.2.0`. This is the verified coordinated
+`@rabassoft/schema-engine@0.4.1`,
+`@rabassoft/schema-engine-angular@0.4.1` and
+`@rabassoft/schema-engine-angular-aria@0.2.1` are public and verified on npm.
+Exact, `next`, `latest` and unqualified resolution select this coordinated M23
 Experimental line; registry routing does not promote any API to Stable.
 
-Install the verified M21 line from the Experimental channel:
+Install the verified M23 line from the Experimental channel:
 
 ```sh
 npm install @rabassoft/schema-engine@next @rabassoft/schema-engine-angular@next @rabassoft/schema-engine-angular-aria@next
@@ -161,15 +167,16 @@ versions:
 npm install @rabassoft/schema-engine@0.3.0 @rabassoft/schema-engine-angular@0.3.0 @rabassoft/schema-engine-angular-aria@0.1.0
 ```
 
-For M21, prefer exact versions for reproducible installs; coordinated `@next`,
-`@latest` and unqualified installs resolve the same reviewed line. Every
-package remains Public + Experimental + Active with no support SLA.
+For M23, prefer exact versions for reproducible installs; coordinated `@next`,
+`@latest` and unqualified installs resolve the same reviewed line. Every package
+remains Public + Experimental + Active with no support SLA.
 
-The workspace manifests contain M21 source versions `0.4.0`, `0.4.0` and
-`0.2.0`; all are public and verified exactly, under `next`/`latest` and through
-unqualified resolution. See the
-[M21 release notes](./.ai-docs/releases/0.4.0.md) for migration, compatibility
-and immutable recovery.
+The workspace manifests contain M23 source versions `0.4.1`, `0.4.1` and
+`0.2.1`; all are public and verified exactly, under `next`/`latest` and through
+unqualified resolution. The immutable M21 `0.4.0`/`0.4.0`/`0.2.0` line remains
+available through explicit versions. See the
+[M23 release notes](./.ai-docs/releases/0.4.1.md) for current routing and
+verification.
 
 All three packages are available under GNU AGPL v3 only (`AGPL-3.0-only`), including
 commercial use under its conditions. A separate paid commercial license may be
@@ -182,12 +189,13 @@ The sanitized source repository is public at
 has completed its GitHub controls and fail-closed secure-release preparation.
 Each package carries its preferred TypeScript source, frozen build harness,
 license and notices so its existing release can be rebuilt independently.
-Existing M19/M21 versions do not claim repository-backed npm provenance; a
-future release must separately prove OIDC publication from the sanitized public
-source. The workspace now prepares metadata-only M23 source versions core/base
-`0.4.1` and pilot `0.2.1`, exact package repository directories and a
-stage-only workflow. They are not generated, staged or public; verified M21
-remains the installable line.
+Existing M19/M21 versions do not claim repository-backed npm provenance. The
+complete M23 line—core/base `0.4.1` and pilot `0.2.1`—is public exactly and
+under `next`, with verified OIDC provenance from protected `main@028a98c`.
+Exact, `next`, `latest` or unqualified installation now consumes the
+coordinated M23 line. Pilot `latest` resolves `0.2.1` and core/base Angular
+`latest` resolve `0.4.1`. All lower/current native/pilot consumer lanes pass;
+routing remains Experimental and does not imply Stable.
 
 Issues may be used for non-code feedback. External code contributions are not
 accepted until a separately reviewed rights policy exists; see

@@ -567,6 +567,11 @@ function region(
   const section = document.createElement('section');
   section.className = 'reference-region';
   section.dataset['region'] = id;
+  const disclosure = document.createElement('details');
+  disclosure.className = 'region-disclosure';
+  disclosure.open = true;
+  const summary = document.createElement('summary');
+  summary.className = 'region-summary';
   const heading = document.createElement('h2');
   heading.className = 'eyebrow';
   heading.id = `${id}-heading`;
@@ -574,7 +579,9 @@ function region(
   section.setAttribute('aria-labelledby', heading.id);
   const body = document.createElement('div');
   body.className = 'region-body';
-  section.append(heading, body);
+  summary.append(heading);
+  disclosure.append(summary, body);
+  section.append(disclosure);
   return Object.freeze({ section, body });
 }
 

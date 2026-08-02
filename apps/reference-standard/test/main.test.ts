@@ -101,7 +101,31 @@ describe('Standard reference skeleton', () => {
       ),
     ).not.toBeNull();
     expect(root.querySelectorAll('.eyebrow')).toHaveLength(4);
-    expect(root.querySelector('details')?.open).toBe(true);
+    const disclosures = Array.from(
+      root.querySelectorAll<HTMLDetailsElement>(
+        '.reference-region > details.region-disclosure',
+      ),
+    );
+    expect(disclosures).toHaveLength(4);
+    expect(disclosures.every(({ open }) => open)).toBe(true);
+    expect(
+      disclosures.map((disclosure) =>
+        disclosure.querySelector(':scope > summary')?.textContent?.trim(),
+      ),
+    ).toEqual([
+      'Scenario',
+      'Interactive consumer',
+      'Schemas',
+      'Observable evidence',
+    ]);
+    for (const disclosure of disclosures) {
+      disclosure.open = false;
+      expect(disclosure.open).toBe(false);
+      expect(
+        disclosure.querySelector(':scope > summary .eyebrow'),
+      ).not.toBeNull();
+      disclosure.open = true;
+    }
 
     dispose();
   });
@@ -169,6 +193,10 @@ describe('Standard reference skeleton', () => {
     expect(css).toContain('@media (max-width: 62rem)');
     expect(css).toContain('@media (max-width: 34rem)');
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(css).toContain('--editor-selection: light-dark(#c7d2fe, #2b3852)');
+    expect(css).toContain('--code-selection: #2b3852');
+    expect(css).toContain('.cm-selectionBackground');
+    expect(css).toContain('pre ::selection');
 
     dispose();
     expect(document.documentElement.dataset['theme']).toBeUndefined();

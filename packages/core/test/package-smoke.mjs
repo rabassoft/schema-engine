@@ -108,6 +108,22 @@ assert.equal(nullableApplied.success, true);
 if (!nullableApplied.success) throw new Error('Nullable set failed');
 assert.equal(nullableApplied.value.value, null);
 
+const fixedResult = compileFormDefinition({
+  schema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: { value: { type: 'string', const: '' } },
+  },
+});
+assert.equal(fixedResult.success, true);
+if (!fixedResult.success) throw new Error('Fixed-value compilation failed');
+assert.equal(fixedResult.definition.fields[0]?.fixedValue, '');
+assert.equal(
+  Object.hasOwn(fixedResult.definition.fields[0], 'fixedValue'),
+  true,
+);
+assert.equal(Object.isFrozen(fixedResult.definition.fields[0]), true);
+
 const runtimeResult = createControlledFormRuntime({
   formId: 'smoke',
   definition: result.definition,

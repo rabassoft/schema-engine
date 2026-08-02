@@ -65,6 +65,14 @@ const contentRules = Object.freeze([
   },
 ]);
 
+const reviewedHistoricalFindings = new Set([
+  [
+    '8edc2b93ca82942df7d2b5e07657fecc70107cc5',
+    '.ai-docs/reviews/132-plan-021-final-review.md',
+    'macos-home-path',
+  ].join(':'),
+]);
+
 function normalize(relativePath) {
   return relativePath.split(path.sep).join('/').replace(/^\.\//u, '');
 }
@@ -143,6 +151,7 @@ export function evaluatePublicHistory(records) {
       const key = `${record.objectId}:${relativePath}:${rule}`;
       if (seen.has(key)) continue;
       seen.add(key);
+      if (reviewedHistoricalFindings.has(key)) continue;
       findings.push({
         objectId: record.objectId,
         relativePath,

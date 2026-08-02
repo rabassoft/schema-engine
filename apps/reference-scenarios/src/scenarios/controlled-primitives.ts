@@ -52,6 +52,7 @@ export const controlledPrimitives = {
       fields: {
         name: { description: 'A required display name.' },
         role: {
+          placeholder: 'Select a role',
           enumLabels: {
             admin: 'Administrator',
             editor: 'Editor',

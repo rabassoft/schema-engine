@@ -23,7 +23,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Superseded por ADR-010.**
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
 4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
-5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 4; conserva D-041/M11 e incorpora solo el diseño D-009/M14 coordinado con ADR-019 tras review 032 ciclo 2 sin hallazgos.**
+5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 6; conserva el dialecto fail-closed y coordina el `const` primitivo D-036/M25 con ADR-028 tras review 219 ciclo 2.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
@@ -40,11 +40,13 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 19. [ADR 019: Nullable primitive leaves and explicit null intention](./019-hojas-primitivas-nullable.md) — **Accepted revision 1 after review 033 cycle 2 preserved SPEC-003 collection diagnostics with zero findings; SPEC-006 v0.1.1 is now Accepted.**
 20. [ADR 020: Private multi-framework reference platform](./020-plataforma-referencia-multiframework.md) — **Accepted revision 0 after review 054 cycle 3; separately approved PLAN-016 revision 0 completed the private catalog and first Angular 22 shell after final review 063 cycle 2 passed with zero findings.**
 21. [ADR 021: Private Standard/DOM direct-core reference shell](./021-shell-standard-dom-core-directo.md) — **Accepted revision 1 after review 090 cycle 3 passed twelve areas with zero findings; it requires a reviewed PLAN-018 revision before checkpoint 5 resumes.**
-22. [ADR 022: Reusable synchronous Ajv validator package](./022-validador-ajv-sincrono-reutilizable.md) — **Accepted revision 1 after review 083 cycle 2 passed ten areas with zero findings; completed PLAN-019 implements it privately.**
+22. [ADR 022: Reusable synchronous Ajv validator package](./022-validador-ajv-sincrono-reutilizable.md) — **Accepted revision 3; reviews 210/219 coordinate the bounded M24 format and M25 primitive-`const` assertions while completed PLAN-019 remains its private baseline.**
 23. [ADR 023: Static neutral tabs, accordion and logical-grid containers](./023-contenedores-layout-neutral-estatico.md) — **Accepted revision 1 after review 099 cycle 3 passed ten areas with zero findings; review 100 and accepted ADR-024 completed its separate Angular-kit architecture gate.**
 24. [ADR 024: Angular presentation-container SPI and Angular Aria pilot](./024-spi-contenedores-angular-y-piloto-angular-aria.md) — **Accepted revision 1 after review 101 cycle 4 passed eleven areas with zero findings; SPEC-008 remains authoritative and completed PLAN-020/review 113 delivered M18.**
 25. [ADR 025: Recursive local presentation forests for nested objects and collection items](./025-bosques-presentacion-locales-objetos-items.md) — **Accepted revision 0 after review 134 cycle 4; accepted SPEC-009 v0.1.0 and completed PLAN-022 now implement the narrow M20 decision after final review 144 cycle 3.**
 26. [ADR 026: Sanitized public history and secure release automation](./026-public-repository-and-secure-releases.md) — **Accepted revision 1; M22 remains completed and review 179 cycle 2 accepts M23 stage-only trusted-publication architecture. PLAN-025 and every external action remain gated.**
+27. [ADR 027: Neutral semantic string formats and official assertion](./027-formatos-semanticos-string.md) — **Accepted revision 0 after review 210 cycle 3; coordinates ADR-005 revision 5 and ADR-022 revision 2 for the bounded D-037/M24 slice.**
+28. [ADR 028: Primitive const normalization and fixed presentation](./028-const-primitivo-presentacion-fija.md) — **Accepted revision 0 after review 219 cycle 2; coordinates ADR-005 revision 6 and ADR-022 revision 3 for the bounded D-036/M25 slice.**
 
 ## 4. ADRs específicos de Angular
 

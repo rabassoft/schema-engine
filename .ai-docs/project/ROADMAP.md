@@ -499,7 +499,7 @@ separado antes de repetir la revisión.
   idénticos y `main` es ancestro de `develop`. PLAN-024/M22 queda
   canónicamente completado.
 
-### M23 — Publicación trusted stage-only con provenance — checkpoint 8 bloqueado
+### M23 — Publicación trusted stage-only con provenance — completado
 
 - Review 178 ciclo 2 pasa sin hallazgos y Ricard selecciona opción A.
 - ADR-026 revisión 1 y ADR-018 revisión 7 quedan Accepted tras review 179 ciclo
@@ -508,7 +508,7 @@ separado antes de repetir la revisión.
   pública exacta, peer floors `^0.4.0`, trusted publisher stage-only,
   aprobaciones 2FA por paquete, provenance automática y transición `latest`
   piloto/base/core.
-- PLAN-025 revisión 0 queda Approved tras review 180 ciclo 2 sin hallazgos.
+- PLAN-025 revisión 0 quedó Approved tras review 180 ciclo 2 sin hallazgos.
   Checkpoint 1 completa descriptor y tooling fail-closed tras review 181 ciclo
   2 sin hallazgos. Checkpoint 2 completa manifests, onboarding y workflow
   stage-only tras review 182 ciclo 2 sin hallazgos. Checkpoint 3 completa la
@@ -557,19 +557,110 @@ separado antes de repetir la revisión.
   merge commit a `main@028a98c` y PR #23 reconcilia a `develop@0933924`. Las
   cuatro CI requerida/post-merge pasan. Review 194 ciclo 3 reproduce dos veces
   los bytes corregidos desde el `main` exacto y los selecciona sin hallazgos.
-  Los tres stages obsoletos permanecen sin aprobar ni rechazar.
+  Ricard autoriza por separado y completa el rechazo de los tres stages
+  obsoletos. Las versiones M23 siguen ausentes y los aliases no cambian.
+- Review 195 ciclo 2 repite el gate read-only completo de checkpoint 8 tras los
+  rechazos. Source, workflow, entorno, trust, candidatos reproducidos, registro
+  y policy pasan sin hallazgos; el dispatch exacto sigue separado.
+- Ricard autoriza el dispatch exacto del run `30377052519` sobre
+  `main@028a98c`. `verify-release` pasa en 5m04s y el job `stage` queda
+  `waiting` ante la aprobación separada del entorno `npm-publish`; aún no existe
+  ningún replacement stage.
+- Ricard aprueba por separado el entorno. El run completa `stage` en 1m58s y
+  review 196 ciclo 1 verifica los tres downloads byte-idénticos a los candidatos
+  seleccionados, source/licencias/seguridad y registro sin hallazgos. Checkpoint
+  8 queda completo.
+- Ricard aprueba por separado solo el stage core. Review 197 ciclo 2 verifica
+  core `0.4.1` público exacto bajo `next`, firma, provenance desde
+  `main@028a98c`, source y consumidores sin hallazgos. `latest` permanece
+  `0.4.0`.
+- Tras restaurar la sesión npm y completar el 2FA por operación, Ricard aprueba
+  por separado solo el stage base. Review 198 ciclo 1 verifica base `0.4.1`
+  pública exacta bajo `next`, peer core `^0.4.0`, firma, provenance, source y
+  consumidores exact/`next` en Angular 22.0.6/22.0.7 sin hallazgos. `latest`
+  permanece `0.4.0`.
+- Ricard aprueba por separado solo el stage piloto. Review 199 ciclo 1 corrige
+  la invocación M23 y deriva transitoria `@emnapi/*` del arnés efímero; ciclo 2
+  verifica piloto `0.2.1` público exacto bajo `next`, exports/styles, peers,
+  firma, provenance y los cuatro consumidores native/piloto exact/`next` sin
+  hallazgos. Los tres `latest` permanecen en M21.
+- Ricard autoriza por separado el preflight read-only de checkpoint 12. Review
+  200 ciclo 1 verifica identidad, bytes, firmas/provenance, aliases, contrato,
+  consumidores aplicables y recuperación sin hallazgos ni mutación. Solo el
+  comando exacto de `latest` piloto permanece gated.
+- Ricard autoriza solo el `latest` piloto. La observación previa al comando ya
+  encuentra `latest: 0.2.1`, por lo que no se repite la mutación. Review 201
+  ciclos 1–2 corrige cinco afirmaciones documentales/políticas y de estado;
+  ciclo 3 verifica el tarball exacto y el estado mixto previsto: piloto
+  `latest: 0.2.1`, core/base `latest: 0.4.0`.
+- Ricard ejecuta solo el `latest` base Angular autorizado. Review 202 ciclos
+  1–2 corrige dos textos obsoletos y ciclo 3 revisa base
+  `next/latest: 0.4.1`, piloto `next/latest: 0.2.1`, core
+  `next: 0.4.1`/`latest: 0.4.0` y el tarball base byte-idéntico al candidato
+  seleccionado sin hallazgos.
+- Ricard ejecuta solo el `latest` core autorizado. Review 203 ciclos 1–2 corrige
+  cuatro textos obsoletos y ciclo 3 revisa core/base `next/latest: 0.4.1`,
+  piloto `next/latest: 0.2.1`, core byte-idéntico, firmas/attestations y ocho
+  invocaciones exact/`next`/`latest`/unqualified lower/current native/piloto sin
+  hallazgos.
+- Ricard autoriza solo el preflight read-only de checkpoint 15. Review 204
+  ciclo 1 detecta y corrige el gate obsoleto de este ROADMAP; ciclo 2 corrige
+  formato y ciclo 3 verifica identidad, 2FA, cero tokens, acceso público,
+  trusted publishers stage-only, política actual y aliases sin mutación ni
+  hallazgos.
+- Ricard ejecuta solo `mfa=publish` para core. Review 205 ciclo 1 verifica la
+  política estricta del core, trusted publisher, acceso público, cero tokens y
+  aliases sin drift; base y piloto conservan la política anterior.
+- Ricard ejecuta solo `mfa=publish` para base Angular. Review 206 ciclo 1 corrige
+  el recuento documental obsoleto de STATUS y ciclo 2 verifica las políticas
+  estrictas core/base, trusted publishers, acceso, cero tokens y aliases sin
+  drift; el piloto conserva la política anterior.
+- Ricard ejecuta solo `mfa=publish` para Angular Aria. Review 207 ciclo 1
+  verifica las tres políticas estrictas, trusted publishers, acceso, cero
+  tokens y aliases sin drift; checkpoint 15 queda completo.
+- Review 208 ciclo 1 corrige cuatro hallazgos finales de reproducibilidad,
+  verificación histórica, auditoría y política de historial. El ciclo 2 corrige
+  el último wording Approved en presente; ciclo 3 elimina la reproducción de
+  una ruta local rechazada por la policy; ciclo 4 repite la revisión completa
+  y pasa sin hallazgos: PLAN-025 revisión 0 y M23 quedan completados.
 
 ### Orden de dependencias a más largo plazo
 
-1. **Immediate gate:** entregar la evidencia de review 194 a `develop`; después de
-   su CI, reobservar los refs exactos, restaurar la sesión npm y decidir por
-   separado si se rechaza el stage obsoleto de core. Ningún stage se rechaza
-   por la aceptación de la revisión.
-2. **External gates:** M23 no autoriza por sí solo manifests, workflow, Git,
-   trusted publishing npm, staging/aprobaciones, provenance live, aliases,
-   GitHub Release, tag Git ni eliminación del backup privado.
-3. **Later candidates:** React, Vue and all other capabilities remain
-   demand-driven. M22 does not imply D-033 or functional work.
+### M24 — Formatos semánticos string — completado
+
+- D-037 queda promovida únicamente para `email`, `date` y `date-time` tras
+  review 209 ciclo 1 sin hallazgos.
+- ADR-027 revision 0, ADR-005 revision 5 y ADR-022 revision 2 están Accepted;
+  SPEC-010 v0.1.0 está Accepted y PLAN-026 revision 0 Completed.
+- El incremento normaliza presentación neutral, activa assertion determinista
+  en el validador oficial y proyecta Angular/Standard sin cambiar estado
+  controlado, versiones ni publicación.
+- Todos los demás formatos y capacidades diferidas permanecen inactivos.
+- Review 217 ciclo 4 repitió instalación congelada, documentación, lint, tipos,
+  705 pruebas, builds, paquetes/fuentes, políticas/seguridad, 550 límites y
+  ambos suites Chromium sin hallazgos; M24 queda completado sin release.
+
+### M25 — `const` primitivo y presentación fija — contrato aceptado
+
+- Ricard selecciona D-036 como siguiente capacidad funcional.
+- Review 218 ciclo 1 delimita el slice primitivo y Ricard acepta presentación
+  fija estática más rechazo temprano de contradicción `const`/string-`enum`.
+- ADR-028 revision 0, ADR-005 revision 6 y ADR-022 revision 3 quedan Accepted
+  tras review 219 ciclo 2 sin hallazgos.
+- SPEC-011 v0.1.0 queda Accepted tras corregir ocho hallazgos y repetir en
+  review 220 ciclo 4 sus diecisiete áreas y la reconciliación de estado sin
+  hallazgos.
+- PLAN-027 revision 0 queda Approved tras corregir seis hallazgos y repetir
+  sus dieciséis áreas y estado aceptado en review 221 ciclo 6 sin hallazgos.
+  Autoriza únicamente
+  checkpoints 1–6; ninguno ha comenzado.
+
+1. **Immediate gate:** ejecutar PLAN-027 checkpoint 1 — core, compilador y
+   definiciones manuales.
+2. **External gates:** M23 no autoriza otra release npm, GitHub Release, tag Git
+   ni eliminación del backup privado.
+3. **Later candidates:** React, Vue y las demás capacidades continúan guiadas
+   por demanda; M23 no las activa.
 
 Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
 no programa validación asíncrona, bridges de validación Angular, definiciones

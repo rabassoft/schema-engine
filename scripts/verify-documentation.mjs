@@ -1180,37 +1180,44 @@ const requiredOnboardingFragments = new Map([
       'core/base Angular\n`0.4.0` plus pilot `0.2.0` under both `next` and `latest`',
       'Exact, `next`,\n`latest` and unqualified lower/latest-compatible native/pilot consumers pass',
       'npm install @rabassoft/schema-engine@next @rabassoft/schema-engine-angular@next @rabassoft/schema-engine-angular-aria@next',
+      'complete M23 line—core/base `0.4.1` and pilot `0.2.1`—is public exactly and\nunder `next`',
+      'Exact, `next`, `latest` and unqualified resolution select this coordinated M23',
+      'workspace manifests contain M23 source versions `0.4.1`, `0.4.1` and\n`0.2.1`',
+      'Exact, `next`, `latest` or unqualified installation now consumes the\ncoordinated M23 line',
+      'Pilot `latest` resolves `0.2.1` and core/base Angular\n`latest` resolve `0.4.1`',
     ],
   ],
   [
     'packages/core/README.md',
     [
-      'Public verified Experimental `0.4.0`',
-      'Source package manifest: proposed metadata-only `0.4.1`',
-      'under both\n  `next` and `latest`',
-      'Exact core `0.4.0`, `next`, `latest` and unqualified clean-consumer evidence',
+      'Public verified Experimental `0.4.1`',
+      'under `next`,\n  `latest` and unqualified resolution from protected commit `028a98c`',
+      'Exact core `0.4.1`, `next`, `latest` and unqualified clean-consumer evidence',
       'Published core `0.4.0` includes these local forests',
     ],
   ],
   [
     'packages/angular/README.md',
     [
-      'Public verified Experimental `0.4.0`',
-      'Source package manifest: proposed metadata-only `0.4.1`',
+      'Public verified Experimental `0.4.1`',
+      'under `next`,\n  `latest` and unqualified resolution from protected commit `028a98c`',
+      'Core `latest` and unqualified resolution now select verified `0.4.1`',
       '| `0.4.x` | `^0.4.0`',
-      'Required core `0.4.0` is likewise public and verified under `next`',
-      'under both\n  `next` and `latest`',
-      '`next`, `latest` and unqualified consumers are\n> verified with public core `0.4.0`',
+      'Required core `0.4.1` is likewise public and verified under `next`',
+      'Exact base Angular `0.4.1` and `next` consumers',
+      'Base Angular `latest` and unqualified installs now resolve verified\n> `0.4.1` together with core',
       'Published `0.4.0` includes these local forests',
     ],
   ],
   [
     'packages/angular-aria/README.md',
     [
-      'Public verified Experimental `0.2.0`',
-      'Source package manifest: proposed metadata-only `0.2.1`',
-      'selected from commit',
-      'under both\n  `next` and `latest`',
+      'Public verified Experimental `0.2.1`',
+      'under `next`\n  from protected commit `028a98c`',
+      '`next`, `latest` and unqualified installs resolve the same verified `0.2.1`',
+      'Core/base defaults both resolve `0.4.1`',
+      'required base `@rabassoft/schema-engine-angular@0.4.1` is now public under\n  exact, `next`, `latest` and unqualified resolution',
+      'pilot `0.2.1` is public through the same\n  routes',
       'pilot `0.2.x` with base Angular `^0.4.0`',
       'Core/base Angular `0.4.0`\nand pilot `0.2.0` are public together under both `next` and `latest`',
       'Published `0.2.0`\nincludes these local forests',
@@ -1232,6 +1239,13 @@ for (const [onboardingPath, fragments] of requiredOnboardingFragments) {
       `${onboardingPath} conflates routing with Stable: ${stabilityClaim[0]}`,
     );
   }
+}
+if (
+  /All three `next` aliases resolve to those M21 versions/iu.test(
+    await read('README.md'),
+  )
+) {
+  fail('README.md retains M21 as the current next channel');
 }
 
 const m19ReleaseNotePath = '.ai-docs/releases/0.3.0.md';
@@ -1402,7 +1416,10 @@ for (const fragment of [
   'deepest-dependent-first',
   'npm stage publish',
   'exact npm `11.18.0`',
-  'npm provenance remains unobserved',
+  'all three provenance records are verified',
+  'core/base Angular `0.4.1` and pilot `0.2.1` are public',
+  'The coordinated `next` channel resolves the same line',
+  'The exact, `next`, `latest` and unqualified routes now resolve the coordinated',
   'Never fall back from OIDC',
 ]) {
   if (!m23ReleaseNote.includes(fragment)) {
@@ -1410,9 +1427,8 @@ for (const fragment of [
   }
 }
 for (const claim of [
-  /M23 (?:is|is now) (?:public|published|staged)/iu,
-  /provenance is (?:available|enabled|verified)/iu,
-  /0\.4\.1[^\n.]{0,80}(?:is available|may be installed)/iu,
+  /pilot `0\.2\.1`[^\n.]{0,80}(?:is not live|remains unpublished)/iu,
+  /core `latest`[^\n.]{0,80}(?:remains|still resolves) `0\.4\.0`/iu,
 ]) {
   const match = m23ReleaseNote.match(claim);
   if (match) {

@@ -1,6 +1,6 @@
 # ADR 005: Política de dialecto y compatibilidad de JSON Schema
 
-- **Estado:** Accepted revision 4
+- **Estado:** Accepted revision 6
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
 - **Revisión aceptada:** 4 — type array nullable cerrado
@@ -32,6 +32,18 @@
 - **Revisión 4 completa:**
   [`review 032`](../reviews/032-adr-019-adr-005-revision-4-review.md) ciclo 2
   pasó las diez áreas sin hallazgos
+- **Revisión 5 aceptada y coordinada con:**
+  [`ADR-027`](./027-formatos-semanticos-string.md); solo D-037/M24
+- **Fecha de aceptación de revisión 5:** 30 de julio de 2026
+- **Revisión 5 completa:**
+  [`review 210`](../reviews/210-adr-027-review.md) ciclo 3 pasó las doce áreas
+  sin hallazgos
+- **Revisión 6 aceptada y coordinada con:**
+  [`ADR-028`](./028-const-primitivo-presentacion-fija.md); solo D-036/M25
+- **Fecha de aceptación de revisión 6:** 1 de agosto de 2026
+- **Revisión 6 completa:**
+  [`review 219`](../reviews/219-adr-028-review.md) ciclo 2 pasó las catorce áreas
+  sin hallazgos
 
 ## 1. Contexto y problema
 
@@ -1120,3 +1132,37 @@ Tras cada hallazgo se corrigió y repitió la revisión completa. Review 032 cic
 2 cerró las diez áreas sin hallazgos y Ricard había aprobado las tres decisiones
 antes de la redacción. La aceptación conjunta autoriza únicamente redactar
 SPEC-006 como tarea separada.
+
+## 14. Revisión 5 aceptada — formatos semánticos string
+
+ADR-027 revision 0 sustituye únicamente la clasificación genérica de `format`
+para hojas string. Los valores exactos `email`, `date` y `date-time` pasan de
+anotación ignorada a anotación soportada y normalizada en la definición
+neutral, en posiciones directas, nested, item-template y local-reference.
+
+Otro nombre string conserva conducta no bloqueante mediante
+`IGNORED_SCHEMA_FORMAT`; un accessor o valor no string es estructuralmente
+inválido y produce `INVALID_SCHEMA_KEYWORD_VALUE`. En raíz, objects, arrays,
+identidad y hojas no string, `format` conserva
+`IGNORED_SCHEMA_KEYWORD`.
+
+Esta revisión no convierte core en validador ni negocia vocabularios. La
+assertion seleccionada pertenece exclusivamente al validador oficial
+reemplazable bajo ADR-027/ADR-022 revision 2. Todos los demás formatos,
+comparadores, vocabularios, dialectos y capacidades D-037 continúan Deferred.
+
+## 15. Revisión 6 aceptada — `const` primitivo y presentación fija
+
+ADR-028 revision 0 sustituye únicamente la clasificación de `const` en hojas
+primitivas existentes. Un valor string, number finito, integer finito o boolean
+compatible se normaliza como valor fijo; `null` requiere la capacidad nullable
+ya aceptada. Accessors, valores incompatibles y containers son bloqueantes.
+
+Root, object, array e identidad conservan `UNSUPPORTED_SCHEMA_KEYWORD` y
+`const` nunca infiere tipo. Una `const` string debe pertenecer al `enum` string
+soportado cuando ambos coexisten. Esta regla cerrada no autoriza evaluar
+pattern, longitudes, restricciones numéricas o formatos en core.
+
+El schema original permanece autoridad del validador reemplazable. Core no
+inserta ni corrige el valor y runtime/operaciones no imponen la assertion. Todo
+el resto de D-036 y las capacidades no promovidas permanecen Deferred.

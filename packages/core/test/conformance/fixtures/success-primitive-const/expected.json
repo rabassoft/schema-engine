@@ -1,0 +1,48 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"status\"]",
+        "name": "status",
+        "path": ["status"],
+        "required": false,
+        "nullable": false,
+        "label": "status",
+        "fixedValue": "open",
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"status\"]",
+        "name": "status",
+        "path": ["status"],
+        "required": false,
+        "nullable": false,
+        "label": "status",
+        "fixedValue": "open",
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"status\"]",
+          "name": "status",
+          "path": ["status"],
+          "required": false,
+          "nullable": false,
+          "label": "status",
+          "fixedValue": "open",
+          "kind": "string",
+          "constraints": {}
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

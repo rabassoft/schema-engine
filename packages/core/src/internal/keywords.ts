@@ -95,20 +95,26 @@ export const SHARED_FIELD_KEYWORDS = new Set([
 
 export const STRING_FIELD_KEYWORDS = new Set([
   ...SHARED_FIELD_KEYWORDS,
+  'const',
   'minLength',
   'maxLength',
   'pattern',
   'enum',
+  'format',
 ]);
 
 export const NUMBER_FIELD_KEYWORDS = new Set([
   ...SHARED_FIELD_KEYWORDS,
+  'const',
   'minimum',
   'maximum',
   'multipleOf',
 ]);
 
-export const BOOLEAN_FIELD_KEYWORDS = SHARED_FIELD_KEYWORDS;
+export const BOOLEAN_FIELD_KEYWORDS = new Set([
+  ...SHARED_FIELD_KEYWORDS,
+  'const',
+]);
 
 export const COMPILER_SUPPORTED_KEYWORDS = new Set([
   ...[...ROOT_SUPPORTED_KEYWORDS].filter(

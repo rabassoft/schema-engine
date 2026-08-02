@@ -9,6 +9,7 @@ const scenarios = [
   ['nullable-preferences', 'Nullable preferences'],
   ['advanced-presentation', 'Advanced static presentation'],
   ['recursive-local-presentation', 'Recursive local presentation'],
+  ['semantic-contact', 'Semantic contact formats'],
 ] as const;
 
 async function selectScenario(page: Page, id: string, heading: string) {
@@ -130,6 +131,29 @@ test('navigates every scenario and exposes the complete inspector inventory', as
   await expect(
     page.getByRole('heading', { name: 'Build-checked integration excerpts' }),
   ).toBeVisible();
+});
+
+test('projects and validates the shared semantic-format scenario', async ({
+  page,
+}) => {
+  await selectScenario(page, 'semantic-contact', 'Semantic contact formats');
+  const email = page.getByRole('textbox', { name: 'Email' });
+  const birthDate = page.getByRole('textbox', {
+    name: 'Birth date',
+    exact: true,
+  });
+  const publishedAt = page.getByRole('textbox', { name: 'Published at' });
+
+  await expect(email).toHaveAttribute('type', 'email');
+  await expect(birthDate).toHaveAttribute('type', 'date');
+  await expect(publishedAt).toHaveAttribute('type', 'text');
+  await expect(publishedAt).toHaveValue('1843-01-01T12:00:00Z');
+
+  await page.getByRole('button', { name: 'All issues' }).click();
+  await email.fill('invalid-email');
+  await expect(email).toHaveAttribute('aria-invalid', 'true');
+  await email.fill('grace@example.com');
+  await expect(email).not.toHaveAttribute('aria-invalid', 'true');
 });
 
 test('highlights and copies integration code, editable JSON and inspector JSON', async ({
@@ -372,6 +396,13 @@ test('shows confirm, reject, pending, stale, reset and application controls', as
     'controlled-primitives',
     'Controlled primitive fields',
   );
+  const role = page.getByRole('combobox', { name: 'Role' });
+  await expect(role.locator('option')).toHaveText([
+    'Select a role',
+    'Administrator',
+    'Editor',
+    'Viewer',
+  ]);
   const name = page.getByRole('textbox', { name: 'Name' });
   await name.fill('Grace');
   await expect(page.getByTestId('reference-state')).toContainText('Modified');
@@ -485,11 +516,25 @@ test('covers nested, collection and nullable keyboard interaction with accessibl
     'advanced-presentation',
     'Advanced static presentation',
   );
-  await expect(page.getByRole('tab', { name: 'Identity' })).toHaveAttribute(
-    'aria-selected',
-    'true',
+  const identityTab = page.getByRole('tab', { name: 'Identity' });
+  const contactTab = page.getByRole('tab', { name: 'Contact' });
+  await expect(identityTab).toHaveAttribute('aria-selected', 'true');
+  const selectedBackground = await identityTab.evaluate(
+    (element) => getComputedStyle(element).backgroundColor,
   );
-  await page.getByRole('tab', { name: 'Contact' }).click();
+  const inactiveBackground = await contactTab.evaluate(
+    (element) => getComputedStyle(element).backgroundColor,
+  );
+  expect(selectedBackground).not.toBe(inactiveBackground);
+  await contactTab.click();
+  await expect(contactTab).toHaveAttribute('aria-selected', 'true');
+  await expect
+    .poll(() =>
+      contactTab.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      ),
+    )
+    .toBe(selectedBackground);
   await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible();
   await page.getByRole('button', { name: 'Notifications' }).click();
   await expect(

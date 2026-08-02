@@ -17,6 +17,7 @@ import type {
   PresentationGridItemDefinition,
   PresentationPanelDefinition,
   PresentationTabsDefinition,
+  PrimitiveFixedValue,
   UiAccordionSchema,
   UiGridItemSchema,
   UiGridSchema,
@@ -67,8 +68,14 @@ describe('public string choice contracts', () => {
       | 'clear'
       | 'set-null'
       | 'null-value'
+      | 'fixed-missing'
+      | 'fixed-unavailable'
+      | 'fixed-incompatible'
       | 'choice'
       | 'issue'
+    >();
+    expectTypeOf<PrimitiveFixedValue>().toEqualTypeOf<
+      string | number | boolean | null
     >();
     const clearContext = {
       formId: 'form',

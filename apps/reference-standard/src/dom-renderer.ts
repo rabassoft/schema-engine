@@ -1110,7 +1110,10 @@ function createControl(
   if (definition.kind === 'boolean') {
     input.type = 'checkbox';
   } else {
-    input.type = 'text';
+    input.type =
+      definition.kind === 'string'
+        ? semanticStringInputType(definition.format)
+        : 'text';
     if (definition.kind === 'number') {
       input.inputMode =
         definition.numericType === 'integer' ? 'numeric' : 'decimal';
@@ -1119,6 +1122,14 @@ function createControl(
     }
   }
   return input;
+}
+
+function semanticStringInputType(
+  format: 'email' | 'date' | 'date-time' | undefined,
+): 'email' | 'date' | 'text' {
+  if (format === 'email') return 'email';
+  if (format === 'date') return 'date';
+  return 'text';
 }
 
 function presenceLabel(snapshot: FieldRuntimeSnapshot): string {

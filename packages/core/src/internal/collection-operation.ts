@@ -1547,9 +1547,13 @@ function definitionDiagnostic(
             presentationTemplatePath: [...defect.presentationTemplatePath],
           }),
       ...(defect.member === undefined ? {} : { member: defect.member }),
+      ...(defect.expected === undefined ? {} : { expected: defect.expected }),
       ...(defect.actualType === undefined
         ? {}
         : { actualType: defect.actualType }),
+      ...(Object.hasOwn(defect, 'actualValue')
+        ? { actualValue: defect.actualValue }
+        : {}),
       ...(defect.members === undefined ? {} : { members: [...defect.members] }),
     },
     'Form definition is invalid.',

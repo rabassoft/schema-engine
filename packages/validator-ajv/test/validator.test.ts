@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import { Ajv2020 } from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
 import { createAjvSchemaValidator } from '../src/index.js';
 
 const DIALECT = 'https://json-schema.org/draft/2020-12/schema';
@@ -57,7 +59,7 @@ describe('createAjvSchemaValidator', () => {
     expect(result.issues[0]?.path).toEqual(['0', 'a/b~c']);
   });
 
-  it('does not mutate data and ignores formats and opaque extensions', () => {
+  it('does not mutate data, asserts selected formats and tolerates opaque extensions', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const validator = createAjvSchemaValidator();
     const schema = {
@@ -73,10 +75,83 @@ describe('createAjvSchemaValidator', () => {
 
     const result = validator.validate(schema, value);
 
-    expect(result.issues.map((issue) => issue.code)).toEqual(['type']);
+    expect(result.issues.map((issue) => issue.code)).toEqual([
+      'format',
+      'type',
+    ]);
+    expect(result.issues[0]).toMatchObject({
+      code: 'format',
+      keyword: 'format',
+      path: ['email'],
+      parameters: { format: 'email' },
+    });
     expect(value).toEqual(before);
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
+  });
+
+  it.each([
+    ['email', 'person@example.com', 'not-an-email'],
+    ['date', '2024-02-29', '2023-02-29'],
+    ['date-time', '2026-07-30T12:34:56Z', '2026-07-30T12:34:56'],
+  ] as const)('asserts %s in full mode', (format, validValue, invalidValue) => {
+    const validator = createAjvSchemaValidator();
+    const schema = { type: 'string', format };
+
+    expect(validator.validate(schema, validValue)).toEqual({
+      valid: true,
+      issues: [],
+    });
+    const invalid = validator.validate(schema, invalidValue);
+    expect(invalid).toMatchObject({
+      valid: false,
+      issues: [
+        {
+          code: 'format',
+          keyword: 'format',
+          path: [],
+          parameters: { format },
+        },
+      ],
+    });
+    expect(Object.isFrozen(invalid.issues[0]?.parameters)).toBe(true);
+  });
+
+  it('continues to tolerate unregistered format names under strict false', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const result = createAjvSchemaValidator().validate(
+      { type: 'string', format: 'hostname' },
+      'not a hostname',
+    );
+
+    expect(result).toEqual({ valid: true, issues: [] });
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('keeps the browser-safe ESM subset in parity with pinned ajv-formats full mode', () => {
+    const oracle = new Ajv2020({ strict: false, validateFormats: true });
+    for (const format of ['email', 'date', 'date-time'] as const) {
+      oracle.addFormat(format, addFormats.default.get(format, 'full'));
+    }
+    const validator = createAjvSchemaValidator();
+    const cases = [
+      ['email', 'person@example.com'],
+      ['email', 'person@localhost'],
+      ['date', '2000-02-29'],
+      ['date', '1900-02-29'],
+      ['date-time', '2026-07-30T12:34:56Z'],
+      ['date-time', '2026-07-30 12:34:56+02:00'],
+      ['date-time', '2026-07-30T12:34:56'],
+      ['date-time', '2026-02-30T12:34:56Z'],
+    ] as const;
+
+    for (const [format, value] of cases) {
+      const schema = { type: 'string', format };
+      expect(validator.validate(schema, value).valid).toBe(
+        oracle.validate(schema, value),
+      );
+    }
   });
 
   it('resolves same-document references', () => {

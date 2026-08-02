@@ -19,7 +19,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
-    "@rabassoft/schema-engine": "workspace:*"
+    "@rabassoft/schema-engine": "workspace:*",
+    "ajv-formats": "3.0.1"
   },
   "peerDependencies": {
     "@rabassoft/schema-engine": "workspace:^"

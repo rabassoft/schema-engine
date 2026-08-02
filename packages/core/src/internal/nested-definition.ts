@@ -46,6 +46,7 @@ export type NestedDefinitionReason =
   | 'duplicate-presented-node'
   | 'missing-presented-node'
   | 'invalid-field-nullable'
+  | 'invalid-field-fixed-value'
   | 'incompatible-field-capabilities';
 
 export interface NestedDefinitionDefect {
@@ -61,9 +62,12 @@ export interface NestedDefinitionDefect {
   readonly presentationOwnerKind?: 'object' | 'item' | 'template-object';
   readonly presentationOwnerPath?: readonly string[];
   readonly presentationTemplatePath?: readonly string[];
-  readonly member?: 'nullable';
+  readonly member?: 'nullable' | 'fixedValue';
+  readonly expected?: string;
   readonly actualType?: string;
-  readonly members?: readonly ['nullable', 'choices'];
+  readonly actualValue?: unknown;
+  readonly members?:
+    readonly ['nullable', 'choices'] | readonly ['fixedValue', 'choices'];
 }
 
 export type NestedDefinitionValidationResult =
@@ -203,9 +207,15 @@ function collectFormDefinitionDefects(
           ...(inspected.member === undefined
             ? {}
             : { member: inspected.member }),
+          ...(inspected.expected === undefined
+            ? {}
+            : { expected: inspected.expected }),
           ...(inspected.actualType === undefined
             ? {}
             : { actualType: inspected.actualType }),
+          ...(Object.hasOwn(inspected, 'actualValue')
+            ? { actualValue: inspected.actualValue }
+            : {}),
           ...(inspected.members === undefined
             ? {}
             : { members: inspected.members }),
@@ -213,6 +223,7 @@ function collectFormDefinitionDefects(
       );
       if (
         inspected.reason === 'invalid-field-nullable' ||
+        inspected.reason === 'invalid-field-fixed-value' ||
         inspected.reason === 'incompatible-field-capabilities'
       ) {
         leaves.push(node as FieldDefinition);
@@ -896,9 +907,12 @@ type InspectedNode =
       readonly success: false;
       readonly reason: NestedDefinitionReason;
       readonly path?: readonly string[];
-      readonly member?: 'nullable';
+      readonly member?: 'nullable' | 'fixedValue';
+      readonly expected?: string;
       readonly actualType?: string;
-      readonly members?: readonly ['nullable', 'choices'];
+      readonly actualValue?: unknown;
+      readonly members?:
+        readonly ['nullable', 'choices'] | readonly ['fixedValue', 'choices'];
     };
 
 function inspectNode(
@@ -997,6 +1011,13 @@ function inspectNode(
   if (kind === 'number' && !validNumberField(node)) {
     return { success: false, reason: 'invalid-node', path };
   }
+  const fixedValueDefect = inspectFixedValueCapability(
+    node,
+    kind as 'string' | 'number' | 'boolean',
+  );
+  if (fixedValueDefect !== undefined) {
+    return { success: false, path, ...fixedValueDefect };
+  }
   return { success: true, kind: 'field', key, path };
 }
 
@@ -1093,9 +1114,15 @@ function collectTemplateDefects(
           ...(inspected.member === undefined
             ? {}
             : { member: inspected.member }),
+          ...(inspected.expected === undefined
+            ? {}
+            : { expected: inspected.expected }),
           ...(inspected.actualType === undefined
             ? {}
             : { actualType: inspected.actualType }),
+          ...(Object.hasOwn(inspected, 'actualValue')
+            ? { actualValue: inspected.actualValue }
+            : {}),
           ...(inspected.members === undefined
             ? {}
             : { members: inspected.members }),
@@ -1103,6 +1130,7 @@ function collectTemplateDefects(
       );
       if (
         inspected.reason === 'invalid-field-nullable' ||
+        inspected.reason === 'invalid-field-fixed-value' ||
         inspected.reason === 'incompatible-field-capabilities'
       ) {
         leaves.push(template);
@@ -1204,9 +1232,12 @@ type InspectedTemplateNode =
       readonly success: false;
       readonly reason: NestedDefinitionReason;
       readonly relativePath?: readonly string[];
-      readonly member?: 'nullable';
+      readonly member?: 'nullable' | 'fixedValue';
+      readonly expected?: string;
       readonly actualType?: string;
-      readonly members?: readonly ['nullable', 'choices'];
+      readonly actualValue?: unknown;
+      readonly members?:
+        readonly ['nullable', 'choices'] | readonly ['fixedValue', 'choices'];
     };
 
 function inspectTemplateNode(
@@ -1288,6 +1319,13 @@ function inspectTemplateNode(
       relativePath,
     };
   }
+  const fixedValueDefect = inspectFixedValueCapability(
+    node,
+    kind as 'string' | 'number' | 'boolean',
+  );
+  if (fixedValueDefect !== undefined) {
+    return { success: false, relativePath, ...fixedValueDefect };
+  }
   return { success: true, kind: 'field', key, relativePath };
 }
 
@@ -1331,9 +1369,116 @@ function inspectNullableCapability(node: object):
   return undefined;
 }
 
+type FixedValueDefect =
+  | {
+      readonly reason: 'invalid-field-fixed-value';
+      readonly member: 'fixedValue';
+      readonly expected: string;
+      readonly actualType: string;
+      readonly actualValue?: unknown;
+    }
+  | {
+      readonly reason: 'incompatible-field-capabilities';
+      readonly members: readonly ['fixedValue', 'choices'];
+    };
+
+function inspectFixedValueCapability(
+  node: object,
+  kind: 'string' | 'number' | 'boolean',
+): FixedValueDefect | undefined {
+  const fixedValue = readOwnDataMember(node, 'fixedValue');
+  if (fixedValue.kind === 'missing') return undefined;
+
+  const nullableMember = readOwnDataMember(node, 'nullable');
+  const nullable =
+    nullableMember.kind === 'value' && nullableMember.value === true;
+  const numericType = kind === 'number' ? readValue(node, 'numericType') : kind;
+  let expected: string;
+  if (nullable) expected = 'compatible primitive value or null';
+  else if (numericType === 'integer') expected = 'finite integer';
+  else if (numericType === 'number') expected = 'finite number';
+  else expected = kind;
+
+  if (fixedValue.kind === 'accessor') {
+    return {
+      reason: 'invalid-field-fixed-value',
+      member: 'fixedValue',
+      expected,
+      actualType: 'accessor',
+    };
+  }
+
+  const value = fixedValue.value;
+  const compatible =
+    (nullable && value === null) ||
+    (kind === 'string' && typeof value === 'string') ||
+    (kind === 'boolean' && typeof value === 'boolean') ||
+    (kind === 'number' &&
+      typeof value === 'number' &&
+      Number.isFinite(value) &&
+      (numericType !== 'integer' || Number.isInteger(value)));
+  if (!compatible) {
+    const type = actualType(value);
+    const safelyDescribed =
+      value === null ||
+      typeof value === 'string' ||
+      typeof value === 'boolean' ||
+      (typeof value === 'number' && Number.isFinite(value));
+    return {
+      reason: 'invalid-field-fixed-value',
+      member: 'fixedValue',
+      expected,
+      actualType: type,
+      ...(safelyDescribed ? { actualValue: value } : {}),
+    };
+  }
+
+  if (kind === 'string') {
+    const choices = readOwnDataMember(node, 'choices');
+    if (
+      choices.kind === 'value' &&
+      Array.isArray(choices.value) &&
+      !stringChoicesContain(choices.value, value)
+    ) {
+      return {
+        reason: 'incompatible-field-capabilities',
+        members: Object.freeze(['fixedValue', 'choices']),
+      };
+    }
+  }
+  return undefined;
+}
+
+function stringChoicesContain(
+  choices: readonly unknown[],
+  expected: unknown,
+): boolean {
+  for (let index = 0; index < choices.length; index += 1) {
+    const choice = readOwnDataMember(choices, String(index));
+    if (
+      choice.kind === 'value' &&
+      isOrdinaryObject(choice.value) &&
+      readValue(choice.value, 'value') === expected
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function validStringField(node: object): boolean {
   const constraints = readValue(node, 'constraints');
   if (!isOrdinaryObject(constraints)) return false;
+  const format = readOwnDataMember(node, 'format');
+  if (
+    format.kind !== 'missing' &&
+    (format.kind !== 'value' ||
+      (format.value !== 'email' &&
+        format.value !== 'date' &&
+        format.value !== 'date-time'))
+  ) {
+    return false;
+  }
   const choicesMember = readOwnDataMember(node, 'choices');
   if (choicesMember.kind === 'missing') return true;
   if (

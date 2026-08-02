@@ -81,6 +81,25 @@ const nullableCompiled = compileFormDefinition({
 if (!nullableCompiled.success)
   throw new Error('nullable native fixture compilation failed');
 const nullableDefinition = nullableCompiled.definition;
+const semanticCompiled = compileFormDefinition({
+  schema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      email: { type: 'string', format: 'email' },
+      birthday: { type: 'string', format: 'date' },
+      startsAt: { type: 'string', format: 'date-time' },
+      contact: {
+        type: 'string',
+        format: 'email',
+        enum: ['one@example.com', 'two@example.com'],
+      },
+    },
+  },
+});
+if (!semanticCompiled.success)
+  throw new Error('semantic native fixture compilation failed');
+const semanticDefinition = semanticCompiled.definition;
 const schema = Object.freeze({});
 const validValidator: SchemaValidator = Object.freeze({
   validate: () => ({ valid: true, issues: [] }),
@@ -187,6 +206,59 @@ describe('native Signal Forms renderers', () => {
       success: true,
       registration: { id: 'native-string-enum' },
     });
+  });
+
+  it('projects semantic string input types without changing enum precedence or exact emission', () => {
+    TestBed.configureTestingModule({
+      providers: [provideSchemaEngineAngularNative()],
+    });
+    const fixture = TestBed.createComponent(NativeHost);
+    fixture.componentInstance.config.set(
+      createConfig({
+        definition: semanticDefinition,
+        value: {
+          email: 'old@example.com',
+          birthday: '2000-01-01',
+          startsAt: '2026-07-30T12:34:56Z',
+          contact: 'one@example.com',
+        },
+        baselineValue: {},
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const email = controlByBase(
+      root,
+      nodeBase('native form', ['email']),
+    ) as HTMLInputElement;
+    const birthday = controlByBase(
+      root,
+      nodeBase('native form', ['birthday']),
+    ) as HTMLInputElement;
+    const startsAt = controlByBase(
+      root,
+      nodeBase('native form', ['startsAt']),
+    ) as HTMLInputElement;
+    const contact = controlByBase(root, nodeBase('native form', ['contact']));
+    expect(email.type).toBe('email');
+    expect(birthday.type).toBe('date');
+    expect(startsAt.type).toBe('text');
+    expect(contact).toBeInstanceOf(HTMLSelectElement);
+
+    email.value = 'Exact+tag@example.com';
+    email.dispatchEvent(new Event('input', { bubbles: true }));
+    startsAt.value = '2026-07-30T12:34:56+02:00';
+    startsAt.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(fixture.componentInstance.operations).toMatchObject([
+      { type: 'set-value', path: ['email'], value: 'Exact+tag@example.com' },
+      {
+        type: 'set-value',
+        path: ['startsAt'],
+        value: '2026-07-30T12:34:56+02:00',
+      },
+    ]);
   });
 
   it('applies rank and priority override rules at the enum rank', () => {

@@ -3,6 +3,11 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { referenceScenarios } from '@schema-engine-internal/reference-scenarios';
+import {
+  compileFormDefinition,
+  createControlledFormRuntime,
+  type FormOperation,
+} from '@rabassoft/schema-engine';
 
 import { StandardDomRenderer } from '../src/dom-renderer.js';
 import { StandardReferenceApplication } from '../src/reference-application.js';
@@ -46,6 +51,86 @@ describe('StandardDomRenderer', () => {
     expect(harness.application.getState().value).toMatchObject({
       role: 'viewer',
     });
+  });
+
+  it('projects semantic string input types independently and emits exact values', () => {
+    const compiled = compileFormDefinition({
+      schema: {
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: {
+          email: { type: 'string', format: 'email' },
+          birthday: { type: 'string', format: 'date' },
+          startsAt: { type: 'string', format: 'date-time' },
+          contact: {
+            type: 'string',
+            format: 'email',
+            enum: ['one@example.com', 'two@example.com'],
+          },
+        },
+      },
+    });
+    if (!compiled.success) throw new Error('Expected semantic definition.');
+    const created = createControlledFormRuntime({
+      formId: 'standard-semantic',
+      definition: compiled.definition,
+      schema: {},
+      value: {
+        email: 'old@example.com',
+        birthday: '2000-01-01',
+        startsAt: '2026-07-30T12:34:56Z',
+        contact: 'one@example.com',
+      },
+      baselineValue: {
+        email: 'old@example.com',
+        birthday: '2000-01-01',
+        startsAt: '2026-07-30T12:34:56Z',
+        contact: 'one@example.com',
+      },
+      locale: 'en',
+      validator: { validate: () => ({ valid: true, issues: [] }) },
+    });
+    if (!created.success) throw new Error('Expected semantic runtime.');
+    const operations: FormOperation[] = [];
+    const subscription = created.runtime.subscribeOperations((operation) =>
+      operations.push(operation),
+    );
+    if (!subscription.success) throw new Error('Expected operation listener.');
+    const host = document.createElement('main');
+    document.body.append(host);
+    const renderer = new StandardDomRenderer(
+      host,
+      compiled.definition,
+      created.runtime,
+      { formId: 'standard-semantic' },
+    );
+    renderer.reconcile(created.runtime.getSnapshot());
+    disposals.push(() => {
+      subscription.unsubscribe();
+      renderer.dispose();
+      created.runtime.dispose();
+    });
+
+    const email = fieldControl(host, 'email');
+    const birthday = fieldControl(host, 'birthday');
+    const startsAt = fieldControl(host, 'startsAt');
+    expect(email.type).toBe('email');
+    expect(birthday.type).toBe('date');
+    expect(startsAt.type).toBe('text');
+    expect(field(host, 'contact').querySelector('select')).not.toBeNull();
+
+    email.value = 'Exact+tag@example.com';
+    email.dispatchEvent(new Event('input', { bubbles: true }));
+    startsAt.value = '2026-07-30T12:34:56+02:00';
+    startsAt.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(operations).toMatchObject([
+      { type: 'set-value', path: ['email'], value: 'Exact+tag@example.com' },
+      {
+        type: 'set-value',
+        path: ['startsAt'],
+        value: '2026-07-30T12:34:56+02:00',
+      },
+    ]);
   });
 
   it('reconciles string rejection without emitting during rendering', () => {

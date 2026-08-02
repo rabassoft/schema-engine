@@ -12,6 +12,7 @@ const scenarios = [
   ['nullable-preferences', 'Nullable preferences'],
   ['advanced-presentation', 'Advanced static presentation'],
   ['recursive-local-presentation', 'Recursive local presentation'],
+  ['semantic-contact', 'Semantic contact formats'],
 ] as const;
 
 test.beforeEach(async ({ page }) => {
@@ -27,6 +28,23 @@ test.beforeEach(async ({ page }) => {
 test('navigates all scenarios with normalized accessible interaction', async ({
   page,
 }) => {
+  const disclosures = page.locator(
+    '.reference-region > details.region-disclosure',
+  );
+  await expect(disclosures).toHaveCount(4);
+  for (let index = 0; index < 4; index += 1) {
+    await expect(disclosures.nth(index)).toHaveAttribute('open', '');
+  }
+  const previewDisclosure = page
+    .locator('[data-region="preview-panel"]')
+    .locator(':scope > details.region-disclosure');
+  await previewDisclosure.locator(':scope > summary').click();
+  await expect(previewDisclosure).not.toHaveAttribute('open', '');
+  await expect(
+    page.locator('[data-region="configuration-panel"]'),
+  ).toBeVisible();
+  await previewDisclosure.locator(':scope > summary').click();
+
   const preview = page.locator('[data-region="preview-panel"]');
   const schemas = page.locator('[data-region="configuration-panel"]');
   const previewBounds = await preview.boundingBox();
@@ -131,6 +149,29 @@ test('navigates all scenarios with normalized accessible interaction', async ({
     'aria-expanded',
     'true',
   );
+});
+
+test('projects and validates the shared semantic-format scenario', async ({
+  page,
+}) => {
+  await selectScenario(page, 'semantic-contact', 'Semantic contact formats');
+  const email = page.getByRole('textbox', { name: 'Email' });
+  const birthDate = page.getByRole('textbox', {
+    name: 'Birth date',
+    exact: true,
+  });
+  const publishedAt = page.getByRole('textbox', { name: 'Published at' });
+
+  await expect(email).toHaveAttribute('type', 'email');
+  await expect(birthDate).toHaveAttribute('type', 'date');
+  await expect(publishedAt).toHaveAttribute('type', 'text');
+  await expect(publishedAt).toHaveValue('1843-01-01T12:00:00Z');
+
+  await page.getByRole('button', { name: 'All issues' }).click();
+  await email.fill('invalid-email');
+  await expect(email).toHaveAttribute('aria-invalid', 'true');
+  await email.fill('grace@example.com');
+  await expect(email).not.toHaveAttribute('aria-invalid', 'true');
 });
 
 test('covers controlled decisions, stale pending work, baseline and reset', async ({
@@ -291,6 +332,19 @@ test('keeps tabs, copy and themes accessible', async ({ page, context }) => {
   const dark = await readColors();
   expect(dark.page).not.toBe(light.page);
   expect(dark.surface).not.toBe(light.surface);
+  const codeSelection = await code.evaluate(
+    (element) => getComputedStyle(element, '::selection').backgroundColor,
+  );
+  expect(codeSelection).toBe('rgb(43, 56, 82)');
+  await page.getByRole('tab', { name: 'Schema', exact: true }).click();
+  const editor = page.getByRole('textbox', { name: 'JSON Schema editor' });
+  await editor.click();
+  await editor.press('Meta+A');
+  const editorSelection = await page
+    .locator('[data-testid="schema-editor"] .cm-selectionBackground')
+    .first()
+    .evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(editorSelection).toBe('rgb(43, 56, 82)');
   await theme.selectOption('auto');
   await expect(page.locator('main')).toHaveAttribute('data-theme', 'auto');
   await expect(page.locator('html')).not.toHaveAttribute('data-theme');

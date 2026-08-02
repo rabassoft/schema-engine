@@ -66,3 +66,36 @@ test('reports historical findings by object, path and rule without content', () 
     [{ objectId, relativePath: 'notes.txt', rule: 'private-ipv4-url' }],
   );
 });
+
+test('allows only the reviewed benign historical home-path blob', () => {
+  const reviewedObjectId = '8edc2b93ca82942df7d2b5e07657fecc70107cc5';
+  const reviewedPath = '.ai-docs/reviews/132-plan-021-final-review.md';
+  const homePath = ['/Users', 'ricard', 'Library', 'pnpm', 'store'].join('/');
+
+  assert.deepEqual(
+    evaluatePublicHistory([
+      {
+        objectId: reviewedObjectId,
+        relativePath: reviewedPath,
+        text: homePath,
+      },
+    ]),
+    [],
+  );
+  assert.deepEqual(
+    evaluatePublicHistory([
+      {
+        objectId: 'c'.repeat(40),
+        relativePath: reviewedPath,
+        text: homePath,
+      },
+    ]),
+    [
+      {
+        objectId: 'c'.repeat(40),
+        relativePath: reviewedPath,
+        rule: 'macos-home-path',
+      },
+    ],
+  );
+});

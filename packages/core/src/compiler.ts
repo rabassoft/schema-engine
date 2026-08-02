@@ -23,7 +23,9 @@ import type {
   PresentationPanelDefinition,
   PresentationSectionDefinition,
   PresentationTabsDefinition,
+  PrimitiveFixedValue,
   StringFieldDefinition,
+  StringSemanticFormat,
 } from './contracts.js';
 import { diagnostic, hasErrors } from './internal/diagnostics.js';
 import { deepFreeze } from './internal/immutable.js';
@@ -78,6 +80,11 @@ type StringEnumState =
   | { readonly kind: 'valid'; readonly values: readonly string[] }
   | { readonly kind: 'schema-blocked' };
 
+type FixedValueState =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'valid'; readonly value: PrimitiveFixedValue }
+  | { readonly kind: 'schema-blocked' };
+
 interface FieldCandidate {
   readonly name: string;
   readonly type: FieldType;
@@ -88,6 +95,8 @@ interface FieldCandidate {
   readonly stringConstraints: StringConstraints;
   readonly numberConstraints: NumberConstraints;
   readonly stringEnum: StringEnumState;
+  readonly fixedValue: FixedValueState;
+  readonly stringFormat?: StringSemanticFormat;
   readonly dataPath: readonly string[];
   readonly documentPath: readonly (string | number)[];
   readonly templatePath?: readonly string[];
@@ -1602,6 +1611,7 @@ function inspectArrayCandidate(
         );
       } else if (
         keyword !== '$schema' &&
+        keyword !== 'const' &&
         (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
       ) {
         diagnostics.push(
@@ -2006,6 +2016,7 @@ function inspectItemRoot(
       );
     } else if (
       keyword !== '$schema' &&
+      keyword !== 'const' &&
       (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
     ) {
       itemDiagnostic = diagnostic({
@@ -2402,6 +2413,7 @@ function inspectIdentitySchema(
       );
     } else if (
       keyword !== '$schema' &&
+      keyword !== 'const' &&
       (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
     ) {
       compatible = false;
@@ -2559,6 +2571,7 @@ function inspectObjectCandidate(
         );
       } else if (
         keyword !== '$schema' &&
+        keyword !== 'const' &&
         (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
       ) {
         diagnostics.push(
@@ -2901,6 +2914,8 @@ function inspectValidField(
     multipleOf?: number;
   } = {};
   let stringEnum: StringEnumState = { kind: 'absent' };
+  let fixedValue: FixedValueState = { kind: 'absent' };
+  let stringFormat: StringSemanticFormat | undefined;
   const supportedKeywords = fieldKeywords(type);
 
   for (const keyword of Object.keys(field)) {
@@ -2983,6 +2998,18 @@ function inspectValidField(
       continue;
     }
 
+    if (keyword === 'const') {
+      fixedValue = inspectFixedValue(
+        field,
+        type,
+        nullable,
+        diagnostics,
+        dataPath,
+        fieldPath,
+      );
+      continue;
+    }
+
     const descriptor = Object.getOwnPropertyDescriptor(field, keyword);
     const value: unknown =
       descriptor !== undefined && 'value' in descriptor
@@ -3019,6 +3046,32 @@ function inspectValidField(
         schemaTitle = value;
       } else {
         schemaDescription = value;
+      }
+    } else if (keyword === 'format') {
+      if (typeof value !== 'string') {
+        diagnostics.push(
+          invalidSchemaKeywordValue(
+            keyword,
+            value,
+            'string format name',
+            documentPath,
+            dataPath,
+          ),
+        );
+      } else if (isStringSemanticFormat(value)) {
+        stringFormat = value;
+      } else {
+        diagnostics.push(
+          diagnostic({
+            code: 'IGNORED_SCHEMA_FORMAT',
+            severity: 'warning',
+            source: 'schema',
+            dataPath,
+            documentPath,
+            parameters: { format: value },
+            fallbackMessage: `String format "${value}" is not supported and is ignored by the compiler.`,
+          }),
+        );
       }
     } else if (keyword === 'minLength' || keyword === 'maxLength') {
       if (!Number.isInteger(value) || (value as number) < 0) {
@@ -3079,6 +3132,31 @@ function inspectValidField(
     }
   }
 
+  if (
+    type === 'string' &&
+    fixedValue.kind === 'valid' &&
+    typeof fixedValue.value === 'string' &&
+    stringEnum.kind === 'valid' &&
+    !stringEnum.values.includes(fixedValue.value)
+  ) {
+    diagnostics.push(
+      diagnostic({
+        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: [...fieldPath, 'const'],
+        parameters: {
+          keyword: 'const',
+          fieldType: 'string',
+          reason: 'value-not-in-enum',
+        },
+        fallbackMessage:
+          'Schema keyword "const" is incompatible with field type "string".',
+      }),
+    );
+  }
+
   return {
     name,
     type,
@@ -3089,9 +3167,73 @@ function inspectValidField(
     stringConstraints,
     numberConstraints,
     stringEnum,
+    fixedValue,
+    ...(stringFormat === undefined ? {} : { stringFormat }),
     dataPath,
     documentPath: fieldPath,
   };
+}
+
+function inspectFixedValue(
+  field: Record<string, unknown>,
+  type: FieldType,
+  nullable: boolean,
+  diagnostics: Diagnostic[],
+  dataPath: readonly string[],
+  fieldPath: readonly (string | number)[],
+): FixedValueState {
+  const documentPath = [...fieldPath, 'const'] as const;
+  const descriptor = Object.getOwnPropertyDescriptor(field, 'const');
+  const expected = expectedFixedValue(type, nullable);
+  if (descriptor === undefined || !('value' in descriptor)) {
+    diagnostics.push(
+      invalidSchemaKeywordDescriptor(
+        'const',
+        expected,
+        documentPath,
+        dataPath,
+        descriptor === undefined ? 'missing' : 'accessor',
+      ),
+    );
+    return { kind: 'schema-blocked' };
+  }
+  const value = descriptor.value;
+  if (!isCompatibleFixedValue(value, type, nullable)) {
+    diagnostics.push(
+      invalidSchemaKeywordValue(
+        'const',
+        value,
+        expected,
+        documentPath,
+        dataPath,
+      ),
+    );
+    return { kind: 'schema-blocked' };
+  }
+  return { kind: 'valid', value };
+}
+
+function expectedFixedValue(type: FieldType, nullable: boolean): string {
+  if (nullable) return 'compatible primitive value or null';
+  if (type === 'string') return 'string';
+  if (type === 'number') return 'finite number';
+  if (type === 'integer') return 'finite integer';
+  return 'boolean';
+}
+
+function isCompatibleFixedValue(
+  value: unknown,
+  type: FieldType,
+  nullable: boolean,
+): value is PrimitiveFixedValue {
+  if (nullable && value === null) return true;
+  if (type === 'string') return typeof value === 'string';
+  if (type === 'boolean') return typeof value === 'boolean';
+  return (
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    (type !== 'integer' || Number.isInteger(value))
+  );
 }
 
 function expectedSchemaKeywordValue(keyword: string): string {
@@ -3099,8 +3241,13 @@ function expectedSchemaKeywordValue(keyword: string): string {
   if (keyword === 'minLength' || keyword === 'maxLength')
     return 'non-negative integer';
   if (keyword === 'pattern') return 'valid Unicode regular expression string';
+  if (keyword === 'format') return 'string format name';
   if (keyword === 'multipleOf') return 'finite number greater than zero';
   return 'finite number';
+}
+
+function isStringSemanticFormat(value: string): value is StringSemanticFormat {
+  return value === 'email' || value === 'date' || value === 'date-time';
 }
 
 function inspectStringEnum(
@@ -6172,11 +6319,17 @@ function buildFieldTemplate(
     ...(ui?.hint === undefined ? {} : { hint: ui.hint }),
     ...(ui?.tooltip === undefined ? {} : { tooltip: ui.tooltip }),
     ...(ui?.placeholder === undefined ? {} : { placeholder: ui.placeholder }),
+    ...(candidate.fixedValue.kind === 'valid'
+      ? { fixedValue: candidate.fixedValue.value }
+      : {}),
   };
   if (candidate.type === 'string') {
     return {
       ...base,
       kind: 'string',
+      ...(candidate.stringFormat === undefined
+        ? {}
+        : { format: candidate.stringFormat }),
       constraints: { ...candidate.stringConstraints },
       ...(candidate.stringEnum.kind === 'valid'
         ? {
@@ -6453,12 +6606,18 @@ function buildFieldDefinition(
     ...(ui?.hint === undefined ? {} : { hint: ui.hint }),
     ...(ui?.tooltip === undefined ? {} : { tooltip: ui.tooltip }),
     ...(ui?.placeholder === undefined ? {} : { placeholder: ui.placeholder }),
+    ...(candidate.fixedValue.kind === 'valid'
+      ? { fixedValue: candidate.fixedValue.value }
+      : {}),
   };
 
   if (candidate.type === 'string') {
     const definition: StringFieldDefinition = {
       ...base,
       kind: 'string',
+      ...(candidate.stringFormat === undefined
+        ? {}
+        : { format: candidate.stringFormat }),
       constraints: { ...candidate.stringConstraints },
       ...(candidate.stringEnum.kind === 'valid'
         ? {

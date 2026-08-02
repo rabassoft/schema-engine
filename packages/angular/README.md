@@ -5,20 +5,21 @@ Engine.
 
 ## Release status
 
-- Public verified Experimental `0.4.0` is available exactly and under both
-  `next` and `latest` during coordinated delivery.
-- Source package manifest: proposed metadata-only `0.4.1`; it is not generated,
-  staged or public. Verified public `0.4.0` remains the installable line and is
-  identical to the clean candidate selected from commit `07755b4c`.
-- Required core `0.4.0` is likewise public and verified under `next`.
+- Public verified Experimental `0.4.1` is available exactly and under `next`,
+  `latest` and unqualified resolution from protected commit `028a98c`, with
+  repository-backed npm provenance.
+- Core `latest` and unqualified resolution now select verified `0.4.1`, so the
+  default dependency pair is coordinated M23 evidence.
+- Required core `0.4.1` is likewise public and verified under `next`; the
+  packed core peer floor remains `^0.4.0`.
 - API classification: Public + Experimental + Active.
 - Installing or versioning this package does not promote any API to Stable.
-- Recommended channel: an explicit version, `next` or `latest`. The observed
-  aliases resolve the same Experimental `0.4.0` and do not imply stability.
+- Recommended M23 channel: exact `0.4.1`, `next` or `latest`. Routing does not
+  imply stability.
 - Experimental incompatible changes require at least a MINOR release and an
   approved contract; no support SLA is provided.
 
-The following commands install the verified public Experimental `0.4.0` pair:
+The following commands install the verified public Experimental `0.4.1` pair:
 
 ```sh
 npm install @rabassoft/schema-engine@next
@@ -51,8 +52,9 @@ bound.
 
 ## Supported import and boundary
 
-> Exact base Angular `0.4.0`, `next`, `latest` and unqualified consumers are
-> verified with public core `0.4.0`.
+> Exact base Angular `0.4.1` and `next` consumers are verified with public core
+> `0.4.1`. Base Angular `latest` and unqualified installs now resolve verified
+> `0.4.1` together with core.
 
 Import only from `@rabassoft/schema-engine-angular`. Deep imports into `dist`,
 `src`, or other physical paths are unsupported.
@@ -82,6 +84,12 @@ leaves. String enum remains excluded. Manually authored
 `nullValueLabel` strings in addition to `clearLabel`; this is a coordinated
 Experimental source migration with core's required `nullable` member.
 
+Current source projects normalized semantic strings as native `email` and
+`date` inputs while keeping `date-time` textual so RFC 3339 timezone data is
+preserved exactly. Native validity is presentational; runtime issues still come
+only from the configured replaceable validator. String-enum select precedence
+is unchanged.
+
 The current source projects static sections, tabs, accordions and logical grids
 at the root and on direct nested-object and collection-item template owners
 through the Public Experimental container SPI with mandatory native fallback.
@@ -103,8 +111,8 @@ The sanitized development repository is public at
 `https://github.com/rabassoft/schema-engine`. Preferred TypeScript source and a
 frozen package-local build harness are included; see `SOURCE.md`.
 
-The proposed `0.4.1` source metadata names that repository, but npm provenance
-is not claimed until a later stage-only trusted publication is approved and
-verified. Existing `0.4.0` has no retroactive repository/provenance claim.
-Issues may be used for non-code feedback; external code contributions are not
-currently accepted.
+Public `0.4.1` carries verified npm provenance bound to
+`rabassoft/schema-engine`, `.github/workflows/npm-publish.yml` and protected
+commit `028a98c`. Existing `0.4.0` has no retroactive repository/provenance
+claim. Issues may be used for non-code feedback; external code contributions
+are not currently accepted.

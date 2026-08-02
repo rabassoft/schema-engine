@@ -426,7 +426,7 @@ describe('ReferenceFormComponent application ownership', () => {
 
     expect(navigation).not.toBeNull();
     expect(selector).toBeInstanceOf(HTMLSelectElement);
-    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(8);
+    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(9);
     expect(
       root.querySelector('label[for="scenario-selector"]')?.textContent,
     ).toBe('Scenario');
@@ -447,6 +447,29 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(
       root.querySelector('#observable-evidence-heading')?.textContent,
     ).toContain('Observable evidence');
+    const disclosures = Array.from(
+      root.querySelectorAll<HTMLDetailsElement>('details.card-disclosure'),
+    );
+    expect(disclosures).toHaveLength(4);
+    expect(disclosures.every(({ open }) => open)).toBe(true);
+    expect(
+      disclosures.map((details) =>
+        details.querySelector(':scope > summary')?.textContent?.trim(),
+      ),
+    ).toEqual([
+      'Reference scenario',
+      'Interactive consumer',
+      'Schemas',
+      'Observable evidence',
+    ]);
+    for (const disclosure of disclosures) {
+      disclosure.open = false;
+      expect(disclosure.open).toBe(false);
+      expect(
+        disclosure.querySelector(':scope > summary .eyebrow'),
+      ).not.toBeNull();
+      disclosure.open = true;
+    }
     for (const entry of fixture.componentInstance.selectedScenario()
       .explanation) {
       expect(root.textContent).toContain(entry.title);
@@ -460,11 +483,37 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(root.querySelector('form')?.getAttribute('aria-label')).toBe(
       'Selected schema form',
     );
+    const role = root.querySelector<HTMLSelectElement>('form select');
+    expect(
+      Array.from(role?.options ?? [], ({ textContent }) => textContent?.trim()),
+    ).toEqual(['Select a role', 'Administrator', 'Editor', 'Viewer']);
+    expect(role?.options[0]?.disabled).toBe(true);
     expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(2);
     expect(root.querySelectorAll('[role="tab"]')).toHaveLength(7);
     expect(root.querySelectorAll('[role="tabpanel"]')).toHaveLength(2);
     expect(root.querySelector('.preview-workspace')).not.toBeNull();
     expect(root.querySelector('.schema-workspace')).not.toBeNull();
+    const consumerRegion = root.querySelector(
+      'section[aria-labelledby="interactive-consumer-heading"]',
+    );
+    const schemaRegion = root.querySelector(
+      'section[aria-labelledby="schemas-heading"]',
+    );
+    expect(consumerRegion?.parentElement).toBe(schemaRegion?.parentElement);
+    expect(consumerRegion?.contains(schemaRegion as Node)).toBe(false);
+    const configurationTabs = root.querySelector(
+      '.tab-interface--configuration',
+    );
+    expect(configurationTabs?.children[0]?.tagName).toBe('REFERENCE-TABS');
+    expect(configurationTabs?.children[1]?.getAttribute('role')).toBe(
+      'tabpanel',
+    );
+    expect(
+      configurationTabs?.querySelector('.configuration-actions'),
+    ).toBeNull();
+    const evidenceTabs = root.querySelector('.tab-interface--evidence');
+    expect(evidenceTabs?.children[0]?.tagName).toBe('REFERENCE-TABS');
+    expect(evidenceTabs?.children[1]?.getAttribute('role')).toBe('tabpanel');
     expect(
       root.querySelector('.cm-content[aria-label="JSON Schema editor"]'),
     ).not.toBeNull();

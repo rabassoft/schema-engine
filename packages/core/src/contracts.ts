@@ -199,9 +199,12 @@ export interface ObjectFieldDefinition extends BaseNodeDefinition {
 export type FormNodeDefinition =
   ObjectFieldDefinition | ArrayNodeDefinition | FieldDefinition;
 
+export type PrimitiveFixedValue = string | number | boolean | null;
+
 export interface BaseFieldDefinition extends BaseNodeDefinition {
   readonly nullable: boolean;
   readonly placeholder?: string;
+  readonly fixedValue?: PrimitiveFixedValue;
 }
 
 export interface StringChoiceDefinition {
@@ -209,8 +212,11 @@ export interface StringChoiceDefinition {
   readonly label: string;
 }
 
+export type StringSemanticFormat = 'email' | 'date' | 'date-time';
+
 export interface StringFieldDefinition extends BaseFieldDefinition {
   readonly kind: 'string';
+  readonly format?: StringSemanticFormat;
   readonly constraints: {
     readonly minLength?: number;
     readonly maxLength?: number;
@@ -442,6 +448,9 @@ export type FieldTextMember =
   | 'clear'
   | 'set-null'
   | 'null-value'
+  | 'fixed-missing'
+  | 'fixed-unavailable'
+  | 'fixed-incompatible'
   | 'choice'
   | 'issue';
 export type ObjectTextMember =

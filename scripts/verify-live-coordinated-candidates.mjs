@@ -18,10 +18,9 @@ assert.ok(
   'Invalid --tag-mode',
 );
 
-const releaseRoot = join(
-  workspaceRoot,
-  `.release/${descriptor.releaseDirectory}`,
-);
+const releaseRoot =
+  argumentValue(process.argv, 'release-root') ??
+  join(workspaceRoot, `.release/${descriptor.releaseDirectory}`);
 const evidence = JSON.parse(
   readFileSync(join(releaseRoot, 'candidates.json'), 'utf8'),
 );
@@ -34,6 +33,10 @@ async function registryDocument(path, accept = 'application/json') {
 }
 
 for (const candidate of evidence.candidates) {
+  const packageTarget = descriptor.packages.find(
+    ({ role }) => role === candidate.role,
+  );
+  assert.ok(packageTarget, `Missing descriptor target ${candidate.role}`);
   const encoded = encodeURIComponent(candidate.name);
   const metadata = await registryDocument(
     encoded,
@@ -49,9 +52,25 @@ for (const candidate of evidence.candidates) {
   const manifest = metadata.versions[candidate.version];
   assert.ok(manifest, `Missing ${candidate.name}@${candidate.version}`);
   assert.equal(manifest.dist.integrity, candidate.integrity);
-  assert.equal(exact.repository, undefined);
   assert.ok(exact.dist.signatures?.length > 0, 'Missing registry signature');
-  assert.equal(exact.dist.attestations, undefined);
+  if (descriptor.provenance) {
+    assert.deepEqual(exact.repository, {
+      url: 'git+https://github.com/rabassoft/schema-engine.git',
+      type: 'git',
+      directory: packageTarget.workspacePath,
+    });
+    assert.match(
+      exact.dist.attestations?.url ?? '',
+      /^https:\/\/registry\.npmjs\.org\/-\/npm\/v1\/attestations\//u,
+    );
+    assert.equal(
+      exact.dist.attestations?.provenance?.predicateType,
+      'https://slsa.dev/provenance/v1',
+    );
+  } else {
+    assert.equal(exact.repository, undefined);
+    assert.equal(exact.dist.attestations, undefined);
+  }
   const response = await fetch(manifest.dist.tarball);
   assert.equal(response.status, 200);
   const bytes = Buffer.from(await response.arrayBuffer());

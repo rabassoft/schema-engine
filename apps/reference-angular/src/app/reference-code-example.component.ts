@@ -82,6 +82,14 @@ export type ReferenceCodeLanguage = 'html' | 'typescript';
       caret-color: transparent;
     }
 
+    reference-code-example .cm-selectionBackground {
+      background: var(--color-code-selection) !important;
+    }
+
+    reference-code-example .cm-content ::selection {
+      background: var(--color-code-selection);
+    }
+
     reference-code-example .cm-editor.cm-focused {
       outline: 3px solid var(--color-focus);
       outline-offset: -3px;

@@ -347,6 +347,7 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
   assert.deepEqual(dependencyNames(validator.manifest).sort(), [
     '@rabassoft/schema-engine',
     'ajv',
+    'ajv-formats',
   ]);
   assert.deepEqual(validator.manifest.exports, {
     '.': {
@@ -359,6 +360,11 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
     rootManifest.devDependencies?.ajv,
     '8.20.0',
     'workspace root must own exact Ajv for Angular/Vite virtual-root resolution',
+  );
+  assert.equal(
+    rootManifest.devDependencies?.['ajv-formats'],
+    '3.0.1',
+    'workspace root must own the exact ajv-formats conformance oracle',
   );
   const workspace = readJson(join(root, 'angular.json'));
   assert.deepEqual(

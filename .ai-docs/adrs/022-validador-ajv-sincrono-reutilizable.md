@@ -1,6 +1,6 @@
 # ADR 022: Reusable synchronous Ajv validator package
 
-- **State:** Accepted revision 1
+- **State:** Accepted revision 3
 - **Date:** 17 July 2026
 - **Acceptance date:** 17 July 2026
 - **Complete review:** [`review 083`](../reviews/083-adr-022-review.md) cycle 2
@@ -13,6 +13,12 @@
 - **Authority:** Accepted M17 architecture; authorizes SPEC-007 and PLAN-019
   preparation/review, not publication, release, commit, push or external
   settings mutation
+- **Revision 2 coordination:** Accepted ADR-027 revision 0 and SPEC-010 v0.1.0
+  replace only the M17 no-format clause for the bounded D-037/M24 slice after
+  review 210 passed with zero findings
+- **Revision 3 coordination:** Accepted ADR-028 revision 0 replaces only the
+  compiler-rejected `const` boundary for the bounded D-036/M25 slice after
+  review 219 cycle 2 passed with zero findings
 
 ## 1. Context
 
@@ -159,3 +165,32 @@ This delivery rule preserves the synchronous factory/API and restores the
 existing initial bundle budget. Ajv's CommonJS distribution may produce one
 documented optimization warning; it does not authorize a budget increase or a
 different validator build.
+
+## 8. Revision 2 — selected semantic-format assertion
+
+The factory owns a private browser-safe ESM subset adapted from the `email`,
+`date` and `date-time` full validators in exact `ajv-formats@3.0.1`, registers
+only those definitions and selects `validateFormats: true`. The package and
+workspace root own the pinned dependency only as development/conformance
+tooling; parity tests and MIT attribution guard the adapted subset. This
+narrowly replaces the original no-format option and rejected-alternative
+clause without adding `ajv-formats` to runtime.
+
+The factory signature, cache, synchronous lifecycle, non-mutation and immutable
+Ajv issue mapping remain unchanged. Other format names are not registered and
+remain tolerated under `strict: false`; no Public configuration surface,
+additional format, comparison keyword or browser validation bridge is added.
+`logger: false` preserves the existing no-console contract when another format
+name is tolerated under `strict: false`.
+
+## 9. Revision 3 — primitive const assertion
+
+The unchanged Ajv Draft 2020-12 instance already asserts compiler-accepted
+primitive `const` schemas. No dependency, plugin, custom keyword, option,
+factory surface, cache rule or mapping changes. Ordinary Ajv `const` errors
+continue through the existing immutable issue normalization.
+
+The compiler remains the supported-flow gate and accepts only the bounded
+ADR-028/SPEC-011 primitive slice. Ajv's broader `const` support does not enable
+root/container values, insertion, mutation, renderer behavior or any other
+Deferred capability.

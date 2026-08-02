@@ -22,6 +22,7 @@ const EXPECTED_SCENARIOS = [
   'nullable-preferences',
   'advanced-presentation',
   'recursive-local-presentation',
+  'semantic-contact',
 ] as const;
 
 const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
@@ -38,6 +39,7 @@ const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
   'nullable-leaves',
   'advanced-layout',
   'recursive-local-presentation',
+  'semantic-formats',
 ];
 
 const EXPECTED_TRANSITIONS = {
@@ -68,6 +70,7 @@ const EXPECTED_TRANSITIONS = {
   ],
   'advanced-presentation': ['change-contact-email'],
   'recursive-local-presentation': ['move-beta-first', 'move-beta-last'],
+  'semantic-contact': ['invalidate-email-format', 'repair-email-format'],
 } as const;
 
 function withRuntimeEnvelope(
@@ -128,6 +131,7 @@ describe('reference scenario catalog', () => {
       'nullable-preferences': ['nullable-leaves'],
       'advanced-presentation': ['advanced-layout'],
       'recursive-local-presentation': ['recursive-local-presentation'],
+      'semantic-contact': ['semantic-formats'],
     });
     expect(
       Object.fromEntries(

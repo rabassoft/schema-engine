@@ -28,6 +28,11 @@
   --warning-soft: light-dark(#fffbeb, #3a2c16);
   --danger: light-dark(#b42318, #fda4af);
   --danger-soft: light-dark(#fff1f2, #3b1d25);
+  --editor-selection: light-dark(#c7d2fe, #2b3852);
+  --code-selection: #2b3852;
+  --syntax-string: light-dark(#216e39, #7ee787);
+  --syntax-literal: light-dark(#0550ae, #79c0ff);
+  --syntax-property: light-dark(#953800, #ffa657);
   --radius-small: 0.35rem;
   --radius-medium: 0.55rem;
   --radius-large: 0.75rem;
@@ -160,12 +165,27 @@ button:disabled {
   box-shadow: var(--shadow-surface);
 }
 
-.eyebrow {
+.reference-region > .region-disclosure {
   margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.region-summary {
   padding: 0.75rem 1rem;
   border-block-end: 1px solid var(--border);
   background: var(--surface-muted);
   color: var(--primary-strong);
+}
+
+.region-disclosure:not([open]) > .region-summary {
+  border-block-end: 0;
+}
+
+.eyebrow {
+  display: inline;
+  margin: 0;
+  color: currentColor;
   font-size: 0.78rem;
   font-weight: 750;
   letter-spacing: 0.09em;
@@ -367,6 +387,10 @@ pre {
   tab-size: 2;
 }
 
+pre ::selection {
+  background: var(--code-selection);
+}
+
 code {
   display: block;
   min-width: max-content;
@@ -384,17 +408,17 @@ code {
 
 .tok-string,
 .tok-regexp {
-  color: light-dark(#216e39, #7ee787);
+  color: var(--syntax-string);
 }
 
 .tok-number {
-  color: light-dark(#0550ae, #79c0ff);
+  color: var(--syntax-literal);
 }
 
 .tok-propertyName,
 .tok-variableName,
 .tok-definition {
-  color: light-dark(#953800, #ffa657);
+  color: var(--syntax-property);
 }
 
 .tok-typeName,
@@ -426,6 +450,16 @@ code {
 [data-testid='schema-editor'] .cm-scroller,
 [data-testid='ui-schema-editor'] .cm-scroller {
   overflow: auto;
+}
+
+[data-testid='schema-editor'] .cm-selectionBackground,
+[data-testid='ui-schema-editor'] .cm-selectionBackground {
+  background: var(--editor-selection) !important;
+}
+
+[data-testid='schema-editor'] .cm-content ::selection,
+[data-testid='ui-schema-editor'] .cm-content ::selection {
+  background: var(--editor-selection);
 }
 
 .standard-form,

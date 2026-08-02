@@ -6,6 +6,805 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-08-02 — Standard visual parity extended
+
+### Completed
+
+- Made Scenario, Interactive consumer, Schemas and Observable evidence
+  independent native disclosures, open by default and DOM-preserving when
+  collapsed.
+- Applied the Angular-approved dark selection outcome independently to Standard
+  editable JSON and highlighted code.
+- Added a Standard-owned JSON syntax theme after cycle 1 found that the prior
+  light-oriented CodeMirror tokens lost contrast inside dark selections.
+- Review 229 cycle 2 passes formatting, strict types, 55 Standard tests, eight
+  snippet checks, production build, all seven Standard Chromium tests,
+  documentation and diff hygiene with zero findings.
+- No Public contract, dependency, version, milestone, commit, push or external
+  state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 through the existing Ajv integration without
+  production drift.
+
+## 2026-08-02 — Angular scenario controls clarified
+
+### Completed
+
+- Labelled the controlled Role selector's required missing-value sentinel
+  `Select a role`, leaving its three domain choices unchanged.
+- Styled native advanced-presentation tabs as joined tabs and panels, with a
+  persistent visual state driven by their existing `aria-selected` contract.
+- Confirmed that selecting Contact, removing focus and resetting the scenario
+  retain both target-owned state and its visible treatment.
+- Review 228 cycle 1 identified the stale compiled internal scenario catalog;
+  after rebuilding it, cycle 2 passes formatting, strict types, 44 scenario
+  tests, 26 Angular tests, eight snippet checks, production build, all nine
+  Angular Chromium tests, documentation and diff hygiene with zero findings.
+- No Public contract, dependency, version, milestone, commit, push or external
+  state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 through the existing Ajv integration without
+  production drift.
+
+## 2026-08-02 — Angular dark editor selection refined
+
+### Completed
+
+- Added an explicit theme-aware JSON selection color and a stable dark code
+  selection color, both `#2b3852` in dark presentation.
+- Applied the colors to CodeMirror selection layers and native selection
+  fallback rendering in editable JSON and read-only highlighted examples.
+- Runtime inspection confirms selection remains distinct from the editor
+  background while syntax colors and text stay legible.
+- Review 227 cycle 1 corrected a CSS-serialization-coupled regression assertion;
+  cycle 2 repeats the complete review with formatting, strict types, 26 Angular
+  tests, eight snippet checks, production build, documentation and diff hygiene
+  passing with zero findings.
+- No Public contract, dependency, version, milestone, commit, push or external
+  state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 through the existing Ajv integration without
+  production drift.
+
+## 2026-08-02 — Angular Schemas made collapsible
+
+### Completed
+
+- Applied the shared native disclosure pattern to the promoted first-level
+  Schemas region and kept it open by default.
+- Confirmed at runtime that Schemas hides and restores its configuration
+  controls, tabs and editors independently of Interactive consumer.
+- Extended regression evidence from three to all four first-level reversible
+  disclosures.
+- Review 226 cycle 1 passes formatting, strict types, 26 Angular tests, eight
+  snippet checks, production build, runtime inspection, documentation and diff
+  hygiene with zero findings.
+- No Public contract, dependency, version, milestone, commit, push or external
+  state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 through the existing Ajv integration without
+  production drift.
+
+## 2026-08-02 — Angular workspace aligned with Standard
+
+### Completed
+
+- Promoted Schemas from inside the Angular Interactive consumer disclosure to
+  an independent sibling region at its right, matching Standard.
+- Preserved the two-column desktop composition, existing single-column
+  responsive fallback and all configuration/editor behavior.
+- Confirmed at runtime that collapsing Interactive consumer hides only the form
+  preview while Schemas remains visible and operable.
+- Added structural regression evidence and completed review 225 cycle 1 with
+  formatting, strict types, 26 Angular tests, eight snippet checks, production
+  build, documentation and diff hygiene passing with zero findings.
+- No Public contract, dependency, version, milestone, commit, push or external
+  state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 through the existing Ajv integration without
+  production drift.
+
+## 2026-08-02 — Angular reference groups made collapsible
+
+### Completed
+
+- Removed the tab strips' incidental vertical scrollbar while retaining
+  responsive horizontal overflow.
+- Made Reference scenario, Interactive consumer and Observable evidence native
+  default-open disclosures without changing their region labels or content.
+- Added regression evidence for all three reversible disclosure states and the
+  tablist overflow rule.
+- Review 224 cycle 1 passes runtime interaction inspection, formatting, strict
+  types, all 26 Angular reference tests, eight snippet checks, production build,
+  documentation and diff hygiene with zero findings.
+- No Public contract, dependency, version, milestone, commit, push or external
+  state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 through the existing Ajv integration without
+  production drift.
+
+## 2026-08-02 — Angular reference tab hierarchy refined
+
+### Completed
+
+- Replaced the equal-width button-like tab treatment with content-width tabs,
+  a shared baseline and an active surface visually joined to its panel.
+- Moved all shared Schema status, actions, guidance, confirmation and diagnostic
+  content before the tab interface so tabs remain immediately adjacent to the
+  selected editor.
+- Applied the same joined composition to Observable evidence and retained
+  horizontal overflow on narrow screens.
+- Preserved deterministic IDs, ARIA relationships, roving focus and keyboard
+  behavior; added structural regression evidence for tab/panel adjacency.
+- Review 223 cycle 1 passes both themes at runtime, formatting, strict types,
+  all 26 Angular reference tests, eight snippet checks, production build and
+  diff hygiene with zero findings.
+- No Public contract, dependency, version, milestone, commit, push or external
+  state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 through the existing Ajv integration without
+  production drift.
+
+## 2026-08-02 — PLAN-027 checkpoint 1 completed
+
+### Completed
+
+- Core now root-exports `PrimitiveFixedValue`, exposes optional primitive-only
+  `fixedValue` and carries the three accepted fixed-status text members.
+- Primitive `const` compiles descriptor-safely through direct, nested,
+  collection-template and local-reference leaves with exact immutable values,
+  diagnostics, provenance and string-enum coherence.
+- Iterative manual-definition validation emits the accepted direct and wrapped
+  defect envelopes while preserving existing-before-fixed precedence.
+- Operations and controlled runtime behavior remain application-owned and do
+  not insert, repair or enforce fixed values.
+- Review 222 corrected a stale unsupported fixture, one ordinary choice
+  traversal, review formatting and two missing explicit conformance mappings.
+  Cycle 5 repeated formatting, strict types, build, all 471 core tests, package
+  smoke, documentation and diff checks with zero findings.
+- No dependency, version, release, publication, commit, push or external state
+  changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 2 and prove ordinary Ajv `const` assertion
+  through the existing validator API without production drift.
+
+## 2026-08-01 — PLAN-027 revision 0 approved
+
+### Completed
+
+- PLAN-027 maps SPEC-011 to six ordered checkpoints: core, existing Ajv
+  evidence, Angular fixed renderer, independent Standard projection, shared
+  reference evidence and complete closure.
+- Review 221 corrected six ownership, localization, final-matrix, wording and
+  accepted-state findings. Cycle 6 repeated all sixteen areas and state
+  reconciliation with zero findings.
+- Formatting, documentation verification (320 documents/1011 local links) and
+  `git diff --check` pass after approval reconciliation.
+- PLAN-027 revision 0 is Approved for checkpoints 1–6. No checkpoint has
+  started and no code, dependency, version, commit, push, release or external
+  state changed during this planning task.
+
+### Next
+
+- Execute PLAN-027 checkpoint 1 and completely review it before checkpoint 2.
+
+## 2026-08-01 — SPEC-011 v0.1.0 accepted
+
+### Completed
+
+- SPEC-011 fixes the Public primitive `fixedValue` contract, exact compiler
+  and manual-definition diagnostics, unchanged controlled runtime/Ajv boundary,
+  rank-30 Angular fixed renderer and independent Standard semantics.
+- Review 220 corrected eight contract, accessibility, localization,
+  compatibility, indexing and onboarding findings. Cycle 4 repeated all
+  seventeen areas and accepted-state reconciliation with zero findings.
+- Formatting, documentation verification (318 documents/1007 local links) and
+  `git diff --check` pass after the accepted-state reconciliation.
+- SPEC-011 v0.1.0 is Accepted and promotes no broader D-036 scope.
+- No code, dependency, package version, release, commit, push or external state
+  changed during this normative checkpoint.
+
+### Next
+
+- Draft and completely review PLAN-027 before implementation.
+
+## 2026-08-01 — D-036/M25 architecture accepted
+
+### Completed
+
+- Ricard accepted review 218's dedicated static fixed presentation and the
+  bounded compile-time `const`/string-`enum` coherence rule.
+- ADR-028 revision 0, ADR-005 revision 6 and ADR-022 revision 3 were reviewed
+  coordinately; review 219 cycle 2 repeated all fourteen areas with zero
+  findings and accepts the architecture.
+- D-036 is promoted only for the primitive M25 slice. Broader readonly,
+  hidden, object/array `const`, defaults, implementation, version and release
+  scope remain inactive.
+- Current-state reconciliation passes formatting, documentation verification
+  (316 documents/1001 local links) and `git diff --check` with zero findings.
+- No code, dependency, package version, commit, push or external state changed
+  during this architecture checkpoint.
+
+### Next
+
+- Draft and completely review SPEC-011 before preparing any implementation
+  plan.
+
+## 2026-07-31 — D-036 selected as the M25 candidate
+
+### Completed
+
+- Ricard selected D-036 `const` and fixed-value presentation as the next
+  functional candidate after M24.
+- Review 218 cycle 1 found a bounded primitive slice viable without changing
+  application ownership, operations or validator replacement.
+- The review recommends a dedicated static fixed renderer that shows actual
+  controlled state, emits no operations and preserves Ajv assertion.
+- No ADR, SPEC, plan, implementation, dependency, version, commit, push or
+  external mutation is authorized by this selection.
+
+### Next
+
+- Accept or revise the fixed-presentation architecture and the recommended
+  compile-time rejection of `const`/`enum` contradictions.
+
+## 2026-07-30 — PLAN-026 and M24 completed
+
+### Completed
+
+- The bounded D-037 slice now normalizes, validates and independently projects
+  `email`, `date` and `date-time` across core, the private Ajv validator,
+  Angular, Standard and the shared reference platform.
+- Final cycles corrected one onboarding omission and one strictly typed
+  Standard baseline fixture.
+- Review 217 cycle 4 repeated the complete applicable matrix with zero
+  findings: frozen install, 313 documents/993 links, lint, types, builds, 705
+  tests, package/source/policy/security checks, 550 boundaries and 16 Chromium
+  cases.
+- PLAN-026 revision 0 and M24 are complete. Package versions and published M23
+  artifacts remain unchanged; no commit, push, release or external mutation
+  occurred.
+
+### Next
+
+- Review Deferred functional candidates and select the next milestone before
+  drafting another normative or implementation document.
+
+## 2026-07-30 — PLAN-026 checkpoint 4 completed
+
+### Completed
+
+- One shared semantic-contact scenario demonstrates `email`, `date` and
+  timezone-preserving `date-time` behavior in Angular and Standard.
+- Review cycles corrected a stale scenario count, the exact conformance-oracle
+  boundary and ambiguous accessible E2E locators.
+- Review 216 cycle 5 passed 44 shared-scenario tests, 26 Angular-shell tests,
+  55 Standard-shell tests, 550 import boundaries and both complete Chromium
+  suites with zero findings.
+- Clarification of the historical checkpoint-2 entry: exact
+  `ajv-formats@3.0.1` is development/conformance tooling; runtime uses the
+  attributed browser-safe ESM subset.
+
+### Next
+
+- Execute PLAN-026 checkpoint 5 and repeat the complete M24 review until one
+  full pass has zero findings.
+
+## 2026-07-30 — PLAN-026 checkpoint 3 completed
+
+### Completed
+
+- Angular and Standard independently project `email`, `date` and the textual
+  timezone-preserving `date-time` fallback.
+- Enum select precedence, exact DOM-value emission and controlled runtime
+  behavior remain unchanged.
+- Review 215 cycle 1 passed all 107 Angular tests, all 54 Standard tests and
+  both target builds with zero findings.
+
+### Next
+
+- Add and completely review the shared M24 reference scenario and Chromium
+  evidence.
+
+## 2026-07-30 — PLAN-026 checkpoint 2 completed
+
+### Completed
+
+- The private validator owns exact `ajv-formats@3.0.1`, registers only the
+  selected formats in full mode and emits existing immutable `format` issues.
+- Cycle 1 found console warnings for unregistered formats; fixed
+  `logger: false` preserves tolerant no-console behavior.
+- Review 214 cycle 2 passed types, 11 validator tests, build, package smoke and
+  manifest/lock inspection with zero findings.
+
+### Next
+
+- Implement PLAN-026 checkpoint 3 independently in Angular and Standard.
+
+## 2026-07-30 — PLAN-026 checkpoint 1 completed
+
+### Completed
+
+- Core now exports the Experimental `StringSemanticFormat` contract and
+  normalizes `email`, `date` and `date-time` without validating data.
+- Descriptor-safe diagnostics and direct, nested, collection-template,
+  nullable, enum and local-reference propagation are covered.
+- Manual string definitions accept only the selected formats.
+- Review 213 cycle 1 passed formatting, strict types, build and all 459 core
+  tests with zero findings.
+
+### Next
+
+- Implement PLAN-026 checkpoint 2 in the private reusable Ajv validator.
+
+## 2026-07-30 — M24 normative gates completed
+
+### Completed
+
+- Review 209 promoted only D-037 `email`, `date` and `date-time` after one
+  complete zero-finding pass.
+- ADR-027 revision 0 coordinates ADR-005 revision 5 and ADR-022 revision 2;
+  review 210 passed all twelve areas and accepted the architecture.
+- SPEC-010 v0.1.0 and PLAN-026 revision 0 passed reviews 211–212 with zero
+  findings and are Accepted/Approved respectively.
+- No implementation, package version, release, publication, commit, push or
+  external mutation occurred in this checkpoint.
+
+### Next
+
+- Execute PLAN-026 checkpoint 1: core contract, compiler and conformance.
+
+## 2026-07-30 — PLAN-025 and M23 completed
+
+### Completed
+
+- Review 208 cycle 1 corrected the M23 live verifier, froze M19 historical
+  consumer tuples, reconciled obsolete M21 alias expectations and fixed the
+  explicit M23 security-audit invocation.
+- Ricard authorized one exact historical-policy exception for the benign
+  pnpm-store path in blob `8edc2b93`, review 132. Tests prove every other local
+  home-path occurrence remains rejected.
+- Review 208 cycle 4 repeated exact M23/M19/M21 registry evidence, all eight
+  M23 consumers, the frozen local/tooling/security matrix and both Chromium
+  reference suites with zero findings.
+- PLAN-025 revision 0, checkpoint 16, M23 and the promoted D-043 slice are
+  complete. No commit, push, Git tag, GitHub Release, later npm release or
+  backup deletion occurred.
+
+### Next
+
+- Select the next functional capability before drafting a new SPEC, ADR or
+  implementation plan.
+
+## 2026-07-30 — Checkpoint 15 token restrictions completed
+
+### Completed
+
+- Ricard executed only
+  `npm access set mfa=publish @rabassoft/schema-engine-angular-aria`.
+- Fresh npmjs.com observation confirms Angular Aria and the previously verified
+  core/base packages all select “Require two-factor authentication and disallow
+  bypass 2fa tokens.”
+- All three packages remain public with exact stage-only trusted publishers.
+  Authenticated identity remains `ricardrabasso` and the token list remains
+  empty.
+- Aliases remain core/base `next/latest: 0.4.1` plus pilot
+  `next/latest: 0.2.1`.
+- Review 207 cycle 1 accepts the scoped transition with zero findings and
+  completes checkpoint 15. No unrelated npm, Git or GitHub state changed.
+
+### Next
+
+- Decide only checkpoint 16's complete read-only final closure. It grants no
+  later release or external mutation.
+
+## 2026-07-30 — Base Angular token policy restricted
+
+### Completed
+
+- Ricard executed only
+  `npm access set mfa=publish @rabassoft/schema-engine-angular`.
+- Fresh npmjs.com observation confirms base Angular selects “Require two-factor
+  authentication and disallow bypass 2fa tokens.”
+- Core remains strict; Angular Aria remains on the previous
+  bypass-token-compatible policy. All three packages remain public with exact
+  stage-only trusted publishers.
+- Authenticated identity remains `ricardrabasso`, the token list remains empty
+  and aliases remain core/base `next/latest: 0.4.1` plus pilot
+  `next/latest: 0.2.1`.
+- Review 206 cycle 1 corrects stale STATUS verification counts; cycle 2 accepts
+  the complete repeated review with zero findings.
+
+### Next
+
+- Decide only the Angular Aria package's immediate mutation to “Require
+  two-factor authentication and disallow bypass 2fa tokens.”
+
+## 2026-07-30 — Core package token policy restricted
+
+### Completed
+
+- Ricard executed only
+  `npm access set mfa=publish @rabassoft/schema-engine` and completed npm's
+  interactive authentication.
+- Fresh npmjs.com observation confirms the core package selects “Require
+  two-factor authentication and disallow bypass 2fa tokens.”
+- Core remains public with its exact stage-only trusted publisher. Base Angular
+  and Angular Aria remain public with unchanged trusted publishers and the
+  previous bypass-token-compatible policy.
+- Authenticated identity remains `ricardrabasso`, the token list remains empty
+  and aliases remain core/base `next/latest: 0.4.1` plus pilot
+  `next/latest: 0.2.1`.
+- Review 205 cycle 1 accepts the scoped transition with zero findings. No
+  unrelated npm, Git or GitHub state changed.
+
+### Next
+
+- Decide only the base Angular package's immediate mutation to “Require
+  two-factor authentication and disallow bypass 2fa tokens.” Angular Aria
+  remains separately gated.
+
+## 2026-07-30 — Checkpoint 15 token-policy preflight accepted
+
+### Completed
+
+- Ricard authorized only checkpoint 15's authenticated read-only package-access
+  and token preflight.
+- npm CLI and npmjs.com confirm identity `ricardrabasso`, account 2FA mode
+  `auth-and-writes`, verified `ricard@rabassoft.com` email and zero account/
+  organization tokens.
+- Core, base Angular and Angular Aria remain public and each retains exactly one
+  stage-only trusted publisher for `rabassoft/schema-engine`,
+  `npm-publish.yml`, environment `npm-publish`.
+- All three packages currently select the policy that permits either 2FA or a
+  granular access token with bypass 2FA.
+- Review 204 cycle 1 corrects the stale ROADMAP gate, cycle 2 corrects review
+  formatting and cycle 3 accepts the complete repeated read-only review with
+  zero findings.
+- Fresh post-preflight registry observation preserves core/base
+  `next/latest: 0.4.1` and pilot `next/latest: 0.2.1`.
+- No package setting, token, access, trusted publisher, alias, publication, Git
+  or GitHub state changed.
+
+### Next
+
+- Decide only the core package's immediate mutation to “Require two-factor
+  authentication and disallow bypass 2fa tokens.” Base Angular and Angular
+  Aria remain separately gated.
+
+## 2026-07-30 — Core latest transition observed
+
+### Completed
+
+- Ricard executed only the separately authorized core `latest` transition.
+- Fresh authenticated observation returns core/base `next/latest: 0.4.1` and
+  pilot `next/latest: 0.2.1`, closing the mixed window.
+- A fresh core `@latest` tarball is 217599 bytes and byte-identical to the
+  selected protected-main candidate, with SHA-512
+  `7a2f641fbf6bea6f217987bd67883fa5e7654fd60f32db51b1d73998cb8e09f7885cf9bb5a02e046138d9d83558038b173490229a51da89bb6ea11bddffb6592`.
+- All eight exact/`next`/`latest`/unqualified lower/current consumer
+  invocations pass native and pilot partial compilation, typecheck, unit test,
+  production build and Chromium E2E.
+- Fresh audit verifies 15 registry signatures and 6 attestations.
+- Review 203 cycle 1 corrects accepted review 202's stale pending outcome plus
+  stale root onboarding and current-state preflight text.
+- Review 203 cycle 2 repeats every applicable area with zero findings and
+  then corrects the stale current objective before the complete cycle 3 review.
+- Review 203 cycle 3 repeats every applicable area with zero findings and
+  accepts checkpoint 14.
+- Formatting, 296-document/963-link documentation, lint, 41 release-tooling
+  tests, 23 public-policy tests, 777-file public-tree policy, workflow policy
+  and diff checks pass.
+
+### Next
+
+- Decide only checkpoint 15's read-only package-access/token preflight. No
+  restriction or token removal is authorized.
+
+## 2026-07-30 — Base Angular latest transition observed
+
+### Completed
+
+- Ricard executed only the separately authorized base Angular `latest`
+  transition.
+- Fresh authenticated observation returns base Angular `next/latest: 0.4.1`,
+  pilot `next/latest: 0.2.1` and core `next: 0.4.1`/`latest: 0.4.0`.
+- A fresh base `@latest` tarball is 127734 bytes and byte-identical to the
+  selected protected-main candidate, with SHA-512
+  `016138d763fcee7e80eebb3a0c1f05e39d96efea94a07ada4a48f1c16e3550b27531ed8f70da3e3b51627f3a7fd89c98afcf6ec5ad0889d7ddde4e59024f961a`.
+- Review 202 cycle 1 corrects one stale release-state date before the complete
+  repeated review.
+- Review 202 cycle 2 passes the technical matrix, then corrects one final stale
+  current-state question before the complete cycle 3 review.
+- Review 202 cycle 3 repeats all applicable areas with zero findings and accepts
+  checkpoint 13.
+- Formatting, 295-document/960-link documentation, lint, 41 release-tooling
+  tests, 23 public-policy tests, 776-file public-tree policy, workflow policy
+  and diff checks pass.
+
+### Next
+
+- Decide only
+  `npm dist-tag add @rabassoft/schema-engine@0.4.1 latest`.
+
+## 2026-07-30 — Pilot latest transition observed
+
+### Completed
+
+- Ricard authorized only the exact pilot `latest` mutation.
+- Fresh observation before executing it already returned pilot
+  `latest: 0.2.1`; this task did not repeat the command.
+- Review 201 cycle 1 verified a fresh `@latest` download byte-identical to the
+  selected 29281-byte candidate, then found three stale documentation/policy
+  claims.
+- After correcting all three findings, review 201 cycle 2 passed the automated
+  matrix but found and corrected two final current-state summary
+  inconsistencies.
+- Review 201 cycle 3 then repeats every applicable area with zero findings and
+  accepts checkpoint 12.
+- Core/base `next` remain `0.4.1` and `latest` remain `0.4.0`. The planned
+  one-edge mixed window is preserved and no coordinated default evidence is
+  claimed.
+- Formatting, 294-document/957-link documentation, lint, 41 release-tooling
+  tests, 23 public-policy tests, 775-file public-tree policy, workflow policy
+  and diff checks pass.
+
+### Next
+
+- Decide only
+  `npm dist-tag add @rabassoft/schema-engine-angular@0.4.1 latest`.
+
+## 2026-07-29 — Pilot latest preflight passed
+
+### Completed
+
+- Ricard separately authorized only checkpoint 12's read-only preflight.
+- Review 200 cycle 1 verifies authenticated identity, all three exact candidate
+  bytes, signatures/attestations, metadata/access, current aliases, applicable
+  consumers and mixed-window recovery with zero findings.
+- `next` remains core/base `0.4.1` and pilot `0.2.1`; `latest` remains
+  core/base `0.4.0` and pilot `0.2.0`.
+- No registry, access, trust, token, Git or GitHub mutation occurred.
+- Formatting, 293-document/954-link documentation, lint, 41 release-tooling
+  tests, 23 public-policy tests, 774-file public-tree policy, workflow policy
+  and diff checks pass.
+
+### Next
+
+- Decide only the exact pilot `latest` command:
+  `npm dist-tag add @rabassoft/schema-engine-angular-aria@0.2.1 latest`.
+
+## 2026-07-29 — Pilot checkpoint 11 completed
+
+### Completed
+
+- Ricard completed browser 2FA for only pilot stage
+  `86d03e2d-3630-459d-8805-122e972f34b5`.
+- Pilot `0.2.1` is public exactly and under `next`; all three `latest` aliases
+  remain on M21.
+- Review 199 cycle 1 corrected the explicit M23 invocation and transitive
+  Vitest/Rolldown `@emnapi/*` strict-peer drift in the ephemeral M20 consumer
+  generator. Cycle 2 verifies candidate-byte identity, exports/styles, peers,
+  source/license, signature, exact protected-main provenance and all four
+  exact/`next` native/pilot lanes with zero findings.
+- The consumer-harness correction changes no public package, dependency,
+  declaration, runtime behavior or supported peer range.
+- Formatting, 292-document/951-link documentation, lint, 41 release-tooling
+  tests, 23 public-policy tests, 773-file public-tree policy, workflow policy
+  and diff checks pass.
+
+### Next
+
+- Decide the separately gated read-only checkpoint-12 preflight for only the
+  pilot `latest` transition.
+
+## 2026-07-29 — Base checkpoint 10 completed
+
+### Completed
+
+- The first authorized base approval stopped before mutation on per-operation
+  npm 2FA. Ricard restored the expired session and completed browser
+  authentication for only stage `8e81ef31-188c-4f32-8140-a7ee6af237c7`.
+- Base Angular `0.4.1` is public exactly and under `next`; `latest` remains
+  `0.4.0`.
+- Review 198 cycle 1 verifies candidate-byte identity, integrity, packed core
+  peer `^0.4.0`, framework peers, runtime dependencies, repository/source/
+  license, signature, SLSA provenance from exact protected `main@028a98c` and
+  exact/`next` consumers at Angular 22.0.6/22.0.7 with zero findings.
+- Formatting, 291-document/948-link documentation, lint, 41 release-tooling
+  tests, 23 public-policy tests, 772-file public-tree policy, workflow policy
+  and diff checks pass.
+- Pilot stage `86d03e2d-3630-459d-8805-122e972f34b5` remains unchanged and
+  unapproved.
+
+### Next
+
+- Decide 2FA approval of only the exact pilot stage
+  `86d03e2d-3630-459d-8805-122e972f34b5`.
+
+## 2026-07-28 — Core checkpoint 9 completed
+
+### Completed
+
+- Ricard authorized approval of only core stage
+  `86becb8b-9722-4a2d-aa5e-06678893c50a`.
+- Although the CLI ended with a post-consumption `E404`, fresh registry state
+  proves core `0.4.1` is public exactly and under `next`; `latest` remains
+  `0.4.0`.
+- Review 197 cycle 1 corrects stale pre-publication documentation policy; cycle
+  2 verifies candidate-byte identity, integrity, public access,
+  repository/source/license, registry signature, SLSA provenance from exact
+  protected `main@028a98c` and exact/`next` clean consumers with zero findings.
+- Formatting, 290-document/945-link documentation, lint, 41 release-tooling
+  tests, 23 public-policy tests, 771-file public-tree policy, workflow policy
+  and diff checks pass.
+- Base stage `8e81ef31-188c-4f32-8140-a7ee6af237c7` and pilot stage
+  `86d03e2d-3630-459d-8805-122e972f34b5` remain unchanged and unapproved.
+
+### Next
+
+- Decide 2FA approval of only the exact base Angular stage
+  `8e81ef31-188c-4f32-8140-a7ee6af237c7`.
+
+## 2026-07-28 — Replacement checkpoint 8 completed
+
+### Completed
+
+- Ricard separately approved environment `npm-publish`; run `30377052519`
+  completed `stage` job `90336699234` in 1m58s.
+- Review 196 cycle 1 verifies three exact replacement stage IDs and downloads.
+  Every tarball is byte-identical to the selected review 194/195 candidate.
+- Packed manifests, licenses, package-local Corresponding Source, isolated
+  source rebuilds and security/rights checks pass.
+- Core/base `0.4.1` and pilot `0.2.1` remain unpublished; `next`/`latest`
+  aliases remain on core/base `0.4.0` and pilot `0.2.0`.
+
+### Next
+
+- Decide 2FA approval of only core stage
+  `86becb8b-9722-4a2d-aa5e-06678893c50a`.
+
+## 2026-07-28 — Replacement workflow awaits environment approval
+
+### Completed
+
+- Ricard authorized exact `npm-publish.yml` dispatch with `release=m23` and
+  `source_commit=028a98cfb1c96c821b6233c82f688a416e987656`.
+- Run `30377052519` targets that exact protected-main SHA.
+- `verify-release` job `90335307910` passed all steps in 5m04s.
+
+### In progress
+
+- Stage job `90336699234` is `waiting` for separate authenticated approval of
+  environment `npm-publish`. No replacement stage exists.
+
+### Next
+
+- Decide only the environment approval. After approval, observe the run and
+  inspect/download all three stages before any package approval.
+
+## 2026-07-28 — Replacement checkpoint-8 gate accepted
+
+### Completed
+
+- Review 195 cycle 1 corrected formatting; cycle 2 passes with zero findings
+  after all obsolete stages were rejected.
+- Reobserved exact protected `main@028a98c`, workflow, environment, branch
+  controls, three stage-only trust relations, package authority and empty
+  stage/version state.
+- A fresh exact-main clone reproduces review 194's three candidate hashes and
+  passes frozen offline install, build, readiness, neutral dry runs and focused
+  policy checks.
+- No workflow dispatch, environment approval, stage, publication, alias or
+  token mutation occurred.
+
+### Next
+
+- Decide the exact replacement `npm-publish.yml` dispatch on `main` with
+  `release=m23` and
+  `source_commit=028a98cfb1c96c821b6233c82f688a416e987656`.
+
+## 2026-07-28 — All obsolete M23 stages rejected
+
+### Completed
+
+- With Ricard's exact authorization, permanently rejected only Angular Aria
+  stage `de129160-ae80-4a15-8f43-dbc64a6f25fb`.
+- All three obsolete stage IDs now return `E404`. Core/base `0.4.1` and pilot
+  `0.2.1` remain unpublished.
+- Public `latest` and `next` aliases remain core/base `0.4.0` and pilot
+  `0.2.0`. No workflow dispatch, stage approval or publication occurred.
+
+### Next
+
+- Repeat the complete checkpoint-8 pre-dispatch read-only gate. Present the
+  exact replacement workflow dispatch only after that gate passes.
+
+## 2026-07-28 — Obsolete base Angular stage rejected
+
+### Completed
+
+- The first authorized rejection attempt ended with an npm browser-auth
+  completion `E404`; read-only observation confirmed that no mutation occurred.
+- Retried the same exact authorized action and permanently rejected base
+  Angular stage `bd1e0399-d41a-405c-8b24-dcc9a63eb761`.
+- Its authenticated stage view now returns `E404`. Base Angular `0.4.1`
+  remains unpublished and `latest`/`next` remain `0.4.0`.
+- Angular Aria stage `de129160-ae80-4a15-8f43-dbc64a6f25fb` remains observable
+  with unchanged metadata. No other npm mutation occurred.
+
+### Next
+
+- Decide permanent rejection of only the obsolete Angular Aria stage.
+  Replacement workflow dispatch remains a separate gate.
+
+## 2026-07-28 — Obsolete core stage rejected
+
+### Completed
+
+- With Ricard's exact authorization, permanently rejected only core stage
+  `a748719f-7fe6-4c79-ac23-61e3ee8ffb25`.
+- Its authenticated stage view now returns `E404`. Core `0.4.1` remains
+  unpublished and `latest`/`next` remain `0.4.0`.
+- Base Angular stage `bd1e0399-d41a-405c-8b24-dcc9a63eb761` and Angular Aria
+  stage `de129160-ae80-4a15-8f43-dbc64a6f25fb` remain observable with
+  unchanged metadata. No other npm mutation occurred.
+
+### Next
+
+- Decide permanent rejection of only the obsolete base Angular stage. Angular
+  Aria rejection and replacement workflow dispatch remain separate gates.
+
+## 2026-07-28 — Obsolete npm stages reobserved
+
+### Completed
+
+- Restored authenticated npm access as `ricardrabasso`.
+- Exact authenticated views and downloads reproduce review 189's three stage
+  IDs, metadata, sizes, SHA-1 and SHA-512 values without registry mutation.
+- All three downloaded tarballs still differ from review 194's corrected
+  selected SHA-512 values. Core/base `0.4.1` and pilot `0.2.1` remain
+  unpublished.
+- Public `latest` and `next` aliases remain core/base `0.4.0` and pilot
+  `0.2.0`.
+
+### Next
+
+- Decide permanent rejection of only obsolete core stage
+  `a748719f-7fe6-4c79-ac23-61e3ee8ffb25`. Base/pilot rejection and replacement
+  workflow dispatch remain separate gates.
+
+## 2026-07-28 — Review 194 evidence delivered
+
+### Completed
+
+- PR #24 merged exact head `e1afca6` as protected `develop@4a244b9`.
+- Required run `30339984396`, job `90213156210`, passed in 5m06s; post-merge
+  run `30345205617`, job `90229681030`, passed in 4m06s.
+- Exact `main@028a98c` remains the merge base and ancestor of `develop`;
+  corrected selected candidate evidence and npm remain unchanged.
+
+### Next
+
+- Ricard runs `npm login`. Then reobserve all three stage lists and candidate
+  hashes read-only before deciding rejection of only the obsolete core stage.
+
 ## 2026-07-28 — Corrected protected-main candidates selected
 
 ### Completed

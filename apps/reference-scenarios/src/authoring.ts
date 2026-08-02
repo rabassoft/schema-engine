@@ -24,6 +24,7 @@ const FEATURES: ReadonlySet<ReferenceFeature> = new Set([
   'advanced-layout',
   'recursive-local-presentation',
   'nullable-leaves',
+  'semantic-formats',
 ]);
 
 const SCENARIO_MEMBERS = Object.freeze([

@@ -2,7 +2,31 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { json } from '@codemirror/lang-json';
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import { tags } from '@lezer/highlight';
 import { basicSetup, EditorView } from 'codemirror';
+
+const standardJsonSyntaxTheme = syntaxHighlighting(
+  HighlightStyle.define([
+    {
+      tag: [tags.string, tags.special(tags.string)],
+      color: 'var(--syntax-string)',
+    },
+    {
+      tag: [tags.number, tags.bool, tags.null],
+      color: 'var(--syntax-literal)',
+    },
+    {
+      tag: tags.propertyName,
+      color: 'var(--syntax-property)',
+    },
+    {
+      tag: tags.invalid,
+      color: 'var(--danger)',
+      textDecoration: 'underline',
+    },
+  ]),
+);
 
 export interface StandardJsonEditorOptions {
   readonly host: HTMLElement;
@@ -30,6 +54,7 @@ export class StandardJsonEditor {
       extensions: [
         basicSetup,
         json(),
+        standardJsonSyntaxTheme,
         EditorView.lineWrapping,
         EditorView.contentAttributes.of(attributes),
         EditorView.updateListener.of((update) => {

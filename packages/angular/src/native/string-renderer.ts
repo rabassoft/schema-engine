@@ -50,7 +50,7 @@ import {
         </details>
       }
       <input
-        type="text"
+        [type]="inputType()"
         [id]="ids().control"
         [formField]="controlField"
         [placeholder]="texts().placeholder ?? ''"
@@ -122,6 +122,13 @@ export class SchemaStringRendererComponent implements AngularFieldRenderer {
   protected readonly ariaInvalid = computed(() =>
     this.snapshot().showIssues && !this.snapshot().valid ? 'true' : null,
   );
+  protected readonly inputType = computed(() => {
+    const field = this.field();
+    if (field.kind !== 'string') return 'text';
+    if (field.format === 'email') return 'email';
+    if (field.format === 'date') return 'date';
+    return 'text';
+  });
   protected readonly confirmedNull = computed(() => {
     const presence = this.snapshot().presence;
     return (

@@ -1491,9 +1491,15 @@ function invalidDefinitionOption(
       ...(defect.member === undefined
         ? {}
         : { definitionMember: defect.member }),
+      ...(defect.expected === undefined
+        ? {}
+        : { definitionExpected: defect.expected }),
       ...(defect.actualType === undefined
         ? {}
         : { definitionActualType: defect.actualType }),
+      ...(Object.hasOwn(defect, 'actualValue')
+        ? { definitionActualValue: defect.actualValue }
+        : {}),
       ...(defect.members === undefined
         ? {}
         : { definitionMembers: Object.freeze([...defect.members]) }),

@@ -95,6 +95,12 @@ function createConsumer(label, pilot, packageSpecifiers, workspacePackage) {
       build: 'ng build --configuration production',
       e2e: 'playwright test',
     },
+    pnpm: {
+      overrides: {
+        '@emnapi/core': '2.0.0-alpha.3',
+        '@emnapi/runtime': '2.0.0-alpha.3',
+      },
+    },
     dependencies: {
       ...angular,
       ...(pilot

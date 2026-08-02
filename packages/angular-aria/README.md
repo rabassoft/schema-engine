@@ -4,21 +4,21 @@ Angular Aria 22 presentation-container pilot for Schema Engine.
 
 ## Delivery status
 
-- Public verified Experimental `0.2.0` is available exactly and under both
-  `next` and `latest` during the planned dependent-first transition.
-- Source package manifest: proposed metadata-only `0.2.1`; it is not generated,
-  staged or public. Verified public `0.2.0` remains the installable line and is
-  identical to the clean candidate selected from commit `07755b4c`.
-- Its proposed base source is
-  `@rabassoft/schema-engine-angular@0.4.1`, while the preserved packed peer
-  floor remains `^0.4.0`; neither proposed version is live.
+- Public verified Experimental `0.2.1` is available exactly and under `next`
+  from protected commit `028a98c`, with repository-backed npm provenance.
+- `next`, `latest` and unqualified installs resolve the same verified `0.2.1`.
+  Core/base defaults both resolve `0.4.1`, completing coordinated M23 routing.
+- Its required base `@rabassoft/schema-engine-angular@0.4.1` is now public under
+  exact, `next`, `latest` and unqualified resolution, while the preserved
+  packed peer floor remains `^0.4.0`; pilot `0.2.1` is public through the same
+  routes.
 - API classification: Public + Experimental + Active.
 - The only root API is `provideSchemaEngineAngularAriaContainers()`; the only
   style entry point is the explicit `./styles.css` export.
 - PLAN-021 completed publication and verification; it authorizes no later
   registry, repository or Git action.
-- Recommended channel: exact `0.2.0`, `next` or `latest`. Exact, tagged and
-  unqualified M21 consumers pass; routing never implies Stable.
+- Recommended M23 channel: exact `0.2.1`, `next` or `latest`. Routing never
+  implies Stable.
 
 The coordinated M19 exact fallback remains
 `@rabassoft/schema-engine-angular-aria@0.1.0` with
@@ -88,6 +88,7 @@ support SLA is represented by this package.
 
 Preferred TypeScript source is included in `src/`; see `SOURCE.md`. The
 sanitized repository is public at `https://github.com/rabassoft/schema-engine`.
-The proposed `0.2.1` source metadata names that repository, but npm provenance
-is not claimed until a later stage-only trusted publication is approved and
-verified. Existing `0.2.0` has no retroactive repository/provenance claim.
+Public `0.2.1` carries verified npm provenance bound to
+`rabassoft/schema-engine`, `.github/workflows/npm-publish.yml` and protected
+commit `028a98c`. Existing `0.2.0` has no retroactive repository/provenance
+claim.

@@ -12,6 +12,7 @@ import type {
   ValidationIssue,
   ValidationResult,
 } from '@rabassoft/schema-engine';
+import { selectedFormats } from './formats.js';
 
 const EMPTY_ISSUES = Object.freeze([]) as readonly ValidationIssue[];
 
@@ -19,9 +20,13 @@ export function createAjvSchemaValidator(): SchemaValidator {
   const ajv = new Ajv2020({
     addUsedSchema: false,
     allErrors: true,
+    logger: false,
     strict: false,
-    validateFormats: false,
+    validateFormats: true,
   });
+  for (const format of ['email', 'date', 'date-time'] as const) {
+    ajv.addFormat(format, selectedFormats[format]);
+  }
   const objectCache = new WeakMap<object, ValidateFunction>();
   let trueSchema: ValidateFunction | undefined;
   let falseSchema: ValidateFunction | undefined;

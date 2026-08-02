@@ -24,6 +24,12 @@ describe('StandardJsonEditor', () => {
         ?.getAttribute('aria-label'),
     ).toBe('JSON Schema editor');
     expect(host.querySelector('.cm-lineNumbers')).not.toBeNull();
+    expect(
+      Array.from(host.querySelectorAll('.cm-content span')).some(
+        ({ className, textContent }) =>
+          className.length > 0 && textContent === '"type"',
+      ),
+    ).toBe(true);
 
     editor.setValue('{}');
     expect(editor.getValue()).toBe('{}');

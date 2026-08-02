@@ -520,7 +520,9 @@ Cada decisión debe registrar:
 
 ## D-036: Const y presentación de valores fijos
 
-- **Estado:** Deferred
+- **Estado:** Promoted only for the bounded M25 primitive fixed-presentation
+  slice accepted in review 218; every broader readonly/hidden/const policy
+  remains Deferred
 - **Pregunta:** ¿Debe `const` producir una presentación fixed, readonly, hidden
   o ningún renderer?
 - **Motivo:** La assertion de datos no determina por sí sola la interacción ni
@@ -529,10 +531,24 @@ Cada decisión debe registrar:
   se defina quién controla su presencia y visualización.
 - **Documento esperado:** ADR de semántica normalizada y presentación de
   valores fijos.
+- **Revisión de preparación M25:** review 218 ciclo 1 encuentra viable un slice
+  primitivo acotado y recomienda una presentación fija estática que muestra el
+  valor controlado real, no emite operaciones y conserva Ajv como autoridad de
+  assertion. Ricard aceptó esa decisión y el rechazo temprano de contradicción
+  `const`/string-`enum` el 1 de agosto de 2026.
+- **Arquitectura:** ADR-028 revision 0, ADR-005 revision 6 y ADR-022 revision 3
+  están Accepted tras review 219 ciclo 2 sin hallazgos.
+- **Contrato observable:** SPEC-011 v0.1.0 está Accepted tras review 220 ciclo
+  4 sin hallazgos.
+- **Entrega autorizada:** PLAN-027 revision 0 está Approved tras review 221
+  ciclo 6 sin hallazgos y autoriza solo sus checkpoints 1–6. El alcance
+  restante sigue inactivo.
 
 ## D-037: Format y renderers semánticos especializados
 
-- **Estado:** Deferred
+- **Estado:** Implemented only for the bounded M24
+  `email`/`date`/`date-time` increment; every other format and policy remains
+  Deferred
 - **Pregunta:** ¿Qué formatos se soportan y cuáles actúan como annotation,
   assertion o hint de presentación?
 - **Motivo:** ADR-005 trata `format` como anotación ignorada; cambiarlo requiere
@@ -540,6 +556,13 @@ Cada decisión debe registrar:
 - **Retomar cuando:** Exista un caso consumidor concreto para un formato y se
   defina su vocabulario, validación y fallback visual.
 - **Documento esperado:** ADR que revise explícitamente ADR-005.
+- **Promoción M24 aceptada:** review 209 ciclo 1 pasó sin hallazgos y promueve
+  únicamente normalización neutral, assertion oficial Ajv y proyección
+  Angular/Standard de los tres formatos seleccionados.
+- **Arquitectura y contrato:** ADR-027 revision 0, coordinada con ADR-005
+  revision 5 y ADR-022 revision 2, y SPEC-010 v0.1.0 están Accepted tras
+  reviews 210–211 sin hallazgos. PLAN-026 revision 0 está Completed tras review
+  217 ciclo 4; no activa ningún otro formato o política D-037.
 
 ## D-038: Utilidad para confirmar un scope en el baseline
 
@@ -780,11 +803,11 @@ Cada decisión debe registrar:
 
 ## D-043: Publicación del repositorio y automatización segura de releases
 
-- **Estado:** Promoted for M23 delivery; ADR-026 revision 1 and
+- **Estado:** Promoted and completed for M23 delivery; ADR-026 revision 1 and
   coordinated ADR-018 revision 7 are Accepted after review 179 cycle 2.
   Completed PLAN-024/review 177 deliver M22 repository sanitization,
   publication, governance, protected controls and fail-closed workflow
-  preparation. PLAN-025 revision 0 is Approved after review 180 cycle 2;
+  preparation. PLAN-025 revision 0 was Approved after review 180 cycle 2;
   checkpoints 1–6 are complete after reviews 181–186. Review 186 cycle 5
   verifies the complete read-only preflight with all three trust lists empty
   and zero findings. Checkpoint 7 configures and post-observes all three
@@ -803,8 +826,37 @@ Cada decisión debe registrar:
   `develop@ed1cd2d`; PR #22 promotes it as protected `main@028a98c` and PR #23
   reconciles it as `develop@0933924`, with all required/post-merge CI passing.
   Review 194 cycle 3 selects corrected deterministic candidates from exact
-  protected `main` with zero findings; stage rejection, replacement staging,
-  approvals, provenance release and backup deletion remain gated
+  protected `main` with zero findings. Reviews 195–196 verify replacement
+  staging after rejection of the obsolete stages. Review 197 cycle 2 completes
+  core checkpoint 9, review 198 cycle 1 completes base checkpoint 10 and review
+  199 cycle 2 completes pilot checkpoint 11: the full M23 line is public under
+  `next` with exact provenance. Review 200 cycle 1 passes checkpoint 12's
+  read-only pilot-`latest` preflight. Review 201 cycle 1 corrects three stale
+  documentation/policy claims, cycle 2 corrects two final current-state claims
+  and cycle 3 verifies the intended pilot alias already active without
+  repeating the mutation; base/core aliases, token restrictions and backup
+  deletion remain gated. Review 202 cycles 1–2 corrects two stale
+  release/current-state claims and cycle 3 repeats the separately executed base
+  Angular alias and exact-byte review with zero findings; core, tokens and
+  backup deletion remain gated. Review 203 cycles 1–2 corrects four stale
+  onboarding/review/current-state claims and cycle 3 repeats the separately
+  executed core alias, coordinated default routing, signatures/attestations and
+  all eight consumer invocations with zero findings; token restrictions and
+  backup deletion remain gated. Review 204 cycle 3 then verifies all three
+  public package policies, exact stage-only trusted publishers, account 2FA and
+  zero tokens without mutation or findings; the three stronger package-policy
+  changes remain separately gated. Review 205 cycle 1 then verifies only the
+  core stronger policy, unchanged trust/access/aliases, zero tokens and
+  unchanged Angular policies with zero findings; base and pilot remain
+  separately gated. Review 206 cycle 2 then verifies core/base strict policies,
+  unchanged trust/access/aliases, zero tokens and unchanged pilot policy with
+  zero findings; only the pilot remains separately gated. Review 207 cycle 1
+  then verifies all three strict policies, unchanged trust/access/aliases and
+  zero tokens with zero findings, completing checkpoint 15. Review 208 cycle 1
+  corrects four final verification findings, cycle 2 corrects final Approved
+  wording, cycle 3 corrects the final public-tree evidence and cycle 4 repeats
+  the complete
+  closure with zero findings, completing PLAN-025 revision 0 and M23
 - **Pregunta:** ¿Cuándo y cómo sanear/publicar GitHub y activar metadata pública,
   trusted publishing OIDC, staged approval, restricciones de tokens y
   provenance verificable?
@@ -847,7 +899,7 @@ Cada decisión debe registrar:
   publisher stage-only, aprobaciones 2FA por paquete y provenance automática.
   [`ADR-026 revision 1`](../adrs/026-public-repository-and-secure-releases.md) y
   [`ADR-018 revision 7`](../adrs/018-licencia-dual-publicacion-experimental.md)
-  quedan Accepted tras review 179 ciclo 2. PLAN-025 revisión 0 queda Approved
+  quedan Accepted tras review 179 ciclo 2. PLAN-025 revisión 0 quedó Approved
   tras review 180 ciclo 2; checkpoints 1–3 quedan completos tras reviews
   181–183 ciclo 2. Checkpoint 4 entrega PR #13 a `develop@39a0d60`, pasa CI
   requerida/post-merge y review 184 ciclo 1, y produce candidatos limpios
@@ -872,8 +924,15 @@ Cada decisión debe registrar:
   `develop@ed1cd2d`; PR #22 promueve a `main@028a98c` y PR #23 reconcilia a
   `develop@0933924`, con todas las CI requeridas/post-merge superadas. Review
   194 ciclo 3 selecciona desde ese `main` los bytes deterministas corregidos
-  sin hallazgos. El rechazo de los stages obsoletos y todo npm posterior
-  permanecen gated.
+  sin hallazgos. Ricard rechaza por separado los tres stages obsoletos; reviews
+  195–196 verifican el reemplazo exacto. Review 197 ciclo 2 verifica core
+  `0.4.1` público bajo `next`; review 198 ciclo 1 verifica base `0.4.1`, peer,
+  firma, provenance y consumidores exactos. Review 199 ciclo 2 verifica piloto
+  `0.2.1`, contrato, provenance y matriz exact/`next`; aliases, tokens y demás
+  acciones permanecen gated. Review 200 ciclo 1 pasa el preflight read-only de
+  `latest` piloto sin mutación. Review 201 ciclo 1 corrige tres afirmaciones
+  documentales/políticas obsoletas, ciclo 2 corrige dos resúmenes finales y
+  ciclo 3 verifica después el alias piloto ya activo y el estado mixto exacto.
 
 ## D-044: Plataforma multi-framework de referencia, consumo y demostración
 
@@ -1003,9 +1062,10 @@ Cada decisión debe registrar:
 
 1. **M22 repository delivery:** PLAN-024 y checkpoints 1–9 están canónicamente
    completados tras review 177 ciclo 3 y PRs protegidas #9–#11.
-2. **M23 design:** review 178 option A y las revisiones Accepted ADR-026 r1 /
-   ADR-018 r7 fijan el PATCH stage-only. El siguiente gate es preparar y revisar
-   PLAN-025; implementación, npm y el backup privado permanecen gated.
+2. **M23 delivery:** PLAN-025 revisión 0 y M23 están Completed tras review 208
+   ciclo 4. Core/base `0.4.1` y piloto `0.2.1` están verificados exactos y
+   mediante `next`, `latest` y resolución unqualified, con provenance y
+   políticas estrictas. Otra release y el backup privado permanecen gated.
 3. **M20 delivery:** SPEC-009 v0.1.0 y PLAN-022 revisión 0 permanecen
    Completed tras review 144 ciclo 3; constituyen el contrato/comportamiento que
    M21 pretende entregar sin ampliarlo.
@@ -1016,9 +1076,9 @@ Cada decisión debe registrar:
 5. **M18 delivery:** SPEC-008 v0.1.0 y ADR-023/ADR-024 permanecen Accepted;
    PLAN-020 revisión 0 y M18 están Completed tras review 113 ciclo 2 sin
    hallazgos.
-6. **D-043:** M22 está completado y M23 tiene diseño normativo Accepted.
-   PLAN-025, metadata npm y la primera release OIDC/provenance requieren sus
-   gates posteriores.
+6. **D-043:** el slice promovido está completado por M22/PLAN-024 y
+   M23/PLAN-025. Publicación OIDC/provenance, aliases coordinados y restricciones
+   de tokens están verificados.
 7. **D-045:** conserva Angular legacy como trabajo futuro sin versión mínima ni
    familia de artefactos seleccionada.
 8. **D-046/M16:** checkpoints 1–8 y el prerrequisito M17 están completos;

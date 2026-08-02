@@ -19,9 +19,10 @@
   exact, under `next`/`latest` and through unqualified resolution.
 - [M23 stage-only metadata release notes](./releases/0.4.1.md) — deterministic
   clean protected-`main` candidates selected for core/base `0.4.1` and pilot
-  `0.2.1`; corrected exact source is `028a98c`. Three obsolete stages exist but
-  remain blocked on gzip byte drift; stage rejection, replacement staging,
-  publication and live provenance remain unclaimed.
+  `0.2.1`; corrected exact source is `028a98c`. The three obsolete stages are
+  rejected; all three replacements are public exactly and under `next`, with
+  verified live provenance. Pilot `latest` resolves `0.2.1`; core/base
+  `latest` resolve `0.4.1`, completing coordinated M23 default routing.
 
 ## Specifications
 
@@ -52,9 +53,113 @@
 - [SPEC-009 v0.1.0: Recursive Local Presentation Layout](./specs/009-recursive-local-presentation-layout.md)
   — Accepted after review 135 cycle 6 passed all fourteen areas with zero
   findings; completed PLAN-022 implements its 27-row M20 boundary.
+- [SPEC-010 v0.1.0: Semantic String Formats](./specs/010-semantic-string-formats.md)
+  — Accepted after review 211 cycle 2; PLAN-026 implements only the bounded
+  `email`, `date` and `date-time` D-037/M24 slice.
+- [SPEC-011 v0.1.0: Primitive Const and Fixed Presentation](./specs/011-primitive-const-fixed-presentation.md)
+  — Accepted after review 220 cycle 4 for the bounded D-036/M25 slice;
+  PLAN-027 revision 0 is now separately Approved for checkpoints 1–6.
 
 ## Acceptance reviews
 
+- [Standard reference visual parity review](./reviews/229-standard-reference-visual-parity-review.md)
+  — Cycle 1 corrects dark JSON syntax contrast; cycle 2 verifies four
+  first-level disclosures and dark JSON/code selection with zero findings.
+- [Angular scenario controls review](./reviews/228-angular-scenario-controls-review.md)
+  — Cycle 1 rebuilds a stale internal scenario artifact; cycle 2 verifies the
+  labelled Role sentinel and persistent advanced-tab visual state with zero
+  findings.
+- [Angular dark editor selection review](./reviews/227-angular-dark-editor-selection-review.md)
+  — Cycle 1 corrects a brittle CSS regression assertion; cycle 2 verifies dark
+  JSON and code selection contrast with zero findings.
+- [Angular Schemas disclosure review](./reviews/226-angular-schemas-disclosure-review.md)
+  — Cycle 1 verifies default-open and independent collapsible behavior for the
+  promoted first-level Schemas region, with zero findings.
+- [Angular reference workspace alignment review](./reviews/225-angular-reference-workspace-alignment-review.md)
+  — Cycle 1 verifies that Interactive consumer and Schemas are independent
+  sibling regions matching the Standard composition, with zero findings.
+- [Angular reference disclosures UX review](./reviews/224-angular-reference-disclosures-ux-review.md)
+  — Cycle 1 verifies vertical tab overflow removal and default-open,
+  accessible collapsible behavior for all three primary groups with zero
+  findings.
+- [Angular reference tabs UX review](./reviews/223-angular-reference-tabs-ux-review.md)
+  — Cycle 1 verifies the joined tab/panel hierarchy, Schema control placement,
+  light/dark presentation and unchanged accessible interaction with zero
+  findings.
+- [PLAN-027 checkpoint 1 core review](./reviews/222-plan-027-checkpoint-1-core-review.md)
+  — Cycles 1–4 correct a stale fixture, defensive traversal, review formatting
+  and two explicit conformance mappings; cycle 5 verifies the complete core
+  checkpoint with zero findings.
+- [PLAN-027 complete review](./reviews/221-plan-027-review.md) — Six findings
+  were corrected; cycle 6 passes all sixteen areas and accepted-state
+  reconciliation with zero findings and
+  approves only checkpoints 1–6.
+- [SPEC-011 complete review](./reviews/220-spec-011-review.md) — Eight findings
+  were corrected; cycle 4 repeats all seventeen areas and accepted-state
+  reconciliation with zero findings.
+- [D-036/M25 primitive const promotion readiness](./reviews/218-d036-m25-const-promotion-readiness.md)
+  — Cycle 1 promotes the bounded primitive slice after Ricard accepts fixed
+  presentation and the closed `const`/string-`enum` coherence rule.
+- [ADR-028 complete review](./reviews/219-adr-028-review.md) — Cycle 2 accepts
+  ADR-028 revision 0 with ADR-005 revision 6 and ADR-022 revision 3 after all
+  fourteen areas pass with zero findings.
+- [PLAN-026 checkpoint 4 reference review](./reviews/216-plan-026-checkpoint-4-reference-review.md)
+  — Cycle 5 repeats shared catalog, shell unit/build/boundary and both complete
+  Chromium suites with zero findings.
+- [PLAN-026 checkpoint 3 target review](./reviews/215-plan-026-checkpoint-3-target-review.md)
+  — Cycle 1 verifies independent Angular/Standard native projection with zero
+  findings.
+- [PLAN-026 checkpoint 2 validator review](./reviews/214-plan-026-checkpoint-2-validator-review.md)
+  — Cycle 3 verifies the attributed ESM subset, pinned conformance oracle and
+  browser bundles with zero findings.
+- [PLAN-026 checkpoint 1 core review](./reviews/213-plan-026-checkpoint-1-core-review.md)
+  — Cycle 1 verifies the Public neutral contract and compiler with zero
+  findings.
+- [PLAN-025 checkpoint 16 final review](./reviews/208-plan-025-checkpoint-16-final-review.md)
+  — Cycle 1 corrects four final reproducibility, verifier, audit and historical
+  policy findings; cycles 2–3 correct final documentation and cycle 4 repeats
+  the complete M23 matrix with zero findings and completes PLAN-025/M23.
+- [PLAN-025 checkpoint 15 pilot token-policy review](./reviews/207-plan-025-checkpoint-15-pilot-token-policy-review.md)
+  — Cycle 1 verifies all three strict package policies, exact stage-only trust,
+  public access, zero tokens and unchanged aliases with zero findings.
+- [PLAN-025 checkpoint 14 core-latest transition review](./reviews/203-plan-025-checkpoint-14-transition-review.md)
+  — Cycles 1–2 correct four stale onboarding/review/current-state claims; cycle
+  3 repeats the exact-byte, coordinated-alias, signature/attestation and eight
+  consumer-invocation review with zero findings.
+- [PLAN-025 checkpoint 13 base-latest transition review](./reviews/202-plan-025-checkpoint-13-transition-review.md)
+  — Cycles 1–2 correct two stale release/current-state claims; cycle 3 repeats
+  the exact base Angular `latest`, unchanged-alias and mixed-window review with
+  zero findings.
+- [PLAN-025 checkpoint 12 pilot-latest transition review](./reviews/201-plan-025-checkpoint-12-transition-review.md)
+  — Cycles 1–2 correct five stale documentation/policy and current-state
+  claims; cycle 3 reconciles the already-arrived authorized target without
+  repeating the mutation, verifies exact pilot `latest` bytes and preserves
+  unchanged core/base aliases with zero findings.
+- [PLAN-025 checkpoint 12 pilot-latest pre-transition review](./reviews/200-plan-025-checkpoint-12-pre-transition-review.md)
+  — Cycle 1 passes identity, exact bytes, signatures/provenance, aliases,
+  package contract, applicable consumers, recovery and external-boundary areas
+  with zero findings; the pilot alias mutation remains separately gated.
+- [PLAN-025 checkpoint 11 pilot approval review](./reviews/199-plan-025-checkpoint-11-pilot-approval-review.md)
+  — Cycle 1 corrects explicit-release invocation and transitive strict-peer
+  drift in the ephemeral consumer harness; cycle 2 verifies exact pilot bytes,
+  packed contract, signature, provenance and all exact/`next` native/pilot
+  consumers with zero findings.
+- [PLAN-025 checkpoint 10 base approval review](./reviews/198-plan-025-checkpoint-10-base-approval-review.md)
+  — Cycle 1 verifies exact live base bytes, packed peers, signature, provenance,
+  repository, source, channels and exact/`next` native consumers with zero
+  findings; the pilot remains a separately gated stage.
+- [PLAN-025 checkpoint 9 core approval review](./reviews/197-plan-025-checkpoint-9-core-approval-review.md)
+  — Cycle 1 corrects stale pre-publication documentation policy; cycle 2
+  verifies exact live core bytes, signature, provenance, repository, source,
+  channels and exact/`next` consumers with zero findings.
+- [PLAN-025 checkpoint 8 replacement staged-byte review](./reviews/196-plan-025-checkpoint-8-replacement-staged-byte-review.md)
+  — Cycle 1 verifies the exact run, three downloaded replacement stages,
+  selected-byte identity, source, licenses, security and unchanged live
+  registry with zero findings; review 197 subsequently completes core approval.
+- [PLAN-025 checkpoint 8 replacement pre-dispatch review](./reviews/195-plan-025-checkpoint-8-replacement-pre-dispatch-review.md)
+  — Cycle 2 reobserves exact protected source, workflow, environment, three
+  stage-only trust relations, reproduced candidates and empty registry after
+  obsolete-stage rejection; the replacement dispatch remains separately gated.
 - [R189-F01 protected-main reselection](./reviews/194-r189-f01-protected-main-reselection-review.md)
   — Cycle 1 corrects the isolated browser setup; cycle 2 corrects a broad
   stale-action guard match; cycle 3 verifies protected
@@ -81,8 +186,9 @@
   complete local correction review with zero findings;
   protected delivery and all stage mutations remain separately gated.
 - [PLAN-025 checkpoint 8 staged-byte review](./reviews/189-plan-025-checkpoint-8-staged-byte-review.md)
-  — Cycle 1 blocks on macOS/Linux gzip byte drift; three stages remain
-  unapproved and unrejected.
+  — Cycle 1 blocked on macOS/Linux gzip byte drift; its three stages were later
+  rejected separately after deterministic correction and protected-main
+  reselection.
 - [PLAN-025 checkpoint 8 pre-dispatch review](./reviews/188-plan-025-checkpoint-8-pre-dispatch-review.md)
   — Cycle 2 passes protected source, workflow, environment, trust, candidate
   and empty-registry verification with zero findings; dispatch remains gated.
@@ -634,9 +740,9 @@
   corrected final closure after review 177 cycle 3. Future package metadata,
   OIDC/provenance and backup deletion remain separately gated.
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
-  — Accepted revision 3; adds only the reviewed D-041 `$defs`/local `$ref`
-  normative contract; SPEC-004 v0.1.1 and completed PLAN-011 implement that
-  narrow slice.
+  — Accepted revision 6; its successive bounded revisions coordinate local
+  references, nullable primitives, semantic string formats and primitive
+  `const` without widening the compiler beyond their accepted gates.
 - [ADR-017: Static neutral presentation groups](./adrs/017-grupos-presentacion-estaticos.md)
   — Accepted revision 0 for D-042 after review 023 cycle 3 passed all eight
   areas with zero findings; SPEC-005 and completed PLAN-012 implement it.
@@ -716,7 +822,9 @@
 - [PLAN-022: Recursive local presentation layout](./plans/022-recursive-local-presentation-layout.md) — Completed revision 0 after final review 144 cycle 3 repeated the complete frozen matrix and all 27 rows with zero findings
 - [PLAN-023: Coordinated Experimental M20 delivery](./plans/023-coordinated-experimental-0-4-release.md) — Completed revision 0 after final review 164 cycle 3 repeated the complete release matrix and all 27 SPEC-009 rows with zero findings
 - [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Completed revision 0 after review 177 cycle 3 repeated the corrected final closure with zero unresolved findings
-- [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Approved revision 0; checkpoints 1–7 completed after reviews 181–187
+- [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Completed revision 0 after final review 208 cycle 4 repeated the complete M23 matrix with zero findings
+- [PLAN-026: Semantic string formats](./plans/026-semantic-string-formats.md) — Completed revision 0 after final review 217 cycle 4 repeated the complete applicable matrix with zero findings
+- [PLAN-027: Primitive const and fixed presentation](./plans/027-primitive-const-fixed-presentation.md) — Approved revision 0 after review 221 cycle 6 passed all sixteen areas and accepted-state reconciliation with zero findings; checkpoint 1 is complete after review 222 cycle 5
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and
@@ -734,10 +842,9 @@ AGPL/commercial licensing and select a sanitized public-history transition.
 The sanitized repository is public and PLAN-024/M22 completed its governance,
 GitHub controls and fail-closed secure-release preparation after review 177.
 M23's stage-only metadata/provenance PATCH design is Accepted after review 179;
-PLAN-025 revision 0 is Approved after review 180 and authorizes local
-checkpoints plus separately gated protected delivery. Checkpoint 8's
-pre-dispatch gate passes after review 188 cycle 2; exact run `30304490264`
-creates three stages, but review 189 blocks them on gzip byte drift.
+PLAN-025 revision 0 and M23 are Completed after review 208 cycle 4 repeats the
+complete exact-byte, provenance, policy, consumer and local matrix with zero
+findings.
 Completed PLAN-013 published and verified core and Angular `0.1.0` without
 promoting Stable APIs.
 

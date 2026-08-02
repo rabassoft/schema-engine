@@ -9,3 +9,5 @@
 7. [SPEC-007: Reusable Synchronous Ajv Validator](./007-synchronous-ajv-validator.md) — **Accepted 0.1.0 after review 084 cycle 1 passed all twelve areas with zero findings; completed PLAN-019 revision 1 implements it privately.**
 8. [SPEC-008: Static Advanced Presentation Layout and Angular Container Pilot](./008-static-advanced-presentation-layout.md) — **Accepted 0.1.0 after review 102 cycle 5 passed all twelve areas with zero findings; PLAN-020 revision 0 is now Approved after review 103 cycle 2.**
 9. [SPEC-009: Recursive Local Presentation Layout](./009-recursive-local-presentation-layout.md) — **Accepted 0.1.0 and implemented by completed PLAN-022 after final review 144 cycle 3 repeated all 27 rows with zero findings.**
+10. [SPEC-010: Semantic String Formats](./010-semantic-string-formats.md) — **Accepted 0.1.0 after review 211 cycle 2; Approved PLAN-026 revision 0 authorizes the bounded M24 implementation.**
+11. [SPEC-011: Primitive Const and Fixed Presentation](./011-primitive-const-fixed-presentation.md) — **Accepted 0.1.0 after review 220 cycle 4; only PLAN-027 preparation/review is authorized.**

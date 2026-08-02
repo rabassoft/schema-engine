@@ -26,6 +26,7 @@ import { nullablePreferences } from './scenarios/nullable-preferences.js';
 import { presentationSections } from './scenarios/presentation-sections.js';
 import { recursiveLocalPresentation } from './scenarios/recursive-local-presentation.js';
 import { stableTeam } from './scenarios/stable-team.js';
+import { semanticContact } from './scenarios/semantic-contact.js';
 
 export const referenceScenarios = defineReferenceCatalog([
   controlledPrimitives,
@@ -36,4 +37,5 @@ export const referenceScenarios = defineReferenceCatalog([
   nullablePreferences,
   advancedPresentation,
   recursiveLocalPresentation,
+  semanticContact,
 ]);
