@@ -14,6 +14,9 @@ export const referenceSnippets = Object.freeze({
     '  locale: this.locale,',
     '  validationVisibility: this.validationVisibility,',
     '  validator: this.validator,',
+    '  ...(this.asyncValidator === undefined',
+    '    ? {}',
+    '    : { asyncValidator: this.asyncValidator.validator }),',
     '});',
   ].join('\n'),
   'standard-runtime-subscriptions': [
@@ -66,6 +69,7 @@ export const referenceSnippets = Object.freeze({
     'this.unsubscribeOperations = undefined;',
     'this.runtime?.dispose();',
     'this.runtime = undefined;',
+    'this.asyncValidator = undefined;',
   ].join('\n'),
 });
 

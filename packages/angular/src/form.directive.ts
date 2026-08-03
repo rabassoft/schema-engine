@@ -235,6 +235,10 @@ export class SchemaFormDirective<TData extends object> {
     return this.runAction('hideValidationErrors', scopeId);
   }
 
+  retryAsyncValidation(): RuntimeActionResult {
+    return this.runAction('retryAsyncValidation');
+  }
+
   getValidationSnapshot(scope?: FormScope): ValidationSnapshot | undefined {
     const result = this.runtime?.getValidationSnapshot(scope);
     if (result !== undefined) this.reportDiagnostics(result.diagnostics);
@@ -254,7 +258,8 @@ export class SchemaFormDirective<TData extends object> {
       previous.formId !== config.formId ||
       previous.definition !== config.definition ||
       previous.schema !== config.schema ||
-      previous.validator !== config.validator
+      previous.validator !== config.validator ||
+      previous.asyncValidator !== config.asyncValidator
     ) {
       this.replaceRuntime(config, locale);
       return;
@@ -326,7 +331,8 @@ export class SchemaFormDirective<TData extends object> {
       | 'resetTouched'
       | 'setValidationVisibility'
       | 'showValidationErrors'
-      | 'hideValidationErrors',
+      | 'hideValidationErrors'
+      | 'retryAsyncValidation',
     first?: unknown,
     second?: unknown,
   ): RuntimeActionResult {
@@ -397,6 +403,9 @@ export class SchemaFormDirective<TData extends object> {
         break;
       case 'hideValidationErrors':
         result = this.runtime.hideValidationErrors(first as string);
+        break;
+      case 'retryAsyncValidation':
+        result = this.runtime.retryAsyncValidation();
         break;
     }
     this.reportDiagnostics(result.diagnostics);

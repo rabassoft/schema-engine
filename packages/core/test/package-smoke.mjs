@@ -1,15 +1,67 @@
 import assert from 'node:assert/strict';
+import * as packageRoot from '@rabassoft/schema-engine';
 import {
   applyFormOperation,
   applyOperation,
+  commitScopeToBaseline,
   compileFormDefinition,
   createControlledFormRuntime,
+  deriveSchemaDefaultCandidate,
 } from '@rabassoft/schema-engine';
 
 assert.equal(typeof compileFormDefinition, 'function');
 assert.equal(typeof applyOperation, 'function');
 assert.equal(typeof applyFormOperation, 'function');
 assert.equal(typeof createControlledFormRuntime, 'function');
+assert.equal(typeof commitScopeToBaseline, 'function');
+assert.equal(typeof deriveSchemaDefaultCandidate, 'function');
+assert.deepEqual(Object.keys(packageRoot).sort(), [
+  'applyFormOperation',
+  'applyOperation',
+  'commitScopeToBaseline',
+  'compileFormDefinition',
+  'createControlledFormRuntime',
+  'deriveSchemaDefaultCandidate',
+]);
+
+const defaultSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    profile: {
+      type: 'object',
+      properties: { name: { type: 'string', default: 'Ada' } },
+    },
+  },
+};
+const defaultInput = {};
+const defaultCandidate = deriveSchemaDefaultCandidate(
+  defaultSchema,
+  defaultInput,
+);
+assert.equal(defaultCandidate.success, true);
+assert.equal(defaultCandidate.changed, true);
+assert.deepEqual(defaultCandidate.value, { profile: { name: 'Ada' } });
+const defaultNoEffect = deriveSchemaDefaultCandidate(
+  defaultSchema,
+  defaultCandidate.value,
+);
+assert.equal(defaultNoEffect.success, true);
+assert.equal(defaultNoEffect.changed, false);
+assert.equal(defaultNoEffect.value, defaultCandidate.value);
+const defaultFailure = deriveSchemaDefaultCandidate(
+  {
+    ...defaultSchema,
+    properties: { value: { type: 'integer', default: 1.5 } },
+  },
+  defaultInput,
+);
+assert.equal(defaultFailure.success, false);
+assert.equal(defaultFailure.value, defaultInput);
+assert.equal(
+  defaultFailure.diagnostics[0]?.code,
+  'INVALID_SCHEMA_KEYWORD_VALUE',
+);
 
 const referencedSchema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -34,6 +86,19 @@ if (result.success) {
     result.definition.nodes[0],
   );
   assert.equal(Object.isFrozen(result.definition.presentation), true);
+
+  const confirmed = commitScopeToBaseline(
+    result.definition,
+    { profile: { address: 'before' }, unmanaged: 'baseline' },
+    { profile: { address: 'after' }, unmanaged: 'current' },
+    { id: 'profile', paths: [['profile', 'address']] },
+  );
+  assert.equal(confirmed.success, true);
+  assert.equal(confirmed.changed, true);
+  assert.deepEqual(confirmed.value, {
+    profile: { address: 'after' },
+    unmanaged: 'baseline',
+  });
 }
 
 const advancedResult = compileFormDefinition({
@@ -124,6 +189,220 @@ assert.equal(
 );
 assert.equal(Object.isFrozen(fixedResult.definition.fields[0]), true);
 
+const composedSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  $defs: {
+    contact: {
+      type: 'object',
+      properties: { email: { type: 'string' } },
+    },
+  },
+  allOf: [
+    { $ref: '#/$defs/contact' },
+    {
+      type: 'object',
+      properties: { displayName: { type: 'string' } },
+      required: ['email', 'displayName'],
+    },
+  ],
+};
+const composedResult = compileFormDefinition({ schema: composedSchema });
+assert.equal(composedResult.success, true);
+if (!composedResult.success)
+  throw new Error('Static object composition compilation failed');
+assert.deepEqual(
+  composedResult.definition.fields.map(({ name, required }) => ({
+    name,
+    required,
+  })),
+  [
+    { name: 'email', required: true },
+    { name: 'displayName', required: true },
+  ],
+);
+const conflictingComposition = compileFormDefinition({
+  schema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    allOf: [
+      {
+        type: 'object',
+        properties: { value: { type: 'string' } },
+      },
+      {
+        type: 'object',
+        properties: { value: { type: 'number' } },
+      },
+    ],
+  },
+});
+assert.equal(conflictingComposition.success, false);
+assert.equal(
+  conflictingComposition.diagnostics[0]?.code,
+  'INCOMPATIBLE_SCHEMA_COMPOSITION',
+);
+
+const conditionalSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    active: { type: 'boolean' },
+    visibleTarget: { type: 'string' },
+    enabledTarget: { type: 'string' },
+  },
+};
+const conditionalResult = compileFormDefinition({
+  schema: conditionalSchema,
+  uiSchema: {
+    fields: {
+      visibleTarget: {
+        visibleWhen: { path: ['active'], equals: true },
+      },
+      enabledTarget: {
+        enabledWhen: { path: ['active'], equals: true },
+      },
+    },
+  },
+});
+assert.equal(conditionalResult.success, true);
+if (!conditionalResult.success)
+  throw new Error('Conditional field compilation failed');
+assert.deepEqual(conditionalResult.definition.fields[1]?.visibleWhen, {
+  sourcePath: ['active'],
+  equals: true,
+});
+assert.deepEqual(conditionalResult.definition.fields[2]?.enabledWhen, {
+  sourcePath: ['active'],
+  equals: true,
+});
+const conditionalValue = {
+  active: false,
+  visibleTarget: 'visible',
+  enabledTarget: 'enabled',
+};
+const conditionalRuntime = createControlledFormRuntime({
+  formId: 'conditional-smoke',
+  definition: conditionalResult.definition,
+  schema: conditionalSchema,
+  value: conditionalValue,
+  baselineValue: conditionalValue,
+  locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+});
+assert.equal(conditionalRuntime.success, true);
+if (!conditionalRuntime.success)
+  throw new Error('Conditional field runtime failed');
+assert.deepEqual(
+  conditionalRuntime.runtime
+    .getSnapshot()
+    .fields.map(({ path, visible, enabled }) => ({ path, visible, enabled })),
+  [
+    { path: ['active'], visible: true, enabled: true },
+    { path: ['visibleTarget'], visible: false, enabled: true },
+    { path: ['enabledTarget'], visible: true, enabled: false },
+  ],
+);
+assert.deepEqual(
+  conditionalRuntime.runtime.requestSetValue(['visibleTarget'], 'stale'),
+  {
+    success: false,
+    effects: { snapshotChanged: false, operationEmitted: false },
+    diagnostics: [
+      {
+        code: 'INACTIVE_RUNTIME_FIELD',
+        severity: 'error',
+        source: 'runtime',
+        dataPath: ['visibleTarget'],
+        parameters: {
+          action: 'requestSetValue',
+          reason: 'hidden',
+        },
+        fallbackMessage:
+          'Runtime action is blocked by conditional field state.',
+      },
+    ],
+  },
+);
+assert.equal(
+  conditionalRuntime.runtime.requestSetValue(['enabledTarget'], 'stale')
+    .diagnostics[0]?.parameters.reason,
+  'disabled',
+);
+conditionalRuntime.runtime.dispose();
+
+const stringEnumArraySchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    roles: {
+      type: 'array',
+      items: { type: 'string', enum: ['', 'reader', 'editor'] },
+      uniqueItems: true,
+    },
+  },
+};
+const stringEnumArrayResult = compileFormDefinition({
+  schema: stringEnumArraySchema,
+  uiSchema: {
+    fields: {
+      roles: {
+        enumLabels: {
+          '': '(empty string)',
+          reader: 'Reader',
+          editor: 'Editor',
+        },
+      },
+    },
+  },
+});
+assert.equal(stringEnumArrayResult.success, true);
+if (!stringEnumArrayResult.success)
+  throw new Error('String-enum array compilation failed');
+const stringEnumArrayField = stringEnumArrayResult.definition.fields[0];
+assert.equal(stringEnumArrayField?.kind, 'string-enum-array');
+assert.deepEqual(stringEnumArrayField?.choices, [
+  { value: '', label: '(empty string)' },
+  { value: 'reader', label: 'Reader' },
+  { value: 'editor', label: 'Editor' },
+]);
+const stringEnumArrayValue = { roles: ['editor'] };
+const stringEnumArrayRuntime = createControlledFormRuntime({
+  formId: 'string-enum-array-smoke',
+  definition: stringEnumArrayResult.definition,
+  schema: stringEnumArraySchema,
+  value: stringEnumArrayValue,
+  baselineValue: stringEnumArrayValue,
+  locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+});
+assert.equal(stringEnumArrayRuntime.success, true);
+if (!stringEnumArrayRuntime.success)
+  throw new Error('String-enum array runtime failed');
+const stringEnumArrayOperations = [];
+stringEnumArrayRuntime.runtime.subscribeOperations((operation) =>
+  stringEnumArrayOperations.push(operation),
+);
+assert.equal(
+  stringEnumArrayRuntime.runtime.requestSetValue(
+    ['roles'],
+    ['editor', 'reader'],
+  ).success,
+  true,
+);
+assert.equal(stringEnumArrayOperations.length, 1);
+assert.equal(Object.isFrozen(stringEnumArrayOperations[0].value), true);
+const stringEnumArrayApplied = applyFormOperation(
+  stringEnumArrayResult.definition,
+  stringEnumArrayValue,
+  stringEnumArrayOperations[0],
+);
+assert.equal(stringEnumArrayApplied.success, true);
+if (!stringEnumArrayApplied.success)
+  throw new Error('String-enum array operation failed');
+assert.deepEqual(stringEnumArrayApplied.value, {
+  roles: ['editor', 'reader'],
+});
+stringEnumArrayRuntime.runtime.dispose();
+
 const runtimeResult = createControlledFormRuntime({
   formId: 'smoke',
   definition: result.definition,
@@ -137,6 +416,11 @@ assert.equal(runtimeResult.success, true);
 if (runtimeResult.success) {
   const snapshot = runtimeResult.runtime.getSnapshot();
   assert.equal(snapshot.valid, true);
+  assert.equal(Object.hasOwn(snapshot, 'asyncValidation'), false);
+  assert.equal(
+    runtimeResult.runtime.retryAsyncValidation().diagnostics[0]?.code,
+    'ASYNC_VALIDATION_RETRY_UNAVAILABLE',
+  );
   const profile = snapshot.nodes[0];
   assert.equal(profile?.nodeKind, 'object');
   if (profile?.nodeKind !== 'object')

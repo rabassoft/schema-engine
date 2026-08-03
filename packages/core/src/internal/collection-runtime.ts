@@ -230,6 +230,18 @@ export function firstManagedDataAccessor(
       continue;
     }
     if (
+      frame.node.kind === 'string-enum-array' &&
+      entry.kind === 'value' &&
+      Array.isArray(entry.value)
+    ) {
+      for (let index = 0; index < entry.value.length; index += 1) {
+        if (readOwnDataMember(entry.value, String(index)).kind === 'accessor') {
+          return Object.freeze([...frame.node.path, index]);
+        }
+      }
+      continue;
+    }
+    if (
       frame.node.kind !== 'array' ||
       entry.kind !== 'value' ||
       !Array.isArray(entry.value)
@@ -437,6 +449,8 @@ export function buildItemFieldSnapshots(
             : fieldPresenceDirty(presence, baselinePresence),
         touched: isTouched,
         focused: focused === key,
+        visible: true,
+        enabled: true,
         valid: ownIssues.length === 0,
         issues: ownIssues,
         showIssues:
@@ -928,6 +942,8 @@ function sameFieldSnapshot(
     left.dirty === right.dirty &&
     left.touched === right.touched &&
     left.focused === right.focused &&
+    left.visible === right.visible &&
+    left.enabled === right.enabled &&
     left.valid === right.valid &&
     left.showIssues === right.showIssues &&
     sameReferences(left.issues, right.issues)

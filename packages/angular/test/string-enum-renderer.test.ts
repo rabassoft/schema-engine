@@ -22,7 +22,12 @@ const texts: AngularFieldTextSnapshot = Object.freeze({
   clearLabel: 'Clear',
   setNullLabel: 'Set null',
   nullValueLabel: 'Null value',
+  fixedMissingLabel: 'Missing value',
+  fixedUnavailableLabel: 'Unavailable value',
+  fixedIncompatibleLabel: 'Incompatible value',
   choiceLabels: Object.freeze(['Empty', 'Draft']),
+  missingSelectionLabel: 'No value provided.',
+  emptySelectionLabel: 'No values selected.',
   issueMessages: Object.freeze([]),
 });
 
@@ -166,6 +171,8 @@ function snapshot(
     dirty: false,
     touched: false,
     focused: false,
+    visible: true,
+    enabled: true,
     valid: true,
     issues: Object.freeze([]),
     showIssues: false,

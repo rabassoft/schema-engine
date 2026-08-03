@@ -37,6 +37,28 @@ describe('Standard reference skeleton', () => {
     expect(root.childElementCount).toBe(0);
   });
 
+  it('mounts the renderer after immediate initial asynchronous pending delivery', () => {
+    const root = document.createElement('main');
+    const application = new StandardReferenceApplication(
+      undefined,
+      'service-validation',
+    );
+    const dispose = renderReferenceSkeleton(root, application);
+
+    expect(application.getState().snapshot?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: 1,
+    });
+    expect(
+      root.querySelector('form[aria-label="Schema Engine form preview"]'),
+    ).not.toBeNull();
+    expect(
+      root.querySelector('[data-testid="async-validation-state"]')?.textContent,
+    ).toBe('Generation 1 pending.');
+
+    dispose();
+  });
+
   it('focuses destructive configuration confirmation and restores its trigger', async () => {
     const root = document.createElement('main');
     document.body.replaceChildren(root);
@@ -197,6 +219,9 @@ describe('Standard reference skeleton', () => {
     expect(css).toContain('--code-selection: #2b3852');
     expect(css).toContain('.cm-selectionBackground');
     expect(css).toContain('pre ::selection');
+    expect(css).toContain('.fixed-value');
+    expect(css).toContain('white-space: pre-wrap');
+    expect(css).toContain('overflow-wrap: anywhere');
 
     dispose();
     expect(document.documentElement.dataset['theme']).toBeUndefined();

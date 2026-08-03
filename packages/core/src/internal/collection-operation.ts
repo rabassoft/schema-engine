@@ -1555,6 +1555,48 @@ function definitionDiagnostic(
         ? { actualValue: defect.actualValue }
         : {}),
       ...(defect.members === undefined ? {} : { members: [...defect.members] }),
+      ...(defect.conditionMember === undefined
+        ? {}
+        : { conditionMember: defect.conditionMember }),
+      ...(defect.conditionReason === undefined
+        ? {}
+        : { conditionReason: defect.conditionReason }),
+      ...(defect.conditionDetailMember === undefined
+        ? {}
+        : { member: defect.conditionDetailMember }),
+      ...(defect.conditionExpected === undefined
+        ? {}
+        : { expected: defect.conditionExpected }),
+      ...(defect.conditionActualType === undefined
+        ? {}
+        : { actualType: defect.conditionActualType }),
+      ...(defect.conditionActualLength === undefined
+        ? {}
+        : { actualLength: defect.conditionActualLength }),
+      ...(defect.conditionIndex === undefined
+        ? {}
+        : { index: defect.conditionIndex }),
+      ...(defect.conditionPathKey === undefined
+        ? {}
+        : { pathKey: defect.conditionPathKey }),
+      ...(defect.sourcePath === undefined
+        ? {}
+        : { sourcePath: [...defect.sourcePath] }),
+      ...(defect.sourceReason === undefined
+        ? {}
+        : { sourceReason: defect.sourceReason }),
+      ...(defect.sourceKind === undefined
+        ? {}
+        : { sourceKind: defect.sourceKind }),
+      ...(defect.sourceNullable === undefined
+        ? {}
+        : { sourceNullable: defect.sourceNullable }),
+      ...(defect.conditionTargetCapability === undefined
+        ? {}
+        : { targetCapability: defect.conditionTargetCapability }),
+      ...(defect.conditionLocation === undefined
+        ? {}
+        : { location: defect.conditionLocation }),
     },
     'Form definition is invalid.',
     path,

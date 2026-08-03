@@ -14,16 +14,44 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
   [contribution policy](./CONTRIBUTING.md) and
   [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-The repository contains the completed M1-M24 controlled-form ecosystem,
+The repository contains the completed M1-M31 controlled-form ecosystem,
 verified public Experimental packages and the sanitized public history,
 governance and protected controls completed by PLAN-024. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
-v0.1.1, SPEC-006 v0.1.1, SPEC-007 v0.1.0, SPEC-008 v0.1.0, SPEC-009 v0.1.0
-SPEC-010 v0.1.0 and SPEC-011 v0.1.0 are Accepted. SPEC-007 defines the private
-M17 reusable synchronous Ajv-validator contract. SPEC-011 defines the bounded
-M25 primitive-`const` contract; approved PLAN-027 revision 0 authorizes only
-its six local implementation checkpoints and has not started. The source
-checkout implements the M14 contract under completed PLAN-014. PLAN-015
+v0.1.1, SPEC-006 v0.1.1, SPEC-007 v0.1.0, SPEC-008 v0.1.0, SPEC-009 v0.1.0,
+SPEC-010 v0.1.0, SPEC-011 v0.1.0, SPEC-012 v0.1.0, SPEC-013 v0.1.1,
+SPEC-014 v0.1.0, SPEC-015 v0.1.0, SPEC-016 v0.1.1 and SPEC-017 v0.1.0 are
+Accepted. SPEC-007
+defines the private M17 reusable synchronous Ajv-validator contract. SPEC-011 defines the bounded
+M25 primitive-`const` contract; completed PLAN-027 revision 1 implements its
+six checkpoints after final review 234 passed with zero findings. Completed
+PLAN-028 implements SPEC-012's optional controlled async-validation lifecycle,
+Angular forwarding and independent Angular/Standard reference evidence after
+final review 244 passed with zero findings. SPEC-013 defines the bounded M27
+scope-to-baseline confirmation contract; completed PLAN-029 revision 1
+implements its six checkpoints, including Public core/package conformance and
+independent Angular/Standard reference evidence, after final review 257 passed
+with zero findings. SPEC-014 defines the bounded M28 static object-`allOf`
+compiler contract; PLAN-030 revision 0 was approved after review 262 cycle 2 and
+all six checkpoints are complete after final review 268 cycle 2 repeated the
+full matrix and all 21 rows with zero findings. The
+Accepted SPEC-015 defines the bounded M29 explicit schema-default candidate;
+completed PLAN-031 revision 0 implements all six checkpoints after final review
+278 cycle 2 repeated the complete matrix and all 21 rows with zero findings.
+ADR-033 revision 0 and SPEC-016 v0.1.1 now close the bounded M30 ordinary
+primitive-field visibility/enabled architecture and observable contract;
+Completed PLAN-032 revision 1 implements all seven checkpoints and all 24
+SPEC-016 rows after final review 291 cycle 1 repeated the frozen matrix with
+zero findings. Bounded D-006/M31 defines one ordered homogeneous array of
+unique closed-enum strings controlled atomically as a field. Reviews 292–295
+close its promotion, ADR-034, ADR-005 revision 8 and Accepted SPEC-017 v0.1.0
+with zero findings. Completed PLAN-033 revision 0 implements all seven
+checkpoints and all 26 SPEC-017 rows after final review 303 cycle 2 repeated
+the frozen matrix and both Chromium suites with zero findings.
+Package versions and published M23 artifacts remain unchanged.
+The
+source checkout implements the M14
+contract under completed PLAN-014. PLAN-015
 published and verified
 byte-identical core and Angular `0.2.0` packages under both `next` and `latest`.
 M15 completed a private reference platform without changing those Public
@@ -57,7 +85,8 @@ recursive object/collection/item/leaf snapshots, stable collection operations,
 scopes, diagnostics, and text contracts.
 
 `packages/angular` exposes the Angular 22 headless adapter and accessible native
-HTML renderers for string, number/integer, boolean, and string enum fields. It
+HTML renderers for string, number/integer, boolean, scalar string enum, fixed
+value and current-source atomic string-enum array fields. It
 recursively projects normalized inline object groups with semantic fieldsets,
 fixed homogeneous collection/item groups and static root sections, tabs,
 accordions and logical grids, with canonical stable IDs and localized text. Its
@@ -74,9 +103,26 @@ application-owned stable string identity. The SPEC-004 subset resolves static
 same-document fragment-only `$ref` values into root `$defs` at supported
 non-root schema positions. Static presentation forests are supported at the
 root and on direct nested-object and collection-item template owners.
-External/dynamic references, anchors, arrays of
-primitives, arrays inside collection item templates, tuples, composition,
-generated identity, async validation, persistence, wizards, workflow,
+Current unreleased source also supports one strict equality `visibleWhen` and
+one `enabledWhen` predicate on ordinary primitive fields. Core derives required
+snapshot flags from application-controlled values; Angular and Standard keep
+hidden hosts mounted, project disabled controls independently and retain core
+as the final inactive-action gate. Collection-template conditions, compound
+expressions, dependency graphs and dynamic validation semantics remain
+deferred. The required snapshot flags are a coordinated Experimental migration
+reserved for a separately approved future MINOR release; public `0.4.1`
+artifacts remain unchanged.
+
+Current unreleased source also recognizes one deliberately atomic array field:
+a direct or nested homogeneous array whose items are unique strings from a
+closed non-empty enum. It preserves missing, present empty and ordered values,
+uses ordinary controlled set/remove operations, and is projected independently
+as a native multiple selection in Angular and Standard. It is not an M10
+collection and exposes no item identity or item operation.
+
+External/dynamic references, anchors, other arrays of primitives, arrays inside
+collection item templates, tuples, general composition,
+generated identity, async transport/Ajv, persistence, wizards, workflow,
 controlled layout state, custom
 collection renderers and other deferred decisions are not active.
 
@@ -136,10 +182,15 @@ Source consumers moving from the published `0.1.0` boundary must make two
 coordinated Experimental migrations: every manually authored primitive
 definition/template supplies the required boolean `nullable`, and every
 manually authored `AngularFieldTextSnapshot` supplies `setNullLabel` and
-`nullValueLabel`; exhaustive `FieldTextMember` handling also adds `set-null`
-and `null-value`. Schema-compiled consumers do not manually add definition
-members. The live `0.1.0` packages remain the immutable pre-M14 release and
-must not be treated as containing these source changes.
+`nullValueLabel`, `fixedMissingLabel`, `fixedUnavailableLabel` and
+`fixedIncompatibleLabel`, plus `missingSelectionLabel` and
+`emptySelectionLabel`; exhaustive `FieldTextMember` handling also includes
+their corresponding members. Manually authored field definitions may now need
+to handle `StringEnumArrayFieldDefinition` in exhaustive `FieldDefinition`
+switches. Schema-compiled consumers do not manually add definition members.
+These coordinated source changes require a separately approved future MINOR;
+published packages remain immutable historical releases and must not be
+treated as containing unversioned source changes.
 
 ## Branch workflow
 

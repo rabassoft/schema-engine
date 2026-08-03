@@ -1,0 +1,57 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"roles\"]",
+        "name": "roles",
+        "path": ["roles"],
+        "required": true,
+        "nullable": false,
+        "label": "Roles",
+        "hint": "Choose roles",
+        "kind": "string-enum-array",
+        "choices": [
+          { "value": "", "label": "No role" },
+          { "value": "editor", "label": "Can edit" }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"roles\"]",
+        "name": "roles",
+        "path": ["roles"],
+        "required": true,
+        "nullable": false,
+        "label": "Roles",
+        "hint": "Choose roles",
+        "kind": "string-enum-array",
+        "choices": [
+          { "value": "", "label": "No role" },
+          { "value": "editor", "label": "Can edit" }
+        ]
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"roles\"]",
+          "name": "roles",
+          "path": ["roles"],
+          "required": true,
+          "nullable": false,
+          "label": "Roles",
+          "hint": "Choose roles",
+          "kind": "string-enum-array",
+          "choices": [
+            { "value": "", "label": "No role" },
+            { "value": "editor", "label": "Can edit" }
+          ]
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

@@ -73,6 +73,8 @@ describe('public string choice contracts', () => {
       | 'fixed-incompatible'
       | 'choice'
       | 'issue'
+      | 'missing-selection'
+      | 'empty-selection'
     >();
     expectTypeOf<PrimitiveFixedValue>().toEqualTypeOf<
       string | number | boolean | null

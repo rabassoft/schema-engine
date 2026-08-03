@@ -101,6 +101,46 @@ try {
     declaration(coreRoot, 'dist'),
     'Core root declarations differ after source rebuild',
   );
+  const coreRootDeclaration = declaration(coreRoot, 'dist');
+  for (const typeName of [
+    'UiFieldValueConditionSchema',
+    'FieldValueConditionDefinition',
+    'StringEnumArrayFieldDefinition',
+  ]) {
+    assert.equal(
+      coreRootDeclaration.match(new RegExp(`\\b${typeName}\\b`, 'gu'))?.length,
+      1,
+      `${typeName} must appear exactly once in the core root inventory`,
+    );
+  }
+  const coreContractsDeclaration = readFileSync(
+    join(coreRoot, 'dist/contracts.d.ts'),
+    'utf8',
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /readonly visibleWhen\?: UiFieldValueConditionSchema;/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /readonly enabledWhen\?: UiFieldValueConditionSchema;/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /keyof BaseNodeDefinition \| 'visibleWhen' \| 'enabledWhen'/u,
+  );
+  assert.match(coreContractsDeclaration, /readonly visible: boolean;/u);
+  assert.match(coreContractsDeclaration, /readonly enabled: boolean;/u);
+  assert.match(
+    coreContractsDeclaration,
+    /readonly kind: 'string-enum-array';/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /readonly choices: readonly StringChoiceDefinition\[\];/u,
+  );
+  assert.match(coreContractsDeclaration, /\| 'missing-selection'/u);
+  assert.match(coreContractsDeclaration, /\| 'empty-selection';/u);
 
   const shippedCore = await loadIndex(coreRoot, 'dist');
   const rebuiltCore = await loadIndex(coreRoot, 'rebuilt-dist');
@@ -112,6 +152,157 @@ try {
   };
   assert.equal(shippedCore.compileFormDefinition({ schema }).success, true);
   assert.equal(rebuiltCore.compileFormDefinition({ schema }).success, true);
+  const defaultSchema = {
+    ...schema,
+    properties: { name: { type: 'string', default: 'Ada' } },
+  };
+  const shippedDefault = shippedCore.deriveSchemaDefaultCandidate(
+    defaultSchema,
+    {},
+  );
+  const rebuiltDefault = rebuiltCore.deriveSchemaDefaultCandidate(
+    defaultSchema,
+    {},
+  );
+  assert.deepEqual(rebuiltDefault, shippedDefault);
+  assert.deepEqual(shippedDefault.value, { name: 'Ada' });
+  const shippedFailure = shippedCore.deriveSchemaDefaultCandidate(
+    {
+      ...schema,
+      properties: { count: { type: 'integer', default: 1.5 } },
+    },
+    {},
+  );
+  const rebuiltFailure = rebuiltCore.deriveSchemaDefaultCandidate(
+    {
+      ...schema,
+      properties: { count: { type: 'integer', default: 1.5 } },
+    },
+    {},
+  );
+  assert.deepEqual(rebuiltFailure, shippedFailure);
+  assert.equal(shippedFailure.success, false);
+  const composedSchema = {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    allOf: [
+      {
+        type: 'object',
+        properties: { first: { type: 'string' } },
+      },
+      {
+        type: 'object',
+        properties: { second: { type: 'number' } },
+      },
+    ],
+  };
+  const shippedComposition = shippedCore.compileFormDefinition({
+    schema: composedSchema,
+  });
+  const rebuiltComposition = rebuiltCore.compileFormDefinition({
+    schema: composedSchema,
+  });
+  assert.deepEqual(rebuiltComposition, shippedComposition);
+  assert.equal(shippedComposition.success, true);
+  const conditionalSchema = {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      active: { type: 'boolean' },
+      target: { type: 'string' },
+    },
+  };
+  const conditionalInput = {
+    schema: conditionalSchema,
+    uiSchema: {
+      fields: {
+        target: { visibleWhen: { path: ['active'], equals: true } },
+      },
+    },
+  };
+  const shippedConditional =
+    shippedCore.compileFormDefinition(conditionalInput);
+  const rebuiltConditional =
+    rebuiltCore.compileFormDefinition(conditionalInput);
+  assert.deepEqual(rebuiltConditional, shippedConditional);
+  assert.equal(shippedConditional.success, true);
+  if (!shippedConditional.success)
+    throw new Error('Shipped conditional compilation failed');
+  const conditionalValue = { active: false, target: 'kept' };
+  for (const api of [shippedCore, rebuiltCore]) {
+    const created = api.createControlledFormRuntime({
+      formId: 'source-conditional',
+      definition: shippedConditional.definition,
+      schema: conditionalSchema,
+      value: conditionalValue,
+      baselineValue: conditionalValue,
+      locale: 'en',
+      validator: { validate: () => ({ valid: true, issues: [] }) },
+    });
+    assert.equal(created.success, true);
+    if (!created.success) throw new Error('Conditional source runtime failed');
+    assert.deepEqual(
+      created.runtime.getFieldSnapshot(['target']),
+      created.runtime.getSnapshot().fields[1],
+    );
+    assert.equal(created.runtime.getFieldSnapshot(['target'])?.visible, false);
+    assert.equal(
+      created.runtime.requestSetValue(['target'], 'stale').diagnostics[0]?.code,
+      'INACTIVE_RUNTIME_FIELD',
+    );
+    created.runtime.dispose();
+  }
+
+  const stringEnumArraySchema = {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      roles: {
+        type: 'array',
+        items: { type: 'string', enum: ['', 'reader', 'editor'] },
+        uniqueItems: true,
+      },
+    },
+  };
+  const shippedStringEnumArray = shippedCore.compileFormDefinition({
+    schema: stringEnumArraySchema,
+  });
+  const rebuiltStringEnumArray = rebuiltCore.compileFormDefinition({
+    schema: stringEnumArraySchema,
+  });
+  assert.deepEqual(rebuiltStringEnumArray, shippedStringEnumArray);
+  assert.equal(shippedStringEnumArray.success, true);
+  if (!shippedStringEnumArray.success)
+    throw new Error('Shipped string-enum array compilation failed');
+  assert.equal(
+    shippedStringEnumArray.definition.fields[0]?.kind,
+    'string-enum-array',
+  );
+  for (const api of [shippedCore, rebuiltCore]) {
+    const value = { roles: ['editor'] };
+    const created = api.createControlledFormRuntime({
+      formId: 'source-string-enum-array',
+      definition: shippedStringEnumArray.definition,
+      schema: stringEnumArraySchema,
+      value,
+      baselineValue: value,
+      locale: 'en',
+      validator: { validate: () => ({ valid: true, issues: [] }) },
+    });
+    assert.equal(created.success, true);
+    if (!created.success)
+      throw new Error('String-enum array source runtime failed');
+    const operations = [];
+    created.runtime.subscribeOperations((operation) =>
+      operations.push(operation),
+    );
+    assert.equal(
+      created.runtime.requestSetValue(['roles'], ['editor', 'reader']).success,
+      true,
+    );
+    assert.deepEqual(operations[0]?.value, ['editor', 'reader']);
+    assert.equal(Object.isFrozen(operations[0]?.value), true);
+    created.runtime.dispose();
+  }
 
   const angularDirectory = join(temporaryRoot, 'angular');
   mkdirSync(angularDirectory, { recursive: true });
@@ -122,11 +313,42 @@ try {
     declaration(angularRoot, 'dist'),
     'Angular root declarations differ after source rebuild',
   );
+  const angularRendererDeclaration = readFileSync(
+    join(angularRoot, 'dist/renderer.d.ts'),
+    'utf8',
+  );
+  assert.match(
+    angularRendererDeclaration,
+    /readonly snapshot: InputSignal<FieldRuntimeSnapshot>;/u,
+  );
+  const angularRootDeclaration = declaration(angularRoot, 'dist');
+  assert.equal(
+    angularRootDeclaration.match(/SchemaStringEnumArrayRendererComponent/gu)
+      ?.length,
+    1,
+    'M31 renderer must appear exactly once in the Angular root inventory',
+  );
+  const angularTextDeclaration = readFileSync(
+    join(angularRoot, 'dist/text.d.ts'),
+    'utf8',
+  );
+  assert.match(
+    angularTextDeclaration,
+    /readonly missingSelectionLabel: string;/u,
+  );
+  assert.match(
+    angularTextDeclaration,
+    /readonly emptySelectionLabel: string;/u,
+  );
 
   const shippedAngular = angularBehavior(angularRoot, 'dist');
   const rebuiltAngular = angularBehavior(angularRoot, 'rebuilt-dist');
   assert.deepEqual(rebuiltAngular, shippedAngular);
   assert.equal(shippedAngular.providerType, 'object');
+  assert.equal(
+    shippedAngular.keys.includes('SchemaStringEnumArrayRendererComponent'),
+    true,
+  );
 
   if (includeAngularAria) {
     assert.notEqual(tarballs.angularAria, undefined);

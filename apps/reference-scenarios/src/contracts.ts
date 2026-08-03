@@ -1,6 +1,7 @@
 import type {
   CompileFormDefinitionInput,
   FormOperation,
+  FormScope,
   SchemaValidator,
   ValidationIssue,
   ValidationResult,
@@ -21,7 +22,14 @@ export type ReferenceFeature =
   | 'advanced-layout'
   | 'recursive-local-presentation'
   | 'nullable-leaves'
-  | 'semantic-formats';
+  | 'semantic-formats'
+  | 'fixed-values'
+  | 'object-composition'
+  | 'async-validation'
+  | 'scope-confirmation'
+  | 'schema-defaults'
+  | 'conditional-field-state'
+  | 'string-enum-array';
 
 export type ReferenceExpectedOperation<
   TOperation extends FormOperation = FormOperation,
@@ -61,6 +69,52 @@ export interface ReferenceExplanation {
   readonly body: string;
 }
 
+export interface ReferenceServiceValidation {
+  readonly fieldPath: readonly (string | number)[];
+  readonly issue: {
+    readonly code: string;
+    readonly keyword: string;
+    readonly fallbackMessage: string;
+  };
+  readonly labels: {
+    readonly heading: string;
+    readonly settleValid: string;
+    readonly settleInvalid: string;
+    readonly reject: string;
+    readonly throwNext: string;
+    readonly retry: string;
+  };
+}
+
+export type ReferenceScopeConfirmationExpectation =
+  'candidate-and-acceptance-leaves-unrelated-dirty' | 'unconfirmable';
+
+export interface ReferenceScopeConfirmationTarget {
+  readonly id: string;
+  readonly label: string;
+  readonly scope: FormScope;
+  readonly expectation: ReferenceScopeConfirmationExpectation;
+}
+
+export interface ReferenceScopeConfirmation {
+  readonly labels: {
+    readonly heading: string;
+    readonly guidance: string;
+    readonly accept: string;
+  };
+  readonly targets: readonly ReferenceScopeConfirmationTarget[];
+}
+
+export interface ReferenceSchemaDefaults {
+  readonly labels: {
+    readonly heading: string;
+    readonly guidance: string;
+    readonly derive: string;
+    readonly cancel: string;
+    readonly accept: string;
+  };
+}
+
 export interface ReferenceScenario<TData extends object = object> {
   readonly id: string;
   readonly title: string;
@@ -71,6 +125,9 @@ export interface ReferenceScenario<TData extends object = object> {
   readonly validator: SchemaValidator;
   readonly transitions: readonly ReferenceTransitionExpectation<TData>[];
   readonly explanation: readonly ReferenceExplanation[];
+  readonly serviceValidation?: ReferenceServiceValidation;
+  readonly scopeConfirmation?: ReferenceScopeConfirmation;
+  readonly schemaDefaults?: ReferenceSchemaDefaults;
 }
 
 export type ReferenceScenarioAuthoring<TData extends object = object> =

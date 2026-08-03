@@ -577,6 +577,11 @@ function createFieldBinding(
   intentions: FieldIntentions,
   idScope = '',
 ): FieldBinding {
+  if (hasOwnFixedValue(definition))
+    return createFixedFieldBinding(definition, idScope);
+  if (definition.kind === 'string-enum-array') {
+    return createStringEnumArrayFieldBinding(definition, intentions, idScope);
+  }
   const container = document.createElement('div');
   container.className = 'form-field';
   container.dataset['fieldKey'] = definition.key;
@@ -634,25 +639,33 @@ function createFieldBinding(
   control.setAttribute('aria-describedby', describedBy.join(' '));
 
   listen(control, 'focus', () => {
+    if (!fieldInteractive(currentSnapshot)) return;
     focused = true;
     intentions.focus();
   });
   listen(control, 'blur', () => {
     focused = false;
+    if (!fieldInteractive(currentSnapshot)) return;
     intentions.blur();
   });
   listen(clear, 'click', () => {
-    if (currentSnapshot?.presence.kind === 'value') {
+    if (
+      fieldInteractive(currentSnapshot) &&
+      currentSnapshot?.presence.kind === 'value'
+    ) {
       intentions.remove();
     }
   });
   if (setNull !== undefined) {
-    listen(setNull, 'click', () => intentions.set(null));
+    listen(setNull, 'click', () => {
+      if (fieldInteractive(currentSnapshot)) intentions.set(null);
+    });
   }
 
   if (definition.kind === 'string') {
     const eventType = control instanceof HTMLSelectElement ? 'change' : 'input';
     listen(control, eventType, () => {
+      if (!fieldInteractive(currentSnapshot)) return;
       if (control instanceof HTMLSelectElement && control.value === MISSING) {
         if (currentSnapshot?.presence.kind === 'value') {
           intentions.remove();
@@ -681,14 +694,21 @@ function createFieldBinding(
     );
   } else {
     listen(control, 'change', () => {
-      if (control instanceof HTMLInputElement) {
+      if (
+        fieldInteractive(currentSnapshot) &&
+        control instanceof HTMLInputElement
+      ) {
         intentions.set(control.checked);
       }
     });
   }
 
   function handleNumberInput(): void {
-    if (!(control instanceof HTMLInputElement)) return;
+    if (
+      !fieldInteractive(currentSnapshot) ||
+      !(control instanceof HTMLInputElement)
+    )
+      return;
     const parsed = parseNumber(control.value, intentions.locale());
     if (
       parsed !== undefined &&
@@ -703,13 +723,19 @@ function createFieldBinding(
   function reconcile(snapshot: FieldRuntimeSnapshot, locale: string): void {
     const previousPresence = currentSnapshot?.presence;
     currentSnapshot = snapshot;
+    const unavailable = fieldUnavailable(snapshot);
+    const disabled = !snapshot.enabled || unavailable;
+    if (!snapshot.visible || disabled) focused = false;
+    setFieldMountedState(container, snapshot.visible);
+    control.disabled = disabled;
     const value =
       snapshot.presence.kind === 'value' ? snapshot.presence.value : undefined;
     const isPresent = snapshot.presence.kind === 'value';
     const isNull = isPresent && value === null;
     presence.value = presenceLabel(snapshot);
     clear.hidden = !isPresent;
-    if (setNull !== undefined) setNull.disabled = isNull;
+    clear.disabled = disabled;
+    if (setNull !== undefined) setNull.disabled = disabled || isNull;
     control.setAttribute('aria-invalid', String(!snapshot.valid));
 
     if (definition.kind === 'boolean') {
@@ -760,6 +786,481 @@ function createFieldBinding(
   };
 }
 
+function createStringEnumArrayFieldBinding(
+  definition: Extract<FieldDefinition, { kind: 'string-enum-array' }>,
+  intentions: FieldIntentions,
+  idScope: string,
+): FieldBinding {
+  const container = document.createElement('div');
+  container.className = 'form-field string-enum-array-field';
+  container.dataset['fieldKey'] = definition.key;
+  container.dataset['fieldName'] = definition.name;
+  const controlId = domId(`field-${idScope}-${definition.key}`);
+  const labelId = `${controlId}-label`;
+  const descriptionId = `${controlId}-description`;
+  const hintId = `${controlId}-hint`;
+  const statusId = `${controlId}-status`;
+  const issuesId = `${controlId}-issues`;
+  const describedBy: string[] = [];
+  const cleanups: Array<() => void> = [];
+  let currentSnapshot: FieldRuntimeSnapshot | undefined;
+  let currentPresentation: StringEnumArrayPresentation = {
+    representable: true,
+    values: [],
+    tokens: [],
+  };
+
+  const label = document.createElement('label');
+  label.id = labelId;
+  label.htmlFor = controlId;
+  label.textContent = definition.label;
+  container.append(label);
+  container.setAttribute('aria-labelledby', labelId);
+
+  if (definition.description !== undefined) {
+    container.append(supportingText(descriptionId, definition.description));
+    describedBy.push(descriptionId);
+  }
+  if (definition.hint !== undefined) {
+    container.append(supportingText(hintId, definition.hint));
+    describedBy.push(hintId);
+  }
+
+  const control = document.createElement('select');
+  control.id = controlId;
+  control.multiple = true;
+  control.required = definition.required;
+  if (definition.tooltip !== undefined) control.title = definition.tooltip;
+  definition.choices.forEach((choice, index) => {
+    control.append(option(choiceToken(index), choice.label));
+  });
+  container.append(control);
+
+  const actions = document.createElement('div');
+  actions.className = 'field-actions';
+  const clear = button('Clear');
+  clear.id = `${controlId}-clear`;
+  clear.setAttribute('aria-labelledby', `${clear.id} ${labelId}`);
+  actions.append(clear);
+  container.append(actions);
+
+  const status = document.createElement('p');
+  status.id = statusId;
+  status.className = 'presence-state';
+  describedBy.push(statusId);
+  container.append(status);
+
+  const issues = document.createElement('ul');
+  issues.id = issuesId;
+  issues.className = 'field-issues';
+  issues.hidden = true;
+  describedBy.push(issuesId);
+  container.append(issues);
+  control.setAttribute('aria-describedby', describedBy.join(' '));
+
+  listen(control, 'focus', () => {
+    if (fieldInteractive(currentSnapshot)) intentions.focus();
+  });
+  listen(control, 'blur', () => {
+    reconcileSelection();
+    if (fieldInteractive(currentSnapshot)) intentions.blur();
+  });
+  listen(container, 'focus', (event) => {
+    if (event.target === container && fieldInteractive(currentSnapshot)) {
+      intentions.focus();
+    }
+  });
+  listen(container, 'blur', (event) => {
+    if (event.target === container && fieldInteractive(currentSnapshot)) {
+      intentions.blur();
+    }
+  });
+  listen(clear, 'focus', () => {
+    if (fieldInteractive(currentSnapshot)) intentions.focus();
+  });
+  listen(clear, 'blur', () => {
+    if (fieldInteractive(currentSnapshot)) intentions.blur();
+  });
+  listen(clear, 'click', () => {
+    if (
+      !fieldInteractive(currentSnapshot) ||
+      currentSnapshot?.presence.kind !== 'value'
+    ) {
+      return;
+    }
+    if (currentPresentation.representable) control.focus();
+    else container.focus();
+    intentions.remove();
+  });
+  listen(control, 'change', () => {
+    if (
+      !fieldInteractive(currentSnapshot) ||
+      !currentPresentation.representable
+    ) {
+      return;
+    }
+    const selected = new Set<number>();
+    for (const candidate of Array.from(control.options)) {
+      if (!candidate.selected) continue;
+      const index = choiceIndex(candidate.value, definition.choices.length);
+      if (index === undefined) {
+        reconcileSelection();
+        return;
+      }
+      selected.add(index);
+    }
+    const retained = currentPresentation.values.filter((value) => {
+      const index = definition.choices.findIndex(
+        (choice) => choice.value === value,
+      );
+      return index >= 0 && selected.has(index);
+    });
+    const confirmed = new Set(currentPresentation.values);
+    const candidate = [...retained];
+    definition.choices.forEach((choice, index) => {
+      if (selected.has(index) && !confirmed.has(choice.value)) {
+        candidate.push(choice.value);
+      }
+    });
+    reconcileSelection();
+    if (!orderedStringsEqual(candidate, currentPresentation.values)) {
+      intentions.set(candidate);
+    }
+  });
+
+  function reconcileSelection(): void {
+    const selected = new Set(currentPresentation.tokens);
+    for (const candidate of Array.from(control.options)) {
+      candidate.selected = selected.has(candidate.value);
+    }
+  }
+
+  function reconcile(snapshot: FieldRuntimeSnapshot, locale: string): void {
+    currentSnapshot = snapshot;
+    currentPresentation = inspectStringEnumArrayPresentation(
+      snapshot,
+      definition,
+    );
+    const unavailable = fieldUnavailable(snapshot);
+    const actionDisabled = !snapshot.enabled || unavailable;
+    setFieldMountedState(container, snapshot.visible);
+    control.disabled = actionDisabled || !currentPresentation.representable;
+    if (
+      snapshot.visible &&
+      !actionDisabled &&
+      !currentPresentation.representable
+    ) {
+      container.tabIndex = 0;
+    } else {
+      container.removeAttribute('tabindex');
+    }
+    clear.hidden = snapshot.presence.kind !== 'value';
+    clear.disabled = actionDisabled;
+    clear.textContent = selectionText('Clear', locale);
+    control.setAttribute('aria-invalid', String(!snapshot.valid));
+    status.textContent = selectionStatus(
+      snapshot,
+      currentPresentation,
+      definition,
+      locale,
+    );
+    reconcileSelection();
+    issues.replaceChildren(
+      ...snapshot.issues.map((validationIssue) => {
+        const item = document.createElement('li');
+        item.textContent =
+          validationIssue.fallbackMessage ?? validationIssue.code;
+        return item;
+      }),
+    );
+    issues.hidden = !snapshot.showIssues || snapshot.issues.length === 0;
+  }
+
+  function listen(
+    target: EventTarget,
+    type: string,
+    handler: EventListener,
+  ): void {
+    target.addEventListener(type, handler);
+    cleanups.push(() => target.removeEventListener(type, handler));
+  }
+
+  return {
+    element: container,
+    reconcile,
+    dispose() {
+      for (const cleanup of cleanups.splice(0)) cleanup();
+    },
+  };
+}
+
+interface StringEnumArrayPresentation {
+  readonly representable: boolean;
+  readonly values: readonly string[];
+  readonly tokens: readonly string[];
+}
+
+function inspectStringEnumArrayPresentation(
+  snapshot: FieldRuntimeSnapshot,
+  definition: Extract<FieldDefinition, { kind: 'string-enum-array' }>,
+): StringEnumArrayPresentation {
+  if (snapshot.presence.kind === 'missing') {
+    return { representable: true, values: [], tokens: [] };
+  }
+  if (
+    snapshot.presence.kind !== 'value' ||
+    !Array.isArray(snapshot.presence.value)
+  ) {
+    return { representable: false, values: [], tokens: [] };
+  }
+  const values: string[] = [];
+  const tokens: string[] = [];
+  const seen = new Set<string>();
+  for (let index = 0; index < snapshot.presence.value.length; index += 1) {
+    const member = Object.getOwnPropertyDescriptor(
+      snapshot.presence.value,
+      index,
+    );
+    if (
+      member === undefined ||
+      !('value' in member) ||
+      typeof member.value !== 'string' ||
+      seen.has(member.value)
+    ) {
+      return { representable: false, values: [], tokens: [] };
+    }
+    const choiceIndex = definition.choices.findIndex(
+      (choice) => choice.value === member.value,
+    );
+    if (choiceIndex < 0) {
+      return { representable: false, values: [], tokens: [] };
+    }
+    seen.add(member.value);
+    values.push(member.value);
+    tokens.push(choiceToken(choiceIndex));
+  }
+  return {
+    representable: true,
+    values: Object.freeze(values),
+    tokens: Object.freeze(tokens),
+  };
+}
+
+const selectionTextByLocale = Object.freeze({
+  en: Object.freeze({
+    Clear: 'Clear',
+    Missing: 'No value provided.',
+    Empty: 'No values selected.',
+    Incompatible: 'Incompatible selection.',
+    Unavailable: 'Selection unavailable.',
+    Selected: 'Selected',
+  }),
+  es: Object.freeze({
+    Clear: 'Limpiar',
+    Missing: 'No se ha proporcionado ningún valor.',
+    Empty: 'No hay valores seleccionados.',
+    Incompatible: 'Selección incompatible.',
+    Unavailable: 'Selección no disponible.',
+    Selected: 'Seleccionados',
+  }),
+});
+
+type SelectionTextSource = keyof (typeof selectionTextByLocale)['en'];
+
+function selectionText(source: SelectionTextSource, locale: string): string {
+  return selectionTextByLocale[locale === 'es' ? 'es' : 'en'][source];
+}
+
+function selectionStatus(
+  snapshot: FieldRuntimeSnapshot,
+  presentation: StringEnumArrayPresentation,
+  definition: Extract<FieldDefinition, { kind: 'string-enum-array' }>,
+  locale: string,
+): string {
+  if (snapshot.presence.kind === 'missing') {
+    return selectionText('Missing', locale);
+  }
+  if (snapshot.presence.kind === 'blocked') {
+    return selectionText('Unavailable', locale);
+  }
+  if (!presentation.representable) {
+    return selectionText('Incompatible', locale);
+  }
+  if (presentation.values.length === 0) {
+    return selectionText('Empty', locale);
+  }
+  const labels = presentation.values.map(
+    (value) =>
+      definition.choices.find((choice) => choice.value === value)?.label ??
+      value,
+  );
+  return `${selectionText('Selected', locale)}: ${labels.join(', ')}`;
+}
+
+function choiceToken(index: number): string {
+  return `choice:${index}`;
+}
+
+function choiceIndex(token: string, choiceCount: number): number | undefined {
+  const match = /^choice:(0|[1-9]\d*)$/u.exec(token);
+  if (match === null) return undefined;
+  const index = Number(match[1]);
+  return Number.isSafeInteger(index) && index < choiceCount ? index : undefined;
+}
+
+function orderedStringsEqual(
+  left: readonly string[],
+  right: readonly string[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => Object.is(value, right[index]))
+  );
+}
+
+function createFixedFieldBinding(
+  definition: FieldDefinition | FieldTemplate,
+  idScope: string,
+): FieldBinding {
+  const group = document.createElement('div');
+  group.className = 'form-field fixed-field';
+  group.dataset['fieldKey'] = definition.key;
+  group.dataset['fieldName'] = definition.name;
+  const baseId = domId(`field-${idScope}-${definition.key}`);
+  const labelId = `${baseId}-label`;
+  const descriptionId = `${baseId}-description`;
+  const hintId = `${baseId}-hint`;
+  const issuesId = `${baseId}-issues`;
+  group.id = baseId;
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-labelledby', labelId);
+  if (definition.tooltip !== undefined) group.title = definition.tooltip;
+
+  const label = document.createElement('span');
+  label.id = labelId;
+  label.className = 'field-label';
+  label.textContent = definition.label;
+  group.append(label);
+
+  const describedBy: string[] = [];
+  if (definition.description !== undefined) {
+    group.append(supportingText(descriptionId, definition.description));
+    describedBy.push(descriptionId);
+  }
+  if (definition.hint !== undefined) {
+    group.append(supportingText(hintId, definition.hint));
+    describedBy.push(hintId);
+  }
+
+  const value = document.createElement('span');
+  value.id = `${baseId}-fixed-value`;
+  value.className = 'fixed-value';
+  group.append(value);
+
+  const issues = document.createElement('ul');
+  issues.id = issuesId;
+  issues.className = 'field-issues';
+  issues.hidden = true;
+  group.append(issues);
+
+  return {
+    element: group,
+    reconcile(snapshot, locale) {
+      setFieldMountedState(group, snapshot.visible);
+      const display = fixedDisplay(definition, snapshot, locale);
+      value.textContent = display.text;
+      value.dataset['fixedValueState'] = display.state;
+      if (snapshot.valid) group.removeAttribute('aria-invalid');
+      else group.setAttribute('aria-invalid', 'true');
+      issues.replaceChildren(
+        ...snapshot.issues.map((issue) => {
+          const item = document.createElement('li');
+          item.textContent = issue.code;
+          return item;
+        }),
+      );
+      const issuesVisible = snapshot.showIssues && snapshot.issues.length > 0;
+      issues.hidden = !issuesVisible;
+      const ids = issuesVisible ? [...describedBy, issuesId] : describedBy;
+      if (ids.length === 0) group.removeAttribute('aria-describedby');
+      else group.setAttribute('aria-describedby', ids.join(' '));
+    },
+    dispose() {},
+  };
+}
+
+function hasOwnFixedValue(
+  definition: FieldDefinition | FieldTemplate,
+): boolean {
+  const descriptor = Object.getOwnPropertyDescriptor(definition, 'fixedValue');
+  return descriptor !== undefined && 'value' in descriptor;
+}
+
+type FixedTextSource =
+  'Missing value' | 'Unavailable value' | 'Incompatible value' | 'Null value';
+
+const fixedTextByLocale: Readonly<
+  Record<'en' | 'es', Readonly<Record<FixedTextSource, string>>>
+> = Object.freeze({
+  en: Object.freeze({
+    'Missing value': 'Missing value',
+    'Unavailable value': 'Unavailable value',
+    'Incompatible value': 'Incompatible value',
+    'Null value': 'Null value',
+  }),
+  es: Object.freeze({
+    'Missing value': 'Valor ausente',
+    'Unavailable value': 'Valor no disponible',
+    'Incompatible value': 'Valor incompatible',
+    'Null value': 'Valor nulo',
+  }),
+});
+
+function fixedText(source: FixedTextSource, locale: string): string {
+  return fixedTextByLocale[locale === 'es' ? 'es' : 'en'][source];
+}
+
+function fixedDisplay(
+  definition: FieldDefinition | FieldTemplate,
+  snapshot: FieldRuntimeSnapshot,
+  locale: string,
+): { readonly state: string; readonly text: string } {
+  const presence = snapshot.presence;
+  if (presence.kind === 'blocked')
+    return {
+      state: 'unavailable',
+      text: fixedText('Unavailable value', locale),
+    };
+  if (presence.kind === 'missing')
+    return { state: 'missing', text: fixedText('Missing value', locale) };
+  const value = presence.value;
+  if (value === null)
+    return definition.nullable
+      ? { state: 'value', text: fixedText('Null value', locale) }
+      : {
+          state: 'incompatible',
+          text: fixedText('Incompatible value', locale),
+        };
+  if (definition.kind === 'string' && typeof value === 'string')
+    return { state: 'value', text: value === '' ? '""' : value };
+  if (
+    definition.kind === 'number' &&
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    (definition.numericType !== 'integer' || Number.isInteger(value))
+  )
+    return {
+      state: 'value',
+      text: Object.is(value, -0) ? '-0' : String(value),
+    };
+  if (definition.kind === 'boolean' && typeof value === 'boolean')
+    return { state: 'value', text: String(value) };
+  return {
+    state: 'incompatible',
+    text: fixedText('Incompatible value', locale),
+  };
+}
+
 function presenceChanged(
   previous: FieldRuntimeSnapshot['presence'] | undefined,
   current: FieldRuntimeSnapshot['presence'],
@@ -770,6 +1271,33 @@ function presenceChanged(
     current.kind === 'value' &&
     !Object.is(previous.value, current.value)
   );
+}
+
+function fieldUnavailable(snapshot: FieldRuntimeSnapshot): boolean {
+  return (
+    snapshot.presence.kind === 'blocked' &&
+    snapshot.presence.reason === 'incompatible-ancestor'
+  );
+}
+
+function fieldInteractive(snapshot: FieldRuntimeSnapshot | undefined): boolean {
+  return (
+    snapshot !== undefined &&
+    snapshot.visible &&
+    snapshot.enabled &&
+    !fieldUnavailable(snapshot)
+  );
+}
+
+function setFieldMountedState(element: HTMLElement, visible: boolean): void {
+  element.hidden = !visible;
+  if (visible) {
+    element.removeAttribute('inert');
+    element.removeAttribute('aria-hidden');
+  } else {
+    element.setAttribute('inert', '');
+    element.setAttribute('aria-hidden', 'true');
+  }
 }
 
 function createCollectionBinding(
@@ -1098,6 +1626,9 @@ const MISSING = '__schema_engine_missing__';
 function createControl(
   definition: FieldDefinition | FieldTemplate,
 ): HTMLInputElement | HTMLSelectElement {
+  if (definition.kind === 'string-enum-array') {
+    throw new Error('String-enum array renderer is not registered.');
+  }
   if (definition.kind === 'string' && definition.choices !== undefined) {
     const select = document.createElement('select');
     select.append(option(MISSING, 'Missing'));

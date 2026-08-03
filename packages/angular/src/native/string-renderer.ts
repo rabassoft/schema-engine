@@ -24,6 +24,8 @@ import {
   FIELD_INSTANCE_CONTEXT,
   describedBy,
   fieldDisabled,
+  fieldInteractive,
+  fieldUnavailable,
   fieldIds,
 } from './common.js';
 
@@ -58,13 +60,14 @@ import {
         [attr.aria-invalid]="ariaInvalid()"
         [attr.aria-required]="field().required ? 'true' : null"
         (input)="onInput($event)"
-        (focus)="fieldFocus.emit()"
+        (focus)="onFocus()"
         (blur)="onBlur()"
       />
       @if (canSetNull()) {
         <button
           type="button"
           [id]="ids().setNull"
+          [disabled]="disabled()"
           [attr.aria-labelledby]="ids().setNull + ' ' + ids().label"
           (click)="onSetNull()"
         >
@@ -78,6 +81,7 @@ import {
         <button
           type="button"
           [id]="ids().clear"
+          [disabled]="disabled()"
           [attr.aria-labelledby]="ids().clear + ' ' + ids().label"
           (click)="onClear()"
         >
@@ -113,6 +117,7 @@ export class SchemaStringRendererComponent implements AngularFieldRenderer {
   protected readonly controlField = form(this.controlModel, (path) =>
     disabled(path, { when: () => fieldDisabled(this.snapshot()) }),
   );
+  protected readonly disabled = computed(() => fieldDisabled(this.snapshot()));
   protected readonly ids = computed(() =>
     fieldIds(this.formId(), this.field(), this.instanceContext?.address()),
   );
@@ -140,7 +145,7 @@ export class SchemaStringRendererComponent implements AngularFieldRenderer {
   protected readonly canSetNull = computed(
     () =>
       this.field().nullable &&
-      !fieldDisabled(this.snapshot()) &&
+      !fieldUnavailable(this.snapshot()) &&
       !this.confirmedNull(),
   );
   private readonly confirmedText = computed(() => {
@@ -155,20 +160,28 @@ export class SchemaStringRendererComponent implements AngularFieldRenderer {
   }
 
   protected onInput(event: Event): void {
+    if (!fieldInteractive(this.snapshot())) return;
     this.setValue.emit((event.target as HTMLInputElement).value);
   }
 
   protected onBlur(): void {
     this.controlField().reset(this.confirmedText());
+    if (!fieldInteractive(this.snapshot())) return;
     this.fieldBlur.emit();
   }
 
+  protected onFocus(): void {
+    if (fieldInteractive(this.snapshot())) this.fieldFocus.emit();
+  }
+
   protected onClear(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     this.controlField().focusBoundControl();
     this.removeValue.emit();
   }
 
   protected onSetNull(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     try {
       this.controlField().focusBoundControl();
     } finally {

@@ -16,6 +16,8 @@ export interface FieldIds {
   readonly clear: string;
   readonly setNull: string;
   readonly nullValue: string;
+  readonly fixedValue: string;
+  readonly status: string;
   readonly description: string;
   readonly hint: string;
   readonly tooltip: string;
@@ -68,6 +70,8 @@ export function fieldIds(
     clear: `${base}-clear`,
     setNull: `${base}-set-null`,
     nullValue: `${base}-null-value`,
+    fixedValue: `${base}-fixed-value`,
+    status: `${base}-status`,
     description: `${base}-description`,
     hint: `${base}-hint`,
     tooltip: `${base}-tooltip`,
@@ -76,10 +80,18 @@ export function fieldIds(
 }
 
 export function fieldDisabled(snapshot: FieldRuntimeSnapshot): boolean {
+  return !snapshot.enabled || fieldUnavailable(snapshot);
+}
+
+export function fieldUnavailable(snapshot: FieldRuntimeSnapshot): boolean {
   return (
     snapshot.presence.kind === 'blocked' &&
     snapshot.presence.reason === 'incompatible-ancestor'
   );
+}
+
+export function fieldInteractive(snapshot: FieldRuntimeSnapshot): boolean {
+  return snapshot.visible && !fieldDisabled(snapshot);
 }
 
 export function describedBy(

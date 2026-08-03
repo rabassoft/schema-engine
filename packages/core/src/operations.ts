@@ -20,6 +20,10 @@ import {
 } from './internal/path.js';
 import { actualType, describeActualValue } from './internal/value.js';
 import {
+  inspectDenseStringArray,
+  orderedDenseStringArraysEqual,
+} from './internal/string-enum-array.js';
+import {
   applyCollectionOperation,
   isCollectionOperation,
 } from './internal/collection-operation.js';
@@ -37,7 +41,8 @@ interface ParsedOperation {
 
 interface ManagedField {
   readonly name: string;
-  readonly type: 'string' | 'number' | 'integer' | 'boolean';
+  readonly type:
+    'string' | 'number' | 'integer' | 'boolean' | 'string-enum-array';
   readonly nullable: boolean;
 }
 
@@ -46,7 +51,7 @@ interface ValidatedDefinition {
   readonly objectKeys: ReadonlySet<string>;
 }
 
-const EMPTY_DIAGNOSTICS: readonly [] = Object.freeze([]);
+export const EMPTY_DIAGNOSTICS: readonly [] = Object.freeze([]);
 
 export function applyOperation<TData extends object>(
   currentValue: Readonly<TData>,
@@ -82,6 +87,7 @@ function apply<TData extends object>(
   }
 
   const parsedOperation = parsed.operation;
+  let managedField: ManagedField | undefined;
   if (definition !== undefined) {
     const validated = validateDefinition(definition, parsedOperation.path);
     if (
@@ -112,7 +118,11 @@ function apply<TData extends object>(
         ),
       ]);
     }
-    if (parsedOperation.type === 'set-value') {
+    managedField = managed;
+    if (
+      parsedOperation.type === 'set-value' &&
+      managed.type !== 'string-enum-array'
+    ) {
       const compatibility = validateCompatibleValue(
         managed,
         parsedOperation.value,
@@ -141,7 +151,22 @@ function apply<TData extends object>(
   }
 
   if (parsedOperation.type === 'set-value') {
-    if (present && Object.is(actual, parsedOperation.value)) {
+    if (managedField?.type === 'string-enum-array') {
+      const compatibility = validateCompatibleValue(
+        managedField,
+        parsedOperation.value,
+        parsedOperation.path,
+      );
+      if (compatibility !== undefined) {
+        return failure(currentValue, [compatibility]);
+      }
+    }
+    if (
+      present &&
+      (Object.is(actual, parsedOperation.value) ||
+        (managedField?.type === 'string-enum-array' &&
+          orderedDenseStringArraysEqual(actual, parsedOperation.value)))
+    ) {
       return success(currentValue, false);
     }
     return success(
@@ -519,6 +544,26 @@ function validateDefinition(
     return { diagnostics: [formDiagnostic('fields-not-array', dataPath)] };
   }
   const diagnostics: Diagnostic[] = [];
+  let containsStringEnumArray = false;
+  for (let index = 0; index < fieldsMember.value.length; index += 1) {
+    const field = member(fieldsMember.value, String(index));
+    if (field.kind !== 'value' || !isObject(field.value)) continue;
+    const kind = member(field.value, 'kind');
+    if (kind.kind === 'value' && kind.value === 'string-enum-array') {
+      containsStringEnumArray = true;
+      break;
+    }
+  }
+  if (containsStringEnumArray) {
+    const nestedDefects = collectCollectionFormDefinitionDefects(definition);
+    if (nestedDefects.length > 0) {
+      return {
+        diagnostics: nestedDefects.map((defect) =>
+          nestedFormDiagnostic(defect, dataPath),
+        ),
+      };
+    }
+  }
   const fields = new Map<string, ManagedField>();
   for (let index = 0; index < fieldsMember.value.length; index += 1) {
     const fieldMember = member(fieldsMember.value, String(index));
@@ -547,7 +592,8 @@ function validateDefinition(
       kind.kind !== 'value' ||
       (kind.value !== 'string' &&
         kind.value !== 'number' &&
-        kind.value !== 'boolean')
+        kind.value !== 'boolean' &&
+        kind.value !== 'string-enum-array')
     ) {
       diagnostics.push(
         formDiagnostic('unsupported-field-kind', dataPath, index),
@@ -673,6 +719,48 @@ function nestedFormDiagnostic(
         ? { actualValue: defect.actualValue }
         : {}),
       ...(defect.members === undefined ? {} : { members: [...defect.members] }),
+      ...(defect.conditionMember === undefined
+        ? {}
+        : { conditionMember: defect.conditionMember }),
+      ...(defect.conditionReason === undefined
+        ? {}
+        : { conditionReason: defect.conditionReason }),
+      ...(defect.conditionDetailMember === undefined
+        ? {}
+        : { member: defect.conditionDetailMember }),
+      ...(defect.conditionExpected === undefined
+        ? {}
+        : { expected: defect.conditionExpected }),
+      ...(defect.conditionActualType === undefined
+        ? {}
+        : { actualType: defect.conditionActualType }),
+      ...(defect.conditionActualLength === undefined
+        ? {}
+        : { actualLength: defect.conditionActualLength }),
+      ...(defect.conditionIndex === undefined
+        ? {}
+        : { index: defect.conditionIndex }),
+      ...(defect.conditionPathKey === undefined
+        ? {}
+        : { pathKey: defect.conditionPathKey }),
+      ...(defect.sourcePath === undefined
+        ? {}
+        : { sourcePath: [...defect.sourcePath] }),
+      ...(defect.sourceReason === undefined
+        ? {}
+        : { sourceReason: defect.sourceReason }),
+      ...(defect.sourceKind === undefined
+        ? {}
+        : { sourceKind: defect.sourceKind }),
+      ...(defect.sourceNullable === undefined
+        ? {}
+        : { sourceNullable: defect.sourceNullable }),
+      ...(defect.conditionTargetCapability === undefined
+        ? {}
+        : { targetCapability: defect.conditionTargetCapability }),
+      ...(defect.conditionLocation === undefined
+        ? {}
+        : { location: defect.conditionLocation }),
     },
     'Form definition is invalid.',
     dataPath,
@@ -684,6 +772,21 @@ function validateCompatibleValue(
   value: unknown,
   dataPath: readonly string[],
 ): Diagnostic | undefined {
+  if (field.type === 'string-enum-array') {
+    const inspection = inspectDenseStringArray(value);
+    if (inspection.success) return undefined;
+    return runtimeDiagnostic(
+      'INCOMPATIBLE_OPERATION_VALUE',
+      {
+        field: field.name,
+        fieldType: field.type,
+        ...describeActualValue(value),
+        ...(inspection.defect ?? {}),
+      },
+      `Operation value is incompatible with field "${field.name}".`,
+      dataPath,
+    );
+  }
   const compatible =
     (field.nullable && value === null) ||
     (field.type === 'string' && typeof value === 'string') ||

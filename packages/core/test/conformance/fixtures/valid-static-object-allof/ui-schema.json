@@ -1,0 +1,7 @@
+{
+  "order": ["displayName", "email"],
+  "fields": {
+    "displayName": { "label": "Display name" },
+    "email": { "label": "Email address" }
+  }
+}

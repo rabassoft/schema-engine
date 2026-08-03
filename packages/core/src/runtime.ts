@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type {
+  AsyncSchemaValidator,
+  AsyncValidationState,
   CollectionItemAddress,
   CollectionNodeAddress,
   CollectionPlacement,
@@ -33,6 +35,10 @@ import type {
   ValidationSnapshot,
   ValidationVisibility,
 } from './contracts.js';
+import {
+  AsyncCancellationController,
+  AsyncGenerationCounter,
+} from './internal/async-validation.js';
 import { diagnostic } from './internal/diagnostics.js';
 import {
   type NestedDefinitionDefect,
@@ -58,8 +64,39 @@ import {
   readOwnDataMember,
 } from './internal/path.js';
 import { actualType, describeActualValue } from './internal/value.js';
+import {
+  detachDenseStringArray,
+  inspectDenseStringArray,
+  orderedDenseStringArraysEqual,
+} from './internal/string-enum-array.js';
 
 const EMPTY: readonly [] = Object.freeze([]);
+
+interface AsyncGenerationRecord {
+  readonly generation: number;
+  readonly cancellation: AsyncCancellationController;
+  completed: boolean;
+}
+
+interface RuntimeFieldConditionState {
+  readonly visible: boolean;
+  readonly enabled: boolean;
+}
+
+interface DetachedRuntimeFieldConditions {
+  readonly visibleWhen?: {
+    readonly sourcePath: readonly string[];
+    readonly equals: string | number | boolean | null;
+  };
+  readonly enabledWhen?: {
+    readonly sourcePath: readonly string[];
+    readonly equals: string | number | boolean | null;
+  };
+}
+
+function blockedAsyncValidation(): AsyncValidationState {
+  return Object.freeze({ status: 'blocked', reason: 'sync-invalid' });
+}
 
 export function createControlledFormRuntime<TData extends object>(
   options: ControlledFormRuntimeOptions<TData>,
@@ -74,7 +111,11 @@ export function createControlledFormRuntime<TData extends object>(
     checked.options.definition.nodes,
   );
   if (!validation.success) return failedCreation(validation.diagnostics);
-  const runtime = new ControlledRuntime(checked.options, validation);
+  const runtime = new ControlledRuntime(
+    checked.options,
+    checked.conditions,
+    validation,
+  );
   return Object.freeze({
     success: true,
     runtime,
@@ -95,6 +136,8 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   private locale: string;
   private visibility: ValidationVisibility;
   private validationValid: boolean;
+  private syncIssues: readonly ValidationIssue[];
+  private asyncIssues: readonly ValidationIssue[] = EMPTY;
   private issues: readonly ValidationIssue[];
   private snapshot: FormRuntimeSnapshot<TData>;
   private readonly touched = new Set<string>();
@@ -109,13 +152,23 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     string,
     ReadonlySet<string>
   >;
+  private readonly conditions: ReadonlyMap<
+    string,
+    DetachedRuntimeFieldConditions
+  >;
+  private conditionState: ReadonlyMap<string, RuntimeFieldConditionState>;
   private snapshotByKey = new Map<string, RuntimeTreeSnapshot>();
   private snapshotByPath = new Map<string, RuntimeTreeSnapshot>();
+  private readonly asyncValidator: AsyncSchemaValidator | undefined;
+  private readonly asyncGenerations = new AsyncGenerationCounter();
+  private asyncValidation: AsyncValidationState | undefined;
+  private activeAsync: AsyncGenerationRecord | undefined;
   private nextOperationId = 1;
   private disposed = false;
 
   constructor(
     private readonly options: ControlledFormRuntimeOptions<TData>,
+    conditions: ReadonlyMap<string, DetachedRuntimeFieldConditions>,
     validation: ValidValidation,
   ) {
     const indexes = buildDefinitionIndexes(options.definition.nodes);
@@ -123,13 +176,34 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     this.fieldByKey = indexes.fields;
     this.descendantNodeKeys = indexes.descendantNodes;
     this.descendantFieldKeys = indexes.descendantFields;
+    this.conditions = conditions;
     this.value = options.value;
     this.baseline = options.baselineValue;
     this.locale = options.locale;
     this.visibility = options.validationVisibility ?? 'touched';
     this.validationValid = validation.valid;
+    this.syncIssues = validation.issues;
     this.issues = validation.issues;
+    this.conditionState = evaluateRuntimeFieldConditions(
+      this.conditions,
+      this.value,
+    );
+    const asyncValidator = read(options, 'asyncValidator');
+    this.asyncValidator =
+      asyncValidator.kind === 'value'
+        ? (asyncValidator.value as AsyncSchemaValidator | undefined)
+        : undefined;
+    const initialAsync =
+      this.asyncValidator === undefined
+        ? undefined
+        : validation.valid
+          ? this.prepareAsyncStart()
+          : undefined;
+    if (this.asyncValidator !== undefined && !validation.valid) {
+      this.asyncValidation = blockedAsyncValidation();
+    }
     this.snapshot = this.buildSnapshot();
+    if (initialAsync !== undefined) this.invokeAsync(initialAsync);
   }
 
   getSnapshot(): FormRuntimeSnapshot<TData> {
@@ -260,7 +334,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     let validation: ValidValidation = {
       success: true,
       valid: this.validationValid,
-      issues: this.issues,
+      issues: this.syncIssues,
       diagnostics: EMPTY,
     };
     if (valueChanged) {
@@ -278,7 +352,24 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     this.baseline = nextBaseline as Readonly<TData>;
     this.locale = nextLocale;
     this.validationValid = validation.valid;
-    this.issues = validation.issues;
+    if (valueChanged) {
+      this.conditionState = evaluateRuntimeFieldConditions(
+        this.conditions,
+        this.value,
+      );
+      this.syncIssues = validation.issues;
+      this.asyncIssues = EMPTY;
+      this.issues = this.syncIssues;
+    }
+    let asyncStart: AsyncGenerationRecord | undefined;
+    if (valueChanged && this.asyncValidator !== undefined) {
+      if (validation.valid) {
+        asyncStart = this.prepareAsyncStart();
+      } else {
+        this.cancelActiveAsync();
+        this.asyncValidation = blockedAsyncValidation();
+      }
+    }
     if (valueChanged && this.focused !== undefined) {
       const focusedField = this.fieldByKey.get(this.focused);
       const presence =
@@ -286,8 +377,9 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
           ? undefined
           : resolveFieldPresence(this.value, focusedField.path);
       if (
-        presence?.kind === 'blocked' &&
-        presence.reason === 'incompatible-ancestor'
+        (presence?.kind === 'blocked' &&
+          presence.reason === 'incompatible-ancestor') ||
+        !runtimeFieldIsActive(this.conditionState.get(focusedField?.key ?? ''))
       ) {
         this.focused = undefined;
       }
@@ -310,6 +402,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     if (interactionChanged) {
       this.snapshot = this.buildSnapshot(previousSnapshot);
     }
+    if (asyncStart !== undefined) this.invokeAsync(asyncStart);
     return actionSuccess(true, false, [
       ...collectionStateDiagnostics(
         nextValue as object,
@@ -406,9 +499,15 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   getValidationSnapshot(scope?: FormScope): ValidationSnapshot {
     if (scope === undefined) {
       return Object.freeze({
-        valid: this.validationValid,
+        valid:
+          this.asyncValidation === undefined
+            ? this.validationValid
+            : this.snapshot.valid,
         issues: this.issues,
         diagnostics: EMPTY,
+        ...(this.asyncValidation === undefined
+          ? {}
+          : { asyncValidation: this.asyncValidation }),
       });
     }
     const parsed = this.parseScope(scope);
@@ -417,6 +516,9 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         valid: false,
         issues: EMPTY,
         diagnostics: parsed.diagnostics,
+        ...(this.asyncValidation === undefined
+          ? {}
+          : { asyncValidation: this.asyncValidation }),
       });
     const issues = this.issues.filter(
       (issue) =>
@@ -434,9 +536,15 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         })(),
     );
     return Object.freeze({
-      valid: issues.length === 0,
+      valid:
+        this.asyncValidation === undefined
+          ? issues.length === 0
+          : this.asyncValidation.status === 'settled' && issues.length === 0,
       issues: Object.freeze(issues),
       diagnostics: parsed.diagnostics,
+      ...(this.asyncValidation === undefined
+        ? {}
+        : { asyncValidation: this.asyncValidation }),
     });
   }
 
@@ -470,8 +578,26 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     return this.commitInteraction(this.forcedScopes.delete(scopeId));
   }
 
+  retryAsyncValidation(): RuntimeActionResult {
+    const disposed = this.disposedResult('retryAsyncValidation');
+    if (disposed) return disposed;
+    if (this.asyncValidator === undefined)
+      return asyncRetryUnavailable('not-configured');
+    if (!this.validationValid) return asyncRetryUnavailable('sync-invalid');
+    if (this.asyncGenerations.exhausted())
+      return asyncRetryUnavailable('generation-exhausted');
+    const record = this.prepareAsyncStart();
+    if (record === undefined)
+      return asyncRetryUnavailable('generation-exhausted');
+    this.snapshot = this.buildSnapshot(this.snapshot);
+    this.invokeAsync(record);
+    this.notifySnapshots();
+    return actionSuccess(true, false);
+  }
+
   dispose(): RuntimeActionResult {
     if (this.disposed) return actionSuccess(false, false);
+    this.cancelActiveAsync();
     this.disposed = true;
     this.snapshotListeners.clear();
     this.operationListeners.clear();
@@ -550,19 +676,41 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
           'Runtime path is not managed.',
         ),
       ]);
-    if (type === 'set-value' && !compatible(field, nextValue))
-      return actionFailure([
-        runtimeDiagnostic(
-          'INCOMPATIBLE_OPERATION_VALUE',
-          {
-            field: field.name,
-            fieldType: fieldType(field),
-            ...describeActualValue(nextValue),
-          },
-          'Operation value is incompatible with the field.',
-          field.path,
-        ),
-      ]);
+    let operationValue = nextValue;
+    if (type === 'set-value') {
+      if (field.kind === 'string-enum-array') {
+        const detached = detachDenseStringArray(nextValue);
+        if (!detached.success) {
+          return actionFailure([
+            runtimeDiagnostic(
+              'INCOMPATIBLE_OPERATION_VALUE',
+              {
+                field: field.name,
+                fieldType: fieldType(field),
+                ...describeActualValue(nextValue),
+                ...(detached.defect ?? {}),
+              },
+              'Operation value is incompatible with the field.',
+              field.path,
+            ),
+          ]);
+        }
+        operationValue = detached.value;
+      } else if (!compatible(field, nextValue)) {
+        return actionFailure([
+          runtimeDiagnostic(
+            'INCOMPATIBLE_OPERATION_VALUE',
+            {
+              field: field.name,
+              fieldType: fieldType(field),
+              ...describeActualValue(nextValue),
+            },
+            'Operation value is incompatible with the field.',
+            field.path,
+          ),
+        ]);
+      }
+    }
     const snapshot = this.snapshotByKey.get(key) as
       FieldRuntimeSnapshot | undefined;
     if (snapshot === undefined) {
@@ -587,6 +735,11 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         ),
       ]);
     }
+    const inactive = inactiveRuntimeField(
+      type === 'set-value' ? 'requestSetValue' : 'requestRemoveValue',
+      snapshot,
+    );
+    if (inactive !== undefined) return actionFailure([inactive]);
     if (
       type === 'remove-value' &&
       (snapshot.presence.kind === 'missing' ||
@@ -598,7 +751,11 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     const actual: unknown =
       snapshot.presence.kind === 'value' ? snapshot.presence.value : undefined;
     if (
-      (type === 'set-value' && present && Object.is(actual, nextValue)) ||
+      (type === 'set-value' &&
+        present &&
+        (Object.is(actual, operationValue) ||
+          (field.kind === 'string-enum-array' &&
+            orderedDenseStringArraysEqual(actual, operationValue)))) ||
       (type === 'remove-value' && !present)
     )
       return actionSuccess(false, false);
@@ -613,7 +770,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       }),
       path: Object.freeze([...field.path]),
       expected: expectation,
-      ...(type === 'set-value' ? { value: nextValue } : {}),
+      ...(type === 'set-value' ? { value: operationValue } : {}),
       source: 'user' as const,
     }) as FormOperation;
     this.nextOperationId += 1;
@@ -966,6 +1123,10 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         ),
       ]);
     }
+    if (snapshot !== undefined) {
+      const inactive = inactiveRuntimeField(action, snapshot);
+      if (inactive !== undefined) return actionFailure([inactive]);
+    }
     return this.interactWithKey(action, key, snapshot);
   }
 
@@ -1023,6 +1184,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       issues: this.issues,
       touched: this.touched,
       focused: this.focused,
+      conditionState: this.conditionState,
       forcedScopes: this.forcedScopes,
       visibility: this.visibility,
       ...(previous === undefined ? {} : { previous }),
@@ -1033,16 +1195,183 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     return Object.freeze({
       value: this.value,
       locale: this.locale,
-      valid:
-        this.validationValid &&
+      valid: this.rootValidationValid(
         built.globalIssues.length === 0 &&
-        built.nodes.every((node) => node.valid),
+          built.nodes.every((node) => node.valid),
+      ),
       dirty: built.nodes.some((node) => node.dirty),
       validationVisibility: this.visibility,
       nodes: built.nodes,
       fields: built.fields,
       globalIssues: built.globalIssues,
+      ...(this.asyncValidation === undefined
+        ? {}
+        : { asyncValidation: this.asyncValidation }),
     });
+  }
+
+  private rootValidationValid(treeValid = true): boolean {
+    const synchronousValid = this.validationValid && treeValid;
+    if (this.asyncValidation === undefined) return synchronousValid;
+    return (
+      this.asyncValidation.status === 'settled' &&
+      this.asyncValidation.valid &&
+      synchronousValid
+    );
+  }
+
+  private prepareAsyncStart(): AsyncGenerationRecord | undefined {
+    this.cancelActiveAsync();
+    this.clearAsyncResult();
+    const generation = this.asyncGenerations.next();
+    if (generation === undefined) {
+      this.asyncValidation = Object.freeze({
+        status: 'failed',
+        generation: this.asyncGenerations.last(),
+        reason: 'generation-exhausted',
+      });
+      return undefined;
+    }
+    const record: AsyncGenerationRecord = {
+      generation,
+      cancellation: new AsyncCancellationController(),
+      completed: false,
+    };
+    this.activeAsync = record;
+    this.asyncValidation = Object.freeze({ status: 'pending', generation });
+    return record;
+  }
+
+  private cancelActiveAsync(): void {
+    const record = this.activeAsync;
+    if (record === undefined) return;
+    this.activeAsync = undefined;
+    record.cancellation.cancel();
+  }
+
+  private invokeAsync(record: AsyncGenerationRecord): void {
+    const validator = this.asyncValidator;
+    if (validator === undefined) return;
+    const context = Object.freeze({
+      generation: record.generation,
+      cancellation: record.cancellation.capability,
+    });
+    let raw: unknown;
+    try {
+      raw = validator.validate(this.options.schema, this.value, context);
+    } catch {
+      this.queueAsyncFailure(record, 'exception');
+      return;
+    }
+    let then: unknown;
+    try {
+      then =
+        (typeof raw === 'object' && raw !== null) || typeof raw === 'function'
+          ? Reflect.get(raw, 'then')
+          : undefined;
+    } catch {
+      this.queueAsyncFailure(record, 'exception');
+      return;
+    }
+    if (typeof then !== 'function') {
+      this.queueAsyncFailure(record, 'invalid-result');
+      return;
+    }
+    const observation = new Promise<unknown>((resolve, reject) => {
+      try {
+        Reflect.apply(then, raw, [resolve, reject]);
+      } catch (error) {
+        reject(
+          error instanceof Error
+            ? error
+            : new Error('Asynchronous validator thenable threw.'),
+        );
+      }
+    });
+    void observation.then(
+      (result) => this.completeAsync(record, result),
+      () => this.failAsync(record, 'exception'),
+    );
+  }
+
+  private queueAsyncFailure(
+    record: AsyncGenerationRecord,
+    reason: 'exception' | 'invalid-result',
+  ): void {
+    void Promise.resolve().then(() => this.failAsync(record, reason));
+  }
+
+  private completeAsync(record: AsyncGenerationRecord, raw: unknown): void {
+    if (!this.isCurrentAsync(record)) return;
+    let normalized:
+      | { readonly valid: boolean; readonly issues: readonly ValidationIssue[] }
+      | undefined;
+    try {
+      normalized = normalizeAsyncValidationResult(
+        raw,
+        this.nodeByKey,
+        this.snapshotByPath,
+      );
+    } catch {
+      normalized = undefined;
+    }
+    if (normalized === undefined) {
+      this.failAsync(record, 'invalid-result');
+      return;
+    }
+    if (!this.finishAsync(record)) return;
+    this.asyncIssues = normalized.issues;
+    this.issues =
+      this.asyncIssues.length === 0
+        ? this.syncIssues
+        : Object.freeze([...this.syncIssues, ...this.asyncIssues]);
+    this.asyncValidation = Object.freeze({
+      status: 'settled',
+      generation: record.generation,
+      valid: normalized.valid,
+    });
+    this.commitAsyncTransition();
+  }
+
+  private failAsync(
+    record: AsyncGenerationRecord,
+    reason: 'exception' | 'invalid-result',
+  ): void {
+    if (!this.finishAsync(record)) return;
+    this.clearAsyncResult();
+    this.asyncValidation = Object.freeze({
+      status: 'failed',
+      generation: record.generation,
+      reason,
+    });
+    this.commitAsyncTransition();
+  }
+
+  private finishAsync(record: AsyncGenerationRecord): boolean {
+    if (!this.isCurrentAsync(record)) return false;
+    record.completed = true;
+    this.activeAsync = undefined;
+    record.cancellation.release();
+    return true;
+  }
+
+  private isCurrentAsync(record: AsyncGenerationRecord): boolean {
+    return (
+      !this.disposed &&
+      !record.completed &&
+      !record.cancellation.isCancelled() &&
+      this.activeAsync === record
+    );
+  }
+
+  private clearAsyncResult(): void {
+    this.asyncIssues = EMPTY;
+    this.issues = this.syncIssues;
+  }
+
+  private commitAsyncTransition(): void {
+    this.snapshot = this.buildSnapshot(this.snapshot);
+    this.notifySnapshots();
   }
 
   private fieldNames(): ReadonlySet<string> {
@@ -1109,6 +1438,7 @@ function collectionStateDiagnostics(
 interface ValidOptions<TData extends object> {
   readonly success: true;
   readonly options: ControlledFormRuntimeOptions<TData>;
+  readonly conditions: ReadonlyMap<string, DetachedRuntimeFieldConditions>;
 }
 interface InvalidResult {
   readonly success: false;
@@ -1176,6 +1506,7 @@ function validateOptions<TData extends object>(
         ),
       ]),
     };
+  const conditions = detachRuntimeFieldConditions(options.definition.fields);
   const valueDiagnostic = validateManagedExternalData(
     options.value,
     options.definition.nodes,
@@ -1247,7 +1578,36 @@ function validateOptions<TData extends object>(
         ),
       ]),
     };
-  return { success: true, options };
+  const asyncValidator = read(value, 'asyncValidator');
+  if (asyncValidator.kind === 'accessor')
+    return {
+      success: false,
+      diagnostics: freezeDiagnostics([
+        invalidOption(
+          'asyncValidator',
+          'object with callable validate or undefined',
+          undefined,
+          'accessor-member',
+        ),
+      ]),
+    };
+  if (asyncValidator.kind === 'value' && asyncValidator.value !== undefined) {
+    const validate = isRecord(asyncValidator.value)
+      ? read(asyncValidator.value, 'validate')
+      : undefined;
+    if (validate?.kind !== 'value' || typeof validate.value !== 'function')
+      return {
+        success: false,
+        diagnostics: freezeDiagnostics([
+          invalidOption(
+            'asyncValidator',
+            'object with callable validate or undefined',
+            asyncValidator.value,
+          ),
+        ]),
+      };
+  }
+  return { success: true, options, conditions };
 }
 
 function runValidator(
@@ -1305,6 +1665,71 @@ function runValidator(
     valid: validEntry.value,
     issues: Object.freeze(issues),
     diagnostics: freezeDiagnostics(diagnostics),
+  };
+}
+
+function normalizeAsyncValidationResult(
+  raw: unknown,
+  nodes: ReadonlyMap<string, FormNodeDefinition>,
+  snapshots: ReadonlyMap<string, RuntimeTreeSnapshot>,
+):
+  | { readonly valid: boolean; readonly issues: readonly ValidationIssue[] }
+  | undefined {
+  if (!isRecord(raw)) return undefined;
+  const valid = read(raw, 'valid');
+  const issuesEntry = read(raw, 'issues');
+  if (
+    valid.kind !== 'value' ||
+    typeof valid.value !== 'boolean' ||
+    issuesEntry.kind !== 'value' ||
+    !Array.isArray(issuesEntry.value)
+  ) {
+    return undefined;
+  }
+  const issues: ValidationIssue[] = [];
+  for (let index = 0; index < issuesEntry.value.length; index += 1) {
+    const entry = read(issuesEntry.value, String(index));
+    if (entry.kind !== 'value') return undefined;
+    const normalized = normalizeAsyncIssue(entry.value, index);
+    if (!normalized.success) return undefined;
+    const path = normalized.issue.path;
+    if (
+      path.length !== 0 &&
+      assignedRuntimeIssueKey(path, snapshots) === undefined &&
+      assignedIssueKey(path, nodes) === undefined
+    ) {
+      return undefined;
+    }
+    issues.push(normalized.issue);
+  }
+  return Object.freeze({
+    valid: valid.value,
+    issues: issues.length === 0 ? EMPTY : Object.freeze(issues),
+  });
+}
+
+function normalizeAsyncIssue(
+  value: unknown,
+  issueIndex: number,
+): { readonly success: true; readonly issue: ValidationIssue } | InvalidResult {
+  const normalized = normalizeIssue(value, issueIndex);
+  if (!normalized.success) return normalized;
+  const parameters = copyAsyncParameters(normalized.issue.parameters);
+  if (parameters === undefined)
+    return invalidValidation('invalid-parameters', issueIndex);
+  return {
+    success: true,
+    issue: Object.freeze({
+      code: normalized.issue.code,
+      path: normalized.issue.path,
+      parameters,
+      ...(normalized.issue.keyword === undefined
+        ? {}
+        : { keyword: normalized.issue.keyword }),
+      ...(normalized.issue.fallbackMessage === undefined
+        ? {}
+        : { fallbackMessage: normalized.issue.fallbackMessage }),
+    }),
   };
 }
 
@@ -1425,6 +1850,121 @@ function managedPathKey(path: unknown): string | undefined {
   return copied === undefined ? undefined : canonicalDataPathKey(copied);
 }
 
+function detachRuntimeFieldConditions(
+  fields: readonly FieldDefinition[],
+): ReadonlyMap<string, DetachedRuntimeFieldConditions> {
+  const result = new Map<string, DetachedRuntimeFieldConditions>();
+  const detach = (
+    field: FieldDefinition,
+    member: 'visibleWhen' | 'enabledWhen',
+  ):
+    | {
+        readonly sourcePath: readonly string[];
+        readonly equals: string | number | boolean | null;
+      }
+    | undefined => {
+    const condition = readOwnDataMember(field, member);
+    if (condition.kind !== 'value' || !isOrdinaryObject(condition.value)) {
+      return undefined;
+    }
+    const sourcePath = readOwnDataMember(condition.value, 'sourcePath');
+    const equals = readOwnDataMember(condition.value, 'equals');
+    const copied =
+      sourcePath.kind === 'value'
+        ? copyStringDataPath(sourcePath.value)
+        : undefined;
+    if (
+      copied === undefined ||
+      equals.kind !== 'value' ||
+      !isRuntimeConditionLiteral(equals.value)
+    ) {
+      return undefined;
+    }
+    return Object.freeze({ sourcePath: copied, equals: equals.value });
+  };
+  for (const field of fields) {
+    const visibleWhen = detach(field, 'visibleWhen');
+    const enabledWhen = detach(field, 'enabledWhen');
+    if (visibleWhen === undefined && enabledWhen === undefined) continue;
+    result.set(
+      field.key,
+      Object.freeze({
+        ...(visibleWhen === undefined ? {} : { visibleWhen }),
+        ...(enabledWhen === undefined ? {} : { enabledWhen }),
+      }),
+    );
+  }
+  return Object.freeze(result);
+}
+
+function isRuntimeConditionLiteral(
+  value: unknown,
+): value is string | number | boolean | null {
+  return (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    (typeof value === 'number' && Number.isFinite(value))
+  );
+}
+
+function evaluateRuntimeFieldConditions(
+  conditions: ReadonlyMap<string, DetachedRuntimeFieldConditions>,
+  value: object,
+): ReadonlyMap<string, RuntimeFieldConditionState> {
+  const result = new Map<string, RuntimeFieldConditionState>();
+  const matches = (condition: {
+    readonly sourcePath: readonly string[];
+    readonly equals: string | number | boolean | null;
+  }): boolean => {
+    const presence = resolveFieldPresence(value, condition.sourcePath);
+    return (
+      presence.kind === 'value' && Object.is(presence.value, condition.equals)
+    );
+  };
+  for (const [key, condition] of conditions) {
+    result.set(
+      key,
+      Object.freeze({
+        visible:
+          condition.visibleWhen === undefined
+            ? true
+            : matches(condition.visibleWhen),
+        enabled:
+          condition.enabledWhen === undefined
+            ? true
+            : matches(condition.enabledWhen),
+      }),
+    );
+  }
+  return Object.freeze(result);
+}
+
+function runtimeFieldIsActive(
+  state: RuntimeFieldConditionState | undefined,
+): boolean {
+  return state === undefined || (state.visible && state.enabled);
+}
+
+function inactiveRuntimeField(
+  action: 'requestSetValue' | 'requestRemoveValue' | 'focus' | 'blur',
+  snapshot: FieldRuntimeSnapshot,
+): Diagnostic | undefined {
+  const reason = !snapshot.visible
+    ? 'hidden'
+    : !snapshot.enabled
+      ? 'disabled'
+      : undefined;
+  return reason === undefined
+    ? undefined
+    : runtimeDiagnostic(
+        'INACTIVE_RUNTIME_FIELD',
+        { action, reason },
+        'Runtime action is blocked by conditional field state.',
+        snapshot.path,
+      );
+}
+
 function positionalPathKey(path: unknown): string | undefined {
   const copied = safePath(path);
   return copied === undefined || copied.length === 0
@@ -1484,7 +2024,10 @@ function invalidDefinitionOption(
     'INVALID_RUNTIME_OPTIONS',
     {
       member: 'definition',
-      expected: 'valid collection FormDefinition',
+      expected:
+        defect.reason === 'invalid-string-enum-array-field'
+          ? 'valid FormDefinition with string-enum-array fields'
+          : 'valid collection FormDefinition',
       reason: 'invalid-value',
       ...describeActualValue(value),
       definitionReason: defect.reason,
@@ -1503,6 +2046,60 @@ function invalidDefinitionOption(
       ...(defect.members === undefined
         ? {}
         : { definitionMembers: Object.freeze([...defect.members]) }),
+      ...(defect.conditionMember === undefined
+        ? {}
+        : { definitionConditionMember: defect.conditionMember }),
+      ...(defect.conditionReason === undefined
+        ? {}
+        : { definitionConditionReason: defect.conditionReason }),
+      ...(defect.conditionDetailMember === undefined
+        ? {}
+        : { definitionConditionDetailMember: defect.conditionDetailMember }),
+      ...(defect.conditionExpected === undefined ||
+      defect.reason === 'field-condition-literal-incompatible'
+        ? {}
+        : { definitionConditionExpected: defect.conditionExpected }),
+      ...(defect.conditionActualType === undefined ||
+      defect.reason === 'field-condition-literal-incompatible'
+        ? {}
+        : { definitionConditionActualType: defect.conditionActualType }),
+      ...(defect.conditionActualLength === undefined
+        ? {}
+        : { definitionConditionActualLength: defect.conditionActualLength }),
+      ...(defect.conditionIndex === undefined
+        ? {}
+        : { definitionConditionIndex: defect.conditionIndex }),
+      ...(defect.conditionPathKey === undefined
+        ? {}
+        : { definitionConditionPathKey: defect.conditionPathKey }),
+      ...(defect.sourcePath === undefined
+        ? {}
+        : { definitionSourcePath: Object.freeze([...defect.sourcePath]) }),
+      ...(defect.sourceReason === undefined
+        ? {}
+        : { definitionSourceReason: defect.sourceReason }),
+      ...(defect.sourceKind === undefined
+        ? {}
+        : { definitionSourceKind: defect.sourceKind }),
+      ...(defect.sourceNullable === undefined
+        ? {}
+        : { definitionSourceNullable: defect.sourceNullable }),
+      ...(defect.conditionExpected === undefined ||
+      defect.reason !== 'field-condition-literal-incompatible'
+        ? {}
+        : { definitionExpected: defect.conditionExpected }),
+      ...(defect.conditionActualType === undefined ||
+      defect.reason !== 'field-condition-literal-incompatible'
+        ? {}
+        : { definitionActualType: defect.conditionActualType }),
+      ...(defect.conditionTargetCapability === undefined
+        ? {}
+        : {
+            definitionTargetCapability: defect.conditionTargetCapability,
+          }),
+      ...(defect.conditionLocation === undefined
+        ? {}
+        : { definitionLocation: defect.conditionLocation }),
       ...(defect.nodeIndexPath === undefined
         ? {}
         : { nodeIndexPath: Object.freeze([...defect.nodeIndexPath]) }),
@@ -2047,6 +2644,65 @@ function copyParameters(
   }
   return Object.freeze(result);
 }
+
+function copyAsyncParameters(
+  value: Readonly<Record<string, unknown>>,
+): Readonly<Record<string, unknown>> | undefined {
+  const copied = copyAsyncParameterValue(value, new Set());
+  return copied !== undefined && isRecord(copied)
+    ? Object.freeze(copied)
+    : undefined;
+}
+
+function copyAsyncParameterValue(
+  value: unknown,
+  ancestors: Set<object>,
+): unknown {
+  if (typeof value !== 'object' || value === null) return value;
+  if (ancestors.has(value)) return undefined;
+  ancestors.add(value);
+  if (Array.isArray(value)) {
+    const result: unknown[] = [];
+    for (let index = 0; index < value.length; index += 1) {
+      const entry = read(value, String(index));
+      if (entry.kind !== 'value') {
+        ancestors.delete(value);
+        return undefined;
+      }
+      const copied = copyAsyncParameterValue(entry.value, ancestors);
+      if (copied === undefined && entry.value !== undefined) {
+        ancestors.delete(value);
+        return undefined;
+      }
+      result.push(copied);
+    }
+    ancestors.delete(value);
+    return Object.freeze(result);
+  }
+  const result: Record<string, unknown> = {};
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== 'string') continue;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor === undefined || !descriptor.enumerable) continue;
+    if (!('value' in descriptor)) {
+      ancestors.delete(value);
+      return undefined;
+    }
+    const copied = copyAsyncParameterValue(descriptor.value, ancestors);
+    if (copied === undefined && descriptor.value !== undefined) {
+      ancestors.delete(value);
+      return undefined;
+    }
+    Object.defineProperty(result, key, {
+      value: copied,
+      enumerable: true,
+      writable: false,
+      configurable: false,
+    });
+  }
+  ancestors.delete(value);
+  return Object.freeze(result);
+}
 function scalar(value: unknown): unknown {
   return value === null ||
     ['string', 'number', 'boolean'].includes(typeof value)
@@ -2068,6 +2724,7 @@ interface SnapshotBuildInput<TData extends object> {
   readonly issues: readonly ValidationIssue[];
   readonly touched: ReadonlySet<string>;
   readonly focused: string | undefined;
+  readonly conditionState: ReadonlyMap<string, RuntimeFieldConditionState>;
   readonly forcedScopes: ReadonlyMap<string, ReadonlySet<string>>;
   readonly visibility: ValidationVisibility;
   readonly previous?: FormRuntimeSnapshot<TData>;
@@ -2234,17 +2891,24 @@ function buildNestedSnapshots<TData extends object>(
     const touched = input.touched.has(frame.definition.key);
     const focused = input.focused === frame.definition.key;
     const forced = isForced(frame.definition.key, input.forcedScopes);
+    const condition = input.conditionState.get(frame.definition.key) ?? {
+      visible: true,
+      enabled: true,
+    };
     const candidate = freezeField({
       nodeKind: 'field',
       key: frame.definition.key,
       path: [...frame.definition.path],
       presence: current.presence as FieldPresence,
       dirty: fieldDirty(
+        frame.definition,
         current.presence as FieldPresence,
         baseline.presence as FieldPresence,
       ),
       touched,
       focused,
+      visible: condition.visible,
+      enabled: condition.enabled,
       valid: ownIssues.length === 0,
       issues: ownIssues,
       showIssues:
@@ -2322,13 +2986,21 @@ function inspectNodeState(
   };
 }
 
-function fieldDirty(current: FieldPresence, baseline: FieldPresence): boolean {
+function fieldDirty(
+  definition: FieldDefinition,
+  current: FieldPresence,
+  baseline: FieldPresence,
+): boolean {
   if (current.kind === 'blocked' || baseline.kind === 'blocked') return false;
   if (current.kind !== baseline.kind) return true;
   return (
     current.kind === 'value' &&
     baseline.kind === 'value' &&
-    !Object.is(current.value, baseline.value)
+    (definition.kind === 'string-enum-array' &&
+    inspectDenseStringArray(current.value).success &&
+    inspectDenseStringArray(baseline.value).success
+      ? !orderedDenseStringArraysEqual(current.value, baseline.value)
+      : !Object.is(current.value, baseline.value))
   );
 }
 
@@ -2441,7 +3113,10 @@ function assignedIssueKey(
   if (firstNumeric >= 0) {
     const collectionPath = path.slice(0, firstNumeric);
     const key = canonicalDataPathKey(collectionPath);
-    return nodes.get(key)?.kind === 'array' ? key : undefined;
+    const node = nodes.get(key);
+    return node?.kind === 'array' || node?.kind === 'string-enum-array'
+      ? key
+      : undefined;
   }
   const copied = copyStringDataPath(path, true);
   if (copied === undefined) return undefined;
@@ -2491,7 +3166,7 @@ function collectScopeTree(
 }
 function fieldType(
   field: FieldDefinition | FieldTemplate,
-): 'string' | 'number' | 'integer' | 'boolean' {
+): 'string' | 'number' | 'integer' | 'boolean' | 'string-enum-array' {
   return field.kind === 'number' ? field.numericType : field.kind;
 }
 function compatible(
@@ -2509,7 +3184,8 @@ function compatible(
     (type === 'integer' &&
       typeof value === 'number' &&
       Number.isFinite(value) &&
-      Number.isInteger(value))
+      Number.isInteger(value)) ||
+    (type === 'string-enum-array' && inspectDenseStringArray(value).success)
   );
 }
 
@@ -2557,6 +3233,8 @@ function sameField(a: FieldRuntimeSnapshot, b: FieldRuntimeSnapshot): boolean {
     a.dirty === b.dirty &&
     a.touched === b.touched &&
     a.focused === b.focused &&
+    a.visible === b.visible &&
+    a.enabled === b.enabled &&
     a.valid === b.valid &&
     a.showIssues === b.showIssues &&
     sameArray(a.issues, b.issues)
@@ -2759,6 +3437,17 @@ function actionFailure(
     effects: Object.freeze({ snapshotChanged: false, operationEmitted: false }),
     diagnostics: freezeDiagnostics(diagnostics),
   });
+}
+function asyncRetryUnavailable(
+  reason: 'not-configured' | 'sync-invalid' | 'generation-exhausted',
+): RuntimeActionResult {
+  return actionFailure([
+    runtimeDiagnostic(
+      'ASYNC_VALIDATION_RETRY_UNAVAILABLE',
+      { action: 'retryAsyncValidation', reason },
+      'Asynchronous validation cannot be retried.',
+    ),
+  ]);
 }
 function failedCreation(diagnostics: readonly Diagnostic[]): InvalidResult {
   return Object.freeze({

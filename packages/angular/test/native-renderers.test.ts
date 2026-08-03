@@ -18,6 +18,7 @@ import {
   SchemaBooleanRendererComponent,
   SchemaFormDirective,
   SchemaNumberRendererComponent,
+  SchemaStringEnumArrayRendererComponent,
   SchemaStringEnumRendererComponent,
   SchemaStringRendererComponent,
   provideSchemaEngineAngular,
@@ -100,6 +101,23 @@ const semanticCompiled = compileFormDefinition({
 if (!semanticCompiled.success)
   throw new Error('semantic native fixture compilation failed');
 const semanticDefinition = semanticCompiled.definition;
+const stringEnumArrayCompiled = compileFormDefinition({
+  schema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      roles: {
+        type: 'array',
+        items: { type: 'string', enum: ['reader', 'editor', 'reviewer'] },
+        uniqueItems: true,
+      },
+    },
+    required: ['roles'],
+  },
+});
+if (!stringEnumArrayCompiled.success)
+  throw new Error('string-enum array native fixture compilation failed');
+const stringEnumArrayDefinition = stringEnumArrayCompiled.definition;
 const schema = Object.freeze({});
 const validValidator: SchemaValidator = Object.freeze({
   validate: () => ({ valid: true, issues: [] }),
@@ -206,6 +224,59 @@ describe('native Signal Forms renderers', () => {
       success: true,
       registration: { id: 'native-string-enum' },
     });
+  });
+
+  it('projects controlled string-enum arrays through the provider and outlet', () => {
+    TestBed.configureTestingModule({
+      providers: [provideSchemaEngineAngularNative()],
+    });
+    const fixture = TestBed.createComponent(NativeHost);
+    fixture.componentInstance.config.set(
+      createConfig({
+        definition: stringEnumArrayDefinition,
+        value: { roles: ['editor', 'reader'] },
+        baselineValue: { roles: ['editor', 'reader'] },
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    const select = controlByBase(
+      fixture.nativeElement as HTMLElement,
+      nodeBase('native form', ['roles']),
+    ) as HTMLSelectElement;
+    expect(select).toBeInstanceOf(HTMLSelectElement);
+    expect(select.multiple).toBe(true);
+    expect(
+      TestBed.inject(AngularRendererResolver).resolve(
+        stringEnumArrayDefinition.fields[0]!,
+      ),
+    ).toMatchObject({
+      success: true,
+      registration: {
+        id: 'native-string-enum-array',
+        renderer: SchemaStringEnumArrayRendererComponent,
+      },
+    });
+
+    select.options[2]!.selected = true;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'set-value',
+      path: ['roles'],
+      value: ['editor', 'reader', 'reviewer'],
+    });
+    expect(selectedOptionTokens(select)).toEqual(['choice:0', 'choice:1']);
+
+    fixture.componentInstance.config.set(
+      createConfig({
+        definition: stringEnumArrayDefinition,
+        value: { roles: ['reviewer', 'reader'] },
+        baselineValue: { roles: ['editor', 'reader'] },
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(selectedOptionTokens(select)).toEqual(['choice:0', 'choice:2']);
   });
 
   it('projects semantic string input types without changing enum precedence or exact emission', () => {
@@ -998,4 +1069,10 @@ function controlByBase(root: HTMLElement, base: string): HTMLElement {
   const control = root.querySelector(`[id="${base}"]`);
   if (!(control instanceof HTMLElement)) throw new Error('control is missing');
   return control;
+}
+
+function selectedOptionTokens(select: HTMLSelectElement): readonly string[] {
+  return Array.from(select.options)
+    .filter((option) => option.selected)
+    .map(({ value }) => value);
 }

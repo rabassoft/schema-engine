@@ -11,11 +11,14 @@ import {
 } from '@angular/core';
 import {
   applyFormOperation,
+  commitScopeToBaseline,
   compileFormDefinition,
+  deriveSchemaDefaultCandidate,
   type CompileFormDefinitionInput,
   type CompileFormResult,
   type Diagnostic,
   type FormOperation,
+  type RuntimeActionResult,
   type ValidationVisibility,
 } from '@rabassoft/schema-engine';
 import {
@@ -23,8 +26,11 @@ import {
   type AngularControlledFormConfig,
 } from '@rabassoft/schema-engine-angular';
 import {
+  fixedValueControlStates,
   referenceScenarios,
   type ReferenceScenario,
+  type ReferenceScopeConfirmationTarget,
+  type ReferenceServiceValidation,
 } from '@schema-engine-internal/reference-scenarios';
 
 import { InspectorPanelComponent } from './inspector-panel.component.js';
@@ -33,6 +39,10 @@ import { referenceSnippets } from './generated/reference-snippets.js';
 import { serializeInspector } from './inspector-serialization.js';
 import { ReferenceJsonEditorComponent } from './reference-json-editor.component.js';
 import { REFERENCE_SCHEMA_VALIDATOR } from './reference-validator.js';
+import {
+  AngularReferenceAsyncValidator,
+  type AngularServiceRequestEvidence,
+} from './reference-async-validator.js';
 import {
   ReferenceTabsComponent,
   type ReferenceTab,
@@ -53,6 +63,39 @@ interface ScenarioSelection {
   readonly scenario: ReferenceScenario;
   readonly compilation: CompileFormResult;
 }
+
+type ScopeCandidateState =
+  | {
+      readonly status: 'available';
+      readonly targetId: string;
+      readonly label: string;
+      readonly value: Readonly<object>;
+      readonly changed: boolean;
+      readonly diagnostics: readonly Diagnostic[];
+    }
+  | {
+      readonly status: 'unconfirmable';
+      readonly targetId: string;
+      readonly label: string;
+      readonly diagnostics: readonly Diagnostic[];
+    }
+  | {
+      readonly status: 'accepted';
+      readonly targetId: string;
+      readonly label: string;
+      readonly diagnostics: readonly Diagnostic[];
+    };
+
+type DefaultCandidateState =
+  | {
+      readonly status: 'available';
+      readonly value: Readonly<object>;
+      readonly diagnostics: readonly Diagnostic[];
+    }
+  | {
+      readonly status: 'accepted' | 'cancelled' | 'no-effect' | 'failed';
+      readonly diagnostics: readonly Diagnostic[];
+    };
 
 interface AppliedConfiguration {
   readonly input: CompileFormDefinitionInput;
@@ -349,6 +392,170 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                         Remove last member
                       </button>
                     </div>
+                  </fieldset>
+                }
+
+                @if (selectedScenario().id === 'fixed-values') {
+                  <fieldset class="collection-controls">
+                    <legend>Fixed value controls</legend>
+                    <div class="button-row">
+                      @for (control of fixedValueControls; track control.id) {
+                        <button
+                          type="button"
+                          [attr.data-testid]="'fixed-control-' + control.id"
+                          (click)="replaceValue(control.value)"
+                        >
+                          {{ control.label }}
+                        </button>
+                      }
+                    </div>
+                  </fieldset>
+                }
+
+                @if (selectedScenario().serviceValidation; as service) {
+                  <fieldset
+                    class="collection-controls service-validation-controls"
+                    data-testid="service-validation-controls"
+                  >
+                    <legend>{{ service.labels.heading }}</legend>
+                    <p class="scope-guidance">
+                      Resolve deterministic application work to inspect core
+                      settlement, cancellation, failure and retry behavior.
+                    </p>
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      data-testid="async-validation-state"
+                    >
+                      {{ asyncValidationStatus() }}
+                    </p>
+                    <div class="button-row">
+                      <button
+                        type="button"
+                        [disabled]="!hasPendingServiceRequest()"
+                        (click)="resolveServiceValidation(true)"
+                      >
+                        {{ service.labels.settleValid }}
+                      </button>
+                      <button
+                        type="button"
+                        [disabled]="!hasPendingServiceRequest()"
+                        (click)="resolveServiceValidation(false)"
+                      >
+                        {{ service.labels.settleInvalid }}
+                      </button>
+                      <button
+                        type="button"
+                        [disabled]="!hasPendingServiceRequest()"
+                        (click)="rejectServiceValidation()"
+                      >
+                        {{ service.labels.reject }}
+                      </button>
+                      <button type="button" (click)="throwOnNextValidation()">
+                        {{ service.labels.throwNext }}
+                      </button>
+                      <button type="button" (click)="retryAsyncValidation()">
+                        {{ service.labels.retry }}
+                      </button>
+                    </div>
+                    <reference-inspector-panel
+                      label="Service request evidence"
+                      testId="inspector-service-requests"
+                      [expanded]="true"
+                      [value]="serviceRequestEvidence()"
+                    />
+                  </fieldset>
+                }
+
+                @if (selectedScenario().scopeConfirmation; as confirmation) {
+                  <fieldset
+                    class="collection-controls scope-confirmation-controls"
+                    data-testid="scope-confirmation-controls"
+                  >
+                    <legend>{{ confirmation.labels.heading }}</legend>
+                    <p class="scope-guidance">
+                      {{ confirmation.labels.guidance }}
+                    </p>
+                    <div class="button-row">
+                      @for (target of confirmation.targets; track target.id) {
+                        <button
+                          type="button"
+                          [attr.data-testid]="'prepare-scope-' + target.id"
+                          (click)="prepareScopeCandidate(target)"
+                        >
+                          {{ target.label }}
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        data-testid="accept-scope-candidate"
+                        [disabled]="scopeCandidate()?.status !== 'available'"
+                        (click)="acceptScopeCandidate()"
+                      >
+                        {{ confirmation.labels.accept }}
+                      </button>
+                    </div>
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      data-testid="scope-candidate-status"
+                    >
+                      {{ scopeCandidateStatus() }}
+                    </p>
+                    <reference-inspector-panel
+                      label="Prepared baseline candidate"
+                      testId="inspector-scope-candidate"
+                      [expanded]="true"
+                      [value]="scopeCandidate()"
+                    />
+                  </fieldset>
+                }
+
+                @if (selectedScenario().schemaDefaults; as defaults) {
+                  <fieldset
+                    class="collection-controls schema-default-controls"
+                    data-testid="schema-default-controls"
+                  >
+                    <legend>{{ defaults.labels.heading }}</legend>
+                    <p class="scope-guidance">{{ defaults.labels.guidance }}</p>
+                    <div class="button-row">
+                      <button
+                        type="button"
+                        data-testid="derive-default-candidate"
+                        (click)="deriveDefaultCandidate()"
+                      >
+                        {{ defaults.labels.derive }}
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="cancel-default-candidate"
+                        [disabled]="defaultCandidate()?.status !== 'available'"
+                        (click)="cancelDefaultCandidate()"
+                      >
+                        {{ defaults.labels.cancel }}
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="accept-default-candidate"
+                        [disabled]="defaultCandidate()?.status !== 'available'"
+                        (click)="acceptDefaultCandidate()"
+                      >
+                        {{ defaults.labels.accept }}
+                      </button>
+                    </div>
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      data-testid="default-candidate-status"
+                    >
+                      {{ defaultCandidateStatus() }}
+                    </p>
+                    <reference-inspector-panel
+                      label="Prepared schema-default candidate"
+                      testId="inspector-default-candidate"
+                      [expanded]="true"
+                      [value]="defaultCandidate()"
+                    />
                   </fieldset>
                 }
 
@@ -827,6 +1034,7 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
   `,
 })
 export class ReferenceFormComponent {
+  readonly fixedValueControls = fixedValueControlStates;
   private readonly injector = inject(Injector);
   private readonly validator = inject(REFERENCE_SCHEMA_VALIDATOR);
   readonly scenarios = referenceScenarios;
@@ -857,6 +1065,18 @@ export class ReferenceFormComponent {
   private readonly runtimeDiagnosticsState = signal<readonly Diagnostic[]>(
     Object.freeze([]),
   );
+  private readonly serviceRequestEvidenceState = signal<
+    readonly AngularServiceRequestEvidence[]
+  >(Object.freeze([]));
+  private readonly asyncValidatorState = signal<
+    AngularReferenceAsyncValidator | undefined
+  >(undefined);
+  private readonly scopeCandidateState = signal<
+    ScopeCandidateState | undefined
+  >(undefined);
+  private readonly defaultCandidateState = signal<
+    DefaultCandidateState | undefined
+  >(undefined);
   // reference-snippet:end application-signals
   private readonly formState = signal<SchemaFormDirective<object> | undefined>(
     undefined,
@@ -899,6 +1119,10 @@ export class ReferenceFormComponent {
   readonly decisionMode = this.decisionModeState.asReadonly();
   readonly history = this.historyState.asReadonly();
   readonly runtimeDiagnostics = this.runtimeDiagnosticsState.asReadonly();
+  readonly serviceRequestEvidence =
+    this.serviceRequestEvidenceState.asReadonly();
+  readonly scopeCandidate = this.scopeCandidateState.asReadonly();
+  readonly defaultCandidate = this.defaultCandidateState.asReadonly();
   readonly collectionDraftId = this.collectionDraftIdState.asReadonly();
   readonly collectionDraftName = this.collectionDraftNameState.asReadonly();
   readonly activeCompileInput = computed(
@@ -968,6 +1192,7 @@ export class ReferenceFormComponent {
   >(() => {
     const selection = this.selectionState();
     if (!selection.compilation.success) return undefined;
+    const asyncValidator = this.asyncValidatorState()?.validator;
     return Object.freeze({
       formId: `reference-${selection.scenario.id}`,
       definition: selection.compilation.definition,
@@ -976,6 +1201,7 @@ export class ReferenceFormComponent {
       baselineValue: this.baselineValue(),
       locale: this.locale(),
       validator: this.validator,
+      ...(asyncValidator === undefined ? {} : { asyncValidator }),
       validationVisibility: this.validationVisibility(),
     });
   });
@@ -987,6 +1213,49 @@ export class ReferenceFormComponent {
     ]);
   });
   readonly runtimeSnapshot = computed(() => this.formDirective?.snapshot());
+  readonly asyncValidationStatus = computed(() => {
+    const state = this.runtimeSnapshot()?.asyncValidation;
+    if (state === undefined)
+      return 'Asynchronous validation is not configured.';
+    if (state.status === 'blocked') return 'Blocked by synchronous validation.';
+    if (state.status === 'pending')
+      return `Generation ${state.generation} pending.`;
+    if (state.status === 'failed') {
+      return `Generation ${state.generation} failed: ${state.reason}.`;
+    }
+    return `Generation ${state.generation} settled ${state.valid ? 'valid' : 'invalid'}.`;
+  });
+  readonly hasPendingServiceRequest = computed(() =>
+    this.serviceRequestEvidence().some(({ status }) => status === 'pending'),
+  );
+  readonly scopeCandidateStatus = computed(() => {
+    const candidate = this.scopeCandidate();
+    if (candidate === undefined) return 'No baseline candidate prepared.';
+    if (candidate.status === 'unconfirmable') {
+      return `${candidate.label}: unconfirmable; baseline and dirty state are unchanged.`;
+    }
+    if (candidate.status === 'accepted') {
+      return `${candidate.label}: simulated persistence accepted; unrelated edits remain dirty.`;
+    }
+    return `${candidate.label}: candidate prepared; baseline and dirty state are unchanged until acceptance.`;
+  });
+  readonly defaultCandidateStatus = computed(() => {
+    const candidate = this.defaultCandidate();
+    if (candidate === undefined) return 'No schema-default candidate derived.';
+    if (candidate.status === 'available') {
+      return 'Candidate derived; controlled value and operation history are unchanged.';
+    }
+    if (candidate.status === 'accepted') {
+      return 'Candidate explicitly accepted as the application-owned value.';
+    }
+    if (candidate.status === 'cancelled') {
+      return 'Candidate cancelled; controlled value remains unchanged.';
+    }
+    if (candidate.status === 'no-effect') {
+      return 'Derivation has no effect because every supported default path is present.';
+    }
+    return 'Candidate derivation failed; controlled value remains unchanged.';
+  });
 
   @ViewChild(SchemaFormDirective)
   private get formDirective(): SchemaFormDirective<object> | undefined {
@@ -1015,6 +1284,7 @@ export class ReferenceFormComponent {
   }
 
   loadScenario(scenario: ReferenceScenario): void {
+    this.installAsyncValidator(scenario.serviceValidation);
     const original = prepareConfiguration(scenario.compileInput);
     const configuration = prepareConfiguration(original.input);
     const compilation = compileFormDefinition(configuration.input);
@@ -1037,6 +1307,95 @@ export class ReferenceFormComponent {
     this.baselineValueState.set(this.value());
   }
 
+  prepareScopeCandidate(target: ReferenceScopeConfirmationTarget): void {
+    const definition = this.definition();
+    if (definition === undefined) return;
+    const result = commitScopeToBaseline(
+      definition,
+      this.baselineValue(),
+      this.value(),
+      target.scope,
+    );
+    this.scopeCandidateState.set(
+      result.success
+        ? Object.freeze({
+            status: 'available',
+            targetId: target.id,
+            label: target.label,
+            value: result.value,
+            changed: result.changed,
+            diagnostics: result.diagnostics,
+          })
+        : Object.freeze({
+            status: 'unconfirmable',
+            targetId: target.id,
+            label: target.label,
+            diagnostics: result.diagnostics,
+          }),
+    );
+  }
+
+  acceptScopeCandidate(): void {
+    const candidate = this.scopeCandidate();
+    if (candidate?.status !== 'available') return;
+    this.baselineValueState.set(candidate.value);
+    this.scopeCandidateState.set(
+      Object.freeze({
+        status: 'accepted',
+        targetId: candidate.targetId,
+        label: candidate.label,
+        diagnostics: candidate.diagnostics,
+      }),
+    );
+  }
+
+  deriveDefaultCandidate(): void {
+    const result = deriveSchemaDefaultCandidate(
+      this.activeCompileInput().schema,
+      this.value(),
+    );
+    this.defaultCandidateState.set(
+      result.success
+        ? result.changed
+          ? Object.freeze({
+              status: 'available',
+              value: result.value,
+              diagnostics: result.diagnostics,
+            })
+          : Object.freeze({
+              status: 'no-effect',
+              diagnostics: result.diagnostics,
+            })
+        : Object.freeze({
+            status: 'failed',
+            diagnostics: result.diagnostics,
+          }),
+    );
+  }
+
+  cancelDefaultCandidate(): void {
+    const candidate = this.defaultCandidate();
+    if (candidate?.status !== 'available') return;
+    this.defaultCandidateState.set(
+      Object.freeze({
+        status: 'cancelled',
+        diagnostics: candidate.diagnostics,
+      }),
+    );
+  }
+
+  acceptDefaultCandidate(): void {
+    const candidate = this.defaultCandidate();
+    if (candidate?.status !== 'available') return;
+    this.valueState.set(candidate.value);
+    this.defaultCandidateState.set(
+      Object.freeze({
+        status: 'accepted',
+        diagnostics: candidate.diagnostics,
+      }),
+    );
+  }
+
   replaceValue(value: Readonly<object>): void {
     this.valueState.set(value);
   }
@@ -1051,6 +1410,26 @@ export class ReferenceFormComponent {
 
   setDecisionMode(mode: OperationDecisionMode): void {
     this.decisionModeState.set(mode);
+  }
+
+  resolveServiceValidation(valid: boolean): void {
+    this.asyncValidatorState()?.resolveCurrent(valid);
+  }
+
+  resolveServiceRequest(id: number, valid: boolean): boolean {
+    return this.asyncValidatorState()?.resolveRequest(id, valid) ?? false;
+  }
+
+  rejectServiceValidation(): void {
+    this.asyncValidatorState()?.rejectCurrent();
+  }
+
+  throwOnNextValidation(): void {
+    this.asyncValidatorState()?.throwOnNextRequest();
+  }
+
+  retryAsyncValidation(): RuntimeActionResult | undefined {
+    return this.formDirective?.retryAsyncValidation();
   }
 
   setConfigurationTab(id: string): void {
@@ -1379,6 +1758,7 @@ export class ReferenceFormComponent {
     );
     this.pendingConfigurationActionState.set(undefined);
     this.configurationActionTrigger = undefined;
+    this.installAsyncValidator(this.selectedScenario().serviceValidation);
     this.runtimeEpochState.update((epoch) => epoch + 1);
     this.resetApplicationState(this.selectedScenario());
     this.focusConfigurationStatusAfterRender();
@@ -1392,7 +1772,28 @@ export class ReferenceFormComponent {
     this.decisionModeState.set('confirm');
     this.collectionDraftIdState.set('new-member');
     this.collectionDraftNameState.set('New member');
+    this.scopeCandidateState.set(undefined);
+    this.defaultCandidateState.set(undefined);
     this.clearOperationState();
+  }
+
+  private installAsyncValidator(
+    definition: ReferenceServiceValidation | undefined,
+  ): void {
+    this.serviceRequestEvidenceState.set(Object.freeze([]));
+    if (definition === undefined) {
+      this.asyncValidatorState.set(undefined);
+      return;
+    }
+    const controller = new AngularReferenceAsyncValidator(
+      definition,
+      (evidence) => {
+        if (this.asyncValidatorState() === controller) {
+          this.serviceRequestEvidenceState.set(evidence);
+        }
+      },
+    );
+    this.asyncValidatorState.set(controller);
   }
 }
 

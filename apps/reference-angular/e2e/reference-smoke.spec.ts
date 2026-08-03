@@ -5,11 +5,18 @@ const scenarios = [
   ['nested-profile', 'Nested profile materialization'],
   ['stable-team', 'Stable team collection'],
   ['local-definitions', 'Same-document local definitions'],
+  ['object-composition', 'Static object composition'],
   ['presentation-sections', 'Static presentation sections'],
   ['nullable-preferences', 'Nullable preferences'],
   ['advanced-presentation', 'Advanced static presentation'],
   ['recursive-local-presentation', 'Recursive local presentation'],
   ['semantic-contact', 'Semantic contact formats'],
+  ['fixed-values', 'Primitive fixed values'],
+  ['service-validation', 'Controlled service validation'],
+  ['scope-baseline-confirmation', 'Scoped baseline confirmation'],
+  ['explicit-schema-defaults', 'Explicit schema defaults'],
+  ['conditional-field-state', 'Controlled conditional field state'],
+  ['string-enum-array', 'Controlled multiple choices'],
 ] as const;
 
 async function selectScenario(page: Page, id: string, heading: string) {
@@ -133,6 +140,273 @@ test('navigates every scenario and exposes the complete inspector inventory', as
   ).toBeVisible();
 });
 
+test('keeps conditionally hidden and disabled Angular fields mounted and inaccessible', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'controlled-primitives',
+    'Controlled primitive fields',
+  );
+  await page.getByRole('tab', { name: 'UI Schema', exact: true }).click();
+  await page.getByRole('textbox', { name: 'UI Schema editor' }).fill(
+    JSON.stringify(
+      {
+        order: ['name', 'role', 'age', 'score', 'active'],
+        fields: {
+          name: {
+            description: 'A required display name.',
+            visibleWhen: { path: ['active'], equals: true },
+          },
+          role: {
+            placeholder: 'Select a role',
+            enumLabels: {
+              admin: 'Administrator',
+              editor: 'Editor',
+              viewer: 'Viewer',
+            },
+            enabledWhen: { path: ['active'], equals: true },
+          },
+          score: {
+            options: { decimalPlaces: 1, showTrailingZeros: true },
+          },
+        },
+      },
+      null,
+      2,
+    ),
+  );
+  await page.getByRole('button', { name: 'Apply configuration' }).click();
+  await expect(
+    page.getByText('Matches applied configuration', { exact: true }),
+  ).toBeVisible();
+
+  const nameId = nodeBase('reference-controlled-primitives', ['name']);
+  const roleId = nodeBase('reference-controlled-primitives', ['role']);
+  const name = page.locator(`[id="${nameId}"]`);
+  const role = page.locator(`[id="${roleId}"]`);
+  const nameHost = page.locator('schema-leaf-outlet-host', { has: name });
+  await expect(name).toBeVisible();
+  await expect(role).toBeEnabled();
+  await name.evaluate((element) => {
+    Object.defineProperty(element, '__conditionalIdentity', {
+      value: true,
+      configurable: true,
+    });
+  });
+  await name.focus();
+
+  await page.getByRole('checkbox', { name: 'Active' }).uncheck();
+  await expect(nameHost).toHaveAttribute('hidden', '');
+  await expect(nameHost).toHaveAttribute('inert', '');
+  await expect(nameHost).toHaveAttribute('aria-hidden', 'true');
+  await expect(name).toBeHidden();
+  await expect(
+    page.getByRole('textbox', { name: 'Name', exact: true }),
+  ).toHaveCount(0);
+  await expect(role).toBeDisabled();
+  await expect(page.locator(`[id="${roleId}-clear"]`)).toBeDisabled();
+  expect(
+    await name.evaluate(
+      (element) =>
+        (element as HTMLElement & { __conditionalIdentity?: boolean })
+          .__conditionalIdentity,
+    ),
+  ).toBe(true);
+  expect(await page.evaluate(() => document.activeElement?.id)).not.toBe(
+    nameId,
+  );
+
+  const diagnostics = await openInspector(
+    page,
+    'inspector-runtime-diagnostics',
+  );
+  await expect(diagnostics).toContainText('[]');
+
+  const history = await openInspector(page, 'inspector-history');
+  const historyBefore = await history.textContent();
+  await name.evaluate((element) => {
+    const input = element as HTMLInputElement;
+    input.value = 'stale hidden edit';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('focus', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+  });
+  await role.dispatchEvent('change');
+  await page.locator(`[id="${roleId}-clear"]`).dispatchEvent('click');
+  await expect(history).toHaveText(historyBefore ?? '');
+  await expect(
+    await openInspector(page, 'inspector-runtime-diagnostics'),
+  ).toContainText('[]');
+
+  await page.getByRole('checkbox', { name: 'Active' }).check();
+  await expect(nameHost).not.toHaveAttribute('hidden', '');
+  await expect(nameHost).not.toHaveAttribute('inert', '');
+  await expect(nameHost).not.toHaveAttribute('aria-hidden', 'true');
+  await expect(name).toBeVisible();
+  await expect(name).toHaveValue('Ada');
+  await expect(role).toBeEnabled();
+  expect(
+    await name.evaluate(
+      (element) =>
+        (element as HTMLElement & { __conditionalIdentity?: boolean })
+          .__conditionalIdentity,
+    ),
+  ).toBe(true);
+  expect(await page.evaluate(() => document.activeElement?.id)).not.toBe(
+    nameId,
+  );
+});
+
+test('projects the exact shared conditional scenario through Angular', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'conditional-field-state',
+    'Controlled conditional field state',
+  );
+  const nameId = nodeBase('reference-conditional-field-state', ['displayName']);
+  const roleId = nodeBase('reference-conditional-field-state', ['role']);
+  const driverId = nodeBase('reference-conditional-field-state', ['driver']);
+  const name = page.locator(`[id="${nameId}"]`);
+  const nameHost = page.locator('schema-leaf-outlet-host', { has: name });
+  const role = page.locator(`[id="${roleId}"]`);
+  const driver = page.locator(`[id="${driverId}"]`);
+  const driverHost = page.locator('schema-leaf-outlet-host', { has: driver });
+
+  await expect(
+    page.getByRole('textbox', { name: 'Nullable match' }),
+  ).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Zero match' })).toBeVisible();
+  await expect(
+    page.getByRole('textbox', { name: 'Empty-string match' }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole('textbox', { name: 'Hidden-source match' }),
+  ).toBeVisible();
+
+  await name.evaluate((element) => {
+    Object.defineProperty(element, '__sharedConditionalIdentity', {
+      value: true,
+      configurable: true,
+    });
+  });
+  await name.fill('Grace');
+  await page
+    .getByRole('textbox', { name: 'Conditional review code' })
+    .fill('needs-review');
+  await expect(
+    page.getByRole('textbox', { name: 'Conditional review code' }),
+  ).toHaveAttribute('aria-invalid', 'true');
+  await name.focus();
+  await page.getByRole('checkbox', { name: 'Show details' }).uncheck();
+  await expect(nameHost).toHaveAttribute('hidden', '');
+  await expect(nameHost).toHaveAttribute('inert', '');
+  await expect(nameHost).toHaveAttribute('aria-hidden', 'true');
+  await expect(
+    page.getByRole('textbox', { name: 'Conditional name' }),
+  ).toHaveCount(0);
+  await expect(await openInspector(page, 'inspector-snapshot')).toContainText(
+    '"valid": false',
+  );
+  expect(await page.evaluate(() => document.activeElement?.id)).not.toBe(
+    nameId,
+  );
+
+  const history = await openInspector(page, 'inspector-history');
+  const historyBeforeHidden = await history.textContent();
+  await name.evaluate((element) => {
+    const input = element as HTMLInputElement;
+    input.value = 'stale hidden edit';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('focus', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+  });
+  await expect(history).toHaveText(historyBeforeHidden ?? '');
+
+  await page.getByRole('checkbox', { name: 'Enable role' }).uncheck();
+  await expect(role).toBeDisabled();
+  await expect(page.locator(`[id="${roleId}-clear"]`)).toBeDisabled();
+  const historyBeforeDisabled = await history.textContent();
+  await role.dispatchEvent('change');
+  await page.locator(`[id="${roleId}-clear"]`).dispatchEvent('click');
+  await expect(history).toHaveText(historyBeforeDisabled ?? '');
+  await expect(
+    await openInspector(page, 'inspector-runtime-diagnostics'),
+  ).toContainText('[]');
+
+  await page.getByRole('checkbox', { name: 'Show driver' }).uncheck();
+  await expect(driverHost).toHaveAttribute('hidden', '');
+  await expect(
+    page.getByRole('textbox', { name: 'Hidden-source match' }),
+  ).toBeVisible();
+
+  await page.getByRole('checkbox', { name: 'Show details' }).check();
+  await page.getByRole('checkbox', { name: 'Enable role' }).check();
+  await expect(nameHost).not.toHaveAttribute('hidden', '');
+  await expect(name).toHaveValue('Grace');
+  await expect(role).toBeEnabled();
+  expect(
+    await name.evaluate(
+      (element) =>
+        (
+          element as HTMLElement & {
+            __sharedConditionalIdentity?: boolean;
+          }
+        ).__sharedConditionalIdentity,
+    ),
+  ).toBe(true);
+});
+
+test('projects controlled ordered multiple choices through Angular', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'string-enum-array',
+    'Controlled multiple choices',
+  );
+  const roles = page.getByRole('listbox', { name: 'Assigned roles' });
+  const channels = page.getByRole('listbox', { name: 'Required channels' });
+  await expect(roles).toHaveAttribute('multiple', '');
+  await expect(roles.locator('option')).toHaveCount(6);
+  await expect(
+    page.getByText('No value provided.', { exact: true }),
+  ).toBeVisible();
+  await expect(channels).toHaveAttribute('aria-required', 'true');
+  await expect(
+    page.getByText('No values selected.', { exact: true }),
+  ).toBeVisible();
+
+  await roles.selectOption(['choice:3']);
+  await roles.selectOption(['choice:2', 'choice:3']);
+  await expect(await openInspector(page, 'inspector-value')).toContainText(
+    '"roles": [\n    "editor",\n    "reader"',
+  );
+  await page.getByTestId('decision-reject').click();
+  await roles.selectOption(['choice:2', 'choice:3', 'choice:4']);
+  await expect(roles).toHaveValues(['choice:2', 'choice:3']);
+  await expect(await openInspector(page, 'inspector-history')).toContainText(
+    '"status": "rejected"',
+  );
+
+  await roles.focus();
+  await roles.blur();
+  await expect(await openInspector(page, 'inspector-snapshot')).toContainText(
+    '"touched": true',
+  );
+  await page.getByRole('button', { name: 'Locale es' }).click();
+  await expect(
+    page.getByText('No hay valores seleccionados.', { exact: true }),
+  ).toBeVisible();
+  await page.getByTestId('decision-confirm').click();
+  await page.getByRole('button', { name: /Limpiar Assigned roles/u }).click();
+  await expect(
+    page.getByText('No se ha proporcionado ningún valor.', { exact: true }),
+  ).toBeVisible();
+});
+
 test('projects and validates the shared semantic-format scenario', async ({
   page,
 }) => {
@@ -154,6 +428,207 @@ test('projects and validates the shared semantic-format scenario', async ({
   await expect(email).toHaveAttribute('aria-invalid', 'true');
   await email.fill('grace@example.com');
   await expect(email).not.toHaveAttribute('aria-invalid', 'true');
+});
+
+function nodeBase(formId: string, path: readonly string[]): string {
+  return `se-${encodeURIComponent(JSON.stringify([formId, path]))}`;
+}
+
+test('projects and validates shared object composition independently', async ({
+  page,
+}) => {
+  await selectScenario(page, 'object-composition', 'Static object composition');
+  const form = page.getByRole('form', { name: 'Selected schema form' });
+  const department = form.getByRole('textbox', { name: 'Department' });
+  const displayName = form.getByRole('textbox', { name: 'Display name' });
+
+  await expect
+    .poll(() =>
+      form
+        .locator('label')
+        .evaluateAll((labels) =>
+          labels.map(({ textContent }) => textContent?.trim()),
+        ),
+    )
+    .toEqual(['Department', 'Display name', 'Contact email', 'Active']);
+  await expect(department).toHaveAttribute('aria-required', 'true');
+  await expect(displayName).toHaveAttribute('aria-required', 'true');
+  await department.fill('R');
+  await displayName.fill('A');
+  await displayName.blur();
+  await expect(department).toHaveAttribute('aria-invalid', 'true');
+  await expect(displayName).toHaveAttribute('aria-invalid', 'true');
+  await department.fill('Engineering');
+  await displayName.fill('Grace Hopper');
+  await expect(department).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(displayName).not.toHaveAttribute('aria-invalid', 'true');
+  await page.getByRole('combobox', { name: 'Theme' }).selectOption('dark');
+  await expect(form).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+test('projects shared fixed values without renderer-owned intentions', async ({
+  page,
+}) => {
+  await selectScenario(page, 'fixed-values', 'Primitive fixed values');
+  const direct = page.getByRole('group', { name: 'Direct fixed choice' });
+  const value = direct.locator('[data-fixed-value-state]');
+  await expect(value).toHaveText('fixed');
+  await expect(value).toHaveAttribute('data-fixed-value-state', 'value');
+  await expect(direct.locator('input, select, button, [tabindex]')).toHaveCount(
+    0,
+  );
+  await expect(
+    page
+      .getByRole('group', { name: 'Missing fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Missing value');
+  await expect(
+    page
+      .getByRole('group', { name: 'Blocked child' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Unavailable value');
+  await expect(
+    page
+      .getByRole('group', { name: 'Nullable fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Null value');
+  await expect(
+    page
+      .getByRole('group', { name: 'Empty string' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('""');
+  await expect(
+    page
+      .getByRole('group', { name: 'Negative zero' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('-0');
+
+  await page.getByTestId('fixed-control-mismatch').click();
+  await expect(value).toHaveText('other');
+  await expect(direct).toHaveAttribute('aria-invalid', 'true');
+  await expect(direct).toContainText('must be equal to constant');
+  await page.getByTestId('fixed-control-incompatible').click();
+  await expect(
+    page
+      .getByRole('group', { name: 'Incompatible fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Incompatible value');
+  await expect(await openInspector(page, 'inspector-history')).toContainText(
+    '[]',
+  );
+  await page.getByRole('button', { name: 'Locale es' }).click();
+  await expect(
+    page
+      .getByRole('group', { name: 'Missing fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Valor ausente');
+});
+
+test('exposes deterministic controlled service validation without renderer orchestration', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'service-validation',
+    'Controlled service validation',
+  );
+  const status = page.getByTestId('async-validation-state');
+  const username = page.getByRole('textbox', { name: 'Username' });
+  await expect(status).toHaveText('Generation 1 pending.');
+
+  await page.getByRole('button', { name: 'Resolve as unavailable' }).click();
+  await expect(status).toHaveText('Generation 1 settled invalid.');
+  await expect(username).toHaveAttribute('aria-invalid', 'true');
+  await expect(
+    page.getByRole('form', { name: 'Selected schema form' }),
+  ).toContainText('This username is not available.');
+
+  await username.fill('x');
+  await expect(status).toHaveText('Blocked by synchronous validation.');
+  await username.fill('grace');
+  await expect(status).toContainText('pending');
+  await username.fill('linus');
+  await expect(status).toContainText('pending');
+  await expect(page.getByTestId('service-validation-controls')).toContainText(
+    'cancelled',
+  );
+
+  await page.getByRole('button', { name: 'Reject current request' }).click();
+  await expect(status).toContainText('failed: exception');
+  await page.getByRole('button', { name: 'Throw on next request' }).click();
+  await page.getByRole('button', { name: 'Retry service validation' }).click();
+  await expect(status).toContainText('failed: exception');
+  await page.getByRole('button', { name: 'Retry service validation' }).click();
+  await expect(status).toContainText('pending');
+  await page.getByRole('button', { name: 'Resolve as available' }).click();
+  await expect(status).toContainText('settled valid');
+  await expect(username).not.toHaveAttribute('aria-invalid', 'true');
+});
+
+test('prepares and accepts application-owned scoped baseline candidates', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'scope-baseline-confirmation',
+    'Scoped baseline confirmation',
+  );
+  const status = page.getByTestId('scope-candidate-status');
+  const accept = page.getByTestId('accept-scope-candidate');
+  await expect(status).toHaveText('No baseline candidate prepared.');
+
+  await page.getByTestId('prepare-scope-profile-name').click();
+  await expect(status).toContainText('candidate prepared');
+  await expect(accept).toBeEnabled();
+  await expect(await openInspector(page, 'inspector-baseline')).toContainText(
+    'Ada Lovelace',
+  );
+  await accept.click();
+  await expect(status).toContainText('simulated persistence accepted');
+  await expect(await openInspector(page, 'inspector-baseline')).toContainText(
+    'Ada Byron',
+  );
+  await expect(page.getByTestId('reference-state')).toContainText('Modified');
+
+  await page.getByRole('button', { name: 'Reset scenario' }).click();
+  await page.getByTestId('prepare-scope-current-only-linus').click();
+  await expect(status).toContainText('unconfirmable');
+  await expect(accept).toBeDisabled();
+
+  await page.getByTestId('prepare-scope-whole-team').click();
+  await accept.click();
+  const acceptedCollection = await openInspector(page, 'inspector-baseline');
+  await expect(acceptedCollection).toContainText('Linus');
+  await expect(acceptedCollection).toContainText('Baseline note');
+  await expect(page.getByTestId('reference-state')).toContainText('Modified');
+});
+
+test('derives, cancels and accepts explicit schema defaults', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'explicit-schema-defaults',
+    'Explicit schema defaults',
+  );
+  const status = page.getByTestId('default-candidate-status');
+  const accept = page.getByTestId('accept-default-candidate');
+  await page.getByTestId('derive-default-candidate').click();
+  await expect(status).toContainText('Candidate derived');
+  await expect(await openInspector(page, 'inspector-value')).not.toContainText(
+    'New entity',
+  );
+  await page.getByTestId('cancel-default-candidate').click();
+  await expect(status).toContainText('cancelled');
+  await page.getByTestId('derive-default-candidate').click();
+  await accept.click();
+  const value = await openInspector(page, 'inspector-value');
+  await expect(value).toContainText('New entity');
+  await expect(value).toContainText('Existing row');
+  await expect(status).toContainText('explicitly accepted');
+  await page.getByTestId('derive-default-candidate').click();
+  await expect(status).toContainText('no effect');
 });
 
 test('highlights and copies integration code, editable JSON and inspector JSON', async ({

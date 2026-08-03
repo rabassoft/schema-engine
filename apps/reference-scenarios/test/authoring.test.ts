@@ -158,6 +158,104 @@ describe('defineReferenceCatalog', () => {
     expect(Object.isFrozen(properties.first)).toBe(true);
   });
 
+  it('copies and validates optional service-validation metadata without executing effects', () => {
+    const authored = validScenario();
+    const serviceValidation = {
+      fieldPath: ['name'],
+      issue: {
+        code: 'name-unavailable',
+        keyword: 'service',
+        fallbackMessage: 'Name unavailable.',
+      },
+      labels: {
+        heading: 'Service controls',
+        settleValid: 'Resolve valid',
+        settleInvalid: 'Resolve invalid',
+        reject: 'Reject request',
+        throwNext: 'Throw next',
+        retry: 'Retry',
+      },
+    };
+    (
+      authored as ReferenceScenarioAuthoring & {
+        serviceValidation: typeof serviceValidation;
+      }
+    ).serviceValidation = serviceValidation;
+
+    const [scenario] = defineReferenceCatalog([authored]);
+
+    expect(scenario?.serviceValidation).toEqual(serviceValidation);
+    expect(scenario?.serviceValidation).not.toBe(serviceValidation);
+    expect(Object.isFrozen(scenario?.serviceValidation)).toBe(true);
+    expect(Object.isFrozen(scenario?.serviceValidation?.fieldPath)).toBe(true);
+
+    serviceValidation.labels.retry = 'Changed';
+    expect(scenario?.serviceValidation?.labels.retry).toBe('Retry');
+
+    const invalid = validScenario() as ReferenceScenarioAuthoring & {
+      serviceValidation: typeof serviceValidation;
+    };
+    invalid.serviceValidation = {
+      ...serviceValidation,
+      labels: { ...serviceValidation.labels, retry: ' ' },
+    };
+    expectAuthoringError(
+      () => defineReferenceCatalog([invalid]),
+      'invalid-member',
+      [0, 'serviceValidation', 'labels', 'retry'],
+    );
+  });
+
+  it('copies and validates optional scoped-confirmation metadata', () => {
+    const authored = validScenario();
+    const scopeConfirmation = {
+      labels: {
+        heading: 'Confirmation',
+        guidance: 'Prepare then accept.',
+        accept: 'Accept candidate',
+      },
+      targets: [
+        {
+          id: 'name',
+          label: 'Prepare name',
+          scope: { id: 'name', paths: [['name']] },
+          expectation: 'candidate-and-acceptance-leaves-unrelated-dirty',
+        },
+      ],
+    } as const;
+    (
+      authored as ReferenceScenarioAuthoring & {
+        scopeConfirmation: typeof scopeConfirmation;
+      }
+    ).scopeConfirmation = scopeConfirmation;
+
+    const [scenario] = defineReferenceCatalog([authored]);
+
+    expect(scenario?.scopeConfirmation).toEqual(scopeConfirmation);
+    expect(scenario?.scopeConfirmation).not.toBe(scopeConfirmation);
+    expect(
+      Object.isFrozen(scenario?.scopeConfirmation?.targets[0]?.scope),
+    ).toBe(true);
+
+    const invalid = validScenario() as ReferenceScenarioAuthoring & {
+      scopeConfirmation: typeof scopeConfirmation;
+    };
+    invalid.scopeConfirmation = {
+      ...scopeConfirmation,
+      targets: [
+        {
+          ...scopeConfirmation.targets[0],
+          scope: { id: 'name', paths: [[]] },
+        },
+      ],
+    } as unknown as typeof scopeConfirmation;
+    expectAuthoringError(
+      () => defineReferenceCatalog([invalid]),
+      'invalid-member',
+      [0, 'scopeConfirmation', 'targets', 0, 'scope', 'paths', 0],
+    );
+  });
+
   it('rejects duplicate IDs at every catalog level with scenario context', () => {
     const duplicateScenario = validScenario();
     expectAuthoringError(

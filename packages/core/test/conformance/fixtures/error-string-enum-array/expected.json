@@ -1,0 +1,81 @@
+{
+  "success": false,
+  "diagnostics": [
+    {
+      "code": "UNSUPPORTED_SCHEMA_KEYWORD",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["roles"],
+      "documentPath": ["properties", "roles", "minItems"],
+      "parameters": { "keyword": "minItems" },
+      "fallbackMessage": "Schema keyword \"minItems\" is not supported."
+    },
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["roles"],
+      "documentPath": ["properties", "roles", "uniqueItems"],
+      "parameters": {
+        "keyword": "uniqueItems",
+        "expected": "true",
+        "actualType": "boolean",
+        "actualValue": false
+      },
+      "fallbackMessage": "Schema keyword \"uniqueItems\" has an invalid value."
+    },
+    {
+      "code": "INCOMPATIBLE_SCHEMA_KEYWORD",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["roles"],
+      "documentPath": ["properties", "roles", "items", "title"],
+      "parameters": {
+        "keyword": "title",
+        "fieldType": "string-enum-array-item"
+      },
+      "fallbackMessage": "Schema keyword \"title\" is incompatible with field type \"string-enum-array-item\"."
+    },
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["roles"],
+      "documentPath": ["properties", "roles", "items", "enum", 1],
+      "parameters": {
+        "keyword": "enum",
+        "expected": "unique string",
+        "actualType": "string",
+        "actualValue": "a"
+      },
+      "fallbackMessage": "Schema keyword \"enum\" has an invalid value."
+    },
+    {
+      "code": "INVALID_SCHEMA_KEYWORD_VALUE",
+      "severity": "error",
+      "source": "schema",
+      "dataPath": ["roles"],
+      "documentPath": ["properties", "roles", "items", "enum", 2],
+      "parameters": {
+        "keyword": "enum",
+        "expected": "string",
+        "actualType": "number",
+        "actualValue": 1
+      },
+      "fallbackMessage": "Schema keyword \"enum\" has an invalid value."
+    },
+    {
+      "code": "INVALID_UI_SCHEMA_VALUE",
+      "severity": "error",
+      "source": "ui-schema",
+      "dataPath": ["roles"],
+      "documentPath": ["fields", "roles", "enumLabels"],
+      "parameters": {
+        "key": "enumLabels",
+        "expected": "object",
+        "actualType": "array"
+      },
+      "fallbackMessage": "UI Schema key \"enumLabels\" has an invalid value."
+    }
+  ]
+}

@@ -7,11 +7,14 @@ import {
 import { TestBed } from '@angular/core/testing';
 import {
   compileFormDefinition,
+  type AsyncSchemaValidator,
+  type AsyncValidationContext,
   type ControlledFormRuntimeOptions,
   type Diagnostic,
   type FieldDefinition,
   type FormDefinition,
   type FormOperation,
+  type ValidationResult,
 } from '@rabassoft/schema-engine';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -459,7 +462,180 @@ describe('Angular adapter directives', () => {
         .some(({ code }) => code === 'NO_RENDERER_MATCH'),
     ).toBe(true);
   });
+
+  it('projects configured async state and forwards retry diagnostics', async () => {
+    const work = [deferred<ValidationResult>(), deferred<ValidationResult>()];
+    let invocation = 0;
+    const asyncValidator: AsyncSchemaValidator = {
+      validate: () => work[invocation++]?.promise as Promise<ValidationResult>,
+    };
+    const fixture = TestBed.createComponent(FormHost);
+    fixture.componentInstance.config.set(createConfig({ asyncValidator }));
+    fixture.detectChanges();
+    TestBed.tick();
+    const form = fixture.componentInstance.form;
+    expect(form?.snapshot()?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: 1,
+    });
+
+    work[0]?.resolve({
+      valid: false,
+      issues: [{ code: 'reserved', path: ['name'], parameters: {} }],
+    });
+    await flushAsync();
+    fixture.detectChanges();
+    expect(form?.snapshot()).toMatchObject({
+      valid: false,
+      asyncValidation: { status: 'settled', generation: 1, valid: false },
+    });
+    expect(form?.snapshot()?.fields[0]?.issues).toMatchObject([
+      { code: 'reserved' },
+    ]);
+
+    expect(form?.retryAsyncValidation()).toEqual({
+      success: true,
+      effects: { snapshotChanged: true, operationEmitted: false },
+      diagnostics: [],
+    });
+    expect(form?.snapshot()?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: 2,
+    });
+    work[1]?.reject(new Error('offline'));
+    await flushAsync();
+    fixture.detectChanges();
+    expect(form?.snapshot()?.asyncValidation).toEqual({
+      status: 'failed',
+      generation: 2,
+      reason: 'exception',
+    });
+    expect(fixture.componentInstance.operations).toEqual([]);
+  });
+
+  it('recreates for async port identity and silences the disposed port', async () => {
+    const oldWork = deferred<ValidationResult>();
+    const newWork = deferred<ValidationResult>();
+    let oldContext: AsyncValidationContext | undefined;
+    const first: AsyncSchemaValidator = {
+      validate: (_schema, _value, context) => {
+        oldContext = context;
+        return oldWork.promise;
+      },
+    };
+    const second: AsyncSchemaValidator = { validate: () => newWork.promise };
+    const fixture = TestBed.createComponent(FormHost);
+    fixture.componentInstance.config.set(
+      createConfig({ asyncValidator: first }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+
+    fixture.componentInstance.config.set(
+      createConfig({ asyncValidator: second }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(oldContext?.cancellation.isCancelled()).toBe(true);
+    expect(fixture.componentInstance.form?.snapshot()?.asyncValidation).toEqual(
+      {
+        status: 'pending',
+        generation: 1,
+      },
+    );
+
+    oldWork.resolve({ valid: true, issues: [] });
+    await flushAsync();
+    expect(fixture.componentInstance.form?.snapshot()?.asyncValidation).toEqual(
+      {
+        status: 'pending',
+        generation: 1,
+      },
+    );
+    newWork.resolve({ valid: true, issues: [] });
+    await flushAsync();
+    expect(fixture.componentInstance.form?.snapshot()?.asyncValidation).toEqual(
+      {
+        status: 'settled',
+        generation: 1,
+        valid: true,
+      },
+    );
+  });
+
+  it('keeps unconfigured shape exact and emits retry failure through diagnostics', () => {
+    const fixture = TestBed.createComponent(FormHost);
+    fixture.detectChanges();
+    TestBed.tick();
+    const form = fixture.componentInstance.form;
+    expect(Object.hasOwn(form?.snapshot() ?? {}, 'asyncValidation')).toBe(
+      false,
+    );
+    expect(form?.retryAsyncValidation()).toMatchObject({
+      success: false,
+      diagnostics: [
+        {
+          code: 'ASYNC_VALIDATION_RETRY_UNAVAILABLE',
+          parameters: { reason: 'not-configured' },
+        },
+      ],
+    });
+    expect(
+      fixture.componentInstance.diagnostics
+        .flat()
+        .some(({ code }) => code === 'ASYNC_VALIDATION_RETRY_UNAVAILABLE'),
+    ).toBe(true);
+  });
+
+  it('cancels on destroy and ignores late completion', async () => {
+    const work = deferred<ValidationResult>();
+    let context: AsyncValidationContext | undefined;
+    const asyncValidator: AsyncSchemaValidator = {
+      validate: (_schema, _value, nextContext) => {
+        context = nextContext;
+        return work.promise;
+      },
+    };
+    const fixture = TestBed.createComponent(FormHost);
+    fixture.componentInstance.config.set(createConfig({ asyncValidator }));
+    fixture.detectChanges();
+    TestBed.tick();
+    const form = fixture.componentInstance.form;
+    const snapshot = form?.snapshot();
+    fixture.destroy();
+    expect(context?.cancellation.isCancelled()).toBe(true);
+    expect(form?.snapshot()).toBeUndefined();
+    work.resolve({ valid: true, issues: [] });
+    await flushAsync();
+    expect(form?.snapshot()).toBeUndefined();
+    expect(snapshot?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: 1,
+    });
+  });
 });
+
+interface Deferred<T> {
+  readonly promise: Promise<T>;
+  resolve(value: T): void;
+  reject(reason?: unknown): void;
+}
+
+function deferred<T>(): Deferred<T> {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((done, fail) => {
+    resolve = done;
+    reject = fail;
+  });
+  return { promise, resolve, reject };
+}
+
+async function flushAsync(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 function createConfig(
   overrides: Partial<

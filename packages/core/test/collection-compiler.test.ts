@@ -227,7 +227,7 @@ describe('M10 collection compiler', () => {
     ]);
   });
 
-  it('orders item-root shape diagnostics before incompatible members', () => {
+  it('classifies direct string items as the atomic M31 family before item members', () => {
     const schema = collectionSchema();
     schema.properties.rows.items = {
       title: 'Not allowed',
@@ -238,10 +238,21 @@ describe('M10 collection compiler', () => {
       schema,
       collectionPolicies: policy(),
     });
-    expect(result.diagnostics.slice(0, 3).map(({ code }) => code)).toEqual([
-      'UNSUPPORTED_FIELD_TYPE',
-      'INVALID_SCHEMA_PROPERTIES',
-      'INCOMPATIBLE_SCHEMA_KEYWORD',
+    expect(result.diagnostics.slice(0, 3)).toMatchObject([
+      {
+        code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+        documentPath: ['properties', 'rows', 'uniqueItems'],
+      },
+      {
+        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+        documentPath: ['properties', 'rows', 'items', 'title'],
+        parameters: { fieldType: 'string-enum-array-item' },
+      },
+      {
+        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+        documentPath: ['properties', 'rows', 'items', 'properties'],
+        parameters: { fieldType: 'string-enum-array-item' },
+      },
     ]);
   });
 

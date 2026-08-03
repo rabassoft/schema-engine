@@ -1,12 +1,20 @@
 # PLAN-027: Primitive const and fixed presentation
 
-- **Status:** Approved revision 0
+- **Status:** Completed revision 1
 - **Date:** 2026-08-01
 - **Approval date:** 2026-08-01
 - **Milestone:** M25 — Primitive `const` and fixed presentation
 - **Requires:** Accepted ADR-028 revision 0 and SPEC-011 v0.1.0
 - **Complete review:** [`review 221`](../reviews/221-plan-027-review.md) cycle 6
-  passed all sixteen areas with zero findings
+  passed revision 0's sixteen areas with zero findings
+- **Revision 1 decision:** On 2026-08-02 Ricard accepted a narrow operational
+  correction to checkpoint 6 after the configured pnpm store proved unable to
+  recreate `node_modules` offline despite a frozen fetch. The gate now requires
+  a successful network-backed frozen restore, zero lockfile/dependency drift
+  and the complete subsequent local matrix; it does not weaken any behavioral,
+  package, security or release requirement.
+- **Implementation review:** [Review 234](../reviews/234-plan-027-final-implementation-review.md)
+  cycle 3 repeated the complete revision-1 closure matrix with zero findings.
 - **Implementation authorized:** Yes, checkpoints 1–6 only; release, version,
   publication, commit, push and external mutations remain separate gates
 
@@ -237,10 +245,12 @@ zero findings.
 
 ### Required matrix
 
-1. Reinstall from the frozen graph without changing it:
+1. Reinstall from the frozen graph without changing it. Network access may be
+   used only to retrieve artifacts already pinned by `pnpm-lock.yaml`; no graph
+   update or fallback resolution is allowed:
 
    ```sh
-   pnpm install --frozen-lockfile --offline
+   pnpm install --frozen-lockfile
    ```
 
 2. Run complete local quality and workspace evidence:
@@ -270,12 +280,14 @@ zero findings.
 4. Reconcile root/package onboarding, SPEC/ADR/plan indexes, ROADMAP, Deferred
    register, `STATUS.md` and the newest `WORKLOG.md` entry.
 5. Correct every finding and repeat the complete matrix until one full pass has
-   zero findings. Known restricted-sandbox Angular/esbuild IPC aborts must be
-   rerun unchanged outside the sandbox before being classified environmental.
+   zero findings. Confirm the frozen restore leaves `pnpm-lock.yaml` and package
+   dependency declarations unchanged. Known restricted-sandbox Angular/esbuild
+   IPC aborts must be rerun unchanged outside the sandbox before being
+   classified environmental.
 
 ### Completion gate
 
-Only a complete zero-finding pass may mark PLAN-027 revision 0 and M25
+Only a complete zero-finding pass may mark PLAN-027 revision 1 and M25
 Completed. Record implemented capability M1–M25, no active task and the next
 functional-selection action. Package versions and published M23 artifacts stay
 unchanged.
@@ -286,5 +298,5 @@ Stop for any change to the accepted SPEC-011 contract; object/array/root
 `const`; value insertion/repair; defaults; readonly/disabled/hidden policy; new
 operation/snapshot/visibility behavior; Angular/Standard shared target code;
 validator production/API/dependency changes; new package/entry point; React or
-Vue; release/version/publication; network fallback; destructive action; commit;
-push; or unresolved authoritative conflict.
+Vue; release/version/publication; resolution outside the frozen lockfile;
+destructive action; commit; push; or unresolved authoritative conflict.

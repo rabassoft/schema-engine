@@ -87,16 +87,11 @@ describe('M25 primitive const compiler contract', () => {
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.diagnostics).toEqual([]);
-    expect(result.definition.fields.map((field) => field.fixedValue)).toEqual([
-      '',
-      0,
-      -0,
-      2,
-      false,
-      null,
-      'b',
-    ]);
-    expect(Object.is(result.definition.fields[2]?.fixedValue, -0)).toBe(true);
+    const fixedValues = result.definition.fields.map((field) =>
+      'fixedValue' in field ? field.fixedValue : undefined,
+    );
+    expect(fixedValues).toEqual(['', 0, -0, 2, false, null, 'b']);
+    expect(Object.is(fixedValues[2], -0)).toBe(true);
     for (const field of result.definition.fields) {
       expect(Object.hasOwn(field, 'fixedValue')).toBe(true);
       expect(
@@ -391,13 +386,14 @@ describe('M25 primitive const compiler contract', () => {
         $defs: { name: { type: 'string', const: 'target' } },
       },
     });
-    expect(referenceSibling.diagnostics).toEqual([
-      expect.objectContaining({
-        code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
-        documentPath: ['properties', 'name', 'const'],
-        parameters: expect.objectContaining({ fieldType: 'reference' }),
-      }),
-    ]);
+    expect(referenceSibling.diagnostics).toHaveLength(1);
+    expect(referenceSibling.diagnostics[0]).toMatchObject({
+      code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+      documentPath: ['properties', 'name', 'const'],
+    });
+    expect(referenceSibling.diagnostics[0]?.parameters).toMatchObject({
+      fieldType: 'reference',
+    });
   });
 
   it('retains reference and template provenance for invalid const values', () => {

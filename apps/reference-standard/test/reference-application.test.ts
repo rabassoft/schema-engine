@@ -11,6 +11,111 @@ import { describe, expect, it, vi } from 'vitest';
 import { StandardReferenceApplication } from '../src/reference-application.js';
 
 describe('StandardReferenceApplication', () => {
+  it('derives, cancels and explicitly accepts schema defaults without operations', () => {
+    const application = new StandardReferenceApplication(
+      referenceScenarios,
+      'explicit-schema-defaults',
+    );
+    const original = application.getState().value;
+    const rows = (original as { rows: readonly unknown[] }).rows;
+
+    expect(application.deriveDefaultCandidate()).toBe(true);
+    expect(application.getState().defaultCandidate?.status).toBe('available');
+    expect(application.getState().value).toBe(original);
+    expect(application.getState().history).toHaveLength(0);
+
+    expect(application.cancelDefaultCandidate()).toBe(true);
+    expect(application.getState().defaultCandidate?.status).toBe('cancelled');
+    expect(application.getState().value).toBe(original);
+
+    expect(application.deriveDefaultCandidate()).toBe(true);
+    expect(application.acceptDefaultCandidate()?.success).toBe(true);
+    expect(application.getState().defaultCandidate?.status).toBe('accepted');
+    expect(application.getState().value).toMatchObject({
+      title: 'New entity',
+      enabled: false,
+      attempts: 0,
+      note: '',
+      nullableNote: null,
+      locale: 'en',
+      profile: { displayName: 'Ada', code: 'x' },
+    });
+    expect(
+      (application.getState().value as { rows: readonly unknown[] }).rows,
+    ).toBe(rows);
+    expect(application.getState().history).toHaveLength(0);
+    expect(
+      application
+        .getState()
+        .snapshot?.fields.flatMap(({ issues }) => issues)
+        .map(({ keyword }) => keyword),
+    ).toContain('minLength');
+
+    expect(application.deriveDefaultCandidate()).toBe(true);
+    expect(application.getState().defaultCandidate?.status).toBe('no-effect');
+    application.dispose();
+  });
+
+  it('prepares and separately accepts scoped candidates with independent application state', () => {
+    const application = new StandardReferenceApplication(
+      referenceScenarios,
+      'scope-baseline-confirmation',
+    );
+    const confirmation = application.getState().scenario.scopeConfirmation;
+    const profile = confirmation?.targets.find(
+      ({ id }) => id === 'profile-name',
+    );
+    const team = confirmation?.targets.find(({ id }) => id === 'whole-team');
+    const currentOnly = confirmation?.targets.find(
+      ({ id }) => id === 'current-only-linus',
+    );
+    if (
+      profile === undefined ||
+      team === undefined ||
+      currentOnly === undefined
+    ) {
+      throw new Error('Scoped confirmation targets are required.');
+    }
+
+    const baseline = application.getState().baselineValue;
+    expect(application.getState().snapshot?.dirty).toBe(true);
+    expect(application.prepareScopeCandidate(profile)).toBe(true);
+    expect(application.getState().scopeCandidate?.status).toBe('available');
+    expect(application.getState().baselineValue).toBe(baseline);
+    expect(application.getState().snapshot?.dirty).toBe(true);
+
+    expect(application.acceptScopeCandidate()?.success).toBe(true);
+    expect(application.getState().scopeCandidate?.status).toBe('accepted');
+    expect(application.getState().baselineValue).toMatchObject({
+      profile: { displayName: 'Ada Byron', timezone: 'UTC' },
+      reviewNote: 'Baseline note',
+    });
+    expect(application.getState().snapshot?.dirty).toBe(true);
+
+    application.resetScenario();
+    expect(application.prepareScopeCandidate(currentOnly)).toBe(false);
+    expect(application.getState().scopeCandidate?.status).toBe('unconfirmable');
+    expect(application.getState().baselineValue).toEqual(baseline);
+
+    expect(application.prepareScopeCandidate(team)).toBe(true);
+    expect(application.acceptScopeCandidate()?.success).toBe(true);
+    expect(application.getState().baselineValue).toMatchObject({
+      team: [
+        { id: 'grace', name: 'Grace Hopper' },
+        { id: 'linus', name: 'Linus' },
+        { id: 'ada', name: 'Ada' },
+      ],
+      reviewNote: 'Baseline note',
+    });
+    expect(application.getState().snapshot?.dirty).toBe(true);
+
+    expect(application.selectScenario('scope-baseline-confirmation')).toBe(
+      true,
+    );
+    expect(application.getState().scopeCandidate).toBeUndefined();
+    application.dispose();
+  });
+
   it('owns copied complete roots and creates a Public controlled runtime', () => {
     const application = new StandardReferenceApplication();
     const state = application.getState();
@@ -25,6 +130,116 @@ describe('StandardReferenceApplication', () => {
     expect(Object.isFrozen(state.history)).toBe(true);
     expect(application.getRuntime()).toBeDefined();
 
+    application.dispose();
+  });
+
+  it('keeps unconfigured scenarios exact and demonstrates the complete controlled async lifecycle', async () => {
+    const unconfigured = new StandardReferenceApplication();
+    expect(unconfigured.getState().snapshot).not.toHaveProperty(
+      'asyncValidation',
+    );
+    unconfigured.dispose();
+
+    const application = new StandardReferenceApplication(
+      referenceScenarios,
+      'service-validation',
+    );
+    expect(application.getState().snapshot?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: 1,
+    });
+    expect(application.getState().history).toEqual([]);
+
+    expect(application.resolveServiceValidation(false)).toBe(true);
+    await flushAsyncValidation();
+    expect(application.getState().snapshot?.asyncValidation).toEqual({
+      status: 'settled',
+      generation: 1,
+      valid: false,
+    });
+    expect(application.getState().snapshot?.fields[0]?.issues).toEqual([
+      expect.objectContaining({
+        code: 'username-unavailable',
+        path: ['username'],
+      }),
+    ]);
+
+    expect(
+      application.replaceValue({
+        ...application.getState().value,
+        username: 'x',
+      })?.success,
+    ).toBe(true);
+    expect(application.getState().snapshot?.asyncValidation).toEqual({
+      status: 'blocked',
+      reason: 'sync-invalid',
+    });
+    const blockedCount = application.getState().serviceRequestEvidence.length;
+
+    application.replaceValue({
+      ...application.getState().value,
+      username: 'grace',
+    });
+    const stale = application.getState().serviceRequestEvidence.at(-1);
+    application.replaceValue({
+      ...application.getState().value,
+      username: 'linus',
+    });
+    const current = application.getState().serviceRequestEvidence.at(-1);
+    expect(application.getState().serviceRequestEvidence).toHaveLength(
+      blockedCount + 2,
+    );
+    expect(
+      application
+        .getState()
+        .serviceRequestEvidence.find(({ id }) => id === stale?.id)?.status,
+    ).toBe('cancelled');
+    expect(current?.status).toBe('pending');
+    expect(application.resolveServiceRequest(stale?.id ?? -1, false)).toBe(
+      true,
+    );
+    await flushAsyncValidation();
+    expect(application.getState().snapshot?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: current?.generation,
+    });
+
+    expect(application.rejectServiceValidation()).toBe(true);
+    await flushAsyncValidation();
+    expect(application.getState().snapshot?.asyncValidation).toEqual({
+      status: 'failed',
+      generation: current?.generation,
+      reason: 'exception',
+    });
+    expect(application.throwOnNextValidation()).toBe(true);
+    expect(application.retryAsyncValidation()?.success).toBe(true);
+    await flushAsyncValidation();
+    expect(application.getState().snapshot?.asyncValidation).toMatchObject({
+      status: 'failed',
+      reason: 'exception',
+    });
+    expect(application.retryAsyncValidation()?.success).toBe(true);
+    expect(application.resolveServiceValidation(true)).toBe(true);
+    await flushAsyncValidation();
+    expect(application.getState().snapshot?.asyncValidation).toMatchObject({
+      status: 'settled',
+      valid: true,
+    });
+    expect(application.getState().history).toEqual([]);
+    expect(
+      application
+        .getState()
+        .serviceRequestEvidence.filter(({ status }) => status === 'threw'),
+    ).toHaveLength(1);
+
+    application.updateUiSchemaDraft(
+      `${application.getState().uiSchemaDraft}\n`,
+    );
+    expect(application.applyConfiguration()).toBe(false);
+    expect(application.confirmConfigurationAction()).toBe(true);
+    expect(application.getState().serviceRequestEvidence).toEqual([
+      expect.objectContaining({ id: 1, generation: 1, status: 'pending' }),
+    ]);
     application.dispose();
   });
 
@@ -446,4 +661,10 @@ function addNameMaximum(schemaText: string, maxLength: number): string {
     maxLength,
   };
   return JSON.stringify(schema, undefined, 2);
+}
+
+async function flushAsyncValidation(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 }

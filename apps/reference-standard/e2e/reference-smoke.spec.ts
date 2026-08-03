@@ -8,11 +8,18 @@ const scenarios = [
   ['nested-profile', 'Nested profile materialization'],
   ['stable-team', 'Stable team collection'],
   ['local-definitions', 'Same-document local definitions'],
+  ['object-composition', 'Static object composition'],
   ['presentation-sections', 'Static presentation sections'],
   ['nullable-preferences', 'Nullable preferences'],
   ['advanced-presentation', 'Advanced static presentation'],
   ['recursive-local-presentation', 'Recursive local presentation'],
   ['semantic-contact', 'Semantic contact formats'],
+  ['fixed-values', 'Primitive fixed values'],
+  ['service-validation', 'Controlled service validation'],
+  ['scope-baseline-confirmation', 'Scoped baseline confirmation'],
+  ['explicit-schema-defaults', 'Explicit schema defaults'],
+  ['conditional-field-state', 'Controlled conditional field state'],
+  ['string-enum-array', 'Controlled multiple choices'],
 ] as const;
 
 test.beforeEach(async ({ page }) => {
@@ -172,6 +179,352 @@ test('projects and validates the shared semantic-format scenario', async ({
   await expect(email).toHaveAttribute('aria-invalid', 'true');
   await email.fill('grace@example.com');
   await expect(email).not.toHaveAttribute('aria-invalid', 'true');
+});
+
+test('projects the exact shared conditional scenario independently', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'conditional-field-state',
+    'Controlled conditional field state',
+  );
+  const nameHost = page.locator('[data-field-name="displayName"]');
+  const name = nameHost.locator('input');
+  const roleHost = page.locator('[data-field-name="role"]');
+  const role = roleHost.locator('select');
+  const driverHost = page.locator('[data-field-name="driver"]');
+
+  await expect(
+    page.getByRole('textbox', { name: 'Nullable match' }),
+  ).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Zero match' })).toBeVisible();
+  await expect(
+    page.getByRole('textbox', { name: 'Empty-string match' }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole('textbox', { name: 'Hidden-source match' }),
+  ).toBeVisible();
+
+  await name.evaluate((element) => {
+    Object.defineProperty(element, '__sharedConditionalIdentity', {
+      value: true,
+      configurable: true,
+    });
+  });
+  await name.fill('Grace');
+  await page
+    .getByRole('textbox', { name: 'Conditional review code' })
+    .fill('needs-review');
+  await expect(
+    page.getByRole('textbox', { name: 'Conditional review code' }),
+  ).toHaveAttribute('aria-invalid', 'true');
+  await name.focus();
+  await page.getByRole('checkbox', { name: 'Show details' }).uncheck();
+  await expect(nameHost).toHaveAttribute('hidden', '');
+  await expect(nameHost).toHaveAttribute('inert', '');
+  await expect(nameHost).toHaveAttribute('aria-hidden', 'true');
+  await expect(
+    page.getByRole('textbox', { name: 'Conditional name' }),
+  ).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Runtime', exact: true }).click();
+  await expect(
+    page.locator('#evidence-panel-runtime pre').first(),
+  ).toContainText('"valid": false');
+  const history = page.locator('#evidence-panel-runtime pre').nth(1);
+  const historyBeforeHidden = await history.textContent();
+  await name.evaluate((element) => {
+    const input = element as HTMLInputElement;
+    input.value = 'stale hidden edit';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('focus', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+  });
+  await expect(history).toHaveText(historyBeforeHidden ?? '');
+
+  await page.getByRole('checkbox', { name: 'Enable role' }).uncheck();
+  await expect(role).toBeDisabled();
+  await expect(roleHost.getByRole('button', { name: /Clear/u })).toBeDisabled();
+  const historyBeforeDisabled = await history.textContent();
+  await role.dispatchEvent('change');
+  await roleHost.getByRole('button', { name: /Clear/u }).dispatchEvent('click');
+  await expect(history).toHaveText(historyBeforeDisabled ?? '');
+  await page.getByRole('tab', { name: 'Diagnostics', exact: true }).click();
+  await expect(page.locator('#evidence-panel-diagnostics pre')).toContainText(
+    '"runtime": []',
+  );
+
+  await page.getByRole('checkbox', { name: 'Show driver' }).uncheck();
+  await expect(driverHost).toHaveAttribute('hidden', '');
+  await expect(
+    page.getByRole('textbox', { name: 'Hidden-source match' }),
+  ).toBeVisible();
+
+  await page.getByRole('checkbox', { name: 'Show details' }).check();
+  await page.getByRole('checkbox', { name: 'Enable role' }).check();
+  await expect(nameHost).not.toHaveAttribute('hidden', '');
+  await expect(name).toHaveValue('Grace');
+  await expect(role).toBeEnabled();
+  expect(
+    await name.evaluate(
+      (element) =>
+        (
+          element as HTMLElement & {
+            __sharedConditionalIdentity?: boolean;
+          }
+        ).__sharedConditionalIdentity,
+    ),
+  ).toBe(true);
+});
+
+test('projects controlled ordered multiple choices independently', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'string-enum-array',
+    'Controlled multiple choices',
+  );
+  const roles = page.getByRole('listbox', { name: 'Assigned roles' });
+  const channels = page.getByRole('listbox', { name: 'Required channels' });
+  await expect(roles).toHaveAttribute('multiple', '');
+  await expect(roles.locator('option')).toHaveCount(6);
+  await expect(
+    page.getByText('No value provided.', { exact: true }),
+  ).toBeVisible();
+  await expect(channels).toHaveAttribute('required', '');
+  await expect(
+    page.getByText('No values selected.', { exact: true }),
+  ).toBeVisible();
+
+  await roles.selectOption(['choice:3']);
+  await roles.selectOption(['choice:2', 'choice:3']);
+  await page.getByRole('tab', { name: 'State', exact: true }).click();
+  await expect(page.locator('#evidence-panel-state pre').first()).toContainText(
+    '"roles": [\n    "editor",\n    "reader"',
+  );
+  await page.getByTestId('decision-reject').click();
+  await roles.selectOption(['choice:2', 'choice:3', 'choice:4']);
+  await expect(roles).toHaveValues(['choice:2', 'choice:3']);
+  await page.getByRole('tab', { name: 'Runtime', exact: true }).click();
+  await expect(
+    page.locator('#evidence-panel-runtime pre').nth(1),
+  ).toContainText('"decision": "rejected"');
+
+  await roles.focus();
+  await roles.blur();
+  await expect(
+    page.locator('#evidence-panel-runtime pre').first(),
+  ).toContainText('"touched": true');
+  await page.getByRole('button', { name: 'Locale es' }).click();
+  await expect(
+    page.getByText('No hay valores seleccionados.', { exact: true }),
+  ).toBeVisible();
+  await page.getByTestId('decision-confirm').click();
+  await page.getByRole('button', { name: /Limpiar Assigned roles/u }).click();
+  await expect(
+    page.getByText('No se ha proporcionado ningún valor.', { exact: true }),
+  ).toBeVisible();
+});
+
+test('projects and validates shared object composition independently', async ({
+  page,
+}) => {
+  await selectScenario(page, 'object-composition', 'Static object composition');
+  const form = page.getByRole('form', {
+    name: 'Schema Engine form preview',
+  });
+  const department = form.getByRole('textbox', { name: 'Department' });
+  const displayName = form.getByRole('textbox', { name: 'Display name' });
+
+  await expect
+    .poll(() =>
+      form
+        .locator('[data-field-name]')
+        .evaluateAll((fields) =>
+          fields.map((field) => (field as HTMLElement).dataset['fieldName']),
+        ),
+    )
+    .toEqual(['department', 'displayName', 'contactEmail', 'active']);
+  await expect(department).toHaveAttribute('required', '');
+  await expect(displayName).toHaveAttribute('required', '');
+  await department.fill('R');
+  await displayName.fill('A');
+  await expect(department).toHaveAttribute('aria-invalid', 'true');
+  await expect(displayName).toHaveAttribute('aria-invalid', 'true');
+  await department.fill('Engineering');
+  await displayName.fill('Grace Hopper');
+  await expect(department).toHaveAttribute('aria-invalid', 'false');
+  await expect(displayName).toHaveAttribute('aria-invalid', 'false');
+  await page.getByRole('combobox', { name: 'Theme' }).selectOption('dark');
+  await expect(form).toBeVisible();
+  await expect(page.getByTestId('compile-status')).toHaveText(
+    'Public core compilation succeeded.',
+  );
+});
+
+test('projects shared fixed values without renderer-owned intentions', async ({
+  page,
+}) => {
+  await selectScenario(page, 'fixed-values', 'Primitive fixed values');
+  const direct = page.getByRole('group', { name: 'Direct fixed choice' });
+  const value = direct.locator('[data-fixed-value-state]');
+  await expect(value).toHaveText('fixed');
+  await expect(value).toHaveAttribute('data-fixed-value-state', 'value');
+  await expect(direct.locator('input, select, button, [tabindex]')).toHaveCount(
+    0,
+  );
+  await expect(
+    page
+      .getByRole('group', { name: 'Missing fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Missing value');
+  await expect(
+    page
+      .getByRole('group', { name: 'Blocked child' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Unavailable value');
+  await expect(
+    page
+      .getByRole('group', { name: 'Nullable fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Null value');
+  await expect(
+    page
+      .getByRole('group', { name: 'Empty string' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('""');
+  await expect(
+    page
+      .getByRole('group', { name: 'Negative zero' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('-0');
+
+  await page.getByTestId('fixed-control-mismatch').click();
+  await expect(value).toHaveText('other');
+  await expect(direct).toHaveAttribute('aria-invalid', 'true');
+  await expect(direct).toContainText('const');
+  await page.getByTestId('fixed-control-incompatible').click();
+  await expect(
+    page
+      .getByRole('group', { name: 'Incompatible fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Incompatible value');
+  await page.getByRole('tab', { name: 'Runtime', exact: true }).click();
+  await expect(
+    page
+      .getByRole('button', { name: 'Copy operation history' })
+      .locator('..')
+      .locator('..'),
+  ).toContainText('[]');
+  await page.getByRole('button', { name: 'Locale es' }).click();
+  await expect(
+    page
+      .getByRole('group', { name: 'Missing fixed value' })
+      .locator('[data-fixed-value-state]'),
+  ).toHaveText('Valor ausente');
+});
+
+test('exposes deterministic controlled service validation without renderer orchestration', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'service-validation',
+    'Controlled service validation',
+  );
+  const status = page.getByTestId('async-validation-state');
+  const username = page.getByRole('textbox', { name: 'Username' });
+  await expect(status).toHaveText('Generation 1 pending.');
+
+  await page.getByRole('button', { name: 'Resolve as unavailable' }).click();
+  await expect(status).toHaveText('Generation 1 settled invalid.');
+  await expect(username).toHaveAttribute('aria-invalid', 'true');
+  await expect(
+    page.getByRole('form', { name: 'Schema Engine form preview' }),
+  ).toContainText('username-unavailable');
+
+  await username.fill('x');
+  await expect(status).toHaveText('Blocked by synchronous validation.');
+  await username.fill('grace');
+  await expect(status).toContainText('pending');
+  await username.fill('linus');
+  await expect(status).toContainText('pending');
+  await expect(page.getByTestId('service-validation-controls')).toContainText(
+    'cancelled',
+  );
+
+  await page.getByRole('button', { name: 'Reject current request' }).click();
+  await expect(status).toContainText('failed: exception');
+  await page.getByRole('button', { name: 'Throw on next request' }).click();
+  await page.getByRole('button', { name: 'Retry service validation' }).click();
+  await expect(status).toContainText('failed: exception');
+  await page.getByRole('button', { name: 'Retry service validation' }).click();
+  await expect(status).toContainText('pending');
+  await page.getByRole('button', { name: 'Resolve as available' }).click();
+  await expect(status).toContainText('settled valid');
+  await expect(username).not.toHaveAttribute('aria-invalid', 'true');
+});
+
+test('prepares and accepts application-owned scoped baseline candidates', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'scope-baseline-confirmation',
+    'Scoped baseline confirmation',
+  );
+  const status = page.getByTestId('scope-candidate-status');
+  const accept = page.getByTestId('accept-scope-candidate');
+  const baseline = page
+    .locator('#evidence-panel-state details')
+    .nth(1)
+    .locator('pre');
+  await expect(status).toHaveText('No baseline candidate prepared.');
+
+  await page.getByTestId('prepare-scope-profile-name').click();
+  await expect(status).toContainText('candidate prepared');
+  await expect(accept).toBeEnabled();
+  await expect(baseline).toContainText('Ada Lovelace');
+  await accept.click();
+  await expect(status).toContainText('simulated persistence accepted');
+  await expect(baseline).toContainText('Ada Byron');
+
+  await page.getByRole('button', { name: 'Reset scenario' }).click();
+  await page.getByTestId('prepare-scope-current-only-linus').click();
+  await expect(status).toContainText('unconfirmable');
+  await expect(accept).toBeDisabled();
+
+  await page.getByTestId('prepare-scope-whole-team').click();
+  await accept.click();
+  await expect(baseline).toContainText('Linus');
+  await expect(baseline).toContainText('Baseline note');
+  await expect(valueEvidence(page)).toContainText(
+    'Unrelated edit remains dirty',
+  );
+});
+
+test('derives, cancels and accepts explicit schema defaults', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'explicit-schema-defaults',
+    'Explicit schema defaults',
+  );
+  const status = page.getByTestId('default-candidate-status');
+  await page.getByTestId('derive-default-candidate').click();
+  await expect(status).toContainText('Candidate derived');
+  await expect(valueEvidence(page)).not.toContainText('New entity');
+  await page.getByTestId('cancel-default-candidate').click();
+  await expect(status).toContainText('cancelled');
+  await page.getByTestId('derive-default-candidate').click();
+  await page.getByTestId('accept-default-candidate').click();
+  await expect(valueEvidence(page)).toContainText('New entity');
+  await expect(valueEvidence(page)).toContainText('Existing row');
+  await expect(status).toContainText('explicitly accepted');
+  await page.getByTestId('derive-default-candidate').click();
+  await expect(status).toContainText('no effect');
 });
 
 test('covers controlled decisions, stale pending work, baseline and reset', async ({

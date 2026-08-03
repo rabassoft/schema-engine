@@ -4,8 +4,14 @@
 export { compileFormDefinition } from './compiler.js';
 export { applyFormOperation, applyOperation } from './operations.js';
 export { createControlledFormRuntime } from './runtime.js';
+export { commitScopeToBaseline } from './internal/scope-baseline.js';
+export { deriveSchemaDefaultCandidate } from './default-candidate.js';
 export type {
   ApplyOperationResult,
+  AsyncSchemaValidator,
+  AsyncValidationCancellation,
+  AsyncValidationContext,
+  AsyncValidationState,
   AdvancedPresentationLabelDefinition,
   AdvancedPresentationTextMember,
   AdvancedPresentationTextResolutionContext,
@@ -33,6 +39,7 @@ export type {
   Diagnostic,
   DocumentPath,
   FieldDefinition,
+  FieldValueConditionDefinition,
   FieldPresence,
   FieldRuntimeSnapshot,
   FieldTemplate,
@@ -85,6 +92,7 @@ export type {
   SetItemValueOperation,
   SnapshotListener,
   StringChoiceDefinition,
+  StringEnumArrayFieldDefinition,
   StringFieldDefinition,
   StringSemanticFormat,
   SubscribeResult,
@@ -97,6 +105,7 @@ export type {
   UiAccordionSchema,
   UiGridItemSchema,
   UiGridSchema,
+  UiFieldValueConditionSchema,
   UiPresentationPanelSchema,
   UiSectionSchema,
   UiTabsSchema,

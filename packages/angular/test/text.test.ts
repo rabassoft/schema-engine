@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import type {
   FieldRuntimeSnapshot,
+  StringEnumArrayFieldDefinition,
   StringFieldDefinition,
   TextResolutionContext,
   ValidationIssue,
@@ -45,9 +46,21 @@ const snapshot: FieldRuntimeSnapshot = Object.freeze({
   dirty: false,
   touched: false,
   focused: false,
+  visible: true,
+  enabled: true,
   valid: false,
   issues: Object.freeze([issue]),
   showIssues: false,
+});
+const arrayField: StringEnumArrayFieldDefinition = Object.freeze({
+  key: 'roles',
+  name: 'roles',
+  path: Object.freeze(['roles']),
+  required: false,
+  label: 'roles.label',
+  kind: 'string-enum-array',
+  nullable: false,
+  choices,
 });
 
 describe('AngularTextProjector choice texts', () => {
@@ -84,6 +97,8 @@ describe('AngularTextProjector choice texts', () => {
       'null-value',
       'choice',
       'choice',
+      'missing-selection',
+      'empty-selection',
       'issue',
     ]);
     const choiceContexts = calls
@@ -107,7 +122,12 @@ describe('AngularTextProjector choice texts', () => {
       clearLabel: 'ca:Clear',
       setNullLabel: 'ca:Set null',
       nullValueLabel: 'ca:Null value',
+      fixedMissingLabel: 'Missing value',
+      fixedUnavailableLabel: 'Unavailable value',
+      fixedIncompatibleLabel: 'Incompatible value',
       choiceLabels: ['ca:status.draft', 'ca:status.published'],
+      missingSelectionLabel: 'ca:No value provided.',
+      emptySelectionLabel: 'ca:No values selected.',
       issueMessages: ['ca:status.required'],
     });
     expect(result.diagnostics).toEqual([]);
@@ -136,6 +156,11 @@ describe('AngularTextProjector choice texts', () => {
               context.member === 'clear' ||
               context.member === 'set-null' ||
               context.member === 'null-value'
+            )
+              return _text;
+            if (
+              context.member === 'missing-selection' ||
+              context.member === 'empty-selection'
             )
               return _text;
             if (context.member !== 'choice') return '';
@@ -195,6 +220,52 @@ describe('AngularTextProjector choice texts', () => {
       expect(Object.isFrozen(diagnostic.dataPath)).toBe(true);
       expect(Object.isFrozen(diagnostic.parameters)).toBe(true);
     }
+  });
+
+  it('projects fixed status members after null and before choices and issues', () => {
+    const calls: TextResolutionContext[] = [];
+    TestBed.configureTestingModule({
+      providers: [
+        provideSchemaTextResolver({
+          resolve(text, context) {
+            calls.push(context);
+            return `${context.locale}:${text}`;
+          },
+        }),
+      ],
+    });
+    const fixedField = Object.freeze({ ...field, fixedValue: 'draft' });
+    const result = TestBed.inject(AngularTextProjector).project(
+      fixedField,
+      snapshot,
+      'form',
+      'es',
+    );
+
+    expect(calls.map(({ member }) => member)).toEqual([
+      'label',
+      'description',
+      'hint',
+      'tooltip',
+      'placeholder',
+      'clear',
+      'set-null',
+      'null-value',
+      'fixed-missing',
+      'fixed-unavailable',
+      'fixed-incompatible',
+      'choice',
+      'choice',
+      'missing-selection',
+      'empty-selection',
+      'issue',
+    ]);
+    expect(result.texts).toMatchObject({
+      fixedMissingLabel: 'es:Missing value',
+      fixedUnavailableLabel: 'es:Unavailable value',
+      fixedIncompatibleLabel: 'es:Incompatible value',
+    });
+    expect(result.diagnostics).toEqual([]);
   });
 
   it('falls back to Clear with exact diagnostics for invalid resolutions', () => {
@@ -257,6 +328,9 @@ describe('AngularTextProjector choice texts', () => {
   it.each([
     ['set-null', 'Set null', 'setNullLabel'],
     ['null-value', 'Null value', 'nullValueLabel'],
+    ['fixed-missing', 'Missing value', 'fixedMissingLabel'],
+    ['fixed-unavailable', 'Unavailable value', 'fixedUnavailableLabel'],
+    ['fixed-incompatible', 'Incompatible value', 'fixedIncompatibleLabel'],
   ] as const)(
     'falls back for %s with every existing failure reason',
     (member, source, snapshotMember) => {
@@ -284,8 +358,11 @@ describe('AngularTextProjector choice texts', () => {
             }),
           ],
         });
+        const projectedField = member.startsWith('fixed-')
+          ? { ...fieldWithoutChoices, fixedValue: 'fixed' }
+          : fieldWithoutChoices;
         const result = TestBed.inject(AngularTextProjector).project(
-          fieldWithoutChoices,
+          projectedField,
           { ...snapshot, issues: [] },
           'form',
           'en',
@@ -320,8 +397,15 @@ describe('AngularTextProjector choice texts', () => {
         },
       },
     );
+    Object.defineProperty(accessorField, 'fixedValue', {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return 'draft';
+      },
+    });
     const inheritedField: StringFieldDefinition = Object.assign(
-      Object.create({ choices }) as object,
+      Object.create({ choices, fixedValue: 'draft' }) as object,
       {
         ...field,
       },
@@ -338,12 +422,93 @@ describe('AngularTextProjector choice texts', () => {
         .choiceLabels,
     ).toEqual([]);
     expect(getterCalls).toBe(0);
+    expect(
+      projector.project(accessorField, snapshot, 'form', 'en').texts
+        .fixedMissingLabel,
+    ).toBe('Missing value');
+    expect(
+      projector.project(inheritedField, snapshot, 'form', 'en').texts
+        .fixedMissingLabel,
+    ).toBe('Missing value');
     const empty = emptyTextSnapshot();
     expect(empty.clearLabel).toBe('Clear');
     expect(empty.setNullLabel).toBe('Set null');
     expect(empty.nullValueLabel).toBe('Null value');
+    expect(empty.fixedMissingLabel).toBe('Missing value');
+    expect(empty.fixedUnavailableLabel).toBe('Unavailable value');
+    expect(empty.fixedIncompatibleLabel).toBe('Incompatible value');
     expect(empty.choiceLabels).toEqual([]);
+    expect(empty.missingSelectionLabel).toBe('No value provided.');
+    expect(empty.emptySelectionLabel).toBe('No values selected.');
     expect(Object.isFrozen(empty)).toBe(true);
     expect(Object.isFrozen(empty.choiceLabels)).toBe(true);
+  });
+
+  it('resolves total M31 status texts and falls back for every failure reason', () => {
+    const cases = [
+      {
+        member: 'missing-selection',
+        source: 'No value provided.',
+        snapshotMember: 'missingSelectionLabel',
+      },
+      {
+        member: 'empty-selection',
+        source: 'No values selected.',
+        snapshotMember: 'emptySelectionLabel',
+      },
+    ] as const;
+    for (const current of cases) {
+      for (const [reason, failure] of [
+        [
+          'exception',
+          () => {
+            throw new Error('hidden');
+          },
+        ],
+        ['non-string-result', () => 42 as never],
+        ['blank-string-result', () => '   '],
+      ] as const) {
+        TestBed.resetTestingModule();
+        const contexts: TextResolutionContext[] = [];
+        TestBed.configureTestingModule({
+          providers: [
+            provideSchemaTextResolver({
+              resolve(text, context) {
+                contexts.push(context);
+                return context.member === current.member ? failure() : text;
+              },
+            }),
+          ],
+        });
+        const result = TestBed.inject(AngularTextProjector).project(
+          arrayField,
+          { ...snapshot, key: 'roles', path: ['roles'], issues: [] },
+          'form',
+          'es',
+        );
+        expect(result.texts[current.snapshotMember]).toBe(current.source);
+        expect(result.diagnostics).toMatchObject([
+          {
+            code: 'TEXT_RESOLUTION_FAILED',
+            dataPath: ['roles'],
+            parameters: {
+              field: 'roles',
+              member: current.member,
+              reason,
+            },
+          },
+        ]);
+        expect(result.diagnostics).toHaveLength(1);
+        const context = contexts.find(
+          ({ member }) => member === current.member,
+        );
+        expect(context).toMatchObject({
+          field: arrayField,
+          member: current.member,
+        });
+        expect(Object.hasOwn(context!, 'choice')).toBe(false);
+        expect(Object.hasOwn(context!, 'issue')).toBe(false);
+      }
+    }
   });
 });

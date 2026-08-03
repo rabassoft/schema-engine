@@ -4,9 +4,15 @@ import {
   type FormOperation,
   type SetValueOperation,
 } from '@rabassoft/schema-engine';
-import { provideSchemaEngineAngularNative } from '@rabassoft/schema-engine-angular';
+import {
+  provideSchemaEngineAngularNative,
+  provideSchemaTextResolver,
+} from '@rabassoft/schema-engine-angular';
 import { createAjvSchemaValidator } from '@rabassoft/schema-engine-validator-ajv';
-import type { ReferenceScenario } from '@schema-engine-internal/reference-scenarios';
+import {
+  stringEnumArrayControlStates,
+  type ReferenceScenario,
+} from '@schema-engine-internal/reference-scenarios';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { referenceSnippets } from '../src/app/generated/reference-snippets.js';
@@ -35,6 +41,20 @@ function createComponent() {
     providers: [
       provideZonelessChangeDetection(),
       provideSchemaEngineAngularNative(),
+      provideSchemaTextResolver({
+        resolve(text, context) {
+          if (context.locale !== 'es') return text;
+          return (
+            (
+              {
+                Clear: 'Limpiar',
+                'No value provided.': 'No se ha proporcionado ningún valor.',
+                'No values selected.': 'No hay valores seleccionados.',
+              } as Readonly<Record<string, string>>
+            )[text] ?? text
+          );
+        },
+      }),
       {
         provide: REFERENCE_SCHEMA_VALIDATOR,
         useValue: createAjvSchemaValidator(),
@@ -47,8 +67,109 @@ function createComponent() {
   return fixture;
 }
 
+async function flushAsyncValidation(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+  TestBed.tick();
+}
+
 describe('ReferenceFormComponent application ownership', () => {
   beforeEach(() => TestBed.resetTestingModule());
+
+  it('derives, cancels and explicitly accepts schema defaults without operations', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component.selectScenario('explicit-schema-defaults');
+    const original = component.value();
+    const rows = (original as { rows: readonly unknown[] }).rows;
+
+    component.deriveDefaultCandidate();
+    expect(component.defaultCandidate()?.status).toBe('available');
+    expect(component.value()).toBe(original);
+    expect(component.history()).toHaveLength(0);
+
+    component.cancelDefaultCandidate();
+    expect(component.defaultCandidate()?.status).toBe('cancelled');
+    expect(component.value()).toBe(original);
+
+    component.deriveDefaultCandidate();
+    component.acceptDefaultCandidate();
+    expect(component.defaultCandidate()?.status).toBe('accepted');
+    expect(component.value()).toMatchObject({
+      title: 'New entity',
+      enabled: false,
+      attempts: 0,
+      note: '',
+      nullableNote: null,
+      locale: 'en',
+      profile: { displayName: 'Ada', code: 'x' },
+    });
+    expect((component.value() as { rows: readonly unknown[] }).rows).toBe(rows);
+    expect(component.history()).toHaveLength(0);
+    expect(
+      component.validationIssues().map(({ keyword }) => keyword),
+    ).toContain('minLength');
+
+    component.deriveDefaultCandidate();
+    expect(component.defaultCandidate()?.status).toBe('no-effect');
+  });
+
+  it('prepares and separately accepts scoped baseline candidates without owning persistence', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component.selectScenario('scope-baseline-confirmation');
+    const confirmation = component.selectedScenario().scopeConfirmation;
+    const profile = confirmation?.targets.find(
+      ({ id }) => id === 'profile-name',
+    );
+    const team = confirmation?.targets.find(({ id }) => id === 'whole-team');
+    const currentOnly = confirmation?.targets.find(
+      ({ id }) => id === 'current-only-linus',
+    );
+    if (
+      profile === undefined ||
+      team === undefined ||
+      currentOnly === undefined
+    ) {
+      throw new Error('Scoped confirmation targets are required.');
+    }
+
+    const baseline = component.baselineValue();
+    expect(component.dirty()).toBe(true);
+    component.prepareScopeCandidate(profile);
+    expect(component.scopeCandidate()?.status).toBe('available');
+    expect(component.baselineValue()).toBe(baseline);
+    expect(component.dirty()).toBe(true);
+
+    component.acceptScopeCandidate();
+    expect(component.scopeCandidate()?.status).toBe('accepted');
+    expect(component.baselineValue()).toMatchObject({
+      profile: { displayName: 'Ada Byron', timezone: 'UTC' },
+      reviewNote: 'Baseline note',
+    });
+    expect(component.dirty()).toBe(true);
+
+    component.resetScenario();
+    component.prepareScopeCandidate(currentOnly);
+    expect(component.scopeCandidate()?.status).toBe('unconfirmable');
+    expect(component.baselineValue()).toEqual(baseline);
+
+    component.prepareScopeCandidate(team);
+    component.acceptScopeCandidate();
+    expect(component.baselineValue()).toMatchObject({
+      team: [
+        { id: 'grace', name: 'Grace Hopper' },
+        { id: 'linus', name: 'Linus' },
+        { id: 'ada', name: 'Ada' },
+      ],
+      reviewNote: 'Baseline note',
+    });
+    expect(component.dirty()).toBe(true);
+
+    component.loadScenario(component.selectedScenario());
+    expect(component.scopeCandidate()).toBeUndefined();
+  });
 
   it('compiles before mounting the form and exposes compiler failure', () => {
     const fixture = createComponent();
@@ -94,6 +215,104 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(localized).not.toBe(initial);
     expect(localized?.locale).toBe('es');
     expect(localized?.value).toBe(component.value());
+    expect(initial).not.toHaveProperty('asyncValidator');
+    expect(component.runtimeSnapshot()).not.toHaveProperty('asyncValidation');
+  });
+
+  it('demonstrates controlled async settlement, blocking, stale suppression, failure and retry', async () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component.selectScenario('service-validation');
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect(component.runtimeSnapshot()?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: 1,
+    });
+    expect(component.formConfig()).toHaveProperty('asyncValidator');
+    expect(component.history()).toEqual([]);
+
+    component.resolveServiceValidation(false);
+    await flushAsyncValidation();
+    expect(component.runtimeSnapshot()?.asyncValidation).toEqual({
+      status: 'settled',
+      generation: 1,
+      valid: false,
+    });
+    expect(component.runtimeSnapshot()?.fields[0]?.issues).toEqual([
+      expect.objectContaining({
+        code: 'username-unavailable',
+        path: ['username'],
+      }),
+    ]);
+
+    component.replaceValue({ ...component.value(), username: 'x' });
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.runtimeSnapshot()?.asyncValidation).toEqual({
+      status: 'blocked',
+      reason: 'sync-invalid',
+    });
+    const blockedCount = component.serviceRequestEvidence().length;
+
+    component.replaceValue({ ...component.value(), username: 'grace' });
+    fixture.detectChanges();
+    TestBed.tick();
+    const stale = component.serviceRequestEvidence().at(-1);
+    component.replaceValue({ ...component.value(), username: 'linus' });
+    fixture.detectChanges();
+    TestBed.tick();
+    const current = component.serviceRequestEvidence().at(-1);
+    expect(component.serviceRequestEvidence()).toHaveLength(blockedCount + 2);
+    expect(
+      component.serviceRequestEvidence().find(({ id }) => id === stale?.id)
+        ?.status,
+    ).toBe('cancelled');
+    expect(current?.status).toBe('pending');
+    expect(component.resolveServiceRequest(stale?.id ?? -1, false)).toBe(true);
+    await flushAsyncValidation();
+    expect(component.runtimeSnapshot()?.asyncValidation).toEqual({
+      status: 'pending',
+      generation: current?.generation,
+    });
+
+    component.rejectServiceValidation();
+    await flushAsyncValidation();
+    expect(component.runtimeSnapshot()?.asyncValidation).toEqual({
+      status: 'failed',
+      generation: current?.generation,
+      reason: 'exception',
+    });
+    component.throwOnNextValidation();
+    expect(component.retryAsyncValidation()?.success).toBe(true);
+    await flushAsyncValidation();
+    expect(component.runtimeSnapshot()?.asyncValidation).toMatchObject({
+      status: 'failed',
+      reason: 'exception',
+    });
+    expect(component.retryAsyncValidation()?.success).toBe(true);
+    component.resolveServiceValidation(true);
+    await flushAsyncValidation();
+    expect(component.runtimeSnapshot()?.asyncValidation).toMatchObject({
+      status: 'settled',
+      valid: true,
+    });
+    expect(component.history()).toEqual([]);
+    expect(
+      component
+        .serviceRequestEvidence()
+        .filter(({ status }) => status === 'threw'),
+    ).toHaveLength(1);
+
+    component.updateUiSchemaDraft(`${component.uiSchemaDraft()}\n`);
+    expect(component.applyConfiguration()).toBe(false);
+    expect(component.confirmConfigurationAction()).toBe(true);
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.serviceRequestEvidence()).toEqual([
+      expect.objectContaining({ id: 1, generation: 1, status: 'pending' }),
+    ]);
   });
 
   it('applies confirmed intentions and records rejected intentions without mutation', () => {
@@ -426,7 +645,7 @@ describe('ReferenceFormComponent application ownership', () => {
 
     expect(navigation).not.toBeNull();
     expect(selector).toBeInstanceOf(HTMLSelectElement);
-    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(9);
+    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(16);
     expect(
       root.querySelector('label[for="scenario-selector"]')?.textContent,
     ).toBe('Scenario');
@@ -589,7 +808,7 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(root.textContent).toContain('Own state:');
   });
 
-  it('loads all eight scenarios through the same focused form component', () => {
+  it('loads every shared scenario through the same focused form component', () => {
     const fixture = createComponent();
     const component = fixture.componentInstance;
 
@@ -607,6 +826,205 @@ describe('ReferenceFormComponent application ownership', () => {
         scenario.id,
       ).not.toBeNull();
     }
+  });
+
+  it('projects the shared M31 scenario through controlled Angular operations', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component.selectScenario('string-enum-array');
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+    const rolesId = nodeBase('reference-string-enum-array', ['roles']);
+    const channelsId = nodeBase('reference-string-enum-array', [
+      'profile',
+      'channels',
+    ]);
+    const roles = root.querySelector<HTMLSelectElement>(`[id="${rolesId}"]`);
+    const channels = root.querySelector<HTMLSelectElement>(
+      `[id="${channelsId}"]`,
+    );
+    if (roles === null || channels === null) {
+      throw new Error('Expected Angular M31 controls.');
+    }
+
+    expect(roles.multiple).toBe(true);
+    expect(Array.from(roles.options, ({ value }) => value)).toEqual(
+      Array.from({ length: 6 }, (_value, index) => `choice:${index}`),
+    );
+    expect(document.getElementById(`${rolesId}-status`)?.textContent).toContain(
+      'No value provided.',
+    );
+    expect(document.getElementById(`${rolesId}-clear`)).toBeNull();
+    expect(channels.getAttribute('aria-required')).toBe('true');
+    expect(
+      document.getElementById(`${channelsId}-status`)?.textContent,
+    ).toContain('No values selected.');
+
+    const channelsClear = document.getElementById(`${channelsId}-clear`);
+    if (!(channelsClear instanceof HTMLButtonElement)) {
+      throw new Error('Expected nested Angular M31 clear action.');
+    }
+    channelsClear.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.runtimeSnapshot()?.valid).toBe(false);
+    expect(
+      component
+        .runtimeSnapshot()
+        ?.fields.find(({ path }) => path.length === 2 && path[1] === 'channels')
+        ?.issues.map(({ code }) => code),
+    ).toEqual(['required']);
+    component.replaceValue(component.selectedScenario().initialState.value);
+    fixture.detectChanges();
+    TestBed.tick();
+
+    roles.options[3]!.selected = true;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    TestBed.tick();
+    roles.options[2]!.selected = true;
+    roles.options[3]!.selected = true;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.value()).toMatchObject({ roles: ['editor', 'reader'] });
+    expect(component.history().slice(-2)).toMatchObject([
+      { status: 'applied', operation: { value: ['editor'] } },
+      { status: 'applied', operation: { value: ['editor', 'reader'] } },
+    ]);
+    expect(component.runtimeSnapshot()?.dirty).toBe(true);
+    component.commitBaseline();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.runtimeSnapshot()?.dirty).toBe(false);
+
+    component.setDecisionMode('reject');
+    roles.options[4]!.selected = true;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(component.history().at(-1)).toMatchObject({
+      status: 'rejected',
+      operation: { value: ['editor', 'reader', 'reviewer'] },
+    });
+    expect(selectedTokens(roles)).toEqual(['choice:2', 'choice:3']);
+
+    component.setDecisionMode('confirm');
+    component.replaceValue(
+      Object.freeze({
+        ...component.value(),
+        roles: Object.freeze(['reader', 'editor']),
+      }),
+    );
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(selectedTokens(roles)).toEqual(['choice:2', 'choice:3']);
+    const historyLength = component.history().length;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(component.history()).toHaveLength(historyLength);
+
+    roles.dispatchEvent(new FocusEvent('focus'));
+    roles.dispatchEvent(new FocusEvent('blur'));
+    expect(
+      component
+        .runtimeSnapshot()
+        ?.fields.find(({ path }) => path.length === 1 && path[0] === 'roles'),
+    ).toMatchObject({ focused: false, touched: true });
+
+    component.setLocale('es');
+    fixture.detectChanges();
+    TestBed.tick();
+    const clear = document.getElementById(`${rolesId}-clear`);
+    if (!(clear instanceof HTMLButtonElement)) {
+      throw new Error('Expected Angular M31 clear action.');
+    }
+    expect(clear.textContent?.trim()).toBe('Limpiar');
+    clear.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(Object.hasOwn(component.value(), 'roles')).toBe(false);
+    expect(document.getElementById(`${rolesId}-status`)?.textContent).toContain(
+      'No se ha proporcionado ningún valor.',
+    );
+
+    for (const { value: invalid } of stringEnumArrayControlStates) {
+      component.replaceValue(invalid);
+      fixture.detectChanges();
+      TestBed.tick();
+      expect(roles.disabled).toBe(true);
+      expect(roles.closest('div')?.tabIndex).toBe(0);
+      expect(
+        component
+          .runtimeSnapshot()
+          ?.fields.find(({ path }) => path.length === 1 && path[0] === 'roles')
+          ?.issues.length,
+      ).toBeGreaterThan(0);
+      const incompatibleClear = document.getElementById(`${rolesId}-clear`);
+      expect(incompatibleClear).toBeInstanceOf(HTMLButtonElement);
+      expect((incompatibleClear as HTMLButtonElement).disabled).toBe(false);
+      (incompatibleClear as HTMLButtonElement).click();
+      fixture.detectChanges();
+      TestBed.tick();
+      expect(Object.hasOwn(component.value(), 'roles')).toBe(false);
+    }
+  });
+
+  it('projects shared object composition through the independent Angular lane', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component.selectScenario('object-composition');
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect(
+      component.definition()?.fields.map(({ name, required }) => ({
+        name,
+        required,
+      })),
+    ).toEqual([
+      { name: 'department', required: true },
+      { name: 'displayName', required: true },
+      { name: 'contactEmail', required: false },
+      { name: 'active', required: false },
+    ]);
+    expect(component.compilerDiagnostics()).toEqual([]);
+    expect(component.runtimeDiagnostics()).toEqual([]);
+    const form = (fixture.nativeElement as HTMLElement).querySelector(
+      'form[aria-label="Selected schema form"]',
+    );
+    if (form === null) throw new Error('Composed form missing.');
+    expect(
+      Array.from(
+        form.querySelectorAll(
+          'schema-string-renderer, schema-boolean-renderer',
+        ),
+        (renderer) => renderer.querySelector('label')?.textContent?.trim(),
+      ),
+    ).toEqual(['Department', 'Display name', 'Contact email', 'Active']);
+    expect(
+      Array.from(form.querySelectorAll('input')).map((input) =>
+        input.getAttribute('aria-required'),
+      ),
+    ).toEqual(['true', 'true', null, null]);
+    component.replaceValue({
+      ...component.value(),
+      displayName: 'A',
+      department: 'R',
+    });
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(component.runtimeSnapshot()?.valid).toBe(false);
+    expect(
+      component
+        .runtimeSnapshot()
+        ?.fields.flatMap(({ issues }) => issues)
+        .map(({ code, path }) => ({ code, path })),
+    ).toEqual([
+      { code: 'minLength', path: ['department'] },
+      { code: 'minLength', path: ['displayName'] },
+    ]);
+    expect(component.baselineValue()).toEqual(
+      component.selectedScenario().initialState.baselineValue,
+    );
   });
 
   it('projects the shared advanced scenario through the independent native Angular lane', () => {
@@ -731,3 +1149,13 @@ describe('ReferenceFormComponent application ownership', () => {
     ]);
   });
 });
+
+function nodeBase(formId: string, path: readonly string[]): string {
+  return `se-${encodeURIComponent(JSON.stringify([formId, path]))}`;
+}
+
+function selectedTokens(select: HTMLSelectElement): readonly string[] {
+  return Array.from(select.options)
+    .filter((option) => option.selected)
+    .map(({ value }) => value);
+}

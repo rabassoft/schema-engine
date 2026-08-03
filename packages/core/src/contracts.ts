@@ -92,6 +92,13 @@ export interface FieldUiSchema {
     readonly decimalPlaces?: number;
     readonly showTrailingZeros?: boolean;
   };
+  readonly visibleWhen?: UiFieldValueConditionSchema;
+  readonly enabledWhen?: UiFieldValueConditionSchema;
+}
+
+export interface UiFieldValueConditionSchema {
+  readonly path: readonly string[];
+  readonly equals: string | number | boolean | null;
 }
 
 export interface FormDefinition {
@@ -205,6 +212,13 @@ export interface BaseFieldDefinition extends BaseNodeDefinition {
   readonly nullable: boolean;
   readonly placeholder?: string;
   readonly fixedValue?: PrimitiveFixedValue;
+  readonly visibleWhen?: FieldValueConditionDefinition;
+  readonly enabledWhen?: FieldValueConditionDefinition;
+}
+
+export interface FieldValueConditionDefinition {
+  readonly sourcePath: DataPath;
+  readonly equals: string | number | boolean | null;
 }
 
 export interface StringChoiceDefinition {
@@ -243,8 +257,20 @@ export interface BooleanFieldDefinition extends BaseFieldDefinition {
   readonly kind: 'boolean';
 }
 
+export type StringEnumArrayFieldDefinition = Omit<
+  BaseFieldDefinition,
+  'nullable' | 'placeholder' | 'fixedValue' | 'visibleWhen' | 'enabledWhen'
+> & {
+  readonly kind: 'string-enum-array';
+  readonly nullable: false;
+  readonly choices: readonly StringChoiceDefinition[];
+};
+
 export type FieldDefinition =
-  StringFieldDefinition | NumberFieldDefinition | BooleanFieldDefinition;
+  | StringFieldDefinition
+  | NumberFieldDefinition
+  | BooleanFieldDefinition
+  | StringEnumArrayFieldDefinition;
 
 export interface ItemIdentityDefinition {
   readonly property: string;
@@ -268,9 +294,21 @@ export interface ObjectNodeTemplate extends BaseNodeTemplate {
 }
 
 export type FieldTemplate =
-  | (Omit<StringFieldDefinition, keyof BaseNodeDefinition> & BaseNodeTemplate)
-  | (Omit<NumberFieldDefinition, keyof BaseNodeDefinition> & BaseNodeTemplate)
-  | (Omit<BooleanFieldDefinition, keyof BaseNodeDefinition> & BaseNodeTemplate);
+  | (Omit<
+      StringFieldDefinition,
+      keyof BaseNodeDefinition | 'visibleWhen' | 'enabledWhen'
+    > &
+      BaseNodeTemplate)
+  | (Omit<
+      NumberFieldDefinition,
+      keyof BaseNodeDefinition | 'visibleWhen' | 'enabledWhen'
+    > &
+      BaseNodeTemplate)
+  | (Omit<
+      BooleanFieldDefinition,
+      keyof BaseNodeDefinition | 'visibleWhen' | 'enabledWhen'
+    > &
+      BaseNodeTemplate);
 
 export type FormNodeTemplate = ObjectNodeTemplate | FieldTemplate;
 
@@ -452,7 +490,9 @@ export type FieldTextMember =
   | 'fixed-unavailable'
   | 'fixed-incompatible'
   | 'choice'
-  | 'issue';
+  | 'issue'
+  | 'missing-selection'
+  | 'empty-selection';
 export type ObjectTextMember =
   'label' | 'description' | 'hint' | 'tooltip' | 'issue';
 export type CollectionTextMember =
@@ -567,6 +607,34 @@ export interface ValidationResult {
 export interface SchemaValidator {
   validate(schema: unknown, value: unknown): ValidationResult;
 }
+export interface AsyncValidationCancellation {
+  isCancelled(): boolean;
+  onCancel(listener: () => void): Unsubscribe;
+}
+export interface AsyncValidationContext {
+  readonly generation: number;
+  readonly cancellation: AsyncValidationCancellation;
+}
+export interface AsyncSchemaValidator {
+  validate(
+    schema: unknown,
+    value: unknown,
+    context: AsyncValidationContext,
+  ): PromiseLike<ValidationResult>;
+}
+export type AsyncValidationState =
+  | { readonly status: 'blocked'; readonly reason: 'sync-invalid' }
+  | { readonly status: 'pending'; readonly generation: number }
+  | {
+      readonly status: 'settled';
+      readonly generation: number;
+      readonly valid: boolean;
+    }
+  | {
+      readonly status: 'failed';
+      readonly generation: number;
+      readonly reason: 'exception' | 'invalid-result' | 'generation-exhausted';
+    };
 export type ValidationVisibility = 'touched' | 'all';
 export interface ControlledExternalState<TData extends object> {
   readonly value: Readonly<TData>;
@@ -580,6 +648,7 @@ export interface ControlledFormRuntimeOptions<
   readonly definition: FormDefinition;
   readonly schema: unknown;
   readonly validator: SchemaValidator;
+  readonly asyncValidator?: AsyncSchemaValidator | undefined;
   readonly validationVisibility?: ValidationVisibility;
 }
 export interface ExternalStateUpdate<TData extends object> {
@@ -644,6 +713,8 @@ export interface FieldRuntimeSnapshot {
   readonly dirty: boolean;
   readonly touched: boolean;
   readonly focused: boolean;
+  readonly visible: boolean;
+  readonly enabled: boolean;
   readonly valid: boolean;
   readonly issues: readonly ValidationIssue[];
   readonly showIssues: boolean;
@@ -702,6 +773,7 @@ export interface FormRuntimeSnapshot<TData extends object> {
   readonly nodes: readonly NodeRuntimeSnapshot[];
   readonly fields: readonly FieldRuntimeSnapshot[];
   readonly globalIssues: readonly ValidationIssue[];
+  readonly asyncValidation?: AsyncValidationState;
 }
 export interface FormScope {
   readonly id: string;
@@ -714,6 +786,7 @@ export interface ValidationSnapshot {
   readonly valid: boolean;
   readonly issues: readonly ValidationIssue[];
   readonly diagnostics: readonly Diagnostic[];
+  readonly asyncValidation?: AsyncValidationState;
 }
 export type SnapshotListener<TData extends object> = (
   snapshot: FormRuntimeSnapshot<TData>,
@@ -767,6 +840,7 @@ export interface FormRuntime<TData extends object> {
   getValidationSnapshot(scope?: FormScope): ValidationSnapshot;
   showValidationErrors(scope: FormScope): RuntimeActionResult;
   hideValidationErrors(scopeId: string): RuntimeActionResult;
+  retryAsyncValidation(): RuntimeActionResult;
   dispose(): RuntimeActionResult;
 }
 export type CreateControlledFormRuntimeResult<TData extends object> =

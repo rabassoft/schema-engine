@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import { compileFormDefinition } from '@rabassoft/schema-engine';
 import { createAjvSchemaValidator } from '../src/index.js';
 
 const DIALECT = 'https://json-schema.org/draft/2020-12/schema';
@@ -165,6 +166,169 @@ describe('createAjvSchemaValidator', () => {
       { label: 'long' },
     );
     expect(result.issues.map((issue) => issue.code)).toEqual(['maxLength']);
+  });
+
+  it('asserts every compiler-accepted primitive const with exact ordered issues', () => {
+    const validator = createAjvSchemaValidator();
+    const schema = {
+      $schema: DIALECT,
+      type: 'object',
+      properties: {
+        label: { type: 'string', const: 'fixed' },
+        ratio: { type: 'number', const: 1.5 },
+        count: { type: 'integer', const: 2 },
+        enabled: { type: 'boolean', const: false },
+        optional: { type: ['string', 'null'], const: null },
+      },
+    };
+    const compilation = compileFormDefinition({ schema });
+    expect(compilation.success).toBe(true);
+
+    const matchingValue = {
+      label: 'fixed',
+      ratio: 1.5,
+      count: 2,
+      enabled: false,
+      optional: null,
+    };
+    const matchingSchemaBefore = structuredClone(schema);
+    const matchingValueBefore = structuredClone(matchingValue);
+    expect(validator.validate(schema, matchingValue)).toEqual({
+      valid: true,
+      issues: [],
+    });
+    expect(schema).toEqual(matchingSchemaBefore);
+    expect(matchingValue).toEqual(matchingValueBefore);
+
+    const mismatchingValue = {
+      label: 'other',
+      ratio: 2.5,
+      count: 3,
+      enabled: true,
+      optional: 'present',
+    };
+    const mismatchingSchemaBefore = structuredClone(schema);
+    const mismatchingValueBefore = structuredClone(mismatchingValue);
+    const result = validator.validate(schema, mismatchingValue);
+
+    expect(result.valid).toBe(false);
+    expect(
+      result.issues.map(({ code, keyword, path, parameters }) => ({
+        code,
+        keyword,
+        path,
+        parameters,
+      })),
+    ).toEqual([
+      {
+        code: 'const',
+        keyword: 'const',
+        path: ['label'],
+        parameters: { allowedValue: 'fixed' },
+      },
+      {
+        code: 'const',
+        keyword: 'const',
+        path: ['ratio'],
+        parameters: { allowedValue: 1.5 },
+      },
+      {
+        code: 'const',
+        keyword: 'const',
+        path: ['count'],
+        parameters: { allowedValue: 2 },
+      },
+      {
+        code: 'const',
+        keyword: 'const',
+        path: ['enabled'],
+        parameters: { allowedValue: false },
+      },
+      {
+        code: 'const',
+        keyword: 'const',
+        path: ['optional'],
+        parameters: { allowedValue: null },
+      },
+    ]);
+    expect(
+      result.issues.every((issue) => Object.isFrozen(issue.parameters)),
+    ).toBe(true);
+    expect(schema).toEqual(mismatchingSchemaBefore);
+    expect(mismatchingValue).toEqual(mismatchingValueBefore);
+  });
+
+  it('keeps const issue parameters detached while reusing the identity cache', () => {
+    const validator = createAjvSchemaValidator();
+    const fixedField = { type: 'string', const: 'initial' };
+    const schema = {
+      $schema: DIALECT,
+      type: 'object',
+      properties: { label: fixedField },
+    };
+    expect(compileFormDefinition({ schema }).success).toBe(true);
+
+    const first = validator.validate(schema, { label: 'other' });
+    expect(first.issues[0]?.parameters).toEqual({ allowedValue: 'initial' });
+
+    fixedField.const = 'changed';
+    const cached = validator.validate(schema, { label: 'other' });
+    expect(cached.issues[0]?.parameters).toEqual({ allowedValue: 'initial' });
+    expect(first.issues[0]?.parameters).toEqual({ allowedValue: 'initial' });
+    expect(first.issues[0]?.parameters).not.toBe(cached.issues[0]?.parameters);
+    expect(Object.isFrozen(first.issues[0]?.parameters)).toBe(true);
+
+    const recompiledSchema = structuredClone(schema);
+    expect(compileFormDefinition({ schema: recompiledSchema }).success).toBe(
+      true,
+    );
+    expect(
+      validator.validate(recompiledSchema, { label: 'other' }).issues[0]
+        ?.parameters,
+    ).toEqual({ allowedValue: 'changed' });
+  });
+
+  it('coexists with selected formats and compiler-accepted local references', () => {
+    const validator = createAjvSchemaValidator();
+    const schema = {
+      $schema: DIALECT,
+      $defs: {
+        contact: {
+          type: 'string',
+          format: 'email',
+          const: 'person@example.com',
+        },
+      },
+      type: 'object',
+      properties: { contact: { $ref: '#/$defs/contact' } },
+    };
+    expect(compileFormDefinition({ schema }).success).toBe(true);
+    expect(
+      validator.validate(schema, { contact: 'person@example.com' }).valid,
+    ).toBe(true);
+
+    const result = validator.validate(schema, { contact: 'not-an-email' });
+    expect(
+      result.issues.map(({ code, keyword, path, parameters }) => ({
+        code,
+        keyword,
+        path,
+        parameters,
+      })),
+    ).toEqual([
+      {
+        code: 'const',
+        keyword: 'const',
+        path: ['contact'],
+        parameters: { allowedValue: 'person@example.com' },
+      },
+      {
+        code: 'format',
+        keyword: 'format',
+        path: ['contact'],
+        parameters: { format: 'email' },
+      },
+    ]);
   });
 
   it('caches by identity but recompiles distinct schema objects', () => {

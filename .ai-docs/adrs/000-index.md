@@ -23,7 +23,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Superseded por ADR-010.**
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
 4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
-5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 6; conserva el dialecto fail-closed y coordina el `const` primitivo D-036/M25 con ADR-028 tras review 219 ciclo 2.**
+5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 8 for bounded D-006/M31 after review 294 cycle 2; completed PLAN-033 implements the accepted M31 policy and preserves completed M28 behavior.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
@@ -47,6 +47,12 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 26. [ADR 026: Sanitized public history and secure release automation](./026-public-repository-and-secure-releases.md) — **Accepted revision 1; M22 remains completed and review 179 cycle 2 accepts M23 stage-only trusted-publication architecture. PLAN-025 and every external action remain gated.**
 27. [ADR 027: Neutral semantic string formats and official assertion](./027-formatos-semanticos-string.md) — **Accepted revision 0 after review 210 cycle 3; coordinates ADR-005 revision 5 and ADR-022 revision 2 for the bounded D-037/M24 slice.**
 28. [ADR 028: Primitive const normalization and fixed presentation](./028-const-primitivo-presentacion-fija.md) — **Accepted revision 0 after review 219 cycle 2; coordinates ADR-005 revision 6 and ADR-022 revision 3 for the bounded D-036/M25 slice.**
+29. [ADR 029: Controlled asynchronous validation lifecycle](./029-validacion-asincrona-controlada.md) — **Accepted revision 0 after review 236 cycle 2; accepted SPEC-012 and completed PLAN-028 implement its bounded M26 lifecycle while integrations retain debounce/transport ownership.**
+30. [ADR 030: Pure scope-to-baseline confirmation](./030-confirmacion-parcial-baseline-scope.md) — **Accepted revision 0 after review 246 cycle 2; accepted SPEC-013 v0.1.1 and completed PLAN-029 revision 1 implement its bounded M27 contract after final review 257 cycle 2 passed with zero findings.**
+31. [ADR 031: Static object composition with `allOf`](./031-static-object-allof-composition.md) — **Accepted revision 0 for bounded D-007/M28 after review 259 cycle 5; completed PLAN-030 implements the decision under ADR-005 revision 7 and SPEC-014 v0.1.0 after final review 268 cycle 2.**
+32. [ADR 032: Explicit schema-default candidate derivation](./032-explicit-schema-default-candidate.md) — **Accepted revision 0 after review 270 cycle 2; accepted SPEC-015 and completed PLAN-031 implement bounded D-039/M29 after final review 278 cycle 2.**
+33. [ADR 033: Controlled conditional primitive-field state](./033-controlled-conditional-primitive-field-state.md) — **Accepted revision 0 after review 280 cycle 2; accepted SPEC-016 v0.1.1 and completed PLAN-032 revision 1 implement its bounded M30 decision after final review 291 cycle 1.**
+34. [ADR 034: Controlled homogeneous string-enum array field](./034-controlled-homogeneous-string-enum-array-field.md) — **Accepted revision 0 after review 293 cycle 3 passed all twelve areas with zero findings; accepted SPEC-017 and completed PLAN-033 implement its bounded M31 decision after final review 303 cycle 2.**
 
 ## 4. ADRs específicos de Angular
 

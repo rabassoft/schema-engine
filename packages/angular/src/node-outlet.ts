@@ -382,6 +382,11 @@ export class ObjectHostFactory {
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[hidden]': '!snapshot().visible',
+    '[attr.inert]': "snapshot().visible ? null : ''",
+    '[attr.aria-hidden]': "snapshot().visible ? null : 'true'",
+  },
   template: `<ng-container [schemaFieldOutlet]="definition()" />`,
 })
 class LeafOutletHostComponent {

@@ -9,6 +9,7 @@ import type {
   Diagnostic,
   FieldDefinition,
   FieldTemplate,
+  FieldValueConditionDefinition,
   FormDefinition,
   FormNodeDefinition,
   FormNodeTemplate,
@@ -24,6 +25,7 @@ import type {
   PresentationSectionDefinition,
   PresentationTabsDefinition,
   PrimitiveFixedValue,
+  StringEnumArrayFieldDefinition,
   StringFieldDefinition,
   StringSemanticFormat,
 } from './contracts.js';
@@ -50,6 +52,13 @@ import {
   type ReferenceChain,
 } from './internal/schema-reference.js';
 import {
+  acceptedNonObjectCompositionType,
+  incompatibleAllOfDiagnostic,
+  inspectCompositionFoundation,
+  type CompositionFoundationResult,
+  type CompositionUseSite,
+} from './internal/schema-composition.js';
+import {
   actualType,
   describeActualValue,
   describeDeclaredDialect,
@@ -57,10 +66,31 @@ import {
 } from './internal/value.js';
 
 type FieldType = 'string' | 'number' | 'integer' | 'boolean';
+type CandidateFieldType = FieldType | 'string-enum-array';
 
 interface RequiredEntry {
   readonly name: string;
   readonly index: number;
+}
+
+interface CompositionPropertySource {
+  readonly documentPath: readonly (string | number)[];
+  readonly referenceChain: ReferenceChain;
+  readonly conflicted?: boolean;
+}
+
+interface CompositionRequiredSource extends RequiredEntry {
+  readonly documentPath: readonly (string | number)[];
+  readonly referenceChain: ReferenceChain;
+}
+
+interface ReducedObjectComposition {
+  readonly properties: Record<string, unknown>;
+  readonly propertySources: ReadonlyMap<string, CompositionPropertySource>;
+  readonly requiredNames: ReadonlySet<string>;
+  readonly catalogBlocked: boolean;
+  readonly schemaTitle?: string;
+  readonly schemaDescription?: string;
 }
 
 interface StringConstraints {
@@ -87,7 +117,7 @@ type FixedValueState =
 
 interface FieldCandidate {
   readonly name: string;
-  readonly type: FieldType;
+  readonly type: CandidateFieldType;
   readonly nullable: boolean;
   readonly required: boolean;
   readonly schemaTitle?: string;
@@ -129,6 +159,27 @@ interface ArrayCandidate {
 
 type NodeCandidate = FieldCandidate | ObjectCandidate | ArrayCandidate;
 
+export interface DefaultCandidateSchemaNode {
+  readonly kind: FieldType | 'object' | 'array';
+  readonly nullable: boolean;
+  readonly path: readonly string[];
+  readonly documentPath: readonly (string | number)[];
+  readonly referenceChain: ReferenceChain;
+  readonly schema: Record<string, unknown>;
+  readonly children: readonly DefaultCandidateSchemaNode[];
+}
+
+export type DefaultCandidateSchemaResult =
+  | {
+      readonly success: true;
+      readonly nodes: readonly DefaultCandidateSchemaNode[];
+    }
+  | {
+      readonly success: false;
+      readonly nodes: readonly DefaultCandidateSchemaNode[];
+      readonly diagnostics: readonly Diagnostic[];
+    };
+
 interface ParsedFieldUi {
   readonly label?: string;
   readonly description?: string;
@@ -138,6 +189,26 @@ interface ParsedFieldUi {
   readonly decimalPlaces?: number;
   readonly showTrailingZeros?: boolean;
   readonly enumLabels?: ReadonlyMap<string, string>;
+  readonly visibleWhenCapture?: CapturedConditionMember;
+  readonly enabledWhenCapture?: CapturedConditionMember;
+}
+
+type ConditionMember = 'visibleWhen' | 'enabledWhen';
+
+type CapturedConditionMember =
+  | {
+      readonly kind: 'accessor';
+      readonly documentPath: readonly (string | number)[];
+    }
+  | {
+      readonly kind: 'value';
+      readonly value: unknown;
+      readonly documentPath: readonly (string | number)[];
+    };
+
+interface NormalizedFieldConditions {
+  readonly visibleWhen?: FieldValueConditionDefinition;
+  readonly enabledWhen?: FieldValueConditionDefinition;
 }
 
 interface ParsedUiSchema {
@@ -268,6 +339,8 @@ const UI_FIELD_KEYS = new Set([
   'placeholder',
   'enumLabels',
   'options',
+  'visibleWhen',
+  'enabledWhen',
 ]);
 const UI_TEXT_KEYS = new Set([
   'label',
@@ -344,8 +417,51 @@ export function compileFormDefinition(
           }),
         );
       }
-      inspectRootReference(rawSchema, diagnostics);
-      const root = inspectRootSchema(rawSchema, diagnostics);
+      const rootComposition = inspectCompositionFoundation(rawSchema, {
+        useSite: 'root',
+        documentPath: [],
+        inspectBranches: false,
+      });
+      const referenceContext: ReferenceContext = {
+        rootSchema: rawSchema,
+        registryAvailable: registry.kind !== 'invalid-exterior',
+        activeTargets: new Map(),
+      };
+      if (rootComposition.kind !== 'absent') {
+        diagnostics.push(...rootComposition.diagnostics);
+      } else {
+        inspectRootReference(rawSchema, diagnostics);
+      }
+      const reducedRoot =
+        rootComposition.kind === 'wrapper'
+          ? reduceObjectComposition(
+              rawSchema,
+              rootComposition,
+              'root',
+              [],
+              undefined,
+              undefined,
+              diagnostics,
+              referenceContext,
+              [],
+            )
+          : undefined;
+      const root =
+        rootComposition.kind === 'absent'
+          ? inspectRootSchema(rawSchema, diagnostics)
+          : reducedRoot === undefined
+            ? {
+                canInspectFields: false,
+                requiredEntries: [] as readonly RequiredEntry[],
+                requiredNames: new Set<string>() as ReadonlySet<string>,
+              }
+            : {
+                canInspectFields: true,
+                properties: reducedRoot.properties,
+                propertyNames: Object.keys(reducedRoot.properties),
+                requiredEntries: [] as readonly RequiredEntry[],
+                requiredNames: reducedRoot.requiredNames,
+              };
       propertyNames = root.propertyNames;
 
       if (root.canInspectFields && root.properties !== undefined) {
@@ -356,11 +472,9 @@ export function compileFormDefinition(
           rawSchema,
           collectionPolicies,
           usedPolicyIndices,
-          {
-            rootSchema: rawSchema,
-            registryAvailable: registry.kind !== 'invalid-exterior',
-            activeTargets: new Map(),
-          },
+          referenceContext,
+          reducedRoot?.propertySources,
+          reducedRoot?.catalogBlocked ?? false,
         );
         candidatesByName = new Map(
           candidates.map((candidate) => [candidate.name, candidate] as const),
@@ -402,6 +516,8 @@ export function compileFormDefinition(
     }
   }
 
+  const completeOrdinaryFieldIndex = !hasErrors(diagnostics);
+
   const nested = candidates.some(
     (candidate) =>
       candidate.type !== 'string' &&
@@ -410,7 +526,16 @@ export function compileFormDefinition(
       candidate.type !== 'boolean',
   );
   const parsedUi = nested
-    ? inspectNestedUiSchema(rawUiSchema, candidates, diagnostics)
+    ? inspectNestedUiSchema(
+        rawUiSchema,
+        candidates,
+        diagnostics,
+        [],
+        new Map(),
+        undefined,
+        undefined,
+        propertyNames,
+      )
     : inspectUiSchema(
         rawUiSchema,
         propertyNames,
@@ -418,18 +543,150 @@ export function compileFormDefinition(
         diagnostics,
       );
 
+  const conditions = inspectConditionPhase(
+    candidates,
+    parsedUi,
+    completeOrdinaryFieldIndex,
+    diagnostics,
+    rawUiSchema,
+  );
+
   if (hasErrors(diagnostics)) {
     return failedResult(diagnostics);
   }
 
   const definition = nested
-    ? buildNestedDefinition(candidates, parsedUi)
-    : buildDefinition(candidates as FieldCandidate[], parsedUi);
+    ? buildNestedDefinition(candidates, parsedUi, conditions)
+    : buildDefinition(candidates as FieldCandidate[], parsedUi, conditions);
   return deepFreeze({
     success: true,
     definition,
     diagnostics,
   });
+}
+
+export function inspectDefaultCandidateSchema(
+  schema: unknown,
+): DefaultCandidateSchemaResult {
+  const diagnostics: Diagnostic[] = [];
+  if (!isRecord(schema)) {
+    diagnostics.push(
+      diagnostic({
+        code: 'ROOT_SCHEMA_MUST_BE_OBJECT',
+        severity: 'error',
+        source: 'schema',
+        parameters: describeActualValue(schema),
+        fallbackMessage: 'The root schema must be an object.',
+      }),
+    );
+    return defaultCandidateSchemaFailure(diagnostics);
+  }
+
+  if (!inspectDialect(schema, diagnostics)) {
+    return defaultCandidateSchemaFailure(diagnostics);
+  }
+  const registry = inspectDefinitionRegistry(schema);
+  for (const problem of registry.problems) {
+    diagnostics.push(
+      diagnostic({
+        code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+        severity: 'error',
+        source: 'schema',
+        documentPath: problem.documentPath,
+        parameters: {
+          keyword: '$defs',
+          ...(problem.definition === undefined
+            ? {}
+            : { definition: problem.definition }),
+          expected: problem.expected,
+          actualType: problem.actualType,
+        },
+        fallbackMessage: 'Schema keyword "$defs" has an invalid value.',
+      }),
+    );
+  }
+  const rootComposition = inspectCompositionFoundation(schema, {
+    useSite: 'root',
+    documentPath: [],
+    inspectBranches: false,
+  });
+  const referenceContext: ReferenceContext = {
+    rootSchema: schema,
+    registryAvailable: registry.kind !== 'invalid-exterior',
+    activeTargets: new Map(),
+  };
+  if (rootComposition.kind !== 'absent') {
+    diagnostics.push(...rootComposition.diagnostics);
+  } else {
+    inspectRootReference(schema, diagnostics);
+  }
+  const reducedRoot =
+    rootComposition.kind === 'wrapper'
+      ? reduceObjectComposition(
+          schema,
+          rootComposition,
+          'root',
+          [],
+          undefined,
+          undefined,
+          diagnostics,
+          referenceContext,
+          [],
+        )
+      : undefined;
+  const root =
+    rootComposition.kind === 'absent'
+      ? inspectRootSchema(schema, diagnostics)
+      : reducedRoot === undefined
+        ? {
+            canInspectFields: false,
+            requiredEntries: [] as readonly RequiredEntry[],
+            requiredNames: new Set<string>() as ReadonlySet<string>,
+          }
+        : {
+            canInspectFields: true,
+            properties: reducedRoot.properties,
+            propertyNames: Object.keys(reducedRoot.properties),
+            requiredEntries: [] as readonly RequiredEntry[],
+            requiredNames: reducedRoot.requiredNames,
+          };
+
+  const nodes: DefaultCandidateSchemaNode[] = [];
+  if (root.canInspectFields && root.properties !== undefined) {
+    inspectNodes(
+      root.properties,
+      root.requiredNames,
+      diagnostics,
+      schema,
+      { valid: true, policies: [], byPath: new Map() },
+      new Set(),
+      referenceContext,
+      reducedRoot?.propertySources,
+      reducedRoot?.catalogBlocked ?? false,
+      nodes,
+      true,
+    );
+  }
+  const effectiveDiagnostics = diagnostics.filter(
+    (item) =>
+      !(item.dataPath === undefined && item.documentPath?.at(-1) === 'default'),
+  );
+  if (hasErrors(effectiveDiagnostics)) {
+    return defaultCandidateSchemaFailure(effectiveDiagnostics, nodes);
+  }
+  return { success: true, nodes: Object.freeze(nodes) };
+}
+
+function defaultCandidateSchemaFailure(
+  diagnostics: readonly Diagnostic[],
+  nodes: readonly DefaultCandidateSchemaNode[] = [],
+): DefaultCandidateSchemaResult {
+  const failed = failedResult([...diagnostics]);
+  return {
+    success: false,
+    nodes: Object.freeze([...nodes]),
+    diagnostics: failed.diagnostics,
+  };
 }
 
 function inspectCollectionPolicies(
@@ -713,6 +970,15 @@ function resolveUseSiteSchema(
   const activatedTargets: string[] = [];
 
   while (true) {
+    if (Object.getOwnPropertyDescriptor(currentSchema, 'allOf') !== undefined) {
+      return {
+        kind: 'resolved',
+        schema: currentSchema,
+        documentPath: currentDocumentPath,
+        referenceChain,
+        activatedTargets,
+      };
+    }
     const descriptor = Object.getOwnPropertyDescriptor(currentSchema, '$ref');
     if (descriptor === undefined) {
       return {
@@ -953,6 +1219,654 @@ function addReferenceChainToRange(
       }),
     };
   }
+}
+
+function reduceObjectComposition(
+  schema: Record<string, unknown>,
+  foundation: CompositionFoundationResult,
+  useSite: CompositionUseSite,
+  documentPath: readonly (string | number)[],
+  dataPath: readonly string[] | undefined,
+  templatePath: readonly string[] | undefined,
+  diagnostics: Diagnostic[],
+  referenceContext: ReferenceContext,
+  inheritedReferenceChain: ReferenceChain,
+): ReducedObjectComposition | undefined {
+  const initialActiveTargets = new Set(referenceContext.activeTargets.keys());
+  try {
+    return reduceObjectCompositionUnsafe(
+      schema,
+      foundation,
+      useSite,
+      documentPath,
+      dataPath,
+      templatePath,
+      diagnostics,
+      referenceContext,
+      inheritedReferenceChain,
+    );
+  } catch {
+    for (const target of referenceContext.activeTargets.keys()) {
+      if (!initialActiveTargets.has(target)) {
+        referenceContext.activeTargets.delete(target);
+      }
+    }
+    let value = diagnostic({
+      code: 'INVALID_COMPILER_INPUT',
+      severity: 'error',
+      source: 'schema',
+      ...(dataPath === undefined ? {} : { dataPath }),
+      documentPath,
+      parameters: { actualType: 'object' },
+      fallbackMessage: 'Compiler input must be an object.',
+    });
+    if (templatePath !== undefined)
+      value = withTemplatePath(value, templatePath);
+    if (inheritedReferenceChain.length > 0) {
+      value = {
+        ...value,
+        parameters: referenceDiagnosticParameters(value.parameters, {
+          referenceChain: inheritedReferenceChain,
+        }),
+      };
+    }
+    diagnostics.push(value);
+    return undefined;
+  }
+}
+
+function reduceObjectCompositionUnsafe(
+  schema: Record<string, unknown>,
+  foundation: CompositionFoundationResult,
+  useSite: CompositionUseSite,
+  documentPath: readonly (string | number)[],
+  dataPath: readonly string[] | undefined,
+  templatePath: readonly string[] | undefined,
+  diagnostics: Diagnostic[],
+  referenceContext: ReferenceContext,
+  inheritedReferenceChain: ReferenceChain,
+): ReducedObjectComposition | undefined {
+  if (foundation.kind !== 'wrapper' || foundation.branches === undefined) {
+    return undefined;
+  }
+  interface AnnotationSource {
+    readonly value: string;
+    readonly documentPath: readonly (string | number)[];
+    readonly referenceChain: ReferenceChain;
+  }
+  type Task =
+    | {
+        readonly kind: 'wrapper';
+        readonly schema: Record<string, unknown>;
+        readonly documentPath: readonly (string | number)[];
+        readonly branches: readonly Record<string, unknown>[];
+        readonly referenceChain: ReferenceChain;
+      }
+    | {
+        readonly kind: 'branch';
+        readonly schema: Record<string, unknown>;
+        readonly documentPath: readonly (string | number)[];
+        readonly branchIndex: number;
+        readonly referenceChain: ReferenceChain;
+      }
+    | {
+        readonly kind: 'exit-raw';
+        readonly schema: Record<string, unknown>;
+      }
+    | {
+        readonly kind: 'release-reference';
+        readonly activatedTargets: readonly string[];
+      };
+
+  const properties: Record<string, unknown> = {};
+  const propertySources = new Map<string, CompositionPropertySource>();
+  const requiredNames = new Set<string>();
+  const requiredSources = new Map<string, CompositionRequiredSource>();
+  const annotations = new Map<'title' | 'description', AnnotationSource>();
+  const activeRaw = new Map<object, readonly (string | number)[]>();
+  let catalogBlocked = false;
+  const stack: Task[] = [
+    {
+      kind: 'wrapper',
+      schema,
+      documentPath,
+      branches: foundation.branches,
+      referenceChain: inheritedReferenceChain,
+    },
+  ];
+
+  const pushDiagnostic = (
+    value: Diagnostic,
+    referenceChain: ReferenceChain,
+    preserveRootDataPath = false,
+  ): void => {
+    let next = value;
+    if (
+      dataPath === undefined &&
+      !preserveRootDataPath &&
+      Object.hasOwn(next, 'dataPath')
+    ) {
+      const { dataPath: _omitted, ...withoutDataPath } = next;
+      void _omitted;
+      next = withoutDataPath;
+    }
+    if (templatePath !== undefined) next = withTemplatePath(next, templatePath);
+    if (
+      referenceChain.length > 0 &&
+      !Object.hasOwn(next.parameters, 'referenceChain')
+    ) {
+      next = {
+        ...next,
+        parameters: referenceDiagnosticParameters(next.parameters, {
+          referenceChain,
+        }),
+      };
+    }
+    diagnostics.push(next);
+  };
+
+  const compositionConflict = (
+    path: readonly (string | number)[],
+    parameters: Readonly<Record<string, unknown>>,
+    referenceChain: ReferenceChain,
+  ): void => {
+    pushDiagnostic(
+      diagnostic({
+        code: 'INCOMPATIBLE_SCHEMA_COMPOSITION',
+        severity: 'error',
+        source: 'schema',
+        ...(dataPath === undefined ? {} : { dataPath }),
+        documentPath: path,
+        parameters,
+        fallbackMessage: 'Schema composition is incompatible.',
+      }),
+      referenceChain,
+    );
+  };
+
+  const recordAnnotation = (
+    keyword: 'title' | 'description',
+    value: string,
+    path: readonly (string | number)[],
+    referenceChain: ReferenceChain,
+  ): void => {
+    const first = annotations.get(keyword);
+    if (first === undefined) {
+      annotations.set(keyword, { value, documentPath: path, referenceChain });
+      return;
+    }
+    if (first.value === value) return;
+    compositionConflict(
+      path,
+      {
+        reason: 'conflicting-annotation',
+        keyword,
+        firstDocumentPath: [...first.documentPath],
+        ...(first.referenceChain.length === 0
+          ? {}
+          : {
+              firstReferenceChain: first.referenceChain.map((entry) => [
+                ...entry,
+              ]),
+            }),
+      },
+      referenceChain,
+    );
+  };
+
+  const inspectContribution = (
+    contribution: Record<string, unknown>,
+    contributionPath: readonly (string | number)[],
+    referenceChain: ReferenceChain,
+  ): void => {
+    const allowed =
+      useSite === 'root'
+        ? new Set(['type', 'properties', 'required', 'title', 'description'])
+        : useSite === 'property'
+          ? new Set([
+              'type',
+              'properties',
+              'required',
+              'title',
+              'description',
+              'default',
+            ])
+          : new Set(['type', 'properties', 'required']);
+
+    for (const keyword of Object.keys(contribution)) {
+      const keywordPath = [...contributionPath, keyword];
+      if (allowed.has(keyword)) {
+        if (keyword === 'required') {
+          const member = ownDataValue(contribution, keyword);
+          if (!member.present) continue;
+          const localEntries: RequiredEntry[] = [];
+          const localNames = new Set<string>();
+          const start = diagnostics.length;
+          if (member.accessor) {
+            diagnostics.push(
+              invalidSchemaKeywordDescriptor(
+                keyword,
+                'array of unique strings',
+                keywordPath,
+                dataPath ?? [],
+                'accessor',
+              ),
+            );
+          } else {
+            inspectRequiredAtPath(
+              member.value,
+              localEntries,
+              localNames,
+              diagnostics,
+              dataPath ?? [],
+              keywordPath,
+            );
+          }
+          if (dataPath === undefined) {
+            for (let index = start; index < diagnostics.length; index += 1) {
+              const current = diagnostics[index];
+              if (current === undefined) continue;
+              const { dataPath: _omitted, ...withoutDataPath } = current;
+              void _omitted;
+              diagnostics[index] = withoutDataPath;
+            }
+          }
+          if (templatePath !== undefined)
+            addTemplatePathToRange(diagnostics, start, templatePath);
+          addReferenceChainToRange(diagnostics, start, referenceChain);
+          for (const entry of localEntries) {
+            requiredNames.add(entry.name);
+            if (!requiredSources.has(entry.name)) {
+              requiredSources.set(entry.name, {
+                ...entry,
+                documentPath: [...keywordPath, entry.index],
+                referenceChain,
+              });
+            }
+          }
+        } else if (keyword === 'title' || keyword === 'description') {
+          const member = ownDataValue(contribution, keyword);
+          if (!member.present) continue;
+          const expected =
+            keyword === 'title' && useSite === 'property'
+              ? 'non-blank string'
+              : 'string';
+          if (
+            member.accessor ||
+            typeof member.value !== 'string' ||
+            (expected === 'non-blank string' &&
+              member.value.trim().length === 0)
+          ) {
+            pushDiagnostic(
+              member.accessor
+                ? invalidSchemaKeywordDescriptor(
+                    keyword,
+                    expected,
+                    keywordPath,
+                    dataPath ?? [],
+                    'accessor',
+                  )
+                : invalidSchemaKeywordValue(
+                    keyword,
+                    member.value,
+                    expected,
+                    keywordPath,
+                    dataPath,
+                  ),
+              referenceChain,
+            );
+          } else {
+            recordAnnotation(
+              keyword,
+              member.value,
+              keywordPath,
+              referenceChain,
+            );
+          }
+        }
+        continue;
+      }
+
+      let value: Diagnostic;
+      if (keyword === '$schema' || keyword === '$defs') {
+        value = diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          ...(dataPath === undefined ? {} : { dataPath }),
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'object' },
+          fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "object".`,
+        });
+      } else if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+        value = schemaKeywordDiagnostic(
+          'IGNORED_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Known annotation "${keyword}" is ignored by the compiler.`,
+          dataPath,
+        );
+      } else if (
+        keyword === '$ref' ||
+        keyword === 'items' ||
+        COMPILER_SUPPORTED_KEYWORDS.has(keyword)
+      ) {
+        value = diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          ...(dataPath === undefined ? {} : { dataPath }),
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'object' },
+          fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "object".`,
+        });
+      } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+        value = schemaKeywordDiagnostic(
+          'UNSUPPORTED_SCHEMA_KEYWORD',
+          'error',
+          keyword,
+          keywordPath,
+          `Schema keyword "${keyword}" is not supported.`,
+          dataPath,
+        );
+      } else {
+        value = schemaKeywordDiagnostic(
+          'UNKNOWN_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+          dataPath,
+        );
+      }
+      pushDiagnostic(value, referenceChain);
+    }
+
+    const propertiesMember = ownDataValue(contribution, 'properties');
+    if (
+      !propertiesMember.present ||
+      propertiesMember.accessor ||
+      !isOrdinaryRecord(propertiesMember.value)
+    )
+      return;
+    for (const property of Object.keys(propertiesMember.value)) {
+      const propertyPath = [...contributionPath, 'properties', property];
+      const first = propertySources.get(property);
+      if (first !== undefined) {
+        propertySources.set(property, { ...first, conflicted: true });
+        compositionConflict(
+          propertyPath,
+          {
+            reason: 'duplicate-property',
+            property,
+            firstDocumentPath: [...first.documentPath],
+            ...(first.referenceChain.length === 0
+              ? {}
+              : {
+                  firstReferenceChain: first.referenceChain.map((entry) => [
+                    ...entry,
+                  ]),
+                }),
+          },
+          referenceChain,
+        );
+        continue;
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(
+        propertiesMember.value,
+        property,
+      );
+      if (descriptor !== undefined) {
+        Object.defineProperty(properties, property, descriptor);
+      }
+      propertySources.set(property, {
+        documentPath: propertyPath,
+        referenceChain,
+      });
+    }
+  };
+
+  while (stack.length > 0) {
+    const task = stack.pop();
+    if (task === undefined) break;
+    if (task.kind === 'exit-raw') {
+      activeRaw.delete(task.schema);
+      continue;
+    }
+    if (task.kind === 'release-reference') {
+      releaseReferenceTargets(referenceContext, task.activatedTargets);
+      continue;
+    }
+    if (task.kind === 'wrapper') {
+      const firstPath = activeRaw.get(task.schema);
+      if (firstPath !== undefined) {
+        catalogBlocked = true;
+        pushDiagnostic(
+          diagnostic({
+            code: 'CYCLIC_SCHEMA_OBJECT',
+            severity: 'error',
+            source: 'schema',
+            ...(dataPath === undefined ? {} : { dataPath }),
+            documentPath: task.documentPath,
+            parameters: { firstDocumentPath: [...firstPath] },
+            fallbackMessage: 'Schema object cycle detected.',
+          }),
+          task.referenceChain,
+        );
+        continue;
+      }
+      activeRaw.set(task.schema, task.documentPath);
+      stack.push({ kind: 'exit-raw', schema: task.schema });
+      if (useSite !== 'item-root') {
+        for (const keyword of ['title', 'description'] as const) {
+          const member = ownDataValue(task.schema, keyword);
+          if (
+            member.present &&
+            !member.accessor &&
+            typeof member.value === 'string'
+          ) {
+            const valid =
+              keyword !== 'title' ||
+              useSite !== 'property' ||
+              member.value.trim().length > 0;
+            if (valid)
+              recordAnnotation(
+                keyword,
+                member.value,
+                [...task.documentPath, keyword],
+                task.referenceChain,
+              );
+          }
+        }
+      }
+      for (let index = task.branches.length - 1; index >= 0; index -= 1) {
+        stack.push({
+          kind: 'branch',
+          schema: task.branches[index] as Record<string, unknown>,
+          documentPath: [...task.documentPath, 'allOf', index],
+          branchIndex: index,
+          referenceChain: task.referenceChain,
+        });
+      }
+      continue;
+    }
+
+    const nestedAllOf = Object.getOwnPropertyDescriptor(task.schema, 'allOf');
+    if (nestedAllOf !== undefined) {
+      const nestedStart = diagnostics.length;
+      const nested = inspectCompositionFoundation(task.schema, {
+        useSite,
+        documentPath: task.documentPath,
+        ...(dataPath === undefined ? {} : { dataPath }),
+        ...(templatePath === undefined ? {} : { templatePath }),
+        inspectBranches: false,
+      });
+      if (nested.kind === 'input-failure' || nested.kind === 'wrapper') {
+        diagnostics.push(...nested.diagnostics);
+        addReferenceChainToRange(diagnostics, nestedStart, task.referenceChain);
+      }
+      if (
+        nested.kind === 'input-failure' ||
+        (nested.kind === 'wrapper' && nested.branches === undefined)
+      ) {
+        catalogBlocked = true;
+      }
+      if (nested.kind === 'wrapper' && nested.branches !== undefined) {
+        stack.push({
+          kind: 'wrapper',
+          schema: task.schema,
+          documentPath: task.documentPath,
+          branches: nested.branches,
+          referenceChain: task.referenceChain,
+        });
+      }
+      continue;
+    }
+
+    if (Object.getOwnPropertyDescriptor(task.schema, '$ref') !== undefined) {
+      const start = diagnostics.length;
+      const resolved = resolveUseSiteSchema(
+        task.schema,
+        dataPath ?? [],
+        task.documentPath,
+        task.referenceChain,
+        diagnostics,
+        referenceContext,
+        templatePath,
+      );
+      if (dataPath === undefined) {
+        for (let index = start; index < diagnostics.length; index += 1) {
+          const current = diagnostics[index];
+          if (current === undefined) continue;
+          const { dataPath: _omitted, ...withoutDataPath } = current;
+          void _omitted;
+          diagnostics[index] = withoutDataPath;
+        }
+      }
+      if (resolved.kind === 'blocked') {
+        catalogBlocked = true;
+        releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+        continue;
+      }
+      stack.push({
+        kind: 'release-reference',
+        activatedTargets: resolved.activatedTargets,
+      });
+      const targetFoundation = inspectCompositionFoundation(resolved.schema, {
+        useSite,
+        documentPath: resolved.documentPath,
+        ...(dataPath === undefined ? {} : { dataPath }),
+        ...(templatePath === undefined ? {} : { templatePath }),
+        inspectBranches: false,
+      });
+      if (targetFoundation.kind === 'input-failure') {
+        catalogBlocked = true;
+        diagnostics.push(...targetFoundation.diagnostics);
+        addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      } else if (targetFoundation.kind === 'wrapper') {
+        diagnostics.push(...targetFoundation.diagnostics);
+        addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+        if (targetFoundation.branches !== undefined) {
+          stack.push({
+            kind: 'wrapper',
+            schema: resolved.schema,
+            documentPath: resolved.documentPath,
+            branches: targetFoundation.branches,
+            referenceChain: resolved.referenceChain,
+          });
+        } else {
+          catalogBlocked = true;
+        }
+      } else if (isCompositionContribution(resolved.schema)) {
+        inspectContribution(
+          resolved.schema,
+          resolved.documentPath,
+          resolved.referenceChain,
+        );
+      } else {
+        catalogBlocked = true;
+        compositionConflict(
+          resolved.documentPath,
+          {
+            reason: 'unsupported-branch-kind',
+            branchIndex: task.branchIndex,
+            expected:
+              'object contribution, local reference or nested object composition',
+          },
+          resolved.referenceChain,
+        );
+      }
+      continue;
+    }
+
+    if (isCompositionContribution(task.schema)) {
+      inspectContribution(task.schema, task.documentPath, task.referenceChain);
+    } else {
+      catalogBlocked = true;
+      compositionConflict(
+        task.documentPath,
+        {
+          reason: 'unsupported-branch-kind',
+          branchIndex: task.branchIndex,
+          expected:
+            'object contribution, local reference or nested object composition',
+        },
+        task.referenceChain,
+      );
+    }
+  }
+
+  for (const source of requiredSources.values()) {
+    if (Object.hasOwn(properties, source.name)) continue;
+    const warningDataPath =
+      dataPath === undefined
+        ? [source.name]
+        : useSite === 'property'
+          ? [...dataPath, source.name]
+          : dataPath;
+    pushDiagnostic(
+      diagnostic({
+        code: 'UNMANAGED_REQUIRED_PROPERTY',
+        severity: 'warning',
+        source: 'schema',
+        ...(dataPath === undefined || useSite === 'property'
+          ? { dataPath: warningDataPath }
+          : { dataPath }),
+        documentPath: source.documentPath,
+        parameters: { field: source.name },
+        fallbackMessage: `Required property "${source.name}" is not managed by this form.`,
+      }),
+      source.referenceChain,
+      true,
+    );
+  }
+
+  const title = annotations.get('title');
+  const description = annotations.get('description');
+  return {
+    properties,
+    propertySources,
+    requiredNames,
+    catalogBlocked,
+    ...(title === undefined ? {} : { schemaTitle: title.value }),
+    ...(description === undefined
+      ? {}
+      : { schemaDescription: description.value }),
+  };
+}
+
+function isCompositionContribution(schema: Record<string, unknown>): boolean {
+  const type = ownDataValue(schema, 'type');
+  const properties = ownDataValue(schema, 'properties');
+  return (
+    type.present &&
+    !type.accessor &&
+    type.value === 'object' &&
+    properties.present &&
+    !properties.accessor &&
+    isOrdinaryRecord(properties.value)
+  );
 }
 
 function inspectRootSchema(
@@ -1254,6 +2168,10 @@ function inspectNodes(
   collectionPolicies: ParsedCollectionPolicies,
   usedPolicyIndices: Set<number>,
   referenceContext: ReferenceContext,
+  rootPropertySources?: ReadonlyMap<string, CompositionPropertySource>,
+  rootCompositionBlocked = false,
+  defaultOutput?: DefaultCandidateSchemaNode[],
+  opaqueArrays = false,
 ): NodeCandidate[] {
   const candidates: NodeCandidate[] = [];
   type Frame =
@@ -1273,7 +2191,9 @@ function inspectNodes(
         readonly dataPath: readonly string[];
         readonly documentPath: readonly (string | number)[];
         readonly output: NodeCandidate[];
+        readonly defaultOutput?: DefaultCandidateSchemaNode[];
         readonly referenceChain: ReferenceChain;
+        readonly compositionBlocked: boolean;
       };
   const active = new Map<object, readonly (string | number)[]>([
     [rootSchema, []],
@@ -1283,6 +2203,7 @@ function inspectNodes(
   for (let index = rootNames.length - 1; index >= 0; index -= 1) {
     const name = rootNames[index] as string;
     const descriptor = Object.getOwnPropertyDescriptor(properties, name);
+    const source = rootPropertySources?.get(name);
     stack.push({
       kind: 'node',
       name,
@@ -1292,9 +2213,11 @@ function inspectNodes(
           : ACCESSOR_VALUE,
       required: requiredNames.has(name),
       dataPath: [name],
-      documentPath: ['properties', name],
+      documentPath: source?.documentPath ?? ['properties', name],
       output: candidates,
-      referenceChain: [],
+      ...(defaultOutput === undefined ? {} : { defaultOutput }),
+      referenceChain: source?.referenceChain ?? [],
+      compositionBlocked: rootCompositionBlocked || source?.conflicted === true,
     });
   }
 
@@ -1322,7 +2245,9 @@ function inspectNodes(
       dataPath,
       documentPath: fieldPath,
       output,
+      defaultOutput: frameDefaultOutput,
       referenceChain: inheritedChain,
+      compositionBlocked,
     } = frame;
     const diagnosticStart = diagnostics.length;
 
@@ -1342,6 +2267,18 @@ function inspectNodes(
           fallbackMessage: `Schema for field "${name}" must be an object.`,
         }),
       );
+      continue;
+    }
+
+    const directComposition = inspectCompositionFoundation(rawField, {
+      useSite: 'property',
+      dataPath,
+      documentPath: fieldPath,
+      inspectBranches: false,
+    });
+    if (directComposition.kind === 'input-failure') {
+      diagnostics.push(...directComposition.diagnostics);
+      addReferenceChainToRange(diagnostics, diagnosticStart, inheritedChain);
       continue;
     }
 
@@ -1365,6 +2302,153 @@ function inspectNodes(
     const field = resolved.schema;
     const resolvedFieldPath = resolved.documentPath;
 
+    const composition = inspectCompositionFoundation(field, {
+      useSite: 'property',
+      dataPath,
+      documentPath: resolvedFieldPath,
+      inspectBranches: false,
+    });
+    if (composition.kind === 'input-failure') {
+      diagnostics.push(...composition.diagnostics);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
+      continue;
+    }
+
+    const typeDescriptor = Object.getOwnPropertyDescriptor(field, 'type');
+    const rawType: unknown =
+      typeDescriptor !== undefined && 'value' in typeDescriptor
+        ? typeDescriptor.value
+        : ACCESSOR_VALUE;
+    const allOfDescriptor = Object.getOwnPropertyDescriptor(field, 'allOf');
+    if (
+      allOfDescriptor !== undefined &&
+      acceptedNonObjectCompositionType(rawType) === undefined
+    ) {
+      if (composition.kind === 'wrapper') {
+        diagnostics.push(...composition.diagnostics);
+        const reduced = reduceObjectComposition(
+          field,
+          composition,
+          'property',
+          resolvedFieldPath,
+          dataPath,
+          undefined,
+          diagnostics,
+          referenceContext,
+          resolved.referenceChain,
+        );
+        if (reduced !== undefined) {
+          const firstDocumentPath = active.get(field);
+          if (
+            firstDocumentPath !== undefined &&
+            resolved.activatedTargets.length === 0
+          ) {
+            diagnostics.push(
+              diagnostic({
+                code: 'CYCLIC_SCHEMA_OBJECT',
+                severity: 'error',
+                source: 'schema',
+                dataPath,
+                documentPath: resolvedFieldPath,
+                parameters: { firstDocumentPath: [...firstDocumentPath] },
+                fallbackMessage: 'Schema object cycle detected.',
+              }),
+            );
+            releaseReferenceTargets(
+              referenceContext,
+              resolved.activatedTargets,
+            );
+            addReferenceChainToRange(
+              diagnostics,
+              diagnosticStart,
+              resolved.referenceChain,
+            );
+            continue;
+          }
+          const candidate: ObjectCandidate = {
+            name,
+            type: 'object',
+            required,
+            ...(reduced.schemaTitle === undefined
+              ? {}
+              : { schemaTitle: reduced.schemaTitle }),
+            ...(reduced.schemaDescription === undefined
+              ? {}
+              : { schemaDescription: reduced.schemaDescription }),
+            dataPath,
+            documentPath: resolvedFieldPath,
+            children: [],
+          };
+          output.push(candidate);
+          const defaultChildren: DefaultCandidateSchemaNode[] = [];
+          frameDefaultOutput?.push({
+            kind: 'object',
+            nullable: false,
+            path: dataPath,
+            documentPath: resolvedFieldPath,
+            referenceChain: resolved.referenceChain,
+            schema: field,
+            children: defaultChildren,
+          });
+          active.set(field, resolvedFieldPath);
+          stack.push({
+            kind: 'exit',
+            schema: field,
+            ...(firstDocumentPath === undefined
+              ? {}
+              : { previousDocumentPath: firstDocumentPath }),
+            diagnosticStart,
+            referenceChain: resolved.referenceChain,
+            activatedTargets: resolved.activatedTargets,
+          });
+          const childNames = Object.keys(reduced.properties);
+          for (let index = childNames.length - 1; index >= 0; index -= 1) {
+            const childName = childNames[index] as string;
+            const descriptor = Object.getOwnPropertyDescriptor(
+              reduced.properties,
+              childName,
+            );
+            const source = reduced.propertySources.get(childName);
+            stack.push({
+              kind: 'node',
+              name: childName,
+              schemaValue:
+                descriptor !== undefined && 'value' in descriptor
+                  ? descriptor.value
+                  : ACCESSOR_VALUE,
+              required: reduced.requiredNames.has(childName),
+              dataPath: [...dataPath, childName],
+              documentPath: source?.documentPath ?? [
+                ...resolvedFieldPath,
+                'properties',
+                childName,
+              ],
+              output: candidate.children,
+              defaultOutput: defaultChildren,
+              referenceChain: source?.referenceChain ?? resolved.referenceChain,
+              compositionBlocked:
+                compositionBlocked ||
+                reduced.catalogBlocked ||
+                source?.conflicted === true,
+            });
+          }
+          continue;
+        }
+        releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+        addReferenceChainToRange(
+          diagnostics,
+          diagnosticStart,
+          resolved.referenceChain,
+        );
+        continue;
+      }
+    }
+
     if (!Object.hasOwn(field, 'type')) {
       diagnostics.push(
         diagnostic({
@@ -1386,11 +2470,6 @@ function inspectNodes(
       continue;
     }
 
-    const typeDescriptor = Object.getOwnPropertyDescriptor(field, 'type');
-    const rawType: unknown =
-      typeDescriptor !== undefined && 'value' in typeDescriptor
-        ? typeDescriptor.value
-        : ACCESSOR_VALUE;
     if (Array.isArray(rawType) && !isNullableContainerTypeArray(rawType)) {
       const nullableType = inspectNullableTypeArray(
         name,
@@ -1412,6 +2491,15 @@ function inspectNodes(
             resolvedFieldPath,
           ),
         );
+        frameDefaultOutput?.push({
+          kind: nullableType,
+          nullable: true,
+          path: dataPath,
+          documentPath: resolvedFieldPath,
+          referenceChain: resolved.referenceChain,
+          schema: field,
+          children: [],
+        });
       }
       releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       addReferenceChainToRange(
@@ -1460,6 +2548,15 @@ function inspectNodes(
           resolvedFieldPath,
         ),
       );
+      frameDefaultOutput?.push({
+        kind: rawType as FieldType,
+        nullable: false,
+        path: dataPath,
+        documentPath: resolvedFieldPath,
+        referenceChain: resolved.referenceChain,
+        schema: field,
+        children: [],
+      });
       releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       addReferenceChainToRange(
         diagnostics,
@@ -1495,6 +2592,30 @@ function inspectNodes(
     }
 
     if (rawType === 'array') {
+      if (opaqueArrays) {
+        inspectOpaqueArraySchema(
+          field,
+          dataPath,
+          resolvedFieldPath,
+          diagnostics,
+        );
+        frameDefaultOutput?.push({
+          kind: 'array',
+          nullable: false,
+          path: dataPath,
+          documentPath: resolvedFieldPath,
+          referenceChain: resolved.referenceChain,
+          schema: field,
+          children: [],
+        });
+        releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+        addReferenceChainToRange(
+          diagnostics,
+          diagnosticStart,
+          resolved.referenceChain,
+        );
+        continue;
+      }
       active.set(field, resolvedFieldPath);
       const array = inspectArrayCandidate(
         name,
@@ -1508,6 +2629,7 @@ function inspectNodes(
         usedPolicyIndices,
         referenceContext,
         resolved.referenceChain,
+        compositionBlocked,
       );
       if (firstDocumentPath === undefined) active.delete(field);
       else active.set(field, firstDocumentPath);
@@ -1539,6 +2661,16 @@ function inspectNodes(
       continue;
     }
     output.push(object.candidate);
+    const defaultChildren: DefaultCandidateSchemaNode[] = [];
+    frameDefaultOutput?.push({
+      kind: 'object',
+      nullable: false,
+      path: dataPath,
+      documentPath: resolvedFieldPath,
+      referenceChain: resolved.referenceChain,
+      schema: field,
+      children: defaultChildren,
+    });
     active.set(field, resolvedFieldPath);
     stack.push({
       kind: 'exit',
@@ -1568,12 +2700,69 @@ function inspectNodes(
         dataPath: [...dataPath, childName],
         documentPath: [...resolvedFieldPath, 'properties', childName],
         output: object.candidate.children,
+        defaultOutput: defaultChildren,
         referenceChain: resolved.referenceChain,
+        compositionBlocked,
       });
     }
   }
 
   return candidates;
+}
+
+function inspectOpaqueArraySchema(
+  schema: Record<string, unknown>,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+): void {
+  for (const keyword of Object.keys(schema)) {
+    if (ARRAY_FIELD_KEYWORDS.has(keyword)) continue;
+    const keywordPath = [...documentPath, keyword];
+    if (keyword === 'allOf') {
+      diagnostics.push(
+        incompatibleAllOfDiagnostic('array', keywordPath, dataPath),
+      );
+    } else if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'IGNORED_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Known annotation "${keyword}" is ignored by the compiler.`,
+          dataPath,
+        ),
+      );
+    } else if (
+      keyword !== '$schema' &&
+      keyword !== 'const' &&
+      (COMPILER_SUPPORTED_KEYWORDS.has(keyword) || keyword === 'items')
+    ) {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'array' },
+          fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "array".`,
+        }),
+      );
+    } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'UNSUPPORTED_SCHEMA_KEYWORD',
+          'error',
+          keyword,
+          keywordPath,
+          `Schema keyword "${keyword}" is not supported.`,
+          dataPath,
+        ),
+      );
+    }
+  }
 }
 
 function inspectArrayCandidate(
@@ -1588,15 +2777,94 @@ function inspectArrayCandidate(
   usedPolicyIndices: Set<number>,
   referenceContext: ReferenceContext,
   referenceChain: ReferenceChain,
-): ArrayCandidate | undefined {
+  suppressDependentPolicyDiagnostics: boolean,
+): ArrayCandidate | FieldCandidate | undefined {
+  const directItems = ownDataValue(schema, 'items');
+  if (
+    hasSafeStringEnumArrayMarker(schema) &&
+    (!directItems.present ||
+      directItems.accessor ||
+      !isOrdinaryRecord(directItems.value))
+  ) {
+    inspectUnclassifiedStringEnumArrayCommon(
+      schema,
+      dataPath,
+      documentPath,
+      diagnostics,
+    );
+    const itemsPath = [...documentPath, 'items'];
+    diagnostics.push(
+      !directItems.present || directItems.accessor
+        ? invalidSchemaKeywordDescriptor(
+            'items',
+            'string-enum item schema',
+            itemsPath,
+            dataPath,
+            !directItems.present ? 'missing' : 'accessor',
+          )
+        : invalidSchemaKeywordValue(
+            'items',
+            directItems.value,
+            'string-enum item schema',
+            itemsPath,
+            dataPath,
+          ),
+    );
+    return undefined;
+  }
+  if (
+    directItems.present &&
+    !directItems.accessor &&
+    isOrdinaryRecord(directItems.value)
+  ) {
+    const directItemType = ownDataValue(directItems.value, 'type');
+    if (
+      directItemType.present &&
+      !directItemType.accessor &&
+      directItemType.value === 'string'
+    ) {
+      return inspectStringEnumArrayCandidate(
+        name,
+        schema,
+        directItems.value,
+        required,
+        dataPath,
+        documentPath,
+        diagnostics,
+      );
+    }
+  }
+
   let schemaTitle: string | undefined;
   let schemaDescription: string | undefined;
   const policy = collectionPolicies.valid
     ? collectionPolicies.byPath.get(JSON.stringify(dataPath))
     : undefined;
   if (policy !== undefined) usedPolicyIndices.add(policy.index);
+  const suppressUnclassifiedUnique =
+    hasSafeStringEnumArrayMarker(schema) &&
+    directItems.present &&
+    !directItems.accessor &&
+    isOrdinaryRecord(directItems.value) &&
+    !Object.hasOwn(directItems.value, '$ref') &&
+    !Object.hasOwn(directItems.value, 'allOf') &&
+    (() => {
+      const type = ownDataValue(directItems.value, 'type');
+      return (
+        !type.present ||
+        type.accessor ||
+        (type.value !== 'object' && type.value !== 'string')
+      );
+    })();
   for (const keyword of Object.keys(schema)) {
     const keywordPath = [...documentPath, keyword];
+    if (keyword === 'uniqueItems' && suppressUnclassifiedUnique) continue;
+    if (keyword === 'allOf') {
+      diagnostics.push(
+        incompatibleAllOfDiagnostic('array', keywordPath, dataPath),
+      );
+      continue;
+    }
     if (!ARRAY_FIELD_KEYWORDS.has(keyword)) {
       if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
         diagnostics.push(
@@ -1687,11 +2955,14 @@ function inspectArrayCandidate(
     itemsMember.accessor ||
     !isOrdinaryRecord(itemsMember.value)
   ) {
+    const expectedItems = hasSafeStringEnumArrayMarker(schema)
+      ? 'string-enum item schema'
+      : 'inline object item schema';
     diagnostics.push(
       !itemsMember.present || itemsMember.accessor
         ? invalidSchemaKeywordDescriptor(
             'items',
-            'inline object item schema',
+            expectedItems,
             itemsPath,
             dataPath,
             !itemsMember.present ? 'missing' : 'accessor',
@@ -1699,7 +2970,7 @@ function inspectArrayCandidate(
         : invalidSchemaKeywordValue(
             'items',
             itemsMember.value,
-            'inline object item schema',
+            expectedItems,
             itemsPath,
             dataPath,
           ),
@@ -1720,15 +2991,35 @@ function inspectArrayCandidate(
   }
 
   const itemDiagnosticStart = diagnostics.length;
-  const resolvedItems = resolveUseSiteSchema(
+  const directItemComposition = inspectCompositionFoundation(
     itemsMember.value,
-    dataPath,
-    itemsPath,
-    referenceChain,
-    diagnostics,
-    referenceContext,
-    [],
+    {
+      useSite: 'item-root',
+      dataPath,
+      documentPath: itemsPath,
+      templatePath: [],
+      inspectBranches: false,
+    },
   );
+  const directItemBlocked = directItemComposition.kind === 'input-failure';
+  if (directItemBlocked) {
+    diagnostics.push(...directItemComposition.diagnostics);
+  }
+  const resolvedItems: ResolvedUseSiteResult = directItemBlocked
+    ? {
+        kind: 'blocked',
+        referenceChain,
+        activatedTargets: [],
+      }
+    : resolveUseSiteSchema(
+        itemsMember.value,
+        dataPath,
+        itemsPath,
+        referenceChain,
+        diagnostics,
+        referenceContext,
+        [],
+      );
   const itemSchema =
     resolvedItems.kind === 'resolved' ? resolvedItems.schema : undefined;
   const resolvedItemsPath =
@@ -1784,7 +3075,15 @@ function inspectArrayCandidate(
           dataPath,
           resolvedItemsPath,
           diagnostics,
+          referenceContext,
+          resolvedItems.referenceChain,
         );
+  const itemCompositionBlocked =
+    itemSchema !== undefined &&
+    Object.getOwnPropertyDescriptor(itemSchema, 'allOf') !== undefined &&
+    (item === undefined || item.compositionBlocked === true);
+  const dependentPolicyBlocked =
+    suppressDependentPolicyDiagnostics || itemCompositionBlocked;
   const children: NodeCandidate[] = [];
   let identitySchemaCompatible = false;
   if (item !== undefined) {
@@ -1800,6 +3099,7 @@ function inspectArrayCandidate(
       active,
       referenceContext,
       resolvedItems.referenceChain,
+      item.propertySources,
     );
     if (firstItemsPath === undefined)
       active.delete(itemSchema as Record<string, unknown>);
@@ -1826,8 +3126,9 @@ function inspectArrayCandidate(
         }),
       );
     } else if (
-      item === undefined ||
-      !Object.hasOwn(item.properties, policy.itemIdentityProperty)
+      !dependentPolicyBlocked &&
+      (item === undefined ||
+        !Object.hasOwn(item.properties, policy.itemIdentityProperty))
     ) {
       diagnostics.push(
         semanticCollectionPolicyDiagnostic(
@@ -1838,7 +3139,11 @@ function inspectArrayCandidate(
           resolvedItems.referenceChain,
         ),
       );
-    } else if (!item.requiredNames.has(policy.itemIdentityProperty)) {
+    } else if (
+      !dependentPolicyBlocked &&
+      item !== undefined &&
+      !item.requiredNames.has(policy.itemIdentityProperty)
+    ) {
       diagnostics.push(
         semanticCollectionPolicyDiagnostic(
           policy,
@@ -1848,7 +3153,7 @@ function inspectArrayCandidate(
           resolvedItems.referenceChain,
         ),
       );
-    } else if (!identitySchemaCompatible) {
+    } else if (!dependentPolicyBlocked && !identitySchemaCompatible) {
       diagnostics.push(
         semanticCollectionPolicyDiagnostic(
           policy,
@@ -1879,18 +3184,395 @@ function inspectArrayCandidate(
   };
 }
 
+function hasSafeStringEnumArrayMarker(
+  schema: Record<string, unknown>,
+): boolean {
+  const descriptor = Object.getOwnPropertyDescriptor(schema, 'uniqueItems');
+  return (
+    descriptor !== undefined &&
+    descriptor.enumerable === true &&
+    'value' in descriptor &&
+    descriptor.value === true
+  );
+}
+
+function inspectUnclassifiedStringEnumArrayCommon(
+  schema: Record<string, unknown>,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+): void {
+  for (const keyword of Object.keys(schema)) {
+    if (
+      keyword === 'type' ||
+      keyword === 'items' ||
+      keyword === 'uniqueItems' ||
+      keyword === 'default'
+    ) {
+      continue;
+    }
+    const keywordPath = [...documentPath, keyword];
+    if (keyword === 'title' || keyword === 'description') {
+      const member = ownDataValue(schema, keyword);
+      if (!member.present) continue;
+      const expected = keyword === 'title' ? 'non-blank string' : 'string';
+      if (
+        member.accessor ||
+        typeof member.value !== 'string' ||
+        (keyword === 'title' && member.value.trim().length === 0)
+      ) {
+        diagnostics.push(
+          member.accessor
+            ? invalidSchemaKeywordDescriptor(
+                keyword,
+                expected,
+                keywordPath,
+                dataPath,
+                'accessor',
+              )
+            : invalidSchemaKeywordValue(
+                keyword,
+                member.value,
+                expected,
+                keywordPath,
+                dataPath,
+              ),
+        );
+      }
+    } else if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'IGNORED_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Known annotation "${keyword}" is ignored by the compiler.`,
+          dataPath,
+        ),
+      );
+    } else if (
+      !KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword) &&
+      !COMPILER_SUPPORTED_KEYWORDS.has(keyword)
+    ) {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'UNKNOWN_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+          dataPath,
+        ),
+      );
+    }
+  }
+}
+
+function inspectStringEnumArrayCandidate(
+  name: string,
+  schema: Record<string, unknown>,
+  itemSchema: Record<string, unknown>,
+  required: boolean,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+): FieldCandidate {
+  let schemaTitle: string | undefined;
+  let schemaDescription: string | undefined;
+
+  for (const keyword of Object.keys(schema)) {
+    const keywordPath = [...documentPath, keyword];
+    if (
+      keyword === 'type' ||
+      keyword === 'items' ||
+      keyword === 'uniqueItems' ||
+      keyword === 'default'
+    ) {
+      continue;
+    }
+    if (keyword === 'title' || keyword === 'description') {
+      const member = ownDataValue(schema, keyword);
+      if (!member.present) continue;
+      const expected = keyword === 'title' ? 'non-blank string' : 'string';
+      if (
+        member.accessor ||
+        typeof member.value !== 'string' ||
+        (keyword === 'title' && member.value.trim().length === 0)
+      ) {
+        diagnostics.push(
+          member.accessor
+            ? invalidSchemaKeywordDescriptor(
+                keyword,
+                expected,
+                keywordPath,
+                dataPath,
+                'accessor',
+              )
+            : invalidSchemaKeywordValue(
+                keyword,
+                member.value,
+                expected,
+                keywordPath,
+                dataPath,
+              ),
+        );
+      } else if (keyword === 'title') schemaTitle = member.value;
+      else schemaDescription = member.value;
+      continue;
+    }
+    if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'IGNORED_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Known annotation "${keyword}" is ignored by the compiler.`,
+          dataPath,
+        ),
+      );
+    } else if (keyword === 'const') {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'UNSUPPORTED_SCHEMA_KEYWORD',
+          'error',
+          keyword,
+          keywordPath,
+          `Schema keyword "${keyword}" is not supported.`,
+          dataPath,
+        ),
+      );
+    } else if (
+      keyword === 'properties' ||
+      keyword === 'required' ||
+      keyword === 'enum' ||
+      keyword === 'allOf' ||
+      STRING_FIELD_KEYWORDS.has(keyword) ||
+      NUMBER_FIELD_KEYWORDS.has(keyword) ||
+      BOOLEAN_FIELD_KEYWORDS.has(keyword)
+    ) {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'string-enum-array' },
+          fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "string-enum-array".`,
+        }),
+      );
+    } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'UNSUPPORTED_SCHEMA_KEYWORD',
+          'error',
+          keyword,
+          keywordPath,
+          `Schema keyword "${keyword}" is not supported.`,
+          dataPath,
+        ),
+      );
+    } else {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'UNKNOWN_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+          dataPath,
+        ),
+      );
+    }
+  }
+
+  const uniquePath = [...documentPath, 'uniqueItems'];
+  const uniqueDescriptor = Object.getOwnPropertyDescriptor(
+    schema,
+    'uniqueItems',
+  );
+  if (
+    uniqueDescriptor === undefined ||
+    !uniqueDescriptor.enumerable ||
+    !('value' in uniqueDescriptor) ||
+    uniqueDescriptor.value !== true
+  ) {
+    const actualDescriptorType:
+      'missing' | 'non-enumerable' | 'accessor' | undefined =
+      uniqueDescriptor === undefined
+        ? 'missing'
+        : !uniqueDescriptor.enumerable
+          ? 'non-enumerable'
+          : !('value' in uniqueDescriptor)
+            ? 'accessor'
+            : undefined;
+    const invalidDataValue: unknown =
+      actualDescriptorType === undefined &&
+      uniqueDescriptor !== undefined &&
+      'value' in uniqueDescriptor
+        ? uniqueDescriptor.value
+        : undefined;
+    diagnostics.push(
+      diagnostic({
+        code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: uniquePath,
+        parameters: {
+          keyword: 'uniqueItems',
+          expected: 'true',
+          ...(actualDescriptorType === undefined
+            ? {
+                actualType: actualType(invalidDataValue),
+                ...(invalidDataValue === false ? { actualValue: false } : {}),
+              }
+            : { actualType: actualDescriptorType }),
+        },
+        fallbackMessage: 'Schema keyword "uniqueItems" has an invalid value.',
+      }),
+    );
+  }
+
+  for (const keyword of Object.keys(itemSchema)) {
+    if (keyword === 'type' || keyword === 'enum') continue;
+    const keywordPath = [...documentPath, 'items', keyword];
+    if (KNOWN_IGNORABLE_KEYWORDS.has(keyword) && keyword !== 'format') {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'IGNORED_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Known annotation "${keyword}" is ignored by the compiler.`,
+          dataPath,
+        ),
+      );
+    } else if (KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'string-enum-array-item' },
+          fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "string-enum-array-item".`,
+        }),
+      );
+    } else {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'UNKNOWN_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+          dataPath,
+        ),
+      );
+    }
+  }
+
+  const stringEnum = inspectRequiredStringEnum(
+    itemSchema,
+    diagnostics,
+    dataPath,
+    [...documentPath, 'items'],
+  );
+
+  return {
+    name,
+    type: 'string-enum-array',
+    nullable: false,
+    required,
+    ...(schemaTitle === undefined ? {} : { schemaTitle }),
+    ...(schemaDescription === undefined ? {} : { schemaDescription }),
+    stringConstraints: {},
+    numberConstraints: {},
+    stringEnum,
+    fixedValue: { kind: 'absent' },
+    dataPath,
+    documentPath,
+  };
+}
+
+function inspectRequiredStringEnum(
+  itemSchema: Record<string, unknown>,
+  diagnostics: Diagnostic[],
+  dataPath: readonly string[],
+  itemPath: readonly (string | number)[],
+): StringEnumState {
+  const descriptor = Object.getOwnPropertyDescriptor(itemSchema, 'enum');
+  if (descriptor === undefined) {
+    diagnostics.push(
+      invalidSchemaKeywordDescriptor(
+        'enum',
+        'non-empty array of unique strings',
+        [...itemPath, 'enum'],
+        dataPath,
+        'missing',
+      ),
+    );
+    return { kind: 'schema-blocked' };
+  }
+  return inspectStringEnum(itemSchema, diagnostics, dataPath, itemPath);
+}
+
 function inspectItemRoot(
   name: string,
   schema: Record<string, unknown>,
   dataPath: readonly string[],
   documentPath: readonly (string | number)[],
   diagnostics: Diagnostic[],
+  referenceContext: ReferenceContext,
+  referenceChain: ReferenceChain,
 ):
   | {
       readonly properties: Record<string, unknown>;
       readonly requiredNames: ReadonlySet<string>;
+      readonly propertySources?: ReadonlyMap<string, CompositionPropertySource>;
+      readonly compositionBlocked?: boolean;
     }
   | undefined {
+  const composition = inspectCompositionFoundation(schema, {
+    useSite: 'item-root',
+    dataPath,
+    documentPath,
+    templatePath: [],
+    inspectBranches: false,
+  });
+  if (composition.kind === 'input-failure') {
+    diagnostics.push(...composition.diagnostics);
+    return undefined;
+  }
+  if (composition.kind === 'wrapper') {
+    diagnostics.push(...composition.diagnostics);
+    const reduced = reduceObjectComposition(
+      schema,
+      composition,
+      'item-root',
+      documentPath,
+      dataPath,
+      [],
+      diagnostics,
+      referenceContext,
+      referenceChain,
+    );
+    if (reduced === undefined) return undefined;
+    return {
+      properties: reduced.properties,
+      requiredNames: reduced.requiredNames,
+      propertySources: reduced.propertySources,
+      compositionBlocked:
+        reduced.catalogBlocked ||
+        [...reduced.propertySources.values()].some(
+          ({ conflicted }) => conflicted === true,
+        ),
+    };
+  }
+
   let properties: Record<string, unknown> | undefined;
   const requiredEntries: RequiredEntry[] = [];
   const requiredNames = new Set<string>();
@@ -2083,6 +3765,7 @@ function inspectItemTemplateChildren(
   active: Map<object, readonly (string | number)[]>,
   referenceContext: ReferenceContext,
   inheritedReferenceChain: ReferenceChain,
+  rootPropertySources?: ReadonlyMap<string, CompositionPropertySource>,
 ): boolean {
   type Frame =
     | {
@@ -2108,6 +3791,7 @@ function inspectItemTemplateChildren(
   for (let index = names.length - 1; index >= 0; index -= 1) {
     const name = names[index] as string;
     const member = ownDataValue(properties, name);
+    const source = rootPropertySources?.get(name);
     stack.push({
       kind: 'node',
       name,
@@ -2115,9 +3799,13 @@ function inspectItemTemplateChildren(
         member.present && !member.accessor ? member.value : ACCESSOR_VALUE,
       required: requiredNames.has(name),
       templatePath: [name],
-      documentPath: [...itemDocumentPath, 'properties', name],
+      documentPath: source?.documentPath ?? [
+        ...itemDocumentPath,
+        'properties',
+        name,
+      ],
       output,
-      referenceChain: inheritedReferenceChain,
+      referenceChain: source?.referenceChain ?? inheritedReferenceChain,
     });
   }
   let identityCompatible = false;
@@ -2178,6 +3866,134 @@ function inspectItemTemplateChildren(
     const schema = resolved.schema;
     const resolvedDocumentPath = resolved.documentPath;
     const typeMember = ownDataValue(schema, 'type');
+    const rawType = !typeMember.present
+      ? ACCESSOR_VALUE
+      : typeMember.accessor
+        ? ACCESSOR_VALUE
+        : typeMember.value;
+    if (
+      frame.templatePath.length === 1 &&
+      frame.name === identityProperty &&
+      Object.getOwnPropertyDescriptor(schema, 'allOf') !== undefined
+    ) {
+      diagnostics.push(
+        incompatibleAllOfDiagnostic(
+          'string',
+          [...resolvedDocumentPath, 'allOf'],
+          arrayPath,
+          frame.templatePath,
+        ),
+      );
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
+    const composition = inspectCompositionFoundation(schema, {
+      useSite: 'property',
+      dataPath: arrayPath,
+      documentPath: resolvedDocumentPath,
+      templatePath: frame.templatePath,
+      inspectBranches: false,
+    });
+    if (composition.kind === 'input-failure') {
+      diagnostics.push(...composition.diagnostics);
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
+    if (
+      composition.kind === 'wrapper' &&
+      acceptedNonObjectCompositionType(rawType) === undefined
+    ) {
+      diagnostics.push(...composition.diagnostics);
+      const reduced = reduceObjectComposition(
+        schema,
+        composition,
+        'property',
+        resolvedDocumentPath,
+        arrayPath,
+        frame.templatePath,
+        diagnostics,
+        referenceContext,
+        resolved.referenceChain,
+      );
+      if (reduced !== undefined) {
+        const firstPath = active.get(schema);
+        if (firstPath !== undefined && resolved.activatedTargets.length === 0) {
+          diagnostics.push(
+            withTemplatePath(
+              diagnostic({
+                code: 'CYCLIC_SCHEMA_OBJECT',
+                severity: 'error',
+                source: 'schema',
+                dataPath: arrayPath,
+                documentPath: resolvedDocumentPath,
+                parameters: { firstDocumentPath: [...firstPath] },
+                fallbackMessage: 'Schema object cycle detected.',
+              }),
+              frame.templatePath,
+            ),
+          );
+          addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+          releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+          continue;
+        }
+        const candidate: ObjectCandidate = {
+          name: frame.name,
+          type: 'object',
+          required: frame.required,
+          ...(reduced.schemaTitle === undefined
+            ? {}
+            : { schemaTitle: reduced.schemaTitle }),
+          ...(reduced.schemaDescription === undefined
+            ? {}
+            : { schemaDescription: reduced.schemaDescription }),
+          dataPath: arrayPath,
+          documentPath: resolvedDocumentPath,
+          children: [],
+          templatePath: frame.templatePath,
+        };
+        frame.output.push(candidate);
+        active.set(schema, resolvedDocumentPath);
+        stack.push({
+          kind: 'exit',
+          schema,
+          ...(firstPath === undefined
+            ? {}
+            : { previousDocumentPath: firstPath }),
+          diagnosticStart: start,
+          referenceChain: resolved.referenceChain,
+          activatedTargets: resolved.activatedTargets,
+        });
+        const childNames = Object.keys(reduced.properties);
+        for (let index = childNames.length - 1; index >= 0; index -= 1) {
+          const childName = childNames[index] as string;
+          const member = ownDataValue(reduced.properties, childName);
+          const source = reduced.propertySources.get(childName);
+          stack.push({
+            kind: 'node',
+            name: childName,
+            schemaValue:
+              member.present && !member.accessor
+                ? member.value
+                : ACCESSOR_VALUE,
+            required: reduced.requiredNames.has(childName),
+            templatePath: [...frame.templatePath, childName],
+            documentPath: source?.documentPath ?? [
+              ...resolvedDocumentPath,
+              'properties',
+              childName,
+            ],
+            output: candidate.children,
+            referenceChain: source?.referenceChain ?? resolved.referenceChain,
+          });
+        }
+        continue;
+      }
+      addReferenceChainToRange(diagnostics, start, resolved.referenceChain);
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
     if (!typeMember.present) {
       diagnostics.push(
         diagnostic({
@@ -2195,7 +4011,6 @@ function inspectItemTemplateChildren(
       releaseReferenceTargets(referenceContext, resolved.activatedTargets);
       continue;
     }
-    const rawType = typeMember.accessor ? ACCESSOR_VALUE : typeMember.value;
     if (frame.templatePath.length === 1 && frame.name === identityProperty) {
       identityCompatible = inspectIdentitySchema(
         frame.name,
@@ -2397,6 +4212,18 @@ function inspectIdentitySchema(
   for (const keyword of Object.keys(schema)) {
     if (keyword === 'type') continue;
     const keywordPath = [...documentPath, keyword];
+    if (keyword === 'allOf') {
+      compatible = false;
+      diagnostics.push(
+        incompatibleAllOfDiagnostic(
+          'string',
+          keywordPath,
+          dataPath,
+          templatePath,
+        ),
+      );
+      continue;
+    }
     if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
       diagnostics.push(
         withTemplatePath(
@@ -2921,6 +4748,13 @@ function inspectValidField(
   for (const keyword of Object.keys(field)) {
     const documentPath = [...fieldPath, keyword] as const;
 
+    if (keyword === 'allOf') {
+      diagnostics.push(
+        incompatibleAllOfDiagnostic(type, documentPath, dataPath),
+      );
+      continue;
+    }
+
     if (nullable && keyword === 'enum') {
       stringEnum = { kind: 'schema-blocked' };
       diagnostics.push(
@@ -3197,7 +5031,7 @@ function inspectFixedValue(
     );
     return { kind: 'schema-blocked' };
   }
-  const value = descriptor.value;
+  const value: unknown = descriptor.value;
   if (!isCompatibleFixedValue(value, type, nullable)) {
     diagnostics.push(
       invalidSchemaKeywordValue(
@@ -4703,7 +6537,7 @@ function inspectUnknownPresentationKeys(
   path: readonly (string | number)[],
   diagnostics: Diagnostic[],
 ): void {
-  const known = new Set(knownKeys);
+  const known = new Set([...knownKeys, 'visibleWhen', 'enabledWhen']);
   for (const key of Object.keys(value)) {
     if (!known.has(key)) diagnostics.push(unknownUiKey(key, [...path, key]));
   }
@@ -4840,7 +6674,7 @@ function inspectUiFields(
       candidatesByName?.get(name),
       diagnostics,
     );
-    if (knownFields?.has(name) && candidatesByName?.has(name)) {
+    if (knownFields?.has(name)) {
       fields.set(name, parsed);
     }
   }
@@ -4861,7 +6695,24 @@ function inspectFieldUi(
     decimalPlaces?: number;
     showTrailingZeros?: boolean;
     enumLabels?: ReadonlyMap<string, string>;
+    visibleWhenCapture?: CapturedConditionMember;
+    enabledWhenCapture?: CapturedConditionMember;
   } = {};
+
+  const visibleWhenCapture = captureConditionMember(value, 'visibleWhen', [
+    'fields',
+    name,
+    'visibleWhen',
+  ]);
+  if (visibleWhenCapture !== undefined)
+    parsed.visibleWhenCapture = visibleWhenCapture;
+  const enabledWhenCapture = captureConditionMember(value, 'enabledWhen', [
+    'fields',
+    name,
+    'enabledWhen',
+  ]);
+  if (enabledWhenCapture !== undefined)
+    parsed.enabledWhenCapture = enabledWhenCapture;
 
   for (const key of Object.keys(value)) {
     const documentPath = ['fields', name, key] as const;
@@ -4875,6 +6726,7 @@ function inspectFieldUi(
       inspectEnumLabels(name, value, candidate, parsed, diagnostics);
       continue;
     }
+    if (key === 'visibleWhen' || key === 'enabledWhen') continue;
 
     const rawValue = value[key];
     const fieldType = candidate?.type;
@@ -4885,7 +6737,7 @@ function inspectFieldUi(
           invalidUiValue(key, rawValue, 'string', documentPath, [name]),
         );
       } else if (key === 'placeholder') {
-        if (fieldType === 'boolean') {
+        if (fieldType === 'boolean' || fieldType === 'string-enum-array') {
           diagnostics.push(
             diagnostic({
               code: 'INCOMPATIBLE_PLACEHOLDER',
@@ -5021,7 +6873,7 @@ function inspectEnumLabels(
 function inspectUiOptions(
   name: string,
   value: unknown,
-  fieldType: FieldType | undefined,
+  fieldType: CandidateFieldType | undefined,
   parsed: {
     decimalPlaces?: number;
     showTrailingZeros?: boolean;
@@ -5102,6 +6954,7 @@ function inspectNestedUiSchema(
   ancestorActive: ReadonlyMap<object, readonly (string | number)[]> = new Map(),
   identityProperty?: string,
   templateArrayPath?: readonly string[],
+  rootKnownNames?: readonly string[],
 ): ParsedUiSchema {
   const diagnosticsStart = diagnostics.length;
   const result: ParsedUiSchema & {
@@ -5145,6 +6998,7 @@ function inspectNestedUiSchema(
         readonly target: ParsedUiSchema | ParsedObjectUi;
         readonly dataPath: readonly string[];
         readonly documentPath: readonly (string | number)[];
+        readonly knownNames?: readonly string[];
       };
   const active = new Map<object, readonly (string | number)[]>(ancestorActive);
   active.set(rawUiSchema, rootDocumentPath);
@@ -5158,6 +7012,7 @@ function inspectNestedUiSchema(
       target: result,
       dataPath: [],
       documentPath: rootDocumentPath,
+      ...(rootKnownNames === undefined ? {} : { knownNames: rootKnownNames }),
     },
   ];
 
@@ -5310,13 +7165,19 @@ function inspectNestedUiSchema(
     const byName = new Map(
       frame.candidates.map((candidate) => [candidate.name, candidate] as const),
     );
-    const knownNames = new Set(byName.keys());
+    const knownNames = new Set(frame.knownNames ?? byName.keys());
     const fieldsPath = [...frame.documentPath, 'fields'];
     let rawFields: Record<string, unknown> | undefined;
     if (frame.ui !== undefined) {
       if (frame.dataPath.length === 0) {
         for (const key of Object.keys(frame.ui)) {
           if (key !== 'order' && key !== 'fields' && key !== 'presentation') {
+            if (
+              templateArrayPath !== undefined &&
+              (key === 'visibleWhen' || key === 'enabledWhen')
+            ) {
+              continue;
+            }
             diagnostics.push(unknownUiKey(key, [...frame.documentPath, key]));
           }
         }
@@ -5412,6 +7273,42 @@ function inspectNestedUiSchema(
                   fallbackMessage: `UI Schema references unknown field "${name}".`,
                 }),
           );
+          continue;
+        }
+        if (!byName.has(name)) {
+          const rawNode = ownDataValue(rawFields, name);
+          if (
+            rawNode.present &&
+            !rawNode.accessor &&
+            isOrdinaryRecord(rawNode.value)
+          ) {
+            const parsed: {
+              visibleWhenCapture?: CapturedConditionMember;
+              enabledWhenCapture?: CapturedConditionMember;
+            } = {};
+            const visibleWhenCapture = captureConditionMember(
+              rawNode.value,
+              'visibleWhen',
+              [...fieldsPath, name, 'visibleWhen'],
+            );
+            if (visibleWhenCapture !== undefined) {
+              parsed.visibleWhenCapture = visibleWhenCapture;
+            }
+            const enabledWhenCapture = captureConditionMember(
+              rawNode.value,
+              'enabledWhen',
+              [...fieldsPath, name, 'enabledWhen'],
+            );
+            if (enabledWhenCapture !== undefined) {
+              parsed.enabledWhenCapture = enabledWhenCapture;
+            }
+            if (
+              parsed.visibleWhenCapture !== undefined ||
+              parsed.enabledWhenCapture !== undefined
+            ) {
+              frame.fields.set(name, parsed);
+            }
+          }
         }
       }
     }
@@ -5472,6 +7369,18 @@ function ownDataValue(object: object, key: PropertyKey): OwnValue {
   return 'value' in descriptor
     ? { present: true, accessor: false, value: descriptor.value }
     : { present: true, accessor: true, value: ACCESSOR_VALUE };
+}
+
+function captureConditionMember(
+  object: object,
+  member: ConditionMember,
+  documentPath: readonly (string | number)[],
+): CapturedConditionMember | undefined {
+  const descriptor = Object.getOwnPropertyDescriptor(object, member);
+  if (descriptor === undefined || !descriptor.enumerable) return undefined;
+  return 'value' in descriptor
+    ? { kind: 'value', value: descriptor.value, documentPath }
+    : { kind: 'accessor', documentPath };
 }
 
 function inspectNestedUiOrder(
@@ -5609,6 +7518,8 @@ function inspectNestedNodeUi(
     decimalPlaces?: number;
     showTrailingZeros?: boolean;
     enumLabels?: ReadonlyMap<string, string>;
+    visibleWhenCapture?: CapturedConditionMember;
+    enabledWhenCapture?: CapturedConditionMember;
     order?: string[];
     fields?: Map<string, ParsedNodeUi>;
     item?: ParsedUiSchema;
@@ -5623,6 +7534,18 @@ function inspectNestedNodeUi(
   if (value === undefined) {
     return parsed;
   }
+  const visibleWhenCapture = captureConditionMember(value, 'visibleWhen', [
+    ...documentPath,
+    'visibleWhen',
+  ]);
+  if (visibleWhenCapture !== undefined)
+    parsed.visibleWhenCapture = visibleWhenCapture;
+  const enabledWhenCapture = captureConditionMember(value, 'enabledWhen', [
+    ...documentPath,
+    'enabledWhen',
+  ]);
+  if (enabledWhenCapture !== undefined)
+    parsed.enabledWhenCapture = enabledWhenCapture;
   if (
     candidate.type === 'array' &&
     ownDataValue(value, 'presentation').present
@@ -5651,6 +7574,8 @@ function inspectNestedNodeUi(
           'enumLabels',
           'options',
           'item',
+          'visibleWhen',
+          'enabledWhen',
         ]
       : candidate.type === 'array'
         ? [...UI_FIELD_KEYS, 'order', 'fields', 'item']
@@ -5718,7 +7643,8 @@ function inspectNestedNodeUi(
     } else if (
       candidate.type === 'object' ||
       candidate.type === 'array' ||
-      candidate.type === 'boolean'
+      candidate.type === 'boolean' ||
+      candidate.type === 'string-enum-array'
     ) {
       diagnostics.push(
         diagnostic({
@@ -6040,9 +7966,753 @@ function inspectNestedOptions(
   }
 }
 
+interface ConditionTarget {
+  readonly candidate?: NodeCandidate;
+  readonly field: string;
+  readonly dataPath?: readonly string[];
+  readonly templatePath?: readonly string[];
+  readonly targetKind?:
+    | 'object'
+    | 'array'
+    | 'item'
+    | 'template-object'
+    | 'template-field'
+    | 'identity'
+    | 'presentation';
+  readonly member: ConditionMember;
+  readonly capture: CapturedConditionMember;
+}
+
+function inspectConditionPhase(
+  candidates: readonly NodeCandidate[],
+  ui: ParsedUiSchema,
+  completeOrdinaryFieldIndex: boolean,
+  diagnostics: Diagnostic[],
+  rawUiSchema?: unknown,
+): ReadonlyMap<string, NormalizedFieldConditions> {
+  const targets: ConditionTarget[] = [];
+  collectConditionTargets(candidates, ui, targets);
+  collectUnsupportedConditionTargets(rawUiSchema, candidates, targets);
+  const ordinaryFields = new Map<string, FieldCandidate>();
+  const ordinaryObjects = new Set<string>();
+  const ordinaryArrays = new Set<string>();
+  const collectionPaths: string[][] = [];
+  indexOrdinaryConditionSources(
+    candidates,
+    ordinaryFields,
+    ordinaryObjects,
+    ordinaryArrays,
+    collectionPaths,
+  );
+  const normalized = new Map<string, NormalizedFieldConditions>();
+
+  for (const target of targets) {
+    const parsed = inspectConditionShape(target, diagnostics);
+    const candidate = target.candidate;
+    const targetKind = target.targetKind;
+    if (targetKind !== undefined) {
+      diagnostics.push(
+        conditionDiagnostic(target, 'unsupported-target-location', {
+          targetKind,
+        }),
+      );
+      continue;
+    }
+    if (candidate === undefined) continue;
+    if (
+      target.member === 'enabledWhen' &&
+      candidate.type !== 'object' &&
+      candidate.type !== 'array' &&
+      candidate.fixedValue.kind === 'valid'
+    ) {
+      diagnostics.push(
+        conditionDiagnostic(target, 'incompatible-target', {
+          targetCapability: 'fixed-value',
+        }),
+      );
+      continue;
+    }
+    if (parsed === undefined || !completeOrdinaryFieldIndex) {
+      continue;
+    }
+    const sourceKey = JSON.stringify(parsed.sourcePath);
+    const source = ordinaryFields.get(sourceKey);
+    if (source === undefined) {
+      const sourceReason = ordinaryObjects.has(sourceKey)
+        ? 'object'
+        : ordinaryArrays.has(sourceKey)
+          ? 'array'
+          : collectionPaths.some(
+                (path) =>
+                  parsed.sourcePath.length > path.length &&
+                  path.every(
+                    (segment, index) => parsed.sourcePath[index] === segment,
+                  ),
+              )
+            ? 'below-collection'
+            : 'unmanaged';
+      diagnostics.push(
+        conditionDiagnostic(target, 'source-not-ordinary-field', {
+          sourcePath: [...parsed.sourcePath],
+          sourceReason,
+        }),
+      );
+      continue;
+    }
+    const expected = conditionLiteralExpected(source);
+    if (!conditionLiteralCompatible(source, parsed.equals)) {
+      diagnostics.push(
+        conditionDiagnostic(target, 'literal-incompatible', {
+          sourcePath: [...parsed.sourcePath],
+          sourceKind: source.type,
+          sourceNullable: source.nullable,
+          expected,
+          actualType: actualType(parsed.equals),
+        }),
+      );
+      continue;
+    }
+    const key = JSON.stringify(candidate.dataPath);
+    const previous = normalized.get(key) ?? {};
+    normalized.set(key, {
+      ...previous,
+      [target.member]: {
+        sourcePath: [...parsed.sourcePath],
+        equals: parsed.equals,
+      },
+    });
+  }
+  return normalized;
+}
+
+function collectConditionTargets(
+  candidates: readonly NodeCandidate[],
+  ui: ParsedUiSchema | ParsedObjectUi,
+  output: ConditionTarget[],
+): void {
+  const byName = new Map(
+    candidates.map((candidate) => [candidate.name, candidate] as const),
+  );
+  const names = [
+    ...ui.order,
+    ...candidates
+      .map((candidate) => candidate.name)
+      .filter((name) => !ui.order.includes(name)),
+  ];
+  for (const name of names) {
+    const candidate = byName.get(name);
+    if (candidate === undefined) continue;
+    const parsed = ui.fields.get(name);
+    const targetKind = conditionTargetKind(candidate);
+    const templatePath =
+      'templatePath' in candidate ? candidate.templatePath : undefined;
+    if (parsed?.visibleWhenCapture !== undefined) {
+      output.push({
+        candidate,
+        field: candidate.name,
+        dataPath: candidate.dataPath,
+        ...(templatePath === undefined ? {} : { templatePath }),
+        ...(targetKind === undefined ? {} : { targetKind }),
+        member: 'visibleWhen',
+        capture: parsed.visibleWhenCapture,
+      });
+    }
+    if (parsed?.enabledWhenCapture !== undefined) {
+      output.push({
+        candidate,
+        field: candidate.name,
+        dataPath: candidate.dataPath,
+        ...(templatePath === undefined ? {} : { templatePath }),
+        ...(targetKind === undefined ? {} : { targetKind }),
+        member: 'enabledWhen',
+        capture: parsed.enabledWhenCapture,
+      });
+    }
+    if (candidate.type === 'object') {
+      collectConditionTargets(
+        candidate.children,
+        (parsed as ParsedObjectUi | undefined) ?? {
+          order: [],
+          fields: new Map(),
+        },
+        output,
+      );
+    } else if (candidate.type === 'array') {
+      collectConditionTargets(
+        candidate.children,
+        (parsed as ParsedArrayUi | undefined)?.item ?? {
+          order: [],
+          fields: new Map(),
+        },
+        output,
+      );
+    }
+  }
+  const candidateNames = new Set(candidates.map(({ name }) => name));
+  const unmatchedNames = [
+    ...ui.order.filter(
+      (name) => ui.fields.has(name) && !candidateNames.has(name),
+    ),
+    ...[...ui.fields.keys()].filter(
+      (name) => !candidateNames.has(name) && !ui.order.includes(name),
+    ),
+  ];
+  for (const name of unmatchedNames) {
+    const parsed = ui.fields.get(name);
+    if (parsed?.visibleWhenCapture !== undefined) {
+      output.push({
+        field: name,
+        dataPath: [name],
+        member: 'visibleWhen',
+        capture: parsed.visibleWhenCapture,
+      });
+    }
+    if (parsed?.enabledWhenCapture !== undefined) {
+      output.push({
+        field: name,
+        dataPath: [name],
+        member: 'enabledWhen',
+        capture: parsed.enabledWhenCapture,
+      });
+    }
+  }
+}
+
+function collectUnsupportedConditionTargets(
+  rawUiSchema: unknown,
+  candidates: readonly NodeCandidate[],
+  output: ConditionTarget[],
+): void {
+  if (!isOrdinaryRecord(rawUiSchema)) return;
+  collectUnsupportedContainerConditions(
+    rawUiSchema,
+    candidates,
+    output,
+    [],
+    [],
+  );
+}
+
+function collectUnsupportedContainerConditions(
+  ui: Record<string, unknown>,
+  candidates: readonly NodeCandidate[],
+  output: ConditionTarget[],
+  documentPath: readonly (string | number)[],
+  dataPath: readonly string[],
+  template?: {
+    readonly arrayPath: readonly string[];
+    readonly identityProperty?: string;
+  },
+): void {
+  const presentation = ownDataValue(ui, 'presentation');
+  if (presentation.present && !presentation.accessor) {
+    collectPresentationConditionTargets(
+      presentation.value,
+      [...documentPath, 'presentation'],
+      output,
+      template?.arrayPath ?? (dataPath.length === 0 ? undefined : dataPath),
+      template === undefined ? undefined : dataPath,
+    );
+  }
+  const fieldsMember = ownDataValue(ui, 'fields');
+  if (
+    !fieldsMember.present ||
+    fieldsMember.accessor ||
+    !isOrdinaryRecord(fieldsMember.value)
+  ) {
+    return;
+  }
+  const rawFields = fieldsMember.value;
+  if (template?.identityProperty !== undefined) {
+    const identity = ownDataValue(rawFields, template.identityProperty);
+    if (
+      identity.present &&
+      !identity.accessor &&
+      isOrdinaryRecord(identity.value)
+    ) {
+      collectUnsupportedMembers(
+        identity.value,
+        [...documentPath, 'fields', template.identityProperty],
+        output,
+        {
+          field: template.identityProperty,
+          dataPath: template.arrayPath,
+          templatePath: [template.identityProperty],
+          targetKind: 'identity',
+        },
+      );
+    }
+  }
+  const byName = new Map(
+    candidates.map((candidate) => [candidate.name, candidate] as const),
+  );
+  for (const [name, candidate] of byName) {
+    const rawNodeMember = ownDataValue(rawFields, name);
+    if (
+      !rawNodeMember.present ||
+      rawNodeMember.accessor ||
+      !isOrdinaryRecord(rawNodeMember.value)
+    ) {
+      continue;
+    }
+    const rawNode = rawNodeMember.value;
+    const nodeDocumentPath = [...documentPath, 'fields', name];
+    if (candidate.type === 'object') {
+      collectUnsupportedContainerConditions(
+        rawNode,
+        candidate.children,
+        output,
+        nodeDocumentPath,
+        template === undefined ? [...dataPath, name] : [...dataPath, name],
+        template,
+      );
+    } else if (candidate.type === 'array') {
+      const item = ownDataValue(rawNode, 'item');
+      if (!item.present || item.accessor || !isOrdinaryRecord(item.value)) {
+        continue;
+      }
+      const itemPath = [...nodeDocumentPath, 'item'];
+      collectUnsupportedMembers(item.value, itemPath, output, {
+        field: candidate.name,
+        dataPath: candidate.dataPath,
+        templatePath: [],
+        targetKind: 'item',
+      });
+      collectUnsupportedContainerConditions(
+        item.value,
+        candidate.children,
+        output,
+        itemPath,
+        [],
+        {
+          arrayPath: candidate.dataPath,
+          ...(candidate.identityProperty === undefined
+            ? {}
+            : { identityProperty: candidate.identityProperty }),
+        },
+      );
+    }
+  }
+}
+
+function collectUnsupportedMembers(
+  value: object,
+  documentPath: readonly (string | number)[],
+  output: ConditionTarget[],
+  target: Omit<ConditionTarget, 'member' | 'capture' | 'candidate'>,
+): void {
+  for (const member of ['visibleWhen', 'enabledWhen'] as const) {
+    const capture = captureConditionMember(value, member, [
+      ...documentPath,
+      member,
+    ]);
+    if (capture !== undefined) output.push({ ...target, member, capture });
+  }
+}
+
+function collectPresentationConditionTargets(
+  value: unknown,
+  documentPath: readonly (string | number)[],
+  output: ConditionTarget[],
+  dataPath?: readonly string[],
+  templatePath?: readonly string[],
+): void {
+  type Frame =
+    | {
+        readonly kind: 'visit';
+        readonly value: unknown;
+        readonly documentPath: readonly (string | number)[];
+      }
+    | { readonly kind: 'leave'; readonly value: object };
+  const active = new Set<object>();
+  const stack: Frame[] = [{ kind: 'visit', value, documentPath }];
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (frame === undefined) break;
+    if (frame.kind === 'leave') {
+      active.delete(frame.value);
+      continue;
+    }
+    const current = frame.value;
+    if (Array.isArray(current)) {
+      if (active.has(current)) continue;
+      active.add(current);
+      stack.push({ kind: 'leave', value: current });
+      for (let index = current.length - 1; index >= 0; index -= 1) {
+        const entry = Object.getOwnPropertyDescriptor(current, index);
+        if (entry !== undefined && 'value' in entry) {
+          stack.push({
+            kind: 'visit',
+            value: entry.value,
+            documentPath: [...frame.documentPath, index],
+          });
+        }
+      }
+      continue;
+    }
+    if (!isOrdinaryRecord(current) || active.has(current)) continue;
+    active.add(current);
+    stack.push({ kind: 'leave', value: current });
+    const id = ownDataValue(current, 'id');
+    collectUnsupportedMembers(current, frame.documentPath, output, {
+      field:
+        id.present && !id.accessor && typeof id.value === 'string'
+          ? id.value
+          : 'presentation',
+      ...(dataPath === undefined ? {} : { dataPath }),
+      ...(templatePath === undefined ? {} : { templatePath }),
+      targetKind: 'presentation',
+    });
+    const keys = Object.keys(current);
+    for (let index = keys.length - 1; index >= 0; index -= 1) {
+      const key = keys[index];
+      if (key === undefined || key === 'visibleWhen' || key === 'enabledWhen') {
+        continue;
+      }
+      const member = Object.getOwnPropertyDescriptor(current, key);
+      if (member !== undefined && 'value' in member) {
+        stack.push({
+          kind: 'visit',
+          value: member.value,
+          documentPath: [...frame.documentPath, key],
+        });
+      }
+    }
+  }
+}
+
+function indexOrdinaryConditionSources(
+  candidates: readonly NodeCandidate[],
+  fields: Map<string, FieldCandidate>,
+  objects: Set<string>,
+  arrays: Set<string>,
+  collectionPaths: string[][],
+): void {
+  for (const candidate of candidates) {
+    const key = JSON.stringify(candidate.dataPath);
+    if (candidate.type === 'array') {
+      arrays.add(key);
+      collectionPaths.push([...candidate.dataPath]);
+    } else if (candidate.type === 'string-enum-array') {
+      arrays.add(key);
+    } else if (candidate.type === 'object') {
+      objects.add(key);
+      if (candidate.templatePath === undefined) {
+        indexOrdinaryConditionSources(
+          candidate.children,
+          fields,
+          objects,
+          arrays,
+          collectionPaths,
+        );
+      }
+    } else if (candidate.templatePath === undefined) fields.set(key, candidate);
+  }
+}
+
+function inspectConditionShape(
+  target: ConditionTarget,
+  diagnostics: Diagnostic[],
+):
+  | {
+      readonly sourcePath: readonly string[];
+      readonly equals: string | number | boolean | null;
+    }
+  | undefined {
+  const { capture } = target;
+  if (capture.kind === 'accessor') {
+    diagnostics.push(
+      conditionDiagnostic(target, 'condition-member-accessor', {
+        conditionMember: 'condition',
+        expected: 'condition object',
+      }),
+    );
+    return undefined;
+  }
+  if (!isOrdinaryRecord(capture.value)) {
+    diagnostics.push(
+      conditionDiagnostic(target, 'condition-not-object', {
+        expected: 'condition object',
+        actualType: actualType(capture.value),
+      }),
+    );
+    return undefined;
+  }
+  const condition = capture.value;
+  let valid = true;
+  let sourcePath: string[] | undefined;
+  let equals: string | number | boolean | null | undefined;
+  let equalsValid = false;
+  const pathDescriptor = Object.getOwnPropertyDescriptor(condition, 'path');
+  if (pathDescriptor === undefined || !pathDescriptor.enumerable) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-missing',
+        {
+          conditionMember: 'path',
+          expected: 'non-empty dense string path',
+        },
+        ['path'],
+      ),
+    );
+  } else if (!('value' in pathDescriptor)) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-accessor',
+        {
+          conditionMember: 'path',
+          expected: 'non-empty dense string path',
+        },
+        ['path'],
+      ),
+    );
+  } else if (!Array.isArray(pathDescriptor.value)) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-invalid',
+        {
+          conditionMember: 'path',
+          expected: 'non-empty dense string path',
+          actualType: actualType(pathDescriptor.value),
+        },
+        ['path'],
+      ),
+    );
+  } else {
+    const path = pathDescriptor.value;
+    const length = Object.getOwnPropertyDescriptor(path, 'length');
+    if (
+      length === undefined ||
+      !('value' in length) ||
+      !Number.isInteger(length.value) ||
+      (length.value as number) <= 0
+    ) {
+      valid = false;
+      diagnostics.push(
+        conditionDiagnostic(
+          target,
+          'condition-member-invalid',
+          {
+            conditionMember: 'path',
+            expected: 'non-empty dense string path',
+            actualType: 'array',
+            actualLength:
+              length !== undefined &&
+              'value' in length &&
+              typeof length.value === 'number'
+                ? length.value
+                : 0,
+          },
+          ['path'],
+        ),
+      );
+    } else {
+      sourcePath = [];
+      for (let index = 0; index < length.value; index += 1) {
+        const entry = Object.getOwnPropertyDescriptor(path, index);
+        if (entry === undefined || !entry.enumerable || !('value' in entry)) {
+          valid = false;
+          diagnostics.push(
+            conditionDiagnostic(
+              target,
+              entry !== undefined && !('value' in entry)
+                ? 'condition-member-accessor'
+                : 'condition-member-invalid',
+              entry !== undefined && !('value' in entry)
+                ? {
+                    conditionMember: 'path',
+                    expected: 'string path segment',
+                    pathIndex: index,
+                  }
+                : {
+                    conditionMember: 'path',
+                    expected: 'string path segment',
+                    pathIndex: index,
+                  },
+              ['path', index],
+            ),
+          );
+        } else if (typeof entry.value !== 'string') {
+          valid = false;
+          diagnostics.push(
+            conditionDiagnostic(
+              target,
+              'condition-member-invalid',
+              {
+                conditionMember: 'path',
+                expected: 'string path segment',
+                actualType: actualType(entry.value),
+                pathIndex: index,
+              },
+              ['path', index],
+            ),
+          );
+        } else sourcePath.push(entry.value);
+      }
+      for (const key of Object.keys(path)) {
+        if (/^(0|[1-9]\d*)$/.test(key) && Number(key) < length.value) continue;
+        valid = false;
+        diagnostics.push(
+          conditionDiagnostic(
+            target,
+            'condition-member-invalid',
+            {
+              conditionMember: 'path',
+              expected: 'non-empty dense string path',
+              actualType: 'array',
+              pathKey: key,
+            },
+            ['path', key],
+          ),
+        );
+      }
+    }
+  }
+  const equalsDescriptor = Object.getOwnPropertyDescriptor(condition, 'equals');
+  if (equalsDescriptor === undefined || !equalsDescriptor.enumerable) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-missing',
+        {
+          conditionMember: 'equals',
+          expected: 'string, finite number, boolean or null',
+        },
+        ['equals'],
+      ),
+    );
+  } else if (!('value' in equalsDescriptor)) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-accessor',
+        {
+          conditionMember: 'equals',
+          expected: 'string, finite number, boolean or null',
+        },
+        ['equals'],
+      ),
+    );
+  } else if (
+    equalsDescriptor.value === null ||
+    typeof equalsDescriptor.value === 'string' ||
+    typeof equalsDescriptor.value === 'boolean' ||
+    (typeof equalsDescriptor.value === 'number' &&
+      Number.isFinite(equalsDescriptor.value))
+  ) {
+    equals = equalsDescriptor.value as string | number | boolean | null;
+    equalsValid = true;
+  } else {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-invalid',
+        {
+          conditionMember: 'equals',
+          expected: 'string, finite number, boolean or null',
+          actualType: actualType(equalsDescriptor.value),
+        },
+        ['equals'],
+      ),
+    );
+  }
+  for (const key of Object.keys(condition)) {
+    if (key === 'path' || key === 'equals') continue;
+    const warning = unknownUiKey(
+      key,
+      [...capture.documentPath, key],
+      target.dataPath,
+    );
+    diagnostics.push(
+      target.templatePath === undefined
+        ? warning
+        : withTemplatePath(warning, target.templatePath),
+    );
+  }
+  return valid && sourcePath !== undefined && equalsValid
+    ? { sourcePath, equals: equals as string | number | boolean | null }
+    : undefined;
+}
+
+function conditionTargetKind(
+  candidate: NodeCandidate,
+): 'object' | 'array' | 'template-object' | 'template-field' | undefined {
+  if ('templatePath' in candidate && candidate.templatePath !== undefined) {
+    return candidate.type === 'object' ? 'template-object' : 'template-field';
+  }
+  if (candidate.type === 'object') return 'object';
+  if (candidate.type === 'array' || candidate.type === 'string-enum-array')
+    return 'array';
+  return undefined;
+}
+
+function conditionDiagnostic(
+  target: ConditionTarget,
+  reason: string,
+  details: Readonly<Record<string, unknown>>,
+  suffix: readonly (string | number)[] = [],
+): Diagnostic {
+  return diagnostic({
+    code: 'INVALID_UI_FIELD_CONDITION',
+    severity: 'error',
+    source: 'ui-schema',
+    ...(target.dataPath === undefined
+      ? {}
+      : { dataPath: [...target.dataPath] }),
+    documentPath: [...target.capture.documentPath, ...suffix],
+    parameters: {
+      field: target.field,
+      member: target.member,
+      reason,
+      ...details,
+      ...(target.templatePath === undefined
+        ? {}
+        : { templatePath: [...target.templatePath] }),
+    },
+    fallbackMessage: 'Field condition is invalid.',
+  });
+}
+
+function conditionLiteralCompatible(
+  source: FieldCandidate,
+  value: string | number | boolean | null,
+): boolean {
+  if (value === null) return source.nullable;
+  if (source.type === 'string') return typeof value === 'string';
+  if (source.type === 'boolean') return typeof value === 'boolean';
+  return (
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    (source.type === 'number' || Number.isInteger(value))
+  );
+}
+
+function conditionLiteralExpected(source: FieldCandidate): string {
+  const primitive =
+    source.type === 'string'
+      ? 'string'
+      : source.type === 'boolean'
+        ? 'boolean'
+        : source.type === 'integer'
+          ? 'finite integer'
+          : 'finite number';
+  return source.nullable ? `${primitive} or null` : primitive;
+}
+
 function buildNestedDefinition(
   candidates: readonly NodeCandidate[],
   uiSchema: ParsedUiSchema,
+  conditions: ReadonlyMap<string, NormalizedFieldConditions>,
 ): FormDefinition {
   const nodes: FormNodeDefinition[] = [];
   const fields: FieldDefinition[] = [];
@@ -6137,7 +8807,11 @@ function buildNestedDefinition(
         stack,
       );
     } else {
-      const field = buildFieldDefinition(candidate, frame.ui);
+      const field = buildFieldDefinition(
+        candidate,
+        frame.ui,
+        conditions.get(JSON.stringify(candidate.dataPath)),
+      );
       frame.output.push(field);
       fields.push(field);
     }
@@ -6397,6 +9071,7 @@ function accessibleName(name: string): string {
 function buildDefinition(
   candidates: readonly FieldCandidate[],
   uiSchema: ParsedUiSchema,
+  conditions: ReadonlyMap<string, NormalizedFieldConditions>,
 ): FormDefinition {
   const byName = new Map(candidates.map((field) => [field.name, field]));
   const orderedNames = [
@@ -6411,7 +9086,11 @@ function buildDefinition(
     if (candidate === undefined) {
       throw new Error(`Internal compiler error: missing field "${name}".`);
     }
-    return buildFieldDefinition(candidate, uiSchema.fields.get(name));
+    return buildFieldDefinition(
+      candidate,
+      uiSchema.fields.get(name),
+      conditions.get(JSON.stringify(candidate.dataPath)),
+    );
   });
   return {
     nodes: fields,
@@ -6590,7 +9269,37 @@ function pushPresentationBuildFrames<
 function buildFieldDefinition(
   candidate: FieldCandidate,
   ui: ParsedFieldUi | undefined,
+  conditions?: NormalizedFieldConditions,
 ): FieldDefinition {
+  if (candidate.type === 'string-enum-array') {
+    const definition: StringEnumArrayFieldDefinition = {
+      key: JSON.stringify(candidate.dataPath),
+      name: candidate.name,
+      path: candidate.dataPath,
+      required: candidate.required,
+      nullable: false,
+      label: ui?.label ?? candidate.schemaTitle ?? candidate.name,
+      ...(ui?.description !== undefined
+        ? { description: ui.description }
+        : candidate.schemaDescription === undefined
+          ? {}
+          : { description: candidate.schemaDescription }),
+      ...(ui?.hint === undefined ? {} : { hint: ui.hint }),
+      ...(ui?.tooltip === undefined ? {} : { tooltip: ui.tooltip }),
+      kind: 'string-enum-array',
+      choices:
+        candidate.stringEnum.kind === 'valid'
+          ? candidate.stringEnum.values.map((value) => ({
+              value,
+              label:
+                ui?.enumLabels?.get(value) ??
+                (value.trim().length > 0 ? value : JSON.stringify(value)),
+            }))
+          : [],
+    };
+    return definition;
+  }
+
   const base = {
     key: JSON.stringify(candidate.dataPath),
     name: candidate.name,
@@ -6609,6 +9318,12 @@ function buildFieldDefinition(
     ...(candidate.fixedValue.kind === 'valid'
       ? { fixedValue: candidate.fixedValue.value }
       : {}),
+    ...(conditions?.visibleWhen === undefined
+      ? {}
+      : { visibleWhen: conditions.visibleWhen }),
+    ...(conditions?.enabledWhen === undefined
+      ? {}
+      : { enabledWhen: conditions.enabledWhen }),
   };
 
   if (candidate.type === 'string') {

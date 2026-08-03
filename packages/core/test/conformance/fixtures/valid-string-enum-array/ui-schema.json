@@ -1,0 +1,11 @@
+{
+  "fields": {
+    "roles": {
+      "hint": "Choose roles",
+      "enumLabels": {
+        "": "No role",
+        "editor": "Can edit"
+      }
+    }
+  }
+}

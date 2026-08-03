@@ -24,6 +24,8 @@ import {
   FIELD_INSTANCE_CONTEXT,
   describedBy,
   fieldDisabled,
+  fieldInteractive,
+  fieldUnavailable,
   fieldIds,
 } from './common.js';
 import { createNumberCodec } from './number-codec.js';
@@ -67,6 +69,7 @@ import { createNumberCodec } from './number-codec.js';
         <button
           type="button"
           [id]="ids().setNull"
+          [disabled]="disabled()"
           [attr.aria-labelledby]="ids().setNull + ' ' + ids().label"
           (click)="onSetNull()"
         >
@@ -80,6 +83,7 @@ import { createNumberCodec } from './number-codec.js';
         <button
           type="button"
           [id]="ids().clear"
+          [disabled]="disabled()"
           [attr.aria-labelledby]="ids().clear + ' ' + ids().label"
           (click)="onClear()"
         >
@@ -115,6 +119,7 @@ export class SchemaNumberRendererComponent implements AngularFieldRenderer {
   protected readonly controlField = form(this.controlModel, (path) =>
     disabled(path, { when: () => fieldDisabled(this.snapshot()) }),
   );
+  protected readonly disabled = computed(() => fieldDisabled(this.snapshot()));
   protected readonly ids = computed(() =>
     fieldIds(this.formId(), this.field(), this.instanceContext?.address()),
   );
@@ -135,7 +140,7 @@ export class SchemaNumberRendererComponent implements AngularFieldRenderer {
   protected readonly canSetNull = computed(
     () =>
       this.field().nullable &&
-      !fieldDisabled(this.snapshot()) &&
+      !fieldUnavailable(this.snapshot()) &&
       !this.confirmedNull(),
   );
   private readonly numberField = computed(() => {
@@ -180,6 +185,7 @@ export class SchemaNumberRendererComponent implements AngularFieldRenderer {
   }
 
   protected onInput(event: Event): void {
+    if (!fieldInteractive(this.snapshot())) return;
     const text = (event.target as HTMLInputElement).value;
     const snapshot = this.snapshot();
     const parsed = this.codec().parse(
@@ -201,10 +207,12 @@ export class SchemaNumberRendererComponent implements AngularFieldRenderer {
   protected onBlur(): void {
     const formatted = this.formatConfirmed(this.snapshot(), this.codec());
     this.controlField().reset(formatted.text);
+    if (!fieldInteractive(this.snapshot())) return;
     this.fieldBlur.emit();
   }
 
   protected onFocus(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     const presence = this.snapshot().presence;
     const field = this.numberField();
     if (
@@ -220,11 +228,13 @@ export class SchemaNumberRendererComponent implements AngularFieldRenderer {
   }
 
   protected onClear(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     this.controlField().focusBoundControl();
     this.removeValue.emit();
   }
 
   protected onSetNull(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     try {
       this.controlField().focusBoundControl();
     } finally {

@@ -81,8 +81,15 @@ Native string, number/integer and boolean renderers expose a localized explicit
 set-null intention and a visible confirmed-null status for accepted nullable
 leaves. String enum remains excluded. Manually authored
 `AngularFieldTextSnapshot` values must supply the required `setNullLabel` and
-`nullValueLabel` strings in addition to `clearLabel`; this is a coordinated
-Experimental source migration with core's required `nullable` member.
+`nullValueLabel`, `fixedMissingLabel`, `fixedUnavailableLabel` and
+`fixedIncompatibleLabel` strings in addition to `clearLabel`; this is a
+coordinated Experimental source migration with core's required `nullable`
+member.
+
+Current source also exports `SchemaFixedValueRendererComponent`. The native
+provider selects it at rank 30 for an own normalized `fixedValue`; it presents
+only the actual controlled value or its localized static state, remains
+non-focusable and emits no mutation or focus intention.
 
 Current source projects normalized semantic strings as native `email` and
 `date` inputs while keeping `date-time` textual so RFC 3339 timezone data is
@@ -90,12 +97,50 @@ preserved exactly. Native validity is presentational; runtime issues still come
 only from the configured replaceable validator. String-enum select precedence
 is unchanged.
 
+Current source also accepts the optional core `asyncValidator` through the
+existing controlled configuration, projects immutable async state through the
+existing snapshot Signal and exposes `retryAsyncValidation()` on
+`SchemaFormDirective`. Core owns generations, cancellation and stale-result
+suppression; the adapter and renderers own no scheduler, transport or retry
+policy.
+
+Current source also projects core conditional primitive-field state. The
+Internal field host keeps the selected renderer mounted while removing a
+hidden field from display, sequential focus and the accessibility tree. Native
+editable controls and their clear/set-null actions are disabled when the
+snapshot is disabled. A custom renderer must likewise honor
+`snapshot.enabled` for accessible presentation; the outlet routes stale custom
+outputs through core's final rejection gate while either `snapshot.visible` or
+`snapshot.enabled` is false. Conditional transitions do not re-run renderer
+selection or replace private Signal Forms edit buffers.
+
+This is a coordinated Experimental source migration: custom renderers and
+manually authored renderer snapshot fakes must consume the newly required
+`visible` and `enabled` flags. The capability is not present in published
+`0.4.1`; a later core/Angular MINOR and its release remain separately gated.
+
+Current source also exports `SchemaStringEnumArrayRendererComponent` from the
+existing root entry point. `provideSchemaEngineAngularNative()` selects it only
+for the exact atomic core `string-enum-array` definition. It uses a labelled
+native `<select multiple>` with private index tokens, preserves confirmed
+domain ordering, immediately reconciles rejected intentions, and never turns
+the field into an identity-based collection.
+
+Missing and present-empty selection status are distinct. Invalid controlled
+duplicate, unknown, non-string or sparse values are kept losslessly: native
+selection is disabled while the field host and whole-value clear action remain
+accessible. Manually authored `AngularFieldTextSnapshot` values must therefore
+also supply `missingSelectionLabel` and `emptySelectionLabel`. This Public
+Experimental source migration requires the same separately approved future
+core/Angular MINOR; published `0.4.1` remains unchanged.
+
 The current source projects static sections, tabs, accordions and logical grids
 at the root and on direct nested-object and collection-item template owners
 through the Public Experimental container SPI with mandatory native fallback.
 Published `0.3.x` artifacts remain the earlier root-only historical contract.
 Published `0.4.0` includes these local forests and is available by exact
-version, `next` or `latest`. Arrays of primitives, arrays inside
+version, `next` or `latest`. Primitive arrays other than the exact current-source
+atomic string-enum field, arrays inside
 collection item templates, tuples, external references, composition, workflow,
 generated identity, implicit Add controls and custom collection renderers remain
 outside the supported boundary.

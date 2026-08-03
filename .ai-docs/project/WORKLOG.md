@@ -6,6 +6,1547 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-08-03 — PLAN-033 and M31 completed
+
+### Completed
+
+- Repeated the complete frozen checkpoint-7 matrix and mapped every SPEC-017
+  row 1–26 to its first complete evidence and final regression coverage.
+- Corrected one verification-execution defect by serializing the independent
+  Standard and Angular Chromium suites; review 303 cycle 2 then passed all
+  fifteen areas with zero findings.
+- Completed PLAN-033 revision 0 and M31 with workspace 78/1,103, package,
+  built/clean/source consumer, release-tooling, policy, security, 701-boundary
+  and Chromium 17+14 evidence. Dependencies, manifests, lockfile, versions and
+  published M23 artifacts remain unchanged; no Git or external action occurred.
+
+### Next
+
+- Evaluate the deferred-capability register and select the next bounded
+  post-M31 functional capability for promotion review.
+
+## 2026-08-03 — PLAN-033 checkpoint 6 package evidence completed
+
+### Completed
+
+- Froze exact core/Angular M31 root declarations, runtime export inventories,
+  package smoke and native-provider resolution without a new entry point.
+- Extended the built consumer, clean core consumer, clean Angular 22.0.6 and
+  22.1.0 consumers, and isolated source reconstruction with M31 type, text,
+  compile, operation and renderer evidence.
+- Corrected two union-narrowing and exact-export evidence findings. Review 302
+  cycle 2 repeated all ten areas with zero findings; workspace 78/1,103,
+  package/built/clean/source consumers, 701 boundaries and docs pass with an
+  empty manifest/package/lockfile diff.
+
+### Next
+
+- Execute PLAN-033 checkpoint 7: repeat the frozen complete matrix, audit all
+  26 SPEC-017 rows and close M31 only after a zero-finding final review.
+
+## 2026-08-03 — PLAN-033 checkpoint 5 reference evidence completed
+
+### Completed
+
+- Added one deeply frozen shared M31 scenario with direct optional and nested
+  required fields, ordered transitions, hostile controlled states and ordinary
+  conditional compatibility.
+- Added independent Standard multiselection behavior and equivalent Angular /
+  Standard unit, Chromium, operation, baseline, locale and accessibility
+  evidence without sharing renderer logic.
+- Corrected four selector, status, fixture-ownership and formatting findings.
+  Review 301 cycle 4 repeated all twelve areas with zero findings; Angular
+  17/146, scenarios 2/72, Angular reference 4/31, Standard 7/70 and Chromium
+  17+14 pass.
+
+### Next
+
+- Execute PLAN-033 checkpoint 6 for exact declarations, package smoke, built
+  and clean consumers, isolated source reconstruction and migration evidence.
+
+## 2026-08-03 — PLAN-033 checkpoint 4 Angular projection completed
+
+### Completed
+
+- Added exact missing/empty text members and total Angular projection with
+  isolated fallback diagnostics.
+- Added the exported native rank-30 M31 multiselection renderer with private
+  Signal Form token buffering, lossless representability, deterministic
+  ordering, immediate controlled reconciliation and accessible status/clear.
+- Corrected four Signal Forms, DOM reconciliation, outlet-evidence and
+  conditional-regression findings. Review 300 cycle 2 repeated all twelve
+  areas with zero findings; Angular 17 files/146 tests, scenarios 2/68 and
+  Angular reference 4/30 pass.
+
+### Next
+
+- Execute PLAN-033 checkpoint 5 for the shared authored scenario and
+  independent Standard/Angular reference evidence.
+
+## 2026-08-03 — PLAN-033 checkpoint 3 controlled runtime completed
+
+### Completed
+
+- Closed M31 missing/empty/remove behavior, ordered dense-string dirty with
+  safe identity fallback and immutable current/baseline reconciliation.
+- Routed sync/async array/index/deep/out-of-range issues to one field and
+  preserved ordinary field focus, touched, runtime scopes, baseline scopes and
+  unconditional visible/enabled state.
+- Corrected one numeric issue-routing finding. Review 299 cycle 2 repeated all
+  twelve areas with zero findings; core 46 files/767 tests, workspace
+  typechecks, lint, docs, format and diff hygiene pass.
+
+### Next
+
+- Execute PLAN-033 checkpoint 4 for exact texts and Angular native projection.
+
+## 2026-08-03 — PLAN-033 checkpoint 2 runtime operations completed
+
+### Completed
+
+- Added exact descriptor-safe M31 manual-definition validation, managed
+  current/baseline array-index safety and controlled presence for safely
+  inspectable incompatible data.
+- Added dense-string form-aware compatibility, detached frozen runtime
+  intentions, direct helper ownership, exact first-index diagnostics, ordered
+  runtime/form-aware no-op and reference-exact stale expectations.
+- Corrected two descriptor-safety findings. Review 298 cycle 2 repeated all
+  twelve areas with zero findings; core 45 files/749 tests, workspace
+  typechecks, lint, docs, format and diff hygiene pass.
+
+### Next
+
+- Execute PLAN-033 checkpoint 3 for controlled state, ordered dirty,
+  validation/issues, interaction/scopes and unchanged condition behavior.
+
+## 2026-08-03 — PLAN-033 checkpoint 1 compiler contract completed
+
+### Completed
+
+- Added the exact Public M31 leaf definition/root export and complete detached
+  object-collection/string-enum compiler family without changing templates or
+  M10 identity/operations.
+- Closed direct/nested/reference/composition locations, root/template/type
+  exclusions, required `uniqueItems: true`, item enum, outer/item catalogs,
+  labels, conditions, hostile descriptors, cycles/sharing and immutable
+  normalization for SPEC-017 rows 1–9.
+- Corrected four union, branch-stopping and evidence findings. Review 297 cycle
+  2 repeated all twelve areas with zero findings; core 44 files/731 tests and
+  all workspace typechecks pass.
+
+### Next
+
+- Execute PLAN-033 checkpoint 2 for manual definitions, managed array-index
+  safety and atomic operations under SPEC-017 rows 10–15.
+
+## 2026-08-03 — PLAN-033 revision 0 approved
+
+### Completed
+
+- Distributed all 26 SPEC-017 rows exactly once across seven ordered
+  checkpoints covering compiler, manual/runtime, controlled state, Angular,
+  Standard/reference, packages and final closure.
+- Corrected one intermediate-buildability finding by authorizing only
+  mechanical exhaustive-union adaptations in checkpoint 1.
+- Review 296 cycle 2 repeated all seven areas and exact row ownership with zero
+  findings. PLAN-033 is Approved for autonomous checkpoints 1–7 in order.
+
+### Next
+
+- Implement checkpoint 1 rows 1–9 and repeat its complete review to zero
+  findings.
+
+## 2026-08-03 — SPEC-017 v0.1.0 accepted for M31
+
+### Completed
+
+- Closed the exact Public definition/text/Angular contracts, compiler/runtime
+  diagnostics, controlled presence/operations/order/dirty, validation/issues,
+  target behavior, package migration and 26-row conformance matrix.
+- Corrected six findings covering declaration-ready text types, schema-neutral
+  no-op, resolver behavior, operation detail, Angular symbol wording and the
+  specification index.
+- Review 295 cycle 2 repeated all nine areas and 26 rows with zero findings.
+  SPEC-017 v0.1.0 is Accepted and authorizes only PLAN-033
+  preparation/review.
+
+### Next
+
+- Draft and completely review PLAN-033 before implementation.
+
+## 2026-08-03 — ADR-005 revision 8 accepted for M31
+
+### Completed
+
+- Added the exact M10/M31 family classifier, closed outer/item catalogs,
+  required `uniqueItems: true`, required string enum, UI Schema separation,
+  traversal order and branch stopping.
+- Corrected five policy findings covering the M10 diagnostic envelope,
+  `format`, required enum, `const` classification and ADR-033 condition
+  diagnostics.
+- Review 294 cycle 2 repeated all ten areas with zero findings. ADR-005
+  revision 8 is Accepted and authorizes only SPEC-017 preparation/review.
+
+### Next
+
+- Draft and completely review SPEC-017 before a plan, contracts or
+  implementation.
+
+## 2026-08-03 — ADR-034 accepted for bounded D-006/M31
+
+### Completed
+
+- Drafted the atomic ordered string-enum array architecture, reusing choices
+  and existing set/remove operations without M10 item identity.
+- Corrected five findings covering managed accessors, operation ownership,
+  manual choices, unrepresentable focus and inherited field capabilities.
+- Review 293 cycle 3 repeated all twelve areas with zero findings. ADR-034
+  revision 0 is Accepted under the approved no-scope-expansion rule and
+  authorizes only ADR-005 revision 8.
+
+### Next
+
+- Draft and completely review ADR-005 revision 8 before SPEC-017, contracts or
+  implementation.
+
+## 2026-08-03 — D-006/M31 atomic string-enum array selected
+
+### Completed
+
+- Selected one bounded D-006 slice: an ordered homogeneous array of unique
+  closed-enum strings controlled atomically as a field, not as an M10 stable
+  collection.
+- Corrected ordering, empty-versus-missing and the omitted ADR-005 revision 8
+  policy gate, then repeated all fourteen promotion areas. Review 292 cycle 3
+  passes with zero findings.
+- Reserved ADR-034 for the architecture question. No SPEC, plan, Public
+  contract, code, dependency, version, release, publication or Git action was
+  activated.
+
+### Next
+
+- Draft and completely review ADR-034, then ADR-005 revision 8 if the
+  architecture is accepted, before preparing SPEC-017 or changing contracts or
+  implementation.
+
+## 2026-08-03 — PLAN-032 and M30 completed
+
+### Completed
+
+- Repeated the frozen graph, format/docs/lint/types/build, 74 files/1,035 unit
+  tests, package/clean/source consumers, release and repository policies,
+  security, eight snippets, 671 boundaries and Chromium 16+13.
+- Reviewed all 24 SPEC-016 rows against checkpoint reviews 285–290; final
+  review 291 cycle 1 passes the complete matrix with zero findings.
+- Reconciled PLAN-032, STATUS, ROADMAP, ADR/SPEC indexes, onboarding, D-018 and
+  the append-only log. M1–M30/G0 are implemented; published M23 versions remain
+  unchanged.
+
+### Next
+
+- Evaluate and select the next functional capability, then complete its
+  promotion/ADR/SPEC gates before another implementation plan.
+
+## 2026-08-03 — PLAN-032 checkpoint 6 package boundary completed
+
+### Completed
+
+- Froze the two new condition types, widened definition/snapshot declarations,
+  exact core root values and transitive Angular renderer snapshot contract.
+- Extended built-package smoke, clean core/Angular consumers and isolated
+  source reconstruction with conditional compilation, flags and exact inactive
+  action evidence while preserving every manifest, dependency and version.
+- Documented current-source authoring, target responsibility, Experimental
+  migration and the separately gated coordinated MINOR/release boundary.
+- Review 290 cycle 2 repeated all ten areas and SPEC-016 row 24 with zero
+  findings after four corrections.
+
+### Next
+
+- Run PLAN-032 checkpoint 7's frozen full matrix and all-24-row final review;
+  complete M30 only after a zero-finding repeated pass.
+
+## 2026-08-03 — PLAN-032 checkpoint 5 shared references completed
+
+### Completed
+
+- Added the exact deeply frozen `conditional-field-state` scenario with
+  strict null/false/zero/empty-string matches, a hidden source that keeps
+  driving from controlled data, invalid hidden state and accepted/inactive
+  operation evidence.
+- Implemented Standard mounted hidden hosts, native disabling, confirmed-buffer
+  reconciliation and inactive event-route blocking independently of Angular.
+- Integrated the same scenario into both reference shells and added equivalent
+  accessible Chromium evidence for identity, focus, validation, dirty/scope,
+  history and restoration behavior.
+- Review 289 cycle 2 repeated all fourteen areas and SPEC-016 rows 22–23 with
+  zero findings; all unit suites and Angular 16/16 plus Standard 13/13 Chromium
+  pass.
+
+### Next
+
+- Implement PLAN-032 checkpoint 6 declarations, package smoke, clean consumers,
+  isolated source reconstruction and documentation for SPEC-016 row 24.
+
+## 2026-08-03 — PLAN-032 checkpoint 4 Angular projection completed
+
+### Completed
+
+- Added the stable Internal Angular leaf host that keeps renderers mounted
+  while hidden and removes the whole field from display, focus order and the
+  accessibility tree.
+- Disabled every native editable control and clear/set-null action from the
+  controlled snapshot, guarded inactive native DOM events and retained core as
+  the final stale-output defense for custom renderers.
+- Preserved renderer/host/buffer identity, confirmed-value/text/locale/issue
+  reconciliation and exact-once teardown across hidden transitions.
+- Review 288 cycle 2 repeated all twelve areas and SPEC-016 row 21 with zero
+  findings after four corrections; core 43/718, Angular 16/134, reference
+  2/64 + 4/30, consumer 1/2 and Chromium 15/15 pass.
+
+### Next
+
+- Implement PLAN-032 checkpoint 5's exact shared conditional scenario and
+  independent Standard mounted/disabled projection for SPEC-016 rows 22–23.
+
+## 2026-08-03 — PLAN-032 checkpoint 3 controlled runtime completed
+
+### Completed
+
+- Added required ordinary-field `visible`/`enabled` snapshots, detached linear
+  evaluation after initial/new controlled values, exact presence plus
+  `Object.is` matching and true fixed/item defaults.
+- Preserved structural sharing and atomically reconciled focus without touched;
+  gated direct set/remove/focus/blur after compatibility/ancestor checks and
+  before no-effect with the exact frozen hidden-then-disabled diagnostic.
+- Corrected the stale nested runtime-fixture generator and expanded evidence
+  for the complete non-value schedule, mutable manual inputs, active/inactive
+  actions and unchanged domain/validation/scope/operation behavior.
+- Review 287 cycle 2 repeated all twelve areas and SPEC-016 rows 15–20 with zero
+  findings; core 43 files/718 tests, Angular 15 files/131 tests, affected
+  typechecks, docs, format and diff hygiene pass.
+
+### Next
+
+- Implement PLAN-032 checkpoint 4 mounted and accessible Angular projection
+  for SPEC-016 row 21.
+
+## 2026-08-03 — PLAN-032 checkpoint 2 manual validation completed
+
+### Completed
+
+- Extended the shared manual-definition validator with complete detached shape
+  capture followed by exact fixed-target/source/literal linking only after all
+  base and shape checks pass.
+- Added the five closed condition reasons, ordinary/template locators and exact
+  direct/runtime wrapper mappings without invoking condition accessors.
+- Review 286 cycle 1 found and corrected inherited prototype capture, linked-
+  literal wrapper namespacing and evidence gaps; cycle 2 repeated all twelve
+  areas and SPEC-016 row 14 with zero findings.
+- Core lint/typecheck/build, 17 focused tests, 104 focused contract regressions,
+  42 files/698 complete tests, docs, format and diff hygiene pass.
+
+### Next
+
+- Implement PLAN-032 checkpoint 3 controlled runtime flags, focus
+  reconciliation and inactive direct-action safety for rows 15–20.
+
+## 2026-08-03 — PLAN-032 checkpoint 1 compiler contract completed
+
+### Completed
+
+- Added the exact Public raw/normalized condition declarations, core-root type
+  exports, optional ordinary-field members and explicit template omission for
+  SPEC-016 rows 1–13.
+- Implemented descriptor-safe condition capture, complete post-schema shape/
+  target/source/literal inspection, atomic normalization and exact provenance
+  across direct, nested, referenced, composed and unsupported locations.
+- Review 285 cycle 1 found and corrected template-warning provenance, recursive
+  deep-presentation scanning, schema-blocked raw-shape loss and focused-evidence
+  gaps; cycle 2 repeated all thirteen areas with zero findings.
+- Core lint/typecheck/build, 2 files/97 focused tests, 41 files/681 complete
+  tests, documentation, formatting and diff hygiene pass.
+
+### Next
+
+- Implement PLAN-032 checkpoint 2 manual-definition validation for SPEC-016
+  row 14 and repeat its complete review to zero findings.
+
+## 2026-08-03 — SPEC-016/PLAN-032 revisions accepted and autonomous delivery resumed
+
+### Completed
+
+- Resolved C-002 by making `condition-member-invalid.actualType` optional and
+  omitting it for sparse/non-enumerable path indices in Accepted SPEC-016
+  v0.1.1.
+- Review 283 cycle 1 repeated all seventeen contract areas and 24 conformance
+  rows with zero findings.
+- PLAN-032 revision 1 records the bounded autonomous checkpoint agreement;
+  review 284 cycle 1 passed all twelve areas and exact row ownership with zero
+  findings.
+
+### Next
+
+- Resume PLAN-032 checkpoint 1, apply the exact C-002 diagnostic shape and
+  complete its compiler evidence and repeated review before checkpoint 2.
+
+## 2026-08-03 — PLAN-032 conditional-field-state delivery approved
+
+### Completed
+
+- Drafted PLAN-032 revision 0 with seven ordered checkpoints for compiler,
+  manual definitions, runtime, Angular, Standard/shared evidence, packages and
+  final closure.
+- Review 282 cycle 1 passed all eleven plan areas and proved exact unique
+  ownership of all 24 SPEC-016 rows with zero findings.
+- PLAN-032 revision 0 is Approved under the no-scope-expansion rule; only
+  checkpoints 1–7 in order are authorized, not dependency/version/release,
+  commit, push or external action.
+
+### Next
+
+- Implement checkpoint 1 Public authoring/definition contracts and complete
+  compiler behavior for SPEC-016 rows 1–13.
+
+## 2026-08-03 — SPEC-016 conditional-field-state contract accepted
+
+### Completed
+
+- Drafted the declaration-ready SPEC-016 v0.1.0 contract for two ordinary
+  primitive equality predicates, exact compiler/manual diagnostics, controlled
+  evaluation, required snapshot flags, action safety and mounted target
+  projection.
+- Review 281 cycles 1–2 found and corrected seven baseline, diagnostic,
+  schema-blocking, manual-path, controlled-buffer and scenario-evidence
+  defects.
+- Review 281 cycle 3 repeated all seventeen contract areas and 24 conformance
+  rows with zero findings; SPEC-016 v0.1.0 is Accepted under the approved
+  no-scope-expansion rule.
+- No code, dependency, package/version, release, commit, push or external state
+  changed during the contract gate.
+
+### Next
+
+- Draft and completely review PLAN-032 revision 0; do not implement before the
+  plan is Approved.
+
+## 2026-08-03 — ADR-033 conditional-field-state architecture accepted
+
+### Completed
+
+- Drafted ADR-033 revision 0 for exact equality predicates, immutable
+  normalized conditions, controlled linear evaluation, required snapshot
+  booleans, hidden/disabled action gating and mounted target projection.
+- Review 280 cycle 1 found and corrected schema-blocked diagnostic cascading,
+  premature manual-definition linking and meaningless `enabledWhen` on fixed
+  presentation fields.
+- Review 280 cycle 2 repeated all twelve architecture areas with zero findings;
+  ADR-033 revision 0 is Accepted under the approved no-scope-expansion rule.
+- Collection templates/items retain no condition authoring/evaluation; item
+  snapshots expose only constant true defaults. No code, package/version,
+  release, commit or push changed.
+
+### Next
+
+- Draft and completely review SPEC-016 v0.1.0; do not prepare PLAN-032 or
+  implementation before contract acceptance.
+
+## 2026-08-03 — D-018/M30 conditional-field-state design selected
+
+### Completed
+
+- Ricard selected the recommended bounded D-018 functional direction after
+  completed M29.
+- Review 279 cycle 1 found one shared-snapshot migration ambiguity; cycle 2
+  passed twelve areas with zero findings after fixing item snapshots at
+  unconditional visible/enabled defaults and promoted only architecture design
+  for ordinary primitive-field equality predicates over controlled value.
+- The review proves the slice needs neither an arbitrary expression language
+  nor a dependency graph and preserves value/baseline, validation, scopes,
+  static layout, collection-template and release boundaries.
+- M30 now reserves ADR-033 for architecture only; no observable contract,
+  implementation, package/version, release, commit or push is active.
+
+### Next
+
+- Draft and completely review ADR-033 revision 0; do not prepare SPEC-016 until
+  that architecture is accepted.
+
+## 2026-08-03 — PLAN-031 and M29 completed
+
+### Completed
+
+- Completed all six PLAN-031 checkpoints and all 21 SPEC-015 rows: Public core
+  helper, nested reconstruction, references/composition/array barriers,
+  package consumers and independent Angular/Standard reference behavior.
+- Final review 278 cycle 1 corrected one formatting finding and reconciled
+  stale current-state/onboarding surfaces; cycle 2 repeated the complete frozen
+  matrix with zero findings.
+- Frozen install, format/lint/types/builds, 70 files/949 unit tests, package/
+  clean/source consumers, 41 release-tooling + 24 policy tests, 904-file public
+  scan, security, 8 snippets, 654 boundaries, Chromium 14+12, docs and diff
+  hygiene pass.
+- Package versions and published M23 artifacts remain unchanged. No release,
+  publication, commit, push or other external mutation occurred.
+
+### Next
+
+- Evaluate the remaining Deferred register and let Ricard select the next
+  bounded functional capability before preparing architecture.
+
+## 2026-08-03 — PLAN-031 checkpoint 5 completed
+
+### Completed
+
+- Added one frozen shared explicit-defaults scenario covering preserved
+  presence, nested/reference/composition materialization, array barriers and
+  validator-owned assertion failure.
+- Added independent application-owned candidate state and accessible derive/
+  cancel/accept/evidence controls to Angular and Standard.
+- Proved derivation/cancellation isolation, explicit acceptance, validation
+  after acceptance, repeated no-effect and zero emitted operations.
+- Review 277 cycle 1 corrected the closed feature/transition/scenario inventory;
+  cycle 2 passed twelve areas and SPEC-015 row 21 with zero findings.
+- Scenario 64, Angular 30 and Standard 66 unit tests, both builds, 8 snippets,
+  654 boundaries, Chromium 14+12, docs and diff hygiene pass.
+
+### Next
+
+- Execute PLAN-031 checkpoint 6 only: frozen final matrix, all 21 rows and M29
+  closure review to zero findings.
+
+## 2026-08-03 — PLAN-031 checkpoint 4 completed
+
+### Completed
+
+- Added exact package-root smoke for changed, no-effect and invalid-default
+  helper outcomes plus the frozen runtime export inventory.
+- Added strict clean TypeScript consumer and isolated source-rebuild behavior
+  for the helper; lower/upper Angular 22 package consumers remain compatible.
+- Documented opt-in derivation and application-owned acceptance in the core
+  package README.
+- Review 276 cycle 1 passed ten areas and SPEC-015 row 20 with zero findings.
+- Core 40 files/641 tests, package/clean/source consumers, declarations, docs
+  and diff hygiene pass without manifest/lock/dependency/version drift.
+
+### Next
+
+- Execute PLAN-031 checkpoint 5 only: shared scenario and independent Angular/
+  Standard reference evidence, then repeat its review to zero findings.
+
+## 2026-08-03 — PLAN-031 checkpoint 3 completed
+
+### Completed
+
+- Added one Internal helper traversal over the Accepted compiler resolver and
+  composition reducer without adding a Public cursor or changing compiler
+  behavior.
+- Added local references/chains/repeated-use, root/nested disjoint `allOf`,
+  exact provenance, array/item barriers and schema-before-data atomicity.
+- Added seven focused schema-graph tests; the complete default-candidate slice
+  now has 29 focused tests.
+- Review 275 cycle 1 corrected root-container-default classification and
+  default-diagnostic ordering; cycle 2 passed twelve areas and SPEC-015 rows
+  8–11/17/19 with zero findings.
+- Core lint/typecheck/build, 40 files/641 tests, docs and diff hygiene pass.
+
+### Next
+
+- Execute PLAN-031 checkpoint 4 only: core package and consumer conformance,
+  then repeat its review to zero findings.
+
+## 2026-08-03 — PLAN-031 checkpoint 2 completed
+
+### Completed
+
+- Added iterative inline nested-default traversal, exact own-presence preflight
+  and incompatible-ancestor barriers.
+- Added selective missing-ancestor materialization and one-pass immutable
+  changed-chain reconstruction preserving prototypes, descriptors, symbols and
+  off-path references.
+- Added 10 focused nested tests; the complete default-candidate slice now has
+  22 focused tests.
+- Review 274 cycle 1 corrected one test-lint defect; cycle 2 passed eleven
+  areas and SPEC-015 rows 12–16/18 with zero findings.
+- Core lint/typecheck/build, 39 files/634 tests, docs and diff hygiene pass.
+
+### Next
+
+- Execute PLAN-031 checkpoint 3 only: references, composition and array
+  barriers, then repeat its review to zero findings.
+
+## 2026-08-03 — PLAN-031 checkpoint 1 completed
+
+### Completed
+
+- Added the Public direct-default helper foundation, exact root/dialect gates,
+  primitive/nullable compatibility, presence and immutable direct insertion.
+- Added 12 focused tests for SPEC-015 rows 1–7.
+- Review 273 cycle 1 corrected hostile-root classification and independent
+  default-error collection; cycle 2 passed eleven areas with zero findings.
+- Core typecheck/build, 38 files/624 tests, lint, docs and diff hygiene pass.
+
+### Next
+
+- Execute PLAN-031 checkpoint 2 only: nested presence and immutable
+  reconstruction, then repeat its review to zero findings.
+
+## 2026-08-03 — PLAN-031 approved
+
+### Completed
+
+- Drafted six ordered M29 checkpoints covering direct defaults, nested
+  reconstruction, references/composition/barriers, package consumers,
+  independent references and final closure.
+- Review 272 cycle 1 corrected one duplicated Public-export owner; cycle 2
+  passed all ten areas and exact disjoint ownership of all 21 SPEC-015 rows.
+- PLAN-031 revision 0 is Approved; only checkpoints 1–6 in order are
+  authorized. No implementation, release, Git or external action occurred.
+
+### Next
+
+- Execute PLAN-031 checkpoint 1 only and repeat its complete review to zero
+  findings.
+
+## 2026-08-03 — SPEC-015 accepted
+
+### Completed
+
+- Drafted the bounded M29 observable contract for one pure explicit
+  schema-default candidate helper under Accepted ADR-032.
+- Closed its raw-schema pipeline, primitive/default matrix, array barriers,
+  presence/materialization, diagnostics, structural sharing, package contract
+  and 21-row core/reference conformance matrix.
+- Review 271 cycle 1 repeated all fourteen contract areas with zero findings;
+  SPEC-015 v0.1.0 is Accepted under the authorized
+  zero-finding/no-scope-expansion rule.
+- Prettier, documentation links/state and diff hygiene pass. No source,
+  package, dependency, version, release, Git or external action changed.
+
+### Next
+
+- Draft and completely review PLAN-031; it is not Approved and no
+  implementation is active.
+
+## 2026-08-03 — D-039 selected and ADR-032 accepted
+
+### Completed
+
+- Ricard selected the bounded D-039 core direction recommended by review 269,
+  promoting only M29 architecture and reserving ADR-032.
+- ADR-032 revision 0 defines one pure application-triggered candidate helper
+  for primitive-leaf defaults in object trees, including accepted local
+  references/composition while keeping arrays and container defaults Deferred.
+- Review 270 cycle 1 corrected four contract inconsistencies; cycle 2 repeated
+  all fourteen areas with zero findings, so ADR-032 is Accepted under the
+  authorized zero-finding/no-scope-expansion rule.
+- Prettier, documentation links/state, targeted stale-state search and diff
+  hygiene pass. No source, package, dependency, version, release, Git or
+  external action changed.
+
+### Next
+
+- Draft and completely review SPEC-015 for the Accepted M29 architecture; no
+  implementation plan or code is active.
+
+## 2026-08-03 — Post-M28 capability comparison prepared
+
+### Completed
+
+- Review 269 cycle 1 compares remaining core, platform, workflow and
+  compatibility directions with zero findings.
+- Bounded D-039 explicit defaults is the technical recommendation if core
+  entity-creation functionality remains the priority; React, wizard/workflow
+  and legacy Angular are materially different product alternatives.
+- No candidate, M29, ADR, SPEC, plan, code, dependency, release, Git or
+  external action is active.
+
+### Next
+
+- Ricard selects the next product direction before any promotion or design.
+
+## 2026-08-03 — PLAN-030 and M28 completed
+
+### Completed
+
+- Completed checkpoint 6 and PLAN-030 revision 0 after reviewing all 21
+  SPEC-014 rows, Public/Internal surfaces, package/consumer invariance,
+  reference parity and persistent state.
+- Corrected ten lint findings and six stale current-state documentation
+  surfaces in review 268 cycle 1; cycle 2 repeated the complete frozen matrix
+  with zero findings.
+- Format/lint/types, 67 files and 914 unit tests, package/clean/source
+  consumers, release/repository tooling, 885-file public scan, release-security
+  audit, snippets, 637 boundaries and 24 Chromium tests pass.
+- M28 is complete and the source checkout implements M1–M28 and G0. Published
+  M23 package versions/artifacts remain unchanged.
+- No dependency, version, release, publication, commit, push or other external
+  action occurred.
+
+### Next
+
+- Compare the remaining deferred functional candidates and ask Ricard to
+  select the next product direction before promotion or implementation.
+
+## 2026-08-03 — PLAN-030 checkpoint 5 completed
+
+### Completed
+
+- Added one authoring-safe shared object-composition scenario with a pure local
+  reference, an inline contribution, disjoint fields, cross-branch
+  requiredness, combined UI ordering and validator-visible data.
+- Added independent Angular and Standard unit/Chromium evidence for identical
+  projection, edits, synchronous validation, diagnostics, application-owned
+  roots, accessibility and dark-theme rendering.
+- Corrected four findings across review 267 cycles 1–2. Cycle 3 repeated all
+  twelve areas and SPEC-014 row 21 with zero findings.
+- Scenario types/build and 61 tests, Angular 29 unit + 13 Chromium tests,
+  Standard 64 unit + 11 Chromium tests, eight snippets, 637 import boundaries,
+  documentation and diff hygiene pass.
+- No manifest, lockfile, package, dependency, version, release, publication,
+  commit, push or other external action occurred.
+
+### Next
+
+- Execute PLAN-030 checkpoint 6 only — complete workspace matrix, all 21-row
+  review and persistent-state reconciliation — then repeat to zero findings.
+
+## 2026-08-03 — PLAN-030 checkpoint 4 completed
+
+### Completed
+
+- Documented the bounded static object-composition source contract and explicit
+  general-composition exclusions in the core package README.
+- Extended built-package, clean-consumer and isolated-source checks with valid
+  and conflicting composition behavior while retaining exact root exports.
+- Review 266 cycle 1 passed all ten package/consumer areas and SPEC-014 row 20
+  with zero findings.
+- Core types/build, all 37 files and 612 tests, package smoke, clean consumers,
+  source reconstruction, documentation and diff hygiene pass. The known
+  sandbox-only Angular build abort passed outside that restriction.
+- No manifest, lockfile, package, dependency, peer, version, release,
+  publication, commit, push or external action occurred.
+
+### Next
+
+- Implement PLAN-030 checkpoint 5 only — one shared authored scenario and
+  independent Angular/Standard evidence — then repeat its review to zero
+  findings.
+
+## 2026-08-03 — PLAN-030 checkpoint 3 completed
+
+### Completed
+
+- Applied one existing UI Schema use site to combined root/nested catalogs and
+  existing absolute policies to arrays contributed by composition branches.
+- Resolved composed item identity/requiredness and added selective suppression
+  only where an invalid or duplicate catalog makes dependent policy evidence
+  unknowable.
+- Proved exact original-schema identity and complete-value delivery to the
+  replaceable validator; added named valid/error JSON conformance fixtures.
+- Corrected three findings across review 265 cycles 1–2. Cycle 3 mapped and
+  repeated SPEC-014 core rows 1–19 with zero findings.
+- Prettier, core typecheck/build, all 37 files and 612 tests, documentation and
+  diff hygiene pass. No package, dependency, version, release, publication,
+  commit, push or external action occurred.
+
+### Next
+
+- Implement PLAN-030 checkpoint 4 only — Public package and consumer
+  invariance — then repeat its full review to zero findings.
+
+## 2026-08-03 — PLAN-030 checkpoint 2 completed
+
+### Completed
+
+- Added iterative depth-first reduction for root, nested-object and collection
+  item-root compositions, including pure local-reference branches.
+- Added first-source property ownership, cross-branch required union, delayed
+  unmanaged warnings and wrapper/contribution title-description reduction.
+- Added exact duplicate, annotation and unsupported-target conflicts with
+  immutable document/reference/template provenance, cycle separation, legal
+  acyclic sharing, deep iteration and hostile-reflection containment.
+- Corrected four findings across review 264 cycles 1–2. Cycle 3 repeated all
+  thirteen areas with zero findings.
+- Prettier, core typecheck/build, all 36 files and 602 tests, documentation and
+  diff hygiene pass. No package, dependency, version, release, publication,
+  commit, push or external action occurred.
+
+### Next
+
+- Implement PLAN-030 checkpoint 3 only — collections, UI, validator ownership
+  and complete core conformance — then repeat its full review to zero findings.
+
+## 2026-08-03 — PLAN-030 checkpoint 1 completed
+
+### Completed
+
+- Added an Internal iterative composition foundation and integrated exact
+  object-`allOf` wrapper/exterior failures at root, property, item root,
+  item-template property and local-reference target locations.
+- Added exact primitive/nullable/array incompatibility, `$ref`/`allOf`
+  precedence, branch-kind, template/reference and hostile-reflection evidence.
+- Corrected four findings across review 263 cycles 1–3. Cycle 4 repeated all
+  eleven areas with zero findings.
+- Prettier, core typecheck/build, all 35 files and 587 tests, documentation for
+  371 Markdown files and 1,083 local links, and diff hygiene pass.
+- No package, dependency, version, release, publication, commit, push or
+  external action occurred.
+
+### Next
+
+- Implement PLAN-030 checkpoint 2 only — ordered contribution reduction and
+  provenance — then complete its repeated zero-finding review.
+
+## 2026-08-03 — PLAN-030 approved
+
+### Completed
+
+- Corrected the stale root onboarding found in review 262 cycle 1.
+- Review 262 cycle 2 repeated all fifteen PLAN-030 areas with zero findings;
+  revision 0 is Approved under the authorized no-scope-expansion rule.
+- Implementation is authorized only for checkpoints 1–6 in order; no code,
+  dependency, version, release, publication, commit, push or external action was
+  performed during this documentation closure.
+
+### Next
+
+- Implement PLAN-030 checkpoint 1 only, then repeat its complete review until
+  one full pass has zero findings.
+
+## 2026-08-03 — PLAN-030 drafted
+
+### Completed
+
+- Drafted PLAN-030 revision 0 with six ordered checkpoints and explicit
+  allocation of all 21 SPEC-014 conformance rows.
+- Preserved the no-new-symbol/signature/package/dependency boundary and kept
+  implementation inactive pending a complete plan review and approval.
+
+### Next
+
+- Completely review PLAN-030 revision 0, correct every finding and repeat until
+  one full pass has zero findings.
+
+## 2026-08-03 — SPEC-014 accepted
+
+### Completed
+
+- Accepted SPEC-014 v0.1.0 under the authorized zero-finding/no-scope-expansion
+  rule after review 261 cycle 5 passed all fourteen areas.
+- Reconciled the specification index, onboarding, ADR index, roadmap, deferred
+  register and current status with the Accepted contract.
+- No implementation, dependency, version, release, commit, push or external
+  action is active.
+
+### Next
+
+- Prepare and completely review PLAN-030 only; do not start implementation.
+
+## 2026-08-03 — ADR-005 revision 7 accepted and SPEC-014 reviewed
+
+### Completed
+
+- Accepted ADR-005 revision 7 under the authorized zero-finding/no-scope-
+  expansion rule after review 260 cycle 5.
+- Drafted SPEC-014 v0.1.0 for the bounded M28 compiler contract, including
+  exact composition diagnostics and 21 conformance/reference-evidence rows.
+- Corrected twelve contract/evidence findings across review 261 cycles 1–4;
+  cycle 5 repeated all fourteen areas with zero findings and no unresolved
+  authoritative-document conflict.
+- Prettier, documentation checks for 368 Markdown files and 1,078 local links,
+  and diff hygiene pass.
+- No plan, code, dependency, version, release, commit, push or external action
+  is active.
+
+### Next
+
+- Decide formal acceptance of SPEC-014 v0.1.0. Acceptance would authorize only
+  preparation and complete review of PLAN-030.
+
+## 2026-08-03 — ADR-031 accepted and ADR-005 revision 7 reviewed
+
+### Completed
+
+- Ricard formally accepted ADR-031 revision 0 after review 259 cycle 5; no
+  Public contract or implementation was activated.
+- Drafted ADR-005 revision 7 for the bounded object-`allOf` policy, closing
+  wrapper/contribution catalogs, safe exterior precedence, branch/reference
+  provenance, disjoint properties, required union and deterministic stopping.
+- Corrected thirteen normative/state findings across review 260 cycles 1–4.
+  Cycle 5 repeated all eleven areas with zero findings and no unresolved
+  authoritative-document conflict.
+- Prettier, documentation checks for 366 Markdown files and 1,073 local links,
+  and diff hygiene pass.
+- No SPEC, plan, code, dependency, version, release, commit, push or external
+  action is active.
+
+### Next
+
+- Decide formal acceptance of ADR-005 revision 7. Acceptance would authorize
+  only preparation and complete review of an M28 extension SPEC.
+
+## 2026-08-03 — D-007/M28 selected and ADR-031 completely reviewed
+
+### Completed
+
+- Ricard formally selected review 258's bounded static object-`allOf`
+  recommendation as M28 architecture design only.
+- Drafted ADR-031 revision 0 with object-only wrappers, iterative ordered
+  contributions, disjoint property names, required union, unambiguous
+  title/description reduction, one use-site UI Schema, exact original validator
+  input and no new Public symbol/signature.
+- Corrected twelve architecture/provenance/catalog/state findings across review
+  259 cycles 1–4. Cycle 5 repeated all fourteen areas with zero findings and no
+  unresolved conflict.
+- Prettier, documentation checks for 365 Markdown files and 1,070 local links,
+  and diff hygiene pass. No SPEC, plan, code, dependency, version, release,
+  commit, push or external action is active.
+
+### Next
+
+- Decide formal acceptance of ADR-031 revision 0. Acceptance would authorize
+  only preparation and complete review of ADR-005 revision 7.
+
+## 2026-08-03 — Post-M27 functional-capability selection reviewed
+
+### Completed
+
+- Compared the remaining Deferred functional candidates against the completed
+  M27 baseline and their documented restart conditions.
+- Review 258 cycle 1 found four stale M27 summaries. After correction, cycle 2
+  repeats the complete review with zero findings and recommends only a bounded
+  static object-`allOf` D-007 architecture question. D-039 defaults remains
+  Deferred because it still lacks a concrete entity-creation consumer and an
+  accepted initialization input boundary.
+- Reconciled ADR-030/SPEC-013/PLAN-029 index and onboarding summaries plus the
+  ROADMAP M27 gate labels with the completed milestone.
+- Prettier, documentation checks for 363 Markdown files and 1,065 local links,
+  and diff hygiene pass. No M28, ADR identifier, SPEC, plan, implementation,
+  dependency, version, release, commit, push or external action is active.
+
+### Next
+
+- Ricard decides whether to accept review 258's recommendation. Acceptance
+  would promote only bounded M28 architecture design and make drafting and
+  completely reviewing ADR-031 the exact next action.
+
+## 2026-08-03 — PLAN-029/M27 completed
+
+### Completed
+
+- Completed all six PLAN-029 revision-1 checkpoints for the pure Public
+  `commitScopeToBaseline()` contract, package conformance and independent
+  Angular/Standard reference evidence.
+- Corrected eighteen final lint findings through typed/narrowed implementation
+  and test cleanup without semantic or Public-contract change.
+- Review 257 cycle 2 repeated the complete frozen matrix with zero findings:
+  formatting, docs, lint, types, 872 tests, four package smokes, clean/source
+  consumers, 41+24 policy tests, 861 public candidates, audit, eight snippets,
+  621 boundaries and Chromium 12+10 pass.
+- Confirmed no manifest, dependency, peer, lockfile, package-map, runtime or
+  adapter drift; M27 is complete with no active implementation task.
+
+### Next
+
+- Evaluate remaining deferred decisions and prepare a bounded promotion-
+  readiness review for the next functional capability; no ADR/SPEC/plan or
+  implementation is active yet.
+
+## 2026-08-03 — PLAN-029 checkpoint 5 completed
+
+### Completed
+
+- Added one detached shared scenario with partial profile, structural team,
+  current-only stable-item and unrelated-dirty evidence plus copied scopes,
+  labels and expectations.
+- Implemented independent Angular-signal and Standard-class candidate state,
+  direct root-helper calls, separate simulated acceptance and recreation reset.
+- Added equivalent accessible controls, live/copyable evidence and unit plus
+  Chromium journeys proving preparation isolation, partial dirty isolation,
+  collection order/insertion and current-only failure.
+- Corrected catalog inventories, the Angular scenario-count assertion and the
+  private-app hard bundle ceiling from 1.05 to 1.1 MB while retaining its 750 kB
+  warning. Review 256 cycle 3 repeated the complete matrix with zero findings.
+- Passed 57 scenario, 28 Angular and 62 Standard unit tests, eight snippets,
+  621 import boundaries, Chromium 12+10 and diff hygiene.
+
+### Next
+
+- Run checkpoint 6's complete frozen workspace matrix and repeated final M27
+  implementation review; no dependency, version, release or Git action.
+
+## 2026-08-03 — PLAN-029 checkpoint 4 completed
+
+### Completed
+
+- Mapped all applicable core/package SPEC-013 conformance rows to focused
+  foundation, static, collection, side-effect and package evidence; only the
+  checkpoint-5 reference-consumer row remains.
+- Added core README guidance that separates pure candidate calculation,
+  application-owned persistence and the later baseline-only runtime update.
+- Proved no validator/async/text/listener/operation/console effect and preserved
+  interaction plus async generation when the candidate becomes the baseline.
+- Review 255 cycle 1 passed with zero findings: formatting, typecheck/build, all
+  577 core tests, package smoke, clean consumers, source rebuilds, deep-import
+  rejection, documentation and diff hygiene pass with no dependency drift.
+
+### Next
+
+- Implement checkpoint 5 shared scenario and independent Angular/Standard
+  candidate preparation, simulated acceptance and accessible parity evidence.
+
+## 2026-08-03 — PLAN-029 checkpoint 3 completed
+
+### Completed
+
+- Implemented whole-array reconstruction by stable identity, matched/new item
+  projection, structural order and collection descriptor preservation.
+- Implemented non-structural stable item/node confirmation with exact identity,
+  baseline order and off-target sharing.
+- Exposed exactly `commitScopeToBaseline()` from the core root after Internal
+  cases passed; built declarations and exact package-root smoke pass.
+- Corrected success diagnostics to reuse the existing shared empty tuple;
+  review 254 cycle 2 repeated the complete matrix with zero findings.
+- Passed formatting, core typecheck/build, all 576 tests, package smoke,
+  documentation and diff hygiene.
+
+### Next
+
+- Complete checkpoint 4 core/package conformance, README ownership guidance,
+  side-effect/runtime evidence and clean/source consumer checks.
+
+## 2026-08-02 — PLAN-029 checkpoint 2 completed
+
+### Completed
+
+- Implemented the still-Internal primitive and non-collection object baseline
+  reconstruction with missing/incompatible semantics and minimal ancestors.
+- Preserved baseline unmanaged descriptors/prototypes, excluded current-only
+  unmanaged data and added semantic no-effect plus structural-sharing behavior.
+- Added 17 focused cases, including invalid business terminals, null
+  prototypes, changing traps and iterative depth 1,200; review 253 cycle 1
+  passed the complete applicable matrix with zero findings.
+- Passed formatting, core typecheck/build, all 567 core tests, documentation
+  and diff hygiene.
+
+### Next
+
+- Implement checkpoint 3 whole collections and stable item/node targets; add
+  the sole Public root export only after their complete evidence passes.
+
+## 2026-08-02 — PLAN-029 checkpoint 1 completed
+
+### Completed
+
+- Implemented the unexported Internal definition/root/scope/target preparation,
+  exact frozen diagnostics, fail-closed availability and canonical overlaps.
+- Added 34 focused cases for accessors/traps, seven identity failures, static
+  versus stable C-001 parameters, copying/freezing, depth 1,200 and no Public
+  export.
+- Corrected direct caller-array length access found in review cycle 2; review
+  252 cycle 3 repeated the complete matrix with zero findings.
+- Passed formatting, core typecheck/build, all 550 core tests, documentation
+  and diff hygiene.
+
+### Next
+
+- Implement checkpoint 2 primitive and non-collection object reconstruction;
+  keep collections and the Public export assigned to checkpoint 3.
+
+## 2026-08-02 — C-001 resolved; PLAN-029 checkpoint 1 resumed
+
+### Completed
+
+- Corrected SPEC-013 v0.1.1 so every invalid-identity diagnostic carries its
+  collection fields while stable-address fields exist only for stable targets.
+- Review 250 cycle 1 repeated all twelve SPEC areas with zero findings and the
+  corrected SPEC was Accepted under the standing authorization.
+- Reconciled and Approved PLAN-029 revision 1 after review 251 cycle 1 repeated
+  all fourteen plan areas with zero findings and no checkpoint scope change.
+
+### Next
+
+- Complete checkpoint 1's Internal foundation, focused tests, six required
+  evidence commands and repeated full review; keep the Public export closed.
+
+## 2026-08-02 — PLAN-029 checkpoint 1 halted on C-001
+
+### Completed
+
+- Started the unexported Internal preparation module for definition/root
+  inspection, scope/target parsing, availability and canonicalization.
+- Confirmed the partial module typechecks and leaves the core package root and
+  Public declarations unchanged.
+- Review 249 cycle 1 found that Accepted SPEC-013 requires stable-address fields
+  for an invalid-identity diagnostic even when the selected target is a static
+  array/object and therefore has no `itemId`.
+
+### Next
+
+- Decide the recommended narrow SPEC-013 v0.1.1 diagnostic-matrix correction;
+  no further implementation is authorized until the contract is reconciled.
+
+## 2026-08-02 — PLAN-029 revision 0 approved
+
+### Completed
+
+- Drafted six ordered checkpoints from Internal validation through static and
+  collection reconstruction, delayed Public export, package conformance,
+  independent references and complete closure.
+- Corrected five sequencing/evidence findings across two review cycles; review
+  248 cycle 3 repeats all fourteen areas with zero findings.
+- Applied the standing zero-finding/no-scope-expansion authorization and
+  Approved PLAN-029 revision 0 for checkpoints 1–6 only.
+
+### Next
+
+- Execute checkpoint 1 Internal definition/root/scope/diagnostic foundation;
+  no Public export is allowed yet.
+
+## 2026-08-02 — SPEC-013 v0.1.0 accepted
+
+### Completed
+
+- Applied Ricard's standing authorization to accept a reviewed document after
+  review 247 cycle 3 passed with zero findings and no scope expansion.
+- Accepted the exact bounded M27 observable helper/diagnostic/reconstruction
+  contract and authorized PLAN-029 preparation/review only.
+- Kept plan approval, implementation, dependencies, versioning, release,
+  publication, commit and push inactive.
+
+### Next
+
+- Draft and completely review PLAN-029 before any M27 implementation.
+
+## 2026-08-02 — SPEC-013 v0.1.0 reviewed to zero findings
+
+### Completed
+
+- Drafted the exact bounded M27 Public signature, result envelope, processing
+  order, three diagnostic families and atomic target handling.
+- Closed static/stable parsing, managed projection, missing/incompatible
+  ancestors, collection structure/identity, descriptor preservation,
+  dirty-equivalent no-effect and iterative conformance.
+- Corrected five findings across two review cycles; review 247 cycle 3 repeats
+  all twelve areas with zero findings.
+- Kept SPEC-013 Draft pending explicit acceptance. No plan, code, dependency,
+  version, release, publication, commit, push or external action was activated.
+
+### Next
+
+- Decide formal acceptance of SPEC-013 v0.1.0. If accepted, prepare and
+  completely review PLAN-029 before implementation.
+
+## 2026-08-02 — ADR-030 revision 0 accepted
+
+### Completed
+
+- Ricard explicitly accepted the zero-finding ADR-030 revision 0 architecture.
+- Promoted D-038 only to bounded M27 contract design and authorized preparation
+  and complete review of SPEC-013.
+- Kept the Public helper contract, implementation, plan, versioning, release,
+  publication, commit and push inactive behind their later gates.
+
+### Next
+
+- Draft and completely review SPEC-013 for the exact observable
+  scope-to-baseline confirmation contract.
+
+## 2026-08-02 — ADR-030 revision 0 reviewed to zero findings
+
+### Completed
+
+- Drafted the bounded D-038/M27 architecture as one pure Public Experimental
+  core helper returning an application-owned baseline candidate through the
+  existing `ApplyOperationResult` contract.
+- Closed atomic fail-closed scopes, missing/incompatible managed projection,
+  overlap, whole-collection structure, non-structural stable item/node targets,
+  descriptor safety, sharing and async non-trigger behavior.
+- Corrected three review findings covering empty scopes, required-ancestor
+  effects and reflection-trap wording; review 246 cycle 2 repeats all twelve
+  areas with zero findings.
+- Kept ADR-030 Proposed pending explicit acceptance. No SPEC, implementation,
+  version, release, publication, commit, push or external action was activated.
+
+### Next
+
+- Decide formal acceptance of ADR-030 revision 0. If accepted, prepare and
+  completely review the dedicated M27 extension SPEC before any plan or code.
+
+## 2026-08-02 — D-038 selected for bounded M27 architecture design
+
+### Completed
+
+- Compared scoped baseline confirmation with defaults, issue visibility,
+  composition, batches, broader theming and legacy Angular after completed M26.
+- Review 245 cycle 1 selects only a pure neutral baseline-candidate utility:
+  accepted scopes and stable addresses choose data, while the application keeps
+  persistence and explicit external-state ownership.
+- Kept runtime mutation, autosave, HTTP, submit, transactions, declarative
+  scopes, defaults, packages, versions, release, commit and push inactive.
+
+### Next
+
+- Draft and completely review ADR-030 for the bounded D-038/M27 architecture;
+  no Public contract or implementation is authorized yet.
+
+## 2026-08-02 — PLAN-028 and M26 completed
+
+### Completed
+
+- Completed checkpoint 6 after restoring the frozen graph with zero lock or
+  dependency drift and inspecting Public declarations/exports, package maps,
+  core imports, Ajv production invariance and both application integrations.
+- Corrected 30 accumulated lint findings plus stale root/package onboarding,
+  ADR/index, roadmap, Deferred and current-state descriptions found by the
+  first complete closure pass.
+- Review 244 cycle 2 repeats formatting, documentation, lint, types/builds, all
+  803 tests, package/source/tooling/policy/security checks, eight snippets, 593
+  boundaries, Chromium 11+9 and diff hygiene with zero findings.
+- PLAN-028 revision 0 and M26 are Completed; implemented scope is M1–M26 and
+  G0. Published M23 versions/artifacts remain unchanged and no commit, push,
+  release, publication or other external mutation occurred.
+
+### Next
+
+- Evaluate the remaining Deferred register and select the next bounded
+  functional capability before preparing another ADR, SPEC or plan.
+
+## 2026-08-02 — PLAN-028 checkpoint 5 completed
+
+### Completed
+
+- Added one authoring-safe shared service-validation scenario with common
+  schema/UI Schema, controlled roots, issue metadata, labels and explanation.
+- Added independent deterministic Angular and Standard app effects and
+  accessible controls/evidence for pending/settled, sync blocking, replacement
+  cancellation, stale completion, rejection/exception and explicit retry,
+  without network, timers, renderer orchestration or operation emission.
+- Corrected Standard's immediate-pending renderer mount, isolated replaced
+  Angular controllers during configuration recreation and moved only the
+  Angular hard bundle threshold from 1.02 to 1.05 MB while retaining warnings.
+- Review 243 cycle 5 passes fourteen areas, eight snippets, 52 catalog, 27
+  Angular and 60 Standard tests, 593 boundaries, both production builds and
+  Chromium 11+9 with zero findings.
+- No dependency, version, release, commit, push or publication state changed.
+
+### Next
+
+- Execute PLAN-028 checkpoint 6 complete frozen workspace matrix and final M26
+  closure review.
+
+## 2026-08-02 — PLAN-028 checkpoint 4 completed
+
+### Completed
+
+- Forwarded async-validator identity through Angular runtime recreation, added
+  the exact directive retry method and retained root state in the existing
+  snapshot Signal and diagnostics channel.
+- Added configured/unconfigured, settle/fail/retry, replacement cancellation,
+  destroy/late-completion, package-prototype and built-consumer evidence without
+  renderer, output, scheduler, Ajv or peer/export changes.
+- Review 242 cycle 2 passes ten areas, all 15 files/131 Angular tests, typecheck,
+  build, package smoke and two consumer tests. The operator production build
+  passes with known budget/Ajv warnings; a Codex-host esbuild deadlock is
+  isolated as an environment observation.
+- No dependency, version, release, commit, push or publication state changed.
+
+### Next
+
+- Execute PLAN-028 checkpoint 5 shared scenario and independent Angular/
+  Standard integrations.
+
+## 2026-08-02 — PLAN-028 checkpoint 3 completed
+
+### Completed
+
+- Implemented descriptor-safe async result normalization, recursive detached
+  parameter copying, sync-first issue composition and exact global, nested,
+  collection and invalid-identity assignment.
+- Completed root/node/scope validity for every async state, explicit
+  false/no-issue and true/with-issue semantics, issue visibility and selective
+  structural sharing; retry/disposal evidence is closed.
+- Review 241 cycle 1 corrected recursive detachment, configured unscoped root
+  validity, hostile descriptor traps and isolation from unchanged synchronous
+  normalization, plus stale active-state documentation. Cycle 2 passes fifteen
+  areas, all 31 files/516 core tests, typecheck, build, package
+  smoke, formatting, 343-document/1,042-link documentation and diff hygiene.
+- No Ajv, Angular, Standard, dependency, version, release, commit, push or
+  external state changed.
+
+### Next
+
+- Execute PLAN-028 checkpoint 4 Angular projection.
+
+## 2026-08-02 — PLAN-028 checkpoint 2 completed
+
+### Completed
+
+- Implemented synchronous gating, positive safe generations, frozen neutral
+  cancellation, exact triggers/retry, pending/blocked/settled/failed lifecycle
+  and silent stale/disposed completion in framework-neutral core.
+- Added deterministic coverage for borrowed identities, callback ordering and
+  isolation, non-triggers, atomic sync failure, hostile/repeated thenables,
+  exception/rejection/malformed outcomes, completion release and overflow.
+- Review 240 cycle 1 removed a hostile double-`then` read and obsolete listener
+  retention. Cycle 2 passes twelve areas, 30 files/490 tests, typecheck, build,
+  package smoke, formatting, 342-document/1,041-link documentation and diff
+  hygiene.
+- Full result normalization/composition and scoped projection remain checkpoint 3. No dependency, Ajv/Angular/Standard behavior, version, release, commit,
+  push or external state changed.
+
+### Next
+
+- Execute PLAN-028 checkpoint 3 result normalization, composed snapshots,
+  scopes, retry and disposal closure.
+
+## 2026-08-02 — PLAN-028 checkpoint 1 completed
+
+### Completed
+
+- Added the exact four Public Experimental async-validation types, optional
+  option/snapshot members, runtime retry surface and core-root declarations.
+- Implemented descriptor-safe async option classification after visibility,
+  including absence, inherited, own undefined, accessors, malformed ports and
+  own callable acceptance; unconfigured snapshots retain their exact shape.
+- Review 239 cycle 1 corrected `exactOptionalPropertyTypes` representation for
+  own undefined. Cycle 2 passes nine areas, 29 files/477 tests, typecheck,
+  build, package smoke, formatting, 341-document/1,040-link documentation and
+  diff hygiene.
+- Configured generation/result orchestration remains assigned to checkpoints
+  2–3. No dependency, Ajv/Angular/Standard behavior, version, release, commit,
+  push or external state changed.
+
+### Next
+
+- Execute PLAN-028 checkpoint 2 generation, cancellation, trigger and stale
+  thenable lifecycle.
+
+## 2026-08-02 — SPEC-012 accepted and PLAN-028 reviewed
+
+### Completed
+
+- Ricard formally accepted SPEC-012 v0.1.0 after review 237 cycle 2's complete
+  zero-finding pass; the bounded D-003/M26 observable contract is authoritative.
+- Drafted PLAN-028 revision 0 as six ordered checkpoints: Public/options, core
+  lifecycle, observable results, Angular, shared independent reference targets
+  and complete closure.
+- Review 238 cycle 1 corrected checkpoint sizing, overflow testability,
+  edited-schema recreation and final Ajv/import-graph inspection. Cycle 2
+  repeated eighteen areas with zero findings; formatting, documentation checks
+  for 340 files/1,038 links and diff hygiene pass.
+- No implementation, dependency, version, release, commit, push or external
+  state changed. PLAN-028 remains Draft pending separate approval.
+
+### Next
+
+- Decide formal approval of PLAN-028 revision 0. If approved, begin checkpoint
+  1 only and preserve every later/external gate.
+
+## 2026-08-02 — SPEC-012 v0.1.0 drafted and completely reviewed
+
+### Completed
+
+- Drafted the exact Public Experimental D-003/M26 port, cancellation,
+  generation, retry, state, validity, issue-composition, adapter and conformance
+  contracts under Accepted ADR-029 revision 0.
+- Review 237 cycle 1 corrected option-check ordering, completed-generation
+  listener cleanup, overflow routing and an unsupported cancellation-listener
+  misuse outcome.
+- Review 237 cycle 2 repeated eighteen areas with zero findings. Diff hygiene
+  formatting and documentation checks pass for 338 Markdown documents and
+  1,034 local links. SPEC-012 remains Draft; no plan, code, dependency,
+  release, commit, push or external state changed.
+
+### Next
+
+- Decide formal acceptance of SPEC-012 v0.1.0. Acceptance may authorize only
+  preparation and complete review of PLAN-028.
+
+## 2026-08-02 — ADR-029 revision 0 accepted
+
+### Completed
+
+- Drafted the bounded M26 architecture with an optional core async-validation
+  port, unchanged synchronous validator/Ajv contract and consumer-owned
+  debounce, HTTP and transport cancellation adaptation.
+- Review cycle 1 corrected field/scope pending validity, unmanaged async paths,
+  borrowed input/result immutability and throwing cancellation callbacks.
+- Review 236 cycle 2 repeated fourteen areas with zero findings and accepts
+  ADR-029 revision 0. No implementation, dependency, version, release, commit,
+  push or external state changed.
+
+### Next
+
+- Draft and completely review SPEC-012. A plan and implementation remain
+  unauthorized until that observable contract is separately accepted.
+
+## 2026-08-02 — D-003 selected for bounded M26 architecture design
+
+### Completed
+
+- Compared D-003 async validation with D-039 defaults, D-030 localization,
+  D-031 issue visibility, D-007 composition, D-013 dynamic definitions and a
+  second framework adapter.
+- Review 235 cycle 1 selects D-003 because its synchronous-validation
+  prerequisite is complete and the capability provides clear service-backed
+  consumer value with a bounded framework-neutral design question.
+- Promoted only architecture design for application-supplied async validation,
+  deterministic issue composition and pending/cancel/stale lifecycle. No
+  Public contract, implementation, dependency, version, release, commit or
+  external state changed.
+
+### Next
+
+- Draft and completely review ADR-029. Ajv `$async`, remote schemas, HTTP,
+  implementation and every broader Deferred capability remain inactive.
+
+## 2026-08-02 — PLAN-027 revision 1 and M25 completed
+
+### Completed
+
+- Ricard confirmed revocation of the npm token exposed during local diagnostics
+  and accepted PLAN-027 revision 1's narrow frozen-install correction.
+- Repeated the complete corrected matrix after the accepted frozen restore:
+  formatting, 332 documents/1,023 links, lint, types, 744 tests, package smoke,
+  isolated source builds, release/public/security checks, eight snippets, 572
+  boundaries and both Chromium suites pass.
+- Review 234 cycle 3 closes with zero findings. PLAN-027 revision 1 and M25 are
+  Completed; implemented capability is M1–M25 and G0.
+- Package versions, dependencies, peers, exports, `pnpm-lock.yaml`, published
+  M23 artifacts and external release state remain unchanged. No commit or push
+  occurred during checkpoints 2–6.
+
+### Next
+
+- Evaluate the remaining Deferred register and select the next bounded
+  functional capability after M25.
+
+## 2026-08-02 — PLAN-027 checkpoint 6 paused at offline-install gate
+
+### Completed
+
+- Corrected four lint/type-safety findings and repeated formatting,
+  documentation, lint, types, 744 tests, package/source/release/public/security
+  checks, eight snippets, 572 boundaries and both Chromium suites successfully.
+- Inspected package manifests, peers, exports, dependency/lockfile diff,
+  validator production source and the complete scoped diff with no contract or
+  dependency drift.
+- Restored the exact 522-package frozen graph after each failed offline attempt;
+  `pnpm-lock.yaml` remains unchanged.
+
+### Blocked
+
+- A from-scratch `pnpm install --frozen-lockfile --offline` still fails because
+  the configured local pnpm store lacks required Angular tarballs, even after a
+  frozen fetch reports the graph reused. Closing the plan therefore requires
+  either repairing that store or explicitly revising the verification gate.
+- A diagnostic command exposed a locally configured npm authentication token
+  in process output. The value was not copied into project files; it must be
+  revoked/rotated before another npm operation.
+
+### Next
+
+- Revoke the npm token, decide the PLAN-027 offline-gate interpretation, then
+  repeat the required final matrix and complete M25 only after a zero-finding
+  pass under the accepted gate.
+
+## 2026-08-02 — PLAN-027 checkpoint 5 completed
+
+### Completed
+
+- Added the authoring-safe shared `fixed-values` feature/scenario with direct,
+  nested, collection-template and local-reference fixed leaves plus nullable,
+  enum and semantic-format coexistence.
+- Added four shared application-owned control values/labels and independently
+  projected them in Angular and Standard without renderer operations.
+- Added focused Chromium evidence for exact values/states, Ajv mismatch issues,
+  incompatible and blocked data, locale labels, static DOM and empty history.
+- Review cycles corrected the closed authoring vocabulary/non-empty transition
+  contract, a stale Angular scenario count and an Angular-only locator used by
+  Standard. Review 233 cycle 4 passes all 47 scenario, 26 Angular and 57
+  Standard unit tests, snippets, builds, 572 boundaries, all ten Angular and
+  eight Standard Chromium tests, documentation links and diff hygiene with
+  zero findings.
+- No dependency, Public contract, package version, release, publication,
+  commit, push or external state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 6: repeat the complete repository matrix and
+  close PLAN-027/M25 only after a full zero-finding pass.
+
+## 2026-08-02 — PLAN-027 checkpoint 4 completed
+
+### Completed
+
+- Added Standard-owned fixed presentation selected from the normalized own
+  `fixedValue` before ordinary editable controls, without importing Angular.
+- Implemented the complete controlled-value state table, static accessible
+  group, exact whitespace handling, issue visibility and zero intentions.
+- Added the bounded private English/Spanish map for the four accepted status
+  sources with exact English fallback for every other locale.
+- Review cycle 1 replaced an invalid jsdom computed-style assertion with direct
+  stylesheet evidence; cycle 2 corrected visibility-policy evidence to use
+  `setValidationVisibility()`. Review 232 cycle 3 passes formatting, strict
+  types, all 56 Standard tests, production build, snippets, 568 boundaries,
+  documentation links and diff hygiene with zero findings.
+- No dependency, Public contract, package version, release, publication,
+  commit, push or external state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 5: add the shared fixed-values scenario and
+  cross-target Angular/Standard browser evidence.
+
+## 2026-08-02 — PLAN-027 checkpoint 3 completed
+
+### Completed
+
+- Added and root-exported the standalone `OnPush` Angular fixed-value renderer
+  with descriptor-safe rank-30 native selection and unchanged lower ranks.
+- Added the three required localized fixed-status labels, exact projection
+  order/fallbacks and neutral no-resolver projection for ordinary fields.
+- Implemented the accepted controlled-value state table, deterministic static
+  accessibility, whitespace handling, visible issues and zero intentions.
+- Review cycle 1 added missing explicit text-order evidence. Cycle 2 found the
+  reference bundle 3.91 kB over its prior error budget; Ricard authorized a
+  narrow `1MB` to `1.02MB` recalibration while retaining the `750kB` warning.
+- Review 231 cycle 3 passes formatting, strict types, build, all 126 Angular
+  tests, package smoke, the built-package consumer, documentation links and
+  diff hygiene with zero findings.
+- No dependency, entry point, peer, package version, release, publication,
+  commit, push or external state changed.
+
+### Next
+
+- Execute PLAN-027 checkpoint 4: implement the independent Standard fixed-value
+  projection and its bounded private localization.
+
+## 2026-08-02 — PLAN-027 checkpoint 2 completed
+
+### Completed
+
+- Added focused validator conformance for matching and mismatching string,
+  number, integer, boolean and nullable primitive `const` schemas after core
+  compiler success.
+- Verified exact ordered `const` issues, canonical paths, detached frozen
+  `allowedValue` parameters, identity-cache reuse and schema/value
+  non-mutation.
+- Verified `const` coexists with the selected `email` format and a supported
+  same-document reference through the existing factory configuration.
+- Review 230 cycle 1 passes formatting, strict types, build, all 15 validator
+  tests, package smoke, documentation links and diff hygiene with zero
+  findings.
+- Confirmed zero change to validator production source, dependencies, options,
+  exports, cache rules, issue mapping, package versions or external state.
+
+### Next
+
+- Execute PLAN-027 checkpoint 3: implement and verify the Angular fixed-value
+  renderer and its localized static presentation.
+
 ## 2026-08-02 — Standard visual parity extended
 
 ### Completed

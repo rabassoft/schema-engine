@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["a", "a", 1],
+        "title": "wrong"
+      },
+      "uniqueItems": false,
+      "minItems": 1
+    }
+  }
+}

@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { referenceScenarios } from '@schema-engine-internal/reference-scenarios';
+import {
+  referenceScenarios,
+  stringEnumArrayControlStates,
+} from '@schema-engine-internal/reference-scenarios';
 import {
   compileFormDefinition,
   createControlledFormRuntime,
@@ -20,6 +23,325 @@ afterEach(() => {
 });
 
 describe('StandardDomRenderer', () => {
+  it('projects the shared M31 scenario with independent controlled multiselection', () => {
+    const harness = mount('string-enum-array');
+    const rolesHost = field(harness.host, 'roles');
+    const roles = rolesHost.querySelector('select');
+    const rolesStatus = rolesHost.querySelector('.presence-state');
+    if (roles === null || rolesStatus === null) {
+      throw new Error('Expected direct M31 controls.');
+    }
+    const channelsHost = field(harness.host, 'channels');
+    const channels = channelsHost.querySelector('select');
+    if (channels === null) throw new Error('Expected nested M31 control.');
+
+    expect(roles.multiple).toBe(true);
+    expect(roles.options).toHaveLength(6);
+    expect(Array.from(roles.options, ({ value }) => value)).toEqual(
+      Array.from({ length: 6 }, (_value, index) => `choice:${index}`),
+    );
+    expect(Array.from(roles.options, ({ textContent }) => textContent)).toEqual(
+      [
+        '(empty string)',
+        '(single space)',
+        'Reader',
+        'Editor',
+        'Reviewer',
+        'Idea',
+      ],
+    );
+    expect(rolesStatus.textContent).toBe('No value provided.');
+    expect(rolesHost.querySelector('button')?.hidden).toBe(true);
+    expect(channels.required).toBe(true);
+    expect(channelsHost.querySelector('.presence-state')?.textContent).toBe(
+      'No values selected.',
+    );
+    expect(channelsHost.querySelector('button')?.hidden).toBe(false);
+
+    channelsHost.querySelector('button')?.click();
+    expect(harness.application.getState().snapshot?.valid).toBe(false);
+    expect(
+      harness.application
+        .getState()
+        .snapshot?.fields.find(
+          ({ path }) => path.length === 2 && path[1] === 'channels',
+        )
+        ?.issues.map(({ code }) => code),
+    ).toEqual(['required']);
+    harness.application.replaceValue(
+      harness.application.getState().scenario.initialState.value,
+    );
+
+    roles.options[3]!.selected = true;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    roles.options[2]!.selected = true;
+    roles.options[3]!.selected = true;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(harness.application.getState().value).toMatchObject({
+      roles: ['editor', 'reader'],
+    });
+    expect(harness.application.getState().history.slice(-2)).toMatchObject([
+      { decision: 'confirmed', operation: { value: ['editor'] } },
+      { decision: 'confirmed', operation: { value: ['editor', 'reader'] } },
+    ]);
+    expect(requiredSnapshot(harness.application).dirty).toBe(true);
+    harness.application.commitBaseline();
+    expect(requiredSnapshot(harness.application).dirty).toBe(false);
+
+    harness.application.setDecisionMode('reject');
+    roles.options[4]!.selected = true;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(harness.application.getState().history.at(-1)).toMatchObject({
+      decision: 'rejected',
+      operation: { value: ['editor', 'reader', 'reviewer'] },
+    });
+    expect(selectedTokens(roles)).toEqual(['choice:2', 'choice:3']);
+
+    harness.application.setDecisionMode('confirm');
+    harness.application.replaceValue({
+      ...harness.application.getState().value,
+      roles: ['reader', 'editor'],
+    });
+    expect(rolesStatus.textContent).toBe('Selected: Reader, Editor');
+    const historyLength = harness.application.getState().history.length;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(harness.application.getState().history).toHaveLength(historyLength);
+
+    roles.dispatchEvent(new FocusEvent('focus'));
+    roles.dispatchEvent(new FocusEvent('blur'));
+    expect(
+      requiredSnapshot(harness.application).fields.find(
+        ({ path }) => path.length === 1 && path[0] === 'roles',
+      ),
+    ).toMatchObject({ focused: false, touched: true });
+
+    harness.application.setLocale('es');
+    expect(rolesStatus.textContent).toBe('Seleccionados: Reader, Editor');
+    const clear = rolesHost.querySelector('button');
+    if (clear === null) throw new Error('Expected direct clear action.');
+    expect(clear.textContent).toBe('Limpiar');
+    clear.click();
+    expect(Object.hasOwn(harness.application.getState().value, 'roles')).toBe(
+      false,
+    );
+    expect(rolesStatus.textContent).toBe(
+      'No se ha proporcionado ningún valor.',
+    );
+
+    for (const { value: invalid } of stringEnumArrayControlStates) {
+      harness.application.replaceValue(invalid);
+      expect(roles.disabled).toBe(true);
+      expect(rolesHost.tabIndex).toBe(0);
+      expect(rolesStatus.textContent).toBe('Selección incompatible.');
+      expect(
+        requiredSnapshot(harness.application).fields.find(
+          ({ path }) => path.length === 1 && path[0] === 'roles',
+        )?.issues.length,
+      ).toBeGreaterThan(0);
+      expect(
+        rolesHost.querySelector('.field-issues')?.hasAttribute('hidden'),
+      ).toBe(false);
+      const incompatibleClear = rolesHost.querySelector('button');
+      if (incompatibleClear === null) {
+        throw new Error('Expected incompatible clear action.');
+      }
+      expect(incompatibleClear.disabled).toBe(false);
+      incompatibleClear.click();
+      expect(Object.hasOwn(harness.application.getState().value, 'roles')).toBe(
+        false,
+      );
+    }
+
+    const historyBeforeDispose = harness.application.getState().history.length;
+    harness.dispose();
+    roles.options[2]!.selected = true;
+    roles.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(harness.application.getState().history).toHaveLength(
+      historyBeforeDispose,
+    );
+  });
+
+  it('projects the shared conditional scenario with mounted identity and inactive event safety', () => {
+    const harness = mount('conditional-field-state');
+    const initial = requiredSnapshot(harness.application);
+    const snapshot = (name: string) =>
+      requiredSnapshot(harness.application).fields.find(
+        ({ path }) => path.length === 1 && path[0] === name,
+      );
+
+    expect(
+      Object.fromEntries(
+        [
+          'displayName',
+          'role',
+          'nullableNote',
+          'zeroNote',
+          'emptyNote',
+          'drivenNote',
+        ].map((name) => [
+          name,
+          ((field) => ({ visible: field?.visible, enabled: field?.enabled }))(
+            initial.fields.find(
+              ({ path }) => path.length === 1 && path[0] === name,
+            ),
+          ),
+        ]),
+      ),
+    ).toEqual({
+      displayName: { visible: true, enabled: true },
+      role: { visible: true, enabled: true },
+      nullableNote: { visible: true, enabled: true },
+      zeroNote: { visible: true, enabled: true },
+      emptyNote: { visible: true, enabled: true },
+      drivenNote: { visible: true, enabled: true },
+    });
+
+    const nameHost = field(harness.host, 'displayName');
+    const name = fieldControl(harness.host, 'displayName');
+    name.value = 'Grace';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    name.dispatchEvent(new Event('focus'));
+    expect(snapshot('displayName')).toMatchObject({
+      focused: true,
+      touched: false,
+    });
+    name.value = 'unconfirmed';
+
+    const review = fieldControl(harness.host, 'reviewCode');
+    review.value = 'needs-review';
+    review.dispatchEvent(new Event('input', { bubbles: true }));
+    const showDetails = fieldControl(harness.host, 'showDetails');
+    showDetails.checked = false;
+    showDetails.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(field(harness.host, 'displayName')).toBe(nameHost);
+    expect(fieldControl(harness.host, 'displayName')).toBe(name);
+    expect(nameHost.hidden).toBe(true);
+    expect(nameHost.hasAttribute('inert')).toBe(true);
+    expect(nameHost.getAttribute('aria-hidden')).toBe('true');
+    expect(name.value).toBe('Grace');
+    expect(snapshot('displayName')).toMatchObject({
+      visible: false,
+      focused: false,
+      touched: false,
+    });
+    expect(snapshot('reviewCode')).toMatchObject({
+      visible: false,
+      valid: false,
+      showIssues: true,
+    });
+    expect(requiredSnapshot(harness.application)).toMatchObject({
+      valid: false,
+      dirty: true,
+    });
+
+    const historyBeforeHiddenEvents =
+      harness.application.getState().history.length;
+    name.value = 'stale hidden edit';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    name.dispatchEvent(new Event('focus'));
+    name.dispatchEvent(new Event('blur'));
+    expect(harness.application.getState().history).toHaveLength(
+      historyBeforeHiddenEvents,
+    );
+    expect(harness.application.getState().runtimeDiagnostics).toEqual([]);
+
+    const enableRole = fieldControl(harness.host, 'enableRole');
+    enableRole.checked = false;
+    enableRole.dispatchEvent(new Event('change', { bubbles: true }));
+    const roleHost = field(harness.host, 'role');
+    const role = roleHost.querySelector('select');
+    const roleClear = [...roleHost.querySelectorAll('button')].find(
+      ({ textContent }) => textContent === 'Clear',
+    );
+    if (role === null || roleClear === undefined)
+      throw new Error('Expected conditional role controls.');
+    expect(role.disabled).toBe(true);
+    expect(roleClear.disabled).toBe(true);
+    expect(roleHost.hidden).toBe(false);
+    const historyBeforeDisabledEvents =
+      harness.application.getState().history.length;
+    role.value = 'admin';
+    role.dispatchEvent(new Event('change', { bubbles: true }));
+    role.dispatchEvent(new Event('focus'));
+    role.dispatchEvent(new Event('blur'));
+    roleClear.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(harness.application.getState().history).toHaveLength(
+      historyBeforeDisabledEvents,
+    );
+
+    const showDriver = fieldControl(harness.host, 'showDriver');
+    showDriver.checked = false;
+    showDriver.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(field(harness.host, 'driver').hidden).toBe(true);
+    expect(field(harness.host, 'drivenNote').hidden).toBe(false);
+    expect(snapshot('driver')).toMatchObject({
+      visible: false,
+      presence: { kind: 'value', value: false },
+    });
+    expect(snapshot('drivenNote')?.visible).toBe(true);
+
+    showDetails.checked = true;
+    showDetails.dispatchEvent(new Event('change', { bubbles: true }));
+    enableRole.checked = true;
+    enableRole.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(field(harness.host, 'displayName')).toBe(nameHost);
+    expect(fieldControl(harness.host, 'displayName')).toBe(name);
+    expect(nameHost.hidden).toBe(false);
+    expect(nameHost.hasAttribute('inert')).toBe(false);
+    expect(nameHost.hasAttribute('aria-hidden')).toBe(false);
+    expect(name.value).toBe('Grace');
+    expect(role.disabled).toBe(false);
+    expect(role.value).toBe('editor');
+  });
+
+  it('projects shared object composition through the independent Standard lane', () => {
+    const harness = mount('object-composition');
+    const state = harness.application.getState();
+
+    expect(
+      state.definition?.fields.map(({ name, required }) => ({
+        name,
+        required,
+      })),
+    ).toEqual([
+      { name: 'department', required: true },
+      { name: 'displayName', required: true },
+      { name: 'contactEmail', required: false },
+      { name: 'active', required: false },
+    ]);
+    expect(state.compilationDiagnostics).toEqual([]);
+    expect(state.runtimeDiagnostics).toEqual([]);
+    expect(
+      Array.from(
+        harness.host.querySelectorAll<HTMLElement>('[data-field-name]'),
+        ({ dataset }) => dataset['fieldName'],
+      ),
+    ).toEqual(['department', 'displayName', 'contactEmail', 'active']);
+    expect(fieldControl(harness.host, 'department').required).toBe(true);
+    fieldControl(harness.host, 'displayName').value = 'A';
+    fieldControl(harness.host, 'displayName').dispatchEvent(
+      new Event('input', { bubbles: true }),
+    );
+    fieldControl(harness.host, 'department').value = 'R';
+    fieldControl(harness.host, 'department').dispatchEvent(
+      new Event('input', { bubbles: true }),
+    );
+    expect(harness.application.getState().snapshot?.valid).toBe(false);
+    expect(
+      harness.application
+        .getState()
+        .snapshot?.fields.flatMap(({ issues }) => issues)
+        .map(({ code, path }) => ({ code, path })),
+    ).toEqual([
+      { code: 'minLength', path: ['department'] },
+      { code: 'minLength', path: ['displayName'] },
+    ]);
+    expect(harness.application.getState().baselineValue).toEqual(
+      state.scenario.initialState.baselineValue,
+    );
+  });
+
   it('builds labelled normalized controls once and reconciles confirmed values', () => {
     const harness = mount();
     const name = fieldControl(harness.host, 'name');
@@ -131,6 +453,161 @@ describe('StandardDomRenderer', () => {
         value: '2026-07-30T12:34:56+02:00',
       },
     ]);
+  });
+
+  it('projects fixed values independently with localized static semantics and zero intentions', () => {
+    const compiled = compileFormDefinition({
+      schema: {
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: {
+          label: {
+            type: 'string',
+            const: 'fixed',
+            description: 'Fixed description',
+          },
+          zero: { type: 'number', const: 0 },
+          flag: { type: 'boolean', const: false },
+          optional: { type: ['string', 'null'], const: null },
+          empty: { type: 'string', const: '' },
+          broken: { type: 'string', const: 'safe' },
+          parent: {
+            type: 'object',
+            properties: { child: { type: 'integer', const: 2 } },
+          },
+        },
+      },
+      uiSchema: { fields: { label: { hint: 'Fixed hint', tooltip: 'Info' } } },
+    });
+    if (!compiled.success) throw new Error('Expected fixed definition.');
+    const initialValue: Record<string, unknown> = {
+      label: '  other  ',
+      zero: -0,
+      flag: false,
+      optional: null,
+      empty: '',
+      broken: { hostile: true },
+    };
+    const created = createControlledFormRuntime({
+      formId: 'standard-fixed',
+      definition: compiled.definition,
+      schema: {},
+      value: initialValue,
+      baselineValue: initialValue,
+      locale: 'en',
+      validationVisibility: 'all',
+      validator: {
+        validate: () => ({
+          valid: false,
+          issues: [
+            {
+              code: 'const',
+              keyword: 'const',
+              path: ['label'],
+              parameters: { allowedValue: 'fixed' },
+            },
+          ],
+        }),
+      },
+    });
+    if (!created.success) throw new Error('Expected fixed runtime.');
+    const operations: FormOperation[] = [];
+    const subscription = created.runtime.subscribeOperations((operation) =>
+      operations.push(operation),
+    );
+    if (!subscription.success) throw new Error('Expected operation listener.');
+    const host = document.createElement('main');
+    document.body.append(host);
+    const renderer = new StandardDomRenderer(
+      host,
+      compiled.definition,
+      created.runtime,
+      { formId: 'standard-fixed' },
+    );
+    const reconcile = (): void =>
+      renderer.reconcile(created.runtime.getSnapshot());
+    reconcile();
+    disposals.push(() => {
+      subscription.unsubscribe();
+      renderer.dispose();
+      created.runtime.dispose();
+    });
+
+    const label = field(host, 'label');
+    const labelValue = label.querySelector<HTMLElement>('.fixed-value')!;
+    expect(label.getAttribute('role')).toBe('group');
+    expect(label.tabIndex).toBe(-1);
+    expect(label.getAttribute('aria-labelledby')).toBe(
+      label.querySelector('.field-label')?.id,
+    );
+    expect(label.getAttribute('aria-describedby')?.split(' ')).toEqual([
+      label.querySelector('.supporting-text')?.id,
+      [...label.querySelectorAll('.supporting-text')][1]?.id,
+      label.querySelector('.field-issues')?.id,
+    ]);
+    expect(label.getAttribute('aria-invalid')).toBe('true');
+    expect(label.hasAttribute('aria-required')).toBe(false);
+    expect(label.title).toBe('Info');
+    expect(labelValue.id.endsWith('-fixed-value')).toBe(true);
+    expect(labelValue.dataset['fixedValueState']).toBe('value');
+    expect(labelValue.textContent).toBe('  other  ');
+    expect(labelValue.classList.contains('fixed-value')).toBe(true);
+    expect(
+      label.querySelector('.field-issues:not([hidden])')?.textContent,
+    ).toBe('const');
+    expect(host.querySelector('input, select, button, [tabindex]')).toBeNull();
+    expect(fixedValue(host, 'zero')).toMatchObject({
+      textContent: '-0',
+      dataset: { fixedValueState: 'value' },
+    });
+    expect(fixedValue(host, 'flag').textContent).toBe('false');
+    expect(fixedValue(host, 'optional').textContent).toBe('Null value');
+    expect(fixedValue(host, 'empty').textContent).toBe('""');
+    expect(fixedValue(host, 'broken')).toMatchObject({
+      textContent: 'Incompatible value',
+      dataset: { fixedValueState: 'incompatible' },
+    });
+    expect(fixedValue(host, 'child')).toMatchObject({
+      textContent: 'Unavailable value',
+      dataset: { fixedValueState: 'unavailable' },
+    });
+
+    created.runtime.setValidationVisibility('touched');
+    reconcile();
+    expect(label.querySelector('.field-issues')?.hasAttribute('hidden')).toBe(
+      true,
+    );
+    expect(label.getAttribute('aria-describedby')?.split(' ')).toEqual([
+      label.querySelector('.supporting-text')?.id,
+      [...label.querySelectorAll('.supporting-text')][1]?.id,
+    ]);
+    expect(label.getAttribute('aria-invalid')).toBe('true');
+
+    created.runtime.updateExternalState({
+      value: { ...initialValue, label: undefined, parent: 'blocked' },
+      locale: 'es',
+    });
+    reconcile();
+    expect(fixedValue(host, 'label').textContent).toBe('Valor incompatible');
+    expect(fixedValue(host, 'child').textContent).toBe('Valor no disponible');
+    created.runtime.updateExternalState({
+      value: {
+        zero: -0,
+        flag: false,
+        optional: null,
+        empty: '',
+        broken: 'safe',
+      },
+      locale: 'fr',
+    });
+    reconcile();
+    expect(fixedValue(host, 'label')).toMatchObject({
+      textContent: 'Missing value',
+      dataset: { fixedValueState: 'missing' },
+    });
+    expect(operations).toEqual([]);
+    renderer.dispose();
+    expect(operations).toEqual([]);
   });
 
   it('reconciles string rejection without emitting during rendering', () => {
@@ -690,6 +1167,12 @@ function field(host: HTMLElement, key: string): HTMLElement {
   return element;
 }
 
+function fixedValue(host: HTMLElement, key: string): HTMLElement {
+  const value = field(host, key).querySelector<HTMLElement>('.fixed-value');
+  if (value === null) throw new Error(`Expected fixed value ${key}.`);
+  return value;
+}
+
 function item(host: HTMLElement, itemId: string): HTMLElement {
   const element = host.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
   if (element === null) throw new Error(`Expected item ${itemId}.`);
@@ -714,6 +1197,12 @@ function clickButton(container: HTMLElement, label: string): void {
   );
   if (target === undefined) throw new Error(`Expected button ${label}.`);
   target.click();
+}
+
+function selectedTokens(select: HTMLSelectElement): readonly string[] {
+  return Array.from(select.options)
+    .filter((candidate) => candidate.selected)
+    .map(({ value }) => value);
 }
 
 function labelledControl(host: HTMLElement, label: string): HTMLInputElement {

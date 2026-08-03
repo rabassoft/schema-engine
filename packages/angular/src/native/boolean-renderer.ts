@@ -24,6 +24,8 @@ import {
   FIELD_INSTANCE_CONTEXT,
   describedBy,
   fieldDisabled,
+  fieldInteractive,
+  fieldUnavailable,
   fieldIds,
 } from './common.js';
 
@@ -41,7 +43,7 @@ import {
         [attr.aria-describedby]="describedBy()"
         [attr.aria-invalid]="ariaInvalid()"
         (change)="onChange($event)"
-        (focus)="fieldFocus.emit()"
+        (focus)="onFocus()"
         (blur)="onBlur()"
       />
       <label [id]="ids().label" [for]="ids().control">{{
@@ -63,6 +65,7 @@ import {
         <button
           type="button"
           [id]="ids().setNull"
+          [disabled]="disabled()"
           [attr.aria-labelledby]="ids().setNull + ' ' + ids().label"
           (click)="onSetNull()"
         >
@@ -76,6 +79,7 @@ import {
         <button
           type="button"
           [id]="ids().clear"
+          [disabled]="disabled()"
           [attr.aria-labelledby]="ids().clear + ' ' + ids().label"
           (click)="onClear()"
         >
@@ -111,6 +115,7 @@ export class SchemaBooleanRendererComponent implements AngularFieldRenderer {
   protected readonly controlField = form(this.controlModel, (path) =>
     disabled(path, { when: () => fieldDisabled(this.snapshot()) }),
   );
+  protected readonly disabled = computed(() => fieldDisabled(this.snapshot()));
   protected readonly ids = computed(() =>
     fieldIds(this.formId(), this.field(), this.instanceContext?.address()),
   );
@@ -131,7 +136,7 @@ export class SchemaBooleanRendererComponent implements AngularFieldRenderer {
   protected readonly canSetNull = computed(
     () =>
       this.field().nullable &&
-      !fieldDisabled(this.snapshot()) &&
+      !fieldUnavailable(this.snapshot()) &&
       !this.confirmedNull(),
   );
   private readonly confirmedChecked = computed(() => {
@@ -144,20 +149,28 @@ export class SchemaBooleanRendererComponent implements AngularFieldRenderer {
   }
 
   protected onChange(event: Event): void {
+    if (!fieldInteractive(this.snapshot())) return;
     this.setValue.emit((event.target as HTMLInputElement).checked);
   }
 
   protected onBlur(): void {
     this.controlField().reset(this.confirmedChecked());
+    if (!fieldInteractive(this.snapshot())) return;
     this.fieldBlur.emit();
   }
 
+  protected onFocus(): void {
+    if (fieldInteractive(this.snapshot())) this.fieldFocus.emit();
+  }
+
   protected onClear(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     this.controlField().focusBoundControl();
     this.removeValue.emit();
   }
 
   protected onSetNull(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     try {
       this.controlField().focusBoundControl();
     } finally {

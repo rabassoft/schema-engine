@@ -6,6 +6,9 @@ import type {
   ReferenceInitialState,
   ReferenceScenario,
   ReferenceScenarioAuthoring,
+  ReferenceSchemaDefaults,
+  ReferenceScopeConfirmation,
+  ReferenceServiceValidation,
   ReferenceTransitionExpectation,
   ReferenceValidatorFunction,
 } from './contracts.js';
@@ -25,6 +28,13 @@ const FEATURES: ReadonlySet<ReferenceFeature> = new Set([
   'recursive-local-presentation',
   'nullable-leaves',
   'semantic-formats',
+  'fixed-values',
+  'object-composition',
+  'async-validation',
+  'scope-confirmation',
+  'schema-defaults',
+  'conditional-field-state',
+  'string-enum-array',
 ]);
 
 const SCENARIO_MEMBERS = Object.freeze([
@@ -108,7 +118,16 @@ export function defineReferenceCatalog(
 function defineScenario(value: unknown, index: number): ReferenceScenario {
   const basePath: ReferenceCatalogPath = [index];
   assertPlainRecord(value, basePath);
-  assertExactMembers(value, SCENARIO_MEMBERS, basePath);
+  assertAllowedMembers(
+    value,
+    [
+      ...SCENARIO_MEMBERS,
+      'serviceValidation',
+      'scopeConfirmation',
+      'schemaDefaults',
+    ],
+    basePath,
+  );
 
   const rawId = readRequired(value, 'id', basePath);
   const id = requireIdentifier(rawId, [...basePath, 'id']);
@@ -152,6 +171,40 @@ function defineScenario(value: unknown, index: number): ReferenceScenario {
     [...basePath, 'explanation'],
     id,
   );
+  const serviceValidation = readOptional(
+    value,
+    'serviceValidation',
+    basePath,
+    id,
+  );
+  const definedServiceValidation = serviceValidation.present
+    ? defineServiceValidation(
+        serviceValidation.value,
+        [...basePath, 'serviceValidation'],
+        id,
+      )
+    : undefined;
+  const scopeConfirmation = readOptional(
+    value,
+    'scopeConfirmation',
+    basePath,
+    id,
+  );
+  const definedScopeConfirmation = scopeConfirmation.present
+    ? defineScopeConfirmation(
+        scopeConfirmation.value,
+        [...basePath, 'scopeConfirmation'],
+        id,
+      )
+    : undefined;
+  const schemaDefaults = readOptional(value, 'schemaDefaults', basePath, id);
+  const definedSchemaDefaults = schemaDefaults.present
+    ? defineSchemaDefaults(
+        schemaDefaults.value,
+        [...basePath, 'schemaDefaults'],
+        id,
+      )
+    : undefined;
 
   return Object.freeze({
     id,
@@ -163,7 +216,242 @@ function defineScenario(value: unknown, index: number): ReferenceScenario {
     validator,
     transitions,
     explanation,
+    ...(definedServiceValidation === undefined
+      ? {}
+      : { serviceValidation: definedServiceValidation }),
+    ...(definedScopeConfirmation === undefined
+      ? {}
+      : { scopeConfirmation: definedScopeConfirmation }),
+    ...(definedSchemaDefaults === undefined
+      ? {}
+      : { schemaDefaults: definedSchemaDefaults }),
   });
+}
+
+function defineSchemaDefaults(
+  value: unknown,
+  path: ReferenceCatalogPath,
+  scenarioId: string,
+): ReferenceSchemaDefaults {
+  const copy = copyJsonCompatible(value, path, scenarioId);
+  assertPlainRecord(copy, path, scenarioId);
+  assertExactMembers(copy, ['labels'], path, scenarioId);
+  const labels = readRequired(copy, 'labels', path, scenarioId);
+  assertPlainRecord(labels, [...path, 'labels'], scenarioId);
+  const members = [
+    'heading',
+    'guidance',
+    'derive',
+    'cancel',
+    'accept',
+  ] as const;
+  assertExactMembers(labels, members, [...path, 'labels'], scenarioId);
+  for (const member of members) {
+    requireNonBlank(
+      readRequired(labels, member, [...path, 'labels'], scenarioId),
+      [...path, 'labels', member],
+      scenarioId,
+    );
+  }
+  return copy as unknown as ReferenceSchemaDefaults;
+}
+
+function defineScopeConfirmation(
+  value: unknown,
+  path: ReferenceCatalogPath,
+  scenarioId: string,
+): ReferenceScopeConfirmation {
+  const copy = copyJsonCompatible(value, path, scenarioId);
+  assertPlainRecord(copy, path, scenarioId);
+  assertExactMembers(copy, ['labels', 'targets'], path, scenarioId);
+  const labels = readRequired(copy, 'labels', path, scenarioId);
+  assertPlainRecord(labels, [...path, 'labels'], scenarioId);
+  const labelMembers = ['heading', 'guidance', 'accept'] as const;
+  assertExactMembers(labels, labelMembers, [...path, 'labels'], scenarioId);
+  for (const member of labelMembers) {
+    requireNonBlank(
+      readRequired(labels, member, [...path, 'labels'], scenarioId),
+      [...path, 'labels', member],
+      scenarioId,
+    );
+  }
+
+  const targets = readRequired(copy, 'targets', path, scenarioId);
+  if (!isUnknownArray(targets) || targets.length === 0) {
+    fail('invalid-member', [...path, 'targets'], scenarioId);
+  }
+  const ids = new Set<string>();
+  for (let index = 0; index < targets.length; index += 1) {
+    const targetPath: ReferenceCatalogPath = [...path, 'targets', index];
+    const target = targets[index];
+    assertPlainRecord(target, targetPath, scenarioId);
+    assertExactMembers(
+      target,
+      ['id', 'label', 'scope', 'expectation'],
+      targetPath,
+      scenarioId,
+    );
+    const id = requireIdentifier(
+      readRequired(target, 'id', targetPath, scenarioId),
+      [...targetPath, 'id'],
+      scenarioId,
+    );
+    if (ids.has(id)) fail('duplicate-id', [...targetPath, 'id'], scenarioId);
+    ids.add(id);
+    requireNonBlank(
+      readRequired(target, 'label', targetPath, scenarioId),
+      [...targetPath, 'label'],
+      scenarioId,
+    );
+    const expectation = readRequired(
+      target,
+      'expectation',
+      targetPath,
+      scenarioId,
+    );
+    if (
+      expectation !== 'candidate-and-acceptance-leaves-unrelated-dirty' &&
+      expectation !== 'unconfirmable'
+    ) {
+      fail('invalid-member', [...targetPath, 'expectation'], scenarioId);
+    }
+    defineScope(
+      readRequired(target, 'scope', targetPath, scenarioId),
+      [...targetPath, 'scope'],
+      scenarioId,
+    );
+  }
+  return copy as unknown as ReferenceScopeConfirmation;
+}
+
+function defineScope(
+  value: unknown,
+  path: ReferenceCatalogPath,
+  scenarioId: string,
+): void {
+  assertPlainRecord(value, path, scenarioId);
+  assertAllowedMembers(
+    value,
+    ['id', 'paths', 'includeGlobalIssues'],
+    path,
+    scenarioId,
+  );
+  requireIdentifier(
+    readRequired(value, 'id', path, scenarioId),
+    [...path, 'id'],
+    scenarioId,
+  );
+  const paths = readRequired(value, 'paths', path, scenarioId);
+  if (!isUnknownArray(paths) || paths.length === 0) {
+    fail('invalid-member', [...path, 'paths'], scenarioId);
+  }
+  for (let index = 0; index < paths.length; index += 1) {
+    const target = paths[index];
+    const targetPath: ReferenceCatalogPath = [...path, 'paths', index];
+    if (isUnknownArray(target)) {
+      if (target.length === 0) {
+        fail('invalid-member', targetPath, scenarioId);
+      }
+      validatePath(target, targetPath, scenarioId);
+      continue;
+    }
+    assertPlainRecord(target, targetPath, scenarioId);
+    assertAllowedMembers(
+      target,
+      ['collectionPath', 'itemId', 'relativePath'],
+      targetPath,
+      scenarioId,
+    );
+    const collectionPath = readRequired(
+      target,
+      'collectionPath',
+      targetPath,
+      scenarioId,
+    );
+    if (isUnknownArray(collectionPath) && collectionPath.length === 0) {
+      fail('invalid-member', [...targetPath, 'collectionPath'], scenarioId);
+    }
+    validatePath(collectionPath, [...targetPath, 'collectionPath'], scenarioId);
+    requireNonBlank(
+      readRequired(target, 'itemId', targetPath, scenarioId),
+      [...targetPath, 'itemId'],
+      scenarioId,
+    );
+    const relativePath = readOptional(
+      target,
+      'relativePath',
+      targetPath,
+      scenarioId,
+    );
+    if (relativePath.present) {
+      validatePath(
+        relativePath.value,
+        [...targetPath, 'relativePath'],
+        scenarioId,
+      );
+    }
+  }
+  const includeGlobalIssues = readOptional(
+    value,
+    'includeGlobalIssues',
+    path,
+    scenarioId,
+  );
+  if (
+    includeGlobalIssues.present &&
+    typeof includeGlobalIssues.value !== 'boolean'
+  ) {
+    fail('invalid-member', [...path, 'includeGlobalIssues'], scenarioId);
+  }
+}
+
+function defineServiceValidation(
+  value: unknown,
+  path: ReferenceCatalogPath,
+  scenarioId: string,
+): ReferenceServiceValidation {
+  const copy = copyJsonCompatible(value, path, scenarioId);
+  assertPlainRecord(copy, path, scenarioId);
+  assertExactMembers(copy, ['fieldPath', 'issue', 'labels'], path, scenarioId);
+  validatePath(
+    readRequired(copy, 'fieldPath', path, scenarioId),
+    [...path, 'fieldPath'],
+    scenarioId,
+  );
+  const issue = readRequired(copy, 'issue', path, scenarioId);
+  assertPlainRecord(issue, [...path, 'issue'], scenarioId);
+  assertExactMembers(
+    issue,
+    ['code', 'keyword', 'fallbackMessage'],
+    [...path, 'issue'],
+    scenarioId,
+  );
+  for (const member of ['code', 'keyword', 'fallbackMessage'] as const) {
+    requireNonBlank(
+      readRequired(issue, member, [...path, 'issue'], scenarioId),
+      [...path, 'issue', member],
+      scenarioId,
+    );
+  }
+  const labels = readRequired(copy, 'labels', path, scenarioId);
+  const labelMembers = [
+    'heading',
+    'settleValid',
+    'settleInvalid',
+    'reject',
+    'throwNext',
+    'retry',
+  ] as const;
+  assertPlainRecord(labels, [...path, 'labels'], scenarioId);
+  assertExactMembers(labels, labelMembers, [...path, 'labels'], scenarioId);
+  for (const member of labelMembers) {
+    requireNonBlank(
+      readRequired(labels, member, [...path, 'labels'], scenarioId),
+      [...path, 'labels', member],
+      scenarioId,
+    );
+  }
+  return copy as unknown as ReferenceServiceValidation;
 }
 
 function defineFeatures(

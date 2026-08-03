@@ -45,9 +45,15 @@ export type NestedDefinitionReason =
   | 'unknown-presented-node'
   | 'duplicate-presented-node'
   | 'missing-presented-node'
+  | 'invalid-string-enum-array-field'
   | 'invalid-field-nullable'
   | 'invalid-field-fixed-value'
-  | 'incompatible-field-capabilities';
+  | 'incompatible-field-capabilities'
+  | 'invalid-field-condition'
+  | 'unsupported-field-condition-location'
+  | 'field-condition-target-incompatible'
+  | 'field-condition-source-not-managed'
+  | 'field-condition-literal-incompatible';
 
 export interface NestedDefinitionDefect {
   readonly reason: NestedDefinitionReason;
@@ -62,12 +68,36 @@ export interface NestedDefinitionDefect {
   readonly presentationOwnerKind?: 'object' | 'item' | 'template-object';
   readonly presentationOwnerPath?: readonly string[];
   readonly presentationTemplatePath?: readonly string[];
-  readonly member?: 'nullable' | 'fixedValue';
+  readonly member?:
+    | 'nullable'
+    | 'placeholder'
+    | 'fixedValue'
+    | 'visibleWhen'
+    | 'enabledWhen'
+    | 'choices'
+    | `choices.${number}`
+    | `choices.${number}.value`
+    | `choices.${number}.label`;
   readonly expected?: string;
   readonly actualType?: string;
   readonly actualValue?: unknown;
   readonly members?:
     readonly ['nullable', 'choices'] | readonly ['fixedValue', 'choices'];
+  readonly conditionMember?: 'visibleWhen' | 'enabledWhen';
+  readonly conditionReason?:
+    'not-object' | 'member-missing' | 'member-accessor' | 'member-invalid';
+  readonly conditionDetailMember?: 'sourcePath' | 'equals';
+  readonly conditionExpected?: string;
+  readonly conditionActualType?: string;
+  readonly conditionActualLength?: number;
+  readonly conditionIndex?: number;
+  readonly conditionPathKey?: string;
+  readonly sourcePath?: readonly string[];
+  readonly sourceReason?: 'unmanaged' | 'object' | 'array' | 'below-collection';
+  readonly sourceKind?: 'string' | 'number' | 'integer' | 'boolean';
+  readonly sourceNullable?: boolean;
+  readonly conditionTargetCapability?: 'fixed-value';
+  readonly conditionLocation?: 'template-field';
 }
 
 export type NestedDefinitionValidationResult =
@@ -92,6 +122,37 @@ interface ExitFrame {
 }
 
 type Frame = EnterFrame | ExitFrame;
+
+type DefinitionConditionMember = 'visibleWhen' | 'enabledWhen';
+
+type CapturedDefinitionCondition =
+  | { readonly kind: 'accessor' }
+  | { readonly kind: 'value'; readonly value: unknown };
+
+interface DefinitionFieldConditionTarget {
+  readonly field: object;
+  readonly nodeIndexPath: readonly number[];
+  readonly path: readonly string[];
+  readonly kind: 'string' | 'number' | 'integer' | 'boolean';
+  readonly nullable: boolean;
+  readonly fixed: boolean;
+  readonly visibleWhen: CapturedDefinitionCondition | undefined;
+  readonly enabledWhen: CapturedDefinitionCondition | undefined;
+}
+
+interface DefinitionTemplateConditionTarget {
+  readonly templateIndexPath: readonly number[];
+  readonly relativePath: readonly string[];
+  readonly visibleWhen: CapturedDefinitionCondition | undefined;
+  readonly enabledWhen: CapturedDefinitionCondition | undefined;
+}
+
+interface DetachedDefinitionCondition {
+  readonly target: DefinitionFieldConditionTarget;
+  readonly member: DefinitionConditionMember;
+  readonly sourcePath: readonly string[];
+  readonly equals: string | number | boolean | null;
+}
 
 export function validateNestedFormDefinition(
   value: unknown,
@@ -152,6 +213,11 @@ function collectFormDefinitionDefects(
   const firstPath = new Map<string, readonly number[]>();
   const stack: Frame[] = [];
   const defects: NestedDefinitionDefect[] = [];
+  const fieldConditionTargets: DefinitionFieldConditionTarget[] = [];
+  const templateConditionTargets: DefinitionTemplateConditionTarget[] = [];
+  const objectPaths = new Set<string>();
+  const arrayPaths = new Set<string>();
+  const collectionPaths: (readonly string[])[] = [];
 
   for (let index = nodes.length - 1; index >= 0; index -= 1) {
     const member = readOwnDataMember(nodes, String(index));
@@ -224,7 +290,8 @@ function collectFormDefinitionDefects(
       if (
         inspected.reason === 'invalid-field-nullable' ||
         inspected.reason === 'invalid-field-fixed-value' ||
-        inspected.reason === 'incompatible-field-capabilities'
+        inspected.reason === 'incompatible-field-capabilities' ||
+        inspected.reason === 'invalid-string-enum-array-field'
       ) {
         leaves.push(node as FieldDefinition);
       }
@@ -249,20 +316,30 @@ function collectFormDefinitionDefects(
 
     if (inspected.kind === 'field') {
       leaves.push(node as FieldDefinition);
+      if (readValue(node, 'kind') !== 'string-enum-array') {
+        fieldConditionTargets.push(
+          captureFieldConditionTarget(node, frame.indexPath, inspected.path),
+        );
+      }
       continue;
     }
 
     if (inspected.kind === 'array') {
+      arrayPaths.add(canonicalDataPathKey(inspected.path));
+      collectionPaths.push(inspected.path);
       defects.push(
         ...collectTemplateDefects(
           inspected.item.children,
           inspected.item.fields,
           inspected.path,
           inspected.identityProperty,
+          templateConditionTargets,
         ),
       );
       continue;
     }
+
+    objectPaths.add(canonicalDataPathKey(inspected.path));
 
     for (let index = inspected.children.length - 1; index >= 0; index -= 1) {
       const member = readOwnDataMember(inspected.children, String(index));
@@ -295,6 +372,25 @@ function collectFormDefinitionDefects(
   if (defects.length === 0) {
     defects.push(...collectPresentationDefects(value, nodes));
     defects.push(...collectLocalPresentationDefects(nodes));
+  }
+
+  const baseDefinitionValid = defects.length === 0;
+  const detachedConditions: DetachedDefinitionCondition[] = [];
+  collectDefinitionConditionShapeDefects(
+    fieldConditionTargets,
+    templateConditionTargets,
+    detachedConditions,
+    defects,
+  );
+  if (baseDefinitionValid && defects.length === 0) {
+    collectDefinitionConditionSemanticDefects(
+      detachedConditions,
+      fieldConditionTargets,
+      objectPaths,
+      arrayPaths,
+      collectionPaths,
+      defects,
+    );
   }
 
   return Object.freeze(defects);
@@ -907,7 +1003,7 @@ type InspectedNode =
       readonly success: false;
       readonly reason: NestedDefinitionReason;
       readonly path?: readonly string[];
-      readonly member?: 'nullable' | 'fixedValue';
+      readonly member?: NestedDefinitionDefect['member'];
       readonly expected?: string;
       readonly actualType?: string;
       readonly actualValue?: unknown;
@@ -938,7 +1034,14 @@ function inspectNode(
 
   if (
     typeof kind !== 'string' ||
-    !['object', 'array', 'string', 'number', 'boolean'].includes(kind) ||
+    ![
+      'object',
+      'array',
+      'string',
+      'number',
+      'boolean',
+      'string-enum-array',
+    ].includes(kind) ||
     typeof name !== 'string' ||
     typeof key !== 'string' ||
     path === undefined ||
@@ -954,7 +1057,12 @@ function inspectNode(
   ) {
     return {
       success: false,
-      reason: kind === 'array' ? 'invalid-array-node' : 'invalid-node',
+      reason:
+        kind === 'array'
+          ? 'invalid-array-node'
+          : kind === 'string-enum-array'
+            ? 'invalid-string-enum-array-field'
+            : 'invalid-node',
       ...(path === undefined ? {} : { path }),
     };
   }
@@ -996,6 +1104,18 @@ function inspectNode(
       identityProperty,
       item: { children, fields },
     };
+  }
+
+  if (kind === 'string-enum-array') {
+    const defect = inspectStringEnumArrayField(node);
+    return defect === undefined
+      ? { success: true, kind: 'field', key, path }
+      : {
+          success: false,
+          reason: 'invalid-string-enum-array-field',
+          path,
+          ...defect,
+        };
   }
 
   if (!validOptionalText(node, 'placeholder')) {
@@ -1040,6 +1160,7 @@ function collectTemplateDefects(
   fields: readonly unknown[],
   collectionPath: readonly string[],
   identityProperty: string,
+  conditionTargets: DefinitionTemplateConditionTarget[],
 ): readonly NestedDefinitionDefect[] {
   const leaves: object[] = [];
   const leafIndexPaths: (readonly number[])[] = [];
@@ -1173,6 +1294,17 @@ function collectTemplateDefects(
     if (inspected.kind === 'field') {
       leaves.push(template);
       leafIndexPaths.push(frame.indexPath);
+      const conditions = captureConditionMembers(template);
+      if (
+        conditions.visibleWhen !== undefined ||
+        conditions.enabledWhen !== undefined
+      ) {
+        conditionTargets.push({
+          templateIndexPath: frame.indexPath,
+          relativePath: inspected.relativePath,
+          ...conditions,
+        });
+      }
       continue;
     }
     for (let index = inspected.children.length - 1; index >= 0; index -= 1) {
@@ -1327,6 +1459,342 @@ function inspectTemplateNode(
     return { success: false, relativePath, ...fixedValueDefect };
   }
   return { success: true, kind: 'field', key, relativePath };
+}
+
+function captureConditionMembers(node: object): {
+  readonly visibleWhen: CapturedDefinitionCondition | undefined;
+  readonly enabledWhen: CapturedDefinitionCondition | undefined;
+} {
+  const capture = (
+    member: DefinitionConditionMember,
+  ): CapturedDefinitionCondition | undefined => {
+    const descriptor = Object.getOwnPropertyDescriptor(node, member);
+    if (descriptor === undefined) return undefined;
+    return 'value' in descriptor
+      ? { kind: 'value', value: descriptor.value as unknown }
+      : { kind: 'accessor' };
+  };
+  const visibleWhen = capture('visibleWhen');
+  const enabledWhen = capture('enabledWhen');
+  return { visibleWhen, enabledWhen };
+}
+
+function captureFieldConditionTarget(
+  field: object,
+  nodeIndexPath: readonly number[],
+  path: readonly string[],
+): DefinitionFieldConditionTarget {
+  const rawKind = readValue(field, 'kind');
+  const kind =
+    rawKind === 'number'
+      ? (readValue(field, 'numericType') as 'number' | 'integer')
+      : (rawKind as 'string' | 'boolean');
+  const nullable = readValue(field, 'nullable') === true;
+  const fixed = readOwnDataMember(field, 'fixedValue').kind === 'value';
+  return {
+    field,
+    nodeIndexPath,
+    path,
+    kind,
+    nullable,
+    fixed,
+    ...captureConditionMembers(field),
+  };
+}
+
+function collectDefinitionConditionShapeDefects(
+  fields: readonly DefinitionFieldConditionTarget[],
+  templates: readonly DefinitionTemplateConditionTarget[],
+  detached: DetachedDefinitionCondition[],
+  defects: NestedDefinitionDefect[],
+): void {
+  for (const target of fields) {
+    for (const member of ['visibleWhen', 'enabledWhen'] as const) {
+      const capture = target[member];
+      if (capture === undefined) continue;
+      const condition = inspectDefinitionConditionShape(
+        capture,
+        target,
+        member,
+        defects,
+      );
+      if (condition !== undefined) detached.push(condition);
+    }
+  }
+  for (const target of templates) {
+    for (const member of ['visibleWhen', 'enabledWhen'] as const) {
+      if (target[member] === undefined) continue;
+      defects.push(
+        makeDefect('unsupported-field-condition-location', {
+          templateIndexPath: target.templateIndexPath,
+          relativePath: target.relativePath,
+          conditionMember: member,
+          conditionLocation: 'template-field',
+        }),
+      );
+    }
+  }
+}
+
+function inspectDefinitionConditionShape(
+  capture: CapturedDefinitionCondition,
+  target: DefinitionFieldConditionTarget,
+  member: DefinitionConditionMember,
+  defects: NestedDefinitionDefect[],
+): DetachedDefinitionCondition | undefined {
+  const push = (
+    conditionReason: NonNullable<NestedDefinitionDefect['conditionReason']>,
+    details: Omit<
+      NestedDefinitionDefect,
+      | 'reason'
+      | 'nodeIndexPath'
+      | 'path'
+      | 'conditionMember'
+      | 'conditionReason'
+    > = {},
+  ): void => {
+    defects.push(
+      makeDefect('invalid-field-condition', {
+        nodeIndexPath: target.nodeIndexPath,
+        path: target.path,
+        conditionMember: member,
+        conditionReason,
+        ...details,
+      }),
+    );
+  };
+  if (capture.kind === 'accessor') {
+    push('member-accessor', { conditionExpected: 'condition object' });
+    return undefined;
+  }
+  if (!isOrdinaryObject(capture.value)) {
+    push('not-object', {
+      conditionExpected: 'condition object',
+      conditionActualType: actualType(capture.value),
+    });
+    return undefined;
+  }
+
+  const condition = capture.value;
+  let valid = true;
+  let sourcePath: string[] | undefined;
+  let equals: string | number | boolean | null | undefined;
+  let equalsValid = false;
+  const sourcePathMember = readOwnDataMember(condition, 'sourcePath');
+  if (sourcePathMember.kind === 'missing') {
+    valid = false;
+    push('member-missing', {
+      conditionDetailMember: 'sourcePath',
+      conditionExpected: 'non-empty dense string path',
+    });
+  } else if (sourcePathMember.kind === 'accessor') {
+    valid = false;
+    push('member-accessor', {
+      conditionDetailMember: 'sourcePath',
+      conditionExpected: 'non-empty dense string path',
+    });
+  } else if (!Array.isArray(sourcePathMember.value)) {
+    valid = false;
+    push('member-invalid', {
+      conditionDetailMember: 'sourcePath',
+      conditionExpected: 'non-empty dense string path',
+      conditionActualType: actualType(sourcePathMember.value),
+    });
+  } else {
+    const path = sourcePathMember.value;
+    const length = Object.getOwnPropertyDescriptor(path, 'length');
+    if (
+      length === undefined ||
+      !('value' in length) ||
+      !Number.isInteger(length.value) ||
+      (length.value as number) <= 0
+    ) {
+      valid = false;
+      push('member-invalid', {
+        conditionDetailMember: 'sourcePath',
+        conditionExpected: 'non-empty dense string path',
+        conditionActualType: 'array',
+        conditionActualLength:
+          length !== undefined &&
+          'value' in length &&
+          typeof length.value === 'number'
+            ? length.value
+            : 0,
+      });
+    } else {
+      sourcePath = [];
+      for (let index = 0; index < length.value; index += 1) {
+        const entry = Object.getOwnPropertyDescriptor(path, index);
+        if (entry === undefined || !entry.enumerable) {
+          valid = false;
+          push('member-invalid', {
+            conditionDetailMember: 'sourcePath',
+            conditionExpected: 'string path segment',
+            conditionIndex: index,
+          });
+        } else if (!('value' in entry)) {
+          valid = false;
+          push('member-accessor', {
+            conditionDetailMember: 'sourcePath',
+            conditionExpected: 'string path segment',
+            conditionIndex: index,
+          });
+        } else if (typeof entry.value !== 'string') {
+          valid = false;
+          push('member-invalid', {
+            conditionDetailMember: 'sourcePath',
+            conditionExpected: 'string path segment',
+            conditionActualType: actualType(entry.value),
+            conditionIndex: index,
+          });
+        } else sourcePath.push(entry.value);
+      }
+      for (const key of Object.keys(path)) {
+        if (/^(0|[1-9]\d*)$/.test(key) && Number(key) < length.value) continue;
+        valid = false;
+        push('member-invalid', {
+          conditionDetailMember: 'sourcePath',
+          conditionExpected: 'non-empty dense string path',
+          conditionActualType: 'array',
+          conditionPathKey: key,
+        });
+      }
+    }
+  }
+
+  const equalsMember = readOwnDataMember(condition, 'equals');
+  if (equalsMember.kind === 'missing') {
+    valid = false;
+    push('member-missing', {
+      conditionDetailMember: 'equals',
+      conditionExpected: 'string, finite number, boolean or null',
+    });
+  } else if (equalsMember.kind === 'accessor') {
+    valid = false;
+    push('member-accessor', {
+      conditionDetailMember: 'equals',
+      conditionExpected: 'string, finite number, boolean or null',
+    });
+  } else if (
+    equalsMember.value === null ||
+    typeof equalsMember.value === 'string' ||
+    typeof equalsMember.value === 'boolean' ||
+    (typeof equalsMember.value === 'number' &&
+      Number.isFinite(equalsMember.value))
+  ) {
+    equals = equalsMember.value;
+    equalsValid = true;
+  } else {
+    valid = false;
+    push('member-invalid', {
+      conditionDetailMember: 'equals',
+      conditionExpected: 'string, finite number, boolean or null',
+      conditionActualType: actualType(equalsMember.value),
+    });
+  }
+
+  return valid && sourcePath !== undefined && equalsValid
+    ? {
+        target,
+        member,
+        sourcePath: Object.freeze(sourcePath),
+        equals: equals as string | number | boolean | null,
+      }
+    : undefined;
+}
+
+function collectDefinitionConditionSemanticDefects(
+  conditions: readonly DetachedDefinitionCondition[],
+  fields: readonly DefinitionFieldConditionTarget[],
+  objectPaths: ReadonlySet<string>,
+  arrayPaths: ReadonlySet<string>,
+  collectionPaths: readonly (readonly string[])[],
+  defects: NestedDefinitionDefect[],
+): void {
+  const sources = new Map(
+    fields.map((field) => [canonicalDataPathKey(field.path), field] as const),
+  );
+  for (const condition of conditions) {
+    const base = {
+      nodeIndexPath: condition.target.nodeIndexPath,
+      path: condition.target.path,
+      conditionMember: condition.member,
+    } as const;
+    if (condition.member === 'enabledWhen' && condition.target.fixed) {
+      defects.push(
+        makeDefect('field-condition-target-incompatible', {
+          ...base,
+          conditionTargetCapability: 'fixed-value',
+        }),
+      );
+      continue;
+    }
+    const sourceKey = canonicalDataPathKey(condition.sourcePath);
+    const source = sources.get(sourceKey);
+    if (source === undefined) {
+      const sourceReason = objectPaths.has(sourceKey)
+        ? 'object'
+        : arrayPaths.has(sourceKey)
+          ? 'array'
+          : collectionPaths.some(
+                (path) =>
+                  condition.sourcePath.length > path.length &&
+                  path.every(
+                    (segment, index) => condition.sourcePath[index] === segment,
+                  ),
+              )
+            ? 'below-collection'
+            : 'unmanaged';
+      defects.push(
+        makeDefect('field-condition-source-not-managed', {
+          ...base,
+          sourcePath: condition.sourcePath,
+          sourceReason,
+        }),
+      );
+      continue;
+    }
+    if (!definitionConditionLiteralCompatible(source, condition.equals)) {
+      defects.push(
+        makeDefect('field-condition-literal-incompatible', {
+          ...base,
+          sourcePath: condition.sourcePath,
+          sourceKind: source.kind,
+          sourceNullable: source.nullable,
+          conditionExpected: definitionConditionExpected(source),
+          conditionActualType: actualType(condition.equals),
+        }),
+      );
+    }
+  }
+}
+
+function definitionConditionLiteralCompatible(
+  source: DefinitionFieldConditionTarget,
+  value: string | number | boolean | null,
+): boolean {
+  if (value === null) return source.nullable;
+  if (source.kind === 'string') return typeof value === 'string';
+  if (source.kind === 'boolean') return typeof value === 'boolean';
+  return (
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    (source.kind === 'number' || Number.isInteger(value))
+  );
+}
+
+function definitionConditionExpected(
+  source: DefinitionFieldConditionTarget,
+): string {
+  const primitive =
+    source.kind === 'string'
+      ? 'string'
+      : source.kind === 'boolean'
+        ? 'boolean'
+        : source.kind === 'integer'
+          ? 'finite integer'
+          : 'finite number';
+  return source.nullable ? `${primitive} or null` : primitive;
 }
 
 function inspectNullableCapability(node: object):
@@ -1521,6 +1989,116 @@ function validNumberField(node: object): boolean {
     isOrdinaryObject(constraints) &&
     isOrdinaryObject(ui)
   );
+}
+
+function inspectStringEnumArrayField(node: object):
+  | {
+      readonly member: NonNullable<NestedDefinitionDefect['member']>;
+      readonly expected: string;
+      readonly actualType: string;
+    }
+  | undefined {
+  const nullable = readOwnDataMember(node, 'nullable');
+  if (nullable.kind !== 'value' || nullable.value !== false) {
+    return {
+      member: 'nullable',
+      expected: 'false',
+      actualType:
+        nullable.kind === 'missing'
+          ? 'missing'
+          : nullable.kind === 'accessor'
+            ? 'accessor'
+            : actualType(nullable.value),
+    };
+  }
+
+  for (const memberName of [
+    'placeholder',
+    'fixedValue',
+    'visibleWhen',
+    'enabledWhen',
+  ] as const) {
+    const member = readOwnDataMember(node, memberName);
+    if (member.kind !== 'missing') {
+      return {
+        member: memberName,
+        expected: 'absent',
+        actualType:
+          member.kind === 'accessor' ? 'accessor' : actualType(member.value),
+      };
+    }
+  }
+
+  const choices = readOwnDataMember(node, 'choices');
+  if (
+    choices.kind !== 'value' ||
+    !Array.isArray(choices.value) ||
+    choices.value.length === 0
+  ) {
+    return {
+      member: 'choices',
+      expected: 'non-empty dense array of unique string choices',
+      actualType:
+        choices.kind === 'missing'
+          ? 'missing'
+          : choices.kind === 'accessor'
+            ? 'accessor'
+            : actualType(choices.value),
+    };
+  }
+
+  const seen = new Set<string>();
+  for (let index = 0; index < choices.value.length; index += 1) {
+    const choice = readOwnDataMember(choices.value, String(index));
+    if (choice.kind !== 'value' || !isOrdinaryObject(choice.value)) {
+      return {
+        member: `choices.${index}`,
+        expected: 'ordinary choice object',
+        actualType:
+          choice.kind === 'missing'
+            ? 'missing'
+            : choice.kind === 'accessor'
+              ? 'accessor'
+              : actualType(choice.value),
+      };
+    }
+    const value = readOwnDataMember(choice.value, 'value');
+    if (
+      value.kind !== 'value' ||
+      typeof value.value !== 'string' ||
+      seen.has(value.value)
+    ) {
+      return {
+        member: `choices.${index}.value`,
+        expected: 'own unique string',
+        actualType:
+          value.kind === 'missing'
+            ? 'missing'
+            : value.kind === 'accessor'
+              ? 'accessor'
+              : actualType(value.value),
+      };
+    }
+    seen.add(value.value);
+    const label = readOwnDataMember(choice.value, 'label');
+    if (
+      label.kind !== 'value' ||
+      typeof label.value !== 'string' ||
+      label.value.trim().length === 0
+    ) {
+      return {
+        member: `choices.${index}.label`,
+        expected: 'own non-blank string',
+        actualType:
+          label.kind === 'missing'
+            ? 'missing'
+            : label.kind === 'accessor'
+              ? 'accessor'
+              : actualType(label.value),
+      };
+    }
+  }
+  return undefined;
 }
 
 function validOptionalText(node: object, key: string): boolean {

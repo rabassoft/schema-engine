@@ -25,6 +25,7 @@ import {
   FIELD_INSTANCE_CONTEXT,
   describedBy,
   fieldDisabled,
+  fieldInteractive,
   fieldIds,
 } from './common.js';
 
@@ -60,7 +61,7 @@ const choiceTokenPrefix = 'choice:';
         [attr.aria-invalid]="ariaInvalid()"
         [attr.aria-required]="field().required ? 'true' : null"
         (change)="onChange($event)"
-        (focus)="fieldFocus.emit()"
+        (focus)="onFocus()"
         (blur)="onBlur()"
       >
         <option value="" disabled>
@@ -76,6 +77,7 @@ const choiceTokenPrefix = 'choice:';
         <button
           type="button"
           [id]="ids().clear"
+          [disabled]="disabled()"
           [attr.aria-labelledby]="ids().clear + ' ' + ids().label"
           (click)="onClear()"
         >
@@ -111,6 +113,7 @@ export class SchemaStringEnumRendererComponent implements AngularFieldRenderer {
   protected readonly controlField = form(this.controlModel, (path) =>
     disabled(path, { when: () => fieldDisabled(this.snapshot()) }),
   );
+  protected readonly disabled = computed(() => fieldDisabled(this.snapshot()));
   protected readonly choices = computed(() => ownChoices(this.field()));
   protected readonly ids = computed(() =>
     fieldIds(this.formId(), this.field(), this.instanceContext?.address()),
@@ -138,6 +141,7 @@ export class SchemaStringEnumRendererComponent implements AngularFieldRenderer {
   }
 
   protected onChange(event: Event): void {
+    if (!fieldInteractive(this.snapshot())) return;
     const token = (event.target as HTMLSelectElement).value;
     const index = choiceIndex(token, this.choices().length);
     if (index === undefined) return;
@@ -146,10 +150,16 @@ export class SchemaStringEnumRendererComponent implements AngularFieldRenderer {
 
   protected onBlur(): void {
     this.controlField().reset(this.confirmedToken());
+    if (!fieldInteractive(this.snapshot())) return;
     this.fieldBlur.emit();
   }
 
+  protected onFocus(): void {
+    if (fieldInteractive(this.snapshot())) this.fieldFocus.emit();
+  }
+
   protected onClear(): void {
+    if (!fieldInteractive(this.snapshot())) return;
     this.controlField().focusBoundControl();
     this.removeValue.emit();
   }

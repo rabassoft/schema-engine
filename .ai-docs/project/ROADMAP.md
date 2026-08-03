@@ -640,7 +640,7 @@ separado antes de repetir la revisión.
   705 pruebas, builds, paquetes/fuentes, políticas/seguridad, 550 límites y
   ambos suites Chromium sin hallazgos; M24 queda completado sin release.
 
-### M25 — `const` primitivo y presentación fija — contrato aceptado
+### M25 — `const` primitivo y presentación fija — completado
 
 - Ricard selecciona D-036 como siguiente capacidad funcional.
 - Review 218 ciclo 1 delimita el slice primitivo y Ricard acepta presentación
@@ -650,18 +650,254 @@ separado antes de repetir la revisión.
 - SPEC-011 v0.1.0 queda Accepted tras corregir ocho hallazgos y repetir en
   review 220 ciclo 4 sus diecisiete áreas y la reconciliación de estado sin
   hallazgos.
-- PLAN-027 revision 0 queda Approved tras corregir seis hallazgos y repetir
-  sus dieciséis áreas y estado aceptado en review 221 ciclo 6 sin hallazgos.
-  Autoriza únicamente
-  checkpoints 1–6; ninguno ha comenzado.
+- PLAN-027 revision 1 queda Completed. Su corrección operativa limita la red a
+  artefactos fijados por el lockfile y conserva cero drift como gate.
+- Review 234 ciclo 3 repite instalación congelada, documentación, lint, tipos,
+  744 pruebas, builds, paquetes/fuentes, políticas/seguridad, 572 límites y
+  ambas suites Chromium sin hallazgos. M25 queda completado sin release.
 
-1. **Immediate gate:** ejecutar PLAN-027 checkpoint 1 — core, compilador y
-   definiciones manuales.
-2. **External gates:** M23 no autoriza otra release npm, GitHub Release, tag Git
-   ni eliminación del backup privado.
-3. **Later candidates:** React, Vue y las demás capacidades continúan guiadas
-   por demanda; M23 no las activa.
+El gate posterior de M25 seleccionó D-003 como M26 mediante review 235. Las
+acciones Git/release externas y las demás capacidades continuaron separadas.
 
-Las demás entradas diferidas continúan condicionadas a demanda. Esta propuesta
-no programa validación asíncrona, bridges de validación Angular, definiciones
-dinámicas, plugins, persistencia, productos ni trabajo comercial.
+### M26 — Validación asíncrona controlada — completado
+
+- Review 235 ciclo 1 compara D-003 con defaults explícitos, localización
+  avanzada, nuevas políticas de errores, composición, definiciones dinámicas y
+  un segundo framework.
+- D-003 queda promovida para el slice acotado de puerto asíncrono suministrado
+  por la aplicación, composición de issues y lifecycle pending/cancel/stale.
+- No se activan Ajv `$async`, carga remota de schemas, HTTP, debounce propiedad
+  del runtime, versión ni release.
+- ADR-029 revision 0 queda Accepted tras corregir cuatro hallazgos y repetir
+  catorce áreas en review 236 ciclo 2 sin hallazgos. Core posee orchestration,
+  generations y snapshot state; la integración posee effects y transporte.
+- SPEC-012 v0.1.0 queda Accepted tras corregir cuatro hallazgos y repetir
+  dieciocho áreas en review 237 ciclo 2 sin hallazgos.
+- PLAN-028 revision 0 queda Approved tras corregir cuatro hallazgos y repetir
+  dieciocho áreas en review 238 ciclo 2 sin hallazgos.
+- Checkpoint 1 queda completado tras corregir la representación TypeScript del
+  `undefined` propio y repetir nueve áreas en review 239 ciclo 2 sin hallazgos.
+- Checkpoint 2 queda completado tras corregir la doble lectura hostil de `then`
+  y la retención tras completion; review 240 ciclo 2 repite doce áreas sin
+  hallazgos.
+- Checkpoint 3 queda completado tras corregir la copia profunda de parámetros,
+  la validez unscoped, los traps hostiles y el aislamiento de la normalización
+  síncrona, además del estado documental obsoleto; review 241 ciclo 2 repite
+  quince áreas y las 516 pruebas core sin hallazgos.
+- Checkpoint 4 queda completado tras review 242 ciclo 2: forwarding, Signal,
+  retry, recreación/destrucción, 131 pruebas Angular y dos consumidores pasan
+  sin hallazgos de código; el deadlock esbuild del host Codex queda aislado de
+  un build de operador correcto.
+- Checkpoint 5 queda completado tras review 243 ciclo 5: escenario compartido,
+  efectos deterministas independientes, bloqueo/cancelación/stale/fallo/retry,
+  52+27+60 pruebas, 593 límites y Chromium 11+9 pasan sin hallazgos.
+- Checkpoint 6 y PLAN-028 revision 0 quedan completados tras review 244 ciclo 2.
+  La pasada final restaura el grafo congelado sin drift y repite formato,
+  documentación, lint, tipos/builds, 803 pruebas, paquetes/fuentes,
+  tooling/políticas/seguridad, ocho snippets, 593 límites, Chromium 11+9 y
+  diff hygiene sin hallazgos.
+- Las versiones y artefactos publicados M23 permanecen sin cambios. Los avisos
+  de tamaño inicial/CommonJS de Ajv en Angular y chunk de Vite en Standard son
+  observaciones de optimización no bloqueantes.
+
+1. **Immediate gate:** evaluar el registro Deferred restante y seleccionar la
+   siguiente capacidad funcional acotada antes de preparar otra ADR/SPEC/plan.
+2. **External gates:** commit, push, versión, release, publicación y otras
+   acciones externas siguen separados.
+
+Las demás entradas diferidas continúan condicionadas a demanda. M26 no activa
+Ajv `$async`, transporte HTTP propiedad del runtime, definiciones dinámicas,
+plugins, persistencia, productos ni trabajo comercial.
+
+### M27 — Confirmación parcial del baseline por scope — completado
+
+- Review 245 ciclo 1 selecciona D-038 frente a defaults, visibilidad adicional,
+  composición, batches y trabajo multi-framework amplio.
+- El slice se limita a diseñar una utilidad pura neutral que construya un
+  baseline candidato para targets válidos de un `FormScope`; la aplicación
+  conserva persistencia y aplicación explícita mediante estado externo.
+- No se activan mutación del runtime, autosave, HTTP, submit, transacciones,
+  scopes declarativos, defaults, versión ni release.
+
+1. **Architecture gate completed:** ADR-030 revision 0 cerró
+   firma/frontera, ausencia, solapamientos, colecciones estables, sharing y
+   diagnósticos; superó review 246 ciclo 2 con cero hallazgos y está Accepted.
+2. **Contract and implementation gates completed:** SPEC-013 v0.1.1 resolvió
+   C-001 y superó review 250 ciclo 1 con cero hallazgos. PLAN-029 revision 1
+   superó review 251 ciclo 1 con cero hallazgos y quedó Completed tras review
+   final 257 ciclo 2. Sus seis checkpoints, el helper Public, conformance de
+   paquete y evidencia independiente Angular/Standard pasan la matriz completa
+   con cero hallazgos.
+
+### M28 — Composición estática de objetos con `allOf` — completado
+
+- Review 258 ciclos 1–2 compara los candidatos restantes, corrige cuatro
+  resúmenes obsoletos de M27 y recomienda únicamente un slice estático de
+  D-007. Ricard acepta esa selección el 3 de agosto de 2026.
+- La frontera admite solo una definición object derivable estáticamente a
+  partir de contribuciones `allOf`; alternativas, condicionales, composición
+  primitiva/array, `$ref` siblings, recursos externos/dinámicos y un AST público
+  permanecen Deferred.
+- ADR-031 revision 0 está Accepted. Fija contribuciones con propiedades
+  disjuntas, unión de `required`, reducción no ambigua de textos, una única UI
+  Schema de use site, schema original para el validator y cero símbolos Public
+  nuevos. Review 259 ciclo 5 repite sus catorce áreas con cero hallazgos y
+  Ricard la acepta formalmente el 3 de agosto de 2026.
+
+1. **Architecture gate completed:** ADR-031 revision 0 está Accepted y autoriza
+   únicamente preparar y revisar ADR-005 revision 7.
+2. **Normative-policy gate completed:** ADR-005 revision 7 Accepted cierra
+   catálogos, diagnostics/provenance, orden y stopping; review 260 ciclo 5 pasa
+   once áreas sin hallazgos.
+3. **Contract gate completed:** SPEC-014 v0.1.0 Accepted cierra el contrato y
+   sus 21 filas de conformance/evidencia; review 261 ciclo 5 pasa catorce áreas
+   sin hallazgos.
+4. **Plan gate completed:** PLAN-030 revision 0 Approved distribuye las 21 filas
+   en seis checkpoints ordenados tras review 262 ciclo 2 sin hallazgos.
+5. **Checkpoint 1 completed:** clasificación wrapper, exterior descriptor-safe,
+   ubicaciones, precedencia `$ref`/`allOf` y stopping pasan review 263 ciclo 4
+   con cero hallazgos y 587 tests core.
+6. **Checkpoints 2–3 completed:** reducción ordenada, referencias,
+   required/textos, provenance, ciclos, colecciones, UI, validator original y
+   filas core 1–19 pasan reviews 264–265 ciclo 3 con 612 tests core.
+7. **Checkpoint 4 completed:** declaraciones/exports, paquete, consumidor
+   limpio, reconstrucción source y grafo exactos pasan review 266 ciclo 1 y la
+   fila 20 sin hallazgos.
+8. **Checkpoint 5 completed:** un escenario compartido y sus proyecciones
+   independientes Angular/Standard pasan review 267 ciclo 3 y la fila 21 sin
+   hallazgos.
+9. **Checkpoint 6 and milestone completed:** review 268 ciclo 2 repite la
+   matriz congelada completa, las 21 filas y la reconciliación documental con
+   cero hallazgos. Dependencia, versión, release, publicación y Git permanecen
+   inactivos y separados.
+
+### M29 — Candidato explícito de defaults del schema — completado
+
+- Review 269 ciclo 1 compara las direcciones post-M28 con cero hallazgos y
+  recomienda D-039 si la prioridad es funcionalidad core. Ricard selecciona
+  esa dirección el 3 de agosto de 2026.
+- El slice propuesto se limita a una utilidad core pura y activada por la
+  aplicación que deriva un candidato para defaults de hojas primitivas bajo
+  árboles object, incluidas referencias locales y composición M28.
+- La aplicación conserva la aceptación, value, baseline y validación. Arrays,
+  container defaults, factories, mutación implícita y el resto de D-039
+  permanecen Deferred.
+
+1. **Architecture gate completed:** ADR-032 revision 0 cierra helper puro,
+   raw-schema/Internal cursor, hojas primitivas, presencia, materialización,
+   atomicidad y exclusión de arrays. Review 270 ciclo 2 repite catorce áreas con
+   cero hallazgos y la ADR queda Accepted.
+2. **Contract gate completed:** SPEC-015 v0.1.0 cierra firma/resultado,
+   pipeline, defaults, presencia, diagnósticos, materialización, sharing,
+   paquetes y 21 filas de conformidad. Review 271 ciclo 1 pasa catorce áreas
+   con cero hallazgos y la SPEC queda Accepted.
+3. **Plan gate completed:** PLAN-031 revision 0 distribuye las 21 filas entre
+   seis checkpoints. Review 272 corrige una duplicidad de ownership en ciclo 1
+   y ciclo 2 pasa diez áreas con cero hallazgos; el plan queda Approved.
+4. **Checkpoint 1 completed:** helper/export Public, roots, dialecto y defaults
+   primitivos directos pasan review 273 ciclo 2 con cero hallazgos; core queda
+   en 38 ficheros/624 tests.
+5. **Checkpoint 2 completed:** presencia nested, materialización selectiva y
+   reconstrucción inmutable pasan review 274 ciclo 2 y las filas 12–16/18 con
+   cero hallazgos; core queda en 39 ficheros/634 tests.
+6. **Checkpoint 3 completed:** referencias locales, composición object
+   disjunta, barreras array y orden schema-before-data pasan review 275 ciclo 2
+   y las filas 8–11/17/19 con cero hallazgos; core queda en 40 ficheros/641
+   tests.
+7. **Checkpoint 4 completed:** declaraciones, export exacto, paquete,
+   consumidor limpio y reconstrucción source pasan review 276 ciclo 1 y la
+   fila 20 con cero hallazgos.
+8. **Checkpoint 5 completed:** escenario compartido y estado/candidate
+   independiente Angular/Standard pasan review 277 ciclo 2 y la fila 21 con
+   cero hallazgos; Chromium queda en 14+12 tests.
+9. **Checkpoint 6 and milestone completed:** review 278 ciclo 2 repite la
+   matriz congelada completa, las 21 filas y la reconciliación documental con
+   cero hallazgos. Dependencia, versión, release, publicación y Git permanecen
+   inactivos y separados.
+
+### M30 — Estado condicional controlado de campos — completado
+
+- Ricard selecciona el 3 de agosto de 2026 el incremento D-018 recomendado.
+  Review 279 ciclo 2 pasa doce áreas sin hallazgos y promueve únicamente el
+  diseño de visibilidad y estado enabled para campos primitivos ordinarios.
+- El slice propuesto usa como máximo un predicado de igualdad por efecto sobre
+  otro path primitivo ordinario y el `value` controlado. Ausencia o rama
+  bloqueada no coincide; no existe callback, lenguaje general ni grafo de
+  dependencias.
+- Hidden/disabled no modifica value, baseline, dirty, validación, issues,
+  scopes ni layout. Los targets retienen el host, pero core conserva la última
+  barrera de interacción.
+- Templates/items de colección, objetos/arrays, contenedores de presentación,
+  composición booleana, required/computed/default dinámico, validación
+  condicional, versiones, release, publicación y Git permanecen inactivos.
+
+1. **Promotion gate completed:** review 279 ciclo 2 pasa consumidor,
+   prerrequisitos, ownership, runtime/layout, colecciones, validación,
+   compatibilidad y exclusiones con cero hallazgos; reserva ADR-033 solo para
+   arquitectura. El snapshot compartido puede añadir defaults true para items
+   sin admitir condiciones de template.
+2. **Architecture gate completed:** ADR-033 revision 0 cierra gramática,
+   normalización, evaluación lineal, snapshots, acciones, targets, colecciones
+   y migración. Review 280 ciclo 1 corrige tres ambigüedades; ciclo 2 pasa doce
+   áreas sin hallazgos y la ADR queda Accepted.
+3. **Contract gate completed:** SPEC-016 v0.1.1 cierra contratos Public,
+   compilación, definiciones manuales, evaluación controlada, snapshots,
+   acciones, proyección y 24 filas. Review 281 corrige siete defectos en los
+   ciclos 1–2; el ciclo 3 pasa diecisiete áreas y las 24 filas sin hallazgos.
+   Review 283 ciclo 1 resuelve C-002 y repite el contrato completo sin
+   hallazgos.
+4. **Plan gate completed:** PLAN-032 revision 1 distribuye las 24 filas entre
+   compilador, definiciones manuales, runtime, Angular, Standard/escenario,
+   paquetes y cierre. Review 284 ciclo 1 pasa doce áreas, el acuerdo de
+   ejecución autónoma y ownership exacto sin hallazgos; checkpoints 1–7 quedan
+   autorizados en orden.
+5. **Checkpoints 1–6 completed:** reviews 285–290 ciclo 2 completan compilador,
+   definiciones manuales, runtime, Angular, escenario/proyección Standard y la
+   frontera de paquetes/consumidores para las 24 filas sin hallazgos.
+6. **Checkpoint 7 and milestone completed:** review 291 ciclo 1 repite el
+   grafo congelado, matriz completa, 24 filas, ambos Chromium y reconciliación
+   documental sin hallazgos. PLAN-032 revision 1 y M30 quedan Completed; la
+   siguiente capacidad requiere una nueva selección/promoción.
+
+### M31 — Campo atómico de array enum-string — completado
+
+- Ricard selecciona el 3 de agosto de 2026 un nuevo slice estrecho de D-006.
+  Review 292 ciclo 3 pasa catorce áreas sin hallazgos y promueve únicamente su
+  diseño arquitectónico.
+- La frontera exige un array ordinario con `uniqueItems: true`, items string y
+  enum cerrado, tratado como un único campo controlado. El valor neutral sigue
+  siendo un array JSON ordenado; la UI no puede ordenarlo o canonicalizarlo
+  silenciosamente.
+- Ausencia, `[]`, array compatible ordenado y valor incompatible permanecen
+  distintos. La aplicación conserva `value`, `baselineValue`, aceptación y
+  persistencia; la validación sigue siendo reemplazable.
+- No se activan identidad estable, operaciones incrementales de colección,
+  arrays libres/numéricos/nullable/nested, templates, otros keywords, targets
+  adicionales, dependencias, versión, release, publicación ni Git.
+
+1. **Promotion gate completed:** review 292 ciclo 3 repite consumidor,
+   compatibilidad normativa, ownership, presencia/orden, runtime, validación,
+   targets, accesibilidad, migración y exclusiones con cero hallazgos.
+2. **Architecture gate completed:** ADR-034 revision 0 cierra definición
+   atómica, orden/inserción, vacío/ausencia, operaciones, dirty, validación,
+   M30, textos y targets. Review 293 ciclo 3 repite doce áreas tras cinco
+   correcciones y pasa sin hallazgos.
+3. **Normative-policy gate completed:** ADR-005 revision 8 cierra clasificación
+   M10/M31, catálogos, `uniqueItems`, enum, UI, orden y branch stopping. Review
+   294 ciclo 2 repite diez áreas tras cinco correcciones y pasa sin hallazgos.
+4. **Contract gate completed:** SPEC-017 v0.1.0 cierra contratos Public,
+   compiler/runtime, operaciones, dirty, validación, textos, targets, packages
+   y 26 filas. Review 295 ciclo 2 repite nueve áreas y toda la matriz tras seis
+   correcciones, sin hallazgos.
+5. **Plan gate completed:** PLAN-033 revision 0 distribuye las 26 filas entre
+   siete checkpoints ordenados. Review 296 ciclo 2 repite siete áreas tras una
+   corrección, sin hallazgos; checkpoints 1–7 quedan autorizados en orden.
+6. **Checkpoints 1–6 completed:** reviews 297–302 completan compiler,
+   definiciones manuales/operaciones, runtime, Angular, escenario/proyección
+   Standard y packages/consumidores tras revisiones repetidas sin hallazgos.
+7. **Checkpoint 7 and milestone completed:** review 303 ciclo 2 repite el
+   grafo congelado, matriz completa, las 26 filas y ambos Chromium en secuencia
+   tras corregir una interferencia de ejecución paralela. PLAN-033 revision 0
+   y M31 quedan Completed; la siguiente capacidad requiere una nueva
+   selección/promoción. Dependencias, versiones, release, publicación y Git
+   permanecen separados.

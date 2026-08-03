@@ -3,8 +3,10 @@
 
 import {
   applyFormOperation,
+  commitScopeToBaseline,
   compileFormDefinition,
   createControlledFormRuntime,
+  deriveSchemaDefaultCandidate,
   type CompileFormDefinitionInput,
   type CompileFormResult,
   type Diagnostic,
@@ -20,6 +22,7 @@ import { createAjvSchemaValidator } from '@rabassoft/schema-engine-validator-ajv
 import {
   referenceScenarios,
   type ReferenceScenario,
+  type ReferenceScopeConfirmationTarget,
 } from '@schema-engine-internal/reference-scenarios';
 
 import {
@@ -30,6 +33,10 @@ import {
   type AppliedConfiguration,
   type ConfigurationDraftResult,
 } from './configuration.js';
+import {
+  StandardReferenceAsyncValidator,
+  type StandardServiceRequestEvidence,
+} from './reference-async-validator.js';
 
 export type OperationDecisionMode = 'confirm' | 'reject' | 'pending';
 
@@ -42,6 +49,33 @@ export interface OperationHistoryEntry {
   readonly decision: OperationHistoryDecision;
   readonly diagnostics: readonly Diagnostic[];
 }
+
+export type StandardScopeCandidateState =
+  | {
+      readonly status: 'available';
+      readonly targetId: string;
+      readonly label: string;
+      readonly value: Readonly<object>;
+      readonly changed: boolean;
+      readonly diagnostics: readonly Diagnostic[];
+    }
+  | {
+      readonly status: 'unconfirmable' | 'accepted';
+      readonly targetId: string;
+      readonly label: string;
+      readonly diagnostics: readonly Diagnostic[];
+    };
+
+export type StandardDefaultCandidateState =
+  | {
+      readonly status: 'available';
+      readonly value: Readonly<object>;
+      readonly diagnostics: readonly Diagnostic[];
+    }
+  | {
+      readonly status: 'accepted' | 'cancelled' | 'no-effect' | 'failed';
+      readonly diagnostics: readonly Diagnostic[];
+    };
 
 export interface StandardReferenceApplicationState {
   readonly scenario: ReferenceScenario;
@@ -69,6 +103,9 @@ export interface StandardReferenceApplicationState {
   readonly canRestoreOriginalConfiguration: boolean;
   readonly runtimeEpoch: number;
   readonly pendingConfigurationAction?: PendingConfigurationAction;
+  readonly serviceRequestEvidence: readonly StandardServiceRequestEvidence[];
+  readonly scopeCandidate?: StandardScopeCandidateState;
+  readonly defaultCandidate?: StandardDefaultCandidateState;
 }
 
 export type PendingConfigurationAction = 'apply' | 'restore';
@@ -111,6 +148,9 @@ export class StandardReferenceApplication {
   private history = EMPTY_HISTORY;
   private nextHistorySequence = 1;
   private runtime: FormRuntime<object> | undefined;
+  private asyncValidator: StandardReferenceAsyncValidator | undefined;
+  private scopeCandidate: StandardScopeCandidateState | undefined;
+  private defaultCandidate: StandardDefaultCandidateState | undefined;
   private unsubscribeSnapshot: Cleanup | undefined;
   private unsubscribeOperations: Cleanup | undefined;
   private readonly bindingCleanups = new Set<Cleanup>();
@@ -179,6 +219,14 @@ export class StandardReferenceApplication {
       ...(this.pendingConfigurationAction === undefined
         ? {}
         : { pendingConfigurationAction: this.pendingConfigurationAction }),
+      serviceRequestEvidence:
+        this.asyncValidator?.getEvidence() ?? Object.freeze([]),
+      ...(this.scopeCandidate === undefined
+        ? {}
+        : { scopeCandidate: this.scopeCandidate }),
+      ...(this.defaultCandidate === undefined
+        ? {}
+        : { defaultCandidate: this.defaultCandidate }),
     });
   }
 
@@ -235,6 +283,8 @@ export class StandardReferenceApplication {
     this.nextHistorySequence = 1;
     this.runtimeDiagnostics = EMPTY_DIAGNOSTICS;
     this.actionDiagnostics = EMPTY_DIAGNOSTICS;
+    this.scopeCandidate = undefined;
+    this.defaultCandidate = undefined;
     this.pendingConfigurationAction = undefined;
     if (runtime === undefined) {
       this.value = value;
@@ -268,6 +318,133 @@ export class StandardReferenceApplication {
     this.decisionMode = mode;
     this.actionDiagnostics = EMPTY_DIAGNOSTICS;
     this.emitState();
+  }
+
+  resolveServiceValidation(valid: boolean): boolean {
+    if (this.disposed) return false;
+    return this.asyncValidator?.resolveCurrent(valid) ?? false;
+  }
+
+  resolveServiceRequest(id: number, valid: boolean): boolean {
+    if (this.disposed) return false;
+    return this.asyncValidator?.resolveRequest(id, valid) ?? false;
+  }
+
+  rejectServiceValidation(): boolean {
+    if (this.disposed) return false;
+    return this.asyncValidator?.rejectCurrent() ?? false;
+  }
+
+  throwOnNextValidation(): boolean {
+    if (this.disposed || this.asyncValidator === undefined) return false;
+    this.asyncValidator.throwOnNextRequest();
+    this.emitState();
+    return true;
+  }
+
+  retryAsyncValidation(): RuntimeActionResult | undefined {
+    const runtime = this.runtime;
+    if (this.disposed || runtime === undefined) return undefined;
+    const result = runtime.retryAsyncValidation();
+    this.actionDiagnostics = freezeDiagnostics(result.diagnostics);
+    this.emitState();
+    return result;
+  }
+
+  prepareScopeCandidate(target: ReferenceScopeConfirmationTarget): boolean {
+    const definition = this.definition;
+    if (this.disposed || definition === undefined) return false;
+    const result = commitScopeToBaseline(
+      definition,
+      this.baselineValue,
+      this.value,
+      target.scope,
+    );
+    this.scopeCandidate = result.success
+      ? Object.freeze({
+          status: 'available',
+          targetId: target.id,
+          label: target.label,
+          value: result.value,
+          changed: result.changed,
+          diagnostics: result.diagnostics,
+        })
+      : Object.freeze({
+          status: 'unconfirmable',
+          targetId: target.id,
+          label: target.label,
+          diagnostics: freezeDiagnostics(result.diagnostics),
+        });
+    this.emitState();
+    return result.success;
+  }
+
+  acceptScopeCandidate(): RuntimeActionResult | undefined {
+    const candidate = this.scopeCandidate;
+    if (candidate?.status !== 'available') return undefined;
+    const result = this.updateControlledState({
+      baselineValue: candidate.value,
+    });
+    if (result?.success) {
+      this.scopeCandidate = Object.freeze({
+        status: 'accepted',
+        targetId: candidate.targetId,
+        label: candidate.label,
+        diagnostics: candidate.diagnostics,
+      });
+      this.emitState();
+    }
+    return result;
+  }
+
+  deriveDefaultCandidate(): boolean {
+    if (this.disposed) return false;
+    const result = deriveSchemaDefaultCandidate(
+      this.activeConfiguration.input.schema,
+      this.value,
+    );
+    this.defaultCandidate = result.success
+      ? result.changed
+        ? Object.freeze({
+            status: 'available',
+            value: result.value,
+            diagnostics: result.diagnostics,
+          })
+        : Object.freeze({
+            status: 'no-effect',
+            diagnostics: result.diagnostics,
+          })
+      : Object.freeze({
+          status: 'failed',
+          diagnostics: freezeDiagnostics(result.diagnostics),
+        });
+    this.emitState();
+    return result.success;
+  }
+
+  cancelDefaultCandidate(): boolean {
+    const candidate = this.defaultCandidate;
+    if (this.disposed || candidate?.status !== 'available') return false;
+    this.defaultCandidate = Object.freeze({
+      status: 'cancelled',
+      diagnostics: candidate.diagnostics,
+    });
+    this.emitState();
+    return true;
+  }
+
+  acceptDefaultCandidate(): RuntimeActionResult | undefined {
+    const candidate = this.defaultCandidate;
+    if (this.disposed || candidate?.status !== 'available') return undefined;
+    const result = this.updateControlledState({ value: candidate.value });
+    if (result?.success) {
+      this.defaultCandidate = Object.freeze({
+        status: 'accepted',
+        diagnostics: candidate.diagnostics,
+      });
+      this.emitState();
+    }
+    return result;
   }
 
   updateCollectionDraftId(value: string): void {
@@ -537,9 +714,17 @@ export class StandardReferenceApplication {
     this.actionDiagnostics = EMPTY_DIAGNOSTICS;
     this.snapshot = undefined;
     this.history = EMPTY_HISTORY;
+    this.scopeCandidate = undefined;
+    this.defaultCandidate = undefined;
     this.nextHistorySequence = 1;
     this.resetCollectionDrafts();
     this.runtimeEpoch += 1;
+    this.asyncValidator =
+      scenario.serviceValidation === undefined
+        ? undefined
+        : new StandardReferenceAsyncValidator(scenario.serviceValidation, () =>
+            this.emitState(),
+          );
 
     this.compilationDiagnostics = freezeDiagnostics(compilation.diagnostics);
     if (!compilation.success) {
@@ -558,6 +743,9 @@ export class StandardReferenceApplication {
       locale: this.locale,
       validationVisibility: this.validationVisibility,
       validator: this.validator,
+      ...(this.asyncValidator === undefined
+        ? {}
+        : { asyncValidator: this.asyncValidator.validator }),
     });
     // reference-snippet:end standard-create-runtime
     this.runtimeDiagnostics = freezeDiagnostics(created.diagnostics);
@@ -759,6 +947,7 @@ export class StandardReferenceApplication {
     this.unsubscribeOperations = undefined;
     this.runtime?.dispose();
     this.runtime = undefined;
+    this.asyncValidator = undefined;
     // reference-snippet:end standard-runtime-cleanup
   }
 

@@ -1,9 +1,9 @@
 # ADR 005: Política de dialecto y compatibilidad de JSON Schema
 
-- **Estado:** Accepted revision 6
+- **Estado:** Accepted revision 8
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
-- **Revisión aceptada:** 4 — type array nullable cerrado
+- **Revisión aceptada:** 8 — campo atómico array enum-string
 - **Fecha de aceptación de revisión 1:** 14 de julio de 2026
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md)
 - **Revisado parcialmente por:**
@@ -18,10 +18,10 @@
 - **Revisión 3 coordinada con:**
   [`ADR-016`](./016-resolucion-referencias-locales.md) Accepted
 - **Fecha de aceptación de revisión 3:** 14 de julio de 2026
-- **Autoridad vigente:** las secciones 1–12 conservan la conducta Accepted de
-  M1–M11; la sección 13 queda Accepted para diseño normativo M14 y no activa
-  comportamiento ni implementación sin SPEC-006 aceptada y PLAN-014 aprobado
-- **Revisión completa:** ciclo 3 pasó las nueve áreas sin hallazgos y Ricard
+- **Autoridad vigente:** las secciones 1–16 conservan la conducta Accepted de
+  M1–M28; revision 7 autoriza únicamente preparar/revisar la SPEC de extensión
+  M28 y no activa plan, comportamiento ni implementación
+- **Revisión 2 completa:** ciclo 3 pasó las nueve áreas sin hallazgos y Ricard
   aceptó formalmente revision 2
 - **Revisión 3 completa y aceptada:**
   [`review 018`](../reviews/018-adr-005-revision-3-review.md) ciclo 2 pasó las
@@ -44,6 +44,27 @@
 - **Revisión 6 completa:**
   [`review 219`](../reviews/219-adr-028-review.md) ciclo 2 pasó las catorce áreas
   sin hallazgos
+- **Revisión 7 coordinada con:**
+  [`ADR-031`](./031-static-object-allof-composition.md) Accepted; solo D-007/M28
+- **Fecha de aceptación de revisión 7:** 3 de agosto de 2026
+- **Autoridad de revisión 7:** diseño normativo Accepted; autoriza únicamente
+  preparar/revisar la SPEC M28, no plan, implementación, dependencia, versión
+  o publicación
+- **Revisión 7 completa:**
+  [`review 260`](../reviews/260-adr-005-revision-7-review.md) ciclo 5 pasó las
+  once áreas con cero hallazgos; aceptada formalmente bajo la regla autorizada
+  de revisión completa sin ampliación de alcance
+- **Revisión 8 coordinada con:**
+  [`ADR-034`](./034-controlled-homogeneous-string-enum-array-field.md)
+  Accepted; solo D-006/M31
+- **Autoridad de revisión 8:** diseño normativo Accepted; autoriza únicamente
+  preparar/revisar SPEC-017, no plan, contrato activo,
+  implementación, dependencia, versión, release, publicación o Git
+- **Fecha de aceptación de revisión 8:** 3 de agosto de 2026
+- **Revisión 8 completa:**
+  [`review 294`](../reviews/294-adr-005-revision-8-review.md) ciclo 2 pasó las
+  diez áreas con cero hallazgos tras cinco correcciones; aceptada bajo la regla
+  autorizada de revisión completa sin ampliación de alcance
 
 ## 1. Contexto y problema
 
@@ -1166,3 +1187,587 @@ pattern, longitudes, restricciones numéricas o formatos en core.
 El schema original permanece autoridad del validador reemplazable. Core no
 inserta ni corrige el valor y runtime/operaciones no imponen la assertion. Todo
 el resto de D-036 y las capacidades no promovidas permanecen Deferred.
+
+## 16. Revisión 7 aceptada — composición estática de objetos con `allOf`
+
+> Esta sección fija únicamente la política normativa M28 autorizada por
+> ADR-031 revision 0 Accepted. Las secciones 1–15 conservan su autoridad
+> Accepted. `allOf` continúa fuera del comportamiento activo hasta una SPEC
+> Accepted y un plan aprobado e implementado.
+
+### 16.1 Motivo, autoridad y frontera
+
+ADR-031 activa el criterio de revisión de la sección 7 para un único slice de
+D-007: un wrapper `allOf` del que el compilador puede derivar estáticamente un
+object normalizado mediante contribuciones de propiedades disjuntas. Revision
+7 conserva Draft 2020-12, la URI canónica, unknowns y annotations, traversal
+descriptor-safe, `$defs`/`$ref` locales, collection policies, UI Schema,
+validación externa y todas las reglas M1–M27 que no sustituye expresamente.
+
+La aceptación de revision 7 autoriza únicamente preparar y revisar una SPEC de
+extensión M28. No activa contrato Accepted, plan, código, dependencia, versión,
+release, publicación o acción Git/externa.
+
+### 16.2 Ubicaciones y catálogos cerrados
+
+La presencia de un descriptor propio `allOf` selecciona la clasificación de
+composición antes de inspeccionar su valor, pero después de clasificar de forma
+segura el `type` propio cuando el use site puede representar distintos tipos.
+Solo se admite donde el compilador Accepted espera un object:
+
+1. raíz del documento;
+2. propiedad object raíz o nested;
+3. raíz object de `items`; y
+4. target local alcanzado desde una de esas ubicaciones.
+
+El catálogo exacto del wrapper es:
+
+| Use site          | Miembros soportados propios                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| raíz documento    | `$schema`, `$defs`, `type`, `title`, `description`, `allOf`                              |
+| propiedad object  | `type`, `title`, `description`, `default`, `allOf`                                       |
+| raíz object items | `type`, `allOf`                                                                          |
+| todos             | annotations ignorables Accepted y keywords desconocidas opacas bajo su política Accepted |
+
+`type` es opcional en un wrapper; cuando existe debe ser una data property
+propia con valor exacto `"object"`. Un accessor u otro valor produce
+`INVALID_SCHEMA_KEYWORD_VALUE` en su ruta exacta con
+`{ keyword: 'type', expected: '"object"', actualType }` y fallback
+`Schema keyword "type" has an invalid value.`. Una data property inherited no
+forma parte del wrapper.
+
+La clasificación como wrapper sustituye los requisitos ordinarios de
+`type`/`properties` del root, object field o item root: su ausencia no emite
+`ROOT_TYPE_MUST_BE_OBJECT`, `MISSING_FIELD_TYPE` ni
+`MISSING_SCHEMA_PROPERTIES`. `properties`/`required` propios se clasifican una
+sola vez como siblings incompatibles sin inspeccionar su valor y no producen
+además diagnósticos ordinarios de shape/required.
+
+`properties`, `required`, `$ref`, cualquier otro applicator/conditional y toda
+keyword semántica soportada pero no incluida en la tabla son siblings
+incompatibles. Producen `INCOMPATIBLE_SCHEMA_KEYWORD` con
+`{ keyword, fieldType: 'composition' }` y fallback
+`Schema keyword "<keyword>" is incompatible with field type "composition".`.
+Las keywords Draft 2020-12 conocidas pero no soportadas conservan
+`UNSUPPORTED_SCHEMA_KEYWORD`; las annotations ignorables y unknowns conservan
+sus warnings Accepted. Un member incompatible bloquea el resultado del wrapper
+sin convertirlo en una contribución implícita.
+
+En una propiedad ordinaria, `type` ausente o exacto `"object"` permite
+clasificar el wrapper; un tipo primitive/array Accepted hace que `allOf` esté
+fuera de ubicación. Un `type` accessor/malformed conserva su diagnóstico de
+tipo anterior y no se usa para inferir un wrapper válido. En raíz e item root
+el contexto ya exige object y el wrapper puede omitir `type` conforme a la
+tabla.
+
+Fuera de las ubicaciones object, un `allOf` propio se diagnostica como
+`INCOMPATIBLE_SCHEMA_KEYWORD` con `{ keyword: 'allOf', fieldType }`, donde
+`fieldType` es el tipo Accepted de la posición (`'string'`, `'number'`,
+`'integer'`, `'boolean'` o `'array'`). Un object con `$ref` y `allOf` propios se
+clasifica como wrapper compuesto y `$ref` es su sibling incompatible; no existe
+un caso competidor `fieldType: 'reference'`. Un `allOf` fuera de ubicación no
+se inspecciona como subschema ni activa primitive/array composition.
+
+### 16.3 Exterior descriptor-safe de `allOf`
+
+`allOf` debe ser una data property propia enumerable cuyo valor satisfaga
+`Array.isArray(value) === true`; no se añade una condición de prototype distinta
+de la frontera array Accepted. Su descriptor `length` propio debe ser data
+property con entero seguro positivo. Cada índice `0..length - 1` debe ser data
+property propia enumerable con schema object ordinario no array;
+`Object.keys(allOf)` no puede contener ninguna key adicional.
+
+Se emite como máximo un diagnóstico exterior por array, siguiendo esta
+precedencia:
+
+1. descriptor `allOf` accessor/no enumerable o valor no array, en la ruta de
+   `allOf`;
+2. `length` ausente/accessor/no entero seguro positivo, también en la ruta de
+   `allOf`;
+3. primer índice missing/no enumerable/accessor/no schema object, en la ruta
+   `[..., 'allOf', index]`; y
+4. primera key enumerable adicional en `Object.keys()` order, en
+   `[..., 'allOf', key]`.
+
+Todos usan `INVALID_SCHEMA_KEYWORD_VALUE`, severidad `error`, fuente `schema`
+y fallback `Schema keyword "allOf" has an invalid value.`. Los parámetros
+exactos son:
+
+- exterior/valor: `{ keyword: 'allOf', expected: 'non-empty dense array of
+object schemas', actualType }`, donde `actualType` es `accessor` o
+  `non-enumerable` para esos fallos de descriptor y la descripción segura
+  Accepted para un valor data incompatible;
+- length: `{ keyword: 'allOf', expected: 'positive safe integer length',
+reason: 'invalid-allof-length', actualType }` para missing/accessor o un number
+  no finito/no entero/no seguro; solo un entero seguro no positivo añade
+  `actualLength`, por lo que ningún parámetro retiene `NaN` o infinito;
+- índice: `{ keyword: 'allOf', expected: 'ordinary schema object', actualType }`,
+  usando `missing`, `non-enumerable` o `accessor` cuando corresponda; y
+- key adicional: `{ keyword: 'allOf', expected: 'dense array indices only',
+reason: 'unexpected-allof-member' }`.
+
+No se ejecutan accessors, iteradores, coerciones ni callbacks. Las traps de
+Proxy que pueda ejecutar la reflexión se contienen como fallo de input según
+la frontera Accepted. Un exterior inválido detiene todas sus ramas
+dependientes; wrappers y ramas hermanas independientes conservan su recorrido.
+
+### 16.4 Formas de rama y reducción ordenada
+
+Tras validar el exterior, cada branch se selecciona en índice ascendente:
+
+1. un object con `$ref` propio y sin `allOf` es un reference object puro y usa
+   toda la política Accepted de revision 3;
+2. un object con `allOf` propio es otro wrapper compuesto; `$ref` u otro
+   semantic sibling se diagnostica bajo la sección 16.2; y
+3. cualquier otro object es candidato a contribución ordinaria y debe declarar
+   data properties propias `type: "object"` y `properties` ordinary object.
+
+Una contribución ordinaria usa el catálogo exacto del use site, salvo que
+`$schema` y `$defs` nunca se admiten dentro de una branch raíz: permanecen
+exclusivos del wrapper raíz del documento. En raíz admite `type`, `properties`,
+`required`, `title` y `description`; en propiedad object añade `default`; en
+item root admite solo `type`, `properties` y `required`. Solo después de que
+`type`/`properties` satisfacen esa forma se aplica dentro de la contribución la
+clasificación Accepted de `required`, textos, default, annotations, unknowns y
+members incompatibles.
+
+Un `$schema` o `$defs` propio en una contribución raíz produce
+`INCOMPATIBLE_SCHEMA_KEYWORD` con `{ keyword, fieldType: 'object' }` y el
+fallback Accepted de incompatibilidad object. No abre dialecto/registry local,
+no se indexa y bloquea solo el resultado de esa composición. En otros use sites
+conserva la clasificación Accepted que ya prohíbe esos members nested.
+
+Un branch que no satisface ninguna de las tres formas emite exactamente:
+
+```ts
+{
+  code: 'INCOMPATIBLE_SCHEMA_COMPOSITION',
+  severity: 'error',
+  source: 'schema',
+  documentPath: [...branchDocumentPath],
+  dataPath: managedUseSitePath,
+  parameters: {
+    reason: 'unsupported-branch-kind',
+    branchIndex,
+    expected: 'object contribution, local reference or nested object composition',
+  },
+  fallbackMessage: 'Schema composition is incompatible.',
+}
+```
+
+La validación del candidato ordinario comprueba `type` y después `properties`;
+missing, accessor o valor incompatible produce este único código/reason en el
+path del branch, no un diagnóstico de campo/root competidor. Para una branch
+inline, `branchDocumentPath` es su path `allOf` + índice. Si una branch `$ref`
+resuelve a un target que no es contribución/wrapper object, el diagnóstico se
+ancla al `documentPath` canónico de ese target y conserva `branchIndex` más la
+`referenceChain` que lo alcanzó.
+
+En item template añade el `templatePath` Accepted. Se detiene solo esa branch;
+las posteriores continúan para diagnósticos independientes.
+
+Las contribuciones válidas se aplanan iterativamente en depth-first `allOf`
+order. Dentro de cada una, `Object.keys(properties)` fija el orden. No existe
+límite público arbitrario ni se expone AST/cursor de composición.
+
+### 16.5 Propiedades, `required` y conflictos
+
+El primer origen de un nombre de propiedad fija su posición y schema source.
+Una aparición posterior del mismo nombre siempre bloquea, aunque ambos schemas
+sean el mismo object o parezcan equivalentes. El schema subtree duplicado se
+detiene; las demás propiedades y branches independientes continúan.
+
+Cada `required` conserva la forma Accepted. Sus nombres válidos se acumulan y
+la requiredness efectiva es la unión de todas las contribuciones. Una branch
+puede requerir una propiedad declarada por otra. Solo después de terminar todo
+el catálogo efectivo se emite `UNMANAGED_REQUIRED_PROPERTY` por cada entrada
+que no corresponde a ninguna propiedad efectiva, conservando el
+`documentPath`, use-site `dataPath`, `templatePath` y `referenceChain` de la
+entrada que la declaró.
+
+Los `title`/`description` del wrapper y las contribuciones se inspeccionan en
+orden wrapper y después contribuciones aplanadas. Ausencia total conserva el
+fallback Accepted; una única string válida se selecciona; repeticiones
+exactamente iguales se reducen a esa string; valores válidos distintos
+bloquean en el origen posterior. UI Schema conserva primera precedencia.
+`default` sigue siendo metadata opaca: no se combina, copia ni aplica.
+
+Los tres conflictos usan `INCOMPATIBLE_SCHEMA_COMPOSITION`, `error`/`schema` y
+fallback `Schema composition is incompatible.` con reason cerrado:
+
+```ts
+type SchemaCompositionConflictReason =
+  'unsupported-branch-kind' | 'duplicate-property' | 'conflicting-annotation';
+```
+
+Un duplicate usa `{ reason: 'duplicate-property', property,
+firstDocumentPath, firstReferenceChain? }`. Un conflicto de texto usa
+`{ reason: 'conflicting-annotation', keyword: 'title' | 'description',
+firstDocumentPath, firstReferenceChain? }`. `documentPath` siempre ancla el
+origen posterior exacto —la key de propiedad o keyword de texto— y los paths
+del primer origen se copian/freeze. `firstReferenceChain` aparece únicamente
+cuando el primer origen se alcanzó mediante una o más referencias. El
+diagnóstico posterior añade además su propio `referenceChain` cuando procede;
+ningún parámetro retiene schema objects, cursors o valores de annotations.
+
+Para duplicate, `firstDocumentPath` es exactamente la primera ruta
+`[..., 'properties', property]`; para texto es exactamente la primera ruta
+`[..., keyword]`. Ambos se expresan en el documento schema fuente, no como
+`DataPath` ni como path de UI.
+
+### 16.6 References, ciclos y provenance
+
+Revision 7 añade los índices `allOf` como posiciones no root donde un reference
+object puro puede resolverse, incluidas las branches de composición raíz. Una
+declaración `$ref` directa en la raíz del documento continúa produciendo
+`root-reference-not-supported`. La sintaxis fragment-only, `$defs` registry,
+target traversal, sibling rules y `INVALID_SCHEMA_REFERENCE`/
+`UNRESOLVED_SCHEMA_REFERENCE` permanecen exactos.
+
+El `documentPath` de todo diagnóstico conserva `allOf` e índices inline. Dentro
+de un target referenciado conserva el path fuente del target y usa el
+`dataPath` del managed use site más la `referenceChain` outermost-to-innermost.
+Un item template añade su `templatePath` relativo. UI Schema conserva paths UI
+y nunca recibe provenance de schema/composición.
+
+La reentrada activa del mismo schema object mediante `allOf`, `properties` o
+`items` usa `CYCLIC_SCHEMA_OBJECT`, con el branch/object path que cierra el
+ciclo y `firstDocumentPath` Accepted. La reentrada de un target canónico por
+edges `$ref` usa `CYCLIC_SCHEMA_REFERENCE`. Sharing acíclico se inspecciona por
+use site y no crea una tercera identidad de ciclo.
+
+### 16.7 Orden global y branch stopping
+
+Se conserva el orden global Accepted de input, dialecto, exterior de policies,
+index `$defs`, schema, policies semánticas/unused y UI. Al alcanzar un wrapper
+compuesto, el orden exacto es:
+
+1. `type` propio;
+2. members propios distintos de `allOf` en `Object.keys()` order, aplicando
+   shape, compatibilidad y annotations; en raíz, `$schema` y `$defs` ya
+   procesados por los gates globales se omiten sin emitirlos de nuevo;
+3. exterior `allOf` según sección 16.3;
+4. branches depth-first en índice ascendente, incluida resolución y nested
+   composition;
+5. conflictos de propiedad/texto cuando se alcanza su origen posterior;
+6. `UNMANAGED_REQUIRED_PROPERTY` tras el catálogo efectivo completo; y
+7. UI Schema del único use site después de todos los diagnósticos schema
+   independientemente recopilables.
+
+Un `type`/sibling inválido bloquea el resultado del wrapper, pero no suprime un
+exterior/branches `allOf` independientemente inspeccionable. Un exterior
+`allOf` inválido detiene todas sus branches. Un branch/propiedad conflictiva
+detiene solo su resultado dependiente. Ramas, propiedades, policies y UI
+exteriores independientes continúan en orden. Cualquier error produce
+`success: false` y ninguna `FormDefinition` parcial.
+
+### 16.8 UI Schema, collections y validator
+
+Existe un único UI node en el managed use site. Se aplica al catálogo y orden
+efectivos; no existen UI branches, selectors ni provenance de composición. La
+policy de una colección aportada por cualquier branch sigue apuntando a su
+`DataPath` absoluto. En un item root compuesto, identidad y requiredness se
+resuelven sobre el catálogo efectivo antes de aplicar las reglas Accepted.
+
+Si un fallo de composición impide obtener de forma única el array o item
+catalog del que depende una policy, se suprimen solo sus diagnósticos semánticos
+de path/identity. La forma exterior de `collectionPolicies`, una policy
+independiente y `UNUSED_COLLECTION_POLICY` continúan bajo el orden Accepted.
+
+`SchemaValidator` recibe el schema original exacto y el valor completo. Core no
+aplana, clona, bundlea ni dereferencia el schema entregado al port. El adapter
+Ajv existente evalúa la conjunción, pero no amplía el subset del compiler ni
+requiere cambio de opción, cache, dependencia o issue mapping.
+
+Runtime, operaciones, baseline confirmation, async validation, Angular y
+Standard consumen la definición normalizada sin branches ni cursors nuevos.
+
+### 16.9 Public/Internal y exclusiones
+
+La migración ADR-009 exacta es:
+
+| Clasificación                       | Efecto                                                                                                                     |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Changed Public behavior             | `compileFormDefinition()` podrá aceptar el subset object-`allOf` M28.                                                      |
+| Changed Public diagnostic semantics | Añade `INCOMPATIBLE_SCHEMA_COMPOSITION` y provenance `firstDocumentPath`/`firstReferenceChain` dentro de parameters.       |
+| New/changed Public signatures       | Ninguna; `Diagnostic`, compiler input/result y definiciones conservan su forma.                                            |
+| Internal                            | Composition frames/cursors, ordered reduction, effective property/required catalogs y first-source tracking.               |
+| Unchanged                           | Runtime, operaciones, adapters, packages, entry points, exports, dependencias, versiones, publicación y clasificación API. |
+
+Permanecen Deferred repeated-property merging, primitive/array `allOf`, `$ref`
+semantic siblings, boolean schemas, `anyOf`, `oneOf`, `not`, conditionals,
+`dependentSchemas`, unevaluated semantics, external/dynamic resources,
+vocabularies, AST/resolved graph Public, defaults aplicados, expressions,
+dynamic definitions y todas las capacidades no listadas.
+
+### 16.10 Gate de aceptación
+
+Revision 7 solo podrá aceptarse después de que una revisión completa repetida
+confirme:
+
+1. ubicaciones y catálogos wrapper/contribution exactos;
+2. exterior `allOf` descriptor-safe, precedencia, parámetros y stopping;
+3. branch forms, nested/reference traversal y orden depth-first;
+4. propiedades disjuntas, required union y unmanaged warnings retrasados;
+5. reducción de annotations y provenance de conflictos exactos;
+6. referencias, paths, templates, sharing y ambos ciclos inalterados;
+7. orden global, recopilación independiente y ausencia de partial definition;
+8. UI/collections/validator original y ownership de aplicación intactos;
+9. inventario Public/Internal sin nueva firma o dependencia;
+10. coherencia con ADR-031 y todas las SPEC/ADR Accepted; y
+11. preservación de cada frontera Deferred y del gate separado de SPEC.
+
+Cada corrección exigió repetir la revisión completa. Review 260 ciclo 5 pasó
+las once áreas con cero hallazgos y ninguna petición de cambio pendiente;
+revision 7 quedó Accepted bajo la autorización previa para aceptar documentos
+revisados sin ampliación de alcance. Su aceptación autoriza únicamente preparar
+y revisar la SPEC de extensión M28.
+
+## 17. Revisión 8 aceptada — campo atómico array enum-string
+
+> Esta sección fija únicamente la política normativa M31 autorizada por
+> ADR-034 revision 0 Accepted. Las secciones 1–16 conservan su autoridad
+> Accepted. Su aceptación autoriza solo preparar/revisar SPEC-017; no activa
+> contrato, plan o implementación.
+
+### 17.1 Motivo, autoridad y frontera
+
+ADR-034 activa el criterio de revisión de la sección 7 para un único slice de
+D-006: una propiedad ordinaria `type: "array"` tratada como un campo atómico
+cuando sus items son strings de un enum cerrado y declara
+`uniqueItems: true`.
+
+Revision 8 conserva Draft 2020-12, la URI canónica, unknowns y annotations,
+referencias locales, composición object-`allOf`, collection policies, traversal
+descriptor-safe, schema original para el validator y todas las reglas M1–M30
+que no sustituye expresamente.
+
+Arrays M10 de objetos conservan identidad, templates, policies y operaciones.
+Permanecen fuera arrays primitive libres/numéricos/nullable/mixed, tuples,
+nested arrays, arrays dentro de item templates, composición array y toda
+keyword array no enumerada como soportada aquí.
+
+### 17.2 Ubicaciones y clasificación de array
+
+El campo M31 puede aparecer solo donde el compilador Accepted espera una
+propiedad ordinaria directa o nested fuera de un collection item template,
+incluido un use site alcanzado mediante `$ref` local o aportado como propiedad
+disjunta por composición object-`allOf`. Root `type: "array"` continúa
+bloqueante.
+
+Todo array candidato exige `items` como data property propia cuyo valor sea un
+schema object ordinario no array. Para preservar exactamente SPEC-003, un
+defecto exterior conserva `expected: 'inline object item schema'` salvo cuando
+el outer ya declara una data property propia enumerable
+`uniqueItems: true`; solo ese marcador seguro usa
+`expected: 'string-enum item schema'`. Ambos usan
+`INVALID_SCHEMA_KEYWORD_VALUE` en la ruta de `items` y el `actualType` seguro
+Accepted. Un `uniqueItems` ausente, accessor, no enumerable o distinto de true
+nunca se usa para reclasificar el diagnóstico M10 existente.
+
+Después del exterior, el `items.type` propio clasifica sin inferencia:
+
+- exacto `"object"` conserva íntegramente el array collection M10;
+- exacto `"string"` selecciona el candidato atómico M31; y
+- ausencia, accessor, valor no string u otro tipo conserva los diagnósticos de
+  tipo Accepted en la ruta exacta y no activa ninguna rama primitive.
+
+Un tipo `number`, `integer`, `boolean`, `null`, `array` u object nullable no se
+convierte en candidato M31. No se inspeccionan sus constraints/items como si
+fueran un schema soportado.
+
+Un array descubierto dentro de cualquier item template continúa emitiendo
+`UNSUPPORTED_FIELD_TYPE` con reason `nested-array-not-supported` y se detiene
+antes de leer `items`, incluso si tendría forma M31. Ninguna
+`CollectionPolicy` se exige ni se consume para un candidato string; una policy
+que apunte a él conserva `UNUSED_COLLECTION_POLICY` porque no existe un array
+collection soportado en ese path.
+
+### 17.3 Catálogo cerrado M31
+
+El catálogo semántico exacto es:
+
+| Ubicación           | Miembros soportados                                               |
+| ------------------- | ----------------------------------------------------------------- |
+| propiedad array M31 | `type`, `items`, `uniqueItems`, `title`, `description`, `default` |
+| item string M31     | `type`, `enum`                                                    |
+
+Las annotations ignorables Accepted producen sus warnings en ambos objects y
+las unknowns siguen opacas, excepto que `format` no se interpreta como
+annotation del item porque este no es un data node. En el item string, `title`,
+`description`, `default`, `format`, `const`, nullable type, constraints string,
+`properties`, `required`, `items`, `$ref`, applicators y toda otra keyword
+semántica producen `INCOMPATIBLE_SCHEMA_KEYWORD` con
+`fieldType: 'string-enum-array-item'`; nunca se convierten en metadata del
+campo exterior.
+
+En el outer M31, `properties`, `required`, constraints primitive, `enum` y
+`allOf` son incompatibles. Usan `INCOMPATIBLE_SCHEMA_KEYWORD` con
+`fieldType: 'string-enum-array'`. `const`, `minItems`, `maxItems`, `contains`,
+`minContains`, `maxContains`, `prefixItems`, `unevaluatedItems` y toda keyword
+array conocida no listada conservan `UNSUPPORTED_SCHEMA_KEYWORD`. `format`
+conserva su warning outer Accepted y no se normaliza desde el item.
+
+En un array collection M10, `uniqueItems` continúa siendo conocida no soportada
+y produce `UNSUPPORTED_SCHEMA_KEYWORD`. Revision 8 no afirma que la identidad
+M10 equivalga a JSON Schema uniqueness.
+
+### 17.4 `uniqueItems: true` requerido
+
+Tras clasificar de forma segura `items.type: "string"`, el outer debe declarar
+`uniqueItems` como data property propia enumerable con valor boolean exacto
+`true`.
+
+Ausencia/herencia, descriptor accessor, propiedad no enumerable y cualquier
+valor distinto de true producen un único `INVALID_SCHEMA_KEYWORD_VALUE` en la
+ruta de `uniqueItems`, con:
+
+```ts
+{
+  keyword: 'uniqueItems';
+  expected: 'true';
+  actualType: string;
+}
+```
+
+`actualType` es `missing`, `accessor` o `non-enumerable` para defectos de
+descriptor; un data value seguro usa el vocabulario Accepted. Un false seguro
+añade `actualValue: false`; ningún otro valor se retiene. El fallback permanece
+`Schema keyword "uniqueItems" has an invalid value.`.
+
+El error no impide inspeccionar la forma/enum de items independientemente
+segura, pero bloquea toda definición parcial. Core no añade la keyword ni la
+considera una policy runtime: el validator externo conserva la assertion.
+
+### 17.5 Item string y enum
+
+El item root exige data properties propias `type: "string"` y `enum`. Una
+ausencia/herencia de `enum` produce `INVALID_SCHEMA_KEYWORD_VALUE` en su ruta
+con `expected: 'non-empty array of unique strings'` y
+`actualType: 'missing'`; un accessor usa
+`expected: 'array of unique strings'` y `actualType: 'accessor'`, sin
+ejecutarlo. Para un data value presente, `enum` reutiliza íntegramente
+ADR-011:
+
+- array propio no vacío, denso, de strings exactas y sin duplicados;
+- inspección por descriptors/index ascendente sin iterator, coercion, trim,
+  case folding ni normalización Unicode;
+- `INVALID_SCHEMA_KEYWORD_VALUE` con expected exacto `array of unique
+strings`, `non-empty array of unique strings`, `string` o `unique string`;
+  y
+- todos los errores independientemente detectables en índice ascendente antes
+  de bloquear la definición.
+
+Los `documentPath` quedan bajo `[..., 'items', 'enum', index?]`; `dataPath` es
+el path string-only del único campo array. No existe `templatePath`, item index
+runtime ni `referenceChain` adicional salvo el del use site schema ya
+alcanzado mediante una referencia Accepted.
+
+La lista se copia en orden para construir las choices de ADR-034, pero el
+schema original exacto sigue siendo la única entrada del validator. El
+compilador comprueba renderabilidad estructural, no pertenencia/duplicados del
+valor controlado.
+
+### 17.6 UI Schema y `enumLabels`
+
+La clasificación normalizada M31 selecciona una rama `FieldUiSchema`, no
+`ArrayUiSchema`. Admite `label`, `description`, `hint`, `tooltip` y
+`enumLabels`. `enumLabels` reutiliza los values/labels, fallback blank,
+descriptor safety, ordering y diagnósticos ADR-011, pero corresponde al
+`items.enum` del mismo campo.
+
+Un `enumLabels` exterior malformed conserva `INVALID_UI_SCHEMA_VALUE` aunque la
+rama schema esté bloqueada. Un exterior válido se recorre solo cuando existe un
+enum item válido; de otro modo se suprimen diagnósticos derivados. Keys
+desconocidas producen `UNKNOWN_ENUM_LABEL` y nunca añaden/reordenan choices.
+
+`placeholder`, numeric options, `item`, `order`, `fields`, actions,
+`visibleWhen` y `enabledWhen` son incompatibles en M31. Los dos miembros de
+condición conservan `INVALID_UI_FIELD_CONDITION` con reason
+`unsupported-target-location` bajo ADR-033; no se degradan a un warning
+genérico. Los demás diagnósticos usan el path UI exacto y
+`fieldType: 'string-enum-array'` cuando el envelope Accepted lo incluye. No
+existe UI Schema del item.
+
+Un array M10 conserva `ArrayUiSchema` y `enumLabels` incompatible; un campo M31
+no acepta `item`. Ninguna forma UI permite cambiar entre ambas familias.
+
+### 17.7 Traversal, orden y branch stopping
+
+La clasificación usa una lectura descriptor-safe de `items`/`items.type` para
+elegir familia, sin normalizar ni emitir trabajo dependiente antes de conocerla.
+El orden observable queda:
+
+1. input, dialecto, exterior de policies e index `$defs` Accepted;
+2. schema depth-first pre-order hasta la propiedad array;
+3. outer `type` y members comunes independientemente clasificables;
+4. exterior `items` y `items.type`;
+5. members outer dependientes de familia, incluido `uniqueItems`;
+6. para M10, item object/template y policy bajo todo su orden Accepted;
+7. para M31, item string y `enum` en índice ascendente;
+8. policies semánticas/unused tras el schema traversal; y
+9. UI Schema completo después de todos los diagnósticos schema
+   independientemente recopilables.
+
+Un `items` exterior/type inválido detiene clasificación y descendants. No
+produce además un diagnóstico derivado para `uniqueItems`, `enum` o
+`enumLabels` members. Un `uniqueItems` inválido detiene solo definición
+dependiente, no el enum item seguro ni formas UI exteriores independientes. Un
+enum bloqueado suprime label compatibility/members, no la forma exterior de
+`enumLabels`.
+
+References, composition provenance, containment sharing y los dos dominios de
+ciclo conservan sus reglas Accepted. El string item no abre un nuevo resource,
+reference target, composition wrapper o containment data node.
+
+### 17.8 Validator, runtime ownership y Public/Internal
+
+El `SchemaValidator` recibe el schema original exacto y el valor completo. Core
+no reescribe `items`, añade `uniqueItems`, deduplica valores ni evalúa
+assertions. ADR-034 conserva application ownership, operaciones atómicas y
+representación de datos inválidos.
+
+La migración ADR-009 exacta es:
+
+| Clasificación                       | Efecto                                                                                                                             |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Changed Public behavior             | `compileFormDefinition()` podrá aceptar el schema M31 después de una SPEC/plan implementados.                                      |
+| Changed Public diagnostic semantics | El expected exterior de `items`, la forma requerida de `uniqueItems`, paths/field type UI y orden familiar quedan cerrados.        |
+| New/changed Public signatures       | Ninguna en esta revisión de política.                                                                                              |
+| Internal                            | Clasificador object-collection/string-enum, cursor del item string y candidatos detached de choices/UI labels.                     |
+| Unchanged                           | Runtime, operaciones, adapters, packages, entry points, exports, dependencies, versions, publication and stability classification. |
+
+Revision 8 no activa la definición/snapshots/texts/renderer de ADR-034; esos
+contratos requieren SPEC-017 Accepted y un plan posterior aprobado. Tampoco
+selecciona versión ni autoriza un release.
+
+### 17.9 Exclusiones
+
+Permanecen Deferred todos los arrays no exactos M10/M31, `uniqueItems` opcional
+o false, enum nullable/mixed/no string, item `$ref`, array `allOf`, nested
+arrays, arrays en templates, tuples y demás keywords array. También permanecen
+inactivos defaults aplicados, conditions array, generated values, persistence,
+otros targets/frameworks, nuevas dependencies/packages, version, release,
+publication, Stable promotion, commit, push y external actions.
+
+### 17.10 Gate de aceptación
+
+Revision 8 solo podrá aceptarse después de que una revisión completa repetida
+confirme:
+
+1. autoridad exacta ADR-034/D-006/M31 y separación M10;
+2. ubicaciones y clasificación family-safe;
+3. catálogos outer/item cerrados y exclusions;
+4. `uniqueItems: true` requerido, descriptor-safe y determinista;
+5. item enum ADR-011, paths y provenance exactos;
+6. UI Field/Array separation y labels/diagnostics;
+7. traversal, diagnostic order and branch stopping completos;
+8. validator original y application ownership intactos;
+9. Public/Internal inventory sin firma/dependency/version; y
+10. documentación, links, formato, diff y gate separado SPEC-017.
+
+Cada corrección exigió repetir la revisión completa. Review 294 ciclo 2 pasó
+las diez áreas con cero hallazgos después de cinco correcciones y revision 8
+queda Accepted bajo la regla autorizada de aceptación sin ampliación de
+alcance. Autoriza únicamente preparar y revisar SPEC-017; no un plan, código,
+dependencia, versión, release, Git o acción externa.

@@ -533,8 +533,14 @@ code {
 }
 
 .form-field > label,
+.form-field > .field-label,
 .object-group > legend {
   font-weight: 650;
+}
+
+.fixed-value {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .form-field input:not([type='checkbox']),

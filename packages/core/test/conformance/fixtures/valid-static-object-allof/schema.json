@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" }
+      }
+    }
+  },
+  "allOf": [
+    { "$ref": "#/$defs/contact" },
+    {
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string", "minLength": 1 }
+      },
+      "required": ["email", "displayName"]
+    }
+  ]
+}

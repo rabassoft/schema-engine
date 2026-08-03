@@ -49,6 +49,7 @@ const nestedProfile = {
   label: 'Profile',
   kind: 'object',
   children: [nestedStreet],
+  presentation: [{ kind: 'form-node', node: nestedStreet }],
 };
 const nestedDefinition = {
   nodes: [nestedProfile],

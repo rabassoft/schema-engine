@@ -58,10 +58,181 @@
   `email`, `date` and `date-time` D-037/M24 slice.
 - [SPEC-011 v0.1.0: Primitive Const and Fixed Presentation](./specs/011-primitive-const-fixed-presentation.md)
   — Accepted after review 220 cycle 4 for the bounded D-036/M25 slice;
-  PLAN-027 revision 0 is now separately Approved for checkpoints 1–6.
+  completed PLAN-027 revision 1 implements that slice after final review 234.
+- [SPEC-012 v0.1.0: Controlled Asynchronous Validation](./specs/012-controlled-asynchronous-validation.md)
+  — Accepted after review 237 cycle 2 for the bounded D-003/M26 contract;
+  completed PLAN-028 implements its six checkpoints after final review 244.
+- [SPEC-013 v0.1.1: Scope-to-Baseline Confirmation](./specs/013-scope-baseline-confirmation.md)
+  — Accepted after review 250 cycle 1 reconciled C-001 with zero findings;
+  completed PLAN-029 revision 1 implements it after final review 257 cycle 2.
+- [SPEC-014 v0.1.0: Static Object `allOf` Composition](./specs/014-static-object-allof-composition.md)
+  — Accepted M28 compiler extension under ADR-031/ADR-005 revision 7 after
+  review 261 cycle 5 passed all fourteen areas with zero findings; completed
+  PLAN-030 implements all 21 rows after final review 268 cycle 2.
+- [SPEC-015 v0.1.0: Explicit Schema-Default Candidate](./specs/015-explicit-schema-default-candidate.md)
+  — Accepted M29 contract under ADR-032 after review 271 cycle 1 passed all
+  fourteen areas and 21 conformance rows with zero findings; completed
+  PLAN-031 implements it after final review 278 cycle 2.
+- [SPEC-016 v0.1.1: Controlled Conditional Primitive-Field State](./specs/016-controlled-conditional-primitive-field-state.md)
+  — Accepted M30 contract under ADR-033 after revision review 283 cycle 1
+  passed all seventeen areas and 24 conformance rows with zero findings;
+  completed PLAN-032 revision 1 implements checkpoints 1–7 after final review
+  291 cycle 1 passed with zero findings.
+- [SPEC-017 v0.1.0: Controlled String-Enum Array Field](./specs/017-controlled-string-enum-array-field.md)
+  — Accepted bounded M31 contract under ADR-034/ADR-005 revision 8 after review
+  295 cycle 2 passed all nine areas and 26 rows with zero findings; completed
+  PLAN-033 implements all 26 rows after final review 303 cycle 2.
+
+ADR-033 revision 0 is the Accepted architecture for bounded D-018/M30
+ordinary primitive-field visibility/enabled equality predicates. Accepted
+SPEC-016 closes the observable contract; completed PLAN-032 revision 1
+implements all seven checkpoints and 24 rows after final review 291 cycle 1
+repeated the frozen matrix with zero findings.
+
+Bounded D-006/M31 defines one ordered homogeneous array of unique closed-enum
+strings controlled atomically as a field. Promotion
+[review 292](./reviews/292-d006-m31-string-enum-array-promotion-readiness.md)
+cycle 3, ADR-034 [review 293](./reviews/293-adr-034-review.md) cycle 3,
+ADR-005 revision 8
+[review 294](./reviews/294-adr-005-revision-8-review.md) cycle 2 and SPEC-017
+[review 295](./reviews/295-spec-017-review.md) cycle 2 all pass with zero
+findings. The ADRs and SPEC-017 v0.1.0 are Accepted. Completed PLAN-033
+revision 0 implements checkpoints 1–7 and all 26 rows after final review 303
+cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
+
+## Latest completed implementation plan
+
+- [PLAN-033 revision 0: Controlled String-Enum Array Field](./plans/033-controlled-string-enum-array-field.md)
+  — Completed after final review 303 cycle 2 repeated the complete frozen
+  matrix, all seven checkpoints and all 26 rows with zero findings.
+- [PLAN-032 revision 1: Controlled Conditional Primitive-Field State](./plans/032-controlled-conditional-primitive-field-state.md)
+  — Completed after final review 291 cycle 1 repeated the complete frozen
+  matrix, all seven checkpoints and all 24 rows with zero findings.
 
 ## Acceptance reviews
 
+- [PLAN-033 final implementation review](./reviews/303-plan-033-final-implementation-review.md) — Cycle 1 identifies parallel-browser server interference; cycle 2 serializes both suites and passes the frozen graph, 78 files/1103 tests, packages/consumers/source, policies/security, 701 boundaries, Chromium 17+14 and all 26 rows with zero findings
+- [PLAN-033 checkpoint 6 review](./reviews/302-plan-033-checkpoint-6-review.md) — Cycle 1 corrects two declaration-evidence defects; cycle 2 passes all ten areas and SPEC-017 row 25 with zero findings
+- [PLAN-033 checkpoint 5 review](./reviews/301-plan-033-checkpoint-5-review.md) — Cycles 1–3 correct selector, status, fixture and formatting defects; cycle 4 passes all twelve areas and SPEC-017 row 24 with zero findings
+- [PLAN-033 checkpoint 4 review](./reviews/300-plan-033-checkpoint-4-review.md) — Cycle 1 corrects four Angular projection/evidence defects; cycle 2 passes all twelve areas and SPEC-017 rows 16 and 22–23 with zero findings
+- [PLAN-033 checkpoint 3 review](./reviews/299-plan-033-checkpoint-3-review.md) — Cycle 1 corrects issue assignment; cycle 2 passes all twelve areas and SPEC-017 rows 17–21 with zero findings
+- [PLAN-033 checkpoint 2 review](./reviews/298-plan-033-checkpoint-2-review.md) — Cycle 1 corrects two descriptor-safety defects; cycle 2 passes all twelve areas and SPEC-017 rows 10–15 with zero findings
+- [PLAN-033 checkpoint 1 review](./reviews/297-plan-033-checkpoint-1-review.md) — Cycle 1 corrects four implementation/evidence defects; cycle 2 passes all twelve areas and SPEC-017 rows 1–9 with zero findings
+- [PLAN-033 complete review](./reviews/296-plan-033-review.md) — Cycle 1 corrects one checkpoint buildability defect; cycle 2 passes all seven areas and exact 26-row ownership with zero findings and approves revision 0
+- [SPEC-017 complete review](./reviews/295-spec-017-review.md) — Cycle 1 corrects six declaration, runtime, target and index defects; cycle 2 passes all nine areas and 26 conformance rows with zero findings and accepts v0.1.0
+- [ADR-005 revision 8 complete review](./reviews/294-adr-005-revision-8-review.md) — Cycle 1 corrects five M10-envelope, catalog, required-enum and condition-policy defects; cycle 2 passes all ten areas with zero findings and accepts revision 8
+- [ADR-034 complete review](./reviews/293-adr-034-review.md) — Cycle 1 corrects five architecture defects; cycle 2 exposes a stale post-acceptance link count; cycle 3 passes all twelve areas with zero findings and accepts revision 0
+- [D-006/M31 string-enum array promotion review](./reviews/292-d006-m31-string-enum-array-promotion-readiness.md) — Cycles 1–2 correct ordering, empty/missing and the ADR-005r8 policy gate; cycle 3 passes all fourteen areas with zero findings and reserves ADR-034 only
+- [PLAN-032 final implementation review](./reviews/291-plan-032-final-implementation-review.md) — Cycle 1 passes the frozen graph, 74 files/1035 unit tests, package/clean/source consumers, policies/security, 671 boundaries, Chromium 16+13, all 24 rows, docs and diff hygiene with zero findings
+- [PLAN-032 checkpoint 6 review](./reviews/290-plan-032-checkpoint-6-review.md) — Cycle 1 corrected four package/source/documentation/hygiene defects; cycle 2 passes all ten areas and SPEC-016 row 24 with zero findings
+- [PLAN-032 checkpoint 5 review](./reviews/289-plan-032-checkpoint-5-review.md) — Cycle 1 corrected three scenario/evidence defects; cycle 2 passes all fourteen areas and SPEC-016 rows 22–23 with zero findings
+- [PLAN-032 checkpoint 4 review](./reviews/288-plan-032-checkpoint-4-review.md) — Cycle 1 corrected four outlet/native/tooling/evidence defects; cycle 2 passes all twelve areas and SPEC-016 row 21 with zero findings
+- [PLAN-032 checkpoint 3 review](./reviews/287-plan-032-checkpoint-3-review.md) — Cycle 1 corrected the nested fixture generator and focused evidence gaps; cycle 2 passes all twelve areas and SPEC-016 rows 15–20 with zero findings
+- [PLAN-032 checkpoint 2 review](./reviews/286-plan-032-checkpoint-2-review.md) — Cycle 1 corrected three validation/mapping/evidence defects; cycle 2 passes all twelve areas and SPEC-016 row 14 with zero findings
+- [PLAN-032 checkpoint 1 review](./reviews/285-plan-032-checkpoint-1-review.md) — Cycle 1 corrected four compiler/evidence defects; cycle 2 passes all thirteen areas and SPEC-016 rows 1–13 with zero findings
+- [PLAN-032 revision 1 complete review](./reviews/284-plan-032-revision-1-review.md) — Cycle 1 passes all twelve plan areas, autonomous execution agreement and exact 24-row ownership with zero findings, approving checkpoints 1–7 in order
+- [SPEC-016 revision 1 complete review](./reviews/283-spec-016-revision-1-review.md) — Cycle 1 resolves C-002 and repeats all seventeen contract areas and 24 rows with zero findings, accepting v0.1.1
+- [PLAN-032 complete review](./reviews/282-plan-032-review.md) — Cycle 1 passes all eleven plan areas and exact 24-row ownership with zero findings, approving checkpoints 1–7 in order
+- [SPEC-016 complete review](./reviews/281-spec-016-review.md) — Cycles 1–2 corrected seven baseline, diagnostic, schema-blocking, buffer and evidence defects; cycle 3 passes all seventeen areas and 24 rows with zero findings and accepts v0.1.0
+- [ADR-033 complete review](./reviews/280-adr-033-review.md) — Cycle 1 corrected schema-blocked diagnostic cascading, premature manual linking and fixed-field enabled ambiguity; cycle 2 passes all twelve areas with zero findings and accepts revision 0
+- [D-018/M30 promotion review](./reviews/279-d018-m30-conditional-field-state-promotion-readiness.md) — Cycle 1 corrected the shared item-snapshot migration boundary; cycle 2 passes all twelve areas with zero findings and reserves ADR-033 for the bounded design
+- [PLAN-031 final implementation review](./reviews/278-plan-031-final-implementation-review.md) — Cycle 1 corrected one formatting finding and stale current-state surfaces; cycle 2 repeats the complete frozen matrix and all 21 SPEC-015 rows with zero findings, completing PLAN-031/M29
+- [PLAN-031 checkpoint 5 review](./reviews/277-plan-031-checkpoint-5-review.md) — Cycle 1 corrected the closed scenario feature/transition/inventory evidence; cycle 2 passes all twelve independent reference areas and row 21 with zero findings
+- [PLAN-031 checkpoint 4 review](./reviews/276-plan-031-checkpoint-4-review.md) — Cycle 1 passes all ten declarations/package/consumer areas and row 20 with zero findings
+- [PLAN-031 checkpoint 3 review](./reviews/275-plan-031-checkpoint-3-review.md) — Cycle 1 corrected container-default classification and diagnostic ordering; cycle 2 passes all twelve schema-graph areas and rows 8–11/17/19 with zero findings
+- [PLAN-031 checkpoint 2 review](./reviews/274-plan-031-checkpoint-2-review.md) — Cycle 1 corrected one test-lint defect; cycle 2 passes all eleven nested/reconstruction areas and rows 12–16/18 with zero findings
+- [PLAN-031 checkpoint 1 review](./reviews/273-plan-031-checkpoint-1-review.md) — Cycle 1 corrected two implementation defects; cycle 2 passes all eleven direct-default areas and rows 1–7 with zero findings
+- [PLAN-031 complete review](./reviews/272-plan-031-review.md) — Cycle 1 corrected one Public-export ownership inconsistency; cycle 2 passes all ten plan areas and exact 21-row coverage with zero findings, approving checkpoints 1–6
+- [SPEC-015 complete review](./reviews/271-spec-015-review.md) — Cycle 1 passes all fourteen contract areas and 21 conformance rows with zero findings; SPEC-015 v0.1.0 is Accepted and authorizes only PLAN-031 preparation/review
+- [ADR-032 complete review](./reviews/270-adr-032-review.md) — Cycle 1 corrected four contract inconsistencies; cycle 2 passes all fourteen areas with zero findings and accepts the bounded D-039/M29 architecture
+- [Post-M28 functional-capability selection](./reviews/269-post-m28-functional-capability-selection.md) — Cycle 1 compares the remaining core, platform, workflow and compatibility candidates with zero findings; Ricard selected bounded D-039 for M29 architecture design on 2026-08-03
+- [PLAN-030 final implementation review](./reviews/268-plan-030-final-implementation-review.md) — Cycle 1 corrected lint and stale current-state documentation; cycle 2 repeats the complete frozen matrix and all 21 SPEC-014 rows with zero findings, completing PLAN-030/M28
+- [PLAN-030 checkpoint 5 review](./reviews/267-plan-030-checkpoint-5-review.md) — Four findings were corrected across cycles 1–2; cycle 3 passes all twelve shared-authoring/consumer areas and SPEC-014 row 21 with zero findings
+- [PLAN-030 checkpoint 4 review](./reviews/266-plan-030-checkpoint-4-review.md) — Cycle 1 passes all ten package/consumer invariance areas and SPEC-014 row 20 with zero findings
+- [PLAN-030 checkpoint 3 review](./reviews/265-plan-030-checkpoint-3-review.md) — Three findings were corrected across cycles 1–2; cycle 3 passes all fifteen core conformance areas and rows 1–19 with zero findings
+- [PLAN-030 checkpoint 2 review](./reviews/264-plan-030-checkpoint-2-review.md) — Four findings were corrected across cycles 1–2; cycle 3 passes all thirteen reduction/provenance areas with zero findings
+- [PLAN-030 checkpoint 1 review](./reviews/263-plan-030-checkpoint-1-review.md) — Four implementation findings were corrected across cycles 1–3; cycle 4 passes all eleven foundation areas and 587 core tests with zero findings
+- [PLAN-030 complete review](./reviews/262-plan-030-review.md) — One stale root-onboarding finding was corrected; cycle 2 passes all fifteen plan areas with zero findings and approves revision 0
+- [SPEC-014 complete review](./reviews/261-spec-014-review.md) — Twelve findings
+  were corrected across cycles 1–4; cycle 5 passes all fourteen contract,
+  conformance and reference-evidence areas with zero findings. SPEC-014 v0.1.0
+  is Accepted under the authorized zero-finding/no-scope-expansion rule.
+- [ADR-005 revision 7 complete review](./reviews/260-adr-005-revision-7-review.md)
+  — Thirteen findings were corrected across cycles 1–4; cycle 5 passes all
+  eleven normative-policy areas with zero findings and revision 7 is Accepted.
+- [ADR-031 complete review](./reviews/259-adr-031-review.md) — Twelve findings
+  were corrected across cycles 1–4; cycle 5 passes all fourteen areas with zero
+  findings and Ricard formally accepted revision 0 on 2026-08-03.
+- [Post-M27 functional-capability selection](./reviews/258-post-m27-functional-capability-selection.md)
+  — Four stale M27 summaries were corrected; cycle 2 recommends a bounded
+  static object-`allOf` design question with zero findings. Ricard selected it
+  on 2026-08-03, promoting only M28 architecture design; no Public contract or
+  implementation is active.
+- [PLAN-029 final implementation review](./reviews/257-plan-029-final-implementation-review.md)
+  — Cycle 2 repeats the complete frozen matrix with zero findings and closes
+  PLAN-029/M27 without dependency, release or Public-surface drift.
+- [PLAN-029 checkpoint 1 review](./reviews/249-plan-029-checkpoint-1-review.md)
+  — Cycle 1 halts incomplete Internal work on SPEC-013 diagnostic conflict
+  C-001; no Public export exists.
+- [PLAN-029 complete review](./reviews/248-plan-029-review.md) — Five findings
+  corrected across cycles 1–2; cycle 3 passes all fourteen areas with zero
+  findings and approves checkpoints 1–6 in order.
+- [SPEC-013 complete review](./reviews/247-spec-013-review.md) — Five findings
+  corrected across cycles 1–2; cycle 3 passes all twelve areas with zero
+  findings and supports acceptance of the bounded M27 contract.
+- [ADR-030 complete review](./reviews/246-adr-030-review.md) — Three findings
+  corrected; cycle 2 passes all twelve areas with zero findings and supports
+  formal acceptance of the bounded M27 architecture.
+- [D-038/M27 scope-baseline promotion readiness](./reviews/245-d038-m27-scope-baseline-promotion-readiness.md)
+  — Cycle 1 selects a bounded pure application-owned baseline-confirmation
+  design question; ADR-030 is the next gate and no contract is active.
+- [PLAN-028 final implementation review](./reviews/244-plan-028-final-implementation-review.md)
+  — Cycle 1 corrects lint and stale onboarding/state text; cycle 2 repeats the
+  complete frozen matrix and closes PLAN-028/M26 with zero findings.
+- [PLAN-028 checkpoint 5 review](./reviews/243-plan-028-checkpoint-5-review.md)
+  — Seven implementation/test/documentation findings corrected; cycle 5
+  passes fourteen shared/parity areas, 52+27+60 tests, 593 boundaries and both
+  complete Chromium suites with zero findings.
+- [PLAN-028 checkpoint 4 review](./reviews/242-plan-028-checkpoint-4-review.md)
+  — Two test/environment findings corrected or isolated; cycle 2 passes all
+  ten Angular adapter areas and 131 tests with zero code findings.
+- [PLAN-028 checkpoint 3 review](./reviews/241-plan-028-checkpoint-3-review.md)
+  — Five observable/state findings corrected; cycle 2 passes all fifteen
+  areas and 516 core tests with zero findings.
+- [PLAN-028 checkpoint 2 review](./reviews/240-plan-028-checkpoint-2-review.md)
+  — Two hostile-lifecycle findings corrected; cycle 2 passes twelve areas and
+  490 core tests with zero findings.
+- [PLAN-028 checkpoint 1 review](./reviews/239-plan-028-checkpoint-1-review.md)
+  — One declaration finding corrected; cycle 2 passes all nine areas and 477
+  core tests with zero findings.
+- [SPEC-012 complete review](./reviews/237-spec-012-review.md) — Four findings
+  corrected; cycle 2 passes all eighteen areas before formal acceptance.
+- [ADR-029 complete review](./reviews/236-adr-029-review.md) — Four findings
+  corrected; cycle 2 passes all fourteen areas and accepts the bounded M26
+  async-validation architecture without starting implementation.
+- [D-003/M26 async-validation promotion readiness](./reviews/235-d003-m26-async-validation-promotion-readiness.md)
+  — Cycle 1 selects a bounded application-supplied async-validation design
+  question; Accepted ADR-029/SPEC-012 and completed PLAN-028 now deliver that
+  bounded M26 slice.
+- [PLAN-027 final implementation review](./reviews/234-plan-027-final-implementation-review.md)
+  — Cycle 3 repeats the complete frozen, workspace, package/source,
+  policy/security, boundary and Chromium matrix with zero findings and
+  completes PLAN-027/M25 without a release.
+- [PLAN-027 checkpoint 5 reference review](./reviews/233-plan-027-checkpoint-5-reference-review.md)
+  — Three findings corrected; cycle 4 verifies the shared fixed-values scenario
+  and both target-owned Chromium projections with zero findings.
+- [PLAN-027 checkpoint 4 Standard review](./reviews/232-plan-027-checkpoint-4-standard-review.md)
+  — Cycles 1–2 correct a stylesheet-harness assertion and visibility API use;
+  cycle 3 verifies the independent fixed projection, bounded localization and
+  zero intentions with zero findings.
+- [PLAN-027 checkpoint 3 Angular review](./reviews/231-plan-027-checkpoint-3-angular-review.md)
+  — Cycles 1–2 add explicit text-order evidence and recalibrate the bundle
+  error budget; cycle 3 verifies the Public fixed renderer and zero-intention
+  behavior with zero findings.
+- [PLAN-027 checkpoint 2 validator review](./reviews/230-plan-027-checkpoint-2-validator-review.md)
+  — Cycle 1 verifies ordinary Ajv primitive `const` assertion, immutable issue
+  mapping, cache reuse, formats/references and zero production drift with zero
+  findings.
 - [Standard reference visual parity review](./reviews/229-standard-reference-visual-parity-review.md)
   — Cycle 1 corrects dark JSON syntax contrast; cycle 2 verifies four
   first-level disclosures and dark JSON/code selection with zero findings.
@@ -735,14 +906,26 @@
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)
+- [ADR-034: Controlled homogeneous string-enum array field](./adrs/034-controlled-homogeneous-string-enum-array-field.md)
+  — Accepted revision 0 after review 293 cycle 3; accepted SPEC-017 and
+  completed PLAN-033 implement its bounded M31 decision after final review 303
+  cycle 2.
+- [ADR-029: Controlled asynchronous validation lifecycle](./adrs/029-validacion-asincrona-controlada.md)
+- [ADR-030: Pure scope-to-baseline confirmation](./adrs/030-confirmacion-parcial-baseline-scope.md)
+  — Accepted revision 0; the pure helper returns an application-owned baseline
+  candidate without mutating runtime state or owning persistence.
+- [ADR-031: Static object composition with `allOf`](./adrs/031-static-object-allof-composition.md)
+  — Accepted revision 0 for bounded D-007/M28 architecture after review 259
+  cycle 5; Accepted ADR-005 revision 7 and SPEC-014 complete its current
+  follow-up gates without activating implementation.
 - [ADR-026: Sanitized public history and secure release automation](./adrs/026-public-repository-and-secure-releases.md)
   — Accepted revision 0 with ADR-018 revision 6; completed PLAN-024 passes its
   corrected final closure after review 177 cycle 3. Future package metadata,
   OIDC/provenance and backup deletion remain separately gated.
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
-  — Accepted revision 6; its successive bounded revisions coordinate local
-  references, nullable primitives, semantic string formats and primitive
-  `const` without widening the compiler beyond their accepted gates.
+  — Accepted revision 8 closes the bounded M31 string-enum array policy after
+  review 294 cycle 2; completed PLAN-033 implements it after final review 303
+  cycle 2.
 - [ADR-017: Static neutral presentation groups](./adrs/017-grupos-presentacion-estaticos.md)
   — Accepted revision 0 for D-042 after review 023 cycle 3 passed all eight
   areas with zero findings; SPEC-005 and completed PLAN-012 implement it.
@@ -824,7 +1007,11 @@
 - [PLAN-024: Sanitized public repository and secure-release preparation](./plans/024-sanitized-public-repository.md) — Completed revision 0 after review 177 cycle 3 repeated the corrected final closure with zero unresolved findings
 - [PLAN-025: Stage-only trusted publication with provenance](./plans/025-stage-only-trusted-publication.md) — Completed revision 0 after final review 208 cycle 4 repeated the complete M23 matrix with zero findings
 - [PLAN-026: Semantic string formats](./plans/026-semantic-string-formats.md) — Completed revision 0 after final review 217 cycle 4 repeated the complete applicable matrix with zero findings
-- [PLAN-027: Primitive const and fixed presentation](./plans/027-primitive-const-fixed-presentation.md) — Approved revision 0 after review 221 cycle 6 passed all sixteen areas and accepted-state reconciliation with zero findings; checkpoint 1 is complete after review 222 cycle 5
+- [PLAN-027: Primitive const and fixed presentation](./plans/027-primitive-const-fixed-presentation.md) — Completed revision 1 after final review 234 cycle 3 repeated the complete matrix with zero findings
+- [PLAN-028: Controlled asynchronous validation](./plans/028-controlled-asynchronous-validation.md) — Completed revision 0 after final review 244 cycle 2 repeated the complete matrix with zero findings
+- [PLAN-029: Scope-to-baseline confirmation](./plans/029-scope-baseline-confirmation.md) — Completed revision 1 after final review 257 cycle 2 repeated the complete matrix with zero findings
+- [PLAN-030: Static Object `allOf` Composition](./plans/030-static-object-allof-composition.md) — Completed revision 0 after final review 268 cycle 2 repeated the complete matrix and all 21 SPEC-014 rows with zero findings
+- [PLAN-031: Explicit Schema-Default Candidate](./plans/031-explicit-schema-default-candidate.md) — Completed revision 0 after final review 278 cycle 2 repeated the complete frozen matrix and all 21 SPEC-015 rows with zero findings
 
 Checkpoint reviews: [065](./reviews/065-plan-017-checkpoint-1-review.md),
 [066](./reviews/066-plan-017-checkpoint-2-review.md) and

@@ -1,0 +1,87 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"flag\"]",
+        "name": "flag",
+        "path": ["flag"],
+        "required": false,
+        "nullable": false,
+        "label": "flag",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"name\"]",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "nullable": false,
+        "label": "name",
+        "visibleWhen": {
+          "sourcePath": ["flag"],
+          "equals": true
+        },
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"flag\"]",
+        "name": "flag",
+        "path": ["flag"],
+        "required": false,
+        "nullable": false,
+        "label": "flag",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"name\"]",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "nullable": false,
+        "label": "name",
+        "visibleWhen": {
+          "sourcePath": ["flag"],
+          "equals": true
+        },
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"flag\"]",
+          "name": "flag",
+          "path": ["flag"],
+          "required": false,
+          "nullable": false,
+          "label": "flag",
+          "kind": "boolean"
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"name\"]",
+          "name": "name",
+          "path": ["name"],
+          "required": false,
+          "nullable": false,
+          "label": "name",
+          "visibleWhen": {
+            "sourcePath": ["flag"],
+            "equals": true
+          },
+          "kind": "string",
+          "constraints": {}
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

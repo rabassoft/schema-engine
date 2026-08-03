@@ -61,7 +61,12 @@ export interface AngularFieldTextSnapshot {
   readonly clearLabel: string;
   readonly setNullLabel: string;
   readonly nullValueLabel: string;
+  readonly fixedMissingLabel: string;
+  readonly fixedUnavailableLabel: string;
+  readonly fixedIncompatibleLabel: string;
   readonly choiceLabels: readonly string[];
+  readonly missingSelectionLabel: string;
+  readonly emptySelectionLabel: string;
   readonly issueMessages: readonly string[];
 }
 
@@ -346,12 +351,31 @@ export class AngularTextProjector {
         ? undefined
         : resolve(field.tooltip, 'tooltip');
     const placeholder =
-      field.placeholder === undefined
+      !('placeholder' in field) || field.placeholder === undefined
         ? undefined
         : resolve(field.placeholder, 'placeholder');
     const clearLabel = resolve('Clear', 'clear', true);
     const setNullLabel = resolve('Set null', 'set-null', true);
     const nullValueLabel = resolve('Null value', 'null-value', true);
+    const fixedLabels = hasOwnFixedValue(field)
+      ? {
+          fixedMissingLabel: resolve('Missing value', 'fixed-missing', true),
+          fixedUnavailableLabel: resolve(
+            'Unavailable value',
+            'fixed-unavailable',
+            true,
+          ),
+          fixedIncompatibleLabel: resolve(
+            'Incompatible value',
+            'fixed-incompatible',
+            true,
+          ),
+        }
+      : {
+          fixedMissingLabel: 'Missing value',
+          fixedUnavailableLabel: 'Unavailable value',
+          fixedIncompatibleLabel: 'Incompatible value',
+        };
     const choiceLabels = ownChoices(field).map((choice) =>
       resolveText(
         this.parsed.resolver,
@@ -361,6 +385,16 @@ export class AngularTextProjector {
         snapshot.path,
         true,
       ),
+    );
+    const missingSelectionLabel = resolve(
+      'No value provided.',
+      'missing-selection',
+      true,
+    );
+    const emptySelectionLabel = resolve(
+      'No values selected.',
+      'empty-selection',
+      true,
     );
     const issueMessages = snapshot.issues.map((issue) =>
       resolveText(
@@ -381,7 +415,10 @@ export class AngularTextProjector {
         clearLabel,
         setNullLabel,
         nullValueLabel,
+        ...fixedLabels,
         choiceLabels: Object.freeze(choiceLabels),
+        missingSelectionLabel,
+        emptySelectionLabel,
         issueMessages: Object.freeze(issueMessages),
       }),
       diagnostics: Object.freeze(diagnostics),
@@ -733,13 +770,18 @@ function textDiagnostic(
 function ownChoices(
   field: FieldDefinition | FieldTemplate,
 ): readonly StringChoiceDefinition[] {
-  if (field.kind !== 'string') return [];
+  if (field.kind !== 'string' && field.kind !== 'string-enum-array') return [];
   const descriptor = Object.getOwnPropertyDescriptor(field, 'choices');
   return descriptor !== undefined &&
     'value' in descriptor &&
     Array.isArray(descriptor.value)
     ? (descriptor.value as readonly StringChoiceDefinition[])
     : [];
+}
+
+function hasOwnFixedValue(field: FieldDefinition | FieldTemplate): boolean {
+  const descriptor = Object.getOwnPropertyDescriptor(field, 'fixedValue');
+  return descriptor !== undefined && 'value' in descriptor;
 }
 
 function findDescriptor(
@@ -774,7 +816,12 @@ export function emptyTextSnapshot(): AngularFieldTextSnapshot {
     clearLabel: 'Clear',
     setNullLabel: 'Set null',
     nullValueLabel: 'Null value',
+    fixedMissingLabel: 'Missing value',
+    fixedUnavailableLabel: 'Unavailable value',
+    fixedIncompatibleLabel: 'Incompatible value',
     choiceLabels: Object.freeze([]),
+    missingSelectionLabel: 'No value provided.',
+    emptySelectionLabel: 'No values selected.',
     issueMessages: Object.freeze([]),
   });
 }

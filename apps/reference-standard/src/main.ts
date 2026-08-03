@@ -3,7 +3,10 @@
 
 import './styles.css';
 
-import { referenceScenarios } from '@schema-engine-internal/reference-scenarios';
+import {
+  fixedValueControlStates,
+  referenceScenarios,
+} from '@schema-engine-internal/reference-scenarios';
 
 import { StandardDomRenderer } from './dom-renderer.js';
 import { referenceSnippets } from './generated/reference-snippets.js';
@@ -206,6 +209,116 @@ export function renderReferenceSkeleton(
     collectionActions,
   );
 
+  const fixedControls = document.createElement('fieldset');
+  fixedControls.className = 'collection-controls';
+  const fixedControlsLegend = document.createElement('legend');
+  fixedControlsLegend.textContent = 'Fixed value controls';
+  const fixedControlActions = document.createElement('div');
+  fixedControlActions.className = 'button-row';
+  const fixedControlButtons = fixedValueControlStates.map((control) => {
+    const controlButton = actionButton(control.label);
+    controlButton.dataset['testid'] = `fixed-control-${control.id}`;
+    controlButton.addEventListener('click', () =>
+      application.replaceValue(control.value),
+    );
+    return controlButton;
+  });
+  fixedControlActions.append(...fixedControlButtons);
+  fixedControls.append(fixedControlsLegend, fixedControlActions);
+
+  const serviceControls = document.createElement('fieldset');
+  serviceControls.className = 'collection-controls service-validation-controls';
+  serviceControls.dataset['testid'] = 'service-validation-controls';
+  const serviceLegend = document.createElement('legend');
+  const serviceGuidance = document.createElement('p');
+  serviceGuidance.className = 'scope-guidance';
+  serviceGuidance.textContent =
+    'Resolve deterministic application work to inspect core settlement, cancellation, failure and retry behavior.';
+  const serviceStatus = document.createElement('p');
+  serviceStatus.dataset['testid'] = 'async-validation-state';
+  serviceStatus.setAttribute('role', 'status');
+  serviceStatus.setAttribute('aria-live', 'polite');
+  const serviceActions = document.createElement('div');
+  serviceActions.className = 'button-row';
+  const settleServiceValid = actionButton('Resolve as available');
+  const settleServiceInvalid = actionButton('Resolve as unavailable');
+  const rejectService = actionButton('Reject current request');
+  const throwNextService = actionButton('Throw on next request');
+  const retryService = actionButton('Retry service validation');
+  serviceActions.append(
+    settleServiceValid,
+    settleServiceInvalid,
+    rejectService,
+    throwNextService,
+    retryService,
+  );
+  const serviceEvidence = evidenceDetails('Service request evidence', true);
+  serviceControls.append(
+    serviceLegend,
+    serviceGuidance,
+    serviceStatus,
+    serviceActions,
+    serviceEvidence.details,
+  );
+
+  const scopeControls = document.createElement('fieldset');
+  scopeControls.className = 'collection-controls scope-confirmation-controls';
+  scopeControls.dataset['testid'] = 'scope-confirmation-controls';
+  const scopeLegend = document.createElement('legend');
+  const scopeGuidance = document.createElement('p');
+  scopeGuidance.className = 'scope-guidance';
+  const scopeActions = document.createElement('div');
+  scopeActions.className = 'button-row';
+  const acceptScopeCandidate = actionButton('Accept prepared candidate');
+  acceptScopeCandidate.dataset['testid'] = 'accept-scope-candidate';
+  const scopeStatus = document.createElement('p');
+  scopeStatus.dataset['testid'] = 'scope-candidate-status';
+  scopeStatus.setAttribute('role', 'status');
+  scopeStatus.setAttribute('aria-live', 'polite');
+  const scopeEvidence = evidenceDetails('Prepared baseline candidate', true);
+  scopeControls.append(
+    scopeLegend,
+    scopeGuidance,
+    scopeActions,
+    scopeStatus,
+    scopeEvidence.details,
+  );
+
+  const defaultControls = document.createElement('fieldset');
+  defaultControls.className = 'collection-controls schema-default-controls';
+  defaultControls.dataset['testid'] = 'schema-default-controls';
+  const defaultLegend = document.createElement('legend');
+  const defaultGuidance = document.createElement('p');
+  defaultGuidance.className = 'scope-guidance';
+  const defaultActions = document.createElement('div');
+  defaultActions.className = 'button-row';
+  const deriveDefaultCandidate = actionButton('Derive candidate');
+  deriveDefaultCandidate.dataset['testid'] = 'derive-default-candidate';
+  const cancelDefaultCandidate = actionButton('Cancel candidate');
+  cancelDefaultCandidate.dataset['testid'] = 'cancel-default-candidate';
+  const acceptDefaultCandidate = actionButton('Accept candidate');
+  acceptDefaultCandidate.dataset['testid'] = 'accept-default-candidate';
+  defaultActions.append(
+    deriveDefaultCandidate,
+    cancelDefaultCandidate,
+    acceptDefaultCandidate,
+  );
+  const defaultStatus = document.createElement('p');
+  defaultStatus.dataset['testid'] = 'default-candidate-status';
+  defaultStatus.setAttribute('role', 'status');
+  defaultStatus.setAttribute('aria-live', 'polite');
+  const defaultEvidence = evidenceDetails(
+    'Prepared schema-default candidate',
+    true,
+  );
+  defaultControls.append(
+    defaultLegend,
+    defaultGuidance,
+    defaultActions,
+    defaultStatus,
+    defaultEvidence.details,
+  );
+
   const formHost = document.createElement('section');
   formHost.dataset['testid'] = 'form-preview';
   const formSurface = document.createElement('div');
@@ -216,6 +329,10 @@ export function renderReferenceSkeleton(
     previewHeading,
     decisionControl,
     collectionControls,
+    fixedControls,
+    serviceControls,
+    scopeControls,
+    defaultControls,
     formSurface,
   );
 
@@ -356,6 +473,7 @@ export function renderReferenceSkeleton(
   renderIntegration(integrationPanel);
 
   let activeDefinition: StandardReferenceApplicationState['definition'];
+  let activeRuntime = application.getRuntime();
   let renderer: StandardDomRenderer | undefined;
   let releaseRenderer: (() => void) | undefined;
   let configurationActionTrigger: HTMLButtonElement | undefined;
@@ -377,11 +495,12 @@ export function renderReferenceSkeleton(
       ? 'Public core compilation succeeded.'
       : 'Public core compilation failed.';
 
-    if (state.definition !== activeDefinition) {
+    const runtime = application.getRuntime();
+    if (state.definition !== activeDefinition || runtime !== activeRuntime) {
       releaseRenderer?.();
       renderer = undefined;
       activeDefinition = state.definition;
-      const runtime = application.getRuntime();
+      activeRuntime = runtime;
       if (state.definition !== undefined && runtime !== undefined) {
         const nextRenderer = new StandardDomRenderer(
           formHost,
@@ -414,6 +533,77 @@ export function renderReferenceSkeleton(
     setInputValue(memberId.input, state.collectionDraftId);
     setInputValue(memberName.input, state.collectionDraftName);
     collectionControls.hidden = state.scenario.id !== 'stable-team';
+    fixedControls.hidden = state.scenario.id !== 'fixed-values';
+    const serviceDefinition = state.scenario.serviceValidation;
+    serviceControls.hidden = serviceDefinition === undefined;
+    if (serviceDefinition !== undefined) {
+      serviceLegend.textContent = serviceDefinition.labels.heading;
+      settleServiceValid.textContent = serviceDefinition.labels.settleValid;
+      settleServiceInvalid.textContent = serviceDefinition.labels.settleInvalid;
+      rejectService.textContent = serviceDefinition.labels.reject;
+      throwNextService.textContent = serviceDefinition.labels.throwNext;
+      retryService.textContent = serviceDefinition.labels.retry;
+    }
+    const hasPendingServiceRequest = state.serviceRequestEvidence.some(
+      ({ status }) => status === 'pending',
+    );
+    settleServiceValid.disabled = !hasPendingServiceRequest;
+    settleServiceInvalid.disabled = !hasPendingServiceRequest;
+    rejectService.disabled = !hasPendingServiceRequest;
+    serviceStatus.textContent = asyncValidationStatus(state);
+    renderCopyable(
+      serviceEvidence.body,
+      'Copy service request evidence',
+      serializeEvidence(state.serviceRequestEvidence),
+      'json',
+    );
+    const scopeDefinition = state.scenario.scopeConfirmation;
+    scopeControls.hidden = scopeDefinition === undefined;
+    if (scopeDefinition !== undefined) {
+      scopeLegend.textContent = scopeDefinition.labels.heading;
+      scopeGuidance.textContent = scopeDefinition.labels.guidance;
+      acceptScopeCandidate.textContent = scopeDefinition.labels.accept;
+      scopeActions.replaceChildren(
+        ...scopeDefinition.targets.map((target) => {
+          const button = actionButton(target.label);
+          button.dataset['testid'] = `prepare-scope-${target.id}`;
+          button.addEventListener('click', () =>
+            application.prepareScopeCandidate(target),
+          );
+          return button;
+        }),
+        acceptScopeCandidate,
+      );
+    }
+    acceptScopeCandidate.disabled =
+      state.scopeCandidate?.status !== 'available';
+    scopeStatus.textContent = scopeCandidateStatus(state);
+    renderCopyable(
+      scopeEvidence.body,
+      'Copy prepared baseline candidate',
+      serializeEvidence(state.scopeCandidate),
+      'json',
+    );
+    const defaultDefinition = state.scenario.schemaDefaults;
+    defaultControls.hidden = defaultDefinition === undefined;
+    if (defaultDefinition !== undefined) {
+      defaultLegend.textContent = defaultDefinition.labels.heading;
+      defaultGuidance.textContent = defaultDefinition.labels.guidance;
+      deriveDefaultCandidate.textContent = defaultDefinition.labels.derive;
+      cancelDefaultCandidate.textContent = defaultDefinition.labels.cancel;
+      acceptDefaultCandidate.textContent = defaultDefinition.labels.accept;
+    }
+    cancelDefaultCandidate.disabled =
+      state.defaultCandidate?.status !== 'available';
+    acceptDefaultCandidate.disabled =
+      state.defaultCandidate?.status !== 'available';
+    defaultStatus.textContent = defaultCandidateStatus(state);
+    renderCopyable(
+      defaultEvidence.body,
+      'Copy prepared schema-default candidate',
+      serializeEvidence(state.defaultCandidate),
+      'json',
+    );
     const memberCount = readTeamMemberCount(state.value);
     moveFirstMember.disabled = memberCount < 2;
     removeLastMember.disabled = memberCount === 0;
@@ -522,6 +712,33 @@ export function renderReferenceSkeleton(
   );
   removeLastMember.addEventListener('click', () =>
     application.removeLastTeamMember(),
+  );
+  settleServiceValid.addEventListener('click', () =>
+    application.resolveServiceValidation(true),
+  );
+  settleServiceInvalid.addEventListener('click', () =>
+    application.resolveServiceValidation(false),
+  );
+  rejectService.addEventListener('click', () =>
+    application.rejectServiceValidation(),
+  );
+  throwNextService.addEventListener('click', () =>
+    application.throwOnNextValidation(),
+  );
+  retryService.addEventListener('click', () =>
+    application.retryAsyncValidation(),
+  );
+  acceptScopeCandidate.addEventListener('click', () =>
+    application.acceptScopeCandidate(),
+  );
+  deriveDefaultCandidate.addEventListener('click', () =>
+    application.deriveDefaultCandidate(),
+  );
+  cancelDefaultCandidate.addEventListener('click', () =>
+    application.cancelDefaultCandidate(),
+  );
+  acceptDefaultCandidate.addEventListener('click', () =>
+    application.acceptDefaultCandidate(),
   );
   theme.select.addEventListener('change', () => {
     const value = theme.select.value;
@@ -779,6 +996,59 @@ function draftStatusLabel(state: StandardReferenceApplicationState): string {
     case 'valid':
       return 'Configuration valid.';
   }
+}
+
+function asyncValidationStatus(
+  state: StandardReferenceApplicationState,
+): string {
+  const asyncValidation = state.snapshot?.asyncValidation;
+  if (asyncValidation === undefined) {
+    return 'Asynchronous validation is not configured.';
+  }
+  if (asyncValidation.status === 'blocked') {
+    return 'Blocked by synchronous validation.';
+  }
+  if (asyncValidation.status === 'pending') {
+    return `Generation ${asyncValidation.generation} pending.`;
+  }
+  if (asyncValidation.status === 'failed') {
+    return `Generation ${asyncValidation.generation} failed: ${asyncValidation.reason}.`;
+  }
+  return `Generation ${asyncValidation.generation} settled ${asyncValidation.valid ? 'valid' : 'invalid'}.`;
+}
+
+function scopeCandidateStatus(
+  state: StandardReferenceApplicationState,
+): string {
+  const candidate = state.scopeCandidate;
+  if (candidate === undefined) return 'No baseline candidate prepared.';
+  if (candidate.status === 'unconfirmable') {
+    return `${candidate.label}: unconfirmable; baseline and dirty state are unchanged.`;
+  }
+  if (candidate.status === 'accepted') {
+    return `${candidate.label}: simulated persistence accepted; unrelated edits remain dirty.`;
+  }
+  return `${candidate.label}: candidate prepared; baseline and dirty state are unchanged until acceptance.`;
+}
+
+function defaultCandidateStatus(
+  state: StandardReferenceApplicationState,
+): string {
+  const candidate = state.defaultCandidate;
+  if (candidate === undefined) return 'No schema-default candidate derived.';
+  if (candidate.status === 'available') {
+    return 'Candidate derived; controlled value and operation history are unchanged.';
+  }
+  if (candidate.status === 'accepted') {
+    return 'Candidate explicitly accepted as the application-owned value.';
+  }
+  if (candidate.status === 'cancelled') {
+    return 'Candidate cancelled; controlled value remains unchanged.';
+  }
+  if (candidate.status === 'no-effect') {
+    return 'Derivation has no effect because every supported default path is present.';
+  }
+  return 'Candidate derivation failed; controlled value remains unchanged.';
 }
 
 function configurationDiagnosticRows(

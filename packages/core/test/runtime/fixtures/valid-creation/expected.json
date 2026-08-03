@@ -20,6 +20,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false
@@ -34,6 +36,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false
@@ -51,6 +55,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false
@@ -65,6 +71,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false
@@ -95,6 +103,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false
@@ -109,6 +119,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false
@@ -126,6 +138,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false
@@ -140,6 +154,8 @@
         "dirty": false,
         "touched": false,
         "focused": false,
+        "visible": true,
+        "enabled": true,
         "valid": true,
         "issues": [],
         "showIssues": false

@@ -226,7 +226,13 @@ function createCoreConsumer(
   applyFormOperation,
   compileFormDefinition,
   createControlledFormRuntime,
+  deriveSchemaDefaultCandidate,
+  type FieldRuntimeSnapshot,
+  type FieldTextMember,
+  type FieldValueConditionDefinition,
   type FormOperation,
+  type StringEnumArrayFieldDefinition,
+  type UiFieldValueConditionSchema,
 } from '@rabassoft/schema-engine';
 
 const schema = {
@@ -252,28 +258,133 @@ const schema = {
   properties: {
     profile: { $ref: '#/$defs/profile' },
     rows: { $ref: '#/$defs/rows' },
+    active: { type: 'boolean' },
+    conditional: { type: 'string' },
+    roles: {
+      type: 'array',
+      items: { type: 'string', enum: ['', 'reader', 'editor'] },
+      uniqueItems: true,
+    },
   },
+};
+const rawCondition: UiFieldValueConditionSchema = {
+  path: ['active'],
+  equals: true,
 };
 const compiled = compileFormDefinition({
   schema,
   collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
   uiSchema: {
+    fields: { conditional: { visibleWhen: rawCondition } },
     presentation: [
       {
         kind: 'section',
         id: 'main',
         label: 'Main',
-        children: ['profile'],
+        children: ['profile', 'active', 'conditional'],
       },
       'rows',
     ],
   },
 });
 if (!compiled.success) throw new Error('Compilation failed');
+const conditionalDefinition = compiled.definition.fields.find(
+  ({ name }) => name === 'conditional',
+);
+const normalizedCondition: FieldValueConditionDefinition | undefined =
+  conditionalDefinition?.kind === 'string-enum-array'
+    ? undefined
+    : conditionalDefinition?.visibleWhen;
+if (
+  normalizedCondition?.sourcePath[0] !== 'active' ||
+  normalizedCondition.equals !== true
+) {
+  throw new Error('Conditional declarations are unavailable');
+}
+const rolesDefinition = compiled.definition.fields.find(
+  ({ name }) => name === 'roles',
+);
+if (rolesDefinition?.kind !== 'string-enum-array') {
+  throw new Error('String-enum array definition is unavailable');
+}
+const publicRolesDefinition: StringEnumArrayFieldDefinition = rolesDefinition;
+const selectionTextMembers: readonly FieldTextMember[] = [
+  'choice',
+  'missing-selection',
+  'empty-selection',
+];
+if (
+  publicRolesDefinition.choices.length !== 3 ||
+  selectionTextMembers.length !== 3
+) {
+  throw new Error('String-enum array declarations are incomplete');
+}
+const defaultInput: { profile?: { address?: string } } = {};
+const defaultCandidate = deriveSchemaDefaultCandidate(
+  {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      profile: {
+        type: 'object',
+        properties: { address: { type: 'string', default: 'Rabassoft' } },
+      },
+    },
+  },
+  defaultInput,
+);
+if (
+  !defaultCandidate.success ||
+  !defaultCandidate.changed ||
+  defaultCandidate.value.profile?.address !== 'Rabassoft'
+) {
+  throw new Error('Schema-default candidate is unavailable');
+}
+const defaultNoEffect = deriveSchemaDefaultCandidate(
+  {
+    type: 'object',
+    properties: { value: { type: 'string', default: 'kept' } },
+  },
+  { value: 'present' },
+);
+if (!defaultNoEffect.success || defaultNoEffect.changed) {
+  throw new Error('Schema-default no-effect contract failed');
+}
+const composed = compileFormDefinition({
+  schema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    allOf: [
+      {
+        type: 'object',
+        properties: { first: { type: 'string' } },
+      },
+      {
+        type: 'object',
+        properties: { second: { type: 'number' } },
+        required: ['first', 'second'],
+      },
+    ],
+  },
+});
+if (
+  !composed.success ||
+  composed.definition.fields.map(({ name }) => name).join(',') !==
+    'first,second'
+) {
+  throw new Error('Static object composition is unavailable');
+}
 const source: {
   profile?: { address?: string };
   rows: { id: string; name?: string }[];
-} = { rows: [{ id: 'a', name: 'Ada' }] };
+  active: boolean;
+  conditional: string;
+  roles: string[];
+} = {
+  rows: [{ id: 'a', name: 'Ada' }],
+  active: false,
+  conditional: 'kept',
+  roles: ['editor'],
+};
 const created = createControlledFormRuntime({
   formId: 'clean-core',
   definition: compiled.definition,
@@ -295,16 +406,50 @@ const itemName = created.runtime.getCollectionNodeSnapshot({
   itemId: 'a',
   relativePath: ['name'],
 });
+const conditionalSnapshot: FieldRuntimeSnapshot | undefined =
+  created.runtime.getFieldSnapshot(['conditional']);
 if (
   profile?.nodeKind !== 'object' ||
   address?.nodeKind !== 'field' ||
   item?.nodeKind !== 'item' ||
-  itemName?.nodeKind !== 'field'
+  itemName?.nodeKind !== 'field' ||
+  conditionalSnapshot?.visible !== false ||
+  conditionalSnapshot.enabled !== true
 ) {
   throw new Error('Nested declarations are unavailable');
 }
+const inactive = created.runtime.requestSetValue(
+  ['conditional'],
+  'blocked',
+);
+if (
+  inactive.success ||
+  inactive.diagnostics[0]?.code !== 'INACTIVE_RUNTIME_FIELD'
+) {
+  throw new Error('Conditional action safety is unavailable');
+}
 const operations: FormOperation[] = [];
 created.runtime.subscribeOperations((candidate) => operations.push(candidate));
+created.runtime.requestSetValue(['roles'], ['editor', 'reader']);
+const rolesOperation = operations.at(-1);
+if (
+  rolesOperation?.type !== 'set-value' ||
+  !Array.isArray(rolesOperation.value) ||
+  rolesOperation.value.join(',') !== 'editor,reader'
+) {
+  throw new Error('String-enum array operation is unavailable');
+}
+const rolesApplied = applyFormOperation(
+  compiled.definition,
+  source,
+  rolesOperation,
+);
+if (
+  !rolesApplied.success ||
+  rolesApplied.value.roles.join(',') !== 'editor,reader'
+) {
+  throw new Error('String-enum array operation failed');
+}
 created.runtime.requestSetValue(['profile', 'address'], 'Rabassoft');
 const deepOperation = operations.at(-1);
 if (deepOperation === undefined)
@@ -418,21 +563,28 @@ import {
 import {
   applyFormOperation,
   compileFormDefinition,
+  type FieldRuntimeSnapshot,
   type FormOperation,
   type SchemaValidator,
+  type StringEnumArrayFieldDefinition,
 } from '@rabassoft/schema-engine';
 import {
   AngularRendererResolver,
   SchemaFormDirective,
+  SchemaStringEnumArrayRendererComponent,
   SchemaStringRendererComponent,
   provideSchemaEngineAngularNative,
   provideSchemaTextResolver,
   type AngularControlledFormConfig,
+  type AngularFieldTextSnapshot,
+  type AngularFieldRenderer,
 } from '@rabassoft/schema-engine-angular';
 
 interface ConsumerValue {
   profile?: { address?: { street?: string } };
+  active: boolean;
   rows: { id: string; name?: string }[];
+  roles: string[];
 }
 
 const schema = {
@@ -465,15 +617,67 @@ const schema = {
   type: 'object',
   properties: {
     profile: { $ref: '#/$defs/profile' },
+    active: { type: 'boolean', title: 'Active' },
     rows: { $ref: '#/$defs/rows' },
+    roles: {
+      type: 'array',
+      items: { type: 'string', enum: ['reader', 'editor'] },
+      uniqueItems: true,
+    },
   },
 };
 const compiled = compileFormDefinition({
   schema,
   collectionPolicies: [{ path: ['rows'], itemIdentityProperty: 'id' }],
+  uiSchema: {
+    fields: {
+      profile: {
+        fields: {
+          address: {
+            fields: {
+              street: {
+                enabledWhen: { path: ['active'], equals: false },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 });
 if (!compiled.success) throw new Error('Compilation failed');
 const definition = compiled.definition;
+const streetDefinition = definition.fields.find(
+  ({ path }) => path.join('.') === 'profile.address.street',
+);
+if (
+  streetDefinition?.kind === 'string-enum-array' ||
+  streetDefinition?.enabledWhen?.sourcePath[0] !== 'active'
+) {
+  throw new Error('Conditional Angular declarations are unavailable');
+}
+const rolesDefinition = definition.fields.find(
+  ({ name }) => name === 'roles',
+);
+if (rolesDefinition?.kind !== 'string-enum-array') {
+  throw new Error('String-enum array Angular definition is unavailable');
+}
+const publicRolesDefinition: StringEnumArrayFieldDefinition = rolesDefinition;
+if (publicRolesDefinition.choices.length !== 2) {
+  throw new Error('String-enum array Angular declarations are incomplete');
+}
+function rendererSnapshotIsCoreSnapshot(
+  snapshot: ReturnType<AngularFieldRenderer['snapshot']>,
+): FieldRuntimeSnapshot {
+  return snapshot;
+}
+void rendererSnapshotIsCoreSnapshot;
+function selectionTextShape(
+  texts: AngularFieldTextSnapshot,
+): readonly [string, string] {
+  return [texts.missingSelectionLabel, texts.emptySelectionLabel];
+}
+void selectionTextShape;
 const validator: SchemaValidator = {
   validate: () => ({ valid: true, issues: [] }),
 };
@@ -485,13 +689,21 @@ const validator: SchemaValidator = {
   template: '<form [schemaForm]="config" (schemaOperation)="apply($event)"></form>',
 })
 class CleanConsumerComponent {
-  value: ConsumerValue = { rows: [{ id: 'a', name: 'Ada' }] };
+  value: ConsumerValue = {
+    active: false,
+    rows: [{ id: 'a', name: 'Ada' }],
+    roles: ['editor'],
+  };
   config: AngularControlledFormConfig<ConsumerValue> = {
     formId: 'clean-angular',
     definition,
     schema,
     value: this.value,
-    baselineValue: { rows: [{ id: 'a', name: 'Ada' }] },
+    baselineValue: {
+      active: false,
+      rows: [{ id: 'a', name: 'Ada' }],
+      roles: ['editor'],
+    },
     validator,
     locale: 'en',
   };
@@ -515,9 +727,19 @@ const resolver = injector.get(AngularRendererResolver);
 if (!resolver.ready) throw new Error('Renderer resolver is not ready');
 if (
   typeof SchemaStringRendererComponent !== 'function' ||
+  typeof SchemaStringEnumArrayRendererComponent !== 'function' ||
   typeof CleanConsumerComponent !== 'function'
 ) {
   throw new Error('Angular root exports are unavailable');
+}
+const rolesResolution = resolver.resolve(publicRolesDefinition);
+if (
+  !rolesResolution.success ||
+  rolesResolution.registration.id !== 'native-string-enum-array' ||
+  rolesResolution.registration.renderer !==
+    SchemaStringEnumArrayRendererComponent
+) {
+  throw new Error('String-enum array native registration is unavailable');
 }
 injector.destroy();
 `,

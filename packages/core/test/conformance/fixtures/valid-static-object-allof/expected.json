@@ -1,0 +1,87 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"displayName\"]",
+        "name": "displayName",
+        "path": ["displayName"],
+        "required": true,
+        "nullable": false,
+        "label": "Display name",
+        "kind": "string",
+        "constraints": {
+          "minLength": 1
+        }
+      },
+      {
+        "key": "[\"email\"]",
+        "name": "email",
+        "path": ["email"],
+        "required": true,
+        "nullable": false,
+        "label": "Email address",
+        "kind": "string",
+        "format": "email",
+        "constraints": {}
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"displayName\"]",
+        "name": "displayName",
+        "path": ["displayName"],
+        "required": true,
+        "nullable": false,
+        "label": "Display name",
+        "kind": "string",
+        "constraints": {
+          "minLength": 1
+        }
+      },
+      {
+        "key": "[\"email\"]",
+        "name": "email",
+        "path": ["email"],
+        "required": true,
+        "nullable": false,
+        "label": "Email address",
+        "kind": "string",
+        "format": "email",
+        "constraints": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"displayName\"]",
+          "name": "displayName",
+          "path": ["displayName"],
+          "required": true,
+          "nullable": false,
+          "label": "Display name",
+          "kind": "string",
+          "constraints": {
+            "minLength": 1
+          }
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"email\"]",
+          "name": "email",
+          "path": ["email"],
+          "required": true,
+          "nullable": false,
+          "label": "Email address",
+          "kind": "string",
+          "format": "email",
+          "constraints": {}
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}

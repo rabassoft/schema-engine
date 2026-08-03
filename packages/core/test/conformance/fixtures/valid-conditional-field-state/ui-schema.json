@@ -1,0 +1,7 @@
+{
+  "fields": {
+    "name": {
+      "visibleWhen": { "path": ["flag"], "equals": true }
+    }
+  }
+}
