@@ -104,7 +104,11 @@ try {
   const coreRootDeclaration = declaration(coreRoot, 'dist');
   for (const typeName of [
     'UiFieldValueConditionSchema',
+    'UiFieldValueConditionGroupSchema',
+    'UiFieldConditionSchema',
     'FieldValueConditionDefinition',
+    'FieldValueConditionGroupDefinition',
+    'FieldConditionDefinition',
     'StringEnumArrayFieldDefinition',
   ]) {
     assert.equal(
@@ -119,11 +123,11 @@ try {
   );
   assert.match(
     coreContractsDeclaration,
-    /readonly visibleWhen\?: UiFieldValueConditionSchema;/u,
+    /readonly visibleWhen\?: UiFieldConditionSchema;/u,
   );
   assert.match(
     coreContractsDeclaration,
-    /readonly enabledWhen\?: UiFieldValueConditionSchema;/u,
+    /readonly enabledWhen\?: UiFieldConditionSchema;/u,
   );
   assert.match(
     coreContractsDeclaration,
@@ -208,6 +212,7 @@ try {
     type: 'object',
     properties: {
       active: { type: 'boolean' },
+      ready: { type: 'boolean' },
       target: { type: 'string' },
     },
   };
@@ -215,7 +220,15 @@ try {
     schema: conditionalSchema,
     uiSchema: {
       fields: {
-        target: { visibleWhen: { path: ['active'], equals: true } },
+        target: {
+          visibleWhen: {
+            operator: 'all',
+            conditions: [
+              { path: ['active'], equals: true },
+              { path: ['ready'], equals: true },
+            ],
+          },
+        },
       },
     },
   };
@@ -227,7 +240,7 @@ try {
   assert.equal(shippedConditional.success, true);
   if (!shippedConditional.success)
     throw new Error('Shipped conditional compilation failed');
-  const conditionalValue = { active: false, target: 'kept' };
+  const conditionalValue = { active: false, ready: false, target: 'kept' };
   for (const api of [shippedCore, rebuiltCore]) {
     const created = api.createControlledFormRuntime({
       formId: 'source-conditional',
@@ -242,13 +255,20 @@ try {
     if (!created.success) throw new Error('Conditional source runtime failed');
     assert.deepEqual(
       created.runtime.getFieldSnapshot(['target']),
-      created.runtime.getSnapshot().fields[1],
+      created.runtime.getSnapshot().fields[2],
     );
     assert.equal(created.runtime.getFieldSnapshot(['target'])?.visible, false);
     assert.equal(
       created.runtime.requestSetValue(['target'], 'stale').diagnostics[0]?.code,
       'INACTIVE_RUNTIME_FIELD',
     );
+    assert.equal(
+      created.runtime.updateExternalState({
+        value: { ...conditionalValue, active: true, ready: true },
+      }).success,
+      true,
+    );
+    assert.equal(created.runtime.getFieldSnapshot(['target'])?.visible, true);
     created.runtime.dispose();
   }
 

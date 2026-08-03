@@ -357,10 +357,9 @@ Cada decisión debe registrar:
 
 ## D-018: Expression engine y dependency graph
 
-- **Estado:** Implemented only for the bounded Accepted M30 architecture and
-  observable contract; bounded M32 is Approved for ordered implementation
-  under PLAN-034; every wider expression, dependency and conditional-state
-  capability remains Deferred
+- **Estado:** Implemented only for the bounded Accepted M30 and M32
+  architectures and observable contracts; every wider expression, dependency
+  and conditional-state capability remains Deferred
 - **Incluye:** visible, enabled, readonly, required dinámico, computed y defaults condicionales.
 - **Motivo:** Requiere lenguaje, sandbox, dependencias, evaluación incremental y diagnósticos.
 - **Retomar cuando:** Los formularios estáticos y objetos anidados estén consolidados.
@@ -397,7 +396,9 @@ Cada decisión debe registrar:
   hallazgos. Checkpoint 2 completa las filas 10–17 tras review 309 ciclo 2
   pasar doce áreas sin hallazgos. Checkpoint 3 completa la fila 18 tras review
   310 ciclo 1 pasar diez áreas sin hallazgos. Checkpoint 4 completa las filas
-  19–20 tras review 311 ciclo 2; checkpoint 5 queda siguiente.
+  19–20 tras review 311 ciclo 2. Checkpoint 5 completa la fila 21 tras review
+  312 ciclo 3. Review 313 ciclo 2 repite la matriz congelada y completa
+  checkpoint 6, la fila 22, PLAN-034 revision 0 y M32 sin hallazgos.
   M33, M34, React y el resto de D-018 permanecen Deferred.
 
 ## D-019: Commands, undo/redo e historial
@@ -1214,6 +1215,8 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 03-08-2026 | PLAN-034 revision 0 y M32 quedan Completed tras review 313 ciclo 2 repetir matriz congelada, 22 filas y Chromium 14+17 sin hallazgos.                  |
+| 03-08-2026 | PLAN-034 checkpoint 5 completa SPEC-018 fila 21 tras review 312 ciclo 3; checkpoint 6 queda siguiente, sin release/Git.                                |
 | 03-08-2026 | PLAN-034 checkpoint 4 completa SPEC-018 filas 19–20 tras review 311 ciclo 2; checkpoint 5 queda siguiente, sin release/Git.                            |
 | 03-08-2026 | PLAN-034 checkpoint 3 completa SPEC-018 fila 18 tras review 310 ciclo 1 pasar diez áreas sin hallazgos; checkpoint 4 queda siguiente.                  |
 | 03-08-2026 | PLAN-034 checkpoint 2 completa SPEC-018 filas 10–17 tras review 309 ciclo 2 pasar doce áreas sin hallazgos; checkpoint 3 queda siguiente.              |

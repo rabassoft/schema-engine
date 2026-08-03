@@ -53,7 +53,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 32. [ADR 032: Explicit schema-default candidate derivation](./032-explicit-schema-default-candidate.md) — **Accepted revision 0 after review 270 cycle 2; accepted SPEC-015 and completed PLAN-031 implement bounded D-039/M29 after final review 278 cycle 2.**
 33. [ADR 033: Controlled conditional primitive-field state](./033-controlled-conditional-primitive-field-state.md) — **Accepted revision 0 after review 280 cycle 2; accepted SPEC-016 v0.1.1 and completed PLAN-032 revision 1 implement its bounded M30 decision after final review 291 cycle 1.**
 34. [ADR 034: Controlled homogeneous string-enum array field](./034-controlled-homogeneous-string-enum-array-field.md) — **Accepted revision 0 after review 293 cycle 3 passed all twelve areas with zero findings; accepted SPEC-017 and completed PLAN-033 implement its bounded M31 decision after final review 303 cycle 2.**
-35. [ADR 035: Flat compound conditions for controlled primitive-field state](./035-flat-compound-field-conditions.md) — **Accepted revision 0 after review 305 cycle 2 passed all twelve areas with zero findings; accepted SPEC-018 and Approved PLAN-034 close and authorize delivery of its bounded M32 decision.**
+35. [ADR 035: Flat compound conditions for controlled primitive-field state](./035-flat-compound-field-conditions.md) — **Accepted revision 0 after review 305 cycle 2 passed all twelve areas with zero findings; accepted SPEC-018 and completed PLAN-034 implement its bounded M32 decision after final review 313 cycle 2.**
 
 ## 4. ADRs específicos de Angular
 

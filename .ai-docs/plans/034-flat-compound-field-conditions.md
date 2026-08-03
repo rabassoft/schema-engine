@@ -1,9 +1,13 @@
 # PLAN-034: Flat Compound Conditions for Controlled Primitive-Field State
 
-- **State:** Approved
+- **State:** Completed
 - **Revision:** 0
 - **Date:** 2026-08-03
 - **Approval date:** 2026-08-03
+- **Completion date:** 2026-08-03
+- **Final implementation review:**
+  [review 313](../reviews/313-plan-034-final-implementation-review.md) cycle 2
+  repeated the frozen matrix and all 22 rows with zero findings
 - **Milestone:** M32 — Declarative compound conditions
 - **Authority:** Accepted ADR-035 revision 0 and SPEC-018 v0.1.0
 - **Scope:** Implement exactly the 22-row SPEC-018 contract across core,
@@ -12,11 +16,12 @@
   [review 307](../reviews/307-plan-034-review.md) cycle 3 passed all twelve
   areas and exact 22-row ownership with zero findings after two corrections
 - **Authorized after approval:** checkpoints 1–6 in order
-- **Progress:** checkpoints 1–4 completed after reviews
+- **Progress:** checkpoints 1–6 completed after reviews
   [308](../reviews/308-plan-034-checkpoint-1-review.md) and
   [309](../reviews/309-plan-034-checkpoint-2-review.md)–[310](../reviews/310-plan-034-checkpoint-3-review.md)
-  and [311](../reviews/311-plan-034-checkpoint-4-review.md) passed their
-  complete reviews and SPEC-018 rows 1–20 with zero findings
+  and [311](../reviews/311-plan-034-checkpoint-4-review.md)–[312](../reviews/312-plan-034-checkpoint-5-review.md)
+  passed their complete reviews; final [review 313](../reviews/313-plan-034-final-implementation-review.md)
+  repeated the complete matrix and SPEC-018 rows 1–22 with zero findings
 - **Not authorized:** dependency, manifest, lockfile, package/version, release,
   publication, commit, push or external mutation
 
@@ -196,7 +201,11 @@ with zero findings after correcting strict typing in deep-freeze evidence.
 - Snippet/reference consistency, docs/diff hygiene and complete checkpoint
   review to zero findings.
 
-## 7. Checkpoint 5 — Declarations, packages and clean consumers
+## 7. Checkpoint 5 — Declarations, packages and clean consumers — Completed
+
+Review 312 cycle 3 passes all twelve checkpoint areas and SPEC-018 row 21 with
+zero findings after correcting package truth evidence and two clean-consumer
+narrowing/projection defects.
 
 ### Deliverables
 
@@ -222,7 +231,11 @@ with zero findings after correcting strict typing in deep-freeze evidence.
 - Workspace lint/typecheck/build/tests required by declarations.
 - Boundary/docs/format/diff hygiene and complete checkpoint review to zero.
 
-## 8. Checkpoint 6 — Frozen final matrix and closure
+## 8. Checkpoint 6 — Frozen final matrix and closure — Completed
+
+Review 313 cycle 2 repeats the complete frozen matrix and all 22 rows with zero
+findings after correcting one external publication-tool availability defect.
+PLAN-034 revision 0 and M32 are complete without package/version/release drift.
 
 ### Deliverables
 

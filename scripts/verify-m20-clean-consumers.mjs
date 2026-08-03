@@ -206,11 +206,14 @@ export default defineConfig({ test: {
 import {
   applyFormOperation,
   compileFormDefinition,
+  createControlledFormRuntime,
   type FormNodeDefinition,
   type FormNodeTemplate,
   type FormOperation,
+  type FieldConditionDefinition,
   type PresentationEntryDefinition,
   type SchemaValidator,
+  type UiFieldConditionSchema,
 } from '@rabassoft/schema-engine';
 import {
   SchemaFormDirective,
@@ -239,7 +242,9 @@ export const schema = {
   },
 } as const;
 export const uiSchema = { fields: {
-  profile: { presentation: [{ kind: 'section', id: 'profile', label: 'Profile workspace', children: [
+  profile: { fields: { givenName: { visibleWhen: { operator: 'all', conditions: [
+    { path: ['profile', 'familyName'], equals: 'Lovelace' },
+  ] } } }, presentation: [{ kind: 'section', id: 'profile', label: 'Profile workspace', children: [
     { kind: 'tabs', id: 'profile-tabs', label: 'Profile details', panels: [
       { kind: 'panel', id: 'names', label: 'Names', children: [{ kind: 'grid', id: 'names-grid', label: 'Names grid', columns: 2, items: [
         { span: 1, child: 'givenName' }, { span: 1, child: 'familyName' },
@@ -267,6 +272,20 @@ export const compilation = compileFormDefinition({
 });
 if (!compilation.success) throw new Error('M20 consumer fixture failed to compile');
 export const definition = compilation.definition;
+export function rawConditionSize(condition: UiFieldConditionSchema): number {
+  return 'operator' in condition ? condition.conditions.length : condition.path.length;
+}
+export function normalizedConditionSize(condition: FieldConditionDefinition): number {
+  return 'operator' in condition ? condition.conditions.length : condition.sourcePath.length;
+}
+const authoredCondition = uiSchema.fields.profile.fields.givenName.visibleWhen;
+const normalizedField = definition.fields.find(({ name }) => name === 'givenName');
+const normalizedCondition = normalizedField !== undefined && 'visibleWhen' in normalizedField
+  ? normalizedField.visibleWhen
+  : undefined;
+if (rawConditionSize(authoredCondition) !== 1 || normalizedCondition === undefined || normalizedConditionSize(normalizedCondition) !== 1) {
+  throw new Error('M32 exhaustive condition narrowing failed');
+}
 export const initial = Object.freeze({
   profile: Object.freeze({ givenName: 'Ada', familyName: 'Lovelace' }),
   rows: Object.freeze([
@@ -275,6 +294,14 @@ export const initial = Object.freeze({
   ]),
 });
 const validator: SchemaValidator = { validate: () => ({ valid: true, issues: [] }) };
+const conditionRuntime = createControlledFormRuntime({
+  formId: 'm32-clean-consumer', definition, schema,
+  value: initial, baselineValue: initial, locale: 'en', validator,
+});
+if (!conditionRuntime.success || conditionRuntime.runtime.getFieldSnapshot(['profile', 'givenName'])?.visible !== true) {
+  throw new Error('M32 clean-consumer group runtime truth failed');
+}
+conditionRuntime.runtime.dispose();
 
 @Component({ standalone: true, template: '' })
 class ExternalContainer implements AngularPresentationContainerRenderer {

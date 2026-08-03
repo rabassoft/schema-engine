@@ -93,10 +93,10 @@ operation, storage or network effect.
 
 ## Conditional primitive fields in current source
 
-Ordinary primitive UI fields may declare one strict equality predicate for
-visibility and one for enabled state. Paths address another ordinary primitive
-field in the controlled current value; literals are exact strings, finite
-numbers, booleans or null.
+Ordinary primitive UI fields may declare either one strict equality predicate
+or one flat non-empty `all`/`any` group for visibility and enabled state. Group
+members keep authored order and use the same ordinary primitive sources and
+exact string, finite-number, boolean or null literals.
 
 ```ts
 const result = compileFormDefinition({
@@ -104,23 +104,31 @@ const result = compileFormDefinition({
   uiSchema: {
     fields: {
       details: {
-        visibleWhen: { path: ['showDetails'], equals: true },
-        enabledWhen: { path: ['canEdit'], equals: true },
+        visibleWhen: {
+          operator: 'all',
+          conditions: [
+            { path: ['showDetails'], equals: true },
+            { path: ['hasProfile'], equals: true },
+          ],
+        },
       },
     },
   },
 });
 ```
 
-Compiled definitions expose detached `visibleWhen`/`enabledWhen` predicates,
-and every ordinary `FieldRuntimeSnapshot` now requires `visible` and `enabled`.
+Compiled definitions expose detached predicate/group unions. Raw readers narrow
+`operator`/`conditions` versus `path`/`equals`; normalized readers use the same
+group branch versus `sourcePath`/`equals`. Existing predicate object literals
+remain source-compatible. Every layer is copied and frozen, and every ordinary
+`FieldRuntimeSnapshot` now requires `visible` and `enabled`.
 Runtime evaluates them from application-controlled values without changing
 data, baseline, validation, issues or layout. Direct actions against an
 inactive field fail with `INACTIVE_RUNTIME_FIELD`; targets must also present
 the flags accessibly.
 
 This bounded current-source capability does not include collection templates,
-compound expressions, a dependency graph, dynamic required/readonly/defaults
+recursive expressions, other operators, a dependency graph, dynamic required/readonly/defaults
 or conditional validation. Because the required snapshot flags and widened
 definition contracts are an Experimental source migration, delivery requires
 a separately approved coordinated MINOR release; published `0.4.1` does not

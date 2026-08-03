@@ -902,7 +902,7 @@ plugins, persistencia, productos ni trabajo comercial.
    selección/promoción. Dependencias, versiones, release, publicación y Git
    permanecen separados.
 
-### M32 — Condiciones compuestas declarativas — entrega aprobada
+### M32 — Condiciones compuestas declarativas — completado
 
 - Ricard selecciona el 3 de agosto de 2026 continuar madurando funcionalidad
   neutral antes de React: M32 condiciones compuestas, después M33 alternativas
@@ -952,6 +952,15 @@ plugins, persistencia, productos ni trabajo comercial.
 9. **Checkpoint 4 completed:** review 311 ciclo 2 pasa doce áreas y las filas
    19–20 sin hallazgos. El escenario compartido profundamente congelado,
    Standard 7/70, Angular 4/31 y Chromium secuencial 14+17 pasan.
-10. **Immediate implementation action:** ejecutar checkpoint 5 para
-    declaraciones, paquetes y consumidores limpios/source sin cambiar versión.
-    Dependencia, versión, release, publicación y Git permanecen inactivos.
+10. **Checkpoint 5 completed:** review 312 ciclo 3 pasa doce áreas y la fila 21
+    sin hallazgos tras corregir evidencia de verdad runtime y dos defectos del
+    consumidor limpio. Declaraciones/export inventory, package smoke,
+    consumidor construido, reconstrucción source y lower/latest native/pilot
+    pasan sin drift de manifests, dependencias, lockfile o versiones.
+11. **Checkpoint 6 and M32 completed:** review 313 ciclo 2 repite el grafo y la
+    matriz completos, las 22 filas, consumidores y Chromium secuencial 14+17
+    sin hallazgos tras instalar con autorización las dos herramientas externas
+    requeridas. PLAN-034 revision 0 queda Completed sin drift ni release/Git.
+12. **Immediate planning action:** preparar y revisar la promoción acotada de
+    D-007/M33 para alternativas de objeto discriminadas. ADR, SPEC, plan,
+    implementación, dependencias, versión, release y Git siguen gated.

@@ -104,7 +104,9 @@ existing snapshot Signal and exposes `retryAsyncValidation()` on
 suppression; the adapter and renderers own no scheduler, transport or retry
 policy.
 
-Current source also projects core conditional primitive-field state. The
+Current source also projects core predicate or flat `all`/`any` conditional
+primitive-field state. Angular consumes only the resulting snapshot booleans;
+it does not inspect or evaluate condition definitions. The
 Internal field host keeps the selected renderer mounted while removing a
 hidden field from display, sequential focus and the accessibility tree. Native
 editable controls and their clear/set-null actions are disabled when the

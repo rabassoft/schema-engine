@@ -6,6 +6,47 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-08-03 — PLAN-034 and M32 completed
+
+### Completed
+
+- Repeated the frozen graph and complete format/docs/lint/type/build/unit,
+  package, built/clean/source consumer, policy/security/history/boundary and
+  sequential Chromium matrix from the dirty source checkout.
+- Installed gitleaks 8.30.1 and git-filter-repo 2.47.0 through the explicitly
+  authorized Homebrew action after their fixture failed closed, then restarted
+  the complete review and verified their isolated fixtures.
+- Review 313 cycle 2 passes all fifteen areas, all 22 SPEC-018 rows, workspace
+  82/1,141, release tooling 41, policy 24, 714 boundaries, clean lower/latest
+  native/pilot and Standard 14 + Angular 17 Chromium with zero findings.
+- Completed PLAN-034 revision 0 and M32 without manifest, dependency, lockfile,
+  package/version, release, publication, commit or push drift.
+
+### Next
+
+- Prepare and review the bounded D-007/M33 discriminated-object-alternatives
+  promotion readiness before any ADR, SPEC, plan or implementation.
+
+## 2026-08-03 — PLAN-034 checkpoint 5 completed
+
+### Completed
+
+- Froze the exact four new core declarations, two widened properties and
+  unchanged six-function runtime inventory without entry-point or graph drift.
+- Extended core/Angular package smoke, the built Angular consumer, isolated
+  source reconstruction and clean lower/latest native/pilot consumers with
+  exhaustive predicate/group narrowing, compilation and runtime truth.
+- Updated current-source migration guidance while keeping the coordinated
+  future MINOR and published `0.4.1`/`0.2.1` artifacts separate.
+- Review 312 cycle 3 passes all twelve areas and SPEC-018 row 21 with zero
+  findings after three corrections; workspace 82/1,141, packages, source,
+  lower/latest Chromium, 714 boundaries and public policy pass.
+
+### Next
+
+- Execute PLAN-034 checkpoint 6: repeat the frozen final matrix, audit all 22
+  rows and close PLAN-034/M32 without release or Git action.
+
 ## 2026-08-03 — PLAN-034 checkpoint 4 completed
 
 ### Completed

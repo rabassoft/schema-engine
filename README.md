@@ -48,16 +48,21 @@ close its promotion, ADR-034, ADR-005 revision 8 and Accepted SPEC-017 v0.1.0
 with zero findings. Completed PLAN-033 revision 0 implements all seven
 checkpoints and all 26 SPEC-017 rows after final review 303 cycle 2 repeated
 the frozen matrix and both Chromium suites with zero findings.
-Bounded D-018/M32 compound conditions are the next selected capability.
+Bounded D-018/M32 compound conditions are implemented.
 Accepted ADR-035 revision 0 closes their architecture after review 305 cycle 2
 passed with zero findings. Accepted SPEC-018 v0.1.0 closes the observable
-contract after review 306 cycle 2. Approved PLAN-034 revision 0 maps all 22
+contract after review 306 cycle 2. PLAN-034 revision 0 maps all 22
 rows exactly once to six ordered checkpoints after review 307 cycle 3 passed
 with zero findings. Checkpoint 1 completes Public unions/compiler rows 1–9
 after review 308 cycle 2; checkpoint 2 completes manual/runtime rows 10–17
 after review 309 cycle 2. Checkpoint 3 completes Angular projection row 18
 after review 310 cycle 1. Checkpoint 4 completes shared Standard/browser rows
-19–20 after review 311 cycle 2; package/consumer evidence is next.
+19–20 after review 311 cycle 2. Checkpoint 5 completes declarations,
+package/built/clean/source consumer migration row 21 after review 312 cycle 3;
+review 313 cycle 2 repeats the frozen matrix and all 22 rows with zero findings,
+completing PLAN-034 revision 0 and M32. The next planning gate is bounded
+D-007/M33 discriminated object alternatives; no M33 contract or implementation
+is active.
 Package versions and published M23 artifacts remain unchanged.
 The
 source checkout implements the M14
@@ -113,13 +118,15 @@ application-owned stable string identity. The SPEC-004 subset resolves static
 same-document fragment-only `$ref` values into root `$defs` at supported
 non-root schema positions. Static presentation forests are supported at the
 root and on direct nested-object and collection-item template owners.
-Current unreleased source also supports one strict equality `visibleWhen` and
-one `enabledWhen` predicate on ordinary primitive fields. Core derives required
-snapshot flags from application-controlled values; Angular and Standard keep
+Current unreleased source supports either one strict equality predicate or one
+flat non-empty `all`/`any` group for `visibleWhen` and `enabledWhen` on ordinary
+primitive fields. Core evaluates every group member in authored order and
+derives snapshot flags from application-controlled values; Angular and Standard keep
 hidden hosts mounted, project disabled controls independently and retain core
-as the final inactive-action gate. Collection-template conditions, compound
-expressions, dependency graphs and dynamic validation semantics remain
-deferred. The required snapshot flags are a coordinated Experimental migration
+as the final inactive-action gate. Collection-template conditions, nested or
+wider expressions, dependency graphs and dynamic validation semantics remain
+deferred. The widened condition unions and required snapshot flags are a
+coordinated Experimental migration
 reserved for a separately approved future MINOR release; public `0.4.1`
 artifacts remain unchanged.
 

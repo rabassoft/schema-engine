@@ -246,6 +246,7 @@ const conditionalSchema = {
   type: 'object',
   properties: {
     active: { type: 'boolean' },
+    ready: { type: 'boolean' },
     visibleTarget: { type: 'string' },
     enabledTarget: { type: 'string' },
   },
@@ -255,10 +256,22 @@ const conditionalResult = compileFormDefinition({
   uiSchema: {
     fields: {
       visibleTarget: {
-        visibleWhen: { path: ['active'], equals: true },
+        visibleWhen: {
+          operator: 'all',
+          conditions: [
+            { path: ['active'], equals: true },
+            { path: ['ready'], equals: true },
+          ],
+        },
       },
       enabledTarget: {
-        enabledWhen: { path: ['active'], equals: true },
+        enabledWhen: {
+          operator: 'any',
+          conditions: [
+            { path: ['active'], equals: true },
+            { path: ['ready'], equals: true },
+          ],
+        },
       },
     },
   },
@@ -266,16 +279,23 @@ const conditionalResult = compileFormDefinition({
 assert.equal(conditionalResult.success, true);
 if (!conditionalResult.success)
   throw new Error('Conditional field compilation failed');
-assert.deepEqual(conditionalResult.definition.fields[1]?.visibleWhen, {
-  sourcePath: ['active'],
-  equals: true,
+assert.deepEqual(conditionalResult.definition.fields[2]?.visibleWhen, {
+  operator: 'all',
+  conditions: [
+    { sourcePath: ['active'], equals: true },
+    { sourcePath: ['ready'], equals: true },
+  ],
 });
-assert.deepEqual(conditionalResult.definition.fields[2]?.enabledWhen, {
-  sourcePath: ['active'],
-  equals: true,
+assert.deepEqual(conditionalResult.definition.fields[3]?.enabledWhen, {
+  operator: 'any',
+  conditions: [
+    { sourcePath: ['active'], equals: true },
+    { sourcePath: ['ready'], equals: true },
+  ],
 });
 const conditionalValue = {
   active: false,
+  ready: false,
   visibleTarget: 'visible',
   enabledTarget: 'enabled',
 };
@@ -297,6 +317,7 @@ assert.deepEqual(
     .fields.map(({ path, visible, enabled }) => ({ path, visible, enabled })),
   [
     { path: ['active'], visible: true, enabled: true },
+    { path: ['ready'], visible: true, enabled: true },
     { path: ['visibleTarget'], visible: false, enabled: true },
     { path: ['enabledTarget'], visible: true, enabled: false },
   ],
@@ -326,6 +347,30 @@ assert.equal(
   conditionalRuntime.runtime.requestSetValue(['enabledTarget'], 'stale')
     .diagnostics[0]?.parameters.reason,
   'disabled',
+);
+assert.equal(
+  conditionalRuntime.runtime.updateExternalState({
+    value: { ...conditionalValue, ready: true },
+  }).success,
+  true,
+);
+assert.equal(
+  conditionalRuntime.runtime.getFieldSnapshot(['visibleTarget'])?.visible,
+  false,
+);
+assert.equal(
+  conditionalRuntime.runtime.getFieldSnapshot(['enabledTarget'])?.enabled,
+  true,
+);
+assert.equal(
+  conditionalRuntime.runtime.updateExternalState({
+    value: { ...conditionalValue, active: true, ready: true },
+  }).success,
+  true,
+);
+assert.equal(
+  conditionalRuntime.runtime.getFieldSnapshot(['visibleTarget'])?.visible,
+  true,
 );
 conditionalRuntime.runtime.dispose();
 

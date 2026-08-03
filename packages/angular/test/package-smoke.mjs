@@ -106,6 +106,7 @@ const conditionalSchema = {
   type: 'object',
   properties: {
     active: { type: 'boolean' },
+    ready: { type: 'boolean' },
     target: { type: 'string' },
   },
 };
@@ -113,14 +114,22 @@ const conditionalDefinition = compileFormDefinition({
   schema: conditionalSchema,
   uiSchema: {
     fields: {
-      target: { enabledWhen: { path: ['active'], equals: true } },
+      target: {
+        enabledWhen: {
+          operator: 'any',
+          conditions: [
+            { path: ['active'], equals: true },
+            { path: ['ready'], equals: true },
+          ],
+        },
+      },
     },
   },
 });
 assert.equal(conditionalDefinition.success, true);
 if (!conditionalDefinition.success)
   throw new Error('Conditional package compilation failed');
-const conditionalValue = { active: false, target: 'kept' };
+const conditionalValue = { active: false, ready: false, target: 'kept' };
 const conditionalRuntime = createControlledFormRuntime({
   formId: 'angular-conditional-package-smoke',
   definition: conditionalDefinition.definition,
@@ -135,7 +144,7 @@ if (!conditionalRuntime.success)
   throw new Error('Conditional package runtime failed');
 assert.deepEqual(
   conditionalRuntime.runtime.getFieldSnapshot(['target']),
-  conditionalRuntime.runtime.getSnapshot().fields[1],
+  conditionalRuntime.runtime.getSnapshot().fields[2],
 );
 assert.equal(
   conditionalRuntime.runtime.getFieldSnapshot(['target'])?.enabled,
@@ -145,6 +154,16 @@ assert.equal(
   conditionalRuntime.runtime.requestSetValue(['target'], 'stale').diagnostics[0]
     ?.parameters.reason,
   'disabled',
+);
+assert.equal(
+  conditionalRuntime.runtime.updateExternalState({
+    value: { ...conditionalValue, ready: true },
+  }).success,
+  true,
+);
+assert.equal(
+  conditionalRuntime.runtime.getFieldSnapshot(['target'])?.enabled,
+  true,
 );
 conditionalRuntime.runtime.dispose();
 

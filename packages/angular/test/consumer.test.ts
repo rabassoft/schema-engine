@@ -90,7 +90,10 @@ const compilation = compileFormDefinition({
           address: {
             fields: {
               street: {
-                enabledWhen: { path: ['active'], equals: false },
+                enabledWhen: {
+                  operator: 'all',
+                  conditions: [{ path: ['active'], equals: false }],
+                },
               },
             },
           },
