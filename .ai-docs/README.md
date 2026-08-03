@@ -82,6 +82,10 @@
   — Accepted bounded M31 contract under ADR-034/ADR-005 revision 8 after review
   295 cycle 2 passed all nine areas and 26 rows with zero findings; completed
   PLAN-033 implements all 26 rows after final review 303 cycle 2.
+- [SPEC-018 v0.1.0: Flat Compound Conditions for Controlled Primitive-Field State](./specs/018-flat-compound-field-conditions.md)
+  — Accepted bounded M32 contract under ADR-035 after review 306 cycle 2
+  passed all fifteen areas and 22 rows with zero findings; Approved PLAN-034
+  now authorizes its six ordered checkpoints.
 
 ADR-033 revision 0 is the Accepted architecture for bounded D-018/M30
 ordinary primitive-field visibility/enabled equality predicates. Accepted
@@ -100,8 +104,12 @@ findings. The ADRs and SPEC-017 v0.1.0 are Accepted. Completed PLAN-033
 revision 0 implements checkpoints 1–7 and all 26 rows after final review 303
 cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
 
-## Latest completed implementation plan
+## Current and latest completed implementation plans
 
+- [PLAN-034 revision 0: Flat Compound Conditions for Controlled Primitive-Field State](./plans/034-flat-compound-field-conditions.md)
+  — Approved after review 307 cycle 3 passed all twelve areas and exact
+  ownership of all 22 rows with zero findings; checkpoints 1–4 and rows 1–20
+  are complete after reviews 308–311, and checkpoint 5 is next.
 - [PLAN-033 revision 0: Controlled String-Enum Array Field](./plans/033-controlled-string-enum-array-field.md)
   — Completed after final review 303 cycle 2 repeated the complete frozen
   matrix, all seven checkpoints and all 26 rows with zero findings.
@@ -111,6 +119,14 @@ cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
 
 ## Acceptance reviews
 
+- [PLAN-034 checkpoint 4 review](./reviews/311-plan-034-checkpoint-4-review.md) — Cycle 1 corrects strict deep-freeze evidence; cycle 2 passes all twelve shared/Standard/browser areas and rows 19–20 with zero findings
+- [PLAN-034 checkpoint 3 review](./reviews/310-plan-034-checkpoint-3-review.md) — Cycle 1 passes all ten Angular projection areas and SPEC-018 row 18 with zero findings
+- [PLAN-034 checkpoint 2 review](./reviews/309-plan-034-checkpoint-2-review.md) — Cycle 1 corrects runtime retention of non-enumerable descriptors; cycle 2 passes all twelve areas and SPEC-018 rows 10–17 with zero findings
+- [PLAN-034 checkpoint 1 review](./reviews/308-plan-034-checkpoint-1-review.md) — Cycle 1 corrects one compiler diagnostic and three evidence/lint defects; cycle 2 passes all twelve areas and SPEC-018 rows 1–9 with zero findings
+- [PLAN-034 complete review](./reviews/307-plan-034-review.md) — Cycle 1 corrects complete first-owning M30 compatibility evidence; cycle 2 finds repository formatting; cycle 3 passes all twelve areas and exact 22-row ownership with zero findings and approves revision 0
+- [SPEC-018 complete review](./reviews/306-spec-018-review.md) — Cycle 1 corrects seven authority, diagnostic and migration defects; cycle 2 passes all fifteen areas and 22 rows with zero findings and accepts v0.1.0
+- [ADR-035 complete review](./reviews/305-adr-035-review.md) — Cycle 1 corrects six authority, migration, descriptor, array-shape and runtime wording defects; cycle 2 passes all twelve areas with zero findings and accepts revision 0
+- [D-018/M32 compound-condition promotion readiness](./reviews/304-d018-m32-compound-condition-promotion-readiness.md) — Cycle 1 corrects one Public migration ambiguity; cycle 2 passes all fourteen areas with zero findings and reserves ADR-035 only for flat non-empty all/any composition of existing M30 equality predicates
 - [PLAN-033 final implementation review](./reviews/303-plan-033-final-implementation-review.md) — Cycle 1 identifies parallel-browser server interference; cycle 2 serializes both suites and passes the frozen graph, 78 files/1103 tests, packages/consumers/source, policies/security, 701 boundaries, Chromium 17+14 and all 26 rows with zero findings
 - [PLAN-033 checkpoint 6 review](./reviews/302-plan-033-checkpoint-6-review.md) — Cycle 1 corrects two declaration-evidence defects; cycle 2 passes all ten areas and SPEC-017 row 25 with zero findings
 - [PLAN-033 checkpoint 5 review](./reviews/301-plan-033-checkpoint-5-review.md) — Cycles 1–3 correct selector, status, fixture and formatting defects; cycle 4 passes all twelve areas and SPEC-017 row 24 with zero findings
@@ -906,6 +922,9 @@ cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)
+- [ADR-035: Flat compound conditions for controlled primitive-field state](./adrs/035-flat-compound-field-conditions.md)
+  — Accepted revision 0 after review 305 cycle 2; Accepted SPEC-018 and
+  Approved PLAN-034 close and authorize its bounded M32 delivery.
 - [ADR-034: Controlled homogeneous string-enum array field](./adrs/034-controlled-homogeneous-string-enum-array-field.md)
   — Accepted revision 0 after review 293 cycle 3; accepted SPEC-017 and
   completed PLAN-033 implement its bounded M31 decision after final review 303

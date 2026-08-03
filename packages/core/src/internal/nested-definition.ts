@@ -50,6 +50,8 @@ export type NestedDefinitionReason =
   | 'invalid-field-fixed-value'
   | 'incompatible-field-capabilities'
   | 'invalid-field-condition'
+  | 'invalid-field-condition-group'
+  | 'nested-field-condition-group'
   | 'unsupported-field-condition-location'
   | 'field-condition-target-incompatible'
   | 'field-condition-source-not-managed'
@@ -86,12 +88,23 @@ export interface NestedDefinitionDefect {
   readonly conditionMember?: 'visibleWhen' | 'enabledWhen';
   readonly conditionReason?:
     'not-object' | 'member-missing' | 'member-accessor' | 'member-invalid';
-  readonly conditionDetailMember?: 'sourcePath' | 'equals';
+  readonly conditionGroupReason?:
+    | 'shape-mixed'
+    | 'member-missing'
+    | 'member-accessor'
+    | 'member-invalid'
+    | 'empty'
+    | 'member-not-object';
+  readonly conditionDetailMember?:
+    'condition' | 'sourcePath' | 'equals' | 'operator' | 'conditions';
   readonly conditionExpected?: string;
   readonly conditionActualType?: string;
   readonly conditionActualLength?: number;
+  readonly conditionActualOperator?: string;
   readonly conditionIndex?: number;
   readonly conditionPathKey?: string;
+  readonly conditionGroupIndex?: number;
+  readonly conditionGroupKey?: string;
   readonly sourcePath?: readonly string[];
   readonly sourceReason?: 'unmanaged' | 'object' | 'array' | 'below-collection';
   readonly sourceKind?: 'string' | 'number' | 'integer' | 'boolean';
@@ -147,11 +160,25 @@ interface DefinitionTemplateConditionTarget {
   readonly enabledWhen: CapturedDefinitionCondition | undefined;
 }
 
+interface DetachedDefinitionConditionPredicate {
+  readonly kind: 'predicate';
+  readonly sourcePath: readonly string[];
+  readonly equals: string | number | boolean | null;
+}
+
+interface DetachedDefinitionConditionGroup {
+  readonly kind: 'group';
+  readonly operator: 'all' | 'any';
+  readonly conditions: readonly DetachedDefinitionConditionPredicate[];
+}
+
+type DetachedDefinitionConditionValue =
+  DetachedDefinitionConditionPredicate | DetachedDefinitionConditionGroup;
+
 interface DetachedDefinitionCondition {
   readonly target: DefinitionFieldConditionTarget;
   readonly member: DefinitionConditionMember;
-  readonly sourcePath: readonly string[];
-  readonly equals: string | number | boolean | null;
+  readonly condition: DetachedDefinitionConditionValue;
 }
 
 export function validateNestedFormDefinition(
@@ -1542,8 +1569,126 @@ function inspectDefinitionConditionShape(
   member: DefinitionConditionMember,
   defects: NestedDefinitionDefect[],
 ): DetachedDefinitionCondition | undefined {
+  if (capture.kind === 'accessor') {
+    pushDefinitionPredicateDefect(target, member, defects, 'member-accessor', {
+      conditionExpected: 'condition object',
+    });
+    return undefined;
+  }
+  if (!isOrdinaryObject(capture.value)) {
+    pushDefinitionPredicateDefect(target, member, defects, 'not-object', {
+      conditionExpected: 'condition object',
+      conditionActualType: actualType(capture.value),
+    });
+    return undefined;
+  }
+
+  const condition = capture.value;
+  const family = classifyDefinitionCondition(condition);
+  if (family === 'mixed') {
+    pushDefinitionGroupDefect(target, member, defects, 'shape-mixed', {
+      conditionDetailMember: 'condition',
+      conditionExpected: 'predicate or flat condition group',
+    });
+    return undefined;
+  }
+  const detached =
+    family === 'group'
+      ? inspectDefinitionConditionGroup(condition, target, member, defects)
+      : inspectDefinitionConditionPredicate(condition, target, member, defects);
+  return detached === undefined
+    ? undefined
+    : Object.freeze({ target, member, condition: detached });
+}
+
+type DefinitionConditionFamily = 'predicate' | 'group' | 'mixed';
+
+function readOwnEnumerableConditionMember(
+  condition: object,
+  member: 'sourcePath' | 'equals' | 'operator' | 'conditions',
+): ReturnType<typeof readOwnDataMember> {
+  const descriptor = Object.getOwnPropertyDescriptor(condition, member);
+  if (descriptor === undefined || !descriptor.enumerable) {
+    return { kind: 'missing' };
+  }
+  return 'value' in descriptor
+    ? { kind: 'value', value: descriptor.value as unknown }
+    : { kind: 'accessor' };
+}
+
+function classifyDefinitionCondition(
+  condition: object,
+): DefinitionConditionFamily {
+  const predicate =
+    readOwnEnumerableConditionMember(condition, 'sourcePath').kind !==
+      'missing' ||
+    readOwnEnumerableConditionMember(condition, 'equals').kind !== 'missing';
+  const group =
+    readOwnEnumerableConditionMember(condition, 'operator').kind !==
+      'missing' ||
+    readOwnEnumerableConditionMember(condition, 'conditions').kind !==
+      'missing';
+  if (predicate && group) return 'mixed';
+  return group ? 'group' : 'predicate';
+}
+
+function pushDefinitionPredicateDefect(
+  target: DefinitionFieldConditionTarget,
+  member: DefinitionConditionMember,
+  defects: NestedDefinitionDefect[],
+  conditionReason: NonNullable<NestedDefinitionDefect['conditionReason']>,
+  details: Omit<
+    NestedDefinitionDefect,
+    'reason' | 'nodeIndexPath' | 'path' | 'conditionMember' | 'conditionReason'
+  > = {},
+): void {
+  defects.push(
+    makeDefect('invalid-field-condition', {
+      nodeIndexPath: target.nodeIndexPath,
+      path: target.path,
+      conditionMember: member,
+      conditionReason,
+      ...details,
+    }),
+  );
+}
+
+function pushDefinitionGroupDefect(
+  target: DefinitionFieldConditionTarget,
+  member: DefinitionConditionMember,
+  defects: NestedDefinitionDefect[],
+  conditionGroupReason: NonNullable<
+    NestedDefinitionDefect['conditionGroupReason']
+  >,
+  details: Omit<
+    NestedDefinitionDefect,
+    | 'reason'
+    | 'nodeIndexPath'
+    | 'path'
+    | 'conditionMember'
+    | 'conditionGroupReason'
+  > = {},
+): void {
+  defects.push(
+    makeDefect('invalid-field-condition-group', {
+      nodeIndexPath: target.nodeIndexPath,
+      path: target.path,
+      conditionMember: member,
+      conditionGroupReason,
+      ...details,
+    }),
+  );
+}
+
+function inspectDefinitionConditionPredicate(
+  condition: object,
+  target: DefinitionFieldConditionTarget,
+  member: DefinitionConditionMember,
+  defects: NestedDefinitionDefect[],
+  conditionGroupIndex?: number,
+): DetachedDefinitionConditionPredicate | undefined {
   const push = (
-    conditionReason: NonNullable<NestedDefinitionDefect['conditionReason']>,
+    reason: NonNullable<NestedDefinitionDefect['conditionReason']>,
     details: Omit<
       NestedDefinitionDefect,
       | 'reason'
@@ -1553,34 +1698,19 @@ function inspectDefinitionConditionShape(
       | 'conditionReason'
     > = {},
   ): void => {
-    defects.push(
-      makeDefect('invalid-field-condition', {
-        nodeIndexPath: target.nodeIndexPath,
-        path: target.path,
-        conditionMember: member,
-        conditionReason,
-        ...details,
-      }),
-    );
-  };
-  if (capture.kind === 'accessor') {
-    push('member-accessor', { conditionExpected: 'condition object' });
-    return undefined;
-  }
-  if (!isOrdinaryObject(capture.value)) {
-    push('not-object', {
-      conditionExpected: 'condition object',
-      conditionActualType: actualType(capture.value),
+    pushDefinitionPredicateDefect(target, member, defects, reason, {
+      ...(conditionGroupIndex === undefined ? {} : { conditionGroupIndex }),
+      ...details,
     });
-    return undefined;
-  }
-
-  const condition = capture.value;
+  };
   let valid = true;
   let sourcePath: string[] | undefined;
   let equals: string | number | boolean | null | undefined;
   let equalsValid = false;
-  const sourcePathMember = readOwnDataMember(condition, 'sourcePath');
+  const sourcePathMember = readOwnEnumerableConditionMember(
+    condition,
+    'sourcePath',
+  );
   if (sourcePathMember.kind === 'missing') {
     valid = false;
     push('member-missing', {
@@ -1662,7 +1792,7 @@ function inspectDefinitionConditionShape(
     }
   }
 
-  const equalsMember = readOwnDataMember(condition, 'equals');
+  const equalsMember = readOwnEnumerableConditionMember(condition, 'equals');
   if (equalsMember.kind === 'missing') {
     valid = false;
     push('member-missing', {
@@ -1694,13 +1824,216 @@ function inspectDefinitionConditionShape(
   }
 
   return valid && sourcePath !== undefined && equalsValid
-    ? {
-        target,
-        member,
+    ? Object.freeze({
+        kind: 'predicate',
         sourcePath: Object.freeze(sourcePath),
         equals: equals as string | number | boolean | null,
-      }
+      })
     : undefined;
+}
+
+function inspectDefinitionConditionGroup(
+  condition: object,
+  target: DefinitionFieldConditionTarget,
+  member: DefinitionConditionMember,
+  defects: NestedDefinitionDefect[],
+): DetachedDefinitionConditionGroup | undefined {
+  const push = (
+    reason: NonNullable<NestedDefinitionDefect['conditionGroupReason']>,
+    details: Omit<
+      NestedDefinitionDefect,
+      | 'reason'
+      | 'nodeIndexPath'
+      | 'path'
+      | 'conditionMember'
+      | 'conditionGroupReason'
+    > = {},
+  ): void =>
+    pushDefinitionGroupDefect(target, member, defects, reason, details);
+  let valid = true;
+  let operator: 'all' | 'any' | undefined;
+  let conditionsValue: unknown;
+  let conditionsReadable = false;
+
+  const operatorMember = readOwnEnumerableConditionMember(
+    condition,
+    'operator',
+  );
+  if (operatorMember.kind === 'missing') {
+    valid = false;
+    push('member-missing', {
+      conditionDetailMember: 'operator',
+      conditionExpected: "'all' or 'any'",
+    });
+  } else if (operatorMember.kind === 'accessor') {
+    valid = false;
+    push('member-accessor', {
+      conditionDetailMember: 'operator',
+      conditionExpected: "'all' or 'any'",
+    });
+  } else if (operatorMember.value !== 'all' && operatorMember.value !== 'any') {
+    valid = false;
+    push('member-invalid', {
+      conditionDetailMember: 'operator',
+      conditionExpected: "'all' or 'any'",
+      conditionActualType: actualType(operatorMember.value),
+      ...(typeof operatorMember.value === 'string'
+        ? { conditionActualOperator: operatorMember.value }
+        : {}),
+    });
+  } else operator = operatorMember.value;
+
+  const conditionsMember = readOwnEnumerableConditionMember(
+    condition,
+    'conditions',
+  );
+  if (conditionsMember.kind === 'missing') {
+    valid = false;
+    push('member-missing', {
+      conditionDetailMember: 'conditions',
+      conditionExpected: 'non-empty dense condition array',
+    });
+  } else if (conditionsMember.kind === 'accessor') {
+    valid = false;
+    push('member-accessor', {
+      conditionDetailMember: 'conditions',
+      conditionExpected: 'non-empty dense condition array',
+    });
+  } else {
+    conditionsValue = conditionsMember.value;
+    conditionsReadable = true;
+  }
+
+  const predicates: DetachedDefinitionConditionPredicate[] = [];
+  if (conditionsReadable) {
+    if (!Array.isArray(conditionsValue)) {
+      valid = false;
+      push('member-invalid', {
+        conditionDetailMember: 'conditions',
+        conditionExpected: 'non-empty dense condition array',
+        conditionActualType: actualType(conditionsValue),
+      });
+    } else {
+      if (conditionsValue.length === 0) {
+        valid = false;
+        push('empty', {
+          conditionDetailMember: 'conditions',
+          conditionExpected: 'non-empty dense condition array',
+          conditionActualType: 'array',
+          conditionActualLength: 0,
+        });
+      }
+      const descriptors: Array<PropertyDescriptor | undefined> = [];
+      for (let index = 0; index < conditionsValue.length; index += 1) {
+        const descriptor = Object.getOwnPropertyDescriptor(
+          conditionsValue,
+          index,
+        );
+        descriptors.push(descriptor);
+        if (
+          descriptor === undefined ||
+          !descriptor.enumerable ||
+          !('value' in descriptor)
+        ) {
+          valid = false;
+          push(
+            descriptor !== undefined && !('value' in descriptor)
+              ? 'member-accessor'
+              : 'member-invalid',
+            {
+              conditionDetailMember: 'conditions',
+              conditionExpected: 'non-empty dense condition array',
+              conditionGroupIndex: index,
+            },
+          );
+        }
+      }
+      for (const key of Object.keys(conditionsValue)) {
+        if (isDefinitionConditionArrayIndex(key, conditionsValue.length)) {
+          continue;
+        }
+        valid = false;
+        push('member-invalid', {
+          conditionDetailMember: 'conditions',
+          conditionExpected: 'non-empty dense condition array',
+          conditionGroupKey: key,
+        });
+      }
+      for (let index = 0; index < descriptors.length; index += 1) {
+        const descriptor = descriptors[index];
+        if (
+          descriptor === undefined ||
+          !descriptor.enumerable ||
+          !('value' in descriptor)
+        ) {
+          continue;
+        }
+        if (!isOrdinaryObject(descriptor.value)) {
+          valid = false;
+          push('member-not-object', {
+            conditionDetailMember: 'condition',
+            conditionExpected: 'condition object',
+            conditionActualType: actualType(descriptor.value),
+            conditionGroupIndex: index,
+          });
+          continue;
+        }
+        const family = classifyDefinitionCondition(descriptor.value);
+        if (family === 'mixed') {
+          valid = false;
+          push('shape-mixed', {
+            conditionDetailMember: 'condition',
+            conditionExpected: 'predicate or flat condition group',
+            conditionGroupIndex: index,
+          });
+          continue;
+        }
+        if (family === 'group') {
+          valid = false;
+          defects.push(
+            makeDefect('nested-field-condition-group', {
+              nodeIndexPath: target.nodeIndexPath,
+              path: target.path,
+              conditionMember: member,
+              conditionDetailMember: 'condition',
+              conditionExpected: 'non-nested condition predicate',
+              conditionGroupIndex: index,
+            }),
+          );
+          continue;
+        }
+        const predicate = inspectDefinitionConditionPredicate(
+          descriptor.value,
+          target,
+          member,
+          defects,
+          index,
+        );
+        if (predicate === undefined) valid = false;
+        else predicates.push(predicate);
+      }
+    }
+  }
+
+  return valid && operator !== undefined
+    ? Object.freeze({
+        kind: 'group',
+        operator,
+        conditions: Object.freeze(predicates),
+      })
+    : undefined;
+}
+
+function isDefinitionConditionArrayIndex(key: string, length: number): boolean {
+  if (key.length === 0) return false;
+  const index = Number(key);
+  return (
+    Number.isInteger(index) &&
+    index >= 0 &&
+    index < 4_294_967_295 &&
+    index < length &&
+    String(index) === key
+  );
 }
 
 function collectDefinitionConditionSemanticDefects(
@@ -1729,42 +2062,57 @@ function collectDefinitionConditionSemanticDefects(
       );
       continue;
     }
-    const sourceKey = canonicalDataPathKey(condition.sourcePath);
-    const source = sources.get(sourceKey);
-    if (source === undefined) {
-      const sourceReason = objectPaths.has(sourceKey)
-        ? 'object'
-        : arrayPaths.has(sourceKey)
-          ? 'array'
-          : collectionPaths.some(
-                (path) =>
-                  condition.sourcePath.length > path.length &&
-                  path.every(
-                    (segment, index) => condition.sourcePath[index] === segment,
-                  ),
-              )
-            ? 'below-collection'
-            : 'unmanaged';
-      defects.push(
-        makeDefect('field-condition-source-not-managed', {
-          ...base,
-          sourcePath: condition.sourcePath,
-          sourceReason,
-        }),
-      );
-      continue;
-    }
-    if (!definitionConditionLiteralCompatible(source, condition.equals)) {
-      defects.push(
-        makeDefect('field-condition-literal-incompatible', {
-          ...base,
-          sourcePath: condition.sourcePath,
-          sourceKind: source.kind,
-          sourceNullable: source.nullable,
-          conditionExpected: definitionConditionExpected(source),
-          conditionActualType: actualType(condition.equals),
-        }),
-      );
+    const predicates =
+      condition.condition.kind === 'predicate'
+        ? [condition.condition]
+        : condition.condition.conditions;
+    for (let index = 0; index < predicates.length; index += 1) {
+      const predicate = predicates[index];
+      if (predicate === undefined) continue;
+      const groupLocation =
+        condition.condition.kind === 'group'
+          ? { conditionGroupIndex: index }
+          : {};
+      const sourceKey = canonicalDataPathKey(predicate.sourcePath);
+      const source = sources.get(sourceKey);
+      if (source === undefined) {
+        const sourceReason = objectPaths.has(sourceKey)
+          ? 'object'
+          : arrayPaths.has(sourceKey)
+            ? 'array'
+            : collectionPaths.some(
+                  (path) =>
+                    predicate.sourcePath.length > path.length &&
+                    path.every(
+                      (segment, pathIndex) =>
+                        predicate.sourcePath[pathIndex] === segment,
+                    ),
+                )
+              ? 'below-collection'
+              : 'unmanaged';
+        defects.push(
+          makeDefect('field-condition-source-not-managed', {
+            ...base,
+            ...groupLocation,
+            sourcePath: predicate.sourcePath,
+            sourceReason,
+          }),
+        );
+        continue;
+      }
+      if (!definitionConditionLiteralCompatible(source, predicate.equals)) {
+        defects.push(
+          makeDefect('field-condition-literal-incompatible', {
+            ...base,
+            ...groupLocation,
+            sourcePath: predicate.sourcePath,
+            sourceKind: source.kind,
+            sourceNullable: source.nullable,
+            conditionExpected: definitionConditionExpected(source),
+            conditionActualType: actualType(predicate.equals),
+          }),
+        );
+      }
     }
   }
 }

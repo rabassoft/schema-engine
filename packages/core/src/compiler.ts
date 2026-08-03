@@ -7,9 +7,11 @@ import type {
   CompileFormDefinitionInput,
   CompileFormResult,
   Diagnostic,
+  FieldConditionDefinition,
   FieldDefinition,
   FieldTemplate,
   FieldValueConditionDefinition,
+  FieldValueConditionGroupDefinition,
   FormDefinition,
   FormNodeDefinition,
   FormNodeTemplate,
@@ -207,8 +209,8 @@ type CapturedConditionMember =
     };
 
 interface NormalizedFieldConditions {
-  readonly visibleWhen?: FieldValueConditionDefinition;
-  readonly enabledWhen?: FieldValueConditionDefinition;
+  readonly visibleWhen?: FieldConditionDefinition;
+  readonly enabledWhen?: FieldConditionDefinition;
 }
 
 interface ParsedUiSchema {
@@ -8035,51 +8037,75 @@ function inspectConditionPhase(
     if (parsed === undefined || !completeOrdinaryFieldIndex) {
       continue;
     }
-    const sourceKey = JSON.stringify(parsed.sourcePath);
-    const source = ordinaryFields.get(sourceKey);
-    if (source === undefined) {
-      const sourceReason = ordinaryObjects.has(sourceKey)
-        ? 'object'
-        : ordinaryArrays.has(sourceKey)
-          ? 'array'
-          : collectionPaths.some(
-                (path) =>
-                  parsed.sourcePath.length > path.length &&
-                  path.every(
-                    (segment, index) => parsed.sourcePath[index] === segment,
-                  ),
-              )
-            ? 'below-collection'
-            : 'unmanaged';
-      diagnostics.push(
-        conditionDiagnostic(target, 'source-not-ordinary-field', {
-          sourcePath: [...parsed.sourcePath],
-          sourceReason,
-        }),
-      );
-      continue;
+    const predicates =
+      parsed.kind === 'predicate' ? [parsed] : parsed.conditions;
+    const linked: FieldValueConditionDefinition[] = [];
+    let semanticValid = true;
+    for (let index = 0; index < predicates.length; index += 1) {
+      const predicate = predicates[index];
+      if (predicate === undefined) continue;
+      const memberLocation =
+        parsed.kind === 'group' ? { memberIndex: index } : {};
+      const sourceKey = JSON.stringify(predicate.sourcePath);
+      const source = ordinaryFields.get(sourceKey);
+      if (source === undefined) {
+        semanticValid = false;
+        const sourceReason = ordinaryObjects.has(sourceKey)
+          ? 'object'
+          : ordinaryArrays.has(sourceKey)
+            ? 'array'
+            : collectionPaths.some(
+                  (path) =>
+                    predicate.sourcePath.length > path.length &&
+                    path.every(
+                      (segment, pathIndex) =>
+                        predicate.sourcePath[pathIndex] === segment,
+                    ),
+                )
+              ? 'below-collection'
+              : 'unmanaged';
+        diagnostics.push(
+          conditionDiagnostic(target, 'source-not-ordinary-field', {
+            sourcePath: [...predicate.sourcePath],
+            sourceReason,
+            ...memberLocation,
+          }),
+        );
+        continue;
+      }
+      const expected = conditionLiteralExpected(source);
+      if (!conditionLiteralCompatible(source, predicate.equals)) {
+        semanticValid = false;
+        diagnostics.push(
+          conditionDiagnostic(target, 'literal-incompatible', {
+            sourcePath: [...predicate.sourcePath],
+            sourceKind: source.type,
+            sourceNullable: source.nullable,
+            expected,
+            actualType: actualType(predicate.equals),
+            ...memberLocation,
+          }),
+        );
+        continue;
+      }
+      linked.push({
+        sourcePath: [...predicate.sourcePath],
+        equals: predicate.equals,
+      });
     }
-    const expected = conditionLiteralExpected(source);
-    if (!conditionLiteralCompatible(source, parsed.equals)) {
-      diagnostics.push(
-        conditionDiagnostic(target, 'literal-incompatible', {
-          sourcePath: [...parsed.sourcePath],
-          sourceKind: source.type,
-          sourceNullable: source.nullable,
-          expected,
-          actualType: actualType(parsed.equals),
-        }),
-      );
-      continue;
-    }
+    if (!semanticValid) continue;
+    const normalizedCondition: FieldConditionDefinition =
+      parsed.kind === 'predicate'
+        ? (linked[0] as FieldValueConditionDefinition)
+        : ({
+            operator: parsed.operator,
+            conditions: linked,
+          } satisfies FieldValueConditionGroupDefinition);
     const key = JSON.stringify(candidate.dataPath);
     const previous = normalized.get(key) ?? {};
     normalized.set(key, {
       ...previous,
-      [target.member]: {
-        sourcePath: [...parsed.sourcePath],
-        equals: parsed.equals,
-      },
+      [target.member]: normalizedCondition,
     });
   }
   return normalized;
@@ -8411,15 +8437,69 @@ function indexOrdinaryConditionSources(
   }
 }
 
+interface InspectedConditionPredicate {
+  readonly kind: 'predicate';
+  readonly sourcePath: readonly string[];
+  readonly equals: string | number | boolean | null;
+}
+
+interface InspectedConditionGroup {
+  readonly kind: 'group';
+  readonly operator: 'all' | 'any';
+  readonly conditions: readonly InspectedConditionPredicate[];
+}
+
+type InspectedCondition = InspectedConditionPredicate | InspectedConditionGroup;
+
+type ConditionShapeFamily = 'predicate' | 'group' | 'mixed';
+
+function enumerableConditionDescriptor(
+  condition: Record<string, unknown>,
+  member: 'path' | 'equals' | 'operator' | 'conditions',
+): PropertyDescriptor | undefined {
+  const descriptor = Object.getOwnPropertyDescriptor(condition, member);
+  return descriptor?.enumerable === true ? descriptor : undefined;
+}
+
+function classifyConditionShape(
+  condition: Record<string, unknown>,
+): ConditionShapeFamily {
+  const predicate =
+    enumerableConditionDescriptor(condition, 'path') !== undefined ||
+    enumerableConditionDescriptor(condition, 'equals') !== undefined;
+  const group =
+    enumerableConditionDescriptor(condition, 'operator') !== undefined ||
+    enumerableConditionDescriptor(condition, 'conditions') !== undefined;
+  if (predicate && group) return 'mixed';
+  return group ? 'group' : 'predicate';
+}
+
+function appendConditionUnknownWarnings(
+  target: ConditionTarget,
+  condition: Record<string, unknown>,
+  known: ReadonlySet<string>,
+  diagnostics: Diagnostic[],
+  suffix: readonly (string | number)[] = [],
+): void {
+  for (const key of Object.keys(condition)) {
+    if (known.has(key)) continue;
+    const warning = unknownUiKey(
+      key,
+      [...target.capture.documentPath, ...suffix, key],
+      target.dataPath,
+    );
+    diagnostics.push(
+      target.templatePath === undefined
+        ? warning
+        : withTemplatePath(warning, target.templatePath),
+    );
+  }
+}
+
 function inspectConditionShape(
   target: ConditionTarget,
   diagnostics: Diagnostic[],
-):
-  | {
-      readonly sourcePath: readonly string[];
-      readonly equals: string | number | boolean | null;
-    }
-  | undefined {
+): InspectedCondition | undefined {
   const { capture } = target;
   if (capture.kind === 'accessor') {
     diagnostics.push(
@@ -8440,12 +8520,42 @@ function inspectConditionShape(
     return undefined;
   }
   const condition = capture.value;
+  const family = classifyConditionShape(condition);
+  if (family === 'mixed') {
+    diagnostics.push(
+      conditionDiagnostic(target, 'condition-shape-mixed', {
+        conditionMember: 'condition',
+        expected: 'predicate or flat condition group',
+      }),
+    );
+    appendConditionUnknownWarnings(
+      target,
+      condition,
+      new Set(['path', 'equals', 'operator', 'conditions']),
+      diagnostics,
+    );
+    return undefined;
+  }
+  return family === 'group'
+    ? inspectConditionGroupShape(target, condition, diagnostics)
+    : inspectConditionPredicateShape(target, condition, diagnostics);
+}
+
+function inspectConditionPredicateShape(
+  target: ConditionTarget,
+  condition: Record<string, unknown>,
+  diagnostics: Diagnostic[],
+  suffixPrefix: readonly (string | number)[] = [],
+  memberIndex?: number,
+): InspectedConditionPredicate | undefined {
   let valid = true;
   let sourcePath: string[] | undefined;
   let equals: string | number | boolean | null | undefined;
   let equalsValid = false;
-  const pathDescriptor = Object.getOwnPropertyDescriptor(condition, 'path');
-  if (pathDescriptor === undefined || !pathDescriptor.enumerable) {
+  const location =
+    memberIndex === undefined ? {} : { memberIndex: memberIndex };
+  const pathDescriptor = enumerableConditionDescriptor(condition, 'path');
+  if (pathDescriptor === undefined) {
     valid = false;
     diagnostics.push(
       conditionDiagnostic(
@@ -8454,8 +8564,9 @@ function inspectConditionShape(
         {
           conditionMember: 'path',
           expected: 'non-empty dense string path',
+          ...location,
         },
-        ['path'],
+        [...suffixPrefix, 'path'],
       ),
     );
   } else if (!('value' in pathDescriptor)) {
@@ -8467,8 +8578,9 @@ function inspectConditionShape(
         {
           conditionMember: 'path',
           expected: 'non-empty dense string path',
+          ...location,
         },
-        ['path'],
+        [...suffixPrefix, 'path'],
       ),
     );
   } else if (!Array.isArray(pathDescriptor.value)) {
@@ -8481,8 +8593,9 @@ function inspectConditionShape(
           conditionMember: 'path',
           expected: 'non-empty dense string path',
           actualType: actualType(pathDescriptor.value),
+          ...location,
         },
-        ['path'],
+        [...suffixPrefix, 'path'],
       ),
     );
   } else {
@@ -8509,8 +8622,9 @@ function inspectConditionShape(
               typeof length.value === 'number'
                 ? length.value
                 : 0,
+            ...location,
           },
-          ['path'],
+          [...suffixPrefix, 'path'],
         ),
       );
     } else {
@@ -8530,13 +8644,15 @@ function inspectConditionShape(
                     conditionMember: 'path',
                     expected: 'string path segment',
                     pathIndex: index,
+                    ...location,
                   }
                 : {
                     conditionMember: 'path',
                     expected: 'string path segment',
                     pathIndex: index,
+                    ...location,
                   },
-              ['path', index],
+              [...suffixPrefix, 'path', index],
             ),
           );
         } else if (typeof entry.value !== 'string') {
@@ -8550,8 +8666,9 @@ function inspectConditionShape(
                 expected: 'string path segment',
                 actualType: actualType(entry.value),
                 pathIndex: index,
+                ...location,
               },
-              ['path', index],
+              [...suffixPrefix, 'path', index],
             ),
           );
         } else sourcePath.push(entry.value);
@@ -8568,15 +8685,16 @@ function inspectConditionShape(
               expected: 'non-empty dense string path',
               actualType: 'array',
               pathKey: key,
+              ...location,
             },
-            ['path', key],
+            [...suffixPrefix, 'path', key],
           ),
         );
       }
     }
   }
-  const equalsDescriptor = Object.getOwnPropertyDescriptor(condition, 'equals');
-  if (equalsDescriptor === undefined || !equalsDescriptor.enumerable) {
+  const equalsDescriptor = enumerableConditionDescriptor(condition, 'equals');
+  if (equalsDescriptor === undefined) {
     valid = false;
     diagnostics.push(
       conditionDiagnostic(
@@ -8585,8 +8703,9 @@ function inspectConditionShape(
         {
           conditionMember: 'equals',
           expected: 'string, finite number, boolean or null',
+          ...location,
         },
-        ['equals'],
+        [...suffixPrefix, 'equals'],
       ),
     );
   } else if (!('value' in equalsDescriptor)) {
@@ -8598,8 +8717,9 @@ function inspectConditionShape(
         {
           conditionMember: 'equals',
           expected: 'string, finite number, boolean or null',
+          ...location,
         },
-        ['equals'],
+        [...suffixPrefix, 'equals'],
       ),
     );
   } else if (
@@ -8621,27 +8741,305 @@ function inspectConditionShape(
           conditionMember: 'equals',
           expected: 'string, finite number, boolean or null',
           actualType: actualType(equalsDescriptor.value),
+          ...location,
         },
-        ['equals'],
+        [...suffixPrefix, 'equals'],
       ),
     );
   }
-  for (const key of Object.keys(condition)) {
-    if (key === 'path' || key === 'equals') continue;
-    const warning = unknownUiKey(
-      key,
-      [...capture.documentPath, key],
-      target.dataPath,
-    );
-    diagnostics.push(
-      target.templatePath === undefined
-        ? warning
-        : withTemplatePath(warning, target.templatePath),
-    );
-  }
+  appendConditionUnknownWarnings(
+    target,
+    condition,
+    new Set(['path', 'equals']),
+    diagnostics,
+    suffixPrefix,
+  );
   return valid && sourcePath !== undefined && equalsValid
-    ? { sourcePath, equals: equals as string | number | boolean | null }
+    ? {
+        kind: 'predicate',
+        sourcePath,
+        equals: equals as string | number | boolean | null,
+      }
     : undefined;
+}
+
+function inspectConditionGroupShape(
+  target: ConditionTarget,
+  condition: Record<string, unknown>,
+  diagnostics: Diagnostic[],
+): InspectedConditionGroup | undefined {
+  let valid = true;
+  let operator: 'all' | 'any' | undefined;
+  let conditionsValue: unknown;
+  let conditionsReadable = false;
+
+  const operatorDescriptor = enumerableConditionDescriptor(
+    condition,
+    'operator',
+  );
+  if (operatorDescriptor === undefined) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-missing',
+        { conditionMember: 'operator', expected: "'all' or 'any'" },
+        ['operator'],
+      ),
+    );
+  } else if (!('value' in operatorDescriptor)) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-accessor',
+        { conditionMember: 'operator', expected: "'all' or 'any'" },
+        ['operator'],
+      ),
+    );
+  } else if (
+    operatorDescriptor.value !== 'all' &&
+    operatorDescriptor.value !== 'any'
+  ) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-invalid',
+        {
+          conditionMember: 'operator',
+          expected: "'all' or 'any'",
+          actualType: actualType(operatorDescriptor.value),
+          ...(typeof operatorDescriptor.value === 'string'
+            ? { actualOperator: operatorDescriptor.value }
+            : {}),
+        },
+        ['operator'],
+      ),
+    );
+  } else operator = operatorDescriptor.value as 'all' | 'any';
+
+  const conditionsDescriptor = enumerableConditionDescriptor(
+    condition,
+    'conditions',
+  );
+  if (conditionsDescriptor === undefined) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-missing',
+        {
+          conditionMember: 'conditions',
+          expected: 'non-empty dense condition array',
+        },
+        ['conditions'],
+      ),
+    );
+  } else if (!('value' in conditionsDescriptor)) {
+    valid = false;
+    diagnostics.push(
+      conditionDiagnostic(
+        target,
+        'condition-member-accessor',
+        {
+          conditionMember: 'conditions',
+          expected: 'non-empty dense condition array',
+        },
+        ['conditions'],
+      ),
+    );
+  } else {
+    conditionsValue = conditionsDescriptor.value;
+    conditionsReadable = true;
+  }
+
+  const members: InspectedConditionPredicate[] = [];
+  if (conditionsReadable) {
+    if (!Array.isArray(conditionsValue)) {
+      valid = false;
+      diagnostics.push(
+        conditionDiagnostic(
+          target,
+          'condition-member-invalid',
+          {
+            conditionMember: 'conditions',
+            expected: 'non-empty dense condition array',
+            actualType: actualType(conditionsValue),
+          },
+          ['conditions'],
+        ),
+      );
+    } else {
+      if (conditionsValue.length === 0) {
+        valid = false;
+        diagnostics.push(
+          conditionDiagnostic(
+            target,
+            'condition-group-empty',
+            {
+              conditionMember: 'conditions',
+              expected: 'non-empty dense condition array',
+              actualType: 'array',
+              actualLength: 0,
+            },
+            ['conditions'],
+          ),
+        );
+      }
+      const descriptors: Array<PropertyDescriptor | undefined> = [];
+      for (let index = 0; index < conditionsValue.length; index += 1) {
+        const descriptor = Object.getOwnPropertyDescriptor(
+          conditionsValue,
+          index,
+        );
+        descriptors.push(descriptor);
+        if (
+          descriptor === undefined ||
+          !descriptor.enumerable ||
+          !('value' in descriptor)
+        ) {
+          valid = false;
+          diagnostics.push(
+            conditionDiagnostic(
+              target,
+              descriptor !== undefined && !('value' in descriptor)
+                ? 'condition-member-accessor'
+                : 'condition-member-invalid',
+              {
+                conditionMember: 'conditions',
+                expected: 'non-empty dense condition array',
+                memberIndex: index,
+              },
+              ['conditions', index],
+            ),
+          );
+        }
+      }
+      for (const key of Object.keys(conditionsValue)) {
+        if (isCanonicalArrayIndex(key, conditionsValue.length)) continue;
+        valid = false;
+        diagnostics.push(
+          conditionDiagnostic(
+            target,
+            'condition-member-invalid',
+            {
+              conditionMember: 'conditions',
+              expected: 'non-empty dense condition array',
+              conditionKey: key,
+            },
+            ['conditions', key],
+          ),
+        );
+      }
+      for (let index = 0; index < descriptors.length; index += 1) {
+        const descriptor = descriptors[index];
+        if (
+          descriptor === undefined ||
+          !descriptor.enumerable ||
+          !('value' in descriptor)
+        ) {
+          continue;
+        }
+        if (!isOrdinaryRecord(descriptor.value)) {
+          valid = false;
+          diagnostics.push(
+            conditionDiagnostic(
+              target,
+              'condition-not-object',
+              {
+                conditionMember: 'condition',
+                expected: 'condition object',
+                actualType: actualType(descriptor.value),
+                memberIndex: index,
+              },
+              ['conditions', index],
+            ),
+          );
+          continue;
+        }
+        const family = classifyConditionShape(descriptor.value);
+        if (family === 'mixed') {
+          valid = false;
+          diagnostics.push(
+            conditionDiagnostic(
+              target,
+              'condition-shape-mixed',
+              {
+                conditionMember: 'condition',
+                expected: 'predicate or flat condition group',
+                memberIndex: index,
+              },
+              ['conditions', index],
+            ),
+          );
+          appendConditionUnknownWarnings(
+            target,
+            descriptor.value,
+            new Set(['path', 'equals', 'operator', 'conditions']),
+            diagnostics,
+            ['conditions', index],
+          );
+          continue;
+        }
+        if (family === 'group') {
+          valid = false;
+          diagnostics.push(
+            conditionDiagnostic(
+              target,
+              'condition-group-nested',
+              {
+                conditionMember: 'condition',
+                expected: 'non-nested condition predicate',
+                memberIndex: index,
+              },
+              ['conditions', index],
+            ),
+          );
+          appendConditionUnknownWarnings(
+            target,
+            descriptor.value,
+            new Set(['operator', 'conditions']),
+            diagnostics,
+            ['conditions', index],
+          );
+          continue;
+        }
+        const member = inspectConditionPredicateShape(
+          target,
+          descriptor.value,
+          diagnostics,
+          ['conditions', index],
+          index,
+        );
+        if (member === undefined) valid = false;
+        else members.push(member);
+      }
+    }
+  }
+
+  appendConditionUnknownWarnings(
+    target,
+    condition,
+    new Set(['operator', 'conditions']),
+    diagnostics,
+  );
+
+  return valid && operator !== undefined
+    ? { kind: 'group', operator, conditions: members }
+    : undefined;
+}
+
+function isCanonicalArrayIndex(key: string, length: number): boolean {
+  if (key.length === 0) return false;
+  const index = Number(key);
+  return (
+    Number.isInteger(index) &&
+    index >= 0 &&
+    index < 4_294_967_295 &&
+    index < length &&
+    String(index) === key
+  );
 }
 
 function conditionTargetKind(

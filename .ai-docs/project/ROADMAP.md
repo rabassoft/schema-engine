@@ -901,3 +901,57 @@ plugins, persistencia, productos ni trabajo comercial.
    y M31 quedan Completed; la siguiente capacidad requiere una nueva
    selección/promoción. Dependencias, versiones, release, publicación y Git
    permanecen separados.
+
+### M32 — Condiciones compuestas declarativas — entrega aprobada
+
+- Ricard selecciona el 3 de agosto de 2026 continuar madurando funcionalidad
+  neutral antes de React: M32 condiciones compuestas, después M33 alternativas
+  de objeto discriminadas, M34 wizard declarativo y finalmente el primer
+  adapter React. Solo M32 está promovido; el resto conserva sus gates propios.
+- Review 304 ciclo 2 pasa catorce áreas sin hallazgos. Promueve únicamente un
+  predicado M30 existente o un grupo plano no vacío con exactamente `all` o
+  `any` para `visible`/`enabled` en campos primitivos ordinarios.
+- Se conservan los snapshots booleanos, estado controlado, evaluación lineal,
+  seguridad de acciones y proyección neutral. No se activan expresiones
+  recursivas, dependency graph, condiciones de colecciones/M31, required/
+  computed/default dinámico, `oneOf`, wizard, React ni release.
+
+1. **Promotion gate completed:** review 304 ciclo 2 revisa autoridad, valor,
+   gramática acotada, ownership, evaluación, targets, colecciones/M31,
+   validación/operaciones, diagnósticos, migración, dependencias, secuencia
+   futura y siguiente gate con cero hallazgos.
+2. **Architecture gate completed:** ADR-035 revision 0 cierra formas raw/
+   normalizada, descriptor safety, diagnostics, evaluación completa lineal,
+   compatibilidad Public Experimental, targets y matriz mínima. Review 305
+   ciclo 1 corrige seis ambigüedades; ciclo 2 pasa doce áreas sin hallazgos y
+   la ADR queda Accepted.
+3. **Contract gate completed:** SPEC-018 v0.1.0 cierra declaraciones, gramática
+   raw/manual, normalización, diagnósticos, evaluación, invariantes, targets,
+   paquetes/migración y 22 filas. Review 306 ciclo 1 corrige siete defectos;
+   ciclo 2 pasa quince áreas y todas las filas sin hallazgos.
+4. **Plan gate completed:** PLAN-034 revision 0 distribuye las 22 filas una
+   sola vez entre seis checkpoints buildable. Review 307 corrige una carencia
+   de evidencia completa para la compatibilidad M30 y cinco ficheros sin
+   formato; ciclo 3 repite doce áreas y todas las filas sin hallazgos. El plan
+   queda Approved para ejecución autónoma en orden.
+5. **Implementation sequence opened:** checkpoint 1 inició los tipos Public,
+   compilador completo y compatibilidad integral de predicados M30.
+6. **Checkpoint 1 completed:** review 308 ciclo 2 repite doce áreas y las filas
+   1–9 sin hallazgos tras cuatro correcciones. Los cuatro tipos Public, la
+   gramática/normalización/diagnósticos/linking completos y la compatibilidad
+   M30 pasan 47/784 core y el build/typecheck completo del workspace.
+7. **Checkpoint 2 completed:** review 309 ciclo 2 repite doce áreas y las filas
+   10–17 sin hallazgos tras corregir la retención runtime de descriptores no
+   enumerables. Definiciones manuales, evaluación all/any completa, schedule,
+   sharing, focus/actions e invariantes pasan 49/803 core y build/typecheck
+   completo del workspace.
+8. **Checkpoint 3 completed:** review 310 ciclo 1 pasa diez áreas y la fila 18
+   sin hallazgos. Angular prueba transiciones all/any, montaje, accesibilidad,
+   focus, stale outputs, locale, replacement y lifecycle consumiendo solo
+   flags del snapshot; 18/148 y 714 fronteras pasan.
+9. **Checkpoint 4 completed:** review 311 ciclo 2 pasa doce áreas y las filas
+   19–20 sin hallazgos. El escenario compartido profundamente congelado,
+   Standard 7/70, Angular 4/31 y Chromium secuencial 14+17 pasan.
+10. **Immediate implementation action:** ejecutar checkpoint 5 para
+    declaraciones, paquetes y consumidores limpios/source sin cambiar versión.
+    Dependencia, versión, release, publicación y Git permanecen inactivos.

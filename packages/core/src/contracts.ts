@@ -92,14 +92,22 @@ export interface FieldUiSchema {
     readonly decimalPlaces?: number;
     readonly showTrailingZeros?: boolean;
   };
-  readonly visibleWhen?: UiFieldValueConditionSchema;
-  readonly enabledWhen?: UiFieldValueConditionSchema;
+  readonly visibleWhen?: UiFieldConditionSchema;
+  readonly enabledWhen?: UiFieldConditionSchema;
 }
 
 export interface UiFieldValueConditionSchema {
   readonly path: readonly string[];
   readonly equals: string | number | boolean | null;
 }
+
+export interface UiFieldValueConditionGroupSchema {
+  readonly operator: 'all' | 'any';
+  readonly conditions: readonly UiFieldValueConditionSchema[];
+}
+
+export type UiFieldConditionSchema =
+  UiFieldValueConditionSchema | UiFieldValueConditionGroupSchema;
 
 export interface FormDefinition {
   readonly nodes: readonly FormNodeDefinition[];
@@ -212,14 +220,22 @@ export interface BaseFieldDefinition extends BaseNodeDefinition {
   readonly nullable: boolean;
   readonly placeholder?: string;
   readonly fixedValue?: PrimitiveFixedValue;
-  readonly visibleWhen?: FieldValueConditionDefinition;
-  readonly enabledWhen?: FieldValueConditionDefinition;
+  readonly visibleWhen?: FieldConditionDefinition;
+  readonly enabledWhen?: FieldConditionDefinition;
 }
 
 export interface FieldValueConditionDefinition {
   readonly sourcePath: DataPath;
   readonly equals: string | number | boolean | null;
 }
+
+export interface FieldValueConditionGroupDefinition {
+  readonly operator: 'all' | 'any';
+  readonly conditions: readonly FieldValueConditionDefinition[];
+}
+
+export type FieldConditionDefinition =
+  FieldValueConditionDefinition | FieldValueConditionGroupDefinition;
 
 export interface StringChoiceDefinition {
   readonly value: string;

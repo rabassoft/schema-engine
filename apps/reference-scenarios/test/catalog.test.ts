@@ -349,6 +349,7 @@ describe('reference scenario catalog', () => {
     expect(Object.isFrozen(scenario)).toBe(true);
     expect(Object.isFrozen(scenario.compileInput.uiSchema)).toBe(true);
     expect(Object.isFrozen(scenario.initialState.value)).toBe(true);
+    expectDeepFrozen(scenario.compileInput.uiSchema);
     expect(
       compiled.definition.fields.flatMap((field) => {
         if (field.kind === 'string-enum-array') return [];
@@ -370,11 +371,26 @@ describe('reference scenario catalog', () => {
       },
       {
         name: 'displayName',
-        visibleWhen: { sourcePath: ['showDetails'], equals: true },
+        visibleWhen: {
+          operator: 'all',
+          conditions: [
+            { sourcePath: ['showDetails'], equals: true },
+            { sourcePath: ['nullableGate'], equals: null },
+            { sourcePath: ['zeroGate'], equals: 0 },
+            { sourcePath: ['emptyGate'], equals: '' },
+            { sourcePath: ['driver'], equals: false },
+          ],
+        },
       },
       {
         name: 'role',
-        enabledWhen: { sourcePath: ['enableRole'], equals: true },
+        enabledWhen: {
+          operator: 'any',
+          conditions: [
+            { sourcePath: ['enableRole'], equals: true },
+            { sourcePath: ['profile', 'flag'], equals: true },
+          ],
+        },
       },
       {
         name: 'nullableNote',
@@ -394,7 +410,23 @@ describe('reference scenario catalog', () => {
       },
       {
         name: 'reviewCode',
-        visibleWhen: { sourcePath: ['showDetails'], equals: true },
+        visibleWhen: {
+          operator: 'all',
+          conditions: [
+            { sourcePath: ['showDetails'], equals: true },
+            { sourcePath: ['nullableGate'], equals: null },
+          ],
+        },
+      },
+      {
+        name: 'note',
+        visibleWhen: {
+          operator: 'all',
+          conditions: [
+            { sourcePath: ['profile', 'flag'], equals: false },
+            { sourcePath: ['zeroGate'], equals: 0 },
+          ],
+        },
       },
     ]);
 
@@ -448,6 +480,7 @@ describe('reference scenario catalog', () => {
       presence: { kind: 'value', value: false },
     });
     expect(field('drivenNote')?.visible).toBe(true);
+    expect(runtime.getFieldSnapshot(['profile', 'note'])?.visible).toBe(true);
     expect(field('reviewCode')).toMatchObject({ visible: false, valid: false });
     expect(
       runtime.getValidationSnapshot({
@@ -721,3 +754,14 @@ describe('reference scenario catalog', () => {
     });
   });
 });
+
+function expectDeepFrozen(value: unknown): void {
+  if (typeof value !== 'object' || value === null) return;
+  expect(Object.isFrozen(value)).toBe(true);
+  for (const key of Object.keys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor !== undefined && 'value' in descriptor) {
+      expectDeepFrozen(descriptor.value as unknown);
+    }
+  }
+}

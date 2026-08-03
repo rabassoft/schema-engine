@@ -16,6 +16,10 @@ const initialValue = {
   emptyNote: 'Empty string enables explicitly',
   drivenNote: 'Hidden sources retain controlled truth',
   reviewCode: 'ok',
+  profile: {
+    flag: false,
+    note: 'Nested compound target',
+  },
 };
 
 const invalidReviewIssue = {
@@ -60,6 +64,14 @@ export const conditionalFieldState = {
           title: 'Conditional review code',
           pattern: '^ok$',
         },
+        profile: {
+          type: 'object',
+          title: 'Nested compound profile',
+          properties: {
+            flag: { type: 'boolean', title: 'Nested condition flag' },
+            note: { type: 'string', title: 'Nested compound note' },
+          },
+        },
       },
       required: [
         'showDetails',
@@ -86,6 +98,7 @@ export const conditionalFieldState = {
         'emptyNote',
         'drivenNote',
         'reviewCode',
+        'profile',
       ],
       fields: {
         driver: {
@@ -93,7 +106,16 @@ export const conditionalFieldState = {
         },
         displayName: {
           description: 'Focus this field before hiding the detail targets.',
-          visibleWhen: { path: ['showDetails'], equals: true },
+          visibleWhen: {
+            operator: 'all',
+            conditions: [
+              { path: ['showDetails'], equals: true },
+              { path: ['nullableGate'], equals: null },
+              { path: ['zeroGate'], equals: 0 },
+              { path: ['emptyGate'], equals: '' },
+              { path: ['driver'], equals: false },
+            ],
+          },
         },
         role: {
           placeholder: 'Select a role',
@@ -102,7 +124,13 @@ export const conditionalFieldState = {
             editor: 'Editor',
             viewer: 'Viewer',
           },
-          enabledWhen: { path: ['enableRole'], equals: true },
+          enabledWhen: {
+            operator: 'any',
+            conditions: [
+              { path: ['enableRole'], equals: true },
+              { path: ['profile', 'flag'], equals: true },
+            ],
+          },
         },
         nullableNote: {
           visibleWhen: { path: ['nullableGate'], equals: null },
@@ -119,7 +147,26 @@ export const conditionalFieldState = {
         reviewCode: {
           description:
             'Its validator issue remains authoritative while this field is hidden.',
-          visibleWhen: { path: ['showDetails'], equals: true },
+          visibleWhen: {
+            operator: 'all',
+            conditions: [
+              { path: ['showDetails'], equals: true },
+              { path: ['nullableGate'], equals: null },
+            ],
+          },
+        },
+        profile: {
+          fields: {
+            note: {
+              visibleWhen: {
+                operator: 'all',
+                conditions: [
+                  { path: ['profile', 'flag'], equals: false },
+                  { path: ['zeroGate'], equals: 0 },
+                ],
+              },
+            },
+          },
         },
       },
     },
@@ -353,8 +400,8 @@ export const conditionalFieldState = {
   explanation: [
     {
       id: 'controlled-predicates',
-      title: 'Controlled equality predicates',
-      body: 'Visibility and enabled state read only the current application-owned primitive value; hidden fields keep their data and validation truth.',
+      title: 'Controlled compound predicates',
+      body: 'Flat all/any groups read only current application-owned primitive values; hidden sources keep participating without losing data or validation truth.',
     },
     {
       id: 'mounted-targets',

@@ -283,6 +283,9 @@ test('projects the exact shared conditional scenario through Angular', async ({
     page.getByRole('textbox', { name: 'Empty-string match' }),
   ).toBeEnabled();
   await expect(
+    page.getByRole('textbox', { name: 'Nested compound note' }),
+  ).toBeVisible();
+  await expect(
     page.getByRole('textbox', { name: 'Hidden-source match' }),
   ).toBeVisible();
 

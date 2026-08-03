@@ -205,6 +205,9 @@ test('projects the exact shared conditional scenario independently', async ({
   await expect(
     page.getByRole('textbox', { name: 'Hidden-source match' }),
   ).toBeVisible();
+  await expect(
+    page.getByRole('textbox', { name: 'Nested compound note' }),
+  ).toBeVisible();
 
   await name.evaluate((element) => {
     Object.defineProperty(element, '__sharedConditionalIdentity', {

@@ -70,9 +70,12 @@ describe('M30 conditional field compiler contract', () => {
       enabledWhen: { sourcePath: ['count'], equals: 0 },
     });
     expect(name.visibleWhen).not.toBe(authored);
-    expect(name.visibleWhen?.sourcePath).not.toBe(authored.path);
+    expect(name.visibleWhen).toHaveProperty('sourcePath');
+    if (name.visibleWhen === undefined || !('sourcePath' in name.visibleWhen))
+      return;
+    expect(name.visibleWhen.sourcePath).not.toBe(authored.path);
     expect(Object.isFrozen(name.visibleWhen)).toBe(true);
-    expect(Object.isFrozen(name.visibleWhen?.sourcePath)).toBe(true);
+    expect(Object.isFrozen(name.visibleWhen.sourcePath)).toBe(true);
   });
 
   it('collects descriptor-safe path/literal diagnostics before unknown keys', () => {

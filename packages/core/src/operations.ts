@@ -725,6 +725,9 @@ function nestedFormDiagnostic(
       ...(defect.conditionReason === undefined
         ? {}
         : { conditionReason: defect.conditionReason }),
+      ...(defect.conditionGroupReason === undefined
+        ? {}
+        : { conditionGroupReason: defect.conditionGroupReason }),
       ...(defect.conditionDetailMember === undefined
         ? {}
         : { member: defect.conditionDetailMember }),
@@ -737,12 +740,21 @@ function nestedFormDiagnostic(
       ...(defect.conditionActualLength === undefined
         ? {}
         : { actualLength: defect.conditionActualLength }),
+      ...(defect.conditionActualOperator === undefined
+        ? {}
+        : { conditionActualOperator: defect.conditionActualOperator }),
       ...(defect.conditionIndex === undefined
         ? {}
         : { index: defect.conditionIndex }),
       ...(defect.conditionPathKey === undefined
         ? {}
         : { pathKey: defect.conditionPathKey }),
+      ...(defect.conditionGroupIndex === undefined
+        ? {}
+        : { conditionGroupIndex: defect.conditionGroupIndex }),
+      ...(defect.conditionGroupKey === undefined
+        ? {}
+        : { conditionGroupKey: defect.conditionGroupKey }),
       ...(defect.sourcePath === undefined
         ? {}
         : { sourcePath: [...defect.sourcePath] }),

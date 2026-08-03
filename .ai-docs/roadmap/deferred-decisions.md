@@ -358,8 +358,9 @@ Cada decisión debe registrar:
 ## D-018: Expression engine y dependency graph
 
 - **Estado:** Implemented only for the bounded Accepted M30 architecture and
-  observable contract; every wider expression, dependency and
-  conditional-state capability remains Deferred
+  observable contract; bounded M32 is Approved for ordered implementation
+  under PLAN-034; every wider expression, dependency and conditional-state
+  capability remains Deferred
 - **Incluye:** visible, enabled, readonly, required dinámico, computed y defaults condicionales.
 - **Motivo:** Requiere lenguaje, sandbox, dependencias, evaluación incremental y diagnósticos.
 - **Retomar cuando:** Los formularios estáticos y objetos anidados estén consolidados.
@@ -377,7 +378,27 @@ Cada decisión debe registrar:
   pasar doce áreas, el acuerdo autónomo y ownership exacto sin hallazgos.
   Reviews 285–290 ciclo 2 completan sus checkpoints 1–6 y las 24 filas. Review
   291 ciclo 1 repite la matriz completa y cierra PLAN-032 revision 1/M30 sin
-  hallazgos. El resto de D-018 permanece Deferred.
+  hallazgos.
+- **Selección M32:** Ricard acepta el 03-08-2026 continuar con funcionalidad
+  neutral antes de React en el orden M32 condiciones compuestas, M33
+  alternativas de objeto discriminadas, M34 wizard declarativo y después
+  React. [Review 304](../reviews/304-d018-m32-compound-condition-promotion-readiness.md)
+  ciclo 2 pasa catorce áreas sin hallazgos y promueve únicamente grupos planos
+  no vacíos `all`/`any` de predicados de igualdad M30 para `visible`/`enabled`
+  sobre campos primitivos ordinarios. Reserva ADR-035 solo para esa
+  arquitectura. ADR-035 revision 0 queda Accepted tras review 305 ciclo 2
+  corregir seis ambigüedades y pasar doce áreas sin hallazgos; autoriza solo
+  preparar/revisar SPEC-018. SPEC-018 v0.1.0 queda Accepted tras review 306
+  ciclo 2 corregir siete defectos y pasar quince áreas y 22 filas sin
+  hallazgos; autoriza solo preparar/revisar PLAN-034. PLAN-034 revision 0 queda
+  Approved tras review 307 ciclo 3 corregir dos hallazgos y pasar doce áreas y
+  las 22 filas sin hallazgos; autoriza solo checkpoints 1–6 en orden. Checkpoint
+  1 completa las filas 1–9 tras review 308 ciclo 2 pasar doce áreas sin
+  hallazgos. Checkpoint 2 completa las filas 10–17 tras review 309 ciclo 2
+  pasar doce áreas sin hallazgos. Checkpoint 3 completa la fila 18 tras review
+  310 ciclo 1 pasar diez áreas sin hallazgos. Checkpoint 4 completa las filas
+  19–20 tras review 311 ciclo 2; checkpoint 5 queda siguiente.
+  M33, M34, React y el resto de D-018 permanecen Deferred.
 
 ## D-019: Commands, undo/redo e historial
 
@@ -1193,6 +1214,14 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 03-08-2026 | PLAN-034 checkpoint 4 completa SPEC-018 filas 19–20 tras review 311 ciclo 2; checkpoint 5 queda siguiente, sin release/Git.                            |
+| 03-08-2026 | PLAN-034 checkpoint 3 completa SPEC-018 fila 18 tras review 310 ciclo 1 pasar diez áreas sin hallazgos; checkpoint 4 queda siguiente.                  |
+| 03-08-2026 | PLAN-034 checkpoint 2 completa SPEC-018 filas 10–17 tras review 309 ciclo 2 pasar doce áreas sin hallazgos; checkpoint 3 queda siguiente.              |
+| 03-08-2026 | PLAN-034 checkpoint 1 completa SPEC-018 filas 1–9 tras review 308 ciclo 2 pasar doce áreas sin hallazgos; checkpoint 2 queda siguiente.                |
+| 03-08-2026 | PLAN-034 revision 0 queda Approved tras review 307 ciclo 3 pasar doce áreas y ownership exacto de 22 filas; autoriza checkpoints 1–6, sin release/Git. |
+| 03-08-2026 | SPEC-018 v0.1.0 queda Accepted tras review 306 ciclo 2 pasar quince áreas y 22 filas sin hallazgos; autoriza solo PLAN-034, sin código.                |
+| 03-08-2026 | ADR-035 revision 0 queda Accepted tras review 305 ciclo 2 pasar doce áreas sin hallazgos; autoriza solo SPEC-018, sin plan/código.                     |
+| 03-08-2026 | Ricard selecciona D-018/M32; review 304 ciclo 2 promueve solo grupos planos all/any de condiciones M30 y reserva ADR-035, sin SPEC/plan/código.        |
 | 03-08-2026 | PLAN-033 revision 0 y M31 quedan Completed tras review 303 ciclo 2 repetir matriz congelada, 26 filas y ambos Chromium sin hallazgos; sin release/Git. |
 | 03-08-2026 | PLAN-033 revision 0 queda Approved tras review 296 ciclo 2; autoriza checkpoints 1–7 en orden, sin release/Git.                                        |
 | 03-08-2026 | SPEC-017 v0.1.0 queda Accepted tras review 295 ciclo 2 pasar 26 filas sin hallazgos; autoriza solo PLAN-033, sin código.                               |

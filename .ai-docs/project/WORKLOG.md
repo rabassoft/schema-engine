@@ -6,6 +6,164 @@ Read only the newest entry by default. Search older entries by date, milestone,
 plan, ADR, or deferred-decision identifier when historical evidence is needed;
 the full file is not part of routine task startup.
 
+## 2026-08-03 — PLAN-034 checkpoint 4 completed
+
+### Completed
+
+- Evolved the shared conditional scenario to deeply frozen flat all/any groups
+  with direct/nested targets, strict primitive/null and hidden sources while
+  preserving confirmed transitions, focus/actions and domain evidence.
+- Proved independent Standard and Angular projection without shared renderer
+  logic. Scenario 2/72, Standard 7/70, Angular 4/31, Chromium Standard 14 and
+  Angular 17, snippets and 714 boundaries pass.
+- Review 311 cycle 2 passes all twelve areas and rows 19–20 with zero findings
+  after correcting strict deep-freeze evidence typing.
+
+### Next
+
+- Execute PLAN-034 checkpoint 5 for declarations, packages and clean/source
+  consumers without dependency, manifest, lockfile or version drift.
+
+## 2026-08-03 — PLAN-034 checkpoint 3 completed
+
+### Completed
+
+- Added independent Angular custom/native evidence for direct all visibility
+  and nested any enabled transitions using false, zero, empty, null and a
+  hidden controlled source.
+- Proved mounted/no-reselection behavior, focus reconciliation, hidden and
+  disabled stale-output rejection, native accessibility, locale, replacement
+  and lifecycle while Angular consumes snapshot booleans only.
+- Review 310 cycle 1 passes all ten areas and SPEC-018 row 18 with zero
+  findings; Angular 18/148, workspace ESLint and 714 import boundaries pass.
+- Preserved Standard/shared scenario, target logic, dependencies, manifests,
+  lockfile, versions, release and Git state outside this checkpoint.
+
+### Next
+
+- Execute PLAN-034 checkpoint 4 for the shared authored scenario, independent
+  Standard projection and sequential Chromium parity.
+
+## 2026-08-03 — PLAN-034 checkpoint 2 completed
+
+### Completed
+
+- Implemented exact manual predicate/group classification, two-phase shape and
+  semantic validation, direct/wrapper diagnostics and complete downstream
+  non-invocation for malformed definitions.
+- Implemented detached complete ordered all/any runtime evaluation with M30
+  presence/Object.is truth, current-reference scheduling, sharing, focus,
+  stale-action and domain invariants; collection/template/M31 exclusions stay
+  unchanged.
+- Corrected runtime retention of non-enumerable descriptors. Review 309 cycle 2
+  passes all twelve areas and SPEC-018 rows 10–17 with zero findings; workspace
+  ESLint, core 49/803, runtime fixture equality and complete workspace
+  build/typecheck pass.
+- Preserved targets, dependencies, manifests, lockfile, package versions,
+  published artifacts, release and Git state outside this checkpoint.
+
+### Next
+
+- Execute PLAN-034 checkpoint 3 for independent Angular projection evidence
+  that consumes only existing snapshot booleans.
+
+## 2026-08-03 — PLAN-034 checkpoint 1 completed
+
+### Completed
+
+- Added the exact four Public predicate/group union types and widened only the
+  two existing raw/normalized condition properties while retaining template
+  omission and the six-function runtime export inventory.
+- Implemented descriptor-safe flat non-empty all/any raw grammar, exact
+  diagnostics/order/semantic linking and detached deeply frozen normalization,
+  including legal duplicate preservation and M31/collection/template
+  exclusions.
+- Corrected one independent empty/extra-key diagnostic defect and three test/
+  lint evidence defects. Review 308 cycle 2 passes all twelve areas and
+  SPEC-018 rows 1–9 with zero findings; core 47/784 and the full workspace
+  build/typecheck pass.
+- Preserved single-predicate M30 behavior and left manual compound definitions,
+  compound runtime evaluation, targets, packages, dependency/version/release
+  and Git work outside this checkpoint.
+
+### Next
+
+- Execute PLAN-034 checkpoint 2 for SPEC-018 rows 10–17: manual definitions,
+  complete ordered all/any runtime evaluation and unchanged controlled-state
+  invariants.
+
+## 2026-08-03 — PLAN-034 compound-condition delivery approved
+
+### Completed
+
+- Mapped all 22 SPEC-018 rows exactly once to six ordered buildable
+  checkpoints covering core compiler/runtime, independent Angular/Standard
+  evidence, packages/consumers and frozen closure.
+- Corrected incomplete first-owning evidence for M30 predicate compatibility
+  and repository formatting. Review 307 cycle 3 repeated all twelve plan areas
+  and the exact ownership audit with zero findings; PLAN-034 revision 0 is
+  Approved.
+- Preserved the dependency/version/release/Git gates and left M33, M34, React
+  and every wider D-018 capability inactive.
+
+### Next
+
+- Execute PLAN-034 checkpoint 1 for SPEC-018 rows 1–9, then complete its review
+  and verification to zero findings before advancing autonomously.
+
+## 2026-08-03 — SPEC-018 compound-condition contract accepted
+
+### Completed
+
+- Closed four exact Public types, predicate/group grammar, compiler/manual
+  diagnostics, immutable normalization, complete ordered runtime evaluation,
+  M30 invariants, independent target evidence and package migration for M32.
+- Corrected seven authority, reason-mapping, accessor, narrowing and manual-
+  diagnostic defects. Review 306 cycle 2 repeated fifteen areas and all 22
+  conformance rows with zero findings; SPEC-018 v0.1.0 is Accepted.
+- Preserved M31 and every future M33/M34/React boundary without starting code,
+  dependency, version or release work.
+
+### Next
+
+- Draft and completely review PLAN-034 with exact ownership of all 22 rows.
+
+## 2026-08-03 — ADR-035 compound-condition architecture accepted
+
+### Completed
+
+- Closed the exact predicate-or-flat-group raw/normalized unions, enumerable
+  descriptor grammar, diagnostics, manual validation, complete ordered runtime
+  evaluation, target neutrality and Public Experimental migration for M32.
+- Corrected six promotion-migration, descriptor, conditions-array and runtime
+  presence ambiguities. Review 305 cycle 2 repeated all twelve areas with zero
+  findings; ADR-035 revision 0 is Accepted under the approved rule.
+- Preserved M30 single-predicate object assignability/behavior and left M33,
+  M34, React, implementation, dependencies, versions and releases inactive.
+
+### Next
+
+- Draft and completely review SPEC-018 for the bounded observable M32 contract.
+
+## 2026-08-03 — D-018/M32 compound conditions selected
+
+### Completed
+
+- Ricard selects continued neutral functionality before React in the order M32
+  compound conditions, M33 discriminated object alternatives, M34 declarative
+  wizard and then the first React adapter.
+- Review 304 cycle 2 passes fourteen areas with zero findings and promotes only
+  flat non-empty `all`/`any` composition of existing M30 equality predicates
+  for ordinary primitive `visible`/`enabled` state.
+- Reserved ADR-035 for the exact M32 architecture. M33, M34, React, every wider
+  D-018 capability, implementation, dependencies, versioning and release remain
+  inactive.
+
+### Next
+
+- Draft and completely review ADR-035 to zero findings without starting a
+  SPEC, plan or implementation.
+
 ## 2026-08-03 — PLAN-033 and M31 completed
 
 ### Completed

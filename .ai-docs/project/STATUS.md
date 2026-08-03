@@ -11,12 +11,12 @@
   v0.1.2, SPEC-004 v0.1.1, SPEC-005 v0.1.1, SPEC-006 v0.1.1, SPEC-007
   v0.1.0, SPEC-008 v0.1.0, SPEC-009 v0.1.0, SPEC-010 v0.1.0, SPEC-011
   v0.1.0, SPEC-012 v0.1.0, SPEC-013 v0.1.1, SPEC-014 v0.1.0, SPEC-015
-  v0.1.0, SPEC-016 v0.1.1 and SPEC-017 v0.1.0
-- **Last implementation plan:** PLAN-033 revision 0, Completed
+  v0.1.0, SPEC-016 v0.1.1, SPEC-017 v0.1.0 and SPEC-018 v0.1.0
+- **Last implementation plan:** PLAN-034 revision 0, Approved
 - **Last completed implementation plan:** PLAN-033 revision 0
 - **Active implementation task:** None
-- **Last accepted ADR:** ADR-005 revision 8
-- **Implemented capability:** M1–M31 and G0
+- **Last accepted ADR:** ADR-035 revision 0
+- **Implemented capability:** M1–M31 and G0; M32 checkpoints 1–4 only
 - **Published packages:** core/base `0.4.1` and pilot `0.2.1` resolve exactly,
   through `next`, `latest` and unqualified installation; all remain Public +
   Experimental + Active
@@ -26,42 +26,41 @@
 
 ## Current objective
 
-Evaluate and select the next post-M31 functional capability. M31 is complete
-after review 303 cycle 2 repeated the frozen matrix and all 26 SPEC-017 rows
-with zero findings.
+Execute PLAN-034 checkpoint 5 for exact declarations, packages and clean/source
+consumer migration evidence without graph or version drift.
 
 ## In progress
 
-- No implementation task is active. Any next capability requires explicit
-  selection and its applicable promotion, ADR, SPEC and plan gates before
-  implementation.
+- PLAN-034 checkpoint 5 is active only for SPEC-018 row 21: exact core
+  declarations/runtime inventory, package smoke, built/clean lower/latest and
+  isolated source consumer migration for predicate/group narrowing. Manifests,
+  dependencies, lockfile, versions, release, publication and Git remain
+  inactive.
 
 ## Latest completed work
 
-- PLAN-033 revision 0 and M31 are complete; review 303 cycle 2 passes all
-  fifteen areas and all 26 SPEC-017 rows with zero findings after serializing
-  the independent browser suites; workspace 78/1,103, packages/consumers/
-  source, 701 boundaries and Chromium 17+14 pass with a frozen graph.
-- PLAN-033 checkpoint 6 is complete; review 302 cycle 2 passes all ten areas
-  and SPEC-017 row 25 with zero findings after two declaration-evidence
-  corrections.
-- PLAN-033 checkpoint 5 is complete; review 301 cycle 4 passes all twelve
-  areas and SPEC-017 row 24 with zero findings after four selector, accessible
-  status, shared-fixture and formatting corrections, with Angular 17/146,
-  scenarios 2/72, Angular reference 4/31, Standard 7/70 and Chromium 17+14
-  passing.
-- PLAN-033 checkpoint 4 is complete; review 300 cycle 2 passes all twelve
-  areas and SPEC-017 rows 16 and 22–23 with zero findings after four
-  implementation/evidence corrections, with Angular 17/146, scenarios 2/68
-  and Angular reference 4/30 passing.
-- PLAN-033 checkpoint 3 is complete; review 299 cycle 2 passes all twelve areas
-  and SPEC-017 rows 17–21 with zero findings after one issue-assignment
-  correction, with core 46/767 and all workspace typechecks passing.
+- PLAN-034 checkpoint 4 is complete; review 311 cycle 2 passes all twelve
+  shared/Standard/browser areas and rows 19–20 with zero findings; scenario
+  2/72, Standard 7/70, Angular 4/31 and sequential Chromium 14+17 pass.
+- PLAN-034 checkpoint 3 is complete; review 310 cycle 1 passes all ten Angular
+  projection areas and SPEC-018 row 18 with zero findings, with Angular 18/148,
+  workspace ESLint and 714 import boundaries passing.
+- PLAN-034 checkpoint 2 is complete; review 309 cycle 2 passes all twelve areas
+  and SPEC-018 rows 10–17 with zero findings after correcting runtime retention
+  of non-enumerable descriptors, with core 49/803 and full workspace
+  build/typecheck passing.
+- PLAN-034 checkpoint 1 is complete; review 308 cycle 2 passes all twelve areas
+  and SPEC-018 rows 1–9 with zero findings after four compiler/evidence
+  corrections, with core 47/784 and full workspace build/typecheck passing.
+- PLAN-034 revision 0 is Approved; review 307 cycle 3 passes all twelve areas
+  and exact ownership of all 22 SPEC-018 rows with zero findings after
+  correcting complete M30 compatibility evidence and documentation format.
 
 ## Exact next action
 
-Evaluate the deferred-capability register against the completed M31 boundary
-and select the next bounded functional capability for promotion review.
+Execute PLAN-034 checkpoint 5: freeze declarations/export inventory and extend
+package, built, clean lower/latest and source consumers for exhaustive
+predicate/group narrowing without dependency/version drift.
 
 ## Blockers and conflicts
 
@@ -78,31 +77,52 @@ and select the next bounded functional capability for promotion review.
 
 ## Open questions
 
-- Which bounded post-M31 functional capability should be selected next?
+- No architecture decision is open inside the accepted M32 boundary.
   Dependency, version, release, commit, push and external actions remain
   separately gated.
 
 ## Latest verification
 
-- Review 303 cycle 2 passes the complete frozen graph and all 26 SPEC-017 rows
-  with zero findings: workspace lint/types/build and 78/1,103, four package
-  smoke lanes, built/clean/source consumers, 41 release-tooling tests, 24
-  policy tests, security, 701 boundaries and sequential Chromium 17+14 pass.
-- Review 302 cycle 2 passes all ten checkpoint-6 areas and SPEC-017 row 25 with
-  zero findings: workspace and package/built/clean/source evidence passes.
-- Review 301 cycle 4 passes all twelve checkpoint-5 areas and SPEC-017 row 24
-  with zero findings: Angular 17/146, scenarios 2/72, Angular reference 4/31,
-  Standard 7/70, Chromium 17+14, lint, types, builds, snippets, 701 boundaries,
-  docs, format and diff hygiene pass.
-- Review 300 cycle 2 passes all twelve checkpoint-4 areas and SPEC-017 rows 16
-  and 22–23 with zero findings: Angular 17/146, scenarios 2/68, Angular
-  reference 4/30, docs, format and diff hygiene pass.
-- Review 299 cycle 2 passes all twelve checkpoint-3 areas and SPEC-017 rows
-  17–21 with zero findings: core 46/767, workspace typechecks, lint, docs,
-  format and diff hygiene pass.
+- Review 311 cycle 2 passes all twelve checkpoint-4 areas and rows 19–20 with
+  zero findings: reference units, sequential Chromium 14+17, snippets, ESLint,
+  714 boundaries and diff hygiene pass.
+- Review 310 cycle 1 passes all ten checkpoint-3 areas and SPEC-018 row 18
+  with zero findings: Angular 18/148, workspace ESLint, 714 import boundaries
+  and diff hygiene pass.
+- Review 309 cycle 2 passes all twelve checkpoint-2 areas and SPEC-018 rows
+  10–17 with zero findings: workspace ESLint, core 49/803, runtime fixture
+  equality, full workspace build/typecheck, 429 Markdown files/1,213 links,
+  public-tree policy and diff hygiene pass.
+- Review 308 cycle 2 passes all twelve checkpoint-1 areas and SPEC-018 rows 1–9
+  with zero findings: ESLint, core 47/784, full workspace build/typecheck,
+  declarations/runtime inventory, 428 Markdown files/1,207 links, public-tree
+  and diff hygiene pass.
+- Review 307 cycle 3 passes all twelve PLAN-034 areas and exact 22-row ownership
+  with zero findings; 427 Markdown files, 1,202 links, formatting and diff
+  hygiene pass.
+- Review 306 cycle 2 passes all fifteen SPEC-018 areas and all 22 conformance
+  rows with zero findings; formatting, documentation links and diff hygiene
+  pass.
+- Review 305 cycle 2 passes all twelve ADR-035 architecture areas with zero
+  findings; formatting, documentation links and diff hygiene pass.
 
 ## Task document map
 
+- Approved M32 implementation plan:
+  `.ai-docs/plans/034-flat-compound-field-conditions.md`
+- M32 plan review: `.ai-docs/reviews/307-plan-034-review.md`
+- M32 checkpoint reviews:
+  `.ai-docs/reviews/308-plan-034-checkpoint-1-review.md` and
+  `.ai-docs/reviews/309-plan-034-checkpoint-2-review.md` through
+  `.ai-docs/reviews/311-plan-034-checkpoint-4-review.md`
+- Accepted M32 contract:
+  `.ai-docs/specs/018-flat-compound-field-conditions.md`
+- M32 contract review: `.ai-docs/reviews/306-spec-018-review.md`
+- Accepted M32 architecture:
+  `.ai-docs/adrs/035-flat-compound-field-conditions.md`
+- M32 architecture review: `.ai-docs/reviews/305-adr-035-review.md`
+- M32 promotion review:
+  `.ai-docs/reviews/304-d018-m32-compound-condition-promotion-readiness.md`
 - Completed M31 plan: `.ai-docs/plans/033-controlled-string-enum-array-field.md`
 - Checkpoint reviews: `.ai-docs/reviews/297-plan-033-checkpoint-1-review.md`
   through `.ai-docs/reviews/302-plan-033-checkpoint-6-review.md`

@@ -1,0 +1,13 @@
+{
+  "fields": {
+    "name": {
+      "visibleWhen": {
+        "operator": "all",
+        "conditions": [
+          { "path": ["flag"], "equals": true },
+          { "path": ["count"], "equals": 0 }
+        ]
+      }
+    }
+  }
+}

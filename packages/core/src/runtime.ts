@@ -83,15 +83,24 @@ interface RuntimeFieldConditionState {
   readonly enabled: boolean;
 }
 
+interface DetachedRuntimeFieldConditionPredicate {
+  readonly kind: 'predicate';
+  readonly sourcePath: readonly string[];
+  readonly equals: string | number | boolean | null;
+}
+
+interface DetachedRuntimeFieldConditionGroup {
+  readonly kind: 'group';
+  readonly operator: 'all' | 'any';
+  readonly conditions: readonly DetachedRuntimeFieldConditionPredicate[];
+}
+
+type DetachedRuntimeFieldCondition =
+  DetachedRuntimeFieldConditionPredicate | DetachedRuntimeFieldConditionGroup;
+
 interface DetachedRuntimeFieldConditions {
-  readonly visibleWhen?: {
-    readonly sourcePath: readonly string[];
-    readonly equals: string | number | boolean | null;
-  };
-  readonly enabledWhen?: {
-    readonly sourcePath: readonly string[];
-    readonly equals: string | number | boolean | null;
-  };
+  readonly visibleWhen?: DetachedRuntimeFieldCondition;
+  readonly enabledWhen?: DetachedRuntimeFieldCondition;
 }
 
 function blockedAsyncValidation(): AsyncValidationState {
@@ -1857,30 +1866,42 @@ function detachRuntimeFieldConditions(
   const detach = (
     field: FieldDefinition,
     member: 'visibleWhen' | 'enabledWhen',
-  ):
-    | {
-        readonly sourcePath: readonly string[];
-        readonly equals: string | number | boolean | null;
-      }
-    | undefined => {
+  ): DetachedRuntimeFieldCondition | undefined => {
     const condition = readOwnDataMember(field, member);
     if (condition.kind !== 'value' || !isOrdinaryObject(condition.value)) {
       return undefined;
     }
-    const sourcePath = readOwnDataMember(condition.value, 'sourcePath');
-    const equals = readOwnDataMember(condition.value, 'equals');
-    const copied =
-      sourcePath.kind === 'value'
-        ? copyStringDataPath(sourcePath.value)
-        : undefined;
+    const operator = readOwnEnumerableRuntimeConditionMember(
+      condition.value,
+      'operator',
+    );
+    const conditions = readOwnEnumerableRuntimeConditionMember(
+      condition.value,
+      'conditions',
+    );
     if (
-      copied === undefined ||
-      equals.kind !== 'value' ||
-      !isRuntimeConditionLiteral(equals.value)
+      operator.kind === 'value' &&
+      (operator.value === 'all' || operator.value === 'any') &&
+      conditions.kind === 'value' &&
+      Array.isArray(conditions.value)
     ) {
-      return undefined;
+      const detached: DetachedRuntimeFieldConditionPredicate[] = [];
+      for (let index = 0; index < conditions.value.length; index += 1) {
+        const entry = readOwnDataMember(conditions.value, String(index));
+        if (entry.kind !== 'value' || !isOrdinaryObject(entry.value)) {
+          return undefined;
+        }
+        const predicate = detachRuntimeFieldConditionPredicate(entry.value);
+        if (predicate === undefined) return undefined;
+        detached.push(predicate);
+      }
+      return Object.freeze({
+        kind: 'group',
+        operator: operator.value,
+        conditions: Object.freeze(detached),
+      });
     }
-    return Object.freeze({ sourcePath: copied, equals: equals.value });
+    return detachRuntimeFieldConditionPredicate(condition.value);
   };
   for (const field of fields) {
     const visibleWhen = detach(field, 'visibleWhen');
@@ -1895,6 +1916,45 @@ function detachRuntimeFieldConditions(
     );
   }
   return Object.freeze(result);
+}
+
+function detachRuntimeFieldConditionPredicate(
+  condition: object,
+): DetachedRuntimeFieldConditionPredicate | undefined {
+  const sourcePath = readOwnEnumerableRuntimeConditionMember(
+    condition,
+    'sourcePath',
+  );
+  const equals = readOwnEnumerableRuntimeConditionMember(condition, 'equals');
+  const copied =
+    sourcePath.kind === 'value'
+      ? copyStringDataPath(sourcePath.value)
+      : undefined;
+  if (
+    copied === undefined ||
+    equals.kind !== 'value' ||
+    !isRuntimeConditionLiteral(equals.value)
+  ) {
+    return undefined;
+  }
+  return Object.freeze({
+    kind: 'predicate',
+    sourcePath: copied,
+    equals: equals.value,
+  });
+}
+
+function readOwnEnumerableRuntimeConditionMember(
+  condition: object,
+  member: 'sourcePath' | 'equals' | 'operator' | 'conditions',
+): ReturnType<typeof readOwnDataMember> {
+  const descriptor = Object.getOwnPropertyDescriptor(condition, member);
+  if (descriptor === undefined || !descriptor.enumerable) {
+    return { kind: 'missing' };
+  }
+  return 'value' in descriptor
+    ? { kind: 'value', value: descriptor.value as unknown }
+    : { kind: 'accessor' };
 }
 
 function isRuntimeConditionLiteral(
@@ -1913,14 +1973,20 @@ function evaluateRuntimeFieldConditions(
   value: object,
 ): ReadonlyMap<string, RuntimeFieldConditionState> {
   const result = new Map<string, RuntimeFieldConditionState>();
-  const matches = (condition: {
-    readonly sourcePath: readonly string[];
-    readonly equals: string | number | boolean | null;
-  }): boolean => {
+  const matches = (
+    condition: DetachedRuntimeFieldConditionPredicate,
+  ): boolean => {
     const presence = resolveFieldPresence(value, condition.sourcePath);
     return (
       presence.kind === 'value' && Object.is(presence.value, condition.equals)
     );
+  };
+  const evaluate = (condition: DetachedRuntimeFieldCondition): boolean => {
+    if (condition.kind === 'predicate') return matches(condition);
+    const memberResults = condition.conditions.map(matches);
+    return condition.operator === 'all'
+      ? memberResults.every(Boolean)
+      : memberResults.some(Boolean);
   };
   for (const [key, condition] of conditions) {
     result.set(
@@ -1929,11 +1995,11 @@ function evaluateRuntimeFieldConditions(
         visible:
           condition.visibleWhen === undefined
             ? true
-            : matches(condition.visibleWhen),
+            : evaluate(condition.visibleWhen),
         enabled:
           condition.enabledWhen === undefined
             ? true
-            : matches(condition.enabledWhen),
+            : evaluate(condition.enabledWhen),
       }),
     );
   }
@@ -2052,6 +2118,9 @@ function invalidDefinitionOption(
       ...(defect.conditionReason === undefined
         ? {}
         : { definitionConditionReason: defect.conditionReason }),
+      ...(defect.conditionGroupReason === undefined
+        ? {}
+        : { definitionConditionGroupReason: defect.conditionGroupReason }),
       ...(defect.conditionDetailMember === undefined
         ? {}
         : { definitionConditionDetailMember: defect.conditionDetailMember }),
@@ -2066,12 +2135,23 @@ function invalidDefinitionOption(
       ...(defect.conditionActualLength === undefined
         ? {}
         : { definitionConditionActualLength: defect.conditionActualLength }),
+      ...(defect.conditionActualOperator === undefined
+        ? {}
+        : {
+            definitionConditionActualOperator: defect.conditionActualOperator,
+          }),
       ...(defect.conditionIndex === undefined
         ? {}
         : { definitionConditionIndex: defect.conditionIndex }),
       ...(defect.conditionPathKey === undefined
         ? {}
         : { definitionConditionPathKey: defect.conditionPathKey }),
+      ...(defect.conditionGroupIndex === undefined
+        ? {}
+        : { definitionConditionGroupIndex: defect.conditionGroupIndex }),
+      ...(defect.conditionGroupKey === undefined
+        ? {}
+        : { definitionConditionGroupKey: defect.conditionGroupKey }),
       ...(defect.sourcePath === undefined
         ? {}
         : { definitionSourcePath: Object.freeze([...defect.sourcePath]) }),

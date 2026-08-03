@@ -195,6 +195,11 @@ describe('StandardDomRenderer', () => {
       emptyNote: { visible: true, enabled: true },
       drivenNote: { visible: true, enabled: true },
     });
+    expect(
+      requiredSnapshot(harness.application).fields.find(
+        ({ path }) => path.join('.') === 'profile.note',
+      ),
+    ).toMatchObject({ visible: true, enabled: true });
 
     const nameHost = field(harness.host, 'displayName');
     const name = fieldControl(harness.host, 'displayName');

@@ -1,0 +1,135 @@
+{
+  "success": true,
+  "definition": {
+    "nodes": [
+      {
+        "key": "[\"flag\"]",
+        "name": "flag",
+        "path": ["flag"],
+        "required": false,
+        "nullable": false,
+        "label": "flag",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"count\"]",
+        "name": "count",
+        "path": ["count"],
+        "required": false,
+        "nullable": false,
+        "label": "count",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"name\"]",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "nullable": false,
+        "label": "name",
+        "visibleWhen": {
+          "operator": "all",
+          "conditions": [
+            { "sourcePath": ["flag"], "equals": true },
+            { "sourcePath": ["count"], "equals": 0 }
+          ]
+        },
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "fields": [
+      {
+        "key": "[\"flag\"]",
+        "name": "flag",
+        "path": ["flag"],
+        "required": false,
+        "nullable": false,
+        "label": "flag",
+        "kind": "boolean"
+      },
+      {
+        "key": "[\"count\"]",
+        "name": "count",
+        "path": ["count"],
+        "required": false,
+        "nullable": false,
+        "label": "count",
+        "kind": "number",
+        "numericType": "integer",
+        "constraints": {},
+        "ui": {}
+      },
+      {
+        "key": "[\"name\"]",
+        "name": "name",
+        "path": ["name"],
+        "required": false,
+        "nullable": false,
+        "label": "name",
+        "visibleWhen": {
+          "operator": "all",
+          "conditions": [
+            { "sourcePath": ["flag"], "equals": true },
+            { "sourcePath": ["count"], "equals": 0 }
+          ]
+        },
+        "kind": "string",
+        "constraints": {}
+      }
+    ],
+    "presentation": [
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"flag\"]",
+          "name": "flag",
+          "path": ["flag"],
+          "required": false,
+          "nullable": false,
+          "label": "flag",
+          "kind": "boolean"
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"count\"]",
+          "name": "count",
+          "path": ["count"],
+          "required": false,
+          "nullable": false,
+          "label": "count",
+          "kind": "number",
+          "numericType": "integer",
+          "constraints": {},
+          "ui": {}
+        }
+      },
+      {
+        "kind": "form-node",
+        "node": {
+          "key": "[\"name\"]",
+          "name": "name",
+          "path": ["name"],
+          "required": false,
+          "nullable": false,
+          "label": "name",
+          "visibleWhen": {
+            "operator": "all",
+            "conditions": [
+              { "sourcePath": ["flag"], "equals": true },
+              { "sourcePath": ["count"], "equals": 0 }
+            ]
+          },
+          "kind": "string",
+          "constraints": {}
+        }
+      }
+    ]
+  },
+  "diagnostics": []
+}
