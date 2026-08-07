@@ -20,6 +20,8 @@ const scenarios = [
   ['explicit-schema-defaults', 'Explicit schema defaults'],
   ['conditional-field-state', 'Controlled conditional field state'],
   ['string-enum-array', 'Controlled multiple choices'],
+  ['discriminated-object-alternatives', 'Controlled object alternatives'],
+  ['linear-wizard', 'Controlled linear wizard'],
 ] as const;
 
 test.beforeEach(async ({ page }) => {
@@ -32,14 +34,67 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
+test('keeps field labels visible and actions on the control row', async ({
+  page,
+}) => {
+  const form = page.getByRole('form', { name: 'Schema Engine form preview' });
+  const firstLabel = form.locator('label').first();
+  await expect(firstLabel).toBeVisible();
+  await expect(firstLabel).toHaveText('Name');
+  const horizontalFields = await form
+    .locator('.form-field:not(.boolean-field):not(.fixed-field)')
+    .evaluateAll((fields) =>
+      fields.map((field) => {
+        const control = field.querySelector(
+          'input:not([type="checkbox"]), select',
+        );
+        const clear = field.querySelector('.field-actions button');
+        if (control === null || clear === null) return undefined;
+        const controlRect = control.getBoundingClientRect();
+        const clearRect = clear.getBoundingClientRect();
+        return {
+          centerGap: Math.abs(
+            controlRect.top +
+              controlRect.height / 2 -
+              (clearRect.top + clearRect.height / 2),
+          ),
+          horizontalGap: clearRect.left - controlRect.right,
+        };
+      }),
+    );
+  expect(horizontalFields).toHaveLength(4);
+  expect(
+    horizontalFields.every(
+      (geometry) =>
+        geometry !== undefined &&
+        geometry.centerGap < 2 &&
+        geometry.horizontalGap >= 4,
+    ),
+  ).toBe(true);
+  const active = form.getByRole('checkbox', { name: 'Active' });
+  const centers = await active.evaluate((control) => {
+    const host = control.parentElement;
+    const label = host?.querySelector('label');
+    const clear = host?.querySelector('.field-actions button');
+    if (label == null || clear == null) return undefined;
+    const center = (element: Element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.top + rect.height / 2;
+    };
+    return [center(control), center(label), center(clear)];
+  });
+  expect(centers).toBeDefined();
+  expect(Math.max(...centers!) - Math.min(...centers!)).toBeLessThan(2);
+});
+
 test('navigates all scenarios with normalized accessible interaction', async ({
   page,
 }) => {
   const disclosures = page.locator(
     '.reference-region > details.region-disclosure',
   );
-  await expect(disclosures).toHaveCount(4);
-  for (let index = 0; index < 4; index += 1) {
+  await expect(disclosures).toHaveCount(5);
+  for (let index = 0; index < 5; index += 1) {
     await expect(disclosures.nth(index)).toHaveAttribute('open', '');
   }
   const previewDisclosure = page
@@ -109,7 +164,17 @@ test('navigates all scenarios with normalized accessible interaction', async ({
   );
   await page.getByRole('tab', { name: 'Contact' }).click();
   await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible();
+  await expect(
+    page
+      .getByRole('button', { name: 'Notifications' })
+      .locator('.presentation-accordion-indicator'),
+  ).toHaveText('+');
   await page.getByRole('button', { name: 'Notifications' }).click();
+  await expect(
+    page
+      .getByRole('button', { name: 'Notifications' })
+      .locator('.presentation-accordion-indicator'),
+  ).toHaveText('−');
   await expect(
     page.getByRole('checkbox', { name: 'Newsletter' }),
   ).toBeVisible();
@@ -293,6 +358,9 @@ test('projects controlled ordered multiple choices independently', async ({
   await expect(roles).toHaveAttribute('multiple', '');
   await expect(roles.locator('option')).toHaveCount(6);
   await expect(
+    page.locator('.string-enum-array-field').filter({ has: roles }),
+  ).not.toContainText('ⓘ');
+  await expect(
     page.getByText('No value provided.', { exact: true }),
   ).toBeVisible();
   await expect(channels).toHaveAttribute('required', '');
@@ -328,6 +396,41 @@ test('projects controlled ordered multiple choices independently', async ({
   await expect(
     page.getByText('No se ha proporcionado ningún valor.', { exact: true }),
   ).toBeVisible();
+});
+
+test('replaces controlled object alternatives independently', async ({
+  page,
+}) => {
+  await selectScenario(
+    page,
+    'discriminated-object-alternatives',
+    'Controlled object alternatives',
+  );
+  const kind = page.getByRole('combobox', { name: 'Kind' });
+  const name = page.getByRole('textbox', { name: 'Name' });
+  const lives = page.getByRole('textbox', { name: 'Lives' });
+  await name.evaluate((element) => {
+    (element as HTMLElement & { __m33Common?: boolean }).__m33Common = true;
+  });
+  await lives.focus();
+  await kind.selectOption('dog');
+  await expect(lives).toHaveCount(0);
+  await expect(
+    page.getByRole('checkbox', { name: 'Lives indoors' }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole('textbox', { name: 'Bark volume' }),
+  ).toBeVisible();
+  await page.getByRole('tab', { name: 'State', exact: true }).click();
+  await expect(page.locator('#evidence-panel-state pre').first()).toContainText(
+    '"lives": 9',
+  );
+  expect(
+    await name.evaluate(
+      (element) =>
+        (element as HTMLElement & { __m33Common?: boolean }).__m33Common,
+    ),
+  ).toBe(true);
 });
 
 test('projects and validates shared object composition independently', async ({
@@ -374,6 +477,20 @@ test('projects shared fixed values without renderer-owned intentions', async ({
   const value = direct.locator('[data-fixed-value-state]');
   await expect(value).toHaveText('fixed');
   await expect(value).toHaveAttribute('data-fixed-value-state', 'value');
+  const fixedAlignment = await direct.evaluate((group) => {
+    const label = group.querySelector('.field-label');
+    const fixedValue = group.querySelector('[data-fixed-value-state]');
+    if (label === null || fixedValue === null) return undefined;
+    const labelRect = label.getBoundingClientRect();
+    const valueRect = fixedValue.getBoundingClientRect();
+    return Math.abs(
+      labelRect.top +
+        labelRect.height / 2 -
+        (valueRect.top + valueRect.height / 2),
+    );
+  });
+  expect(fixedAlignment).toBeDefined();
+  expect(fixedAlignment!).toBeLessThan(3);
   await expect(direct.locator('input, select, button, [tabindex]')).toHaveCount(
     0,
   );
@@ -440,12 +557,21 @@ test('exposes deterministic controlled service validation without renderer orche
   const username = page.getByRole('textbox', { name: 'Username' });
   await expect(status).toHaveText('Generation 1 pending.');
 
-  await page.getByRole('button', { name: 'Resolve as unavailable' }).click();
+  await page
+    .getByRole('button', { name: 'Complete request: username unavailable' })
+    .click();
   await expect(status).toHaveText('Generation 1 settled invalid.');
   await expect(username).toHaveAttribute('aria-invalid', 'true');
   await expect(
     page.getByRole('form', { name: 'Schema Engine form preview' }),
   ).toContainText('username-unavailable');
+  const usernameBorder = await username.evaluate(
+    (element) => getComputedStyle(element).borderColor,
+  );
+  const issueColor = await page
+    .getByText('username-unavailable', { exact: true })
+    .evaluate((element) => getComputedStyle(element).color);
+  expect(usernameBorder).toBe(issueColor);
 
   await username.fill('x');
   await expect(status).toHaveText('Blocked by synchronous validation.');
@@ -457,14 +583,16 @@ test('exposes deterministic controlled service validation without renderer orche
     'cancelled',
   );
 
-  await page.getByRole('button', { name: 'Reject current request' }).click();
+  await page.getByRole('button', { name: 'Fail current request' }).click();
   await expect(status).toContainText('failed: exception');
-  await page.getByRole('button', { name: 'Throw on next request' }).click();
-  await page.getByRole('button', { name: 'Retry service validation' }).click();
+  await page.getByRole('button', { name: 'Make next request throw' }).click();
+  await page.getByRole('button', { name: 'Retry failed validation' }).click();
   await expect(status).toContainText('failed: exception');
-  await page.getByRole('button', { name: 'Retry service validation' }).click();
+  await page.getByRole('button', { name: 'Retry failed validation' }).click();
   await expect(status).toContainText('pending');
-  await page.getByRole('button', { name: 'Resolve as available' }).click();
+  await page
+    .getByRole('button', { name: 'Complete request: username available' })
+    .click();
   await expect(status).toContainText('settled valid');
   await expect(username).not.toHaveAttribute('aria-invalid', 'true');
 });
@@ -490,7 +618,10 @@ test('prepares and accepts application-owned scoped baseline candidates', async 
   await expect(accept).toBeEnabled();
   await expect(baseline).toContainText('Ada Lovelace');
   await accept.click();
-  await expect(status).toContainText('simulated persistence accepted');
+  await expect(status).toContainText('baseline updated');
+  await expect(page.getByTestId('inspector-scope-candidate')).toContainText(
+    'Ada Byron',
+  );
   await expect(baseline).toContainText('Ada Byron');
 
   await page.getByRole('button', { name: 'Reset scenario' }).click();
@@ -577,24 +708,24 @@ test('validates, cancels, applies and restores edited configuration with Ajv', a
     name: 'JSON Schema editor',
   });
   await schemaEditor.fill('{');
-  await page.getByRole('button', { name: 'Validate configuration' }).click();
+  await page.getByRole('button', { name: 'Validate', exact: true }).click();
   await expect(page.getByTestId('configuration-status')).toHaveText(
     'Invalid JSON.',
   );
-  await page.getByRole('button', { name: 'Cancel changes' }).click();
+  await page.getByRole('button', { name: 'Cancel edits' }).click();
   await expect(page.getByTestId('configuration-status')).toHaveText(
     'Not validated.',
   );
 
   await schemaEditor.fill('{"type":"string"}');
-  await page.getByRole('button', { name: 'Validate configuration' }).click();
+  await page.getByRole('button', { name: 'Validate', exact: true }).click();
   await expect(page.getByTestId('configuration-status')).toHaveText(
     'Configuration compilation failed.',
   );
   await expect(page.getByTestId('configuration-diagnostics')).toContainText(
     'ROOT_TYPE_MUST_BE_OBJECT',
   );
-  await page.getByRole('button', { name: 'Cancel changes' }).click();
+  await page.getByRole('button', { name: 'Cancel edits' }).click();
 
   const schema = JSON.parse(await requiredText(schemaEditor)) as {
     properties: Record<string, unknown>;
@@ -613,11 +744,11 @@ test('validates, cancels, applies and restores edited configuration with Ajv', a
   };
   uiSchema.order.push('nickname');
   await uiEditor.fill(JSON.stringify(uiSchema, undefined, 2));
-  await page.getByRole('button', { name: 'Validate configuration' }).click();
+  await page.getByRole('button', { name: 'Validate', exact: true }).click();
   await expect(page.getByTestId('configuration-status')).toHaveText(
     'Configuration valid.',
   );
-  await page.getByRole('button', { name: 'Apply configuration' }).click();
+  await page.getByRole('button', { name: 'Apply', exact: true }).click();
   const nickname = page.getByRole('textbox', { name: 'Nickname' });
   await nickname.fill('long');
   await page.getByRole('button', { name: 'All issues' }).click();
@@ -626,18 +757,16 @@ test('validates, cancels, applies and restores edited configuration with Ajv', a
     'maxLength',
   );
 
-  await page
-    .getByRole('button', { name: 'Restore scenario configuration' })
-    .click();
+  await page.getByRole('button', { name: 'Restore original' }).click();
   await expect(
-    page.getByRole('button', { name: 'Restore scenario', exact: true }),
+    page.getByRole('button', { name: 'Confirm configuration', exact: true }),
   ).toBeFocused();
   await page
-    .getByRole('button', { name: 'Restore scenario', exact: true })
+    .getByRole('button', { name: 'Confirm configuration', exact: true })
     .click();
   await expect(page.getByRole('textbox', { name: 'Nickname' })).toHaveCount(0);
   await expect(
-    page.getByRole('button', { name: 'Restore scenario configuration' }),
+    page.getByRole('button', { name: 'Restore original' }),
   ).toBeDisabled();
 });
 
@@ -648,21 +777,43 @@ test('keeps tabs, copy and themes accessible', async ({ page, context }) => {
   const state = page.getByRole('tab', { name: 'State', exact: true });
   await state.focus();
   await state.press('End');
-  const integration = page.getByRole('tab', {
-    name: 'Integration',
+  const diagnostics = page.getByRole('tab', {
+    name: 'Diagnostics',
     exact: true,
   });
-  await expect(integration).toHaveAttribute('aria-selected', 'true');
-  await integration.press('Home');
+  await expect(diagnostics).toHaveAttribute('aria-selected', 'true');
+  await diagnostics.press('Home');
   await expect(state).toHaveAttribute('aria-selected', 'true');
   await state.press('ArrowRight');
   await expect(
     page.getByRole('tab', { name: 'Definition', exact: true }),
   ).toHaveAttribute('aria-selected', 'true');
 
-  await integration.click();
-  await page.getByText('Compile Definition', { exact: true }).click();
-  const code = page.locator('#evidence-panel-integration code').first();
+  const integration = page.locator('[data-region="integration-panel"]');
+  await expect(
+    integration.locator('details.region-disclosure'),
+  ).toHaveAttribute('open', '');
+  const compile = integration.getByRole('tab', {
+    name: 'Compile Definition',
+    exact: true,
+  });
+  const cleanup = integration.getByRole('tab', {
+    name: 'Runtime Cleanup',
+    exact: true,
+  });
+  await expect(compile).toHaveAttribute('aria-selected', 'true');
+  await compile.press('End');
+  await expect(cleanup).toHaveAttribute('aria-selected', 'true');
+  await cleanup.press('Home');
+  await expect(compile).toHaveAttribute('aria-selected', 'true');
+  const compilePanel = integration.getByRole('tabpanel', {
+    name: 'Compile Definition',
+  });
+  await expect(compilePanel).toBeVisible();
+  await expect(
+    integration.getByRole('tabpanel', { name: 'Create Runtime' }),
+  ).toBeHidden();
+  const code = compilePanel.locator('code');
   await expect(code.locator('[class^="tok-"]').first()).toBeVisible();
   await page.getByRole('button', { name: 'Copy Compile Definition' }).click();
   await expect(
@@ -713,7 +864,7 @@ test('reflows preview before schemas at 390 px and 200% zoom', async ({
   await expectNoPageOverflow(page);
   await expectWorkspaceStacked(page);
   await expect(
-    page.getByRole('button', { name: 'Validate configuration' }),
+    page.getByRole('button', { name: 'Validate', exact: true }),
   ).toBeVisible();
 
   await page.setViewportSize({ width: 800, height: 900 });
@@ -723,7 +874,7 @@ test('reflows preview before schemas at 390 px and 200% zoom', async ({
   await expectNoPageOverflow(page);
   await expectWorkspaceStacked(page);
   await expect(
-    page.getByRole('button', { name: 'Restore scenario configuration' }),
+    page.getByRole('button', { name: 'Restore original' }),
   ).toBeVisible();
 });
 
@@ -747,6 +898,73 @@ test('repeated scenario replacement leaves one active delivery path', async ({
   const history = page.locator('#evidence-panel-runtime pre').nth(1);
   await expect(history).toContainText('"sequence": 1');
   await expect(history).not.toContainText('"sequence": 2');
+});
+
+test('projects the controlled wizard lifecycle and retained step state', async ({
+  page,
+}) => {
+  await selectScenario(page, 'linear-wizard', 'Controlled linear wizard');
+  const wizard = page.locator('.schema-wizard');
+  const regions = wizard.locator('.schema-wizard-step');
+  await expect(regions).toHaveCount(3);
+  await expect(wizard.locator('ol.schema-wizard-steps')).toBeVisible();
+  await expect(wizard.getByRole('tablist')).toHaveCount(0);
+  await expect(regions.nth(0)).toBeVisible();
+  await expect(regions.nth(1)).toBeHidden();
+  await expect(wizard).toContainText('Additional validation not yet available');
+
+  await page.getByTestId('decision-reject').click();
+  await wizard.getByRole('button', { name: 'Next' }).click();
+  await expect(regions.nth(0)).toBeVisible();
+  await page.getByTestId('decision-confirm').click();
+  await wizard.getByRole('button', { name: 'Next' }).click();
+  await expect(regions.nth(1)).toBeVisible();
+  await expect(
+    regions.nth(1).getByRole('heading', { name: 'Team' }),
+  ).toBeFocused();
+
+  const retained = regions.nth(1).getByRole('textbox', {
+    name: 'Profile note',
+  });
+  await retained.fill('Retained browser buffer');
+  await wizard.getByRole('button', { name: 'Previous' }).click();
+  await expect(regions.nth(1)).toBeHidden();
+  await wizard.getByRole('button', { name: 'Next' }).click();
+  await expect(retained).toHaveValue('Retained browser buffer');
+
+  await wizard.getByRole('button', { name: 'Next' }).click();
+  await regions
+    .nth(2)
+    .getByRole('textbox', { name: 'Review code' })
+    .fill('approved');
+  await expect(wizard).toContainText('Additional validation in progress');
+  await page
+    .getByRole('button', { name: 'Reject wizard validation request' })
+    .click();
+  await expect(wizard).toContainText('Additional validation failed');
+  await page.getByRole('button', { name: 'Retry wizard validation' }).click();
+  await page
+    .getByRole('button', {
+      name: 'Resolve wizard validation as available',
+    })
+    .click();
+  await wizard.getByRole('button', { name: 'Complete' }).click();
+  await expect(wizard).toContainText('Completed');
+
+  await page.getByRole('button', { name: 'Locale es' }).click();
+  await expect(
+    wizard.getByRole('heading', { name: 'Incorporación del equipo' }),
+  ).toBeVisible();
+  await expect(wizard.getByRole('button', { name: 'Anterior' })).toBeVisible();
+
+  await selectScenario(
+    page,
+    'controlled-primitives',
+    'Controlled primitive fields',
+  );
+  await selectScenario(page, 'linear-wizard', 'Controlled linear wizard');
+  await expect(page.locator('.schema-wizard-step').nth(0)).toBeVisible();
+  await expect(page.locator('.schema-wizard-step').nth(1)).toBeHidden();
 });
 
 async function selectScenario(page: Page, id: string, title: string) {

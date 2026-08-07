@@ -16,6 +16,10 @@ const PRIVATE_PROJECTS = Object.freeze({
     directory: 'apps/reference-standard',
     name: '@schema-engine-internal/reference-standard',
   }),
+  react: Object.freeze({
+    directory: 'apps/reference-react',
+    name: '@schema-engine-internal/reference-react',
+  }),
 });
 
 const PUBLIC_PROJECTS = Object.freeze([
@@ -27,6 +31,10 @@ const PRIVATE_PRODUCT_PROJECTS = Object.freeze([
   Object.freeze({
     directory: 'packages/validator-ajv',
     name: '@rabassoft/schema-engine-validator-ajv',
+  }),
+  Object.freeze({
+    directory: 'packages/react',
+    name: '@rabassoft/schema-engine-react',
   }),
 ]);
 
@@ -72,7 +80,7 @@ function sourceFiles(directory) {
     if (entry.name === 'dist' || entry.name === 'node_modules') continue;
     const path = join(directory, entry.name);
     if (entry.isDirectory()) result.push(...sourceFiles(path));
-    else if (/\.(?:ts|mts|cts|js|mjs|cjs)$/u.test(entry.name))
+    else if (/\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs)$/u.test(entry.name))
       result.push(path);
   }
   return result;
@@ -254,14 +262,33 @@ function assertImport(root, file, specifier, owner) {
 
   if (owner === 'scenarios') {
     assert.equal(
-      specifier.startsWith('@angular/'),
+      /^(?:@angular\/|@rabassoft\/schema-engine-angular(?:\/|$)|@rabassoft\/schema-engine-react(?:\/|$)|react(?:\/|$)|react-dom(?:\/|$)|rxjs(?:\/|$)|vue(?:\/|$))/u.test(
+        specifier,
+      ),
       false,
-      `${label}: neutral catalog imports Angular ${specifier}`,
+      `${label}: neutral catalog imports framework dependency ${specifier}`,
     );
     assert.equal(
-      specifier === '@schema-engine-internal/reference-angular',
+      /@schema-engine-internal\/reference-(?:angular|react|standard)/u.test(
+        specifier,
+      ),
       false,
-      `${label}: catalog imports Angular shell`,
+      `${label}: catalog imports a target shell`,
+    );
+  }
+
+  if (owner === 'angular') {
+    assert.equal(
+      /^(?:@rabassoft\/schema-engine-react(?:\/|$)|react(?:\/|$)|react-dom(?:\/|$)|vue(?:\/|$))/u.test(
+        specifier,
+      ),
+      false,
+      `${label}: Angular shell imports another target ${specifier}`,
+    );
+    assert.notEqual(
+      specifier,
+      '@schema-engine-internal/reference-react',
+      `${label}: Angular shell imports React shell`,
     );
   }
 
@@ -277,6 +304,23 @@ function assertImport(root, file, specifier, owner) {
       specifier === '@schema-engine-internal/reference-angular',
       false,
       `${label}: Standard shell imports Angular shell`,
+    );
+  }
+
+  if (owner === 'react') {
+    assert.equal(
+      /^(?:@angular\/|@rabassoft\/schema-engine-angular(?:\/|$)|rxjs(?:\/|$)|vue(?:\/|$))/u.test(
+        specifier,
+      ),
+      false,
+      `${label}: React shell imports another target ${specifier}`,
+    );
+    assert.equal(
+      /@schema-engine-internal\/reference-(?:angular|standard)/u.test(
+        specifier,
+      ),
+      false,
+      `${label}: React shell imports another target shell`,
     );
   }
 }
@@ -298,8 +342,17 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
   const scenarios = assertPrivateManifest(root, PRIVATE_PROJECTS.scenarios);
   const angular = assertPrivateManifest(root, PRIVATE_PROJECTS.angular);
   const standard = assertPrivateManifest(root, PRIVATE_PROJECTS.standard);
-  const validatorProject = PRIVATE_PRODUCT_PROJECTS[0];
+  const react = assertPrivateManifest(root, PRIVATE_PROJECTS.react);
+  const validatorProject = PRIVATE_PRODUCT_PROJECTS.find(
+    ({ directory }) => directory === 'packages/validator-ajv',
+  );
+  const reactProject = PRIVATE_PRODUCT_PROJECTS.find(
+    ({ directory }) => directory === 'packages/react',
+  );
+  assert.ok(validatorProject);
+  assert.ok(reactProject);
   const validator = assertPrivateProductManifest(root, validatorProject);
+  const reactAdapter = assertPrivateProductManifest(root, reactProject);
 
   assert.deepEqual(scenarios.exports, {
     '.': {
@@ -344,12 +397,46 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
     '@schema-engine-internal/reference-scenarios',
     'codemirror',
   ]);
+  assert.equal(
+    Object.hasOwn(react, 'exports'),
+    false,
+    'reference-react: exports are forbidden',
+  );
+  assert.deepEqual(dependencyNames(react).sort(), [
+    '@codemirror/lang-javascript',
+    '@codemirror/lang-json',
+    '@codemirror/language',
+    '@lezer/highlight',
+    '@rabassoft/schema-engine',
+    '@rabassoft/schema-engine-react',
+    '@rabassoft/schema-engine-validator-ajv',
+    '@schema-engine-internal/reference-scenarios',
+    '@types/react',
+    '@types/react-dom',
+    'codemirror',
+    'react',
+    'react-dom',
+  ]);
   assert.deepEqual(dependencyNames(validator.manifest).sort(), [
     '@rabassoft/schema-engine',
     'ajv',
     'ajv-formats',
   ]);
   assert.deepEqual(validator.manifest.exports, {
+    '.': {
+      types: './dist/index.d.ts',
+      import: './dist/index.js',
+      default: './dist/index.js',
+    },
+  });
+  assert.deepEqual(dependencyNames(reactAdapter.manifest).sort(), [
+    '@rabassoft/schema-engine',
+    '@types/react',
+    '@types/react-dom',
+    'react',
+    'react-dom',
+  ]);
+  assert.deepEqual(reactAdapter.manifest.exports, {
     '.': {
       types: './dist/index.d.ts',
       import: './dist/index.js',
@@ -376,6 +463,7 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
 
   const inspectedManifestTargets =
     validator.inspectedTargets +
+    reactAdapter.inspectedTargets +
     PUBLIC_PROJECTS.reduce(
       (count, directory) =>
         count + assertPublicManifest(root, directory).inspectedTargets,
@@ -386,7 +474,9 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
     inspectImports(root, PRIVATE_PROJECTS.scenarios.directory, 'scenarios') +
     inspectImports(root, PRIVATE_PROJECTS.angular.directory, 'angular') +
     inspectImports(root, PRIVATE_PROJECTS.standard.directory, 'standard') +
+    inspectImports(root, PRIVATE_PROJECTS.react.directory, 'react') +
     inspectImports(root, validatorProject.directory, 'public') +
+    inspectImports(root, reactProject.directory, 'public') +
     PUBLIC_PROJECTS.reduce(
       (count, directory) => count + inspectImports(root, directory, 'public'),
       0,
@@ -395,7 +485,7 @@ export function verifyReferenceBoundaries(root = resolve('.')) {
   return Object.freeze({
     inspectedImports,
     inspectedManifestTargets,
-    privateProjects: 3,
+    privateProjects: 4,
     privateProductProjects: PRIVATE_PRODUCT_PROJECTS.length,
     publicProjects: PUBLIC_PROJECTS.length,
   });

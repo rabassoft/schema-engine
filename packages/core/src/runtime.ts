@@ -11,6 +11,8 @@ import type {
   CreateControlledFormRuntimeResult,
   DataPath,
   Diagnostic,
+  DiscriminatedObjectFieldDefinition,
+  DiscriminatedObjectRuntimeSnapshot,
   ExternalStateUpdate,
   FieldDefinition,
   FieldTemplate,
@@ -24,7 +26,8 @@ import type {
   ItemRuntimeSnapshot,
   OperationListener,
   NodeRuntimeSnapshot,
-  ObjectFieldDefinition,
+  ObjectAlternativeSelection,
+  ObjectNodeDefinition,
   ObjectPresence,
   ObjectRuntimeSnapshot,
   RuntimeTreeSnapshot,
@@ -34,6 +37,15 @@ import type {
   ValidationIssue,
   ValidationSnapshot,
   ValidationVisibility,
+  WizardActionResult,
+  WizardDefinition,
+  WizardIntention,
+  WizardIntentionListener,
+  WizardRuntimeSnapshot,
+  WizardStepSnapshot,
+  WizardStepProgress,
+  WizardStepValidationSnapshot,
+  WizardStepValidationState,
 } from './contracts.js';
 import {
   AsyncCancellationController,
@@ -81,6 +93,11 @@ interface AsyncGenerationRecord {
 interface RuntimeFieldConditionState {
   readonly visible: boolean;
   readonly enabled: boolean;
+}
+
+interface ObjectAlternativeOwner {
+  readonly owner: DiscriminatedObjectFieldDefinition;
+  readonly alternativeIndex: number;
 }
 
 interface DetachedRuntimeFieldConditionPredicate {
@@ -152,14 +169,21 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   private readonly touched = new Set<string>();
   private focused: string | undefined;
   private readonly forcedScopes = new Map<string, ReadonlySet<string>>();
+  private readonly wizardForcedKeys = new Set<string>();
   private readonly snapshotListeners = new Set<SnapshotListener<TData>>();
   private readonly operationListeners = new Set<OperationListener>();
+  private readonly wizardIntentionListeners =
+    new Set<WizardIntentionListener>();
   private readonly nodeByKey: ReadonlyMap<string, FormNodeDefinition>;
   private readonly fieldByKey: ReadonlyMap<string, FieldDefinition>;
   private readonly descendantNodeKeys: ReadonlyMap<string, ReadonlySet<string>>;
   private readonly descendantFieldKeys: ReadonlyMap<
     string,
     ReadonlySet<string>
+  >;
+  private readonly alternativeOwners: ReadonlyMap<
+    string,
+    ObjectAlternativeOwner
   >;
   private readonly conditions: ReadonlyMap<
     string,
@@ -173,6 +197,17 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
   private asyncValidation: AsyncValidationState | undefined;
   private activeAsync: AsyncGenerationRecord | undefined;
   private nextOperationId = 1;
+  private readonly wizard: WizardDefinition | undefined;
+  private wizardStepIndex = 0;
+  private readonly wizardVisited: boolean[];
+  private readonly wizardAttempted: boolean[];
+  private readonly wizardPassed: boolean[];
+  private wizardPending:
+    | Extract<WizardIntention, { readonly kind: 'previous' | 'next' }>
+    | undefined;
+  private nextWizardRequestId = 1;
+  private wizardCompletionAttempted = false;
+  private wizardShowGlobalIssues = false;
   private disposed = false;
 
   constructor(
@@ -180,11 +215,22 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     conditions: ReadonlyMap<string, DetachedRuntimeFieldConditions>,
     validation: ValidValidation,
   ) {
+    const rootPresentation = options.definition.presentation[0];
+    this.wizard =
+      options.definition.presentation.length === 1 &&
+      rootPresentation?.kind === 'wizard'
+        ? rootPresentation
+        : undefined;
+    this.wizardVisited =
+      this.wizard?.steps.map((_, index) => index === 0) ?? [];
+    this.wizardAttempted = this.wizard?.steps.map(() => false) ?? [];
+    this.wizardPassed = this.wizard?.steps.map(() => false) ?? [];
     const indexes = buildDefinitionIndexes(options.definition.nodes);
     this.nodeByKey = indexes.nodes;
     this.fieldByKey = indexes.fields;
     this.descendantNodeKeys = indexes.descendantNodes;
     this.descendantFieldKeys = indexes.descendantFields;
+    this.alternativeOwners = indexes.alternativeOwners;
     this.conditions = conditions;
     this.value = options.value;
     this.baseline = options.baselineValue;
@@ -265,6 +311,12 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     return this.addListener(listener, 'operation');
   }
 
+  subscribeWizardIntentions(
+    listener: WizardIntentionListener,
+  ): SubscribeResult {
+    return this.addListener(listener, 'wizard-intention');
+  }
+
   updateExternalState(update: ExternalStateUpdate<TData>): RuntimeActionResult {
     const disposed = this.disposedResult('updateExternalState');
     if (disposed) return disposed;
@@ -272,8 +324,8 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       return actionFailure([
         invalidExternal('update', 'non-null object', update),
       ]);
-    const keys = ['value', 'baselineValue', 'locale'].filter((key) =>
-      Object.hasOwn(update, key),
+    const keys = ['value', 'baselineValue', 'locale', 'wizardSelection'].filter(
+      (key) => Object.hasOwn(update, key),
     );
     if (keys.length === 0)
       return actionFailure([
@@ -282,6 +334,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     const valueEntry = read(update, 'value');
     const baselineEntry = read(update, 'baselineValue');
     const localeEntry = read(update, 'locale');
+    const wizardSelectionEntry = read(update, 'wizardSelection');
     if (valueEntry.kind === 'accessor')
       return actionFailure([
         invalidExternal(
@@ -309,6 +362,94 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
           'accessor-member',
         ),
       ]);
+    if (wizardSelectionEntry.kind === 'accessor')
+      return actionFailure(
+        invalidWizardState('wizardSelection', 'accessor-member').diagnostics,
+      );
+    let confirmedTargetIndex: number | undefined;
+    if (wizardSelectionEntry.kind === 'value') {
+      if (this.wizard === undefined)
+        return actionFailure(
+          invalidWizardState('wizardSelection', 'not-applicable').diagnostics,
+        );
+      if (!isRecord(wizardSelectionEntry.value))
+        return actionFailure(
+          invalidWizardState('wizardSelection', 'invalid-value').diagnostics,
+        );
+      const request = read(wizardSelectionEntry.value, 'requestId');
+      const selected = read(wizardSelectionEntry.value, 'selectedStepId');
+      if (request.kind === 'missing')
+        return actionFailure(
+          invalidWizardState('requestId', 'missing-member').diagnostics,
+        );
+      if (request.kind === 'accessor')
+        return actionFailure(
+          invalidWizardState('requestId', 'accessor-member').diagnostics,
+        );
+      if (
+        !Number.isSafeInteger(request.value) ||
+        typeof request.value !== 'number' ||
+        request.value <= 0
+      )
+        return actionFailure(
+          invalidWizardState('requestId', 'invalid-value').diagnostics,
+        );
+      if (selected.kind === 'missing')
+        return actionFailure(
+          invalidWizardState('selectedStepId', 'missing-member').diagnostics,
+        );
+      if (selected.kind === 'accessor')
+        return actionFailure(
+          invalidWizardState('selectedStepId', 'accessor-member').diagnostics,
+        );
+      if (typeof selected.value !== 'string')
+        return actionFailure(
+          invalidWizardState('selectedStepId', 'invalid-value').diagnostics,
+        );
+      if (
+        !hasExactOwnMembers(wizardSelectionEntry.value, [
+          'requestId',
+          'selectedStepId',
+        ])
+      )
+        return actionFailure(
+          invalidWizardState('wizardSelection', 'invalid-value').diagnostics,
+        );
+      const pending = this.wizardPending;
+      if (pending === undefined)
+        return runtimeFromWizardFailure(
+          staleWizardIntention(
+            'confirm',
+            'no-pending-intention',
+            request.value,
+          ),
+        );
+      if (pending.requestId !== request.value)
+        return runtimeFromWizardFailure(
+          staleWizardIntention('confirm', 'request-mismatch', request.value),
+        );
+      if (pending.toStepId !== selected.value)
+        return runtimeFromWizardFailure(
+          staleWizardIntention(
+            'confirm',
+            'target-mismatch',
+            request.value,
+            selected.value,
+          ),
+        );
+      confirmedTargetIndex = this.wizard?.steps.findIndex(
+        ({ id }) => id === selected.value,
+      );
+      if (confirmedTargetIndex === undefined || confirmedTargetIndex < 0)
+        return runtimeFromWizardFailure(
+          staleWizardIntention(
+            'confirm',
+            'target-mismatch',
+            request.value,
+            selected.value,
+          ),
+        );
+    }
     const nextValue =
       valueEntry.kind === 'value' ? valueEntry.value : this.value;
     const nextBaseline =
@@ -335,10 +476,14 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
         invalidExternal('locale', 'non-empty string', nextLocale),
       ]);
     const valueChanged = nextValue !== this.value;
+    const wizardChanged =
+      confirmedTargetIndex !== undefined ||
+      (valueChanged && this.wizardPending?.kind === 'next');
     const changed =
       valueChanged ||
       nextBaseline !== this.baseline ||
-      nextLocale !== this.locale;
+      nextLocale !== this.locale ||
+      wizardChanged;
     if (!changed) return actionSuccess(false, false);
     let validation: ValidValidation = {
       success: true,
@@ -361,6 +506,17 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     this.baseline = nextBaseline as Readonly<TData>;
     this.locale = nextLocale;
     this.validationValid = validation.valid;
+    if (confirmedTargetIndex !== undefined) {
+      const pending = this.wizardPending;
+      if (pending?.kind === 'next')
+        this.wizardPassed[this.wizardStepIndex] = true;
+      this.clearWizardStepFocus(this.wizardStepIndex);
+      this.wizardStepIndex = confirmedTargetIndex;
+      this.wizardVisited[confirmedTargetIndex] = true;
+      this.wizardPending = undefined;
+    } else if (valueChanged && this.wizardPending?.kind === 'next') {
+      this.wizardPending = undefined;
+    }
     if (valueChanged) {
       this.conditionState = evaluateRuntimeFieldConditions(
         this.conditions,
@@ -398,7 +554,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     let interactionChanged = false;
     if (valueChanged) {
       for (const key of [...this.touched]) {
-        if (!this.snapshotByKey.has(key)) {
+        if (!this.snapshotByKey.has(key) && !this.alternativeOwners.has(key)) {
           this.touched.delete(key);
           interactionChanged = true;
         }
@@ -533,7 +689,12 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       (issue) =>
         (issue.path.length === 0 && parsed.includeGlobal) ||
         (() => {
-          const key = assignedIssueKey(issue.path, this.nodeByKey);
+          const key = effectiveAssignedIssueKey(
+            issue.path,
+            this.nodeByKey,
+            this.alternativeOwners,
+            this.value,
+          );
           const runtimeKey = assignedRuntimeIssueKey(
             issue.path,
             this.snapshotByPath,
@@ -595,6 +756,7 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     if (!this.validationValid) return asyncRetryUnavailable('sync-invalid');
     if (this.asyncGenerations.exhausted())
       return asyncRetryUnavailable('generation-exhausted');
+    if (this.wizardPending?.kind === 'next') this.wizardPending = undefined;
     const record = this.prepareAsyncStart();
     if (record === undefined)
       return asyncRetryUnavailable('generation-exhausted');
@@ -604,19 +766,197 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     return actionSuccess(true, false);
   }
 
+  requestWizardPrevious(): WizardActionResult {
+    return this.requestWizardNavigation('previous');
+  }
+
+  requestWizardNext(): WizardActionResult {
+    return this.requestWizardNavigation('next');
+  }
+
+  requestWizardComplete(): WizardActionResult {
+    const wizard = this.wizard;
+    if (this.disposed) return wizardDisposed('requestWizardComplete');
+    if (wizard === undefined) return wizardActionUnavailable('complete');
+    if (this.wizardPending !== undefined)
+      return wizardActionUnavailable('complete', 'intention-pending');
+    if (this.wizardStepIndex !== wizard.steps.length - 1)
+      return wizardActionUnavailable('complete', 'not-last-step');
+    const step = wizard.steps[this.wizardStepIndex];
+    if (step === undefined)
+      return wizardActionUnavailable('complete', 'step-unresolved');
+    const validation = this.getValidationSnapshot(wizard.completionScope);
+    const blocked =
+      !validation.valid ||
+      (this.asyncValidation?.status === 'settled' &&
+        !this.asyncValidation.valid);
+    if (!blocked && !Number.isSafeInteger(this.nextWizardRequestId))
+      return wizardRequestExhausted('complete');
+    this.wizardCompletionAttempted = true;
+    this.wizardAttempted[this.wizardStepIndex] = true;
+    if (blocked) {
+      this.wizardAttempted.fill(true);
+      this.wizardShowGlobalIssues = true;
+      this.forceWizardScope(wizard.completionScope);
+      const previous = this.snapshot;
+      this.snapshot = this.buildSnapshot(previous);
+      const changed = this.snapshot !== previous;
+      return wizardActionSuccess(
+        changed,
+        false,
+        changed ? this.notifySnapshots() : EMPTY,
+      );
+    }
+    this.wizardPassed[this.wizardStepIndex] = true;
+    const intention: WizardIntention = Object.freeze({
+      kind: 'complete',
+      requestId: this.nextWizardRequestId,
+      wizardKey: wizard.key,
+      stepId: step.id,
+    });
+    this.nextWizardRequestId += 1;
+    const previous = this.snapshot;
+    this.snapshot = this.buildSnapshot(previous);
+    const snapshotChanged = this.snapshot !== previous;
+    const diagnostics = [
+      ...(snapshotChanged ? this.notifySnapshots() : EMPTY),
+      ...this.notifyWizardIntentions(intention),
+    ];
+    return wizardActionSuccess(snapshotChanged, true, diagnostics);
+  }
+
+  rejectWizardIntention(requestId: number): WizardActionResult {
+    if (this.disposed) return wizardDisposed('rejectWizardIntention');
+    const pending = this.wizardPending;
+    if (pending === undefined)
+      return staleWizardIntention('reject', 'no-pending-intention', requestId);
+    if (!Number.isSafeInteger(requestId) || requestId !== pending.requestId)
+      return staleWizardIntention('reject', 'request-mismatch', requestId);
+    this.wizardPending = undefined;
+    this.snapshot = this.buildSnapshot(this.snapshot);
+    return wizardActionSuccess(true, false, this.notifySnapshots());
+  }
+
+  private requestWizardNavigation(
+    action: 'previous' | 'next',
+  ): WizardActionResult {
+    if (this.disposed)
+      return wizardDisposed(
+        action === 'previous' ? 'requestWizardPrevious' : 'requestWizardNext',
+      );
+    const wizard = this.wizard;
+    if (wizard === undefined) return wizardActionUnavailable(action);
+    if (this.wizardPending !== undefined)
+      return wizardActionUnavailable(action, 'intention-pending');
+    if (action === 'previous' && this.wizardStepIndex === 0)
+      return wizardActionUnavailable(action, 'at-first-step');
+    if (action === 'next' && this.wizardStepIndex === wizard.steps.length - 1)
+      return wizardActionUnavailable(action, 'at-last-step');
+    const from = wizard.steps[this.wizardStepIndex];
+    const targetIndex = this.wizardStepIndex + (action === 'previous' ? -1 : 1);
+    const to = wizard.steps[targetIndex];
+    if (from === undefined || to === undefined)
+      return wizardActionUnavailable(action, 'step-unresolved');
+    if (action === 'next') {
+      const synchronousValid =
+        this.scopedIssues(from.scope, this.syncIssues).length === 0;
+      const composed = this.getValidationSnapshot(from.scope);
+      const gateValid =
+        synchronousValid &&
+        (this.asyncValidation === undefined ||
+          this.asyncValidation.status === 'blocked' ||
+          (this.asyncValidation.status === 'settled' && composed.valid));
+      if (!gateValid) {
+        this.wizardAttempted[this.wizardStepIndex] = true;
+        this.forceWizardScope(from.scope);
+        const previous = this.snapshot;
+        this.snapshot = this.buildSnapshot(previous);
+        const changed = this.snapshot !== previous;
+        return wizardActionSuccess(
+          changed,
+          false,
+          changed ? this.notifySnapshots() : EMPTY,
+        );
+      }
+    }
+    if (!Number.isSafeInteger(this.nextWizardRequestId))
+      return wizardRequestExhausted(action);
+    if (action === 'next') this.wizardAttempted[this.wizardStepIndex] = true;
+    const intention = Object.freeze({
+      kind: action,
+      requestId: this.nextWizardRequestId,
+      wizardKey: wizard.key,
+      fromStepId: from.id,
+      toStepId: to.id,
+    });
+    this.nextWizardRequestId += 1;
+    this.wizardPending = intention;
+    this.snapshot = this.buildSnapshot(this.snapshot);
+    return wizardActionSuccess(true, true, [
+      ...this.notifySnapshots(),
+      ...this.notifyWizardIntentions(intention),
+    ]);
+  }
+
+  private forceWizardScope(scope: FormScope): void {
+    const parsed = this.parseScope(scope);
+    if (parsed.success)
+      for (const key of parsed.nodeKeys) this.wizardForcedKeys.add(key);
+  }
+
+  private clearWizardStepFocus(stepIndex: number): void {
+    const focused = this.focused;
+    const step = this.wizard?.steps[stepIndex];
+    if (focused === undefined || step === undefined) return;
+    const parsed = this.parseScope(step.scope);
+    if (parsed.success && parsed.fieldKeys.has(focused))
+      this.focused = undefined;
+  }
+
+  private notifyWizardIntentions(
+    intention: WizardIntention,
+  ): readonly Diagnostic[] {
+    const diagnostics: Diagnostic[] = [];
+    [...this.wizardIntentionListeners].forEach((listener, listenerIndex) => {
+      try {
+        listener(intention);
+      } catch {
+        diagnostics.push(
+          runtimeDiagnostic(
+            'LISTENER_EXCEPTION',
+            { channel: 'wizard-intention', listenerIndex },
+            'Listener threw an exception.',
+            undefined,
+            'warning',
+          ),
+        );
+      }
+    });
+    return freezeDiagnostics(diagnostics);
+  }
+
   dispose(): RuntimeActionResult {
     if (this.disposed) return actionSuccess(false, false);
     this.cancelActiveAsync();
     this.disposed = true;
     this.snapshotListeners.clear();
     this.operationListeners.clear();
+    this.wizardIntentionListeners.clear();
+    this.wizardPending = undefined;
+    this.wizardStepIndex = 0;
+    this.wizardVisited.fill(false);
+    this.wizardAttempted.fill(false);
+    this.wizardPassed.fill(false);
+    this.wizardCompletionAttempted = false;
+    this.wizardShowGlobalIssues = false;
     this.forcedScopes.clear();
+    this.wizardForcedKeys.clear();
     return actionSuccess(false, false);
   }
 
   private addListener(
     listener: unknown,
-    channel: 'snapshot' | 'operation',
+    channel: 'snapshot' | 'operation' | 'wizard-intention',
   ): SubscribeResult {
     if (this.disposed)
       return Object.freeze({
@@ -626,7 +966,11 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
             'RUNTIME_DISPOSED',
             {
               action:
-                channel === 'snapshot' ? 'subscribe' : 'subscribeOperations',
+                channel === 'snapshot'
+                  ? 'subscribe'
+                  : channel === 'operation'
+                    ? 'subscribeOperations'
+                    : 'subscribeWizardIntentions',
             },
             'Runtime is disposed.',
           ),
@@ -646,7 +990,9 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
     const listeners =
       channel === 'snapshot'
         ? (this.snapshotListeners as Set<unknown>)
-        : (this.operationListeners as Set<unknown>);
+        : channel === 'operation'
+          ? (this.operationListeners as Set<unknown>)
+          : (this.wizardIntentionListeners as Set<unknown>);
     listeners.add(listener);
     let active = true;
     const unsubscribe = Object.freeze(() => {
@@ -685,6 +1031,14 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
           'Runtime path is not managed.',
         ),
       ]);
+    const inactiveAlternative = this.inactiveAlternativeDiagnostic(
+      type === 'set-value' ? 'requestSetValue' : 'requestRemoveValue',
+      field.path,
+      key,
+    );
+    if (inactiveAlternative !== undefined) {
+      return actionFailure([inactiveAlternative]);
+    }
     let operationValue = nextValue;
     if (type === 'set-value') {
       if (field.kind === 'string-enum-array') {
@@ -1117,6 +1471,14 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
           'Runtime path is not managed.',
         ),
       ]);
+    const inactiveAlternative = this.inactiveAlternativeDiagnostic(
+      action,
+      field.path,
+      key,
+    );
+    if (inactiveAlternative !== undefined) {
+      return actionFailure([inactiveAlternative]);
+    }
     const snapshot = this.snapshotByKey.get(key) as
       FieldRuntimeSnapshot | undefined;
     if (
@@ -1137,6 +1499,26 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       if (inactive !== undefined) return actionFailure([inactive]);
     }
     return this.interactWithKey(action, key, snapshot);
+  }
+
+  private inactiveAlternativeDiagnostic(
+    action: 'requestSetValue' | 'requestRemoveValue' | 'focus' | 'blur',
+    targetPath: DataPath,
+    targetKey: string,
+  ): Diagnostic | undefined {
+    const ownership = this.alternativeOwners.get(targetKey);
+    if (ownership === undefined) return undefined;
+    const activeAlternativeIndex = selectedAlternativeIndex(
+      this.value,
+      ownership.owner,
+    );
+    if (activeAlternativeIndex === ownership.alternativeIndex) return undefined;
+    return inactiveObjectAlternativeDiagnostic(
+      action,
+      targetPath,
+      ownership,
+      activeAlternativeIndex,
+    );
   }
 
   private interactWithKey(
@@ -1195,13 +1577,16 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       focused: this.focused,
       conditionState: this.conditionState,
       forcedScopes: this.forcedScopes,
+      wizardForcedKeys: this.wizardForcedKeys,
       visibility: this.visibility,
       ...(previous === undefined ? {} : { previous }),
       nodeByKey: this.nodeByKey,
+      alternativeOwners: this.alternativeOwners,
     });
     this.snapshotByKey = built.byKey;
     this.snapshotByPath = built.byPath;
-    return Object.freeze({
+    const wizardSnapshot = this.buildWizardSnapshot(previous?.wizard);
+    const next = Object.freeze({
       value: this.value,
       locale: this.locale,
       valid: this.rootValidationValid(
@@ -1216,7 +1601,136 @@ class ControlledRuntime<TData extends object> implements FormRuntime<TData> {
       ...(this.asyncValidation === undefined
         ? {}
         : { asyncValidation: this.asyncValidation }),
+      ...(wizardSnapshot === undefined ? {} : { wizard: wizardSnapshot }),
     });
+    return previous !== undefined && sameFormSnapshot(previous, next)
+      ? previous
+      : next;
+  }
+
+  private buildWizardSnapshot(
+    previous?: WizardRuntimeSnapshot,
+  ): WizardRuntimeSnapshot | undefined {
+    const wizard = this.wizard;
+    if (wizard === undefined) return undefined;
+    const steps = wizard.steps.map((step, index) => {
+      const synchronousIssues = this.scopedIssues(step.scope, this.syncIssues);
+      const synchronousValid = synchronousIssues.length === 0;
+      const composed = this.getValidationSnapshot(step.scope);
+      let state: WizardStepValidationState;
+      if (this.asyncValidation === undefined)
+        state = synchronousValid ? 'valid' : 'invalid';
+      else if (this.asyncValidation.status === 'blocked')
+        state = synchronousValid ? 'provisional' : 'invalid';
+      else if (this.asyncValidation.status === 'pending') state = 'pending';
+      else if (this.asyncValidation.status === 'failed') state = 'failed';
+      else state = composed.valid ? 'valid' : 'invalid';
+      const attempted = this.wizardAttempted[index] ?? false;
+      const passed = this.wizardPassed[index] ?? false;
+      const visited = this.wizardVisited[index] ?? false;
+      const progress: WizardStepProgress =
+        attempted && state === 'invalid'
+          ? 'error'
+          : passed && (state === 'valid' || state === 'provisional')
+            ? 'completed'
+            : visited
+              ? 'visited'
+              : 'unvisited';
+      const previousStep = previous?.steps[index];
+      const candidateIssues = Object.freeze([...composed.issues]);
+      const issues =
+        previousStep !== undefined &&
+        sameArray(previousStep.validation.issues, candidateIssues)
+          ? previousStep.validation.issues
+          : candidateIssues;
+      const candidateValidation: WizardStepValidationSnapshot = Object.freeze({
+        state,
+        synchronousValid,
+        issues,
+        ...(this.asyncValidation === undefined
+          ? {}
+          : { asyncValidation: this.asyncValidation }),
+      });
+      const validation =
+        previousStep !== undefined &&
+        sameWizardStepValidation(previousStep.validation, candidateValidation)
+          ? previousStep.validation
+          : candidateValidation;
+      const candidate: WizardStepSnapshot = Object.freeze({
+        key: step.key,
+        id: step.id,
+        position: index + 1,
+        current: index === this.wizardStepIndex,
+        visited,
+        attempted,
+        passed,
+        progress,
+        validation,
+      });
+      return previousStep !== undefined &&
+        sameWizardStep(previousStep, candidate)
+        ? previousStep
+        : candidate;
+    });
+    const sharedSteps =
+      previous !== undefined && sameArray(previous.steps, steps)
+        ? previous.steps
+        : Object.freeze(steps);
+    const candidateControls = Object.freeze({
+      previous: this.wizardPending === undefined && this.wizardStepIndex > 0,
+      next:
+        this.wizardPending === undefined &&
+        this.wizardStepIndex < wizard.steps.length - 1,
+      complete:
+        this.wizardPending === undefined &&
+        this.wizardStepIndex === wizard.steps.length - 1,
+    });
+    const controls =
+      previous !== undefined &&
+      sameWizardControls(previous.controls, candidateControls)
+        ? previous.controls
+        : candidateControls;
+    const candidate: WizardRuntimeSnapshot = Object.freeze({
+      key: wizard.key,
+      selectedStepId: wizard.steps[this.wizardStepIndex]?.id ?? '',
+      steps: sharedSteps,
+      ...(this.wizardPending === undefined
+        ? {}
+        : { pendingIntention: this.wizardPending }),
+      controls,
+      completionAttempted: this.wizardCompletionAttempted,
+      showGlobalIssues: this.wizardShowGlobalIssues,
+    });
+    return previous !== undefined && sameWizardSnapshot(previous, candidate)
+      ? previous
+      : candidate;
+  }
+
+  private scopedIssues(
+    scope: FormScope,
+    source: readonly ValidationIssue[],
+  ): readonly ValidationIssue[] {
+    const parsed = this.parseScope(scope);
+    if (!parsed.success) return EMPTY;
+    return Object.freeze(
+      source.filter((issue) => {
+        if (issue.path.length === 0) return parsed.includeGlobal;
+        const definitionKey = effectiveAssignedIssueKey(
+          issue.path,
+          this.nodeByKey,
+          this.alternativeOwners,
+          this.value,
+        );
+        const runtimeKey = assignedRuntimeIssueKey(
+          issue.path,
+          this.snapshotByPath,
+        );
+        return (
+          (runtimeKey !== undefined && parsed.nodeKeys.has(runtimeKey)) ||
+          (definitionKey !== undefined && parsed.nodeKeys.has(definitionKey))
+        );
+      }),
+    );
   }
 
   private rootValidationValid(treeValid = true): boolean {
@@ -1515,6 +2029,34 @@ function validateOptions<TData extends object>(
         ),
       ]),
     };
+  const rootPresentation = options.definition.presentation[0];
+  const wizard =
+    options.definition.presentation.length === 1 &&
+    rootPresentation?.kind === 'wizard'
+      ? rootPresentation
+      : undefined;
+  const wizardState = read(value, 'wizardState');
+  if (wizard === undefined && wizardState.kind !== 'missing')
+    return invalidWizardState('wizardState', 'not-applicable');
+  if (wizard !== undefined) {
+    if (wizardState.kind === 'missing')
+      return invalidWizardState('wizardState', 'missing-member');
+    if (wizardState.kind === 'accessor')
+      return invalidWizardState('wizardState', 'accessor-member');
+    if (!isRecord(wizardState.value))
+      return invalidWizardState('wizardState', 'invalid-value');
+    const selected = read(wizardState.value, 'selectedStepId');
+    if (selected.kind === 'missing')
+      return invalidWizardState('selectedStepId', 'missing-member');
+    if (selected.kind === 'accessor')
+      return invalidWizardState('selectedStepId', 'accessor-member');
+    if (typeof selected.value !== 'string')
+      return invalidWizardState('selectedStepId', 'invalid-value');
+    if (!hasExactOwnMembers(wizardState.value, ['selectedStepId']))
+      return invalidWizardState('wizardState', 'invalid-value');
+    if (selected.value !== wizard.steps[0]?.id)
+      return invalidWizardState('selectedStepId', 'unexpected-initial-step');
+  }
   const conditions = detachRuntimeFieldConditions(options.definition.fields);
   const valueDiagnostic = validateManagedExternalData(
     options.value,
@@ -1794,6 +2336,7 @@ interface DefinitionIndexes {
   readonly fields: ReadonlyMap<string, FieldDefinition>;
   readonly descendantNodes: ReadonlyMap<string, ReadonlySet<string>>;
   readonly descendantFields: ReadonlyMap<string, ReadonlySet<string>>;
+  readonly alternativeOwners: ReadonlyMap<string, ObjectAlternativeOwner>;
 }
 
 function buildDefinitionIndexes(
@@ -1803,9 +2346,10 @@ function buildDefinitionIndexes(
   const fields = new Map<string, FieldDefinition>();
   const descendantNodes = new Map<string, ReadonlySet<string>>();
   const descendantFields = new Map<string, ReadonlySet<string>>();
+  const alternativeOwners = new Map<string, ObjectAlternativeOwner>();
   type Frame =
     | { readonly phase: 'enter'; readonly node: FormNodeDefinition }
-    | { readonly phase: 'exit'; readonly node: ObjectFieldDefinition };
+    | { readonly phase: 'exit'; readonly node: ObjectNodeDefinition };
   const stack: Frame[] = [];
   for (let index = definitions.length - 1; index >= 0; index -= 1) {
     stack.push({
@@ -1837,7 +2381,10 @@ function buildDefinitionIndexes(
       descendantFields.set(frame.node.key, new Set());
       continue;
     }
-    if (frame.node.kind !== 'object') {
+    if (
+      frame.node.kind !== 'object' &&
+      frame.node.kind !== 'discriminated-object'
+    ) {
       fields.set(frame.node.key, frame.node);
       descendantNodes.set(frame.node.key, new Set([frame.node.key]));
       descendantFields.set(frame.node.key, new Set([frame.node.key]));
@@ -1851,7 +2398,34 @@ function buildDefinitionIndexes(
       });
     }
   }
-  return { nodes, fields, descendantNodes, descendantFields };
+  for (const node of nodes.values()) {
+    if (node.kind !== 'discriminated-object') continue;
+    const childByName = new Map(
+      node.children.map((child) => [child.name, child] as const),
+    );
+    for (
+      let alternativeIndex = 0;
+      alternativeIndex < node.alternatives.length;
+      alternativeIndex += 1
+    ) {
+      const alternative = node.alternatives[alternativeIndex];
+      if (alternative === undefined) continue;
+      for (const childName of alternative.children) {
+        const child = childByName.get(childName);
+        if (child === undefined) continue;
+        for (const key of descendantNodes.get(child.key) ?? EMPTY) {
+          alternativeOwners.set(key, { owner: node, alternativeIndex });
+        }
+      }
+    }
+  }
+  return {
+    nodes,
+    fields,
+    descendantNodes,
+    descendantFields,
+    alternativeOwners,
+  };
 }
 
 function managedPathKey(path: unknown): string | undefined {
@@ -2038,6 +2612,64 @@ function positionalPathKey(path: unknown): string | undefined {
     : canonicalDataPathKey(copied);
 }
 
+function selectedAlternativeIndex(
+  root: object,
+  owner: DiscriminatedObjectFieldDefinition,
+): number | undefined {
+  let current = root;
+  for (let index = 0; index < owner.path.length; index += 1) {
+    const segment = owner.path[index];
+    if (typeof segment !== 'string') return undefined;
+    const entry = readOwnDataMember(current, segment);
+    if (entry.kind !== 'value' || !isOrdinaryObject(entry.value)) {
+      return undefined;
+    }
+    current = entry.value;
+  }
+  const discriminator = readOwnDataMember(current, owner.discriminator);
+  if (
+    discriminator.kind !== 'value' ||
+    typeof discriminator.value !== 'string'
+  ) {
+    return undefined;
+  }
+  const index = owner.alternatives.findIndex(
+    (alternative) => alternative.discriminatorValue === discriminator.value,
+  );
+  return index < 0 ? undefined : index;
+}
+
+function inactiveObjectAlternativeDiagnostic(
+  action:
+    | 'requestSetValue'
+    | 'requestRemoveValue'
+    | 'focus'
+    | 'blur'
+    | 'applyFormOperation',
+  targetPath: DataPath,
+  ownership: ObjectAlternativeOwner,
+  activeAlternativeIndex: number | undefined,
+): Diagnostic {
+  return runtimeDiagnostic(
+    'INACTIVE_OBJECT_ALTERNATIVE_TARGET',
+    {
+      action,
+      ownerPath: Object.freeze([...ownership.owner.path]),
+      discriminatorPath: Object.freeze([
+        ...ownership.owner.path,
+        ownership.owner.discriminator,
+      ]),
+      requiredAlternativeIndex: ownership.alternativeIndex,
+      selection: activeAlternativeIndex === undefined ? 'none' : 'different',
+      ...(activeAlternativeIndex === undefined
+        ? {}
+        : { activeAlternativeIndex }),
+    },
+    'Runtime target belongs to an inactive object alternative.',
+    targetPath,
+  );
+}
+
 function validateManagedExternalData(
   value: unknown,
   definitions: readonly FormNodeDefinition[],
@@ -2183,6 +2815,12 @@ function invalidDefinitionOption(
       ...(defect.nodeIndexPath === undefined
         ? {}
         : { nodeIndexPath: Object.freeze([...defect.nodeIndexPath]) }),
+      ...(defect.alternativeIndex === undefined
+        ? {}
+        : { alternativeIndex: defect.alternativeIndex }),
+      ...(defect.childIndex === undefined
+        ? {}
+        : { childIndex: defect.childIndex }),
       ...(defect.firstNodeIndexPath === undefined
         ? {}
         : {
@@ -2681,6 +3319,21 @@ function read(object: object, key: PropertyKey): Entry {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+function hasExactOwnMembers(
+  value: object,
+  expected: readonly string[],
+): boolean {
+  let keys: readonly PropertyKey[];
+  try {
+    keys = Reflect.ownKeys(value);
+  } catch {
+    return false;
+  }
+  return (
+    keys.length === expected.length &&
+    expected.every((member) => keys.includes(member))
+  );
+}
 function copyPath(path: unknown): readonly unknown[] {
   if (!Array.isArray(path)) return EMPTY;
   const values: unknown[] = [];
@@ -2806,9 +3459,11 @@ interface SnapshotBuildInput<TData extends object> {
   readonly focused: string | undefined;
   readonly conditionState: ReadonlyMap<string, RuntimeFieldConditionState>;
   readonly forcedScopes: ReadonlyMap<string, ReadonlySet<string>>;
+  readonly wizardForcedKeys: ReadonlySet<string>;
   readonly visibility: ValidationVisibility;
   readonly previous?: FormRuntimeSnapshot<TData>;
   readonly nodeByKey: ReadonlyMap<string, FormNodeDefinition>;
+  readonly alternativeOwners: ReadonlyMap<string, ObjectAlternativeOwner>;
 }
 
 interface SnapshotBuildResult {
@@ -2822,7 +3477,12 @@ interface SnapshotBuildResult {
 function buildNestedSnapshots<TData extends object>(
   input: SnapshotBuildInput<TData>,
 ): SnapshotBuildResult {
-  const assigned = assignIssues(input.issues, input.nodeByKey);
+  const assigned = assignIssues(
+    input.issues,
+    input.nodeByKey,
+    input.alternativeOwners,
+    input.value,
+  );
   const previousByKey = indexSnapshots(input.previous?.nodes ?? EMPTY);
   const nodes = new Array<NodeRuntimeSnapshot>(input.definitions.length);
   const fields: FieldRuntimeSnapshot[] = [];
@@ -2839,9 +3499,10 @@ function buildNestedSnapshots<TData extends object>(
       }
     | {
         readonly phase: 'exit';
-        readonly definition: ObjectFieldDefinition;
+        readonly definition: ObjectNodeDefinition;
         readonly currentPresence: ObjectPresence;
         readonly baselinePresence: ObjectPresence;
+        readonly selection?: ObjectAlternativeSelection;
         readonly children: NodeRuntimeSnapshot[];
         readonly output: NodeRuntimeSnapshot[];
         readonly index: number;
@@ -2870,9 +3531,12 @@ function buildNestedSnapshots<TData extends object>(
       const ownIssues = assigned.byKey.get(frame.definition.key) ?? EMPTY;
       const touched = frame.children.some((child) => child.touched);
       const focused = frame.children.some((child) => child.focused);
-      const forced = isForced(frame.definition.key, input.forcedScopes);
-      const candidate = freezeObjectSnapshot({
-        nodeKind: 'object',
+      const forced = isForced(
+        frame.definition.key,
+        input.forcedScopes,
+        input.wizardForcedKeys,
+      );
+      const base = {
         key: frame.definition.key,
         path: [...frame.definition.path],
         presence: frame.currentPresence,
@@ -2891,12 +3555,32 @@ function buildNestedSnapshots<TData extends object>(
           ownIssues.length > 0 &&
           (input.visibility === 'all' || touched || forced),
         children: frame.children,
-      });
+      };
       const previous = previousByKey.get(frame.definition.key);
       const snapshot =
-        previous?.nodeKind === 'object' && sameObject(previous, candidate)
-          ? previous
-          : candidate;
+        frame.definition.kind === 'discriminated-object'
+          ? (() => {
+              const candidate = freezeDiscriminatedObjectSnapshot({
+                nodeKind: 'discriminated-object',
+                ...base,
+                selection:
+                  frame.selection ?? Object.freeze({ kind: 'none' as const }),
+              });
+              return previous?.nodeKind === 'discriminated-object' &&
+                sameDiscriminatedObject(previous, candidate)
+                ? previous
+                : candidate;
+            })()
+          : (() => {
+              const candidate = freezeObjectSnapshot({
+                nodeKind: 'object',
+                ...base,
+              });
+              return previous?.nodeKind === 'object' &&
+                sameObject(previous, candidate)
+                ? previous
+                : candidate;
+            })();
       frame.output[frame.index] = snapshot;
       byKey.set(snapshot.key, snapshot);
       byPath.set(canonicalDataPathKey(snapshot.path), snapshot);
@@ -2928,7 +3612,7 @@ function buildNestedSnapshots<TData extends object>(
         input.touched,
         input.focused,
         input.visibility === 'all',
-        collectForcedKeys(input.forcedScopes),
+        collectForcedKeys(input.forcedScopes, input.wizardForcedKeys),
       );
       if (snapshot !== undefined) {
         frame.output[frame.index] = snapshot;
@@ -2937,27 +3621,39 @@ function buildNestedSnapshots<TData extends object>(
       }
       continue;
     }
-    if (frame.definition.kind === 'object') {
-      const children = new Array<NodeRuntimeSnapshot>(
-        frame.definition.children.length,
-      );
+    if (
+      frame.definition.kind === 'object' ||
+      frame.definition.kind === 'discriminated-object'
+    ) {
+      const selection =
+        frame.definition.kind === 'discriminated-object'
+          ? inspectObjectAlternativeSelection(
+              current.children,
+              frame.definition,
+            )
+          : undefined;
+      const activeChildren =
+        frame.definition.kind === 'discriminated-object'
+          ? filterActiveObjectChildren(
+              frame.definition,
+              selection?.alternativeIndex,
+            )
+          : frame.definition.children;
+      const children = new Array<NodeRuntimeSnapshot>(activeChildren.length);
       stack.push({
         phase: 'exit',
         definition: frame.definition,
         currentPresence: current.presence as ObjectPresence,
         baselinePresence: baseline.presence as ObjectPresence,
+        ...(selection === undefined ? {} : { selection: selection.selection }),
         children,
         output: frame.output,
         index: frame.index,
       });
-      for (
-        let index = frame.definition.children.length - 1;
-        index >= 0;
-        index -= 1
-      ) {
+      for (let index = activeChildren.length - 1; index >= 0; index -= 1) {
         stack.push({
           phase: 'enter',
-          definition: frame.definition.children[index] as FormNodeDefinition,
+          definition: activeChildren[index] as FormNodeDefinition,
           current: current.children,
           baseline: baseline.children,
           output: children,
@@ -2970,7 +3666,11 @@ function buildNestedSnapshots<TData extends object>(
     const ownIssues = assigned.byKey.get(frame.definition.key) ?? EMPTY;
     const touched = input.touched.has(frame.definition.key);
     const focused = input.focused === frame.definition.key;
-    const forced = isForced(frame.definition.key, input.forcedScopes);
+    const forced = isForced(
+      frame.definition.key,
+      input.forcedScopes,
+      input.wizardForcedKeys,
+    );
     const condition = input.conditionState.get(frame.definition.key) ?? {
       visible: true,
       enabled: true,
@@ -3031,7 +3731,10 @@ function inspectNodeState(
     return { presence, children: parent };
   }
   const member = readOwnDataMember(parent.value, definition.name);
-  if (definition.kind !== 'object') {
+  if (
+    definition.kind !== 'object' &&
+    definition.kind !== 'discriminated-object'
+  ) {
     const presence: FieldPresence =
       member.kind === 'value'
         ? Object.freeze({ kind: 'value', value: member.value })
@@ -3064,6 +3767,60 @@ function inspectNodeState(
       at: path,
     },
   };
+}
+
+function inspectObjectAlternativeSelection(
+  context: BranchContext,
+  definition: DiscriminatedObjectFieldDefinition,
+): {
+  readonly selection: ObjectAlternativeSelection;
+  readonly alternativeIndex?: number;
+} {
+  if (context.kind !== 'object') {
+    return { selection: Object.freeze({ kind: 'none' }) };
+  }
+  const discriminator = readOwnDataMember(
+    context.value,
+    definition.discriminator,
+  );
+  if (
+    discriminator.kind !== 'value' ||
+    typeof discriminator.value !== 'string'
+  ) {
+    return { selection: Object.freeze({ kind: 'none' }) };
+  }
+  const alternativeIndex = definition.alternatives.findIndex(
+    (alternative) => alternative.discriminatorValue === discriminator.value,
+  );
+  if (alternativeIndex < 0) {
+    return { selection: Object.freeze({ kind: 'none' }) };
+  }
+  return {
+    selection: Object.freeze({
+      kind: 'active',
+      discriminatorValue: discriminator.value,
+    }),
+    alternativeIndex,
+  };
+}
+
+function filterActiveObjectChildren(
+  definition: DiscriminatedObjectFieldDefinition,
+  activeAlternativeIndex: number | undefined,
+): readonly FormNodeDefinition[] {
+  const ownedNames = new Set<string>();
+  for (const alternative of definition.alternatives) {
+    for (const name of alternative.children) ownedNames.add(name);
+  }
+  const activeNames =
+    activeAlternativeIndex === undefined
+      ? undefined
+      : new Set(
+          definition.alternatives[activeAlternativeIndex]?.children ?? EMPTY,
+        );
+  return definition.children.filter(
+    (child) => !ownedNames.has(child.name) || activeNames?.has(child.name),
+  );
 }
 
 function fieldDirty(
@@ -3100,14 +3857,18 @@ function objectDirty(
 function isForced(
   key: string,
   scopes: ReadonlyMap<string, ReadonlySet<string>>,
+  wizardKeys: ReadonlySet<string>,
 ): boolean {
-  return [...scopes.values()].some((scope) => scope.has(key));
+  return (
+    wizardKeys.has(key) || [...scopes.values()].some((scope) => scope.has(key))
+  );
 }
 
 function collectForcedKeys(
   scopes: ReadonlyMap<string, ReadonlySet<string>>,
+  wizardKeys: ReadonlySet<string>,
 ): ReadonlySet<string> {
-  const result = new Set<string>();
+  const result = new Set<string>(wizardKeys);
   for (const keys of scopes.values()) {
     for (const key of keys) result.add(key);
   }
@@ -3123,7 +3884,11 @@ function indexSnapshots(
     const node = stack.pop();
     if (node === undefined) continue;
     result.set(node.key, node);
-    if (node.nodeKind === 'object' || node.nodeKind === 'item') {
+    if (
+      node.nodeKind === 'object' ||
+      node.nodeKind === 'discriminated-object' ||
+      node.nodeKind === 'item'
+    ) {
       for (let index = node.children.length - 1; index >= 0; index -= 1) {
         stack.push(node.children[index] as NodeRuntimeSnapshot);
       }
@@ -3152,7 +3917,11 @@ function indexRuntimeTree(
       for (let index = node.items.length - 1; index >= 0; index -= 1) {
         stack.push(node.items[index] as ItemRuntimeSnapshot);
       }
-    } else if (node.nodeKind === 'object' || node.nodeKind === 'item') {
+    } else if (
+      node.nodeKind === 'object' ||
+      node.nodeKind === 'discriminated-object' ||
+      node.nodeKind === 'item'
+    ) {
       for (let index = node.children.length - 1; index >= 0; index -= 1) {
         stack.push(node.children[index] as NodeRuntimeSnapshot);
       }
@@ -3163,6 +3932,8 @@ function indexRuntimeTree(
 function assignIssues(
   issues: readonly ValidationIssue[],
   nodes: ReadonlyMap<string, FormNodeDefinition>,
+  alternativeOwners: ReadonlyMap<string, ObjectAlternativeOwner>,
+  value: object,
 ): {
   readonly byKey: ReadonlyMap<string, readonly ValidationIssue[]>;
   readonly global: readonly ValidationIssue[];
@@ -3170,7 +3941,12 @@ function assignIssues(
   const mutable = new Map<string, ValidationIssue[]>();
   const global: ValidationIssue[] = [];
   for (const issue of issues) {
-    const key = assignedIssueKey(issue.path, nodes);
+    const key = effectiveAssignedIssueKey(
+      issue.path,
+      nodes,
+      alternativeOwners,
+      value,
+    );
     if (key === undefined) {
       global.push(issue);
     } else {
@@ -3182,6 +3958,22 @@ function assignIssues(
   const byKey = new Map<string, readonly ValidationIssue[]>();
   for (const [key, entries] of mutable) byKey.set(key, Object.freeze(entries));
   return { byKey, global: Object.freeze(global) };
+}
+
+function effectiveAssignedIssueKey(
+  path: DataPath,
+  nodes: ReadonlyMap<string, FormNodeDefinition>,
+  alternativeOwners: ReadonlyMap<string, ObjectAlternativeOwner>,
+  value: object,
+): string | undefined {
+  const key = assignedIssueKey(path, nodes);
+  if (key === undefined) return undefined;
+  const ownership = alternativeOwners.get(key);
+  return ownership === undefined ||
+    selectedAlternativeIndex(value, ownership.owner) ===
+      ownership.alternativeIndex
+    ? key
+    : ownership.owner.key;
 }
 
 function assignedIssueKey(
@@ -3205,7 +3997,12 @@ function assignedIssueKey(
   for (let length = copied.length - 1; length > 0; length -= 1) {
     const key = canonicalDataPathKey(copied.slice(0, length));
     const node = nodes.get(key);
-    if (node?.kind === 'object' || node?.kind === 'array') return key;
+    if (
+      node?.kind === 'object' ||
+      node?.kind === 'discriminated-object' ||
+      node?.kind === 'array'
+    )
+      return key;
   }
   return undefined;
 }
@@ -3282,6 +4079,15 @@ function freezeObjectSnapshot(
   Object.freeze(node.children);
   return Object.freeze(node);
 }
+function freezeDiscriminatedObjectSnapshot(
+  node: DiscriminatedObjectRuntimeSnapshot,
+): DiscriminatedObjectRuntimeSnapshot {
+  Object.freeze(node.path);
+  Object.freeze(node.presence);
+  Object.freeze(node.selection);
+  Object.freeze(node.children);
+  return Object.freeze(node);
+}
 function sameObject(
   a: ObjectRuntimeSnapshot,
   b: ObjectRuntimeSnapshot,
@@ -3296,6 +4102,33 @@ function sameObject(
     a.showIssues === b.showIssues &&
     sameArray(a.issues, b.issues) &&
     sameArray(a.children, b.children)
+  );
+}
+function sameDiscriminatedObject(
+  a: DiscriminatedObjectRuntimeSnapshot,
+  b: DiscriminatedObjectRuntimeSnapshot,
+): boolean {
+  return (
+    a.key === b.key &&
+    sameObjectPresence(a.presence, b.presence) &&
+    sameObjectAlternativeSelection(a.selection, b.selection) &&
+    a.dirty === b.dirty &&
+    a.touched === b.touched &&
+    a.focused === b.focused &&
+    a.valid === b.valid &&
+    a.showIssues === b.showIssues &&
+    sameArray(a.issues, b.issues) &&
+    sameArray(a.children, b.children)
+  );
+}
+function sameObjectAlternativeSelection(
+  a: ObjectAlternativeSelection,
+  b: ObjectAlternativeSelection,
+): boolean {
+  return (
+    a.kind === b.kind &&
+    (a.kind === 'none' ||
+      (b.kind === 'active' && a.discriminatorValue === b.discriminatorValue))
   );
 }
 function sameObjectPresence(a: ObjectPresence, b: ObjectPresence): boolean {
@@ -3329,6 +4162,69 @@ function sameFieldPresence(
   if (a.kind === 'value')
     return b.kind === 'value' && Object.is(a.value, b.value);
   return b.kind === 'blocked' && a.reason === b.reason && sameArray(a.at, b.at);
+}
+function sameFormSnapshot<TData extends object>(
+  a: FormRuntimeSnapshot<TData>,
+  b: FormRuntimeSnapshot<TData>,
+): boolean {
+  return (
+    a.value === b.value &&
+    a.locale === b.locale &&
+    a.valid === b.valid &&
+    a.dirty === b.dirty &&
+    a.validationVisibility === b.validationVisibility &&
+    sameArray(a.nodes, b.nodes) &&
+    sameArray(a.fields, b.fields) &&
+    sameArray(a.globalIssues, b.globalIssues) &&
+    a.asyncValidation === b.asyncValidation &&
+    a.wizard === b.wizard
+  );
+}
+function sameWizardStepValidation(
+  a: WizardStepValidationSnapshot,
+  b: WizardStepValidationSnapshot,
+): boolean {
+  return (
+    a.state === b.state &&
+    a.synchronousValid === b.synchronousValid &&
+    sameArray(a.issues, b.issues) &&
+    a.asyncValidation === b.asyncValidation
+  );
+}
+function sameWizardStep(a: WizardStepSnapshot, b: WizardStepSnapshot): boolean {
+  return (
+    a.key === b.key &&
+    a.id === b.id &&
+    a.position === b.position &&
+    a.current === b.current &&
+    a.visited === b.visited &&
+    a.attempted === b.attempted &&
+    a.passed === b.passed &&
+    a.progress === b.progress &&
+    a.validation === b.validation
+  );
+}
+function sameWizardControls(
+  a: WizardRuntimeSnapshot['controls'],
+  b: WizardRuntimeSnapshot['controls'],
+): boolean {
+  return (
+    a.previous === b.previous && a.next === b.next && a.complete === b.complete
+  );
+}
+function sameWizardSnapshot(
+  a: WizardRuntimeSnapshot,
+  b: WizardRuntimeSnapshot,
+): boolean {
+  return (
+    a.key === b.key &&
+    a.selectedStepId === b.selectedStepId &&
+    a.steps === b.steps &&
+    a.pendingIntention === b.pendingIntention &&
+    a.controls === b.controls &&
+    a.completionAttempted === b.completionAttempted &&
+    a.showGlobalIssues === b.showGlobalIssues
+  );
 }
 function sameArray(a: readonly unknown[], b: readonly unknown[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
@@ -3453,7 +4349,10 @@ function parseScope(
       );
     else if (stableNode !== undefined) {
       collectScopeTree(stableNode, nodeKeys, fieldKeys);
-    } else if (staticRuntime?.nodeKind === 'array') {
+    } else if (
+      staticRuntime?.nodeKind === 'array' ||
+      staticRuntime?.nodeKind === 'discriminated-object'
+    ) {
       collectScopeTree(staticRuntime, nodeKeys, fieldKeys);
     } else if (staticKey !== undefined) {
       for (const descendant of descendantNodes.get(staticKey) ?? EMPTY) {
@@ -3518,6 +4417,112 @@ function actionFailure(
     diagnostics: freezeDiagnostics(diagnostics),
   });
 }
+function wizardActionSuccess(
+  snapshotChanged: boolean,
+  intentionEmitted: boolean,
+  diagnostics: readonly Diagnostic[] = EMPTY,
+): WizardActionResult {
+  return Object.freeze({
+    success: true,
+    effects: Object.freeze({ snapshotChanged, intentionEmitted }),
+    diagnostics: freezeDiagnostics(diagnostics),
+  });
+}
+function wizardActionUnavailable(
+  action: 'previous' | 'next' | 'complete',
+  reason:
+    | 'not-configured'
+    | 'at-first-step'
+    | 'at-last-step'
+    | 'not-last-step'
+    | 'intention-pending'
+    | 'step-unresolved' = 'not-configured',
+): WizardActionResult {
+  return Object.freeze({
+    success: false,
+    effects: Object.freeze({
+      snapshotChanged: false,
+      intentionEmitted: false,
+    }),
+    diagnostics: freezeDiagnostics([
+      runtimeDiagnostic(
+        'WIZARD_ACTION_UNAVAILABLE',
+        { action, reason },
+        'Wizard action is unavailable.',
+      ),
+    ]),
+  });
+}
+function staleWizardIntention(
+  action: 'confirm' | 'reject',
+  reason: 'no-pending-intention' | 'request-mismatch' | 'target-mismatch',
+  requestId?: number,
+  selectedStepId?: string,
+): WizardActionResult {
+  return Object.freeze({
+    success: false,
+    effects: Object.freeze({
+      snapshotChanged: false,
+      intentionEmitted: false,
+    }),
+    diagnostics: freezeDiagnostics([
+      runtimeDiagnostic(
+        'STALE_WIZARD_INTENTION',
+        {
+          action,
+          reason,
+          ...(requestId !== undefined && Number.isSafeInteger(requestId)
+            ? { requestId }
+            : {}),
+          ...(selectedStepId !== undefined ? { selectedStepId } : {}),
+        },
+        'Wizard intention is stale.',
+      ),
+    ]),
+  });
+}
+function wizardRequestExhausted(
+  action: 'previous' | 'next' | 'complete',
+): WizardActionResult {
+  return Object.freeze({
+    success: false,
+    effects: Object.freeze({
+      snapshotChanged: false,
+      intentionEmitted: false,
+    }),
+    diagnostics: freezeDiagnostics([
+      runtimeDiagnostic(
+        'WIZARD_REQUEST_EXHAUSTED',
+        { action },
+        'Wizard request identity is exhausted.',
+      ),
+    ]),
+  });
+}
+function wizardDisposed(action: string): WizardActionResult {
+  return Object.freeze({
+    success: false,
+    effects: Object.freeze({
+      snapshotChanged: false,
+      intentionEmitted: false,
+    }),
+    diagnostics: freezeDiagnostics([
+      runtimeDiagnostic('RUNTIME_DISPOSED', { action }, 'Runtime is disposed.'),
+    ]),
+  });
+}
+function runtimeFromWizardFailure(
+  result: WizardActionResult,
+): RuntimeActionResult {
+  return Object.freeze({
+    success: false,
+    effects: Object.freeze({
+      snapshotChanged: false,
+      operationEmitted: false,
+    }),
+    diagnostics: result.diagnostics,
+  });
+}
 function asyncRetryUnavailable(
   reason: 'not-configured' | 'sync-invalid' | 'generation-exhausted',
 ): RuntimeActionResult {
@@ -3534,6 +4539,26 @@ function failedCreation(diagnostics: readonly Diagnostic[]): InvalidResult {
     success: false,
     diagnostics: freezeDiagnostics(diagnostics),
   });
+}
+function invalidWizardState(
+  member: 'wizardState' | 'selectedStepId' | 'wizardSelection' | 'requestId',
+  reason:
+    | 'missing-member'
+    | 'accessor-member'
+    | 'invalid-value'
+    | 'not-applicable'
+    | 'unexpected-initial-step',
+): InvalidResult {
+  return {
+    success: false,
+    diagnostics: freezeDiagnostics([
+      runtimeDiagnostic(
+        'INVALID_WIZARD_STATE',
+        { member, reason },
+        'Wizard state is invalid.',
+      ),
+    ]),
+  };
 }
 function invalidOption(
   member: string,

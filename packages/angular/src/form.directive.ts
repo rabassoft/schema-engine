@@ -32,8 +32,12 @@ import {
   type RuntimeActionResult,
   type ValidationSnapshot,
   type ValidationVisibility,
+  type WizardActionResult,
+  type WizardIntention,
+  type WizardSelectionConfirmation,
 } from '@rabassoft/schema-engine';
 import { SchemaPresentationOutletComponent } from './node-outlet.js';
+import { SchemaWizardOutletComponent } from './wizard.js';
 import { AngularPresentationContainerResolver } from './presentation-container.js';
 import type { PresentationProjectionOwner } from './presentation-context.js';
 
@@ -67,21 +71,29 @@ export function readRuntimeContext(form: object): RuntimeContext | undefined {
   selector: '[schemaForm]',
   exportAs: 'schemaForm',
   standalone: true,
-  imports: [SchemaPresentationOutletComponent],
+  imports: [SchemaPresentationOutletComponent, SchemaWizardOutletComponent],
   template: `
-    @for (
-      projected of projectedPresentation();
-      track projected.entry.kind === 'form-node'
-        ? projected.entry.node.key
-        : projected.entry.key
-    ) {
-      <schema-presentation-outlet
-        [entry]="projected.entry"
-        [owner]="projected.owner"
+    @if (wizardProjection(); as projected) {
+      <schema-wizard-outlet
+        [wizard]="projected.wizard"
         [definition]="projected.definition"
         [snapshot]="projected.snapshot"
-        [locale]="projected.locale"
       />
+    } @else {
+      @for (
+        projected of projectedPresentation();
+        track projected.entry.kind === 'form-node'
+          ? projected.entry.node.key
+          : projected.entry.key
+      ) {
+        <schema-presentation-outlet
+          [entry]="projected.entry"
+          [owner]="projected.owner"
+          [definition]="projected.definition"
+          [snapshot]="projected.snapshot"
+          [locale]="projected.locale"
+        />
+      }
     }
     <ng-content />
   `,
@@ -89,6 +101,7 @@ export function readRuntimeContext(form: object): RuntimeContext | undefined {
 export class SchemaFormDirective<TData extends object> {
   readonly schemaForm = input.required<AngularControlledFormConfig<TData>>();
   readonly schemaOperation = output<FormOperation>();
+  readonly schemaWizardIntention = output<WizardIntention>();
   readonly schemaDiagnostics = output<readonly Diagnostic[]>();
 
   private readonly snapshotState = signal<
@@ -103,6 +116,17 @@ export class SchemaFormDirective<TData extends object> {
   readonly snapshot: Signal<FormRuntimeSnapshot<TData> | undefined> =
     this.snapshotState.asReadonly();
   readonly ready = computed(() => this.snapshotState() !== undefined);
+  protected readonly wizardProjection = computed(() => {
+    const definition = this.acceptedDefinitionState();
+    const snapshot = this.snapshotState();
+    const root = definition?.presentation[0];
+    return definition !== undefined &&
+      snapshot?.wizard !== undefined &&
+      definition.presentation.length === 1 &&
+      root?.kind === 'wizard'
+      ? Object.freeze({ wizard: root, definition, snapshot })
+      : undefined;
+  });
   protected readonly projectedPresentation = computed<
     readonly ProjectedPresentation[]
   >(() => {
@@ -115,14 +139,18 @@ export class SchemaFormDirective<TData extends object> {
     )
       return [];
     return Object.freeze(
-      definition.presentation.map((entry) =>
-        Object.freeze({
-          entry,
-          definition,
-          snapshot,
-          owner: ROOT_PRESENTATION_OWNER,
-          locale: snapshot.locale,
-        }),
+      definition.presentation.flatMap((entry) =>
+        entry.kind === 'wizard'
+          ? []
+          : [
+              Object.freeze({
+                entry,
+                definition,
+                snapshot,
+                owner: ROOT_PRESENTATION_OWNER,
+                locale: snapshot.locale,
+              }),
+            ],
       ),
     );
   });
@@ -131,6 +159,7 @@ export class SchemaFormDirective<TData extends object> {
   private lastConfig: AngularControlledFormConfig<TData> | undefined;
   private unsubscribeSnapshot: (() => void) | undefined;
   private unsubscribeOperations: (() => void) | undefined;
+  private unsubscribeWizardIntentions: (() => void) | undefined;
   private readonly destroyRef = inject(DestroyRef);
   private readonly defaultLocale = inject(LOCALE_ID);
   private readonly presentationContainerResolver = inject(
@@ -239,6 +268,41 @@ export class SchemaFormDirective<TData extends object> {
     return this.runAction('retryAsyncValidation');
   }
 
+  requestWizardPrevious(): WizardActionResult {
+    return this.runWizardAction('previous');
+  }
+
+  requestWizardNext(): WizardActionResult {
+    return this.runWizardAction('next');
+  }
+
+  requestWizardComplete(): WizardActionResult {
+    return this.runWizardAction('complete');
+  }
+
+  rejectWizardIntention(requestId: number): WizardActionResult {
+    if (this.runtime === undefined)
+      return unavailableWizardResult('rejectWizardIntention');
+    const result = this.runtime.rejectWizardIntention(requestId);
+    this.reportDiagnostics(result.diagnostics);
+    return result;
+  }
+
+  confirmWizardSelection(
+    confirmation: WizardSelectionConfirmation,
+  ): RuntimeActionResult {
+    if (this.runtime === undefined) {
+      const result = unavailableResult('confirmWizardSelection');
+      this.reportDiagnostics(result.diagnostics);
+      return result;
+    }
+    const result = this.runtime.updateExternalState({
+      wizardSelection: confirmation,
+    });
+    this.reportDiagnostics(result.diagnostics);
+    return result;
+  }
+
   getValidationSnapshot(scope?: FormScope): ValidationSnapshot | undefined {
     const result = this.runtime?.getValidationSnapshot(scope);
     if (result !== undefined) this.reportDiagnostics(result.diagnostics);
@@ -296,13 +360,22 @@ export class SchemaFormDirective<TData extends object> {
     const operationSubscription = creation.runtime.subscribeOperations(
       (operation) => this.schemaOperation.emit(operation),
     );
-    if (!snapshotSubscription.success || !operationSubscription.success) {
+    const wizardSubscription = creation.runtime.subscribeWizardIntentions(
+      (intention) => this.schemaWizardIntention.emit(intention),
+    );
+    if (
+      !snapshotSubscription.success ||
+      !operationSubscription.success ||
+      !wizardSubscription.success
+    ) {
       this.reportDiagnostics([
         ...snapshotSubscription.diagnostics,
         ...operationSubscription.diagnostics,
+        ...wizardSubscription.diagnostics,
       ]);
       if (snapshotSubscription.success) snapshotSubscription.unsubscribe();
       if (operationSubscription.success) operationSubscription.unsubscribe();
+      if (wizardSubscription.success) wizardSubscription.unsubscribe();
       creation.runtime.dispose();
       return;
     }
@@ -311,6 +384,7 @@ export class SchemaFormDirective<TData extends object> {
     this.runtime = creation.runtime;
     this.unsubscribeSnapshot = snapshotSubscription.unsubscribe;
     this.unsubscribeOperations = operationSubscription.unsubscribe;
+    this.unsubscribeWizardIntentions = wizardSubscription.unsubscribe;
     this.lastConfig = config;
     this.acceptedDefinitionState.set(config.definition);
     this.snapshotState.set(creation.runtime.getSnapshot());
@@ -415,14 +489,31 @@ export class SchemaFormDirective<TData extends object> {
   private destroyRuntime(): void {
     this.unsubscribeSnapshot?.();
     this.unsubscribeOperations?.();
+    this.unsubscribeWizardIntentions?.();
     this.runtime?.dispose();
     this.unsubscribeSnapshot = undefined;
     this.unsubscribeOperations = undefined;
+    this.unsubscribeWizardIntentions = undefined;
     this.runtime = undefined;
     this.lastConfig = undefined;
     this.acceptedDefinitionState.set(undefined);
     this.snapshotState.set(undefined);
     this.runtimeContextState.set(undefined);
+  }
+
+  private runWizardAction(
+    action: 'previous' | 'next' | 'complete',
+  ): WizardActionResult {
+    if (this.runtime === undefined)
+      return unavailableWizardResult(`requestWizard${action}`);
+    const result =
+      action === 'previous'
+        ? this.runtime.requestWizardPrevious()
+        : action === 'next'
+          ? this.runtime.requestWizardNext()
+          : this.runtime.requestWizardComplete();
+    this.reportDiagnostics(result.diagnostics);
+    return result;
   }
 }
 
@@ -441,5 +532,17 @@ function unavailableResult(action: string): RuntimeActionResult {
       operationEmitted: false,
     }),
     diagnostics: Object.freeze([diagnostic]),
+  });
+}
+
+function unavailableWizardResult(action: string): WizardActionResult {
+  const base = unavailableResult(action);
+  return Object.freeze({
+    success: false,
+    effects: Object.freeze({
+      snapshotChanged: false,
+      intentionEmitted: false,
+    }),
+    diagnostics: base.diagnostics,
   });
 }

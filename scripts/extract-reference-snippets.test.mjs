@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 import {
+  EXPECTED_REACT_REFERENCE_SNIPPETS,
   EXPECTED_STANDARD_REFERENCE_SNIPPETS,
   extractReferenceSnippets,
   renderReferenceSnippets,
@@ -25,6 +26,11 @@ const validSource = `
 `;
 
 const validStandardSource = EXPECTED_STANDARD_REFERENCE_SNIPPETS.map(
+  (id) =>
+    `// reference-snippet:start ${id}\nconst ${id.replaceAll('-', '_')} = true;\n// reference-snippet:end ${id}`,
+).join('\n');
+
+const validReactSource = EXPECTED_REACT_REFERENCE_SNIPPETS.map(
   (id) =>
     `// reference-snippet:start ${id}\nconst ${id.replaceAll('-', '_')} = true;\n// reference-snippet:end ${id}`,
 ).join('\n');
@@ -195,11 +201,31 @@ test('enforces the exact Standard marker inventory and all marker failures', () 
   );
 });
 
+test('enforces the exact React marker inventory', () => {
+  const snippets = extractReferenceSnippets(
+    validReactSource,
+    EXPECTED_REACT_REFERENCE_SNIPPETS,
+  );
+  assert.deepEqual(Object.keys(snippets), EXPECTED_REACT_REFERENCE_SNIPPETS);
+  assert.throws(
+    () =>
+      extractReferenceSnippets(
+        validReactSource.replace(
+          /\/\/ reference-snippet:start react-schema-form[\s\S]*$/u,
+          '',
+        ),
+        EXPECTED_REACT_REFERENCE_SNIPPETS,
+      ),
+    /Missing snippet marker/u,
+  );
+});
+
 test('writes and checks multiple targets without changing either source', () => {
   const root = mkdtempSync(join(tmpdir(), 'reference-snippet-targets-'));
   try {
     writeFileSync(join(root, 'angular.ts'), validSource);
     writeFileSync(join(root, 'standard.ts'), validStandardSource);
+    writeFileSync(join(root, 'react.ts'), validReactSource);
     const targets = [
       {
         id: 'angular',
@@ -217,16 +243,24 @@ test('writes and checks multiple targets without changing either source', () => 
         outputPath: 'generated/standard.ts',
         expectedIds: EXPECTED_STANDARD_REFERENCE_SNIPPETS,
       },
+      {
+        id: 'react',
+        sourcePath: 'react.ts',
+        outputPath: 'generated/react.ts',
+        expectedIds: EXPECTED_REACT_REFERENCE_SNIPPETS,
+      },
     ];
     const angularBefore = readFileSync(join(root, 'angular.ts'), 'utf8');
     const standardBefore = readFileSync(join(root, 'standard.ts'), 'utf8');
+    const reactBefore = readFileSync(join(root, 'react.ts'), 'utf8');
     const write = runReferenceSnippetTargets({ mode: 'write', root, targets });
-    assert.deepEqual(write, { changed: true, snippets: 8, targets: 2 });
+    assert.deepEqual(write, { changed: true, snippets: 12, targets: 3 });
     assert.equal(readFileSync(join(root, 'angular.ts'), 'utf8'), angularBefore);
     assert.equal(
       readFileSync(join(root, 'standard.ts'), 'utf8'),
       standardBefore,
     );
+    assert.equal(readFileSync(join(root, 'react.ts'), 'utf8'), reactBefore);
     runReferenceSnippetTargets({ mode: 'check', root, targets });
     writeFileSync(
       join(root, 'standard.ts'),

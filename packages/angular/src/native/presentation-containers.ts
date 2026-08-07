@@ -157,12 +157,18 @@ export class NativePresentationTabsComponent implements AngularPresentationConta
         ) {
           <button
             type="button"
+            data-schema-presentation-accordion-trigger
             [id]="panel.triggerId"
             [attr.aria-expanded]="expanded().has(index)"
             [attr.aria-controls]="panel.regionId"
             (click)="toggle(index)"
           >
-            {{ panel.label }}
+            <span>{{ panel.label }}</span>
+            <span
+              class="schema-presentation-accordion-indicator"
+              aria-hidden="true"
+              >{{ expanded().has(index) ? '−' : '+' }}</span
+            >
           </button>
           <div
             role="region"

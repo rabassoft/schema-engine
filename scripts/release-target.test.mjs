@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { assertCandidateFile, assertJsonNoDrift } from './release-evidence.mjs';
+import { readWorkspacePackage } from './release-candidate-utils.mjs';
 import {
   argumentValue,
   assertCoordinatedReleaseVersion,
@@ -127,6 +128,32 @@ test('accepts current package manifests only for the active M23 source line', ()
     M23_RELEASE_DESCRIPTOR,
   );
   assert.throws(() => loadCoordinatedReleaseTarget(['--release=m21']));
+});
+
+test('keeps local candidate aliases on M23 and historical live aliases on M21', () => {
+  const scripts = readWorkspacePackage().scripts;
+  for (const name of [
+    'audit:m18',
+    'prepare:release',
+    'test:artifacts:m18',
+    'test:consumer:m18:lower',
+    'test:consumer:m18:latest',
+    'test:consumer:m20:lower',
+    'test:consumer:m20:latest',
+    'test:source:m18',
+  ]) {
+    assert.match(scripts[name], /--release=m23/u, name);
+    assert.doesNotMatch(scripts[name], /--release=m21/u, name);
+  }
+  for (const name of [
+    'test:live:m21:exact',
+    'test:live:m21:next',
+    'test:live:m21:latest',
+    'test:live:m21:unqualified',
+  ]) {
+    assert.match(scripts[name], /--release=m21/u, name);
+    assert.doesNotMatch(scripts[name], /--release=m23/u, name);
+  }
 });
 
 function m23ManifestFixtures() {

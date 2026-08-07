@@ -217,7 +217,8 @@ export function firstManagedDataAccessor(
     const entry = readOwnDataMember(frame.parent, frame.node.name);
     if (entry.kind === 'accessor') return frame.node.path;
     if (
-      frame.node.kind === 'object' &&
+      (frame.node.kind === 'object' ||
+        frame.node.kind === 'discriminated-object') &&
       entry.kind === 'value' &&
       isOrdinaryObject(entry.value)
     ) {

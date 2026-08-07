@@ -40,7 +40,7 @@ export const semanticContact = {
         birthDate: { hint: 'Choose a canonical full date.' },
         publishedAt: {
           placeholder: '2026-07-30T12:34:56Z',
-          hint: 'Kept as text so an RFC 3339 timezone is never discarded.',
+          hint: 'Exact RFC 3339 value: date, time and timezone are preserved (Z means UTC).',
         },
       },
     },
@@ -115,7 +115,7 @@ export const semanticContact = {
     {
       id: 'timezone-fidelity',
       title: 'Timezone-preserving date-time',
-      body: 'Date-time remains textual because datetime-local cannot represent the required RFC 3339 timezone.',
+      body: 'The canonical value 1843-01-01T12:00:00Z means 1 January 1843 at 12:00 UTC. It remains textual because datetime-local cannot represent the required timezone.',
     },
   ],
 } satisfies ReferenceScenarioAuthoring;

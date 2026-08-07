@@ -1,9 +1,9 @@
 # ADR 005: Política de dialecto y compatibilidad de JSON Schema
 
-- **Estado:** Accepted revision 8
+- **Estado:** Accepted revision 11
 - **Fecha:** 13 de julio de 2026
 - **Fecha de aceptación:** 13 de julio de 2026
-- **Revisión aceptada:** 8 — campo atómico array enum-string
+- **Revisión aceptada:** 11 — compatibilidad de presentación M33
 - **Fecha de aceptación de revisión 1:** 14 de julio de 2026
 - **Relacionado con:** [`SPEC-001`](../specs/001-controlled-form-runtime.md)
 - **Revisado parcialmente por:**
@@ -18,9 +18,11 @@
 - **Revisión 3 coordinada con:**
   [`ADR-016`](./016-resolucion-referencias-locales.md) Accepted
 - **Fecha de aceptación de revisión 3:** 14 de julio de 2026
-- **Autoridad vigente:** las secciones 1–16 conservan la conducta Accepted de
-  M1–M28; revision 7 autoriza únicamente preparar/revisar la SPEC de extensión
-  M28 y no activa plan, comportamiento ni implementación
+- **Autoridad vigente:** las secciones 1–20 conservan la conducta Accepted de
+  M1–M33 promovida; revision 11 preserva la familia
+  `INVALID_UI_PRESENTATION` de SPEC-005/SPEC-009 para presentación M33
+  malformed y limita `INCOMPATIBLE_UI_OPTION` a una presentación válida, bajo
+  SPEC-019 v0.1.2 y PLAN-035 revision 2 Approved
 - **Revisión 2 completa:** ciclo 3 pasó las nueve áreas sin hallazgos y Ricard
   aceptó formalmente revision 2
 - **Revisión 3 completa y aceptada:**
@@ -65,6 +67,16 @@
   [`review 294`](../reviews/294-adr-005-revision-8-review.md) ciclo 2 pasó las
   diez áreas con cero hallazgos tras cinco correcciones; aceptada bajo la regla
   autorizada de revisión completa sin ampliación de alcance
+- **Revisión 9 coordinada con:**
+  [`ADR-036`](./036-controlled-discriminated-object-alternatives.md) Accepted;
+  solo D-007/M33
+- **Autoridad de revisión 9:** propuesta normativa; no autoriza SPEC, plan,
+  contrato activo, implementación, dependencia, versión, release, publicación
+  o Git antes de su revisión completa y aceptación
+- **Fecha de aceptación de revisión 9:** 3 de agosto de 2026
+- **Revisión 9 completa:**
+  [`review 316`](../reviews/316-adr-005-revision-9-adr-036-revision-1-review.md)
+  ciclo 2 pasó dieciséis áreas con cero hallazgos después de cinco correcciones
 
 ## 1. Contexto y problema
 
@@ -1771,3 +1783,435 @@ las diez áreas con cero hallazgos después de cinco correcciones y revision 8
 queda Accepted bajo la regla autorizada de aceptación sin ampliación de
 alcance. Autoriza únicamente preparar y revisar SPEC-017; no un plan, código,
 dependencia, versión, release, Git o acción externa.
+
+## 18. Revisión 9 aceptada — alternativas discriminadas de objeto anidado
+
+> Esta sección fija únicamente la política normativa M33 autorizada por
+> ADR-036 revision 1 Accepted. Las secciones 1–17 conservan su autoridad
+> Accepted. Su aceptación autoriza solo preparar/revisar SPEC-019;
+> no activaría contrato, plan, implementación, dependencia, versión, release,
+> publicación o Git.
+
+### 18.1 Motivo, autoridad y frontera
+
+ADR-036 activa el criterio de revisión de la sección 7 para un único slice de
+D-007: una propiedad object ordinaria cuyo `oneOf` puede derivarse como un
+catálogo finito de alternativas mediante un discriminador string-enum requerido
+y controlado por la aplicación.
+
+Revision 9 conserva Draft 2020-12, la URI canónica, unknowns y annotations,
+referencias locales, composición object-`allOf`, arrays M10/M31, traversal
+descriptor-safe, schema original para el validator y todas las reglas M1–M32
+que no sustituye expresamente.
+
+Documento raíz, collections/items/templates, arrays, `oneOf` recursivo,
+`anyOf`, `not`, conditions schema, alternativas solapadas, discriminadores no
+string/inferidos, composición dentro del wrapper y evaluación general continúan
+Deferred.
+
+### 18.2 Ubicaciones, clasificación y catálogo exterior
+
+Un descriptor propio `oneOf` clasifica un schema object como candidato M33
+antes de normalizarlo como object ordinario. Solo es elegible como propiedad
+directa del root o descendiente de objects ordinarios fuera de todo collection
+item. Un use site `$ref` local elegible puede resolver al wrapper.
+
+El catálogo semántico exacto del wrapper es:
+
+| Ubicación            | Miembros soportados propios                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| propiedad object M33 | `type`, `properties`, `required`, `oneOf`, `title`, `description`, `default`             |
+| todos                | annotations ignorables Accepted y keywords desconocidas opacas bajo su política Accepted |
+
+`type`, `properties`, `required` y `oneOf` son obligatorios. `type` debe ser
+data property propia con valor exacto `"object"`; `properties`/`required`
+conservan sus formas ordinarias descriptor-safe. `default` permanece metadata
+opaca para compiler/runtime y no crea una rama.
+
+`$ref`, `allOf`, `anyOf`, otro applicator/conditional, keywords array y toda
+keyword semántica no listada son siblings incompatibles. Producen
+`INCOMPATIBLE_SCHEMA_KEYWORD` con
+`{ keyword, fieldType: 'discriminated-object' }` y fallback Accepted. No se
+inspeccionan como una contribución o condición implícita.
+
+En el document root, `oneOf` conserva `UNSUPPORTED_SCHEMA_KEYWORD`, sin
+`dataPath`. En primitive/array ordinario usa `INCOMPATIBLE_SCHEMA_KEYWORD` con
+el `fieldType` Accepted. En item root/template o cualquier descendant de item
+conserva `UNSUPPORTED_SCHEMA_KEYWORD`, porque M33 no promueve esa location. Un
+`oneOf` nested bajo un wrapper M33 usa `INCOMPATIBLE_SCHEMA_KEYWORD` con
+`{ keyword: 'oneOf', fieldType: 'discriminated-object' }`. Ninguno de estos
+casos inspecciona branches.
+
+Cada propiedad outer debe resolver a una hoja primitive no array o a un object
+ordinario sin arrays/alternativas en todo su subtree. `$ref` local puede
+alcanzar solo esos targets efectivos. Un target M10/M31, `allOf` o `oneOf`
+produce la familia de alternativa incompatible de la sección 18.6.
+
+### 18.3 Exterior descriptor-safe de `oneOf`
+
+`oneOf` debe ser una data property propia enumerable cuyo valor satisfaga
+`Array.isArray(value) === true`. Su descriptor propio `length` debe ser un
+entero seguro mayor o igual que dos. Cada índice `0..length - 1` debe ser una
+data property propia enumerable con schema object ordinario no array;
+`Object.keys(oneOf)` no puede contener otra key string.
+
+Se emite como máximo un error exterior por array, en este orden:
+
+1. descriptor/valor de `oneOf`;
+2. descriptor/valor de `length`;
+3. primer índice malformed en orden ascendente; y
+4. primera key enumerable adicional en `Object.keys()` order.
+
+Todos usan `INVALID_SCHEMA_KEYWORD_VALUE`, severidad `error`, fuente `schema`
+y fallback `Schema keyword "oneOf" has an invalid value.`. Paths y parámetros
+exactos son:
+
+| Fallo                      | `documentPath`          | Parámetros                                                                                                                         |
+| -------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| descriptor/valor           | `[..., 'oneOf']`        | `{ keyword: 'oneOf', expected: 'array of at least two object schemas', actualType }`                                               |
+| length                     | `[..., 'oneOf']`        | `{ keyword: 'oneOf', expected: 'safe integer length of at least two', reason: 'invalid-oneof-length', actualType, actualLength? }` |
+| índice                     | `[..., 'oneOf', index]` | `{ keyword: 'oneOf', expected: 'ordinary schema object', actualType }`                                                             |
+| key enumerable no indexada | `[..., 'oneOf', key]`   | `{ keyword: 'oneOf', expected: 'dense array indices only', reason: 'unexpected-oneof-member' }`                                    |
+
+`actualType` usa `missing`, `accessor` o `non-enumerable` para defectos de
+descriptor y la descripción segura Accepted para valores data incompatibles.
+`actualLength` aparece solo para un entero seguro menor que dos; NaN, infinito,
+fracciones y enteros no seguros no se retienen.
+
+No se ejecutan accessors, iterators, coercions ni callbacks. Un exterior
+inválido detiene todas sus ramas dependientes; siblings schema/UI independientes
+conservan su orden Accepted.
+
+### 18.4 Forma de rama y referencias
+
+Cada branch se inspecciona por índice ascendente y debe ser:
+
+1. un object de rama ordinario; o
+2. un object `$ref` puro cuyo target local finito resuelva a un object de rama
+   ordinario.
+
+Revision 9 añade los índices `oneOf` como posiciones no root donde un `$ref`
+puro es soportado. Sintaxis, `$defs`, pointer, siblings, chains, unresolved y
+cycle behavior permanecen exactos. Un target reference-to-reference es válido
+si termina en una rama ordinaria.
+
+El catálogo semántico de una rama ordinaria es solo `type`, `properties` y
+`required`, más annotations ignorables y unknowns opacas. Los tres miembros son
+obligatorios; `type` es exacto `"object"`. `title`, `description`, `default`,
+resources, applicators y conditionals son incompatibles con
+`fieldType: 'object-alternative'`.
+
+Cada rama conserva su `branchIndex` authored para diagnósticos. La definición
+normalizada posterior se ordenará por el enum outer; revision 9 no expone index,
+schema object, cursor o branch provenance en una firma Public.
+
+### 18.5 Inferencia exacta del discriminador
+
+Un seed candidate es una propiedad directa outer que:
+
+1. aparece en `required` outer;
+2. normaliza como string scalar no nullable con enum válido de al menos dos
+   strings únicas;
+3. no tiene `const` outer; y
+4. aparece al menos en una rama safely inspectable con la forma assertion
+   exacta y requerida de esta sección.
+
+La forma branch-local debe declarar data properties propias
+`type: "string"` y `const: <string>`, incluir el nombre en `required` de la
+rama y no declarar `enum`. Solo admite además annotations ignorables y unknowns
+opacas. Su `const` reutiliza inspección/diagnóstico string de revision 6, pero
+nunca crea otro node ni `fixedValue`.
+
+Debe existir exactamente un seed candidate. Cero o más de uno producen
+`INCOMPATIBLE_SCHEMA_ALTERNATIVE` con reason
+`invalid-discriminator-candidate-count`, anclado en `oneOf` y parámetros:
+
+```ts
+{
+  reason: 'invalid-discriminator-candidate-count';
+  candidateCount: number;
+  expected: 'exactly one seeded required outer string-enum discriminator';
+}
+```
+
+`candidateCount` es un entero seguro recopilado sin retener nombres/values de
+candidatos ambiguos. Tras seleccionar el seed único, se comprueba su presencia,
+forma required/type/const y mapping en cada branch; así
+`missing-branch-discriminator` e `invalid-branch-discriminator` son alcanzables
+y exactos. Otro enum common no repetido en branches no es seed. Un defecto
+estructural previo conserva su diagnóstico propio y suprime únicamente el
+conflicto derivado que dependa de ese member.
+
+### 18.6 Bijección, propiedades y familia de conflictos
+
+Las branches deben mapear biyectivamente el enum outer:
+
+- cada `const` pertenece al enum;
+- cada value aparece en exactamente una rama;
+- cada enum choice tiene exactamente una rama; y
+- el número de ramas coincide con el número de choices.
+
+El discriminador se excluye del catálogo de hijos de rama. Cada otro nombre
+branch debe ser disjoint respecto a properties outer y a todas las otras
+branches. Su subtree efectivo queda limitado a primitive/object ordinario no
+array, sin conditions/applicators/composition.
+
+Revision 9 añade un código `INCOMPATIBLE_SCHEMA_ALTERNATIVE`, siempre
+`error`/`schema`, fallback `Schema object alternative is incompatible.` y un
+reason cerrado:
+
+```ts
+type SchemaAlternativeConflictReason =
+  | 'unsupported-branch-kind'
+  | 'invalid-discriminator-candidate-count'
+  | 'missing-branch-discriminator'
+  | 'invalid-branch-discriminator'
+  | 'duplicate-discriminator-value'
+  | 'unmapped-discriminator-value'
+  | 'outer-property-redeclared'
+  | 'duplicate-alternative-property'
+  | 'invalid-alternative-required'
+  | 'unsupported-alternative-descendant';
+```
+
+Formas exactas adicionales:
+
+- branch kind: `{ reason, branchIndex, expected: 'ordinary object alternative or local reference' }`;
+- branch discriminator missing/invalid: `{ reason, branchIndex, discriminator }`;
+- duplicate const: `{ reason, branchIndex, firstBranchIndex, discriminator }`;
+- enum choice sin rama: `{ reason, choiceIndex, discriminator }`;
+- redeclaration/duplicate property:
+  `{ reason, branchIndex, property, firstDocumentPath, firstReferenceChain? }`;
+- branch required fuera de su catálogo:
+  `{ reason: 'invalid-alternative-required', branchIndex, property }`;
+- descendant incompatible:
+  `{ reason, branchIndex, property, expected: 'non-array primitive or ordinary object subtree' }`.
+
+No parámetro retiene un discriminator/enum/const business value. Nombres de
+property y paths son metadata estructural copiada/frozen. `firstDocumentPath`
+apunta a la primera key `properties`; `firstReferenceChain` aparece solo para
+ese origen reference-mediated.
+
+El diagnóstico actual se ancla al origen posterior exacto: branch index/target,
+discriminator keyword, enum choice o property schema. Un target referenciado
+conserva `documentPath` canónico, use-site `dataPath` y `referenceChain`. Una
+branch defectuosa detiene su resultado dependiente; ramas posteriores siguen
+para diagnósticos independientes. Cualquier error impide definición parcial.
+
+### 18.7 Required, unión, orden y UI Schema
+
+`required` outer debe incluir el discriminador. Cualquier otro nombre ausente
+de outer `properties` conserva exactamente `UNMANAGED_REQUIRED_PROPERTY` como
+warning no bloqueante; no invalida la alternativa. `required` branch solo puede
+gobernar el discriminador y properties propias de esa branch, y debe incluir el
+discriminador. Un nombre branch cruzado/no declarado usa
+`INCOMPATIBLE_SCHEMA_ALTERNATIVE`, reason `invalid-alternative-required`, en el
+índice exacto de `required` y nunca crea requiredness condicional implícito.
+
+El catálogo union se construye con properties outer en su orden y luego
+properties específicas por branch/index. Después, un único `ObjectUiSchema`
+del use site ordena ese catálogo. `fields` puede nombrar cualquier key union;
+`order` se filtra en runtime a common + active sin branch UI.
+
+Conforme a revision 11, un `presentation` accessor, malformed o
+estructuralmente inválido conserva la familia warning
+`INVALID_UI_PRESENTATION` Accepted de SPEC-005/SPEC-009, activa su fallback
+atómico y no añade incompatibility. Un `presentation` estructuralmente válido
+en el owner discriminado es incompatible y se ignora con
+`INCOMPATIBLE_UI_OPTION`,
+`fieldType: 'discriminated-object'`, `option: 'presentation'` y reason
+`dynamic-children`. Objects ordinarios hijos conservan su presentación estática
+local.
+
+`visibleWhen`/`enabledWhen` dentro del union conservan
+`INVALID_UI_FIELD_CONDITION`, reason `unsupported-target-location`. Un
+condition externo que intente usar un path union como source conserva
+`source-not-ordinary-field`. No se compilan conditions de lifetime dinámico.
+
+UI paths permanecen paths UI del use site sin provenance schema/reference. Los
+labels de alternativa son los choice labels existentes del discriminador;
+branches no aportan title/description.
+
+### 18.8 Traversal, paths, ciclos y stopping
+
+Tras los gates globales Accepted, el orden dentro del wrapper es:
+
+1. shape/type/properties/required outer y clasificación de members;
+2. exterior `oneOf`;
+3. branches depth-first por índice, incluidos `$ref` y schema descendants
+   independientemente seguros;
+4. inferencia del discriminador y conflictos de bijection;
+5. conflictos de property/required y normalización union;
+6. linking semántico de UI conditions; y
+7. UI Schema completo del único use site.
+
+Un exterior inválido detiene branches. Un member/branch inválido detiene solo
+su resultado dependiente. Cero candidato por defectos ya diagnosticados no
+duplica conflicto derivado; ambigüedad segura sí lo produce. Independientes
+schema, policies y UI exteriores continúan en orden. Todo error devuelve
+`success: false` sin `FormDefinition` parcial.
+
+Inline `documentPath` incluye `oneOf` e índices. Targets referenciados conservan
+path fuente y chain outermost-to-innermost. Raw re-entry por `properties`/
+`oneOf` usa `CYCLIC_SCHEMA_OBJECT`; target re-entry por `$ref` usa
+`CYCLIC_SCHEMA_REFERENCE`. No se crea `alternativeChain` ni un tercer ciclo.
+
+### 18.9 Validator, runtime y helper de defaults
+
+`SchemaValidator` recibe el schema original exacto y el valor completo. Core no
+reescribe ni preselecciona una branch para validar. Compiler selection solo
+prueba renderabilidad estructural; no sustituye la assertion `oneOf`.
+
+La política runtime/definition/snapshot de ADR-036 requiere una SPEC posterior;
+revision 9 no activa sus cinco símbolos Public ni cambia firmas. Sí reserva la
+familia runtime de target alternativo inactivo que la SPEC deberá cerrar sin
+retener business values.
+
+`deriveSchemaDefaultCandidate()` conserva M29 y trata el `oneOf` M33 como
+boundary bloqueante. Emite `UNSUPPORTED_SCHEMA_KEYWORD` en el path exacto de
+`oneOf`, con `dataPath` del owner y `{ keyword: 'oneOf' }`; no recorre branches
+para defaults y devuelve la referencia original con `success: false`. Este
+resultado contextual no reclasifica el soporte del compiler.
+
+### 18.10 Public/Internal y exclusiones
+
+La migración ADR-009 de política es:
+
+| Clasificación                       | Efecto                                                                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Changed Public behavior             | `compileFormDefinition()` podrá aceptar el subset M33 después de SPEC/plan implementados.                                             |
+| Changed Public diagnostic semantics | Exterior, conflicto de alternativa, UI incompatibility, reference provenance y ordering quedan cerrados.                              |
+| New/changed Public signatures       | Ninguna en revision 9; ADR-036 reserva cinco tipos y unions para una SPEC posterior.                                                  |
+| Internal                            | Clasificador/cursors oneOf, inferencia, mapping enum/const, union ownership y provenance.                                             |
+| Unchanged                           | Runtime activo, operaciones, validator/default-helper signatures, adapters, packages, entry points, dependencies, versions y release. |
+
+Permanecen Deferred root/items/collections/arrays, M31 en wrapper, `oneOf`
+recursive, overlapping names, non-string/inferred discriminators, `anyOf`,
+`not`, if/then/else, dependent/unevaluated semantics, alternative `allOf`,
+conditional fields/presentation, applied defaults/clearing/migration,
+dynamic definitions, Public AST/graph, external/dynamic resources, wizard,
+React/Vue, dependency/version/release/publication/Git y toda capacidad no
+enumerada.
+
+### 18.11 Gate de aceptación
+
+Revision 9 solo podrá aceptarse después de que una revisión completa repetida
+confirme:
+
+1. autoridad exacta ADR-036/review 314 y frontera nested-only;
+2. catálogo outer/branch y ubicaciones exactos;
+3. exterior `oneOf` descriptor-safe, paths, parameters y stopping;
+4. referencias, provenance, sharing y ambos ciclos;
+5. inferencia de un discriminador y bijection enum/const sin business-value
+   retention;
+6. properties/required disjoint, unión y orden deterministas;
+7. código/reasons/parameters de alternativa completos;
+8. un UI Schema, presentation/conditions y paths UI exactos;
+9. schema original para validator y default helper M29 bloqueado;
+10. inventario Public/Internal sin firma/dependency/version; y
+11. documentación, links, formato, diff, exclusiones y gate separado SPEC-019.
+
+Cada corrección exigió repetir la revisión completa. Review 316 ciclo 2 pasó
+las dieciséis áreas con cero hallazgos después de cinco correcciones y revision
+9 queda Accepted bajo la regla autorizada. Autoriza únicamente preparar y
+revisar SPEC-019, no plan, implementación, dependencia, versión, release,
+publicación, Git o acción externa.
+
+## 19. Revisión 10 aceptada — diagnóstico owner-relative de descendientes M33
+
+### 19.1 Motivo y frontera
+
+Durante PLAN-035 checkpoint 1 se detectó una incompatibilidad interna entre
+las secciones 18.2 y 18.6. La primera asigna a la familia
+`unsupported-alternative-descendant` tanto propiedades outer/common como
+propiedades específicas de una branch. La segunda hacía `branchIndex`
+obligatorio en todos los casos, aunque una propiedad outer/common no pertenece
+a ninguna branch y no dispone de ese índice.
+
+Ricard acepta la corrección mínima el 3 de agosto de 2026. Revision 10 no añade
+ubicaciones, schemas, diagnósticos, reasons, behavior runtime ni alcance. Solo
+reemplaza la forma del reason `unsupported-alternative-descendant` de la
+sección 18.6 por las dos variantes owner-relative siguientes.
+
+### 19.2 Formas exactas
+
+Un descendiente incompatible declarado en `properties` outer/common usa:
+
+```ts
+{
+  reason: 'unsupported-alternative-descendant';
+  property: string;
+  expected: 'non-array primitive or ordinary object subtree';
+}
+```
+
+`branchIndex` está ausente. El `documentPath` se ancla en la propiedad outer o
+en el target referenciado efectivo, `dataPath` es el owner discriminado y
+`referenceChain` aparece únicamente cuando procede bajo las reglas Accepted.
+
+Un descendiente incompatible declarado por una branch conserva:
+
+```ts
+{
+  reason: 'unsupported-alternative-descendant';
+  branchIndex: number;
+  property: string;
+  expected: 'non-array primitive or ordinary object subtree';
+}
+```
+
+`branchIndex` es obligatorio y es el índice authored de esa branch. Ninguna
+variante retiene enum/const/discriminator values, schema objects o cursors. Los
+demás reasons, parámetros, paths, ordering, stopping y exclusiones de revision
+9 permanecen exactos.
+
+### 19.3 Gate y aceptación
+
+Review 319 ciclo 1 repite completamente autoridad, ubicaciones, catálogos,
+diagnósticos, referencias, seguridad de parámetros, contrato SPEC-019, mapping
+PLAN-035 y documentación con cero hallazgos. ADR-005 revision 10 queda Accepted
+junto con SPEC-019 v0.1.1 y PLAN-035 revision 1, sin cambio de dependencia,
+versión de paquete, release, publicación o Git.
+
+## 20. Revisión 11 aceptada — compatibilidad de presentación M33
+
+### 20.1 Motivo y frontera
+
+Durante PLAN-035 checkpoint 1, una prueba descriptor-safe expuso que la
+sección 18.7 asignaba erróneamente `INVALID_UI_SCHEMA_VALUE` a un
+`presentation` owner M33 malformed/accessor. SPEC-005 v0.1.1 y SPEC-009 v0.1.0
+ya cierran todos los defectos de presentation con la familia warning
+`INVALID_UI_PRESENTATION`, parámetros exactos y fallback atómico. La frase M33
+contradecía esa autoridad Accepted y no definía una forma completa alternativa.
+
+Ricard acepta el 4 de agosto de 2026 preservar la familia existente. Revision
+11 no añade UI, diagnósticos, members, severidades ni runtime behavior; corrige
+solo la interacción M33 con presentation.
+
+### 20.2 Conducta exacta
+
+Un `presentation` owner M33 malformed, accessor o estructuralmente incompleto:
+
+1. conserva los códigos, reasons, parámetros, paths, warning severity,
+   descriptor safety, orden y recopilación independiente de SPEC-005/SPEC-009;
+2. invalida atómicamente únicamente ese forest de presentación y usa el
+   fallback estático Accepted;
+3. no produce `INCOMPATIBLE_UI_OPTION` por `dynamic-children`; y
+4. no convierte por sí solo `compileFormDefinition()` en failure.
+
+Solo cuando el forest owner es estructuralmente válido se descarta para M33 y
+se emite el warning `INCOMPATIBLE_UI_OPTION` exacto de la sección 18.7 con
+`fieldType: 'discriminated-object'`, `option: 'presentation'` y
+`reason: 'dynamic-children'`. No se normaliza presentación dinámica ni se
+introduce UI por branch.
+
+Todas las demás reglas de revision 10, SPEC-019 y PLAN-035 permanecen exactas.
+
+### 20.3 Gate y aceptación
+
+Review 320 ciclo 2 repite autoridad, presentación Accepted, diagnostics,
+owner-relative descendants, referencias, contrato, 17-row mapping,
+exclusiones y documentación con cero hallazgos después de corregir el conflicto
+en ciclo 1. ADR-005 revision 11 queda Accepted junto con SPEC-019 v0.1.2 y
+PLAN-035 revision 2, sin cambio de código requerido, dependencia, versión de
+paquete, release, publicación o Git.

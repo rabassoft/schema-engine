@@ -291,6 +291,13 @@ describe('Angular advanced presentation projection', () => {
     expect(
       triggers.map((trigger) => trigger.getAttribute('aria-expanded')),
     ).toEqual(['false', 'false']);
+    expect(
+      triggers.map(
+        (trigger) =>
+          trigger.querySelector('.schema-presentation-accordion-indicator')
+            ?.textContent,
+      ),
+    ).toEqual(['+', '+']);
     expect(regions.map((region) => region.hidden)).toEqual([true, true]);
     expect(
       regions.every((region) => region.querySelector('input') !== null),

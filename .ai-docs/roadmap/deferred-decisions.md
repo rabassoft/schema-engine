@@ -161,6 +161,42 @@ Cada decisión debe registrar:
   con cero hallazgos y cubren las 21 filas; checkpoint 6 y M28 quedan
   completados tras review 268 ciclo 2 repetir la matriz completa sin hallazgos.
   El resto de D-007 continúa Deferred.
+- **Evaluación M33:** La
+  [revisión 314](../reviews/314-d007-m33-discriminated-object-alternatives-promotion-readiness.md)
+  ciclo 2 pasa quince áreas sin hallazgos y recomienda solo una alternativa
+  `oneOf` en una propiedad object ordinaria, gobernada por un discriminador
+  string-enum requerido y controlado por la aplicación, con al menos dos
+  ramas en correspondencia biyectiva. Documento raíz,
+  colecciones/items, arrays, alternativas recursivas, evaluación general y
+  mutación de valores continúan Deferred. Ricard acepta la recomendación el 3
+  de agosto de 2026: queda promovida únicamente la pregunta arquitectónica M33
+  acotada y ADR-036 se reserva para ella. La selección no acepta una
+  arquitectura ni autoriza revisión de ADR-005, SPEC, plan o implementación.
+  ADR-036 revision 0 queda Accepted tras review 315 ciclo 2 pasar quince áreas
+  sin hallazgos después de dos correcciones; autoriza únicamente preparar y
+  revisar ADR-005 revision 9. El resto de D-007 continúa Deferred.
+  ADR-036 revision 1 y ADR-005 revision 9 quedan Accepted tras review 316 ciclo
+  2 pasar dieciséis áreas sin hallazgos después de cinco correcciones;
+  autorizan únicamente preparar y revisar SPEC-019.
+  SPEC-019 v0.1.0 queda Accepted tras review 317 ciclo 2 pasar quince áreas y
+  sus 17 filas sin hallazgos después de tres correcciones; autoriza únicamente
+  preparar y revisar PLAN-035. PLAN-035 revision 0 queda Approved tras review
+  318 ciclo 2 pasar doce áreas y ownership exacto de las 17 filas sin
+  hallazgos; autoriza checkpoints 1–6 en orden, sin release ni Git. Durante
+  checkpoint 1 Ricard acepta la corrección owner-relative: outer/common omite
+  `branchIndex` y branch lo conserva obligatorio. ADR-005 revision 10,
+  SPEC-019 v0.1.1 y PLAN-035 revision 1 pasan review 319 ciclo 1 sin hallazgos;
+  no se amplía D-007 ni se activa release/Git. Durante el mismo checkpoint,
+  Ricard acepta preservar `INVALID_UI_PRESENTATION` de SPEC-005/SPEC-009 para
+  todo owner forest M33 inválido y emitir la incompatibilidad dinámica solo
+  para uno válido. ADR-005 revision 11, SPEC-019 v0.1.2 y PLAN-035 revision 2
+  pasan review 320 ciclo 2 con cero hallazgos; el resto de D-007, release y Git
+  permanecen inactivos.
+  PLAN-035 revision 2 queda Completed tras reviews 321–326: los seis
+  checkpoints y las 17 filas pasan la matriz final de review 326 ciclo 3 con
+  cero hallazgos. M33 implementa únicamente el slice promovido; root,
+  colecciones/items/arrays, alternativas recursivas/generales, composición y
+  mutación siguen Deferred dentro de D-007. No se activa release ni Git.
 
 ## D-008: Enum de strings y renderer select
 
@@ -231,7 +267,8 @@ Cada decisión debe registrar:
 ## D-011: UI Schema avanzado
 
 - **Estado:** Implemented only for the narrow completed M18 root-layout and M20
-  nested-object/item boundaries; every unlisted capability remains Deferred
+  nested-object/item boundaries and the bounded completed M34 root wizard;
+  every unlisted capability remains Deferred
 - **Incluye:** grids, tabs, accordions, secciones, wizards, slots, acciones y layouts responsivos.
 - **Motivo:** Primero se validará la separación entre semántica de datos y presentación básica.
 - **Retomar cuando:** Existan objetos anidados y un contrato de layout neutral.
@@ -285,14 +322,27 @@ Cada decisión debe registrar:
   ciclo 3. Sus ocho checkpoints, las 27 filas, consumidores lower/latest
   native/pilot y referencias Angular/Standard pasan sin cambiar dependencias,
   versiones, release, Git ni estado externo.
-- **Permanece Deferred:** wizards, workflow, slots, acciones, scopes,
+- **Promoción M34 aceptada:** Ricard aceptó el 4 de agosto de 2026 la frontera
+  refinada de [review 327](../reviews/327-d011-d012-m34-declarative-wizard-promotion-readiness.md)
+  ciclo 8. Promueve solo una pregunta arquitectónica para un wizard único,
+  root-only, lineal y controlado por la aplicación con scopes derivados y
+  progreso efímero neutral; reserva ADR-037 sin aceptar arquitectura, SPEC,
+  plan ni implementación en ese gate. Ricard seleccionó después la excepción síncrona/provisional
+  para evitar deadlock con datos futuros; review 328 ciclo 5 pasa quince áreas
+  sin hallazgos y ADR-037 revision 0 queda Accepted. SPEC-020 v0.1.0 está
+  Accepted y PLAN-036 revision 0 Approved tras revisión completa; solo sus seis
+  checkpoints quedaron autorizados; reviews 331–336 implementan los seis y
+  final review 336 ciclo 2 completa M34 con cero hallazgos.
+- **Permanece Deferred:** wizards fuera del slice M34, workflow, slots,
+  acciones, scopes fuera del slice M34,
   condiciones, layout nested/item fuera del slice local promovido, breakpoints
   arbitrarios, estado controlado o persistido y todo renderer kit salvo la
   arquitectura estrecha del único piloto Angular Aria 22 aceptada por ADR-024.
 
 ## D-012: Scopes declarativos en UI Schema
 
-- **Estado:** Deferred
+- **Estado:** Implemented only for the bounded completed M34 root-step scopes;
+  every other declarative-scope capability remains Deferred
 - **Pregunta:** ¿Deben los pasos y secciones declararse en metadatos?
 - **Motivo:** En la primera versión los scopes pertenecen a la aplicación.
 - **Retomar cuando:** Se diseñe UI Schema avanzado.
@@ -306,6 +356,15 @@ Cada decisión debe registrar:
   Ricard aceptó formalmente este límite el 15 de julio de 2026.
 - **Límite M18:** review 098 no genera scopes desde tabs, panels, accordions ni
   grid; la aplicación conserva toda autoridad de validación y workflow.
+- **Promoción M34 aceptada:** review 327 ciclo 8 permite que cada step estático
+  derive un `FormScope` exacto y que un único completion scope una todos sus
+  targets e issues globales. No registra ni restringe scopes de aplicación, no
+  genera scopes de items y no activa workflow. ADR-037 revision 0 está Accepted;
+  review 328 ciclo 5 cierra con cero hallazgos tras seleccionar el tratamiento
+  síncrono/provisional de `next`. SPEC-020 v0.1.0 está Accepted y PLAN-036
+  revision 0 Approved tras revisión completa; solo sus seis checkpoints quedan
+  autorizados; reviews 331–336 implementan los seis y final review 336 ciclo 2
+  completa M34 con cero hallazgos.
 
 ## D-013: Actualización dinámica de FormDefinition
 
@@ -399,7 +458,8 @@ Cada decisión debe registrar:
   19–20 tras review 311 ciclo 2. Checkpoint 5 completa la fila 21 tras review
   312 ciclo 3. Review 313 ciclo 2 repite la matriz congelada y completa
   checkpoint 6, la fila 22, PLAN-034 revision 0 y M32 sin hallazgos.
-  M33, M34, React y el resto de D-018 permanecen Deferred.
+  Los gates posteriores completaron M33 y M34; React y el resto de D-018
+  permanecen Deferred.
 
 ## D-019: Commands, undo/redo e historial
 
@@ -513,10 +573,28 @@ Cada decisión debe registrar:
 
 ## D-026: Capabilities de adaptadores
 
-- **Estado:** Deferred
+- **Estado:** Promoted only for the bounded M35 client-rendered React adapter
+  architecture question accepted from review 338; every advanced or generic
+  adapter capability remains Deferred
 - **Incluye:** SSR, hydration, portals, dynamic components, zoneless y otras capacidades.
 - **Motivo:** No deben modelarse capacidades hipotéticas antes de comparar dos adaptadores reales.
 - **Retomar cuando:** Comience el segundo adaptador de framework.
+- **Promoción M35 aceptada:** Ricard acepta el 4 de agosto de 2026 la
+  [revisión 338](../reviews/338-d026-d044-m35-react-adapter-promotion-readiness.md)
+  ciclo 2. Solo se promueve la pregunta arquitectónica de un paquete React
+  Public + Experimental, client-only, con proyección HTML nativa completa de la
+  superficie neutral M1–M34 y un shell privado independiente admitido por
+  D-044. ADR-038 revision 0 está Accepted tras review 339 ciclo 5 cerrar con
+  cero hallazgos. SPEC-021 v0.1.0 está Accepted tras review 340 ciclo 2 cerrar
+  36 filas sin hallazgos. PLAN-037 revision 0 está Approved por Ricard el 6 de
+  agosto de 2026 tras review 341 ciclo 2 cerrar ownership exacto sin hallazgos;
+  checkpoints 1–10, PLAN-037 revision 0 y M35 están completos tras reviews
+  343–352; final review 352 ciclo 1 repite las 36 filas con cero hallazgos;
+  no existe versión pública, release, publicación ni acción Git autorizada.
+- **Permanece Deferred:** SSR, hydration, React Server Components, portals,
+  streaming, Suspense/lazy renderers, capability negotiation, dynamic
+  components neutrales, controller/registry universal y cualquier abstracción
+  compartida no demostrada por dos adaptadores reales.
 
 ## D-027: Estrategia de instanciación dinámica en Angular
 
@@ -1092,6 +1170,16 @@ Cada decisión debe registrar:
 - **Documento entregado:** PLAN-016 revisión 0 está Completed. Cada shell
   posterior requiere su propio alcance aceptado. No requiere SPEC nueva
   mientras no cambie comportamiento público.
+- **Promoción M35 aceptada:** Review 338 ciclo 2 autorizó únicamente diseñar en
+  ADR-038 la admisión coordinada del primer paquete React y su shell privado.
+  ADR-038 revision 0 está Accepted tras review 339 ciclo 5 pasar dieciocho áreas
+  sin hallazgos. SPEC-021 v0.1.0 queda Accepted tras review 340 ciclo 2 pasar
+  sus 36 filas sin hallazgos. PLAN-037 revision 0 queda Approved por Ricard el
+  6 de agosto de 2026 tras review 341 ciclo 2 sin hallazgos. Los checkpoints
+  1–10, PLAN-037 revision 0 y M35 están completos tras reviews 343–352; final
+  review 352 ciclo 1 repite las 36 filas con cero hallazgos. El shell
+  conserva catálogo neutral, bootstrap, lifecycle, estilos, tests y build
+  independientes; toda publicación sigue inactiva.
 
 ## D-045: Familias de compatibilidad Angular legacy
 
@@ -1215,6 +1303,7 @@ explícitas.
 
 | Fecha      | Cambio                                                                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 04-08-2026 | PLAN-035 revision 2 y M33 quedan Completed tras review 326 ciclo 3 repetir matriz completa, 17 filas y Chromium 15+18 sin hallazgos.                   |
 | 03-08-2026 | PLAN-034 revision 0 y M32 quedan Completed tras review 313 ciclo 2 repetir matriz congelada, 22 filas y Chromium 14+17 sin hallazgos.                  |
 | 03-08-2026 | PLAN-034 checkpoint 5 completa SPEC-018 fila 21 tras review 312 ciclo 3; checkpoint 6 queda siguiente, sin release/Git.                                |
 | 03-08-2026 | PLAN-034 checkpoint 4 completa SPEC-018 filas 19–20 tras review 311 ciclo 2; checkpoint 5 queda siguiente, sin release/Git.                            |

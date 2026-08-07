@@ -55,7 +55,15 @@ export type NestedDefinitionReason =
   | 'unsupported-field-condition-location'
   | 'field-condition-target-incompatible'
   | 'field-condition-source-not-managed'
-  | 'field-condition-literal-incompatible';
+  | 'field-condition-literal-incompatible'
+  | 'invalid-discriminated-object'
+  | 'invalid-object-alternative'
+  | 'inconsistent-alternative-projection'
+  | 'invalid-wizard'
+  | 'invalid-wizard-step'
+  | 'invalid-wizard-key'
+  | 'invalid-wizard-scope'
+  | 'invalid-wizard-membership';
 
 export interface NestedDefinitionDefect {
   readonly reason: NestedDefinitionReason;
@@ -64,9 +72,13 @@ export interface NestedDefinitionDefect {
   readonly templateIndexPath?: readonly number[];
   readonly firstTemplateIndexPath?: readonly number[];
   readonly fieldIndex?: number;
+  readonly alternativeIndex?: number;
+  readonly childIndex?: number;
   readonly path?: readonly string[];
   readonly relativePath?: readonly string[];
   readonly presentationIndexPath?: readonly number[];
+  readonly wizardStepIndex?: number;
+  readonly wizardTargetIndex?: number;
   readonly presentationOwnerKind?: 'object' | 'item' | 'template-object';
   readonly presentationOwnerPath?: readonly string[];
   readonly presentationTemplatePath?: readonly string[];
@@ -76,6 +88,20 @@ export interface NestedDefinitionDefect {
     | 'fixedValue'
     | 'visibleWhen'
     | 'enabledWhen'
+    | 'kind'
+    | 'id'
+    | 'key'
+    | 'label'
+    | 'discriminator'
+    | 'children'
+    | 'steps'
+    | 'scope'
+    | 'completionScope'
+    | 'paths'
+    | 'includeGlobalIssues'
+    | 'alternatives'
+    | 'discriminatorValue'
+    | 'fields'
     | 'choices'
     | `choices.${number}`
     | `choices.${number}.value`
@@ -127,6 +153,7 @@ interface EnterFrame {
   readonly value: unknown;
   readonly indexPath: readonly number[];
   readonly parentPath?: readonly string[];
+  readonly insideDiscriminatedObject?: boolean;
 }
 
 interface ExitFrame {
@@ -252,6 +279,7 @@ function collectFormDefinitionDefects(
       phase: 'enter',
       value: member.kind === 'value' ? member.value : undefined,
       indexPath: Object.freeze([index]),
+      insideDiscriminatedObject: false,
     });
   }
 
@@ -291,12 +319,21 @@ function collectFormDefinitionDefects(
       continue;
     }
 
-    const inspected = inspectNode(node, frame.parentPath, allowCollections);
+    const inspected =
+      readValue(node, 'kind') === 'discriminated-object'
+        ? inspectDiscriminatedObjectNode(node, frame.parentPath)
+        : inspectNode(node, frame.parentPath, allowCollections);
     if (!inspected.success) {
       defects.push(
         makeDefect(inspected.reason, {
           nodeIndexPath: frame.indexPath,
           ...(inspected.path === undefined ? {} : { path: inspected.path }),
+          ...(inspected.alternativeIndex === undefined
+            ? {}
+            : { alternativeIndex: inspected.alternativeIndex }),
+          ...(inspected.childIndex === undefined
+            ? {}
+            : { childIndex: inspected.childIndex }),
           ...(inspected.member === undefined
             ? {}
             : { member: inspected.member }),
@@ -343,7 +380,10 @@ function collectFormDefinitionDefects(
 
     if (inspected.kind === 'field') {
       leaves.push(node as FieldDefinition);
-      if (readValue(node, 'kind') !== 'string-enum-array') {
+      if (
+        readValue(node, 'kind') !== 'string-enum-array' &&
+        frame.insideDiscriminatedObject !== true
+      ) {
         fieldConditionTargets.push(
           captureFieldConditionTarget(node, frame.indexPath, inspected.path),
         );
@@ -375,15 +415,29 @@ function collectFormDefinitionDefects(
         value: member.kind === 'value' ? member.value : undefined,
         indexPath: Object.freeze([...frame.indexPath, index]),
         parentPath: inspected.path,
+        insideDiscriminatedObject:
+          frame.insideDiscriminatedObject === true ||
+          inspected.kind === 'discriminated-object',
       });
     }
   }
 
+  const containsDiscriminatedObject =
+    firstIdentity.size > 0 &&
+    [...firstIdentity.keys()].some(
+      (node) => readValue(node, 'kind') === 'discriminated-object',
+    );
   if (fields.length !== leaves.length) {
     defects.push(
-      makeDefect('inconsistent-leaf-projection', {
-        fieldIndex: Math.min(fields.length, leaves.length),
-      }),
+      makeDefect(
+        containsDiscriminatedObject
+          ? 'inconsistent-alternative-projection'
+          : 'inconsistent-leaf-projection',
+        {
+          fieldIndex: Math.min(fields.length, leaves.length),
+          ...(containsDiscriminatedObject ? { member: 'fields' } : {}),
+        },
+      ),
     );
   }
   const comparableLength = Math.min(fields.length, leaves.length);
@@ -391,13 +445,21 @@ function collectFormDefinitionDefects(
     const member = readOwnDataMember(fields, String(index));
     if (member.kind !== 'value' || member.value !== leaves[index]) {
       defects.push(
-        makeDefect('inconsistent-leaf-projection', { fieldIndex: index }),
+        makeDefect(
+          containsDiscriminatedObject
+            ? 'inconsistent-alternative-projection'
+            : 'inconsistent-leaf-projection',
+          {
+            fieldIndex: index,
+            ...(containsDiscriminatedObject ? { member: 'fields' } : {}),
+          },
+        ),
       );
     }
   }
 
   if (defects.length === 0) {
-    defects.push(...collectPresentationDefects(value, nodes));
+    defects.push(...collectRootPresentationDefects(value, nodes));
     defects.push(...collectLocalPresentationDefects(nodes));
   }
 
@@ -446,12 +508,314 @@ type PresentationOwner =
       ];
     };
 
+interface PresentationDefectOptions {
+  readonly expected?: ReadonlySet<object>;
+  readonly seen?: Set<object>;
+  readonly containerIds?: Set<string>;
+  readonly requireComplete?: boolean;
+}
+
+function collectRootPresentationDefects(
+  definition: object,
+  nodes: readonly unknown[],
+): readonly NestedDefinitionDefect[] {
+  const presentation = readOwnDataMember(definition, 'presentation');
+  if (presentation.kind !== 'value' || !Array.isArray(presentation.value))
+    return [makeDefect('missing-presentation')];
+  let wizardIndex: number | undefined;
+  for (let index = 0; index < presentation.value.length; index += 1) {
+    const entry = readOwnDataMember(presentation.value, String(index));
+    if (
+      entry.kind === 'value' &&
+      isOrdinaryObject(entry.value) &&
+      readValue(entry.value, 'kind') === 'wizard'
+    ) {
+      wizardIndex = index;
+      break;
+    }
+  }
+  return wizardIndex === undefined
+    ? collectPresentationDefects(definition, nodes)
+    : collectWizardDefinitionDefects(presentation.value, nodes, wizardIndex);
+}
+
+function collectWizardDefinitionDefects(
+  presentation: readonly unknown[],
+  nodes: readonly unknown[],
+  wizardIndex: number,
+): readonly NestedDefinitionDefect[] {
+  if (presentation.length !== 1 || wizardIndex !== 0)
+    return [makeDefect('invalid-wizard-membership')];
+  const wizardMember = readOwnDataMember(presentation, '0');
+  if (wizardMember.kind !== 'value' || !isOrdinaryObject(wizardMember.value))
+    return [makeDefect('invalid-wizard')];
+  const wizard = wizardMember.value;
+  const id = readOwnDataMember(wizard, 'id');
+  const key = readOwnDataMember(wizard, 'key');
+  const label = readOwnDataMember(wizard, 'label');
+  const steps = readOwnDataMember(wizard, 'steps');
+  const completionScope = readOwnDataMember(wizard, 'completionScope');
+  if (
+    readValue(wizard, 'kind') !== 'wizard' ||
+    id.kind !== 'value' ||
+    typeof id.value !== 'string' ||
+    id.value.length === 0 ||
+    label.kind !== 'value' ||
+    typeof label.value !== 'string' ||
+    label.value.trim().length === 0 ||
+    steps.kind !== 'value' ||
+    !Array.isArray(steps.value) ||
+    steps.value.length < 2 ||
+    !hasExactEnumerableKeys(wizard, [
+      'kind',
+      'id',
+      'key',
+      'label',
+      'steps',
+      'completionScope',
+    ])
+  ) {
+    return [makeDefect('invalid-wizard')];
+  }
+  if (
+    key.kind !== 'value' ||
+    key.value !== JSON.stringify(['wizard', id.value])
+  ) {
+    return [makeDefect('invalid-wizard-key', { member: 'key' })];
+  }
+
+  const expected = new Set<object>(
+    nodes.filter((node): node is object => isOrdinaryObject(node)),
+  );
+  const seen = new Set<object>();
+  const containerIds = new Set<string>();
+  const seenSteps = new Set<object>();
+  const stepIds = new Set<string>();
+  const completionTargets: string[][] = [];
+  for (let stepIndex = 0; stepIndex < steps.value.length; stepIndex += 1) {
+    const stepMember = readOwnDataMember(steps.value, String(stepIndex));
+    if (stepMember.kind !== 'value' || !isOrdinaryObject(stepMember.value))
+      return [
+        makeDefect('invalid-wizard-step', { wizardStepIndex: stepIndex }),
+      ];
+    const step = stepMember.value;
+    if (seenSteps.has(step))
+      return [
+        makeDefect('invalid-wizard-step', { wizardStepIndex: stepIndex }),
+      ];
+    seenSteps.add(step);
+    const stepId = readOwnDataMember(step, 'id');
+    const stepKey = readOwnDataMember(step, 'key');
+    const stepLabel = readOwnDataMember(step, 'label');
+    const children = readOwnDataMember(step, 'children');
+    const scope = readOwnDataMember(step, 'scope');
+    if (
+      readValue(step, 'kind') !== 'wizard-step' ||
+      stepId.kind !== 'value' ||
+      typeof stepId.value !== 'string' ||
+      stepId.value.length === 0 ||
+      stepIds.has(stepId.value) ||
+      stepLabel.kind !== 'value' ||
+      typeof stepLabel.value !== 'string' ||
+      stepLabel.value.trim().length === 0 ||
+      children.kind !== 'value' ||
+      !Array.isArray(children.value) ||
+      children.value.length === 0 ||
+      !hasExactEnumerableKeys(step, [
+        'kind',
+        'id',
+        'key',
+        'label',
+        'children',
+        'scope',
+      ])
+    ) {
+      return [
+        makeDefect('invalid-wizard-step', { wizardStepIndex: stepIndex }),
+      ];
+    }
+    stepIds.add(stepId.value);
+    if (
+      stepKey.kind !== 'value' ||
+      stepKey.value !==
+        JSON.stringify(['wizard', id.value, 'step', stepId.value])
+    ) {
+      return [
+        makeDefect('invalid-wizard-key', {
+          wizardStepIndex: stepIndex,
+          member: 'key',
+        }),
+      ];
+    }
+    const childDefects = collectPresentationDefects(
+      { presentation: children.value },
+      nodes,
+      undefined,
+      { expected, seen, containerIds, requireComplete: false },
+    );
+    if (childDefects.length > 0)
+      return [
+        makeDefect('invalid-wizard-membership', {
+          wizardStepIndex: stepIndex,
+          ...(childDefects[0]?.presentationIndexPath === undefined
+            ? {}
+            : {
+                presentationIndexPath: childDefects[0].presentationIndexPath,
+              }),
+        }),
+      ];
+    const stepNodes = collectPresentedNodes(children.value);
+    const stepPaths: string[][] = [];
+    for (const node of stepNodes) {
+      const path = readOwnDataMember(node, 'path');
+      if (
+        path.kind !== 'value' ||
+        !Array.isArray(path.value) ||
+        !path.value.every((segment) => typeof segment === 'string')
+      ) {
+        return [
+          makeDefect('invalid-wizard-membership', {
+            wizardStepIndex: stepIndex,
+          }),
+        ];
+      }
+      stepPaths.push([...path.value] as string[]);
+    }
+    const scopeDefect = validateWizardScope(
+      scope,
+      JSON.stringify(['wizard', id.value, 'step', stepId.value, 'scope']),
+      stepPaths,
+      false,
+      stepIndex,
+    );
+    if (scopeDefect !== undefined) return [scopeDefect];
+    completionTargets.push(...stepPaths.map((path) => [...path]));
+  }
+  if (seen.size !== expected.size)
+    return [makeDefect('invalid-wizard-membership')];
+  const completionDefect = validateWizardScope(
+    completionScope,
+    JSON.stringify(['wizard', id.value, 'completion', 'scope']),
+    completionTargets,
+    true,
+  );
+  return completionDefect === undefined ? [] : [completionDefect];
+}
+
+function validateWizardScope(
+  member: ReturnType<typeof readOwnDataMember>,
+  expectedId: string,
+  expectedPaths: readonly (readonly string[])[],
+  includeGlobalIssues: boolean,
+  wizardStepIndex?: number,
+): NestedDefinitionDefect | undefined {
+  if (member.kind !== 'value' || !isOrdinaryObject(member.value))
+    return makeDefect('invalid-wizard-scope', {
+      ...(wizardStepIndex === undefined ? {} : { wizardStepIndex }),
+      member: wizardStepIndex === undefined ? 'completionScope' : 'scope',
+    });
+  const scope = member.value;
+  const id = readOwnDataMember(scope, 'id');
+  const paths = readOwnDataMember(scope, 'paths');
+  const globals = readOwnDataMember(scope, 'includeGlobalIssues');
+  if (
+    id.kind !== 'value' ||
+    id.value !== expectedId ||
+    paths.kind !== 'value' ||
+    !Array.isArray(paths.value) ||
+    paths.value.length !== expectedPaths.length ||
+    globals.kind !== 'value' ||
+    globals.value !== includeGlobalIssues ||
+    !hasExactEnumerableKeys(scope, ['id', 'paths', 'includeGlobalIssues'])
+  ) {
+    return makeDefect('invalid-wizard-scope', {
+      ...(wizardStepIndex === undefined ? {} : { wizardStepIndex }),
+    });
+  }
+  for (let index = 0; index < expectedPaths.length; index += 1) {
+    const target = readOwnDataMember(paths.value, String(index));
+    if (
+      target.kind !== 'value' ||
+      !Array.isArray(target.value) ||
+      !target.value.every((segment) => typeof segment === 'string') ||
+      !sameDataPath(target.value, expectedPaths[index] ?? [])
+    ) {
+      return makeDefect('invalid-wizard-scope', {
+        ...(wizardStepIndex === undefined ? {} : { wizardStepIndex }),
+        wizardTargetIndex: index,
+      });
+    }
+  }
+  return undefined;
+}
+
+function collectPresentedNodes(entries: readonly unknown[]): readonly object[] {
+  const result: object[] = [];
+  const stack = [...entries].reverse();
+  while (stack.length > 0) {
+    const entry = stack.pop();
+    if (!isOrdinaryObject(entry)) continue;
+    const kind = readValue(entry, 'kind');
+    if (kind === 'form-node') {
+      const node = readOwnDataMember(entry, 'node');
+      if (node.kind === 'value' && isOrdinaryObject(node.value))
+        result.push(node.value);
+      continue;
+    }
+    const childMember =
+      kind === 'section'
+        ? readOwnDataMember(entry, 'children')
+        : kind === 'tabs' || kind === 'accordion'
+          ? readOwnDataMember(entry, 'panels')
+          : kind === 'grid'
+            ? readOwnDataMember(entry, 'items')
+            : { kind: 'missing' as const };
+    if (childMember.kind !== 'value' || !Array.isArray(childMember.value))
+      continue;
+    for (let index = childMember.value.length - 1; index >= 0; index -= 1) {
+      const child = readOwnDataMember(childMember.value, String(index));
+      if (child.kind !== 'value' || !isOrdinaryObject(child.value)) continue;
+      if (kind === 'tabs' || kind === 'accordion') {
+        const panelChildren = readOwnDataMember(child.value, 'children');
+        if (
+          panelChildren.kind === 'value' &&
+          Array.isArray(panelChildren.value)
+        ) {
+          const panelEntries: readonly unknown[] = panelChildren.value;
+          stack.push(...[...panelEntries].reverse());
+        }
+      } else if (kind === 'grid') {
+        const gridChild = readOwnDataMember(child.value, 'child');
+        if (gridChild.kind === 'value') stack.push(gridChild.value);
+      } else stack.push(child.value);
+    }
+  }
+  return result;
+}
+
+function hasExactEnumerableKeys(
+  value: object,
+  expected: readonly string[],
+): boolean {
+  const keys = Object.keys(value);
+  return (
+    keys.length === expected.length &&
+    expected.every((key) => keys.includes(key))
+  );
+}
+
 function collectPresentationDefects(
   definition: object,
   nodes: readonly unknown[],
   owner?: PresentationOwner,
+  options?: PresentationDefectOptions,
 ): readonly NestedDefinitionDefect[] {
-  const defects = collectUnscopedPresentationDefects(definition, nodes, owner);
+  const defects = collectUnscopedPresentationDefects(
+    definition,
+    nodes,
+    owner,
+    options,
+  );
   if (owner === undefined || defects.length === 0) return defects;
   return Object.freeze(
     defects.map((defect) => {
@@ -474,16 +838,19 @@ function collectUnscopedPresentationDefects(
   definition: object,
   nodes: readonly unknown[],
   owner: PresentationOwner | undefined,
+  options?: PresentationDefectOptions,
 ): readonly NestedDefinitionDefect[] {
   const member = readOwnDataMember(definition, 'presentation');
   if (member.kind !== 'value' || !Array.isArray(member.value)) {
     return [makeDefect('missing-presentation')];
   }
-  const expected = new Set<object>(
-    nodes.filter((node): node is object => isOrdinaryObject(node)),
-  );
-  const seen = new Set<object>();
-  const containerIds = new Set<string>();
+  const expected =
+    options?.expected ??
+    new Set<object>(
+      nodes.filter((node): node is object => isOrdinaryObject(node)),
+    );
+  const seen = options?.seen ?? new Set<object>();
+  const containerIds = options?.containerIds ?? new Set<string>();
   const active = new Set<object>();
   type PresentationFrame =
     | { phase: 'enter'; value: unknown; path: readonly number[] }
@@ -848,7 +1215,7 @@ function collectUnscopedPresentationDefects(
     stack.push({ phase: 'exit', value: entry });
     pushEntries(children.value, frame.path);
   }
-  if (seen.size !== expected.size)
+  if (options?.requireComplete !== false && seen.size !== expected.size)
     return [makeDefect('missing-presented-node')];
   return [];
 }
@@ -1017,6 +1384,13 @@ type InspectedNode =
     }
   | {
       readonly success: true;
+      readonly kind: 'discriminated-object';
+      readonly key: string;
+      readonly path: readonly string[];
+      readonly children: readonly unknown[];
+    }
+  | {
+      readonly success: true;
       readonly kind: 'array';
       readonly key: string;
       readonly path: readonly string[];
@@ -1036,7 +1410,427 @@ type InspectedNode =
       readonly actualValue?: unknown;
       readonly members?:
         readonly ['nullable', 'choices'] | readonly ['fixedValue', 'choices'];
+      readonly alternativeIndex?: number;
+      readonly childIndex?: number;
     };
+
+function inspectDiscriminatedObjectNode(
+  node: object,
+  parentPath: readonly string[] | undefined,
+): InspectedNode {
+  const name = readValue(node, 'name');
+  const key = readValue(node, 'key');
+  const path = copyStringDataPath(readValue(node, 'path'));
+  if (
+    typeof name !== 'string' ||
+    typeof key !== 'string' ||
+    path === undefined ||
+    typeof readValue(node, 'required') !== 'boolean' ||
+    typeof readValue(node, 'label') !== 'string' ||
+    path.at(-1) !== name ||
+    key !== canonicalDataPathKey(path) ||
+    (parentPath !== undefined &&
+      !sameDataPath(path.slice(0, -1), parentPath)) ||
+    !validOptionalText(node, 'description') ||
+    !validOptionalText(node, 'hint') ||
+    !validOptionalText(node, 'tooltip')
+  ) {
+    return {
+      success: false,
+      reason: 'invalid-discriminated-object',
+      ...(path === undefined ? {} : { path }),
+      member: 'kind',
+    };
+  }
+
+  const discriminator = readOwnDataMember(node, 'discriminator');
+  if (
+    discriminator.kind !== 'value' ||
+    typeof discriminator.value !== 'string'
+  ) {
+    return {
+      success: false,
+      reason: 'invalid-discriminated-object',
+      path,
+      member: 'discriminator',
+    };
+  }
+
+  const childrenMember = readOwnDataMember(node, 'children');
+  if (childrenMember.kind !== 'value' || !Array.isArray(childrenMember.value)) {
+    return {
+      success: false,
+      reason: 'invalid-discriminated-object',
+      path,
+      member: 'children',
+    };
+  }
+  const children = childrenMember.value;
+  const directByName = new Map<string, { value: object; index: number }>();
+  for (let index = 0; index < children.length; index += 1) {
+    const child = readOwnDataMember(children, String(index));
+    if (child.kind !== 'value' || !isOrdinaryObject(child.value)) {
+      return {
+        success: false,
+        reason: 'invalid-discriminated-object',
+        path,
+        member: 'children',
+        childIndex: index,
+      };
+    }
+    const childName = readValue(child.value, 'name');
+    const childPath = copyStringDataPath(readValue(child.value, 'path'));
+    if (
+      typeof childName !== 'string' ||
+      childPath === undefined ||
+      !sameDataPath(childPath, [...path, childName])
+    ) {
+      return {
+        success: false,
+        reason: 'invalid-discriminated-object',
+        path,
+        member: 'children',
+        childIndex: index,
+      };
+    }
+    if (directByName.has(childName)) {
+      return {
+        success: false,
+        reason: 'inconsistent-alternative-projection',
+        path,
+        member: 'children',
+        childIndex: index,
+      };
+    }
+    directByName.set(childName, { value: child.value, index });
+  }
+
+  const discriminatorChild = directByName.get(discriminator.value);
+  if (discriminatorChild === undefined) {
+    return {
+      success: false,
+      reason: 'invalid-discriminated-object',
+      path,
+      member: 'discriminator',
+    };
+  }
+  const discriminatorDefinition = discriminatorChild.value;
+  const choices = readOwnDataMember(discriminatorDefinition, 'choices');
+  if (
+    readValue(discriminatorDefinition, 'kind') !== 'string' ||
+    readValue(discriminatorDefinition, 'required') !== true ||
+    readValue(discriminatorDefinition, 'nullable') !== false ||
+    readOwnDataMember(discriminatorDefinition, 'fixedValue').kind !==
+      'missing' ||
+    choices.kind !== 'value' ||
+    !Array.isArray(choices.value) ||
+    choices.value.length < 2 ||
+    !validStringField(discriminatorDefinition)
+  ) {
+    return {
+      success: false,
+      reason: 'invalid-discriminated-object',
+      path,
+      member: 'discriminator',
+      childIndex: discriminatorChild.index,
+    };
+  }
+  const choiceValues: string[] = [];
+  for (let index = 0; index < choices.value.length; index += 1) {
+    const choice = readOwnDataMember(choices.value, String(index));
+    if (choice.kind !== 'value' || !isOrdinaryObject(choice.value)) {
+      return {
+        success: false,
+        reason: 'invalid-discriminated-object',
+        path,
+        member: 'discriminator',
+        childIndex: discriminatorChild.index,
+      };
+    }
+    const value = readValue(choice.value, 'value');
+    if (typeof value !== 'string') {
+      return {
+        success: false,
+        reason: 'invalid-discriminated-object',
+        path,
+        member: 'discriminator',
+        childIndex: discriminatorChild.index,
+      };
+    }
+    choiceValues.push(value);
+  }
+
+  const alternatives = readOwnDataMember(node, 'alternatives');
+  if (
+    alternatives.kind !== 'value' ||
+    !Array.isArray(alternatives.value) ||
+    alternatives.value.length < 2
+  ) {
+    return {
+      success: false,
+      reason: 'invalid-object-alternative',
+      path,
+      member: 'alternatives',
+    };
+  }
+  const inspectedAlternatives: Array<{
+    readonly value: string;
+    readonly children: readonly unknown[];
+  }> = [];
+  for (
+    let alternativeIndex = 0;
+    alternativeIndex < alternatives.value.length;
+    alternativeIndex += 1
+  ) {
+    const alternativeMember = readOwnDataMember(
+      alternatives.value,
+      String(alternativeIndex),
+    );
+    if (
+      alternativeMember.kind !== 'value' ||
+      !isOrdinaryObject(alternativeMember.value)
+    ) {
+      return {
+        success: false,
+        reason: 'invalid-object-alternative',
+        path,
+        member: 'alternatives',
+        alternativeIndex,
+      };
+    }
+    const alternative = alternativeMember.value;
+    const discriminatorValue = readOwnDataMember(
+      alternative,
+      'discriminatorValue',
+    );
+    const alternativeChildren = readOwnDataMember(alternative, 'children');
+    if (
+      discriminatorValue.kind !== 'value' ||
+      typeof discriminatorValue.value !== 'string'
+    ) {
+      return {
+        success: false,
+        reason: 'invalid-object-alternative',
+        path,
+        member: 'discriminatorValue',
+        alternativeIndex,
+      };
+    }
+    if (
+      alternativeChildren.kind !== 'value' ||
+      !Array.isArray(alternativeChildren.value)
+    ) {
+      return {
+        success: false,
+        reason: 'invalid-object-alternative',
+        path,
+        member: 'children',
+        alternativeIndex,
+      };
+    }
+    inspectedAlternatives.push({
+      value: discriminatorValue.value,
+      children: alternativeChildren.value,
+    });
+  }
+  if (inspectedAlternatives.length !== choiceValues.length) {
+    return {
+      success: false,
+      reason: 'inconsistent-alternative-projection',
+      path,
+      member: 'alternatives',
+    };
+  }
+  for (
+    let alternativeIndex = 0;
+    alternativeIndex < inspectedAlternatives.length;
+    alternativeIndex += 1
+  ) {
+    if (
+      inspectedAlternatives[alternativeIndex]?.value !==
+      choiceValues[alternativeIndex]
+    ) {
+      return {
+        success: false,
+        reason: 'inconsistent-alternative-projection',
+        path,
+        member: 'discriminatorValue',
+        alternativeIndex,
+      };
+    }
+  }
+
+  const owned = new Set<string>();
+  for (
+    let alternativeIndex = 0;
+    alternativeIndex < inspectedAlternatives.length;
+    alternativeIndex += 1
+  ) {
+    const alternativeChildren = inspectedAlternatives[alternativeIndex]
+      ?.children as readonly unknown[];
+    const local = new Set<string>();
+    let previousDefinitionIndex = -1;
+    for (
+      let childIndex = 0;
+      childIndex < alternativeChildren.length;
+      childIndex += 1
+    ) {
+      const child = readOwnDataMember(alternativeChildren, String(childIndex));
+      const direct =
+        child.kind === 'value' && typeof child.value === 'string'
+          ? directByName.get(child.value)
+          : undefined;
+      if (
+        child.kind !== 'value' ||
+        typeof child.value !== 'string' ||
+        child.value === discriminator.value ||
+        direct === undefined ||
+        local.has(child.value) ||
+        direct.index <= previousDefinitionIndex
+      ) {
+        return {
+          success: false,
+          reason: 'invalid-object-alternative',
+          path,
+          member: 'children',
+          alternativeIndex,
+          childIndex,
+        };
+      }
+      previousDefinitionIndex = direct.index;
+      if (owned.has(child.value)) {
+        return {
+          success: false,
+          reason: 'inconsistent-alternative-projection',
+          path,
+          member: 'children',
+          alternativeIndex,
+          childIndex,
+        };
+      }
+      local.add(child.value);
+      owned.add(child.value);
+    }
+  }
+
+  type Scan =
+    | {
+        readonly phase: 'enter';
+        readonly value: unknown;
+        readonly parentPath: readonly string[];
+        readonly childIndex: number;
+      }
+    | { readonly phase: 'exit'; readonly value: object };
+  const scan: Scan[] = [];
+  for (let index = children.length - 1; index >= 0; index -= 1) {
+    const child = readOwnDataMember(children, String(index));
+    scan.push({
+      phase: 'enter',
+      value: child.kind === 'value' ? child.value : undefined,
+      parentPath: path,
+      childIndex: index,
+    });
+  }
+  const seen = new Set<object>();
+  const seenKeys = new Set<string>();
+  const active = new Set<object>();
+  while (scan.length > 0) {
+    const entry = scan.pop();
+    if (entry === undefined) break;
+    if (entry.phase === 'exit') {
+      active.delete(entry.value);
+      continue;
+    }
+    if (!isOrdinaryObject(entry.value)) {
+      return {
+        success: false,
+        reason: 'invalid-discriminated-object',
+        path,
+        member: 'children',
+        childIndex: entry.childIndex,
+      };
+    }
+    if (active.has(entry.value) || seen.has(entry.value)) {
+      return {
+        success: false,
+        reason: 'inconsistent-alternative-projection',
+        path,
+        member: 'children',
+        childIndex: entry.childIndex,
+      };
+    }
+    seen.add(entry.value);
+    const kind = readValue(entry.value, 'kind');
+    if (
+      kind === 'array' ||
+      kind === 'string-enum-array' ||
+      kind === 'discriminated-object'
+    ) {
+      return {
+        success: false,
+        reason: 'invalid-discriminated-object',
+        path,
+        member: 'children',
+        childIndex: entry.childIndex,
+      };
+    }
+    for (const member of ['visibleWhen', 'enabledWhen'] as const) {
+      if (readOwnDataMember(entry.value, member).kind !== 'missing') {
+        return {
+          success: false,
+          reason: 'invalid-discriminated-object',
+          path,
+          member,
+          childIndex: entry.childIndex,
+        };
+      }
+    }
+    const inspectedChild = inspectNode(entry.value, entry.parentPath, true);
+    if (!inspectedChild.success) {
+      return {
+        success: false,
+        reason: 'invalid-discriminated-object',
+        path,
+        member: 'children',
+        childIndex: entry.childIndex,
+      };
+    }
+    if (seenKeys.has(inspectedChild.key)) {
+      return {
+        success: false,
+        reason: 'inconsistent-alternative-projection',
+        path,
+        member: 'children',
+        childIndex: entry.childIndex,
+      };
+    }
+    seenKeys.add(inspectedChild.key);
+    if (inspectedChild.kind !== 'object') continue;
+    active.add(entry.value);
+    scan.push({ phase: 'exit', value: entry.value });
+    for (
+      let index = inspectedChild.children.length - 1;
+      index >= 0;
+      index -= 1
+    ) {
+      const child = readOwnDataMember(inspectedChild.children, String(index));
+      scan.push({
+        phase: 'enter',
+        value: child.kind === 'value' ? child.value : undefined,
+        parentPath: inspectedChild.path,
+        childIndex: entry.childIndex,
+      });
+    }
+  }
+
+  return {
+    success: true,
+    kind: 'discriminated-object',
+    key,
+    path,
+    children,
+  };
+}
 
 function inspectNode(
   node: object,

@@ -1,0 +1,6 @@
+This private workspace package is licensed under AGPL-3.0-only. Its canonical
+workspace license text is ../../LICENSE.
+
+This local pointer is deliberately excluded from the checkpoint-1 package file
+list. PLAN-037 checkpoint 8 must replace it with the complete license text and
+add that self-contained file to the packed candidate before artifact review.

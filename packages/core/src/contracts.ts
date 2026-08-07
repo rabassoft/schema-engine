@@ -8,7 +8,23 @@ export type DocumentPath = readonly (string | number)[];
 export interface UiSchema {
   readonly order?: readonly string[];
   readonly fields?: Readonly<Record<string, UiNodeSchema>>;
-  readonly presentation?: readonly UiPresentationEntry[];
+  readonly presentation?: readonly UiRootPresentationEntry[];
+}
+
+export type UiRootPresentationEntry = UiPresentationEntry | UiWizardSchema;
+
+export interface UiWizardSchema {
+  readonly kind: 'wizard';
+  readonly id: string;
+  readonly label: string;
+  readonly steps: readonly UiWizardStepSchema[];
+}
+
+export interface UiWizardStepSchema {
+  readonly kind: 'wizard-step';
+  readonly id: string;
+  readonly label: string;
+  readonly children: readonly UiPresentationEntry[];
 }
 
 export type UiPresentationEntry =
@@ -112,7 +128,28 @@ export type UiFieldConditionSchema =
 export interface FormDefinition {
   readonly nodes: readonly FormNodeDefinition[];
   readonly fields: readonly FieldDefinition[];
-  readonly presentation: readonly PresentationEntryDefinition[];
+  readonly presentation: readonly RootPresentationEntryDefinition[];
+}
+
+export type RootPresentationEntryDefinition =
+  PresentationEntryDefinition | WizardDefinition;
+
+export interface WizardDefinition {
+  readonly kind: 'wizard';
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly steps: readonly WizardStepDefinition[];
+  readonly completionScope: FormScope;
+}
+
+export interface WizardStepDefinition {
+  readonly kind: 'wizard-step';
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly children: readonly PresentationEntryDefinition[];
+  readonly scope: FormScope;
 }
 
 export type PresentationEntryDefinition<
@@ -211,8 +248,23 @@ export interface ObjectFieldDefinition extends BaseNodeDefinition {
   readonly presentation: readonly PresentationEntryDefinition[];
 }
 
+export interface DiscriminatedObjectAlternativeDefinition {
+  readonly discriminatorValue: string;
+  readonly children: readonly string[];
+}
+
+export interface DiscriminatedObjectFieldDefinition extends BaseNodeDefinition {
+  readonly kind: 'discriminated-object';
+  readonly discriminator: string;
+  readonly children: readonly FormNodeDefinition[];
+  readonly alternatives: readonly DiscriminatedObjectAlternativeDefinition[];
+}
+
+export type ObjectNodeDefinition =
+  ObjectFieldDefinition | DiscriminatedObjectFieldDefinition;
+
 export type FormNodeDefinition =
-  ObjectFieldDefinition | ArrayNodeDefinition | FieldDefinition;
+  ObjectNodeDefinition | ArrayNodeDefinition | FieldDefinition;
 
 export type PrimitiveFixedValue = string | number | boolean | null;
 
@@ -554,14 +606,14 @@ export type ObjectTextResolutionContext =
   | {
       readonly formId: string;
       readonly locale: string;
-      readonly node: ObjectFieldDefinition | ArrayNodeDefinition;
+      readonly node: ObjectNodeDefinition | ArrayNodeDefinition;
       readonly member: Exclude<ObjectTextMember, 'issue'>;
       readonly issue?: never;
     }
   | {
       readonly formId: string;
       readonly locale: string;
-      readonly node: ObjectFieldDefinition | ArrayNodeDefinition;
+      readonly node: ObjectNodeDefinition | ArrayNodeDefinition;
       readonly member: 'issue';
       readonly issue: ValidationIssue;
     };
@@ -612,7 +664,59 @@ export type TextResolutionContext =
   | ObjectTextResolutionContext
   | CollectionTextResolutionContext
   | SectionTextResolutionContext
-  | AdvancedPresentationTextResolutionContext;
+  | AdvancedPresentationTextResolutionContext
+  | WizardTextResolutionContext;
+
+export type WizardTextMember =
+  | 'label'
+  | 'previous'
+  | 'next'
+  | 'complete'
+  | 'position'
+  | 'unvisited'
+  | 'visited'
+  | 'error'
+  | 'completed'
+  | 'provisional-validation'
+  | 'pending-validation'
+  | 'failed-validation';
+
+export type WizardTextResolutionContext =
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly wizard: WizardDefinition;
+      readonly step?: never;
+      readonly member: 'label' | 'previous' | 'next' | 'complete';
+      readonly position?: never;
+      readonly count?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly wizard: WizardDefinition;
+      readonly step: WizardStepDefinition;
+      readonly member:
+        | 'label'
+        | 'unvisited'
+        | 'visited'
+        | 'error'
+        | 'completed'
+        | 'provisional-validation'
+        | 'pending-validation'
+        | 'failed-validation';
+      readonly position?: never;
+      readonly count?: never;
+    }
+  | {
+      readonly formId: string;
+      readonly locale: string;
+      readonly wizard: WizardDefinition;
+      readonly step: WizardStepDefinition;
+      readonly member: 'position';
+      readonly position: number;
+      readonly count: number;
+    };
 export interface TextResolver {
   resolve(text: string, context: TextResolutionContext): string;
 }
@@ -657,6 +761,13 @@ export interface ControlledExternalState<TData extends object> {
   readonly baselineValue: Readonly<TData>;
   readonly locale: string;
 }
+export interface ControlledWizardState {
+  readonly selectedStepId: string;
+}
+export interface WizardSelectionConfirmation {
+  readonly requestId: number;
+  readonly selectedStepId: string;
+}
 export interface ControlledFormRuntimeOptions<
   TData extends object,
 > extends ControlledExternalState<TData> {
@@ -666,11 +777,36 @@ export interface ControlledFormRuntimeOptions<
   readonly validator: SchemaValidator;
   readonly asyncValidator?: AsyncSchemaValidator | undefined;
   readonly validationVisibility?: ValidationVisibility;
+  readonly wizardState?: ControlledWizardState;
 }
 export interface ExternalStateUpdate<TData extends object> {
   readonly value?: Readonly<TData>;
   readonly baselineValue?: Readonly<TData>;
   readonly locale?: string;
+  readonly wizardSelection?: WizardSelectionConfirmation;
+}
+export type WizardIntention =
+  | {
+      readonly kind: 'previous' | 'next';
+      readonly requestId: number;
+      readonly wizardKey: string;
+      readonly fromStepId: string;
+      readonly toStepId: string;
+    }
+  | {
+      readonly kind: 'complete';
+      readonly requestId: number;
+      readonly wizardKey: string;
+      readonly stepId: string;
+    };
+export type WizardIntentionListener = (intention: WizardIntention) => void;
+export interface WizardActionResult {
+  readonly success: boolean;
+  readonly effects: {
+    readonly snapshotChanged: boolean;
+    readonly intentionEmitted: boolean;
+  };
+  readonly diagnostics: readonly Diagnostic[];
 }
 export interface RuntimeActionResult {
   readonly success: boolean;
@@ -748,6 +884,23 @@ export interface ObjectRuntimeSnapshot {
   readonly showIssues: boolean;
   readonly children: readonly NodeRuntimeSnapshot[];
 }
+export type ObjectAlternativeSelection =
+  | { readonly kind: 'none' }
+  | { readonly kind: 'active'; readonly discriminatorValue: string };
+export interface DiscriminatedObjectRuntimeSnapshot {
+  readonly nodeKind: 'discriminated-object';
+  readonly key: string;
+  readonly path: DataPath;
+  readonly presence: ObjectPresence;
+  readonly selection: ObjectAlternativeSelection;
+  readonly dirty: boolean;
+  readonly touched: boolean;
+  readonly focused: boolean;
+  readonly valid: boolean;
+  readonly issues: readonly ValidationIssue[];
+  readonly showIssues: boolean;
+  readonly children: readonly NodeRuntimeSnapshot[];
+}
 export interface ArrayRuntimeSnapshot {
   readonly nodeKind: 'array';
   readonly key: string;
@@ -779,7 +932,10 @@ export interface ItemRuntimeSnapshot {
 }
 export type RuntimeTreeSnapshot = NodeRuntimeSnapshot | ItemRuntimeSnapshot;
 export type NodeRuntimeSnapshot =
-  ObjectRuntimeSnapshot | ArrayRuntimeSnapshot | FieldRuntimeSnapshot;
+  | ObjectRuntimeSnapshot
+  | DiscriminatedObjectRuntimeSnapshot
+  | ArrayRuntimeSnapshot
+  | FieldRuntimeSnapshot;
 export interface FormRuntimeSnapshot<TData extends object> {
   readonly value: Readonly<TData>;
   readonly locale: string;
@@ -790,6 +946,44 @@ export interface FormRuntimeSnapshot<TData extends object> {
   readonly fields: readonly FieldRuntimeSnapshot[];
   readonly globalIssues: readonly ValidationIssue[];
   readonly asyncValidation?: AsyncValidationState;
+  readonly wizard?: WizardRuntimeSnapshot;
+}
+export type WizardStepValidationState =
+  'valid' | 'provisional' | 'invalid' | 'pending' | 'failed';
+export type WizardStepProgress =
+  'unvisited' | 'visited' | 'error' | 'completed';
+export interface WizardStepValidationSnapshot {
+  readonly state: WizardStepValidationState;
+  readonly synchronousValid: boolean;
+  readonly issues: readonly ValidationIssue[];
+  readonly asyncValidation?: AsyncValidationState;
+}
+export interface WizardStepSnapshot {
+  readonly key: string;
+  readonly id: string;
+  readonly position: number;
+  readonly current: boolean;
+  readonly visited: boolean;
+  readonly attempted: boolean;
+  readonly passed: boolean;
+  readonly progress: WizardStepProgress;
+  readonly validation: WizardStepValidationSnapshot;
+}
+export interface WizardRuntimeSnapshot {
+  readonly key: string;
+  readonly selectedStepId: string;
+  readonly steps: readonly WizardStepSnapshot[];
+  readonly pendingIntention?: Extract<
+    WizardIntention,
+    { readonly kind: 'previous' | 'next' }
+  >;
+  readonly controls: {
+    readonly previous: boolean;
+    readonly next: boolean;
+    readonly complete: boolean;
+  };
+  readonly completionAttempted: boolean;
+  readonly showGlobalIssues: boolean;
 }
 export interface FormScope {
   readonly id: string;
@@ -828,6 +1022,7 @@ export interface FormRuntime<TData extends object> {
   ): RuntimeTreeSnapshot | undefined;
   subscribe(listener: SnapshotListener<TData>): SubscribeResult;
   subscribeOperations(listener: OperationListener): SubscribeResult;
+  subscribeWizardIntentions(listener: WizardIntentionListener): SubscribeResult;
   updateExternalState(update: ExternalStateUpdate<TData>): RuntimeActionResult;
   requestSetValue(path: DataPath, value: unknown): RuntimeActionResult;
   requestRemoveValue(path: DataPath): RuntimeActionResult;
@@ -857,6 +1052,10 @@ export interface FormRuntime<TData extends object> {
   showValidationErrors(scope: FormScope): RuntimeActionResult;
   hideValidationErrors(scopeId: string): RuntimeActionResult;
   retryAsyncValidation(): RuntimeActionResult;
+  requestWizardPrevious(): WizardActionResult;
+  requestWizardNext(): WizardActionResult;
+  requestWizardComplete(): WizardActionResult;
+  rejectWizardIntention(requestId: number): WizardActionResult;
   dispose(): RuntimeActionResult;
 }
 export type CreateControlledFormRuntimeResult<TData extends object> =

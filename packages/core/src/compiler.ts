@@ -7,6 +7,8 @@ import type {
   CompileFormDefinitionInput,
   CompileFormResult,
   Diagnostic,
+  DiscriminatedObjectAlternativeDefinition,
+  DiscriminatedObjectFieldDefinition,
   FieldConditionDefinition,
   FieldDefinition,
   FieldTemplate,
@@ -27,9 +29,12 @@ import type {
   PresentationSectionDefinition,
   PresentationTabsDefinition,
   PrimitiveFixedValue,
+  RootPresentationEntryDefinition,
   StringEnumArrayFieldDefinition,
   StringFieldDefinition,
   StringSemanticFormat,
+  WizardDefinition,
+  WizardStepDefinition,
 } from './contracts.js';
 import { diagnostic, hasErrors } from './internal/diagnostics.js';
 import { deepFreeze } from './internal/immutable.js';
@@ -146,6 +151,19 @@ interface ObjectCandidate {
   readonly templatePath?: readonly string[];
 }
 
+interface DiscriminatedObjectCandidate {
+  readonly name: string;
+  readonly type: 'discriminated-object';
+  readonly required: boolean;
+  readonly schemaTitle?: string;
+  readonly schemaDescription?: string;
+  readonly dataPath: readonly string[];
+  readonly documentPath: readonly (string | number)[];
+  readonly discriminator: string;
+  readonly alternatives: readonly DiscriminatedObjectAlternativeDefinition[];
+  readonly children: NodeCandidate[];
+}
+
 interface ArrayCandidate {
   readonly name: string;
   readonly type: 'array';
@@ -159,7 +177,19 @@ interface ArrayCandidate {
   readonly children: NodeCandidate[];
 }
 
-type NodeCandidate = FieldCandidate | ObjectCandidate | ArrayCandidate;
+type NodeCandidate =
+  | FieldCandidate
+  | ObjectCandidate
+  | DiscriminatedObjectCandidate
+  | ArrayCandidate;
+
+function isObjectCandidate(
+  candidate: NodeCandidate,
+): candidate is ObjectCandidate | DiscriminatedObjectCandidate {
+  return (
+    candidate.type === 'object' || candidate.type === 'discriminated-object'
+  );
+}
 
 export interface DefaultCandidateSchemaNode {
   readonly kind: FieldType | 'object' | 'array';
@@ -217,6 +247,20 @@ interface ParsedUiSchema {
   readonly order: readonly string[];
   readonly fields: ReadonlyMap<string, ParsedNodeUi>;
   presentation?: readonly ParsedPresentationEntry[];
+  wizard?: ParsedWizard;
+}
+
+interface ParsedWizard {
+  readonly id: string;
+  readonly label: string;
+  readonly steps: readonly ParsedWizardStep[];
+}
+
+interface ParsedWizardStep {
+  readonly id: string;
+  readonly label: string;
+  readonly children: readonly ParsedPresentationEntry[];
+  readonly nodeNames: readonly string[];
 }
 
 type ParsedPresentationEntry =
@@ -2174,6 +2218,8 @@ function inspectNodes(
   rootCompositionBlocked = false,
   defaultOutput?: DefaultCandidateSchemaNode[],
   opaqueArrays = false,
+  insideDiscriminatedObject = false,
+  baseDataPath: readonly string[] = [],
 ): NodeCandidate[] {
   const candidates: NodeCandidate[] = [];
   type Frame =
@@ -2214,7 +2260,7 @@ function inspectNodes(
           ? descriptor.value
           : ACCESSOR_VALUE,
       required: requiredNames.has(name),
-      dataPath: [name],
+      dataPath: [...baseDataPath, name],
       documentPath: source?.documentPath ?? ['properties', name],
       output: candidates,
       ...(defaultOutput === undefined ? {} : { defaultOutput }),
@@ -2327,6 +2373,64 @@ function inspectNodes(
         ? typeDescriptor.value
         : ACCESSOR_VALUE;
     const allOfDescriptor = Object.getOwnPropertyDescriptor(field, 'allOf');
+    const oneOfDescriptor = Object.getOwnPropertyDescriptor(field, 'oneOf');
+    if (
+      oneOfDescriptor !== undefined &&
+      (insideDiscriminatedObject ||
+        rawType === 'object' ||
+        rawType === ACCESSOR_VALUE)
+    ) {
+      if (frameDefaultOutput !== undefined) {
+        diagnostics.push(
+          schemaKeywordDiagnostic(
+            'UNSUPPORTED_SCHEMA_KEYWORD',
+            'error',
+            'oneOf',
+            [...resolvedFieldPath, 'oneOf'],
+            'Schema keyword "oneOf" is not supported.',
+            dataPath,
+          ),
+        );
+      } else if (insideDiscriminatedObject) {
+        diagnostics.push(
+          diagnostic({
+            code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+            severity: 'error',
+            source: 'schema',
+            dataPath,
+            documentPath: [...resolvedFieldPath, 'oneOf'],
+            parameters: {
+              keyword: 'oneOf',
+              fieldType: 'discriminated-object',
+            },
+            fallbackMessage:
+              'Schema keyword "oneOf" is incompatible with field type "discriminated-object".',
+          }),
+        );
+      } else {
+        const candidate = inspectDiscriminatedObjectCandidate(
+          name,
+          field,
+          required,
+          dataPath,
+          resolvedFieldPath,
+          diagnostics,
+          rootSchema,
+          collectionPolicies,
+          usedPolicyIndices,
+          referenceContext,
+          resolved.referenceChain,
+        );
+        if (candidate !== undefined) output.push(candidate);
+      }
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      addReferenceChainToRange(
+        diagnostics,
+        diagnosticStart,
+        resolved.referenceChain,
+      );
+      continue;
+    }
     if (
       allOfDescriptor !== undefined &&
       acceptedNonObjectCompositionType(rawType) === undefined
@@ -2712,6 +2816,1156 @@ function inspectNodes(
   return candidates;
 }
 
+interface AlternativeBranchCatalog {
+  readonly index: number;
+  readonly schema: Record<string, unknown>;
+  readonly documentPath: readonly (string | number)[];
+  readonly referenceChain: ReferenceChain;
+  readonly properties: Record<string, unknown>;
+  readonly requiredEntries: readonly RequiredEntry[];
+  readonly requiredNames: ReadonlySet<string>;
+}
+
+function inspectDiscriminatedObjectCandidate(
+  name: string,
+  schema: Record<string, unknown>,
+  required: boolean,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+  rootSchema: Record<string, unknown>,
+  collectionPolicies: ParsedCollectionPolicies,
+  usedPolicyIndices: Set<number>,
+  referenceContext: ReferenceContext,
+  referenceChain: ReferenceChain,
+): DiscriminatedObjectCandidate | undefined {
+  const start = diagnostics.length;
+  let schemaTitle: string | undefined;
+  let schemaDescription: string | undefined;
+  let properties: Record<string, unknown> | undefined;
+  const requiredEntries: RequiredEntry[] = [];
+  const requiredNames = new Set<string>();
+
+  for (const keyword of Object.keys(schema)) {
+    const keywordPath = [...documentPath, keyword];
+    const member = ownDataValue(schema, keyword);
+    const value =
+      member.present && !member.accessor ? member.value : ACCESSOR_VALUE;
+    if (keyword === 'type') {
+      if (value !== 'object') {
+        diagnostics.push(
+          value === ACCESSOR_VALUE
+            ? invalidSchemaKeywordDescriptor(
+                'type',
+                '"object"',
+                keywordPath,
+                dataPath,
+                'accessor',
+              )
+            : invalidSchemaKeywordValue(
+                'type',
+                value,
+                '"object"',
+                keywordPath,
+                dataPath,
+              ),
+        );
+      }
+      continue;
+    }
+    if (keyword === 'properties') {
+      if (isOrdinaryRecord(value)) properties = value;
+      else {
+        diagnostics.push(
+          diagnostic({
+            code: 'INVALID_SCHEMA_PROPERTIES',
+            severity: 'error',
+            source: 'schema',
+            dataPath,
+            documentPath: keywordPath,
+            parameters: {
+              actualType:
+                value === ACCESSOR_VALUE ? 'accessor' : actualType(value),
+            },
+            fallbackMessage: 'Schema properties must be an object.',
+          }),
+        );
+      }
+      continue;
+    }
+    if (keyword === 'required') {
+      if (value === ACCESSOR_VALUE) {
+        diagnostics.push(
+          invalidSchemaKeywordDescriptor(
+            'required',
+            'array of unique strings',
+            keywordPath,
+            dataPath,
+            'accessor',
+          ),
+        );
+      } else {
+        inspectRequiredAtPath(
+          value,
+          requiredEntries,
+          requiredNames,
+          diagnostics,
+          dataPath,
+          keywordPath,
+        );
+      }
+      continue;
+    }
+    if (keyword === 'oneOf' || keyword === 'default') continue;
+    if (keyword === 'title' || keyword === 'description') {
+      const expected = keyword === 'title' ? 'non-blank string' : 'string';
+      if (
+        typeof value !== 'string' ||
+        (keyword === 'title' && value.trim().length === 0)
+      ) {
+        diagnostics.push(
+          value === ACCESSOR_VALUE
+            ? invalidSchemaKeywordDescriptor(
+                keyword,
+                expected,
+                keywordPath,
+                dataPath,
+                'accessor',
+              )
+            : invalidSchemaKeywordValue(
+                keyword,
+                value,
+                expected,
+                keywordPath,
+                dataPath,
+              ),
+        );
+      } else if (keyword === 'title') schemaTitle = value;
+      else schemaDescription = value;
+      continue;
+    }
+    if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'IGNORED_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Known annotation "${keyword}" is ignored by the compiler.`,
+          dataPath,
+        ),
+      );
+    } else if (
+      KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword) ||
+      COMPILER_SUPPORTED_KEYWORDS.has(keyword) ||
+      keyword === 'items'
+    ) {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'discriminated-object' },
+          fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "discriminated-object".`,
+        }),
+      );
+    } else {
+      diagnostics.push(
+        schemaKeywordDiagnostic(
+          'UNKNOWN_SCHEMA_KEYWORD',
+          'warning',
+          keyword,
+          keywordPath,
+          `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+          dataPath,
+        ),
+      );
+    }
+  }
+
+  for (const keyword of ['type', 'properties', 'required'] as const) {
+    if (Object.hasOwn(schema, keyword)) continue;
+    if (keyword === 'properties') {
+      diagnostics.push(
+        diagnostic({
+          code: 'MISSING_SCHEMA_PROPERTIES',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: [...documentPath, keyword],
+          parameters: {},
+          fallbackMessage: 'Object schema must declare properties.',
+        }),
+      );
+    } else {
+      diagnostics.push(
+        invalidSchemaKeywordDescriptor(
+          keyword,
+          keyword === 'type' ? '"object"' : 'array of unique strings',
+          [...documentPath, keyword],
+          dataPath,
+          'missing',
+        ),
+      );
+    }
+  }
+
+  const branches = inspectOneOfBranches(
+    schema,
+    dataPath,
+    documentPath,
+    diagnostics,
+    referenceContext,
+    referenceChain,
+  );
+  if (properties === undefined || branches === undefined) return undefined;
+
+  for (const entry of requiredEntries) {
+    if (!Object.hasOwn(properties, entry.name)) {
+      diagnostics.push(
+        diagnostic({
+          code: 'UNMANAGED_REQUIRED_PROPERTY',
+          severity: 'warning',
+          source: 'schema',
+          dataPath: [...dataPath, entry.name],
+          documentPath: [...documentPath, 'required', entry.index],
+          parameters: { field: entry.name },
+          fallbackMessage: `Required property "${entry.name}" is not managed by this form.`,
+        }),
+      );
+    }
+  }
+
+  const effectiveOuterProperties = new Map<string, Record<string, unknown>>();
+  for (const property of Object.keys(properties)) {
+    const propertyPath = [...documentPath, 'properties', property];
+    const propertyMember = ownDataValue(properties, property);
+    if (
+      !propertyMember.present ||
+      propertyMember.accessor ||
+      !isOrdinaryRecord(propertyMember.value)
+    ) {
+      diagnostics.push(
+        alternativeDiagnostic(dataPath, propertyPath, {
+          reason: 'unsupported-alternative-descendant',
+          property,
+          expected: 'non-array primitive or ordinary object subtree',
+        }),
+      );
+      continue;
+    }
+    if (propertyMember.value === schema) {
+      diagnostics.push(
+        diagnostic({
+          code: 'CYCLIC_SCHEMA_OBJECT',
+          severity: 'error',
+          source: 'schema',
+          dataPath: [...dataPath, property],
+          documentPath: propertyPath,
+          parameters: { firstDocumentPath: [...documentPath] },
+          fallbackMessage: 'Schema object cycle detected.',
+        }),
+      );
+      continue;
+    }
+    const resolvedProperty = resolveUseSiteSchema(
+      propertyMember.value,
+      [...dataPath, property],
+      propertyPath,
+      referenceChain,
+      diagnostics,
+      referenceContext,
+    );
+    if (resolvedProperty.kind === 'blocked') {
+      releaseReferenceTargets(
+        referenceContext,
+        resolvedProperty.activatedTargets,
+      );
+      continue;
+    }
+    const unsupported = findUnsupportedAlternativeDescendant(
+      resolvedProperty.schema,
+      resolvedProperty.documentPath,
+      [...dataPath, property],
+      resolvedProperty.referenceChain,
+      diagnostics,
+      referenceContext,
+    );
+    if (unsupported !== undefined) {
+      diagnostics.push(
+        alternativeDiagnostic(
+          dataPath,
+          unsupported.documentPath,
+          {
+            reason: 'unsupported-alternative-descendant',
+            property,
+            expected: 'non-array primitive or ordinary object subtree',
+          },
+          unsupported.referenceChain,
+        ),
+      );
+    } else {
+      effectiveOuterProperties.set(property, resolvedProperty.schema);
+    }
+    releaseReferenceTargets(
+      referenceContext,
+      resolvedProperty.activatedTargets,
+    );
+  }
+
+  if (hasErrors(diagnostics.slice(start))) return undefined;
+
+  const seedCandidates: Array<{
+    readonly name: string;
+    readonly values: readonly string[];
+  }> = [];
+  for (const property of Object.keys(properties)) {
+    if (!requiredNames.has(property)) continue;
+    const effectiveProperty = effectiveOuterProperties.get(property);
+    if (effectiveProperty === undefined) continue;
+    const values = readSeedEnum(effectiveProperty);
+    if (values === undefined) continue;
+    if (
+      branches.some((branch) => isExactBranchDiscriminator(branch, property))
+    ) {
+      seedCandidates.push({ name: property, values });
+    }
+  }
+
+  if (seedCandidates.length !== 1) {
+    diagnostics.push(
+      alternativeDiagnostic(dataPath, [...documentPath, 'oneOf'], {
+        reason: 'invalid-discriminator-candidate-count',
+        candidateCount: seedCandidates.length,
+        expected: 'exactly one seeded required outer string-enum discriminator',
+      }),
+    );
+    return undefined;
+  }
+  const seed = seedCandidates[0] as (typeof seedCandidates)[number];
+  const discriminator = seed.name;
+  const valueToChoice = new Map(
+    seed.values.map((value, index) => [value, index] as const),
+  );
+  const branchByChoice = new Map<number, number>();
+  let mappingValid = true;
+
+  for (const branch of branches) {
+    const discriminatorMember = ownDataValue(branch.properties, discriminator);
+    if (!discriminatorMember.present) {
+      diagnostics.push(
+        alternativeDiagnostic(
+          dataPath,
+          branch.documentPath,
+          {
+            reason: 'missing-branch-discriminator',
+            branchIndex: branch.index,
+            discriminator,
+          },
+          branch.referenceChain,
+        ),
+      );
+      mappingValid = false;
+      continue;
+    }
+    if (
+      discriminatorMember.accessor ||
+      !isOrdinaryRecord(discriminatorMember.value) ||
+      !branch.requiredNames.has(discriminator)
+    ) {
+      diagnostics.push(
+        alternativeDiagnostic(
+          dataPath,
+          [...branch.documentPath, 'properties', discriminator],
+          {
+            reason: 'invalid-branch-discriminator',
+            branchIndex: branch.index,
+            discriminator,
+          },
+          branch.referenceChain,
+        ),
+      );
+      mappingValid = false;
+      continue;
+    }
+    const value = readExactBranchConst(discriminatorMember.value);
+    const choiceIndex =
+      value === undefined ? undefined : valueToChoice.get(value);
+    if (choiceIndex === undefined) {
+      diagnostics.push(
+        alternativeDiagnostic(
+          dataPath,
+          [...branch.documentPath, 'properties', discriminator, 'const'],
+          {
+            reason: 'invalid-branch-discriminator',
+            branchIndex: branch.index,
+            discriminator,
+          },
+          branch.referenceChain,
+        ),
+      );
+      mappingValid = false;
+      continue;
+    }
+    const firstBranchIndex = branchByChoice.get(choiceIndex);
+    if (firstBranchIndex !== undefined) {
+      diagnostics.push(
+        alternativeDiagnostic(
+          dataPath,
+          [...branch.documentPath, 'properties', discriminator, 'const'],
+          {
+            reason: 'duplicate-discriminator-value',
+            branchIndex: branch.index,
+            firstBranchIndex,
+            discriminator,
+          },
+          branch.referenceChain,
+        ),
+      );
+      mappingValid = false;
+      continue;
+    }
+    branchByChoice.set(choiceIndex, branch.index);
+  }
+  for (
+    let choiceIndex = 0;
+    choiceIndex < seed.values.length;
+    choiceIndex += 1
+  ) {
+    if (!branchByChoice.has(choiceIndex)) {
+      diagnostics.push(
+        alternativeDiagnostic(
+          dataPath,
+          [...documentPath, 'properties', discriminator, 'enum', choiceIndex],
+          {
+            reason: 'unmapped-discriminator-value',
+            choiceIndex,
+            discriminator,
+          },
+        ),
+      );
+      mappingValid = false;
+    }
+  }
+
+  const unionProperties: Record<string, unknown> = {};
+  const propertySources = new Map<string, CompositionPropertySource>();
+  const unionRequired = new Set<string>();
+  for (const property of Object.keys(properties)) {
+    const descriptor = Object.getOwnPropertyDescriptor(properties, property);
+    if (descriptor !== undefined)
+      Object.defineProperty(unionProperties, property, descriptor);
+    propertySources.set(property, {
+      documentPath: [...documentPath, 'properties', property],
+      referenceChain,
+    });
+    if (requiredNames.has(property)) unionRequired.add(property);
+  }
+
+  const branchChildren = new Map<number, string[]>();
+  for (const branch of branches) {
+    const ownChildren: string[] = [];
+    for (const entry of branch.requiredEntries) {
+      if (
+        entry.name !== discriminator &&
+        !Object.hasOwn(branch.properties, entry.name)
+      ) {
+        diagnostics.push(
+          alternativeDiagnostic(
+            dataPath,
+            [...branch.documentPath, 'required', entry.index],
+            {
+              reason: 'invalid-alternative-required',
+              branchIndex: branch.index,
+              property: entry.name,
+            },
+            branch.referenceChain,
+          ),
+        );
+      }
+    }
+    for (const property of Object.keys(branch.properties)) {
+      if (property === discriminator) continue;
+      const currentPath = [...branch.documentPath, 'properties', property];
+      const first = propertySources.get(property);
+      if (first !== undefined) {
+        diagnostics.push(
+          alternativeDiagnostic(
+            dataPath,
+            currentPath,
+            {
+              reason: Object.hasOwn(properties, property)
+                ? 'outer-property-redeclared'
+                : 'duplicate-alternative-property',
+              branchIndex: branch.index,
+              property,
+              firstDocumentPath: [...first.documentPath],
+              ...(first.referenceChain.length === 0
+                ? {}
+                : {
+                    firstReferenceChain: first.referenceChain.map((path) => [
+                      ...path,
+                    ]),
+                  }),
+            },
+            branch.referenceChain,
+          ),
+        );
+        continue;
+      }
+      const propertyMember = ownDataValue(branch.properties, property);
+      if (
+        !propertyMember.present ||
+        propertyMember.accessor ||
+        !isOrdinaryRecord(propertyMember.value)
+      ) {
+        diagnostics.push(
+          alternativeDiagnostic(
+            dataPath,
+            currentPath,
+            {
+              reason: 'unsupported-alternative-descendant',
+              branchIndex: branch.index,
+              property,
+              expected: 'non-array primitive or ordinary object subtree',
+            },
+            branch.referenceChain,
+          ),
+        );
+        continue;
+      }
+      const rawCyclePath =
+        propertyMember.value === branch.schema
+          ? branch.documentPath
+          : propertyMember.value === schema
+            ? documentPath
+            : undefined;
+      if (rawCyclePath !== undefined) {
+        diagnostics.push(
+          diagnostic({
+            code: 'CYCLIC_SCHEMA_OBJECT',
+            severity: 'error',
+            source: 'schema',
+            dataPath: [...dataPath, property],
+            documentPath: currentPath,
+            parameters: { firstDocumentPath: [...rawCyclePath] },
+            fallbackMessage: 'Schema object cycle detected.',
+          }),
+        );
+        continue;
+      }
+      const resolvedDescendant = resolveUseSiteSchema(
+        propertyMember.value,
+        [...dataPath, property],
+        currentPath,
+        branch.referenceChain,
+        diagnostics,
+        referenceContext,
+      );
+      if (resolvedDescendant.kind === 'blocked') {
+        releaseReferenceTargets(
+          referenceContext,
+          resolvedDescendant.activatedTargets,
+        );
+        continue;
+      }
+      const unsupported = findUnsupportedAlternativeDescendant(
+        resolvedDescendant.schema,
+        resolvedDescendant.documentPath,
+        [...dataPath, property],
+        resolvedDescendant.referenceChain,
+        diagnostics,
+        referenceContext,
+      );
+      if (unsupported !== undefined) {
+        diagnostics.push(
+          alternativeDiagnostic(
+            dataPath,
+            unsupported.documentPath,
+            {
+              reason: 'unsupported-alternative-descendant',
+              branchIndex: branch.index,
+              property,
+              expected: 'non-array primitive or ordinary object subtree',
+            },
+            unsupported.referenceChain,
+          ),
+        );
+        releaseReferenceTargets(
+          referenceContext,
+          resolvedDescendant.activatedTargets,
+        );
+        continue;
+      }
+      releaseReferenceTargets(
+        referenceContext,
+        resolvedDescendant.activatedTargets,
+      );
+      const descriptor = Object.getOwnPropertyDescriptor(
+        branch.properties,
+        property,
+      );
+      if (descriptor !== undefined)
+        Object.defineProperty(unionProperties, property, descriptor);
+      propertySources.set(property, {
+        documentPath: currentPath,
+        referenceChain: branch.referenceChain,
+      });
+      if (branch.requiredNames.has(property)) unionRequired.add(property);
+      ownChildren.push(property);
+    }
+    branchChildren.set(branch.index, ownChildren);
+  }
+
+  const children = inspectNodes(
+    unionProperties,
+    unionRequired,
+    diagnostics,
+    rootSchema,
+    collectionPolicies,
+    usedPolicyIndices,
+    referenceContext,
+    propertySources,
+    false,
+    undefined,
+    true,
+    true,
+    dataPath,
+  );
+  if (hasErrors(diagnostics.slice(start)) || !mappingValid) return undefined;
+
+  const branchByIndex = new Map(
+    branches.map((branch) => [branch.index, branch]),
+  );
+  const alternatives = seed.values.map((value, choiceIndex) => {
+    const branchIndex = branchByChoice.get(choiceIndex) as number;
+    const branch = branchByIndex.get(branchIndex) as AlternativeBranchCatalog;
+    return {
+      discriminatorValue: value,
+      children: branchChildren.get(branch.index) ?? [],
+    } satisfies DiscriminatedObjectAlternativeDefinition;
+  });
+  return {
+    name,
+    type: 'discriminated-object',
+    required,
+    ...(schemaTitle === undefined ? {} : { schemaTitle }),
+    ...(schemaDescription === undefined ? {} : { schemaDescription }),
+    dataPath,
+    documentPath,
+    discriminator,
+    alternatives,
+    children,
+  };
+}
+
+function inspectOneOfBranches(
+  schema: Record<string, unknown>,
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  diagnostics: Diagnostic[],
+  referenceContext: ReferenceContext,
+  referenceChain: ReferenceChain,
+): readonly AlternativeBranchCatalog[] | undefined {
+  const oneOfPath = [...documentPath, 'oneOf'];
+  const descriptor = Object.getOwnPropertyDescriptor(schema, 'oneOf');
+  if (
+    descriptor === undefined ||
+    !descriptor.enumerable ||
+    !('value' in descriptor) ||
+    !Array.isArray(descriptor.value)
+  ) {
+    diagnostics.push(
+      diagnostic({
+        code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: oneOfPath,
+        parameters: {
+          keyword: 'oneOf',
+          expected: 'array of at least two object schemas',
+          actualType:
+            descriptor === undefined
+              ? 'missing'
+              : !descriptor.enumerable
+                ? 'non-enumerable'
+                : !('value' in descriptor)
+                  ? 'accessor'
+                  : actualType(descriptor.value),
+        },
+        fallbackMessage: 'Schema keyword "oneOf" has an invalid value.',
+      }),
+    );
+    return undefined;
+  }
+  const value = descriptor.value;
+  const lengthDescriptor = Object.getOwnPropertyDescriptor(value, 'length');
+  const length: unknown =
+    lengthDescriptor !== undefined && 'value' in lengthDescriptor
+      ? (lengthDescriptor.value as unknown)
+      : undefined;
+  if (!Number.isSafeInteger(length) || (length as number) < 2) {
+    diagnostics.push(
+      diagnostic({
+        code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: oneOfPath,
+        parameters: {
+          keyword: 'oneOf',
+          expected: 'safe integer length of at least two',
+          reason: 'invalid-oneof-length',
+          actualType:
+            lengthDescriptor === undefined
+              ? 'missing'
+              : !('value' in lengthDescriptor)
+                ? 'accessor'
+                : actualType(length),
+          ...(Number.isSafeInteger(length) && (length as number) < 2
+            ? { actualLength: length }
+            : {}),
+        },
+        fallbackMessage: 'Schema keyword "oneOf" has an invalid value.',
+      }),
+    );
+    return undefined;
+  }
+  const branches: Record<string, unknown>[] = [];
+  for (let index = 0; index < (length as number); index += 1) {
+    const entry = Object.getOwnPropertyDescriptor(value, index);
+    if (
+      entry === undefined ||
+      !entry.enumerable ||
+      !('value' in entry) ||
+      !isOrdinaryRecord(entry.value)
+    ) {
+      diagnostics.push(
+        diagnostic({
+          code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: [...oneOfPath, index],
+          parameters: {
+            keyword: 'oneOf',
+            expected: 'ordinary schema object',
+            actualType:
+              entry === undefined
+                ? 'missing'
+                : !entry.enumerable
+                  ? 'non-enumerable'
+                  : !('value' in entry)
+                    ? 'accessor'
+                    : actualType(entry.value),
+          },
+          fallbackMessage: 'Schema keyword "oneOf" has an invalid value.',
+        }),
+      );
+      return undefined;
+    }
+    branches.push(entry.value);
+  }
+  const indexedKeys = new Set(branches.map((_, index) => String(index)));
+  const unexpected = Object.keys(value).find((key) => !indexedKeys.has(key));
+  if (unexpected !== undefined) {
+    diagnostics.push(
+      diagnostic({
+        code: 'INVALID_SCHEMA_KEYWORD_VALUE',
+        severity: 'error',
+        source: 'schema',
+        dataPath,
+        documentPath: [...oneOfPath, unexpected],
+        parameters: {
+          keyword: 'oneOf',
+          expected: 'dense array indices only',
+          reason: 'unexpected-oneof-member',
+        },
+        fallbackMessage: 'Schema keyword "oneOf" has an invalid value.',
+      }),
+    );
+    return undefined;
+  }
+
+  const result: AlternativeBranchCatalog[] = [];
+  for (let index = 0; index < branches.length; index += 1) {
+    const inline = branches[index] as Record<string, unknown>;
+    const branchPath = [...oneOfPath, index];
+    if (inline === schema) {
+      diagnostics.push(
+        diagnostic({
+          code: 'CYCLIC_SCHEMA_OBJECT',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: branchPath,
+          parameters: { firstDocumentPath: [...documentPath] },
+          fallbackMessage: 'Schema object cycle detected.',
+        }),
+      );
+      continue;
+    }
+    const resolved = resolveUseSiteSchema(
+      inline,
+      dataPath,
+      branchPath,
+      referenceChain,
+      diagnostics,
+      referenceContext,
+    );
+    if (resolved.kind === 'blocked') {
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
+    const branch = resolved.schema;
+    const branchDocumentPath = resolved.documentPath;
+    const branchStart = diagnostics.length;
+    const type = ownDataValue(branch, 'type');
+    const properties = ownDataValue(branch, 'properties');
+    const required = ownDataValue(branch, 'required');
+    if (
+      !type.present ||
+      type.accessor ||
+      type.value !== 'object' ||
+      !properties.present ||
+      properties.accessor ||
+      !isOrdinaryRecord(properties.value) ||
+      !required.present ||
+      required.accessor
+    ) {
+      diagnostics.push(
+        alternativeDiagnostic(
+          dataPath,
+          branchDocumentPath,
+          {
+            reason: 'unsupported-branch-kind',
+            branchIndex: index,
+            expected: 'ordinary object alternative or local reference',
+          },
+          resolved.referenceChain,
+        ),
+      );
+      releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+      continue;
+    }
+    for (const keyword of Object.keys(branch)) {
+      if (
+        keyword === 'type' ||
+        keyword === 'properties' ||
+        keyword === 'required'
+      )
+        continue;
+      const keywordPath = [...branchDocumentPath, keyword];
+      if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
+        diagnostics.push(
+          schemaKeywordDiagnostic(
+            'IGNORED_SCHEMA_KEYWORD',
+            'warning',
+            keyword,
+            keywordPath,
+            `Known annotation "${keyword}" is ignored by the compiler.`,
+            dataPath,
+          ),
+        );
+      } else if (!KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)) {
+        diagnostics.push(
+          schemaKeywordDiagnostic(
+            'UNKNOWN_SCHEMA_KEYWORD',
+            'warning',
+            keyword,
+            keywordPath,
+            `Unknown schema keyword "${keyword}" is treated as an annotation.`,
+            dataPath,
+          ),
+        );
+      } else {
+        diagnostics.push(
+          diagnostic({
+            code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+            severity: 'error',
+            source: 'schema',
+            dataPath,
+            documentPath: keywordPath,
+            parameters: { keyword, fieldType: 'object-alternative' },
+            fallbackMessage: `Schema keyword "${keyword}" is incompatible with field type "object-alternative".`,
+          }),
+        );
+      }
+    }
+    const requiredEntries: RequiredEntry[] = [];
+    const requiredNames = new Set<string>();
+    inspectRequiredAtPath(
+      required.value,
+      requiredEntries,
+      requiredNames,
+      diagnostics,
+      dataPath,
+      [...branchDocumentPath, 'required'],
+    );
+    addReferenceChainToRange(diagnostics, branchStart, resolved.referenceChain);
+    result.push({
+      index,
+      schema: branch,
+      documentPath: branchDocumentPath,
+      referenceChain: resolved.referenceChain,
+      properties: properties.value,
+      requiredEntries,
+      requiredNames,
+    });
+    releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+  }
+  return result;
+}
+
+function readSeedEnum(
+  schema: Record<string, unknown>,
+): readonly string[] | undefined {
+  const type = ownDataValue(schema, 'type');
+  const values = ownDataValue(schema, 'enum');
+  if (
+    !type.present ||
+    type.accessor ||
+    type.value !== 'string' ||
+    Object.hasOwn(schema, 'const') ||
+    !values.present ||
+    values.accessor ||
+    !Array.isArray(values.value) ||
+    values.value.length < 2
+  ) {
+    return undefined;
+  }
+  const result: string[] = [];
+  const seen = new Set<string>();
+  for (let index = 0; index < values.value.length; index += 1) {
+    const entry = Object.getOwnPropertyDescriptor(values.value, index);
+    if (
+      entry === undefined ||
+      !('value' in entry) ||
+      typeof entry.value !== 'string' ||
+      seen.has(entry.value)
+    ) {
+      return undefined;
+    }
+    seen.add(entry.value);
+    result.push(entry.value);
+  }
+  return result;
+}
+
+function isExactBranchDiscriminator(
+  branch: AlternativeBranchCatalog,
+  property: string,
+): boolean {
+  if (!branch.requiredNames.has(property)) return false;
+  const member = ownDataValue(branch.properties, property);
+  return (
+    member.present &&
+    !member.accessor &&
+    isOrdinaryRecord(member.value) &&
+    readExactBranchConst(member.value) !== undefined
+  );
+}
+
+function readExactBranchConst(
+  schema: Record<string, unknown>,
+): string | undefined {
+  const type = ownDataValue(schema, 'type');
+  const fixed = ownDataValue(schema, 'const');
+  if (
+    !type.present ||
+    type.accessor ||
+    type.value !== 'string' ||
+    !fixed.present ||
+    fixed.accessor ||
+    typeof fixed.value !== 'string' ||
+    Object.hasOwn(schema, 'enum')
+  ) {
+    return undefined;
+  }
+  for (const keyword of Object.keys(schema)) {
+    if (keyword === 'type' || keyword === 'const') continue;
+    if (
+      !KNOWN_IGNORABLE_KEYWORDS.has(keyword) &&
+      KNOWN_DRAFT_2020_12_KEYWORDS.has(keyword)
+    ) {
+      return undefined;
+    }
+  }
+  return fixed.value;
+}
+
+function findUnsupportedAlternativeDescendant(
+  schema: Record<string, unknown>,
+  documentPath: readonly (string | number)[],
+  dataPath: readonly string[],
+  referenceChain: ReferenceChain,
+  diagnostics: Diagnostic[],
+  referenceContext: ReferenceContext,
+):
+  | {
+      readonly documentPath: readonly (string | number)[];
+      readonly referenceChain: ReferenceChain;
+    }
+  | undefined {
+  type Task =
+    | {
+        readonly kind: 'visit';
+        readonly schema: Record<string, unknown>;
+        readonly documentPath: readonly (string | number)[];
+        readonly dataPath: readonly string[];
+        readonly referenceChain: ReferenceChain;
+      }
+    | {
+        readonly kind: 'children';
+        readonly properties: Record<string, unknown>;
+        readonly names: readonly string[];
+        readonly index: number;
+        readonly documentPath: readonly (string | number)[];
+        readonly dataPath: readonly string[];
+        readonly referenceChain: ReferenceChain;
+      }
+    | {
+        readonly kind: 'exit-raw';
+        readonly schema: Record<string, unknown>;
+      }
+    | {
+        readonly kind: 'release-reference';
+        readonly activatedTargets: readonly string[];
+      };
+  const initialTargets = new Set(referenceContext.activeTargets.keys());
+  const activeRaw = new Set<object>();
+  const stack: Task[] = [
+    { kind: 'visit', schema, documentPath, dataPath, referenceChain },
+  ];
+  try {
+    while (stack.length > 0) {
+      const task = stack.pop();
+      if (task === undefined) break;
+      if (task.kind === 'exit-raw') {
+        activeRaw.delete(task.schema);
+        continue;
+      }
+      if (task.kind === 'release-reference') {
+        releaseReferenceTargets(referenceContext, task.activatedTargets);
+        continue;
+      }
+      if (task.kind === 'children') {
+        const name = task.names[task.index];
+        if (name === undefined) continue;
+        stack.push({ ...task, index: task.index + 1 });
+        const child = ownDataValue(task.properties, name);
+        if (!child.present || child.accessor || !isOrdinaryRecord(child.value))
+          continue;
+        const childDataPath = [...task.dataPath, name];
+        const childDocumentPath = [...task.documentPath, 'properties', name];
+        const resolved = resolveUseSiteSchema(
+          child.value,
+          childDataPath,
+          childDocumentPath,
+          task.referenceChain,
+          diagnostics,
+          referenceContext,
+        );
+        if (resolved.kind === 'blocked') {
+          releaseReferenceTargets(referenceContext, resolved.activatedTargets);
+          continue;
+        }
+        stack.push({
+          kind: 'release-reference',
+          activatedTargets: resolved.activatedTargets,
+        });
+        stack.push({
+          kind: 'visit',
+          schema: resolved.schema,
+          documentPath: resolved.documentPath,
+          dataPath: childDataPath,
+          referenceChain: resolved.referenceChain,
+        });
+        continue;
+      }
+
+      const current = task.schema;
+      if (
+        Object.hasOwn(current, 'oneOf') ||
+        Object.hasOwn(current, 'allOf') ||
+        Object.hasOwn(current, 'items')
+      ) {
+        return {
+          documentPath: task.documentPath,
+          referenceChain: task.referenceChain,
+        };
+      }
+      const type = ownDataValue(current, 'type');
+      if (
+        type.present &&
+        !type.accessor &&
+        (type.value === 'array' ||
+          (Array.isArray(type.value) && type.value.includes('array')))
+      ) {
+        return {
+          documentPath: task.documentPath,
+          referenceChain: task.referenceChain,
+        };
+      }
+      if (activeRaw.has(current)) continue;
+      const properties = ownDataValue(current, 'properties');
+      if (
+        !properties.present ||
+        properties.accessor ||
+        !isOrdinaryRecord(properties.value)
+      ) {
+        continue;
+      }
+      activeRaw.add(current);
+      stack.push({ kind: 'exit-raw', schema: current });
+      stack.push({
+        kind: 'children',
+        properties: properties.value,
+        names: Object.keys(properties.value),
+        index: 0,
+        documentPath: task.documentPath,
+        dataPath: task.dataPath,
+        referenceChain: task.referenceChain,
+      });
+    }
+    return undefined;
+  } finally {
+    for (const target of referenceContext.activeTargets.keys()) {
+      if (!initialTargets.has(target)) {
+        referenceContext.activeTargets.delete(target);
+      }
+    }
+  }
+}
+
+function alternativeDiagnostic(
+  dataPath: readonly string[],
+  documentPath: readonly (string | number)[],
+  parameters: Readonly<Record<string, unknown>>,
+  referenceChain: ReferenceChain = [],
+): Diagnostic {
+  const value = diagnostic({
+    code: 'INCOMPATIBLE_SCHEMA_ALTERNATIVE',
+    severity: 'error',
+    source: 'schema',
+    dataPath,
+    documentPath,
+    parameters,
+    fallbackMessage: 'Schema object alternative is incompatible.',
+  });
+  return referenceChain.length === 0
+    ? value
+    : {
+        ...value,
+        parameters: referenceDiagnosticParameters(value.parameters, {
+          referenceChain,
+        }),
+      };
+}
+
 function inspectOpaqueArraySchema(
   schema: Record<string, unknown>,
   dataPath: readonly string[],
@@ -2724,6 +3978,19 @@ function inspectOpaqueArraySchema(
     if (keyword === 'allOf') {
       diagnostics.push(
         incompatibleAllOfDiagnostic('array', keywordPath, dataPath),
+      );
+    } else if (keyword === 'oneOf') {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'array' },
+          fallbackMessage:
+            'Schema keyword "oneOf" is incompatible with field type "array".',
+        }),
       );
     } else if (KNOWN_IGNORABLE_KEYWORDS.has(keyword)) {
       diagnostics.push(
@@ -2864,6 +4131,21 @@ function inspectArrayCandidate(
     if (keyword === 'allOf') {
       diagnostics.push(
         incompatibleAllOfDiagnostic('array', keywordPath, dataPath),
+      );
+      continue;
+    }
+    if (keyword === 'oneOf') {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath: keywordPath,
+          parameters: { keyword, fieldType: 'array' },
+          fallbackMessage:
+            'Schema keyword "oneOf" is incompatible with field type "array".',
+        }),
       );
       continue;
     }
@@ -4756,6 +6038,20 @@ function inspectValidField(
       );
       continue;
     }
+    if (keyword === 'oneOf') {
+      diagnostics.push(
+        diagnostic({
+          code: 'INCOMPATIBLE_SCHEMA_KEYWORD',
+          severity: 'error',
+          source: 'schema',
+          dataPath,
+          documentPath,
+          parameters: { keyword, fieldType: type },
+          fallbackMessage: `Schema keyword "oneOf" is incompatible with field type "${type}".`,
+        }),
+      );
+      continue;
+    }
 
     if (nullable && keyword === 'enum') {
       stringEnum = { kind: 'schema-blocked' };
@@ -5257,13 +6553,394 @@ function inspectUiSchema(
     }
   }
 
-  const presentation = inspectRootPresentation(
+  const wizardInspection = inspectRootWizard(
     rawUiSchema,
     propertyNames ?? [],
     diagnostics,
   );
-  if (presentation !== undefined) result.presentation = presentation;
+  if (wizardInspection.handled) {
+    if (wizardInspection.wizard !== undefined)
+      result.wizard = wizardInspection.wizard;
+  } else {
+    const presentation = inspectRootPresentation(
+      rawUiSchema,
+      propertyNames ?? [],
+      diagnostics,
+    );
+    if (presentation !== undefined) result.presentation = presentation;
+  }
   return result;
+}
+
+interface PresentationInspectionOptions {
+  readonly presentation?: OwnValue;
+  readonly presentationPath?: readonly (string | number)[];
+  readonly firstNodes?: Map<string, readonly (string | number)[]>;
+  readonly firstContainers?: Map<string, readonly (string | number)[]>;
+  readonly active?: Map<object, readonly (string | number)[]>;
+  readonly requireComplete?: boolean;
+  readonly inspectOrderConflict?: boolean;
+}
+
+function inspectRootWizard(
+  ui: Record<string, unknown>,
+  nodeNames: readonly string[],
+  diagnostics: Diagnostic[],
+): { readonly handled: boolean; readonly wizard?: ParsedWizard } {
+  const presentation = ownDataValue(ui, 'presentation');
+  if (
+    !presentation.present ||
+    presentation.accessor ||
+    !Array.isArray(presentation.value)
+  ) {
+    return { handled: false };
+  }
+
+  const entries = presentation.value;
+  let wizardIndex: number | undefined;
+  for (let index = 0; index < entries.length; index += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(entries, String(index));
+    if (descriptor === undefined || !('value' in descriptor)) continue;
+    const value: unknown = descriptor.value;
+    if (!isOrdinaryRecord(value)) continue;
+    const kind = presentationMember(value, 'kind');
+    if (
+      (kind.kind === 'value' && kind.value === 'wizard') ||
+      presentationMember(value, 'steps').kind !== 'missing'
+    ) {
+      wizardIndex = index;
+      break;
+    }
+  }
+  if (wizardIndex === undefined) return { handled: false };
+
+  const rootPath = ['presentation'] as const;
+  if (entries.length !== 1 || wizardIndex !== 0) {
+    diagnostics.push(
+      invalidUiPresentation('wizard-not-sole-root', rootPath, {
+        ownerKind: 'wizard',
+        index: wizardIndex,
+      }),
+    );
+    return { handled: true };
+  }
+  if (ownDataValue(ui, 'order').present) {
+    diagnostics.push(
+      invalidUiPresentation('invalid-wizard-exterior', rootPath, {
+        ownerKind: 'wizard',
+        member: 'order',
+      }),
+    );
+    return { handled: true };
+  }
+
+  const wizardDescriptor = Object.getOwnPropertyDescriptor(entries, '0');
+  const wizardValue: unknown =
+    wizardDescriptor !== undefined && 'value' in wizardDescriptor
+      ? wizardDescriptor.value
+      : undefined;
+  const wizardPath = ['presentation', 0] as const;
+  if (!isOrdinaryRecord(wizardValue)) {
+    diagnostics.push(
+      invalidUiPresentation('invalid-wizard-exterior', wizardPath, {
+        ownerKind: 'wizard',
+        index: 0,
+      }),
+    );
+    return { handled: true };
+  }
+
+  let invalid = false;
+  const kind = presentationMember(wizardValue, 'kind');
+  const id = presentationMember(wizardValue, 'id');
+  const label = presentationMember(wizardValue, 'label');
+  const steps = presentationMember(wizardValue, 'steps');
+  const wizardId = memberNonEmptyString(id);
+  const wizardLabel = memberNonBlankString(label);
+  if (kind.kind !== 'value' || kind.value !== 'wizard') {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation('invalid-wizard-kind', [...wizardPath, 'kind'], {
+        ownerKind: 'wizard',
+        member: 'kind',
+      }),
+    );
+  }
+  if (wizardId === undefined) {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation('invalid-wizard-id', [...wizardPath, 'id'], {
+        ownerKind: 'wizard',
+        member: 'id',
+      }),
+    );
+  }
+  if (wizardLabel === undefined) {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation('invalid-wizard-label', [...wizardPath, 'label'], {
+        ownerKind: 'wizard',
+        member: 'label',
+        ...(wizardId === undefined ? {} : { wizardId }),
+      }),
+    );
+  }
+  if (
+    steps.kind !== 'value' ||
+    !Array.isArray(steps.value) ||
+    steps.value.length < 2
+  ) {
+    invalid = true;
+    diagnostics.push(
+      invalidUiPresentation('invalid-wizard-steps', [...wizardPath, 'steps'], {
+        ownerKind: 'wizard',
+        member: 'steps',
+        ...(wizardId === undefined ? {} : { wizardId }),
+      }),
+    );
+  }
+  for (const key of Object.keys(wizardValue)) {
+    if (!['kind', 'id', 'label', 'steps'].includes(key)) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('invalid-wizard-exterior', [...wizardPath, key], {
+          ownerKind: 'wizard',
+          member: key,
+          ...(wizardId === undefined ? {} : { wizardId }),
+        }),
+      );
+    }
+  }
+  if (steps.kind !== 'value' || !Array.isArray(steps.value))
+    return { handled: true };
+
+  const parsedSteps: ParsedWizardStep[] = [];
+  const firstStepIds = new Map<string, number>();
+  const firstNodes = new Map<string, readonly (string | number)[]>();
+  const firstContainers = new Map<string, readonly (string | number)[]>();
+  const active = new Map<object, readonly (string | number)[]>([
+    [wizardValue, wizardPath],
+  ]);
+  for (let stepIndex = 0; stepIndex < steps.value.length; stepIndex += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      steps.value,
+      String(stepIndex),
+    );
+    const stepValue: unknown =
+      descriptor !== undefined && 'value' in descriptor
+        ? descriptor.value
+        : undefined;
+    const stepPath = [...wizardPath, 'steps', stepIndex] as const;
+    if (!isOrdinaryRecord(stepValue)) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('invalid-wizard-step-exterior', stepPath, {
+          ownerKind: 'wizard-step',
+          stepIndex,
+          ...(wizardId === undefined ? {} : { wizardId }),
+        }),
+      );
+      continue;
+    }
+    const stepKind = presentationMember(stepValue, 'kind');
+    const stepIdMember = presentationMember(stepValue, 'id');
+    const stepLabelMember = presentationMember(stepValue, 'label');
+    const children = presentationMember(stepValue, 'children');
+    const stepId = memberNonEmptyString(stepIdMember);
+    const stepLabel = memberNonBlankString(stepLabelMember);
+    if (stepKind.kind !== 'value' || stepKind.value !== 'wizard-step') {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation(
+          'invalid-wizard-step-kind',
+          [...stepPath, 'kind'],
+          {
+            ownerKind: 'wizard-step',
+            stepIndex,
+            ...(wizardId === undefined ? {} : { wizardId }),
+          },
+        ),
+      );
+    }
+    if (stepId === undefined) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('invalid-wizard-step-id', [...stepPath, 'id'], {
+          ownerKind: 'wizard-step',
+          stepIndex,
+          ...(wizardId === undefined ? {} : { wizardId }),
+        }),
+      );
+    } else {
+      const firstIndex = firstStepIds.get(stepId);
+      if (firstIndex !== undefined) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation(
+            'duplicate-wizard-step-id',
+            [...stepPath, 'id'],
+            {
+              ownerKind: 'wizard-step',
+              stepIndex,
+              stepId,
+              index: firstIndex,
+              ...(wizardId === undefined ? {} : { wizardId }),
+            },
+          ),
+        );
+      } else firstStepIds.set(stepId, stepIndex);
+    }
+    if (stepLabel === undefined) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation(
+          'invalid-wizard-step-label',
+          [...stepPath, 'label'],
+          {
+            ownerKind: 'wizard-step',
+            stepIndex,
+            ...(stepId === undefined ? {} : { stepId }),
+            ...(wizardId === undefined ? {} : { wizardId }),
+          },
+        ),
+      );
+    }
+    if (
+      children.kind !== 'value' ||
+      !Array.isArray(children.value) ||
+      children.value.length === 0
+    ) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation(
+          'invalid-wizard-step-children',
+          [...stepPath, 'children'],
+          {
+            ownerKind: 'wizard-step',
+            stepIndex,
+            ...(stepId === undefined ? {} : { stepId }),
+            ...(wizardId === undefined ? {} : { wizardId }),
+          },
+        ),
+      );
+    }
+    for (const key of Object.keys(stepValue)) {
+      if (!['kind', 'id', 'label', 'children'].includes(key)) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation(
+            'invalid-wizard-step-exterior',
+            [...stepPath, key],
+            {
+              ownerKind: 'wizard-step',
+              member: key,
+              stepIndex,
+              ...(stepId === undefined ? {} : { stepId }),
+              ...(wizardId === undefined ? {} : { wizardId }),
+            },
+          ),
+        );
+      }
+    }
+    if (
+      stepId === undefined ||
+      stepLabel === undefined ||
+      children.kind !== 'value' ||
+      !Array.isArray(children.value) ||
+      children.value.length === 0
+    ) {
+      continue;
+    }
+    active.set(stepValue, stepPath);
+    const parsedChildren = inspectRootPresentation(
+      ui,
+      nodeNames,
+      diagnostics,
+      [],
+      undefined,
+      undefined,
+      {
+        presentation: {
+          present: true,
+          accessor: false,
+          value: children.value,
+        },
+        presentationPath: [...stepPath, 'children'],
+        firstNodes,
+        firstContainers,
+        active,
+        requireComplete: false,
+        inspectOrderConflict: false,
+      },
+    );
+    active.delete(stepValue);
+    if (parsedChildren === undefined) {
+      invalid = true;
+      continue;
+    }
+    parsedSteps.push({
+      id: stepId,
+      label: stepLabel,
+      children: parsedChildren,
+      nodeNames: collectParsedPresentationNodeNames(parsedChildren),
+    });
+  }
+  for (const nodeName of presentationNodeOrder(ui, nodeNames)) {
+    if (!firstNodes.has(nodeName)) {
+      invalid = true;
+      diagnostics.push(
+        invalidUiPresentation('invalid-wizard-membership', rootPath, {
+          ownerKind: 'wizard',
+          member: 'steps',
+          nodeName,
+          ...(wizardId === undefined ? {} : { wizardId }),
+        }),
+      );
+    }
+  }
+  if (
+    invalid ||
+    wizardId === undefined ||
+    wizardLabel === undefined ||
+    parsedSteps.length !== steps.value.length
+  ) {
+    return { handled: true };
+  }
+  return {
+    handled: true,
+    wizard: {
+      id: wizardId,
+      label: wizardLabel,
+      steps: parsedSteps,
+    },
+  };
+}
+
+function collectParsedPresentationNodeNames(
+  entries: readonly ParsedPresentationEntry[],
+): readonly string[] {
+  const names: string[] = [];
+  const stack = [...entries].reverse();
+  while (stack.length > 0) {
+    const entry = stack.pop();
+    if (entry === undefined) continue;
+    if (entry.kind === 'form-node') {
+      names.push(entry.name);
+    } else if (entry.kind === 'section') {
+      stack.push(...[...entry.children].reverse());
+    } else if (entry.kind === 'tabs' || entry.kind === 'accordion') {
+      for (let index = entry.panels.length - 1; index >= 0; index -= 1) {
+        const panel = entry.panels[index];
+        if (panel !== undefined) stack.push(...[...panel.children].reverse());
+      }
+    } else {
+      for (let index = entry.items.length - 1; index >= 0; index -= 1) {
+        const child = entry.items[index]?.child[0];
+        if (child !== undefined) stack.push(child);
+      }
+    }
+  }
+  return names;
 }
 
 function inspectRootPresentation(
@@ -5273,11 +6950,15 @@ function inspectRootPresentation(
   rootDocumentPath: readonly (string | number)[] = [],
   dataPath?: readonly string[],
   templatePath?: readonly string[],
+  options: PresentationInspectionOptions = {},
 ): readonly ParsedPresentationEntry[] | undefined {
-  const presentation = ownDataValue(ui, 'presentation');
+  const presentation = options.presentation ?? ownDataValue(ui, 'presentation');
   if (!presentation.present) return undefined;
   const diagnosticsStart = diagnostics.length;
-  const presentationPath = [...rootDocumentPath, 'presentation'];
+  const presentationPath = options.presentationPath ?? [
+    ...rootDocumentPath,
+    'presentation',
+  ];
   const finish = (
     value: readonly ParsedPresentationEntry[] | undefined,
   ): readonly ParsedPresentationEntry[] | undefined => {
@@ -5299,7 +6980,10 @@ function inspectRootPresentation(
   };
 
   let invalid = false;
-  if (ownDataValue(ui, 'order').present) {
+  if (
+    options.inspectOrderConflict !== false &&
+    ownDataValue(ui, 'order').present
+  ) {
     invalid = true;
     diagnostics.push(
       invalidUiPresentation('order-conflict', presentationPath, {
@@ -5328,9 +7012,12 @@ function inspectRootPresentation(
 
   const known = new Set(nodeNames);
   const normalizedNodeNames = presentationNodeOrder(ui, nodeNames);
-  const firstNodes = new Map<string, readonly (string | number)[]>();
-  const firstContainers = new Map<string, readonly (string | number)[]>();
-  const active = new Map<object, readonly (string | number)[]>();
+  const firstNodes =
+    options.firstNodes ?? new Map<string, readonly (string | number)[]>();
+  const firstContainers =
+    options.firstContainers ?? new Map<string, readonly (string | number)[]>();
+  const active =
+    options.active ?? new Map<object, readonly (string | number)[]>();
   const result: ParsedPresentationEntry[] = [];
   const stack: PresentationInspectionFrame[] = [];
   pushPresentationEntries(presentation.value, presentationPath, result, stack);
@@ -5374,12 +7061,16 @@ function inspectRootPresentation(
     invalid = outcome || invalid;
   }
 
-  for (const name of normalizedNodeNames) {
-    if (!firstNodes.has(name)) {
-      invalid = true;
-      diagnostics.push(
-        invalidUiPresentation('missing-node', presentationPath, { node: name }),
-      );
+  if (options.requireComplete !== false) {
+    for (const name of normalizedNodeNames) {
+      if (!firstNodes.has(name)) {
+        invalid = true;
+        diagnostics.push(
+          invalidUiPresentation('missing-node', presentationPath, {
+            node: name,
+          }),
+        );
+      }
     }
   }
   return finish(invalid ? undefined : result);
@@ -5448,10 +7139,24 @@ function inspectPresentationEntryFrame(
 
   const firstActivePath = active.get(frame.value);
   if (firstActivePath !== undefined) {
+    const activeKind = presentationMember(frame.value, 'kind');
+    const wizardCycle =
+      activeKind.kind === 'value' &&
+      (activeKind.value === 'wizard' || activeKind.value === 'wizard-step');
     diagnostics.push(
-      invalidUiPresentation('cyclic-presentation', frame.path, {
-        firstDocumentPath: [...firstActivePath],
-      }),
+      invalidUiPresentation(
+        wizardCycle ? 'wizard-cycle' : 'cyclic-presentation',
+        frame.path,
+        {
+          ...(wizardCycle
+            ? {
+                ownerKind:
+                  activeKind.value === 'wizard' ? 'wizard' : 'wizard-step',
+              }
+            : {}),
+          firstDocumentPath: [...firstActivePath],
+        },
+      ),
     );
     return true;
   }
@@ -5462,11 +7167,25 @@ function inspectPresentationEntryFrame(
     typeof kind.value === 'string' &&
     !['section', 'tabs', 'accordion', 'grid'].includes(kind.value)
   ) {
+    const wizardMembership =
+      kind.value === 'wizard' || kind.value === 'wizard-step';
     diagnostics.push(
-      invalidUiPresentation('unsupported-entry-kind', [...frame.path, 'kind'], {
-        expected: 'section, tabs, accordion or grid',
-        actualType: 'string',
-      }),
+      invalidUiPresentation(
+        wizardMembership
+          ? 'invalid-wizard-membership'
+          : 'unsupported-entry-kind',
+        [...frame.path, 'kind'],
+        wizardMembership
+          ? {
+              ownerKind: kind.value === 'wizard' ? 'wizard' : 'wizard-step',
+              member: 'kind',
+              index: frame.index,
+            }
+          : {
+              expected: 'section, tabs, accordion or grid',
+              actualType: 'string',
+            },
+      ),
     );
     return true;
   }
@@ -7001,6 +8720,7 @@ function inspectNestedUiSchema(
         readonly dataPath: readonly string[];
         readonly documentPath: readonly (string | number)[];
         readonly knownNames?: readonly string[];
+        readonly dynamicChildren?: boolean;
       };
   const active = new Map<object, readonly (string | number)[]>(ancestorActive);
   active.set(rawUiSchema, rootDocumentPath);
@@ -7084,7 +8804,7 @@ function inspectNestedUiSchema(
         uiPath,
       );
       frame.fields.set(name, parsed);
-      if (candidate.type === 'object') {
+      if (isObjectCandidate(candidate)) {
         const objectUi = parsed as ParsedObjectUi;
         stack.push({
           kind: 'container',
@@ -7095,6 +8815,9 @@ function inspectNestedUiSchema(
           target: objectUi,
           dataPath: nodePath,
           documentPath: uiPath,
+          ...(candidate.type === 'discriminated-object'
+            ? { dynamicChildren: true }
+            : {}),
         });
       } else if (candidate.type === 'array') {
         const arrayUi = parsed as ParsedArrayUi;
@@ -7207,19 +8930,55 @@ function inspectNestedUiSchema(
           );
         }
       }
-      const presentation = inspectRootPresentation(
-        frame.ui,
-        frame.candidates.map(({ name }) => name),
-        diagnostics,
-        frame.documentPath,
-        templateArrayPath === undefined
-          ? frame.dataPath.length === 0
-            ? undefined
-            : frame.dataPath
-          : templateArrayPath,
-        templateArrayPath === undefined ? undefined : frame.dataPath,
-      );
-      if (presentation !== undefined) frame.target.presentation = presentation;
+      const rootWizardInspection =
+        frame.dataPath.length === 0 && templateArrayPath === undefined
+          ? inspectRootWizard(
+              frame.ui,
+              frame.candidates.map(({ name }) => name),
+              diagnostics,
+            )
+          : { handled: false as const };
+      if (
+        rootWizardInspection.handled &&
+        rootWizardInspection.wizard !== undefined
+      ) {
+        (frame.target as ParsedUiSchema).wizard = rootWizardInspection.wizard;
+      }
+      const presentation = rootWizardInspection.handled
+        ? undefined
+        : inspectRootPresentation(
+            frame.ui,
+            frame.candidates.map(({ name }) => name),
+            diagnostics,
+            frame.documentPath,
+            templateArrayPath === undefined
+              ? frame.dataPath.length === 0
+                ? undefined
+                : frame.dataPath
+              : templateArrayPath,
+            templateArrayPath === undefined ? undefined : frame.dataPath,
+          );
+      if (presentation !== undefined) {
+        if (frame.dynamicChildren === true) {
+          diagnostics.push(
+            diagnostic({
+              code: 'INCOMPATIBLE_UI_OPTION',
+              severity: 'warning',
+              source: 'ui-schema',
+              dataPath: frame.dataPath,
+              documentPath: [...frame.documentPath, 'presentation'],
+              parameters: {
+                field: frame.dataPath.at(-1) ?? '',
+                fieldType: 'discriminated-object',
+                option: 'presentation',
+                reason: 'dynamic-children',
+              },
+              fallbackMessage:
+                'UI presentation is incompatible with a discriminated object.',
+            }),
+          );
+        } else frame.target.presentation = presentation;
+      }
       const fieldsValue = ownDataValue(frame.ui, 'fields');
       if (fieldsValue.present) {
         if (isOrdinaryRecord(fieldsValue.value)) {
@@ -7527,7 +9286,7 @@ function inspectNestedNodeUi(
     item?: ParsedUiSchema;
     presentation?: readonly ParsedPresentationEntry[];
   } = {};
-  if (candidate.type === 'object') {
+  if (isObjectCandidate(candidate)) {
     parsed.order = [];
     parsed.fields = new Map();
   } else if (candidate.type === 'array') {
@@ -7565,7 +9324,7 @@ function inspectNestedNodeUi(
     );
   }
   const allowed = new Set(
-    candidate.type === 'object'
+    isObjectCandidate(candidate)
       ? [
           ...UI_ROOT_KEYS,
           'label',
@@ -7592,7 +9351,7 @@ function inspectNestedNodeUi(
     const member = ownDataValue(value, key);
     if (!member.present) continue;
     const expected =
-      (candidate.type === 'object' || candidate.type === 'array') &&
+      (isObjectCandidate(candidate) || candidate.type === 'array') &&
       key === 'label'
         ? 'non-blank string'
         : 'string';
@@ -7643,7 +9402,7 @@ function inspectNestedNodeUi(
             ),
       );
     } else if (
-      candidate.type === 'object' ||
+      isObjectCandidate(candidate) ||
       candidate.type === 'array' ||
       candidate.type === 'boolean' ||
       candidate.type === 'string-enum-array'
@@ -7710,14 +9469,14 @@ function inspectNestedNodeUi(
             field: candidate.name,
             fieldType: candidate.type,
             option: 'item',
-            reason: candidate.type === 'object' ? 'object-node' : 'leaf-node',
+            reason: isObjectCandidate(candidate) ? 'object-node' : 'leaf-node',
           },
           fallbackMessage: `UI option "item" is incompatible with field "${candidate.name}".`,
         }),
       );
     }
   }
-  if (candidate.type !== 'object') {
+  if (!isObjectCandidate(candidate)) {
     for (const key of ['order', 'fields'] as const) {
       const member = ownDataValue(value, key);
       if (!member.present) continue;
@@ -7792,7 +9551,7 @@ function inspectNestedEnumLabels(
     );
     return;
   }
-  if (candidate.type === 'object' || candidate.type === 'array') {
+  if (isObjectCandidate(candidate) || candidate.type === 'array') {
     diagnostics.push(
       diagnostic({
         code: 'INCOMPATIBLE_UI_OPTION',
@@ -7804,7 +9563,7 @@ function inspectNestedEnumLabels(
           field: candidate.name,
           fieldType: candidate.type,
           option: 'enumLabels',
-          reason: candidate.type === 'object' ? 'object-node' : 'array-node',
+          reason: isObjectCandidate(candidate) ? 'object-node' : 'array-node',
         },
         fallbackMessage: `UI option "enumLabels" is incompatible with ${candidate.type} field "${candidate.name}".`,
       }),
@@ -7929,7 +9688,7 @@ function inspectNestedOptions(
               dataPath,
             ),
       );
-    } else if (candidate.type === 'object' || candidate.type === 'array') {
+    } else if (isObjectCandidate(candidate) || candidate.type === 'array') {
       diagnostics.push(
         diagnostic({
           code: 'INCOMPATIBLE_UI_OPTION',
@@ -7941,7 +9700,7 @@ function inspectNestedOptions(
             field: candidate.name,
             fieldType: candidate.type,
             option,
-            reason: candidate.type === 'object' ? 'object-node' : 'array-node',
+            reason: isObjectCandidate(candidate) ? 'object-node' : 'array-node',
           },
           fallbackMessage: `UI option "${option}" is incompatible with ${candidate.type} field "${candidate.name}".`,
         }),
@@ -7980,7 +9739,8 @@ interface ConditionTarget {
     | 'template-object'
     | 'template-field'
     | 'identity'
-    | 'presentation';
+    | 'presentation'
+    | 'discriminated-object';
   readonly member: ConditionMember;
   readonly capture: CapturedConditionMember;
 }
@@ -8023,7 +9783,7 @@ function inspectConditionPhase(
     if (candidate === undefined) continue;
     if (
       target.member === 'enabledWhen' &&
-      candidate.type !== 'object' &&
+      !isObjectCandidate(candidate) &&
       candidate.type !== 'array' &&
       candidate.fixedValue.kind === 'valid'
     ) {
@@ -8115,6 +9875,7 @@ function collectConditionTargets(
   candidates: readonly NodeCandidate[],
   ui: ParsedUiSchema | ParsedObjectUi,
   output: ConditionTarget[],
+  insideDiscriminatedObject = false,
 ): void {
   const byName = new Map(
     candidates.map((candidate) => [candidate.name, candidate] as const),
@@ -8129,7 +9890,9 @@ function collectConditionTargets(
     const candidate = byName.get(name);
     if (candidate === undefined) continue;
     const parsed = ui.fields.get(name);
-    const targetKind = conditionTargetKind(candidate);
+    const targetKind = insideDiscriminatedObject
+      ? 'discriminated-object'
+      : conditionTargetKind(candidate);
     const templatePath =
       'templatePath' in candidate ? candidate.templatePath : undefined;
     if (parsed?.visibleWhenCapture !== undefined) {
@@ -8154,7 +9917,7 @@ function collectConditionTargets(
         capture: parsed.enabledWhenCapture,
       });
     }
-    if (candidate.type === 'object') {
+    if (isObjectCandidate(candidate)) {
       collectConditionTargets(
         candidate.children,
         (parsed as ParsedObjectUi | undefined) ?? {
@@ -8162,6 +9925,7 @@ function collectConditionTargets(
           fields: new Map(),
         },
         output,
+        insideDiscriminatedObject || candidate.type === 'discriminated-object',
       );
     } else if (candidate.type === 'array') {
       collectConditionTargets(
@@ -8171,6 +9935,7 @@ function collectConditionTargets(
           fields: new Map(),
         },
         output,
+        insideDiscriminatedObject,
       );
     }
   }
@@ -8283,7 +10048,7 @@ function collectUnsupportedContainerConditions(
     }
     const rawNode = rawNodeMember.value;
     const nodeDocumentPath = [...documentPath, 'fields', name];
-    if (candidate.type === 'object') {
+    if (isObjectCandidate(candidate)) {
       collectUnsupportedContainerConditions(
         rawNode,
         candidate.children,
@@ -8433,6 +10198,8 @@ function indexOrdinaryConditionSources(
           collectionPaths,
         );
       }
+    } else if (candidate.type === 'discriminated-object') {
+      objects.add(key);
     } else if (candidate.templatePath === undefined) fields.set(key, candidate);
   }
 }
@@ -9048,7 +10815,7 @@ function conditionTargetKind(
   if ('templatePath' in candidate && candidate.templatePath !== undefined) {
     return candidate.type === 'object' ? 'template-object' : 'template-field';
   }
-  if (candidate.type === 'object') return 'object';
+  if (isObjectCandidate(candidate)) return 'object';
   if (candidate.type === 'array' || candidate.type === 'string-enum-array')
     return 'array';
   return undefined;
@@ -9163,6 +10930,56 @@ function buildNestedDefinition(
         item,
       };
       frame.output.push(node);
+    } else if (candidate.type === 'discriminated-object') {
+      const objectUi = frame.ui as ParsedObjectUi | undefined;
+      const children: FormNodeDefinition[] = [];
+      const unionOrder = [
+        ...(objectUi?.order ?? []),
+        ...candidate.children
+          .map(({ name }) => name)
+          .filter((name) => !(objectUi?.order ?? []).includes(name)),
+      ];
+      const unionRank = new Map(
+        unionOrder.map((childName, index) => [childName, index] as const),
+      );
+      const label =
+        objectUi?.label ??
+        candidate.schemaTitle ??
+        accessibleName(candidate.name);
+      const node: DiscriminatedObjectFieldDefinition = {
+        key: JSON.stringify(candidate.dataPath),
+        name: candidate.name,
+        path: candidate.dataPath,
+        required: candidate.required,
+        label,
+        ...(objectUi?.description !== undefined
+          ? { description: objectUi.description }
+          : candidate.schemaDescription === undefined
+            ? {}
+            : { description: candidate.schemaDescription }),
+        ...(objectUi?.hint === undefined ? {} : { hint: objectUi.hint }),
+        ...(objectUi?.tooltip === undefined
+          ? {}
+          : { tooltip: objectUi.tooltip }),
+        kind: 'discriminated-object',
+        discriminator: candidate.discriminator,
+        children,
+        alternatives: candidate.alternatives.map((alternative) => ({
+          discriminatorValue: alternative.discriminatorValue,
+          children: [...alternative.children].sort(
+            (left, right) =>
+              (unionRank.get(left) ?? Number.MAX_SAFE_INTEGER) -
+              (unionRank.get(right) ?? Number.MAX_SAFE_INTEGER),
+          ),
+        })),
+      };
+      frame.output.push(node);
+      pushBuildFrames(
+        candidate.children,
+        objectUi ?? { order: [], fields: new Map() },
+        children,
+        stack,
+      );
     } else if (candidate.type === 'object') {
       const objectUi = frame.ui as ParsedObjectUi | undefined;
       const children: FormNodeDefinition[] = [];
@@ -9226,7 +11043,7 @@ function buildNestedDefinition(
   return {
     nodes,
     fields,
-    presentation: createPresentationDefinition(uiSchema.presentation, nodes),
+    presentation: createRootPresentationDefinition(uiSchema, nodes),
   };
 }
 
@@ -9258,7 +11075,11 @@ function buildItemTemplate(
     const frame = stack.pop();
     if (frame === undefined) break;
     const candidate = frame.candidate;
-    if (candidate.type === 'array' || candidate.templatePath === undefined) {
+    if (
+      candidate.type === 'array' ||
+      candidate.type === 'discriminated-object' ||
+      candidate.templatePath === undefined
+    ) {
       throw new Error('Internal compiler error: invalid item template node.');
     }
     if (candidate.type === 'object') {
@@ -9493,8 +11314,66 @@ function buildDefinition(
   return {
     nodes: fields,
     fields,
-    presentation: createPresentationDefinition(uiSchema.presentation, fields),
+    presentation: createRootPresentationDefinition(uiSchema, fields),
   };
+}
+
+function createRootPresentationDefinition(
+  uiSchema: ParsedUiSchema,
+  nodes: readonly FormNodeDefinition[],
+): readonly RootPresentationEntryDefinition[] {
+  const parsedWizard = uiSchema.wizard;
+  if (parsedWizard === undefined)
+    return createPresentationDefinition(uiSchema.presentation, nodes);
+  const byName = new Map(nodes.map((node) => [node.name, node] as const));
+  const steps: WizardStepDefinition[] = parsedWizard.steps.map((step) => {
+    const paths = step.nodeNames.map((name) => {
+      const node = byName.get(name);
+      if (node === undefined)
+        throw new Error('Internal compiler error: missing wizard step node.');
+      return [...node.path];
+    });
+    return {
+      kind: 'wizard-step',
+      id: step.id,
+      key: JSON.stringify(['wizard', parsedWizard.id, 'step', step.id]),
+      label: step.label,
+      children: createPresentationDefinition(step.children, nodes),
+      scope: {
+        id: JSON.stringify([
+          'wizard',
+          parsedWizard.id,
+          'step',
+          step.id,
+          'scope',
+        ]),
+        paths,
+        includeGlobalIssues: false,
+      },
+    };
+  });
+  const wizard: WizardDefinition = {
+    kind: 'wizard',
+    id: parsedWizard.id,
+    key: JSON.stringify(['wizard', parsedWizard.id]),
+    label: parsedWizard.label,
+    steps,
+    completionScope: {
+      id: JSON.stringify(['wizard', parsedWizard.id, 'completion', 'scope']),
+      paths: parsedWizard.steps.flatMap((step) =>
+        step.nodeNames.map((name) => {
+          const node = byName.get(name);
+          if (node === undefined)
+            throw new Error(
+              'Internal compiler error: missing wizard completion node.',
+            );
+          return [...node.path];
+        }),
+      ),
+      includeGlobalIssues: true,
+    },
+  };
+  return [wizard];
 }
 
 type StaticPresentationOwner =

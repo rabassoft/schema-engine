@@ -1,0 +1,50 @@
+{
+  "name": "@rabassoft/schema-engine-react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "license": "AGPL-3.0-only",
+  "author": {
+    "name": "Ricardo Rabassó Rodríguez, operating as Rabassoft",
+    "email": "ricard@rabassoft.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabassoft/schema-engine.git",
+    "directory": "packages/react"
+  },
+  "files": [
+    "dist",
+    "src",
+    "source-build",
+    "README.md",
+    "SOURCE.md",
+    "NOTICE.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:package": "node test/package-smoke.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@rabassoft/schema-engine": "workspace:*",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "peerDependencies": {
+    "@rabassoft/schema-engine": "workspace:*",
+    "react": ">=19.2.0 <20.0.0",
+    "react-dom": ">=19.2.0 <20.0.0"
+  }
+}

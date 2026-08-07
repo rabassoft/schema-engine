@@ -11,6 +11,7 @@ const matchingValue: Readonly<Record<string, unknown>> = Object.freeze({
   empty: '',
   zero: 0,
   negativeZero: -0,
+  incompatible: true,
 });
 
 export const fixedValueControlStates = Object.freeze([
@@ -157,6 +158,11 @@ export const fixedValues = {
       id: 'official-const-assertion',
       title: 'Ajv owns const assertion',
       body: 'A same-kind mismatch remains visible while the official validator reports the const issue.',
+    },
+    {
+      id: 'fixed-state-legend',
+      title: 'How to read each fixed row',
+      body: 'The left column names the field; the right column shows its actual controlled value. Missing means no property was supplied, unavailable means an ancestor blocks access, and incompatible means the supplied value has the wrong primitive kind.',
     },
   ],
 } satisfies ReferenceScenarioAuthoring;

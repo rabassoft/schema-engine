@@ -24,6 +24,7 @@ import type {
   ArrayNodeDefinition,
   ArrayRuntimeSnapshot,
   CollectionNodeAddress,
+  DiscriminatedObjectRuntimeSnapshot,
   FieldDefinition,
   FieldTemplate,
   FieldRuntimeSnapshot,
@@ -32,6 +33,7 @@ import type {
   ItemRuntimeSnapshot,
   NodeRuntimeSnapshot,
   ObjectFieldDefinition,
+  ObjectNodeDefinition,
   ObjectNodeTemplate,
   ObjectRuntimeSnapshot,
   PresentationEntryDefinition,
@@ -106,17 +108,29 @@ export class SchemaNodeOutletComponent {
       this.destroyComponent(container);
 
       try {
-        if (definition.kind === 'object' && snapshot.nodeKind === 'object') {
+        if (
+          (definition.kind === 'object' ||
+            definition.kind === 'discriminated-object') &&
+          ((definition.kind === 'object' && snapshot.nodeKind === 'object') ||
+            (definition.kind === 'discriminated-object' &&
+              snapshot.nodeKind === 'discriminated-object'))
+        ) {
           this.componentRef = this.objectHostFactory.create(
             container,
             this.environmentInjector,
             () => {
               const candidate = this.definition();
-              return candidate.kind === 'object' ? candidate : definition;
+              return candidate.kind === 'object' ||
+                candidate.kind === 'discriminated-object'
+                ? candidate
+                : definition;
             },
             () => {
               const candidate = this.snapshot();
-              return candidate.nodeKind === 'object' ? candidate : snapshot;
+              return candidate.nodeKind === 'object' ||
+                candidate.nodeKind === 'discriminated-object'
+                ? candidate
+                : snapshot;
             },
             () => this.address() ?? address,
           );
@@ -140,6 +154,7 @@ export class SchemaNodeOutletComponent {
         if (
           definition.kind !== 'object' &&
           definition.kind !== 'array' &&
+          definition.kind !== 'discriminated-object' &&
           snapshot.nodeKind === 'field'
         ) {
           this.componentRef = container.createComponent(
@@ -149,7 +164,10 @@ export class SchemaNodeOutletComponent {
               bindings: [
                 inputBinding('definition', () => {
                   const candidate = this.definition();
-                  return candidate.kind !== 'object' ? candidate : definition;
+                  return candidate.kind !== 'object' &&
+                    candidate.kind !== 'discriminated-object'
+                    ? candidate
+                    : definition;
                 }),
                 inputBinding('snapshot', () => {
                   const candidate = this.snapshot();
@@ -172,7 +190,10 @@ export class SchemaNodeOutletComponent {
               definition.path,
             ),
           ]);
-        } else if (definition.kind === 'object') {
+        } else if (
+          definition.kind === 'object' ||
+          definition.kind === 'discriminated-object'
+        ) {
           this.form.reportDiagnostics([
             adapterDiagnostic(
               'OBJECT_HOST_INSTANTIATION_FAILED',
@@ -356,8 +377,8 @@ export class ObjectHostFactory {
   create(
     container: ViewContainerRef,
     environmentInjector: EnvironmentInjector,
-    definition: () => ObjectFieldDefinition | ObjectNodeTemplate,
-    snapshot: () => ObjectRuntimeSnapshot,
+    definition: () => ObjectNodeDefinition | ObjectNodeTemplate,
+    snapshot: () => ObjectRuntimeSnapshot | DiscriminatedObjectRuntimeSnapshot,
     address: () => CollectionNodeAddress | undefined,
   ): ComponentRef<unknown> {
     return container.createComponent(ObjectHostComponent, {
@@ -398,7 +419,10 @@ class LeafOutletHostComponent {
 @Component({
   selector: 'schema-object-host',
   standalone: true,
-  imports: [SchemaPresentationOutletComponent],
+  imports: [
+    SchemaPresentationOutletComponent,
+    forwardRef(() => SchemaNodeOutletComponent),
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <fieldset [disabled]="disabled()" [attr.aria-describedby]="describedBy()">
@@ -422,26 +446,37 @@ class LeafOutletHostComponent {
           }
         </ul>
       }
-      @for (
-        entry of definition().presentation;
-        track entry.kind === 'form-node' ? entry.node.key : entry.key
-      ) {
-        <schema-presentation-outlet
-          [entry]="entry"
-          [owner]="owner()"
-          [definition]="definition()"
-          [snapshot]="snapshot()"
-          [locale]="locale()"
-        />
+      @if (definition().kind === 'discriminated-object') {
+        @for (child of activeChildren(); track child.definition.key) {
+          <schema-node-outlet
+            [definition]="child.definition"
+            [snapshot]="child.snapshot"
+          />
+        }
+      } @else {
+        @for (
+          entry of ordinaryDefinition().presentation;
+          track entry.kind === 'form-node' ? entry.node.key : entry.key
+        ) {
+          <schema-presentation-outlet
+            [entry]="entry"
+            [owner]="owner()"
+            [definition]="ordinaryDefinition()"
+            [snapshot]="ordinarySnapshot()"
+            [locale]="locale()"
+          />
+        }
       }
     </fieldset>
   `,
 })
 class ObjectHostComponent {
   readonly definition = input.required<
-    ObjectFieldDefinition | ObjectNodeTemplate
+    ObjectNodeDefinition | ObjectNodeTemplate
   >();
-  readonly snapshot = input.required<ObjectRuntimeSnapshot>();
+  readonly snapshot = input.required<
+    ObjectRuntimeSnapshot | DiscriminatedObjectRuntimeSnapshot
+  >();
   readonly address = input<CollectionNodeAddress>();
 
   private readonly form = inject(SchemaFormDirective);
@@ -452,6 +487,41 @@ class ObjectHostComponent {
   private lastTextIdentity: readonly unknown[] | undefined;
 
   protected readonly texts = this.textsState.asReadonly();
+  protected readonly ordinaryDefinition = computed(() => {
+    const definition = this.definition();
+    if (definition.kind === 'discriminated-object') {
+      throw new Error('Discriminated object has no presentation forest.');
+    }
+    return definition;
+  });
+  protected readonly ordinarySnapshot = computed(() => {
+    const snapshot = this.snapshot();
+    if (snapshot.nodeKind === 'discriminated-object') {
+      throw new Error('Discriminated object has no presentation forest.');
+    }
+    return snapshot;
+  });
+  protected readonly activeChildren = computed(() => {
+    const definition = this.definition();
+    const snapshot = this.snapshot();
+    if (
+      definition.kind !== 'discriminated-object' ||
+      snapshot.nodeKind !== 'discriminated-object'
+    ) {
+      return Object.freeze([]);
+    }
+    const snapshots = new Map(
+      snapshot.children.map((child) => [child.key, child] as const),
+    );
+    return Object.freeze(
+      definition.children.flatMap((child) => {
+        const childSnapshot = snapshots.get(child.key);
+        return childSnapshot === undefined
+          ? []
+          : [Object.freeze({ definition: child, snapshot: childSnapshot })];
+      }),
+    );
+  });
   protected readonly locale = computed(
     () => this.form.snapshot()?.locale ?? '',
   );

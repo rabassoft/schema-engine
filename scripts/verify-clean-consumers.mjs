@@ -227,12 +227,31 @@ function createCoreConsumer(
   compileFormDefinition,
   createControlledFormRuntime,
   deriveSchemaDefaultCandidate,
+  type DiscriminatedObjectAlternativeDefinition,
+  type DiscriminatedObjectFieldDefinition,
+  type DiscriminatedObjectRuntimeSnapshot,
+  type ControlledWizardState,
+  type FieldDefinition,
   type FieldRuntimeSnapshot,
   type FieldTextMember,
-  type FieldValueConditionDefinition,
+  type FieldConditionDefinition,
+  type FormDefinition,
+  type FormNodeDefinition,
   type FormOperation,
+  type NodeRuntimeSnapshot,
+  type ObjectAlternativeSelection,
+  type ObjectNodeDefinition,
+  type RootPresentationEntryDefinition,
   type StringEnumArrayFieldDefinition,
+  type UiRootPresentationEntry,
+  type UiWizardSchema,
   type UiFieldValueConditionSchema,
+  type WizardActionResult,
+  type WizardDefinition,
+  type WizardIntention,
+  type WizardRuntimeSnapshot,
+  type WizardStepDefinition,
+  type WizardTextResolutionContext,
 } from '@rabassoft/schema-engine';
 
 const schema = {
@@ -265,6 +284,22 @@ const schema = {
       items: { type: 'string', enum: ['', 'reader', 'editor'] },
       uniqueItems: true,
     },
+    pet: {
+      type: 'object',
+      properties: {
+        kind: { type: 'string', enum: ['cat', 'dog'] },
+        name: { type: 'string' },
+      },
+      required: ['kind'],
+      oneOf: [
+        { type: 'object', properties: {
+          kind: { type: 'string', const: 'cat' }, lives: { type: 'integer' },
+        }, required: ['kind', 'lives'] },
+        { type: 'object', properties: {
+          kind: { type: 'string', const: 'dog' }, barkVolume: { type: 'number' },
+        }, required: ['kind'] },
+      ],
+    },
   },
 };
 const rawCondition: UiFieldValueConditionSchema = {
@@ -291,12 +326,14 @@ if (!compiled.success) throw new Error('Compilation failed');
 const conditionalDefinition = compiled.definition.fields.find(
   ({ name }) => name === 'conditional',
 );
-const normalizedCondition: FieldValueConditionDefinition | undefined =
+const normalizedCondition: FieldConditionDefinition | undefined =
   conditionalDefinition?.kind === 'string-enum-array'
     ? undefined
     : conditionalDefinition?.visibleWhen;
 if (
-  normalizedCondition?.sourcePath[0] !== 'active' ||
+  normalizedCondition === undefined ||
+  !('sourcePath' in normalizedCondition) ||
+  normalizedCondition.sourcePath[0] !== 'active' ||
   normalizedCondition.equals !== true
 ) {
   throw new Error('Conditional declarations are unavailable');
@@ -319,6 +356,188 @@ if (
 ) {
   throw new Error('String-enum array declarations are incomplete');
 }
+const petDefinition = compiled.definition.nodes.find(
+  ({ name }) => name === 'pet',
+);
+if (petDefinition?.kind !== 'discriminated-object') {
+  throw new Error('Discriminated object definition is unavailable');
+}
+const publicPetDefinition: DiscriminatedObjectFieldDefinition = petDefinition;
+const publicAlternatives: readonly DiscriminatedObjectAlternativeDefinition[] =
+  publicPetDefinition.alternatives;
+function objectKind(node: ObjectNodeDefinition): 'ordinary' | 'alternative' {
+  switch (node.kind) {
+    case 'object': return 'ordinary';
+    case 'discriminated-object': return 'alternative';
+    default: return node satisfies never;
+  }
+}
+function snapshotKind(snapshot: NodeRuntimeSnapshot): string {
+  switch (snapshot.nodeKind) {
+    case 'object': return 'object';
+    case 'discriminated-object': return snapshot.selection.kind;
+    case 'array': return 'array';
+    case 'field': return 'field';
+    default: return snapshot satisfies never;
+  }
+}
+if (
+  objectKind(publicPetDefinition) !== 'alternative' ||
+  publicAlternatives.length !== 2
+) {
+  throw new Error('Discriminated object declaration narrowing failed');
+}
+
+const manualKind = {
+  kind: 'string', nullable: false, key: '["pet","kind"]', name: 'kind',
+  path: ['pet', 'kind'], required: true, label: 'Kind', constraints: {},
+  choices: [{ value: 'cat', label: 'Cat' }, { value: 'dog', label: 'Dog' }],
+} satisfies FieldDefinition;
+const manualName = {
+  kind: 'string', nullable: false, key: '["pet","name"]', name: 'name',
+  path: ['pet', 'name'], required: false, label: 'Name', constraints: {},
+} satisfies FieldDefinition;
+const manualLives = {
+  kind: 'number', nullable: false, key: '["pet","lives"]', name: 'lives',
+  path: ['pet', 'lives'], required: true, label: 'Lives',
+  numericType: 'integer', constraints: {}, ui: {},
+} satisfies FieldDefinition;
+const manualBarkVolume = {
+  kind: 'number', nullable: false, key: '["pet","barkVolume"]',
+  name: 'barkVolume', path: ['pet', 'barkVolume'], required: false,
+  label: 'Bark volume', numericType: 'number', constraints: {}, ui: {},
+} satisfies FieldDefinition;
+const manualPet = {
+  kind: 'discriminated-object', key: '["pet"]', name: 'pet', path: ['pet'],
+  required: false, label: 'Pet', discriminator: 'kind',
+  children: [manualKind, manualName, manualLives, manualBarkVolume],
+  alternatives: [
+    { discriminatorValue: 'cat', children: ['lives'] },
+    { discriminatorValue: 'dog', children: ['barkVolume'] },
+  ],
+} satisfies DiscriminatedObjectFieldDefinition;
+const manualDefinition = {
+  nodes: [manualPet],
+  fields: [manualKind, manualName, manualLives, manualBarkVolume],
+  presentation: [{ kind: 'form-node', node: manualPet }],
+} satisfies FormDefinition;
+const manualNode: FormNodeDefinition = manualDefinition.nodes[0];
+if (manualNode.kind !== 'discriminated-object') {
+  throw new Error('Manual discriminated object definition is unavailable');
+}
+const manualValue = {
+  pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
+};
+const manualCreated = createControlledFormRuntime({
+  formId: 'clean-core-manual-m33', definition: manualDefinition, schema,
+  value: manualValue, baselineValue: manualValue, locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+});
+if (!manualCreated.success) {
+  throw new Error('Manual discriminated object runtime failed');
+}
+const manualSnapshot = manualCreated.runtime.getNodeSnapshot(['pet']);
+if (
+  manualSnapshot?.nodeKind !== 'discriminated-object' ||
+  snapshotKind(manualSnapshot) !== 'active'
+) {
+  throw new Error('Manual discriminated object snapshot narrowing failed');
+}
+const publicSnapshot: DiscriminatedObjectRuntimeSnapshot = manualSnapshot;
+const publicSelection: ObjectAlternativeSelection = publicSnapshot.selection;
+if (
+  publicSelection.kind !== 'active' ||
+  publicSelection.discriminatorValue !== 'cat' ||
+  manualCreated.runtime.requestSetValue(['pet', 'barkVolume'], 8)
+    .diagnostics[0]?.code !== 'INACTIVE_OBJECT_ALTERNATIVE_TARGET'
+) {
+  throw new Error('Manual discriminated object runtime safety failed');
+}
+manualCreated.runtime.dispose();
+const wizardSchema = {
+  type: 'object', properties: {
+    active: { type: 'boolean' }, conditional: { type: 'string' },
+  },
+};
+const rawWizard = {
+  kind: 'wizard', id: 'clean-wizard', label: 'Clean wizard', steps: [
+    { kind: 'wizard-step', id: 'identity', label: 'Identity', children: ['active'] },
+    { kind: 'wizard-step', id: 'review', label: 'Review', children: ['conditional'] },
+  ],
+} satisfies UiWizardSchema;
+const rawWizardRoot: UiRootPresentationEntry = rawWizard;
+const compiledWizard = compileFormDefinition({
+  schema: wizardSchema,
+  uiSchema: { presentation: [rawWizardRoot] },
+});
+if (!compiledWizard.success || compiledWizard.definition.presentation[0]?.kind !== 'wizard') {
+  throw new Error('Clean wizard compilation failed');
+}
+const normalizedWizard: WizardDefinition = compiledWizard.definition.presentation[0];
+const publicStep: WizardStepDefinition = normalizedWizard.steps[0];
+function rootPresentationKind(entry: RootPresentationEntryDefinition): string {
+  switch (entry.kind) {
+    case 'form-node': return 'node';
+    case 'section': return 'section';
+    case 'tabs': return 'tabs';
+    case 'accordion': return 'accordion';
+    case 'grid': return 'grid';
+    case 'wizard': return entry.steps[0]?.id ?? 'wizard';
+    default: return entry satisfies never;
+  }
+}
+if (rootPresentationKind(normalizedWizard) !== publicStep.id) {
+  throw new Error('Wizard root narrowing failed');
+}
+const manualWizard = {
+  ...normalizedWizard,
+  steps: normalizedWizard.steps.map((step) => ({
+    ...step, children: [...step.children],
+    scope: { ...step.scope, paths: [...step.scope.paths] },
+  })),
+  completionScope: {
+    ...normalizedWizard.completionScope,
+    paths: [...normalizedWizard.completionScope.paths],
+  },
+} satisfies WizardDefinition;
+const manualWizardDefinition = {
+  nodes: [...compiledWizard.definition.nodes],
+  fields: [...compiledWizard.definition.fields],
+  presentation: [manualWizard],
+} satisfies FormDefinition;
+const controlledWizard: ControlledWizardState = { selectedStepId: 'identity' };
+const wizardValue = { active: false, conditional: 'ready' };
+const wizardCreated = createControlledFormRuntime({
+  formId: 'clean-core-manual-m34', definition: manualWizardDefinition,
+  schema: wizardSchema,
+  value: wizardValue, baselineValue: wizardValue, locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+  wizardState: controlledWizard,
+});
+if (!wizardCreated.success) throw new Error('Manual wizard runtime failed');
+const wizardIntentions: WizardIntention[] = [];
+const wizardSubscription = wizardCreated.runtime.subscribeWizardIntentions(
+  (intention) => wizardIntentions.push(intention),
+);
+const wizardAction: WizardActionResult = wizardCreated.runtime.requestWizardNext();
+const wizardSnapshot: WizardRuntimeSnapshot | undefined =
+  wizardCreated.runtime.getSnapshot().wizard;
+function wizardTextIdentity(context: WizardTextResolutionContext): string {
+  return context.step === undefined
+    ? context.member
+    : context.member === 'position'
+      ? String(context.position)
+      : context.step.id;
+}
+void wizardTextIdentity;
+if (
+  !wizardSubscription.success || !wizardAction.success ||
+  wizardIntentions[0]?.kind !== 'next' || wizardSnapshot?.steps.length !== 2
+) {
+  throw new Error('Wizard action/snapshot declarations are unavailable');
+}
+if (wizardSubscription.success) wizardSubscription.unsubscribe();
+wizardCreated.runtime.dispose();
 const defaultInput: { profile?: { address?: string } } = {};
 const defaultCandidate = deriveSchemaDefaultCandidate(
   {
@@ -379,11 +598,18 @@ const source: {
   active: boolean;
   conditional: string;
   roles: string[];
+  pet: {
+    kind: string;
+    name: string;
+    lives: number;
+    barkVolume: number;
+  };
 } = {
   rows: [{ id: 'a', name: 'Ada' }],
   active: false,
   conditional: 'kept',
   roles: ['editor'],
+  pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
 };
 const created = createControlledFormRuntime({
   formId: 'clean-core',
@@ -408,15 +634,31 @@ const itemName = created.runtime.getCollectionNodeSnapshot({
 });
 const conditionalSnapshot: FieldRuntimeSnapshot | undefined =
   created.runtime.getFieldSnapshot(['conditional']);
+const compiledPetSnapshot = created.runtime.getNodeSnapshot(['pet']);
 if (
   profile?.nodeKind !== 'object' ||
   address?.nodeKind !== 'field' ||
   item?.nodeKind !== 'item' ||
   itemName?.nodeKind !== 'field' ||
   conditionalSnapshot?.visible !== false ||
-  conditionalSnapshot.enabled !== true
+  conditionalSnapshot.enabled !== true ||
+  compiledPetSnapshot?.nodeKind !== 'discriminated-object' ||
+  compiledPetSnapshot.selection.kind !== 'active' ||
+  compiledPetSnapshot.selection.discriminatorValue !== 'cat' ||
+  created.runtime.getFieldSnapshot(['pet', 'barkVolume']) !== undefined
 ) {
   throw new Error('Nested declarations are unavailable');
+}
+const inactiveAlternative = created.runtime.requestSetValue(
+  ['pet', 'barkVolume'],
+  8,
+);
+if (
+  inactiveAlternative.success ||
+  inactiveAlternative.diagnostics[0]?.code !==
+    'INACTIVE_OBJECT_ALTERNATIVE_TARGET'
+) {
+  throw new Error('Discriminated object action safety is unavailable');
 }
 const inactive = created.runtime.requestSetValue(
   ['conditional'],
@@ -563,10 +805,15 @@ import {
 import {
   applyFormOperation,
   compileFormDefinition,
+  createControlledFormRuntime,
+  type DiscriminatedObjectFieldDefinition,
   type FieldRuntimeSnapshot,
   type FormOperation,
   type SchemaValidator,
   type StringEnumArrayFieldDefinition,
+  type WizardActionResult,
+  type WizardIntention,
+  type WizardRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
 import {
   AngularRendererResolver,
@@ -585,6 +832,12 @@ interface ConsumerValue {
   active: boolean;
   rows: { id: string; name?: string }[];
   roles: string[];
+  pet: {
+    kind: string;
+    name: string;
+    lives: number;
+    barkVolume: number;
+  };
 }
 
 const schema = {
@@ -624,6 +877,22 @@ const schema = {
       items: { type: 'string', enum: ['reader', 'editor'] },
       uniqueItems: true,
     },
+    pet: {
+      type: 'object',
+      properties: {
+        kind: { type: 'string', enum: ['cat', 'dog'] },
+        name: { type: 'string' },
+      },
+      required: ['kind'],
+      oneOf: [
+        { type: 'object', properties: {
+          kind: { type: 'string', const: 'cat' }, lives: { type: 'integer' },
+        }, required: ['kind', 'lives'] },
+        { type: 'object', properties: {
+          kind: { type: 'string', const: 'dog' }, barkVolume: { type: 'number' },
+        }, required: ['kind'] },
+      ],
+    },
   },
 };
 const compiled = compileFormDefinition({
@@ -650,9 +919,14 @@ const definition = compiled.definition;
 const streetDefinition = definition.fields.find(
   ({ path }) => path.join('.') === 'profile.address.street',
 );
+const streetCondition =
+  streetDefinition?.kind === 'string-enum-array'
+    ? undefined
+    : streetDefinition?.enabledWhen;
 if (
-  streetDefinition?.kind === 'string-enum-array' ||
-  streetDefinition?.enabledWhen?.sourcePath[0] !== 'active'
+  streetCondition === undefined ||
+  !('sourcePath' in streetCondition) ||
+  streetCondition.sourcePath[0] !== 'active'
 ) {
   throw new Error('Conditional Angular declarations are unavailable');
 }
@@ -665,6 +939,17 @@ if (rolesDefinition?.kind !== 'string-enum-array') {
 const publicRolesDefinition: StringEnumArrayFieldDefinition = rolesDefinition;
 if (publicRolesDefinition.choices.length !== 2) {
   throw new Error('String-enum array Angular declarations are incomplete');
+}
+const petDefinition = definition.nodes.find(({ name }) => name === 'pet');
+if (petDefinition?.kind !== 'discriminated-object') {
+  throw new Error('Discriminated object Angular definition is unavailable');
+}
+const publicPetDefinition: DiscriminatedObjectFieldDefinition = petDefinition;
+if (
+  publicPetDefinition.discriminator !== 'kind' ||
+  publicPetDefinition.alternatives.length !== 2
+) {
+  throw new Error('Discriminated object Angular declarations are incomplete');
 }
 function rendererSnapshotIsCoreSnapshot(
   snapshot: ReturnType<AngularFieldRenderer['snapshot']>,
@@ -681,6 +966,69 @@ void selectionTextShape;
 const validator: SchemaValidator = {
   validate: () => ({ valid: true, issues: [] }),
 };
+const discriminatedValue = {
+  pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
+};
+const discriminatedRuntime = createControlledFormRuntime({
+  formId: 'clean-angular-m33', definition, schema,
+  value: { active: false, rows: [], roles: [], ...discriminatedValue },
+  baselineValue: { active: false, rows: [], roles: [], ...discriminatedValue },
+  locale: 'en', validator,
+});
+if (
+  !discriminatedRuntime.success ||
+  discriminatedRuntime.runtime.getNodeSnapshot(['pet'])?.nodeKind !==
+    'discriminated-object' ||
+  discriminatedRuntime.runtime.requestSetValue(['pet', 'barkVolume'], 8)
+    .diagnostics[0]?.code !== 'INACTIVE_OBJECT_ALTERNATIVE_TARGET'
+) {
+  throw new Error('Discriminated object Angular runtime safety failed');
+}
+discriminatedRuntime.runtime.dispose();
+const wizardSchema = {
+  type: 'object', properties: {
+    name: { type: 'string' }, review: { type: 'string' },
+  },
+};
+const wizardCompiled = compileFormDefinition({
+  schema: wizardSchema,
+  uiSchema: { presentation: [{
+    kind: 'wizard', id: 'angular-clean-wizard', label: 'Angular clean wizard',
+    steps: [
+      { kind: 'wizard-step', id: 'identity', label: 'Identity', children: ['name'] },
+      { kind: 'wizard-step', id: 'review', label: 'Review', children: ['review'] },
+    ],
+  }] },
+});
+if (!wizardCompiled.success) throw new Error('Angular clean wizard failed');
+const wizardValue = { name: 'Ada', review: 'ready' };
+const wizardRuntime = createControlledFormRuntime({
+  formId: 'clean-angular-m34', definition: wizardCompiled.definition,
+  schema: wizardSchema, value: wizardValue, baselineValue: wizardValue,
+  locale: 'en', validator, wizardState: { selectedStepId: 'identity' },
+});
+if (!wizardRuntime.success) throw new Error('Angular clean wizard runtime failed');
+const wizardIntentions: WizardIntention[] = [];
+const wizardSubscription = wizardRuntime.runtime.subscribeWizardIntentions(
+  (intention) => wizardIntentions.push(intention),
+);
+const wizardAction: WizardActionResult = wizardRuntime.runtime.requestWizardNext();
+const wizardSnapshot: WizardRuntimeSnapshot | undefined =
+  wizardRuntime.runtime.getSnapshot().wizard;
+if (
+  !wizardSubscription.success || !wizardAction.success ||
+  wizardIntentions[0]?.kind !== 'next' || wizardSnapshot?.steps.length !== 2
+) {
+  throw new Error('Angular clean wizard declarations are unavailable');
+}
+if (wizardSubscription.success) wizardSubscription.unsubscribe();
+wizardRuntime.runtime.dispose();
+function directiveWizardAction(
+  form: SchemaFormDirective<ConsumerValue>,
+): WizardActionResult {
+  return form.requestWizardNext();
+}
+void directiveWizardAction;
 
 @Component({
   selector: 'clean-consumer',
@@ -693,6 +1041,7 @@ class CleanConsumerComponent {
     active: false,
     rows: [{ id: 'a', name: 'Ada' }],
     roles: ['editor'],
+    pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
   };
   config: AngularControlledFormConfig<ConsumerValue> = {
     formId: 'clean-angular',
@@ -703,6 +1052,7 @@ class CleanConsumerComponent {
       active: false,
       rows: [{ id: 'a', name: 'Ada' }],
       roles: ['editor'],
+      pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
     },
     validator,
     locale: 'en',

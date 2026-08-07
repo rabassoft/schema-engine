@@ -75,6 +75,10 @@ export function packAngularCandidate(directory) {
   return packWorkspacePackage(directory, 'packages/angular');
 }
 
+export function packReactCandidate(directory) {
+  return packWorkspacePackage(directory, 'packages/react');
+}
+
 export function packCandidates(directory) {
   const core = packCoreCandidate(directory);
   const angular = packAngularCandidate(directory);

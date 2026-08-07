@@ -91,7 +91,7 @@ export const serviceValidation = {
     {
       id: 'application-effect',
       title: 'Application-owned effect',
-      body: 'The reference shell resolves, rejects or throws deterministic deferred work while core owns replacement, cancellation and stale-result suppression.',
+      body: 'The buttons settle deterministic fake service work. They change validation evidence, not the form value; core owns replacement, cancellation and stale-result suppression.',
     },
     {
       id: 'explicit-retry',
@@ -108,11 +108,11 @@ export const serviceValidation = {
     },
     labels: {
       heading: 'Service validation controls',
-      settleValid: 'Resolve as available',
-      settleInvalid: 'Resolve as unavailable',
-      reject: 'Reject current request',
-      throwNext: 'Throw on next request',
-      retry: 'Retry service validation',
+      settleValid: 'Complete request: username available',
+      settleInvalid: 'Complete request: username unavailable',
+      reject: 'Fail current request',
+      throwNext: 'Make next request throw',
+      retry: 'Retry failed validation',
     },
   },
 } satisfies ReferenceScenarioAuthoring;

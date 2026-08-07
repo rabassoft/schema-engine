@@ -1,0 +1,30 @@
+{
+  "name": "@schema-engine-internal/reference-react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 127.0.0.1 --port 4213",
+    "dev:e2e": "vite --host 127.0.0.1 --port 4214",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/lang-json": "6.0.2",
+    "@codemirror/language": "6.12.4",
+    "@lezer/highlight": "1.2.3",
+    "@rabassoft/schema-engine": "workspace:*",
+    "@rabassoft/schema-engine-react": "workspace:*",
+    "@rabassoft/schema-engine-validator-ajv": "workspace:*",
+    "@schema-engine-internal/reference-scenarios": "workspace:*",
+    "codemirror": "6.0.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3"
+  }
+}

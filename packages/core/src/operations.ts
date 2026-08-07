@@ -49,6 +49,14 @@ interface ManagedField {
 interface ValidatedDefinition {
   readonly fields: ReadonlyMap<string, ManagedField>;
   readonly objectKeys: ReadonlySet<string>;
+  readonly alternativeOwners: ReadonlyMap<string, AlternativeOwner>;
+}
+
+interface AlternativeOwner {
+  readonly ownerPath: readonly string[];
+  readonly discriminator: string;
+  readonly discriminatorValues: readonly string[];
+  readonly alternativeIndex: number;
 }
 
 export const EMPTY_DIAGNOSTICS: readonly [] = Object.freeze([]);
@@ -119,6 +127,26 @@ function apply<TData extends object>(
       ]);
     }
     managedField = managed;
+    const ownership = validated.definition.alternativeOwners.get(pathKey);
+    if (ownership !== undefined) {
+      const selection = inspectAlternativeSelection(currentValue, ownership);
+      if (selection.kind === 'accessor') {
+        return failure(currentValue, [
+          unsupportedProperty(selection.property, selection.path),
+        ]);
+      }
+      const activeAlternativeIndex =
+        selection.kind === 'active' ? selection.alternativeIndex : undefined;
+      if (activeAlternativeIndex !== ownership.alternativeIndex) {
+        return failure(currentValue, [
+          inactiveObjectAlternativeDiagnostic(
+            parsedOperation.path,
+            ownership,
+            activeAlternativeIndex,
+          ),
+        ]);
+      }
+    }
     if (
       parsedOperation.type === 'set-value' &&
       managed.type !== 'string-enum-array'
@@ -557,8 +585,11 @@ function validateDefinition(
   if (containsStringEnumArray) {
     const nestedDefects = collectCollectionFormDefinitionDefects(definition);
     if (nestedDefects.length > 0) {
+      const selectedDefects = definitionContainsDiscriminatedObject(definition)
+        ? nestedDefects.slice(0, 1)
+        : nestedDefects;
       return {
-        diagnostics: nestedDefects.map((defect) =>
+        diagnostics: selectedDefects.map((defect) =>
           nestedFormDiagnostic(defect, dataPath),
         ),
       };
@@ -625,18 +656,56 @@ function validateDefinition(
 
   const nestedDefects = collectCollectionFormDefinitionDefects(definition);
   if (nestedDefects.length > 0) {
+    const selectedDefects = definitionContainsDiscriminatedObject(definition)
+      ? nestedDefects.slice(0, 1)
+      : nestedDefects;
     return {
-      diagnostics: nestedDefects.map((defect) =>
+      diagnostics: selectedDefects.map((defect) =>
         nestedFormDiagnostic(defect, dataPath),
       ),
     };
   }
 
   const objectKeys = collectObjectKeys(definition);
+  const alternativeOwners = collectAlternativeOwners(definition);
   return {
-    definition: { fields, objectKeys },
+    definition: { fields, objectKeys, alternativeOwners },
     diagnostics,
   };
+}
+
+function definitionContainsDiscriminatedObject(definition: object): boolean {
+  const nodes = readOwnDataMember(definition, 'nodes');
+  if (nodes.kind !== 'value' || !Array.isArray(nodes.value)) return false;
+  const stack: unknown[] = [];
+  const seen = new Set<object>();
+  for (let index = nodes.value.length - 1; index >= 0; index -= 1) {
+    const node = readOwnDataMember(nodes.value, String(index));
+    if (node.kind === 'value') stack.push(node.value);
+  }
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!isOrdinaryObject(node)) continue;
+    if (seen.has(node)) continue;
+    seen.add(node);
+    const kind = readOwnDataMember(node, 'kind');
+    if (kind.kind === 'value' && kind.value === 'discriminated-object') {
+      return true;
+    }
+    if (
+      kind.kind !== 'value' ||
+      (kind.value !== 'object' && kind.value !== 'discriminated-object')
+    ) {
+      continue;
+    }
+    const children = readOwnDataMember(node, 'children');
+    if (children.kind !== 'value' || !Array.isArray(children.value)) continue;
+    for (let index = children.value.length - 1; index >= 0; index -= 1) {
+      const child = readOwnDataMember(children.value, String(index));
+      if (child.kind === 'value') stack.push(child.value);
+    }
+  }
+  return false;
 }
 
 function collectObjectKeys(definition: object): ReadonlySet<string> {
@@ -653,7 +722,11 @@ function collectObjectKeys(definition: object): ReadonlySet<string> {
     if (!isOrdinaryObject(node)) continue;
     const kind = readOwnDataMember(node, 'kind');
     const path = readOwnDataMember(node, 'path');
-    if (kind.kind !== 'value' || kind.value !== 'object') continue;
+    if (
+      kind.kind !== 'value' ||
+      (kind.value !== 'object' && kind.value !== 'discriminated-object')
+    )
+      continue;
     const copiedPath =
       path.kind === 'value' ? copyStringDataPath(path.value) : undefined;
     if (copiedPath !== undefined) {
@@ -664,6 +737,134 @@ function collectObjectKeys(definition: object): ReadonlySet<string> {
     for (let index = children.value.length - 1; index >= 0; index -= 1) {
       const child = readOwnDataMember(children.value, String(index));
       if (child.kind === 'value') stack.push(child.value);
+    }
+  }
+  return result;
+}
+
+function collectAlternativeOwners(
+  definition: object,
+): ReadonlyMap<string, AlternativeOwner> {
+  const result = new Map<string, AlternativeOwner>();
+  const nodes = readOwnDataMember(definition, 'nodes');
+  if (nodes.kind !== 'value' || !Array.isArray(nodes.value)) return result;
+  const stack: unknown[] = [];
+  for (let index = nodes.value.length - 1; index >= 0; index -= 1) {
+    const node = readOwnDataMember(nodes.value, String(index));
+    if (node.kind === 'value') stack.push(node.value);
+  }
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!isOrdinaryObject(node)) continue;
+    const kind = readOwnDataMember(node, 'kind');
+    const children = readOwnDataMember(node, 'children');
+    if (children.kind !== 'value' || !Array.isArray(children.value)) continue;
+    for (let index = children.value.length - 1; index >= 0; index -= 1) {
+      const child = readOwnDataMember(children.value, String(index));
+      if (child.kind === 'value') stack.push(child.value);
+    }
+    if (kind.kind !== 'value' || kind.value !== 'discriminated-object') {
+      continue;
+    }
+    const path = readOwnDataMember(node, 'path');
+    const discriminator = readOwnDataMember(node, 'discriminator');
+    const alternatives = readOwnDataMember(node, 'alternatives');
+    const ownerPath =
+      path.kind === 'value' ? copyStringDataPath(path.value) : undefined;
+    if (
+      ownerPath === undefined ||
+      discriminator.kind !== 'value' ||
+      typeof discriminator.value !== 'string' ||
+      alternatives.kind !== 'value' ||
+      !Array.isArray(alternatives.value)
+    ) {
+      continue;
+    }
+    const childByName = new Map<string, object>();
+    for (let index = 0; index < children.value.length; index += 1) {
+      const child = readOwnDataMember(children.value, String(index));
+      if (child.kind !== 'value' || !isOrdinaryObject(child.value)) continue;
+      const name = readOwnDataMember(child.value, 'name');
+      if (name.kind === 'value' && typeof name.value === 'string') {
+        childByName.set(name.value, child.value);
+      }
+    }
+    const discriminatorValues: string[] = [];
+    const alternativeChildren: string[][] = [];
+    for (let index = 0; index < alternatives.value.length; index += 1) {
+      const alternative = readOwnDataMember(alternatives.value, String(index));
+      if (
+        alternative.kind !== 'value' ||
+        !isOrdinaryObject(alternative.value)
+      ) {
+        continue;
+      }
+      const value = readOwnDataMember(alternative.value, 'discriminatorValue');
+      const names = readOwnDataMember(alternative.value, 'children');
+      if (
+        value.kind !== 'value' ||
+        typeof value.value !== 'string' ||
+        names.kind !== 'value' ||
+        !Array.isArray(names.value)
+      ) {
+        continue;
+      }
+      discriminatorValues.push(value.value);
+      alternativeChildren.push(
+        names.value.filter((name): name is string => typeof name === 'string'),
+      );
+    }
+    for (
+      let alternativeIndex = 0;
+      alternativeIndex < alternativeChildren.length;
+      alternativeIndex += 1
+    ) {
+      for (const childName of alternativeChildren[alternativeIndex] ?? []) {
+        const child = childByName.get(childName);
+        if (child === undefined) continue;
+        const childStack: object[] = [child];
+        while (childStack.length > 0) {
+          const descendant = childStack.pop();
+          if (descendant === undefined) break;
+          const descendantPath = readOwnDataMember(descendant, 'path');
+          const copiedPath =
+            descendantPath.kind === 'value'
+              ? copyStringDataPath(descendantPath.value)
+              : undefined;
+          if (copiedPath !== undefined) {
+            result.set(canonicalDataPathKey(copiedPath), {
+              ownerPath,
+              discriminator: discriminator.value,
+              discriminatorValues,
+              alternativeIndex,
+            });
+          }
+          const descendantKind = readOwnDataMember(descendant, 'kind');
+          if (
+            descendantKind.kind !== 'value' ||
+            descendantKind.value !== 'object'
+          ) {
+            continue;
+          }
+          const descendants = readOwnDataMember(descendant, 'children');
+          if (
+            descendants.kind !== 'value' ||
+            !Array.isArray(descendants.value)
+          ) {
+            continue;
+          }
+          for (
+            let index = descendants.value.length - 1;
+            index >= 0;
+            index -= 1
+          ) {
+            const next = readOwnDataMember(descendants.value, String(index));
+            if (next.kind === 'value' && isOrdinaryObject(next.value)) {
+              childStack.push(next.value);
+            }
+          }
+        }
+      }
     }
   }
   return result;
@@ -680,6 +881,12 @@ function nestedFormDiagnostic(
       ...(defect.nodeIndexPath === undefined
         ? {}
         : { nodeIndexPath: [...defect.nodeIndexPath] }),
+      ...(defect.alternativeIndex === undefined
+        ? {}
+        : { alternativeIndex: defect.alternativeIndex }),
+      ...(defect.childIndex === undefined
+        ? {}
+        : { childIndex: defect.childIndex }),
       ...(defect.firstNodeIndexPath === undefined
         ? {}
         : { firstNodeIndexPath: [...defect.firstNodeIndexPath] }),
@@ -776,6 +983,78 @@ function nestedFormDiagnostic(
     },
     'Form definition is invalid.',
     dataPath,
+  );
+}
+
+function inspectAlternativeSelection(
+  root: object,
+  ownership: AlternativeOwner,
+):
+  | { readonly kind: 'none' }
+  | { readonly kind: 'active'; readonly alternativeIndex: number }
+  | {
+      readonly kind: 'accessor';
+      readonly property: string;
+      readonly path: readonly string[];
+    } {
+  let current = root;
+  for (let index = 0; index < ownership.ownerPath.length; index += 1) {
+    const segment = ownership.ownerPath[index] as string;
+    const entry = readOwnDataMember(current, segment);
+    if (entry.kind === 'accessor') {
+      return {
+        kind: 'accessor',
+        property: segment,
+        path: ownership.ownerPath.slice(0, index + 1),
+      };
+    }
+    if (entry.kind !== 'value' || !isOrdinaryObject(entry.value)) {
+      return { kind: 'none' };
+    }
+    current = entry.value;
+  }
+  const discriminator = readOwnDataMember(current, ownership.discriminator);
+  if (discriminator.kind === 'accessor') {
+    return {
+      kind: 'accessor',
+      property: ownership.discriminator,
+      path: [...ownership.ownerPath, ownership.discriminator],
+    };
+  }
+  if (
+    discriminator.kind !== 'value' ||
+    typeof discriminator.value !== 'string'
+  ) {
+    return { kind: 'none' };
+  }
+  const index = ownership.discriminatorValues.indexOf(discriminator.value);
+  return index < 0
+    ? { kind: 'none' }
+    : { kind: 'active', alternativeIndex: index };
+}
+
+function inactiveObjectAlternativeDiagnostic(
+  targetPath: readonly string[],
+  ownership: AlternativeOwner,
+  activeAlternativeIndex: number | undefined,
+): Diagnostic {
+  return runtimeDiagnostic(
+    'INACTIVE_OBJECT_ALTERNATIVE_TARGET',
+    {
+      action: 'applyFormOperation',
+      ownerPath: Object.freeze([...ownership.ownerPath]),
+      discriminatorPath: Object.freeze([
+        ...ownership.ownerPath,
+        ownership.discriminator,
+      ]),
+      requiredAlternativeIndex: ownership.alternativeIndex,
+      selection: activeAlternativeIndex === undefined ? 'none' : 'different',
+      ...(activeAlternativeIndex === undefined
+        ? {}
+        : { activeAlternativeIndex }),
+    },
+    'Runtime target belongs to an inactive object alternative.',
+    targetPath,
   );
 }
 

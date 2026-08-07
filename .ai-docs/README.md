@@ -86,6 +86,21 @@
   — Accepted bounded M32 contract under ADR-035 after review 306 cycle 2
   passed all fifteen areas and 22 rows with zero findings; completed PLAN-034
   implements all 22 rows after final review 313 cycle 2.
+- [SPEC-019 v0.1.2: Controlled Discriminated Nested-Object Alternatives](./specs/019-controlled-discriminated-object-alternatives.md)
+  — Accepted bounded M33 contract under ADR-036 revision 1 and ADR-005
+  revision 11 after review 320 cycle 2 preserved Accepted presentation
+  diagnostics with zero findings; completed PLAN-035 revision 2 implements all
+  17 rows after final review 326 cycle 3 repeated the frozen matrix with zero
+  findings.
+- [SPEC-020 v0.1.0: Controlled Linear Declarative Wizard](./specs/020-controlled-linear-declarative-wizard.md)
+  — Review 329 cycle 2 passes all fifteen contract areas and 24 conformance rows
+  with zero findings after four corrections; Ricard accepts it and Approved
+  PLAN-036 revision 0 implements all rows after final review 336 cycle 2.
+- [SPEC-021 v0.1.0: First Client-Rendered React Adapter](./specs/021-first-react-adapter.md)
+  — Accepted after review 340 cycle 2 passed all eighteen contract areas and 36
+  conformance rows with zero findings; completed PLAN-037 revision 0 implements
+  all rows after final review 352 cycle 1 repeated the frozen matrix with zero
+  findings.
 
 ADR-033 revision 0 is the Accepted architecture for bounded D-018/M30
 ordinary primitive-field visibility/enabled equality predicates. Accepted
@@ -106,6 +121,23 @@ cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
 
 ## Current and latest completed implementation plans
 
+- [PLAN-037 completed revision 0: First Client-Rendered React Adapter](./plans/037-first-react-adapter.md)
+  — Review 341 cycle 2 passes all fifteen plan areas and exact 36-row ownership
+  with zero findings; checkpoints 1–10 complete the frozen dependency graph,
+  controlled hook/store, custom/native renderer boundary, normalized compound
+  projection, neutral validation/scopes/baseline and controlled wizard after
+  reviews 343–348, the independent React reference shell after review 349 and
+  exact private artifacts/lower-current consumers after review 350 and the
+  complete repository integration matrix after review 351 and final 36-row
+  closure after review 352.
+- [PLAN-036 completed revision 0: Controlled Linear Declarative Wizard](./plans/036-controlled-linear-declarative-wizard.md)
+  — Review 330 cycle 3 passes all twelve plan areas and exact 24-row ownership
+  with zero findings after three corrections; reviews 331–336 implement all
+  checkpoints and final review 336 cycle 2 repeats the frozen matrix with zero
+  findings.
+- [PLAN-035 revision 2: Controlled Discriminated Nested-Object Alternatives](./plans/035-controlled-discriminated-object-alternatives.md)
+  — Completed after final review 326 cycle 3 repeated all six checkpoints, the
+  frozen graph and all 17 rows with zero findings.
 - [PLAN-034 revision 0: Flat Compound Conditions for Controlled Primitive-Field State](./plans/034-flat-compound-field-conditions.md)
   — Completed after review 313 cycle 2 repeated the frozen matrix, all six
   checkpoints and all 22 rows with zero findings.
@@ -118,6 +150,39 @@ cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
 
 ## Acceptance reviews
 
+- [PLAN-037 final implementation review](./reviews/352-plan-037-final-implementation-review.md) — Cycle 1 audits all 36 rows and repeats eighteen frozen areas with zero findings, completing checkpoint 10, PLAN-037 and M35
+- [PLAN-037 checkpoint 9 implementation review](./reviews/351-plan-037-checkpoint-9-review.md) — Cycle 1 corrects stale local-candidate M21 aliases; cycle 2 passes sixteen integration areas and rows 32–35 with zero findings
+- [PLAN-037 checkpoint 8 implementation review](./reviews/350-plan-037-checkpoint-8-review.md) — Cycles 1–2 correct reconstruction, fixture, inventory and isolation defects; cycle 3 passes sixteen areas and rows 4/31 plus repeated row 2 with zero findings
+- [PLAN-037 checkpoint 7 implementation review](./reviews/349-plan-037-checkpoint-7-review.md) — Cycles 1–2 correct ownership, editor, tabs, stale evidence, collection, styling, build and browser evidence; cycle 3 passes sixteen areas and rows 29–30 with zero findings
+- [PLAN-037 checkpoint 6 implementation review](./reviews/348-plan-037-checkpoint-6-review.md) — Cycles 1–2 correct hidden-owner, wizard text/order, global issue and validation evidence findings; cycle 3 passes sixteen areas and rows 26–28 with zero findings
+- [PLAN-037 checkpoint 5 implementation review](./reviews/347-plan-037-checkpoint-5-review.md) — Cycles 1–2 correct compound lifecycle, stable-buffer, text, focus, gate and accessibility findings; cycle 3 passes sixteen areas and rows 21–25 with zero findings
+- [PLAN-037 checkpoint 4 implementation review](./reviews/346-plan-037-checkpoint-4-review.md) — Cycle 1 corrects seven text-cache, buffer, focus, selection, ancestor and fixed-semantics findings; cycle 2 passes sixteen areas and rows 19–20 with zero findings
+- [PLAN-037 checkpoint 3 implementation review](./reviews/345-plan-037-checkpoint-3-review.md) — Cycles 1–3 correct eleven registry, cache, isolation and evidence findings; cycle 4 passes sixteen areas and rows 2/14–18 with zero findings
+- [PLAN-037 checkpoint 2 implementation review](./reviews/344-plan-037-checkpoint-2-review.md) — Cycles 1–2 correct thirteen hook, lifecycle, diagnostics and evidence findings; cycle 3 passes fifteen areas and rows 5–13 with zero findings
+- [PLAN-037 checkpoint 1 implementation review](./reviews/343-plan-037-checkpoint-1-review.md) — Cycles 1–3 correct seven resolved-graph, type-regression and generic-boundary findings; cycle 4 passes fourteen areas with zero findings and accepts the frozen React foundation
+- [PLAN-037 checkpoint 1 pre-install review](./reviews/342-plan-037-checkpoint-1-pre-install-review.md) — Cycle 1 corrects three license-packaging, stale-state and unresolved-lock assertion findings; cycle 2 passes ten local preparation areas with zero findings and pauses at the separate dependency execution gate
+- [PLAN-037 complete review](./reviews/341-plan-037-review.md) — Cycle 1 corrects five API-ownership, dependency, command/port and execution-authority ambiguities; cycle 2 passes fifteen areas and exact 36-row ownership with zero findings
+- [SPEC-021 complete review](./reviews/340-spec-021-review.md) — Cycle 1 corrects seven action, identity, render-purity, composition, reconciliation, diagnostics and interaction findings; cycle 2 passes eighteen areas and 36 rows with zero findings and Ricard accepts v0.1.0
+- [ADR-038 complete review](./reviews/339-adr-038-review.md) — Cycles 1–4 correct twelve lifecycle, API, failure-isolation and persistent-state findings; cycle 5 passes eighteen areas with zero findings and Ricard accepts revision 0
+- [PLAN-036 final implementation review](./reviews/336-plan-036-final-implementation-review.md) — Cycle 1 reconciles closure state and repeats a transient latest-pilot build; cycle 2 passes all fifteen frozen-matrix areas and all 24 rows with zero findings, completing PLAN-036/M34
+- [PLAN-036 checkpoint 5 review](./reviews/335-plan-036-checkpoint-5-review.md) — Cycle 1 corrects package-source inventory, concrete migration evidence and stale persistent checkpoint state; cycle 2 passes fourteen declaration/package/consumer areas and SPEC-020 row 23 with zero findings
+- [PLAN-036 checkpoint 4 review](./reviews/334-plan-036-checkpoint-4-review.md) — Cycles 1–2 correct scenario-count/lint plus Standard text/accessibility findings; cycle 3 passes fifteen lifecycle/text/target/scenario/browser areas and SPEC-020 rows 18–22 with zero findings
+- [PLAN-036 checkpoint 3 review](./reviews/333-plan-036-checkpoint-3-review.md) — Cycle 1 proves exact value/baseline/interaction/operation/validator/collection/condition invariants and passes ten areas plus SPEC-020 row 17 with zero findings
+- [PLAN-036 checkpoint 2 review](./reviews/332-plan-036-checkpoint-2-review.md) — Cycles 1–2 correct eight state/effect, evidence, visibility, immutability and explicitly authorized budget findings; cycle 3 passes fourteen areas and SPEC-020 rows 6–16 with zero findings
+- [PLAN-036 complete review](./reviews/330-plan-036-review.md) — Cycles 1–2 correct row-18 integration ownership, migration guidance and stale public onboarding; cycle 3 passes all twelve areas and exact 24-row ownership with zero findings and Ricard approves revision 0
+- [PLAN-036 checkpoint 1 review](./reviews/331-plan-036-checkpoint-1-review.md) — Cycles 1–2 correct four exhaustive-narrowing, lint, diagnostic and interim-subscription findings; cycle 3 passes fourteen areas and SPEC-020 rows 1–5 with zero findings
+- [SPEC-020 complete review](./reviews/329-spec-020-review.md) — Cycle 1 corrects four Public-inventory, snapshot, text-context and diagnostic-closure defects; cycle 2 passes all fifteen areas and 24 rows with zero findings and Ricard accepts v0.1.0 for PLAN-036 preparation/review only
+- [ADR-037 complete review](./reviews/328-adr-037-review.md) — Cycles 1–4 correct thirteen scope, text, control, stale-intention, host, ID, result, DOM, async-progress and conformance findings; cycle 5 passes all fifteen areas with zero findings and Ricard accepts ADR-037 revision 0 for SPEC-020 preparation/review only
+- [D-011/D-012 M34 declarative-wizard promotion readiness](./reviews/327-d011-d012-m34-declarative-wizard-promotion-readiness.md) — Cycles 1–7 correct eleven navigation, lifecycle, scope and interaction-progress findings; cycle 8 passes all sixteen areas with zero findings; Ricard accepts the refined bounded recommendation, promotes only the M34 architecture question and reserves ADR-037
+- [PLAN-035 final implementation review](./reviews/326-plan-035-final-implementation-review.md) — Cycle 1 corrects the numeric-control browser locator; cycle 2 corrects stale closure wording/evidence; cycle 3 repeats fifteen frozen-matrix areas and all 17 rows with zero findings, completing PLAN-035/M33
+- [PLAN-035 checkpoint 5 review](./reviews/325-plan-035-checkpoint-5-review.md) — Cycle 1 corrects five evidence, consumer, package-tooling and onboarding defects; cycle 2 passes all fourteen declarations/package/consumer areas and row 16 with zero findings
+- [PLAN-035 checkpoint 4 review](./reviews/324-plan-035-checkpoint-4-review.md) — Cycle 1 corrects two target integrations and shared scenario evidence; cycle 2 passes fourteen shared/Angular/Standard/Chromium areas and row 15 with zero findings
+- [PLAN-035 checkpoint 3 review](./reviews/323-plan-035-checkpoint-3-review.md) — Cycle 1 corrects active owner scopes, inactive issue ownership and evidence; cycle 2 passes fourteen scope/validation/helper areas and rows 13–14 with zero findings
+- [PLAN-035 checkpoint 2 review](./reviews/322-plan-035-checkpoint-2-review.md) — Cycle 1 corrects five manual/runtime/action evidence defects; cycle 2 passes fourteen areas and rows 8–12 with zero findings
+- [PLAN-035 checkpoint 1 review](./reviews/321-plan-035-checkpoint-1-review.md) — Cycle 1 corrects five compiler/presentation/evidence defects; cycle 2 passes fourteen areas and rows 1–7 with zero findings
+- [M33 owner-relative descendant diagnostic review](./reviews/319-m33-owner-relative-descendant-diagnostic-review.md) — Cycle 1 passes all fourteen ADR-005 revision 10, SPEC-019 v0.1.1 and PLAN-035 revision 1 areas with zero findings and resolves the checkpoint-1 normative blocker
+- [M33 presentation diagnostic compatibility review](./reviews/320-m33-presentation-diagnostic-compatibility-review.md) — Cycle 2 preserves SPEC-005/SPEC-009 diagnostics, repeats all fourteen coordinated areas and the 17-row map with zero findings
+- [PLAN-035 complete review](./reviews/318-plan-035-review.md) — Cycle 1 corrects stale M33 onboarding; cycle 2 passes all twelve areas and exact 17-row ownership with zero findings and approves revision 0
 - [PLAN-034 final implementation review](./reviews/313-plan-034-final-implementation-review.md) — Cycle 1 corrects missing external publication tools; cycle 2 repeats the frozen graph, complete matrix, all 22 rows and sequential Chromium 14+17 with zero findings, completing PLAN-034/M32
 - [PLAN-034 checkpoint 5 review](./reviews/312-plan-034-checkpoint-5-review.md) — Cycles 1–2 correct package truth and clean-consumer narrowing/projection evidence; cycle 3 passes all twelve declarations/package/consumer areas and row 21 with zero findings
 - [PLAN-034 checkpoint 4 review](./reviews/311-plan-034-checkpoint-4-review.md) — Cycle 1 corrects strict deep-freeze evidence; cycle 2 passes all twelve shared/Standard/browser areas and rows 19–20 with zero findings
@@ -923,6 +988,14 @@ cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
 ## Architecture Decision Records
 
 - [ADR index](./adrs/000-index.md)
+- [ADR-037: Controlled linear declarative wizard and neutral step progress](./adrs/037-controlled-linear-declarative-wizard.md)
+  — Accepted revision 0 after review 328 cycle 5; SPEC-020 v0.1.0 is Accepted
+  and completed PLAN-036 revision 0 implements bounded M34 after final review
+  336 cycle 2.
+- [ADR-036: Controlled discriminated nested-object alternatives](./adrs/036-controlled-discriminated-object-alternatives.md)
+  — Accepted revision 1 with coordinated ADR-005 revision 11; Accepted
+  SPEC-019 and completed PLAN-035 implement the bounded M33 contract after
+  final review 326 cycle 3 passed with zero findings.
 - [ADR-035: Flat compound conditions for controlled primitive-field state](./adrs/035-flat-compound-field-conditions.md)
   — Accepted revision 0 after review 305 cycle 2; Accepted SPEC-018 and
   completed PLAN-034 implement its bounded M32 decision after final review 313
@@ -944,9 +1017,9 @@ cycle 2 repeated the frozen matrix and both Chromium suites with zero findings.
   corrected final closure after review 177 cycle 3. Future package metadata,
   OIDC/provenance and backup deletion remain separately gated.
 - [ADR-005: JSON Schema dialect and compatibility policy](./adrs/005-politica-dialecto-json-schema.md)
-  — Accepted revision 8 closes the bounded M31 string-enum array policy after
-  review 294 cycle 2; completed PLAN-033 implements it after final review 303
-  cycle 2.
+  — Accepted revision 11 preserves the SPEC-005/SPEC-009 presentation family
+  for M33 after review 320 cycle 2; SPEC-019 v0.1.2 and completed PLAN-035
+  revision 2 govern the implemented bounded slice.
 - [ADR-017: Static neutral presentation groups](./adrs/017-grupos-presentacion-estaticos.md)
   — Accepted revision 0 for D-042 after review 023 cycle 3 passed all eight
   areas with zero findings; SPEC-005 and completed PLAN-012 implement it.

@@ -19,7 +19,9 @@ const { descriptor } = release;
 const CORE_MODULES = Object.freeze([
   'compiler',
   'contracts',
+  'default-candidate',
   'index',
+  'internal/async-validation',
   'internal/collection-address',
   'internal/collection-operation',
   'internal/collection-runtime',
@@ -29,7 +31,10 @@ const CORE_MODULES = Object.freeze([
   'internal/nested-definition',
   'internal/path',
   'internal/presentation-definition',
+  'internal/schema-composition',
   'internal/schema-reference',
+  'internal/scope-baseline',
+  'internal/string-enum-array',
   'internal/value',
   'operations',
   'runtime',
@@ -40,10 +45,12 @@ const ANGULAR_MODULES = Object.freeze([
   'index',
   'native/boolean-renderer',
   'native/common',
+  'native/fixed-value-renderer',
   'native/number-codec',
   'native/number-renderer',
   'native/presentation-containers',
   'native/provider',
+  'native/string-enum-array-renderer',
   'native/string-enum-renderer',
   'native/string-renderer',
   'node-outlet',
@@ -56,6 +63,7 @@ const ANGULAR_MODULES = Object.freeze([
   'renderer',
   'testing/fake-renderer',
   'text',
+  'wizard',
 ]);
 const MODULE_SUFFIXES = Object.freeze(['.js', '.js.map', '.d.ts', '.d.ts.map']);
 const LICENSE_SHA256 =
@@ -179,8 +187,8 @@ function verifyCommon(tarball, packageTarget, modules) {
   if (descriptor.id === 'm23') {
     assert.ok(readme.includes('npm provenance'));
     assert.ok(readme.includes('github.com/rabassoft/schema-engine'));
-    assert.ok(readme.includes('is not claimed until'));
-    assert.ok(readme.includes('stage-only trusted publication'));
+    assert.ok(readme.includes('protected commit `028a98c`'));
+    assert.ok(readme.includes('Public'));
   } else {
     assert.ok(readme.includes('no npm provenance'));
     assert.equal(readme.includes('github.com/rabassoft/schema-engine'), false);
@@ -236,6 +244,10 @@ try {
     'CollectionPolicy',
     'CollectionTextMember',
     'CollectionTextResolutionContext',
+    'ControlledWizardState',
+    'DiscriminatedObjectAlternativeDefinition',
+    'DiscriminatedObjectFieldDefinition',
+    'DiscriminatedObjectRuntimeSnapshot',
     'FieldTemplate',
     'FormNodeDefinition',
     'FormNodeTemplate',
@@ -246,8 +258,10 @@ try {
     'ItemUiSchema',
     'MoveItemOperation',
     'ObjectFieldDefinition',
+    'ObjectAlternativeSelection',
     'ObjectItemTemplateDefinition',
     'ObjectNodeTemplate',
+    'ObjectNodeDefinition',
     'ObjectPresence',
     'NodeRuntimeSnapshot',
     'ObjectRuntimeSnapshot',
@@ -257,6 +271,7 @@ try {
     'PresentationEntryDefinition',
     'PresentationSectionDefinition',
     'PresentedFormNodeDefinition',
+    'RootPresentationEntryDefinition',
     'RemoveItemOperation',
     'RemoveItemValueOperation',
     'RuntimeTreeSnapshot',
@@ -265,7 +280,23 @@ try {
     'SectionTextResolutionContext',
     'TemplatePresentationEntryDefinition',
     'UiPresentationEntry',
+    'UiRootPresentationEntry',
     'UiSectionSchema',
+    'UiWizardSchema',
+    'UiWizardStepSchema',
+    'WizardActionResult',
+    'WizardDefinition',
+    'WizardIntention',
+    'WizardIntentionListener',
+    'WizardRuntimeSnapshot',
+    'WizardSelectionConfirmation',
+    'WizardStepDefinition',
+    'WizardStepProgress',
+    'WizardStepSnapshot',
+    'WizardStepValidationSnapshot',
+    'WizardStepValidationState',
+    'WizardTextMember',
+    'WizardTextResolutionContext',
   ]) {
     assert.ok(
       coreIndex.includes(publicName),

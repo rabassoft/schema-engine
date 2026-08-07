@@ -14,6 +14,11 @@ import {
   type FormOperation,
   type SchemaValidator,
   type ValidationResult,
+  type WizardActionResult,
+  type WizardIntention,
+  type WizardRuntimeSnapshot,
+  type WizardTextMember,
+  type WizardTextResolutionContext,
 } from '@rabassoft/schema-engine';
 import {
   SchemaFormDirective,
@@ -32,6 +37,12 @@ interface ConsumerValue {
   };
   readonly active?: boolean;
   readonly roles?: readonly string[];
+  readonly pet?: {
+    readonly kind?: string;
+    readonly name?: string;
+    readonly lives?: number;
+    readonly barkVolume?: number;
+  };
   readonly rows: readonly {
     readonly id: string;
     readonly name?: string;
@@ -65,6 +76,40 @@ const schema = Object.freeze({
         enum: Object.freeze(['reader', 'editor', 'reviewer']),
       }),
       uniqueItems: true,
+    }),
+    pet: Object.freeze({
+      type: 'object',
+      title: 'Pet',
+      properties: Object.freeze({
+        kind: Object.freeze({
+          type: 'string',
+          title: 'Kind',
+          enum: Object.freeze(['cat', 'dog']),
+        }),
+        name: Object.freeze({ type: 'string', title: 'Name' }),
+      }),
+      required: Object.freeze(['kind']),
+      oneOf: Object.freeze([
+        Object.freeze({
+          type: 'object',
+          properties: Object.freeze({
+            kind: Object.freeze({ type: 'string', const: 'cat' }),
+            lives: Object.freeze({ type: 'integer', title: 'Lives' }),
+          }),
+          required: Object.freeze(['kind', 'lives']),
+        }),
+        Object.freeze({
+          type: 'object',
+          properties: Object.freeze({
+            kind: Object.freeze({ type: 'string', const: 'dog' }),
+            barkVolume: Object.freeze({
+              type: 'number',
+              title: 'Bark volume',
+            }),
+          }),
+          required: Object.freeze(['kind']),
+        }),
+      ]),
     }),
     rows: Object.freeze({
       type: 'array',
@@ -105,7 +150,7 @@ const compilation = compileFormDefinition({
         kind: 'section',
         id: 'details',
         label: 'Details',
-        children: ['profile', 'active', 'roles'],
+        children: ['profile', 'active', 'roles', 'pet'],
       },
       'rows',
     ],
@@ -120,6 +165,12 @@ const initialValue: Readonly<ConsumerValue> = Object.freeze({
   }),
   active: false,
   roles: Object.freeze(['editor']),
+  pet: Object.freeze({
+    kind: 'cat',
+    name: 'Milo',
+    lives: 9,
+    barkVolume: 4,
+  }),
   rows: Object.freeze([
     Object.freeze({ id: 'a', name: 'Ada' }),
     Object.freeze({ id: 'b', name: 'Bob' }),
@@ -195,8 +246,123 @@ class AsyncConsumerHost {
   form?: SchemaFormDirective<ConsumerValue>;
 }
 
+const wizardSchema = Object.freeze({
+  type: 'object',
+  properties: Object.freeze({
+    name: Object.freeze({ type: 'string' }),
+    review: Object.freeze({ type: 'string' }),
+  }),
+});
+const wizardCompilation = compileFormDefinition({
+  schema: wizardSchema,
+  uiSchema: {
+    presentation: [
+      {
+        kind: 'wizard',
+        id: 'consumer-wizard',
+        label: 'Consumer wizard',
+        steps: [
+          {
+            kind: 'wizard-step',
+            id: 'identity',
+            label: 'Identity',
+            children: ['name'],
+          },
+          {
+            kind: 'wizard-step',
+            id: 'review',
+            label: 'Review',
+            children: ['review'],
+          },
+        ],
+      },
+    ],
+  },
+});
+if (!wizardCompilation.success)
+  throw new Error('The consumer wizard must compile successfully.');
+const wizardDefinition = wizardCompilation.definition;
+
+function selectedWizardStep(snapshot: WizardRuntimeSnapshot): string {
+  return snapshot.selectedStepId;
+}
+
+function wizardTextMember(
+  context: WizardTextResolutionContext,
+): WizardTextMember {
+  return context.member;
+}
+
+void wizardTextMember;
+
+@Component({
+  standalone: true,
+  imports: [SchemaFormDirective],
+  template: `<form
+    [schemaForm]="config"
+    (schemaWizardIntention)="decide($event)"
+  ></form>`,
+})
+class WizardConsumerHost {
+  readonly config: AngularControlledFormConfig<{
+    name: string;
+    review: string;
+  }> = {
+    formId: 'built-wizard-consumer',
+    definition: wizardDefinition,
+    schema: wizardSchema,
+    value: { name: 'Ada', review: 'ready' },
+    baselineValue: { name: 'Ada', review: 'ready' },
+    locale: 'en',
+    validator,
+    wizardState: { selectedStepId: 'identity' },
+  };
+  readonly intentions: WizardIntention[] = [];
+  @ViewChild(SchemaFormDirective)
+  form?: SchemaFormDirective<{ name: string; review: string }>;
+
+  decide(intention: WizardIntention): void {
+    this.intentions.push(intention);
+    if (intention.kind === 'complete') return;
+    this.form?.confirmWizardSelection({
+      requestId: intention.requestId,
+      selectedStepId: intention.toStepId,
+    });
+  }
+}
+
 describe('minimal built-package Angular consumer', () => {
   beforeEach(() => TestBed.resetTestingModule());
+
+  it('projects and controls a wizard through built public declarations', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideSchemaEngineAngularNative(),
+      ],
+    });
+    const fixture = TestBed.createComponent(WizardConsumerHost);
+    fixture.detectChanges();
+    TestBed.tick();
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const regions = root.querySelectorAll<HTMLElement>('.schema-wizard-step');
+    expect(regions).toHaveLength(2);
+    expect(regions[0]?.hidden).toBe(false);
+    expect(regions[1]?.hidden).toBe(true);
+    const action: WizardActionResult | undefined =
+      host.form?.requestWizardNext();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(action?.success).toBe(true);
+    expect(host.intentions[0]?.kind).toBe('next');
+    const wizard = host.form?.snapshot()?.wizard;
+    expect(wizard === undefined ? undefined : selectedWizardStep(wizard)).toBe(
+      'review',
+    );
+    expect(regions[0]?.hidden).toBe(true);
+    expect(regions[1]?.hidden).toBe(false);
+  });
 
   it('renders nested objects and stable collections from the built packages', () => {
     TestBed.configureTestingModule({
@@ -221,11 +387,12 @@ describe('minimal built-package Angular consumer', () => {
       'en:Details',
       'en:Profile',
       'en:Address',
+      'en:Pet',
       'en:People',
       'en:Item 1',
       'en:Item 2',
     ]);
-    expect(root.querySelectorAll('input[type="text"]')).toHaveLength(3);
+    expect(root.querySelectorAll('input[type="text"]')).toHaveLength(5);
     expect(root.querySelectorAll('input[type="checkbox"]')).toHaveLength(1);
     expect(root.querySelectorAll('select[multiple]')).toHaveLength(1);
     expect(
@@ -263,6 +430,7 @@ describe('minimal built-package Angular consumer', () => {
       profile: { address: {} },
       active: false,
       roles: initialValue.roles,
+      pet: initialValue.pet,
       rows: initialValue.rows,
     });
     expect(root.querySelector(`[id="${streetId}-clear"]`)).toBeNull();
@@ -317,6 +485,49 @@ describe('minimal built-package Angular consumer', () => {
       'editor',
       'reader',
     ]);
+
+    const petNameId = nodeBase('g0-consumer', ['pet', 'name']);
+    const petName = byId(root, petNameId);
+    const petKind = byId(
+      root,
+      nodeBase('g0-consumer', ['pet', 'kind']),
+    ) as HTMLSelectElement;
+    expect(
+      fixture.componentInstance.form
+        ?.snapshot()
+        ?.nodes.find(({ path }) => path.join('.') === 'pet'),
+    ).toMatchObject({
+      nodeKind: 'discriminated-object',
+      selection: { kind: 'active', discriminatorValue: 'cat' },
+    });
+    expect(byId(root, nodeBase('g0-consumer', ['pet', 'lives']))).toBeTruthy();
+    expect(
+      root.querySelector(
+        `[id="${nodeBase('g0-consumer', ['pet', 'barkVolume'])}"]`,
+      ),
+    ).toBeNull();
+    petKind.value = 'choice:1';
+    petKind.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(fixture.componentInstance.operations.at(-1)).toMatchObject({
+      type: 'set-value',
+      path: ['pet', 'kind'],
+      value: 'dog',
+    });
+    expect(byId(root, petNameId)).toBe(petName);
+    expect(
+      root.querySelector(`[id="${nodeBase('g0-consumer', ['pet', 'lives'])}"]`),
+    ).toBeNull();
+    expect(
+      byId(root, nodeBase('g0-consumer', ['pet', 'barkVolume'])),
+    ).toBeTruthy();
+    expect(fixture.componentInstance.value().pet).toEqual({
+      kind: 'dog',
+      name: 'Milo',
+      lives: 9,
+      barkVolume: 4,
+    });
 
     const itemNameId = itemBase('g0-consumer', ['rows'], 'a', ['name']);
     const itemName = byId(root, itemNameId) as HTMLInputElement;

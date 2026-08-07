@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import {
   type FormOperation,
   type SetValueOperation,
+  type TextResolver,
+  type WizardTextResolutionContext,
 } from '@rabassoft/schema-engine';
 import {
   provideSchemaEngineAngularNative,
@@ -35,26 +37,28 @@ function setValue(
   };
 }
 
-function createComponent() {
+function createComponent(resolver?: TextResolver) {
   TestBed.configureTestingModule({
     imports: [ReferenceFormComponent],
     providers: [
       provideZonelessChangeDetection(),
       provideSchemaEngineAngularNative(),
-      provideSchemaTextResolver({
-        resolve(text, context) {
-          if (context.locale !== 'es') return text;
-          return (
-            (
-              {
-                Clear: 'Limpiar',
-                'No value provided.': 'No se ha proporcionado ningún valor.',
-                'No values selected.': 'No hay valores seleccionados.',
-              } as Readonly<Record<string, string>>
-            )[text] ?? text
-          );
+      provideSchemaTextResolver(
+        resolver ?? {
+          resolve(text, context) {
+            if (context.locale !== 'es') return text;
+            return (
+              (
+                {
+                  Clear: 'Limpiar',
+                  'No value provided.': 'No se ha proporcionado ningún valor.',
+                  'No values selected.': 'No hay valores seleccionados.',
+                } as Readonly<Record<string, string>>
+              )[text] ?? text
+            );
+          },
         },
-      }),
+      ),
       {
         provide: REFERENCE_SCHEMA_VALIDATOR,
         useValue: createAjvSchemaValidator(),
@@ -76,6 +80,103 @@ async function flushAsyncValidation(): Promise<void> {
 
 describe('ReferenceFormComponent application ownership', () => {
   beforeEach(() => TestBed.resetTestingModule());
+
+  it('projects a once-mounted native wizard and confirms adjacent intentions in the application', async () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component.selectScenario('linear-wizard');
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+    const wizard = root.querySelector<HTMLElement>('.schema-wizard');
+    if (wizard === null) throw new Error('Expected Angular wizard host.');
+    const regions = [
+      ...wizard.querySelectorAll<HTMLElement>('[role="region"]'),
+    ];
+    expect(regions).toHaveLength(3);
+    expect(regions[0]?.hidden).toBe(false);
+    expect(regions[1]?.hidden).toBe(true);
+    expect(wizard.querySelector('[role="tablist"]')).toBeNull();
+
+    component.setDecisionMode('reject');
+    const next = [...wizard.querySelectorAll<HTMLButtonElement>('button')].find(
+      ({ textContent }) => textContent?.trim() === 'Next',
+    );
+    next?.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(regions[0]?.hidden).toBe(false);
+    component.setDecisionMode('confirm');
+
+    component.resolveServiceValidation(true);
+    await flushAsyncValidation();
+    next?.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(regions[0]?.hidden).toBe(true);
+    expect(regions[1]?.hidden).toBe(false);
+    expect(document.activeElement).toBe(regions[1]?.querySelector('h3'));
+    const retained = regions[1]?.querySelector<HTMLInputElement>('input');
+    if (retained === null || retained === undefined)
+      throw new Error('Expected a retained nested step input.');
+    retained.value = 'Retained Angular buffer';
+    retained.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    TestBed.tick();
+    const previous = [
+      ...wizard.querySelectorAll<HTMLButtonElement>('button'),
+    ].find(({ textContent }) => textContent?.trim() === 'Previous');
+    previous?.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(regions[1]?.hidden).toBe(true);
+    next?.click();
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(regions[1]?.querySelector('input')).toBe(retained);
+    expect(retained.value).toBe('Retained Angular buffer');
+  });
+
+  it('resolves exact wizard text identities once per locale and falls back once on failure', () => {
+    const contexts: WizardTextResolutionContext[] = [];
+    const fixture = createComponent({
+      resolve(text, context) {
+        if (!('wizard' in context)) return text;
+        contexts.push(context);
+        if (context.member === 'next') throw new Error('unsafe');
+        return context.locale === 'es' ? `es:${text}` : text;
+      },
+    });
+    const component = fixture.componentInstance;
+    component.selectScenario('linear-wizard');
+    fixture.detectChanges();
+    TestBed.tick();
+
+    const enIdentities = contexts.map((context) =>
+      JSON.stringify([
+        context.locale,
+        context.member,
+        context.step?.key,
+        context.position,
+        context.count,
+      ]),
+    );
+    expect(new Set(enIdentities).size).toBe(enIdentities.length);
+    const diagnostic = component.runtimeDiagnostics()[0];
+    expect(component.runtimeDiagnostics()).toHaveLength(1);
+    expect(diagnostic?.code).toBe('TEXT_RESOLUTION_FAILED');
+    expect(diagnostic?.parameters?.['member']).toBe('next');
+    expect(diagnostic?.parameters?.['reason']).toBe('exception');
+
+    component.setLocale('es');
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(contexts.some(({ locale }) => locale === 'es')).toBe(true);
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('.schema-wizard h2')?.textContent).toContain(
+      'es:Team onboarding',
+    );
+  });
 
   it('derives, cancels and explicitly accepts schema defaults without operations', () => {
     const fixture = createComponent();
@@ -645,7 +746,7 @@ describe('ReferenceFormComponent application ownership', () => {
 
     expect(navigation).not.toBeNull();
     expect(selector).toBeInstanceOf(HTMLSelectElement);
-    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(16);
+    expect(root.querySelectorAll('#scenario-selector option')).toHaveLength(18);
     expect(
       root.querySelector('label[for="scenario-selector"]')?.textContent,
     ).toBe('Scenario');
@@ -669,7 +770,7 @@ describe('ReferenceFormComponent application ownership', () => {
     const disclosures = Array.from(
       root.querySelectorAll<HTMLDetailsElement>('details.card-disclosure'),
     );
-    expect(disclosures).toHaveLength(4);
+    expect(disclosures).toHaveLength(5);
     expect(disclosures.every(({ open }) => open)).toBe(true);
     expect(
       disclosures.map((details) =>
@@ -680,6 +781,7 @@ describe('ReferenceFormComponent application ownership', () => {
       'Interactive consumer',
       'Schemas',
       'Observable evidence',
+      'Integration',
     ]);
     for (const disclosure of disclosures) {
       disclosure.open = false;
@@ -707,8 +809,8 @@ describe('ReferenceFormComponent application ownership', () => {
       Array.from(role?.options ?? [], ({ textContent }) => textContent?.trim()),
     ).toEqual(['Select a role', 'Administrator', 'Editor', 'Viewer']);
     expect(role?.options[0]?.disabled).toBe(true);
-    expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(2);
-    expect(root.querySelectorAll('[role="tab"]')).toHaveLength(7);
+    expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(3);
+    expect(root.querySelectorAll('[role="tab"]')).toHaveLength(9);
     expect(root.querySelectorAll('[role="tabpanel"]')).toHaveLength(2);
     expect(root.querySelector('.preview-workspace')).not.toBeNull();
     expect(root.querySelector('.schema-workspace')).not.toBeNull();
@@ -730,6 +832,21 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(
       configurationTabs?.querySelector('.configuration-actions'),
     ).toBeNull();
+    const configurationActions = root.querySelector('.configuration-actions');
+    expect(
+      Array.from(
+        configurationActions?.querySelectorAll('button') ?? [],
+        ({ textContent }) => textContent?.trim(),
+      ),
+    ).toEqual(['Validate', 'Apply', 'Cancel edits', 'Restore original']);
+    expect(
+      configurationTabs !== null &&
+        configurationActions !== null &&
+        Boolean(
+          configurationTabs.compareDocumentPosition(configurationActions) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+        ),
+    ).toBe(true);
     const evidenceTabs = root.querySelector('.tab-interface--evidence');
     expect(evidenceTabs?.children[0]?.tagName).toBe('REFERENCE-TABS');
     expect(evidenceTabs?.children[1]?.getAttribute('role')).toBe('tabpanel');
@@ -760,8 +877,8 @@ describe('ReferenceFormComponent application ownership', () => {
     expect(
       root.querySelector('.cm-content[aria-label="JSON Schema editor"]'),
     ).not.toBeNull();
-    expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(2);
-    expect(root.querySelectorAll('[role="tab"]')).toHaveLength(7);
+    expect(root.querySelectorAll('[role="tablist"]')).toHaveLength(3);
+    expect(root.querySelectorAll('[role="tab"]')).toHaveLength(9);
     expect(
       root.querySelector('[data-testid="inspector-definition"]'),
     ).not.toBeNull();
@@ -791,8 +908,6 @@ describe('ReferenceFormComponent application ownership', () => {
       root.querySelector('[data-testid="inspector-issues"]'),
     ).not.toBeNull();
 
-    component.setEvidenceTab('integration');
-    fixture.detectChanges();
     expect(component.snippets.map(({ source }) => source)).toEqual(
       Object.values(referenceSnippets),
     );
@@ -806,6 +921,21 @@ describe('ReferenceFormComponent application ownership', () => {
       'Read them in order to follow the controlled integration',
     );
     expect(root.textContent).toContain('Own state:');
+    const integration = root.querySelector('[data-testid="integration-panel"]');
+    expect(integration).not.toBeNull();
+    expect(
+      Array.from(
+        integration?.querySelectorAll('[role="tab"]') ?? [],
+        ({ textContent }) => textContent?.trim(),
+      ),
+    ).toEqual([
+      'Application signals excerpt',
+      'Operation decisions excerpt',
+      'Controlled form template excerpt',
+    ]);
+    expect(component.integrationTab()).toBe('application-signals');
+    component.setIntegrationTab('controlled-form-template');
+    expect(component.integrationTab()).toBe('controlled-form-template');
   });
 
   it('loads every shared scenario through the same focused form component', () => {
@@ -826,6 +956,52 @@ describe('ReferenceFormComponent application ownership', () => {
         scenario.id,
       ).not.toBeNull();
     }
+  });
+
+  it('projects shared discriminated alternatives with stable common hosts and focused replacement', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component.selectScenario('discriminated-object-alternatives');
+    fixture.detectChanges();
+    TestBed.tick();
+    const root = fixture.nativeElement as HTMLElement;
+    const formId = 'reference-discriminated-object-alternatives';
+    const kind = root.querySelector<HTMLSelectElement>(
+      `[id="${nodeBase(formId, ['pet', 'kind'])}"]`,
+    );
+    const name = root.querySelector<HTMLElement>(
+      `[id="${nodeBase(formId, ['pet', 'name'])}"]`,
+    );
+    const lives = root.querySelector<HTMLInputElement>(
+      `[id="${nodeBase(formId, ['pet', 'lives'])}"]`,
+    );
+    if (kind === null || name === null || lives === null) {
+      throw new Error('Expected initial Angular M33 controls.');
+    }
+    lives.dispatchEvent(new FocusEvent('focus'));
+    kind.selectedIndex = 2;
+    kind.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect(
+      root.querySelector(`[id="${nodeBase(formId, ['pet', 'lives'])}"]`),
+    ).toBeNull();
+    expect(
+      root.querySelector(
+        `[id="${nodeBase(formId, ['pet', 'catDetails', 'indoor'])}"]`,
+      ),
+    ).toBeNull();
+    expect(
+      root.querySelector(`[id="${nodeBase(formId, ['pet', 'barkVolume'])}"]`),
+    ).not.toBeNull();
+    expect(
+      root.querySelector(`[id="${nodeBase(formId, ['pet', 'name'])}"]`),
+    ).toBe(name);
+    expect(lives.isConnected).toBe(false);
+    expect(
+      component.runtimeSnapshot()?.fields.some(({ focused }) => focused),
+    ).toBe(false);
   });
 
   it('projects the shared M31 scenario through controlled Angular operations', () => {

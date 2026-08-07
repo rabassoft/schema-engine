@@ -35,6 +35,8 @@ const FEATURES: ReadonlySet<ReferenceFeature> = new Set([
   'schema-defaults',
   'conditional-field-state',
   'string-enum-array',
+  'discriminated-object-alternatives',
+  'linear-wizard',
 ]);
 
 const SCENARIO_MEMBERS = Object.freeze([

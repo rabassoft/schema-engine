@@ -448,6 +448,190 @@ assert.deepEqual(stringEnumArrayApplied.value, {
 });
 stringEnumArrayRuntime.runtime.dispose();
 
+const discriminatedObjectSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    pet: {
+      type: 'object',
+      properties: {
+        kind: { type: 'string', enum: ['cat', 'dog'] },
+        name: { type: 'string' },
+      },
+      required: ['kind'],
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            kind: { type: 'string', const: 'cat' },
+            lives: { type: 'integer' },
+          },
+          required: ['kind', 'lives'],
+        },
+        {
+          type: 'object',
+          properties: {
+            kind: { type: 'string', const: 'dog' },
+            barkVolume: { type: 'number' },
+          },
+          required: ['kind'],
+        },
+      ],
+    },
+  },
+};
+const discriminatedObjectResult = compileFormDefinition({
+  schema: discriminatedObjectSchema,
+});
+assert.equal(discriminatedObjectResult.success, true);
+if (!discriminatedObjectResult.success)
+  throw new Error('Discriminated object compilation failed');
+const petDefinition = discriminatedObjectResult.definition.nodes[0];
+assert.equal(petDefinition?.kind, 'discriminated-object');
+if (petDefinition?.kind !== 'discriminated-object')
+  throw new Error('Discriminated object definition is unavailable');
+assert.equal(petDefinition.discriminator, 'kind');
+assert.deepEqual(petDefinition.alternatives, [
+  { discriminatorValue: 'cat', children: ['lives'] },
+  { discriminatorValue: 'dog', children: ['barkVolume'] },
+]);
+const discriminatedObjectValue = {
+  pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
+};
+const discriminatedObjectRuntime = createControlledFormRuntime({
+  formId: 'discriminated-object-smoke',
+  definition: discriminatedObjectResult.definition,
+  schema: discriminatedObjectSchema,
+  value: discriminatedObjectValue,
+  baselineValue: discriminatedObjectValue,
+  locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+});
+assert.equal(discriminatedObjectRuntime.success, true);
+if (!discriminatedObjectRuntime.success)
+  throw new Error('Discriminated object runtime failed');
+const petSnapshot = discriminatedObjectRuntime.runtime.getNodeSnapshot(['pet']);
+assert.equal(petSnapshot?.nodeKind, 'discriminated-object');
+if (petSnapshot?.nodeKind !== 'discriminated-object')
+  throw new Error('Discriminated object snapshot is unavailable');
+assert.deepEqual(petSnapshot.selection, {
+  kind: 'active',
+  discriminatorValue: 'cat',
+});
+assert.deepEqual(
+  petSnapshot.children.map(({ path }) => path.at(-1)),
+  ['kind', 'name', 'lives'],
+);
+assert.equal(
+  discriminatedObjectRuntime.runtime.getFieldSnapshot(['pet', 'barkVolume']),
+  undefined,
+);
+const inactiveDiscriminatedAction =
+  discriminatedObjectRuntime.runtime.requestSetValue(['pet', 'barkVolume'], 8);
+assert.equal(inactiveDiscriminatedAction.success, false);
+assert.equal(
+  inactiveDiscriminatedAction.diagnostics[0]?.code,
+  'INACTIVE_OBJECT_ALTERNATIVE_TARGET',
+);
+assert.equal(
+  inactiveDiscriminatedAction.diagnostics[0]?.parameters.selection,
+  'different',
+);
+assert.equal(
+  discriminatedObjectRuntime.runtime.updateExternalState({
+    value: {
+      pet: { ...discriminatedObjectValue.pet, kind: 'dog' },
+    },
+  }).success,
+  true,
+);
+assert.deepEqual(
+  discriminatedObjectRuntime.runtime
+    .getSnapshot()
+    .fields.map(({ path }) => path.join('.')),
+  ['pet.kind', 'pet.name', 'pet.barkVolume'],
+);
+discriminatedObjectRuntime.runtime.dispose();
+
+const wizardSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    review: { type: 'string', minLength: 8 },
+  },
+};
+const wizardDefinition = compileFormDefinition({
+  schema: wizardSchema,
+  uiSchema: {
+    presentation: [
+      {
+        kind: 'wizard',
+        id: 'onboarding',
+        label: 'Onboarding',
+        steps: [
+          {
+            kind: 'wizard-step',
+            id: 'identity',
+            label: 'Identity',
+            children: ['name'],
+          },
+          {
+            kind: 'wizard-step',
+            id: 'review',
+            label: 'Review',
+            children: ['review'],
+          },
+        ],
+      },
+    ],
+  },
+});
+assert.equal(wizardDefinition.success, true);
+if (!wizardDefinition.success) throw new Error('Wizard compilation failed');
+const wizardValue = { name: 'Ada', review: 'approved' };
+const wizardRuntime = createControlledFormRuntime({
+  formId: 'wizard-package-smoke',
+  definition: wizardDefinition.definition,
+  schema: wizardSchema,
+  value: wizardValue,
+  baselineValue: wizardValue,
+  locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+  wizardState: { selectedStepId: 'identity' },
+});
+assert.equal(wizardRuntime.success, true);
+if (!wizardRuntime.success) throw new Error('Wizard runtime failed');
+const wizardIntentions = [];
+const wizardSubscription = wizardRuntime.runtime.subscribeWizardIntentions(
+  (intention) => wizardIntentions.push(intention),
+);
+assert.equal(wizardSubscription.success, true);
+assert.equal(wizardRuntime.runtime.getSnapshot().wizard?.steps.length, 2);
+const wizardNext = wizardRuntime.runtime.requestWizardNext();
+assert.deepEqual(wizardNext.effects, {
+  snapshotChanged: true,
+  intentionEmitted: true,
+});
+assert.deepEqual(wizardIntentions[0], {
+  kind: 'next',
+  requestId: 1,
+  wizardKey: '["wizard","onboarding"]',
+  fromStepId: 'identity',
+  toStepId: 'review',
+});
+assert.equal(
+  wizardRuntime.runtime.updateExternalState({
+    wizardSelection: { requestId: 1, selectedStepId: 'review' },
+  }).success,
+  true,
+);
+assert.equal(
+  wizardRuntime.runtime.getSnapshot().wizard?.selectedStepId,
+  'review',
+);
+if (wizardSubscription.success) wizardSubscription.unsubscribe();
+wizardRuntime.runtime.dispose();
+
 const runtimeResult = createControlledFormRuntime({
   formId: 'smoke',
   definition: result.definition,

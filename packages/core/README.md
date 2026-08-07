@@ -154,6 +154,112 @@ locations, tuples and M10 item operations remain unsupported.
 current-source contracts. Their delivery requires a separately approved
 coordinated MINOR; published `0.4.1` does not contain these unreleased changes.
 
+## Discriminated nested-object alternatives in current source
+
+Current source recognizes one bounded nested object whose required string-enum
+discriminator is mapped bijectively by `oneOf` branches with typed string
+`const` values. Core normalizes one complete static child catalog, while the
+runtime projects common children plus only the branch selected by the current
+application-controlled discriminator. Changing selection never creates,
+clears, migrates or defaults dormant branch data.
+
+The root package adds `DiscriminatedObjectAlternativeDefinition`,
+`DiscriminatedObjectFieldDefinition`, `ObjectNodeDefinition`,
+`ObjectAlternativeSelection` and `DiscriminatedObjectRuntimeSnapshot` as
+Public Experimental current-source types. Exhaustive readers of
+`FormNodeDefinition`/`ObjectNodeDefinition` must handle
+`kind: 'discriminated-object'`; exhaustive readers of `NodeRuntimeSnapshot`
+must likewise handle `nodeKind: 'discriminated-object'` and narrow its
+`selection`. Manually authored definitions must provide the complete static
+children/fields projection and exact alternative ownership catalog described
+by those declarations. Schema-compiled consumers receive that normalized
+shape automatically.
+
+These declaration and exhaustive-reader changes require a separately approved
+coordinated future MINOR release. Published `0.4.1`, its entry point and its
+six runtime exports remain unchanged; current source does not imply a release
+or version selection.
+
+## Controlled linear wizard in current source
+
+Current source accepts one sole root wizard with at least two static steps.
+Core derives each immutable step scope and the whole completion scope, owns
+factual validation/progress and emits frozen adjacent navigation intentions;
+the application remains the authority that confirms selection and handles any
+completion effect. Steps are never direct-selection controls and wizard actions
+never submit, persist or mutate form data.
+
+The Public Experimental source adds the exact wizard raw/normalized, controlled
+state, intention/action, snapshot/progress and text-context types documented by
+SPEC-020. `ControlledFormRuntimeOptions` may require `wizardState` for a wizard;
+`ExternalStateUpdate` accepts an exact `wizardSelection`; `FormRuntimeSnapshot`
+may expose `wizard`; and `FormRuntime` adds wizard intention subscription plus
+previous/next/complete/rejection methods. Exhaustive readers of root
+presentation and `TextResolutionContext` must add the wizard branch. Ordinary
+non-wizard callers remain source-compatible because every widened state member
+is optional outside a wizard.
+
+An exhaustive current-source consumer can isolate the new branch and keep
+non-wizard handling unchanged:
+
+```ts
+import type {
+  FormRuntime,
+  FormRuntimeSnapshot,
+  RootPresentationEntryDefinition,
+  TextResolutionContext,
+  WizardActionResult,
+  WizardTextResolutionContext,
+} from '@rabassoft/schema-engine';
+
+declare function resolveExistingText(
+  context: Exclude<TextResolutionContext, WizardTextResolutionContext>,
+): string;
+
+function presentationKind(entry: RootPresentationEntryDefinition): string {
+  switch (entry.kind) {
+    case 'form-node':
+    case 'section':
+    case 'tabs':
+    case 'accordion':
+    case 'grid':
+    case 'wizard':
+      return entry.kind;
+    default: {
+      const unreachable: never = entry;
+      return unreachable;
+    }
+  }
+}
+
+function resolveText(context: TextResolutionContext): string {
+  if ('wizard' in context) {
+    return `${context.wizard.id}:${context.member}`;
+  }
+  return resolveExistingText(context);
+}
+
+function requestNext<TData extends object>(
+  runtime: FormRuntime<TData>,
+): WizardActionResult {
+  return runtime.requestWizardNext();
+}
+
+function selectedStep<TData extends object>(
+  snapshot: FormRuntimeSnapshot<TData>,
+): string | undefined {
+  return snapshot.wizard?.selectedStepId;
+}
+```
+
+`resolveExistingText()` represents the consumer's pre-M34 exhaustive field,
+object, collection and presentation handling; the wizard branch must be added
+before passing the narrowed context to it.
+
+This source migration requires the same separately approved coordinated future
+MINOR. Published `0.4.1`, the six runtime exports, package entry point,
+dependencies and release tags remain unchanged.
+
 ## Prototype boundary
 
 > Exact core `0.4.1`, `next`, `latest` and unqualified clean-consumer evidence

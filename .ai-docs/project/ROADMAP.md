@@ -907,7 +907,8 @@ plugins, persistencia, productos ni trabajo comercial.
 - Ricard selecciona el 3 de agosto de 2026 continuar madurando funcionalidad
   neutral antes de React: M32 condiciones compuestas, después M33 alternativas
   de objeto discriminadas, M34 wizard declarativo y finalmente el primer
-  adapter React. Solo M32 está promovido; el resto conserva sus gates propios.
+  adapter React. En ese gate solo M32 quedó promovido; los gates posteriores
+  completaron M33/M34 y React conserva su gate propio.
 - Review 304 ciclo 2 pasa catorce áreas sin hallazgos. Promueve únicamente un
   predicado M30 existente o un grupo plano no vacío con exactamente `all` o
   `any` para `visible`/`enabled` en campos primitivos ordinarios.
@@ -961,6 +962,174 @@ plugins, persistencia, productos ni trabajo comercial.
     matriz completos, las 22 filas, consumidores y Chromium secuencial 14+17
     sin hallazgos tras instalar con autorización las dos herramientas externas
     requeridas. PLAN-034 revision 0 queda Completed sin drift ni release/Git.
-12. **Immediate planning action:** preparar y revisar la promoción acotada de
-    D-007/M33 para alternativas de objeto discriminadas. ADR, SPEC, plan,
-    implementación, dependencias, versión, release y Git siguen gated.
+12. **Next promotion completed:** review 314 ciclo 2 pasa quince áreas tras
+    dos correcciones. Ricard acepta únicamente la pregunta arquitectónica M33
+    acotada y reserva ADR-036; SPEC, plan, implementación, dependencias,
+    versión, release y Git siguen gated.
+
+### M33 — Alternativas discriminadas de objeto anidado — completado
+
+- Review 314 ciclo 2 recomienda y Ricard acepta el 3 de agosto de 2026 solo
+  una propiedad object ordinaria, raíz o nested, con un discriminador
+  string-enum requerido y controlado por la aplicación, y al menos dos ramas
+  `oneOf` en correspondencia biyectiva mediante `const` string.
+- Documento raíz, colecciones/items, arrays, alternativas recursivas,
+  composición dentro de alternativas, evaluación general, mutación de valores,
+  wizard y React permanecen fuera.
+
+1. **Promotion gate completed:** review 314 repite autoridad, gramática,
+   ownership, runtime, validación, UI, migración, exclusiones y documentación
+   con cero hallazgos después de corregir cardinalidad y accessors.
+2. **Architecture gate completed:** ADR-036 revision 0 cierra representación
+   estática/activa, selección controlada, estado, operaciones, issues, UI,
+   defaults/conditions, targets y migración Experimental. Review 315 ciclo 2
+   pasa quince áreas sin hallazgos tras dos correcciones y la ADR queda
+   Accepted.
+3. **Dialect-policy gate completed:** ADR-036 revision 1 preserva el warning
+   unmanaged-required y ADR-005 revision 9 cierra catálogo, exterior,
+   discriminator seed/bijection, conflicts, UI, references, ordering y helper
+   M29. Review 316 ciclo 2 pasa dieciséis áreas tras cinco correcciones; ambas
+   revisiones quedan Accepted.
+4. **Contract gate completed:** SPEC-019 v0.1.0 cierra cinco exports,
+   definición estática/snapshot activo, manual definitions, state, inactive
+   operations, issues, scopes, targets, migration y 17 filas. Review 317 ciclo
+   2 pasa quince áreas y todas las filas tras tres correcciones; queda Accepted.
+5. **Plan gate completed:** PLAN-035 revision 0 distribuye las 17 filas una
+   sola vez entre seis checkpoints buildable. Review 318 ciclo 2 pasa doce
+   áreas sin hallazgos tras corregir los README; queda Approved.
+6. **Implementation gate completed:** checkpoints 1–6 se ejecutan en orden
+   bajo el acuerdo autónomo. Dependencias, versión, release, publicación y Git
+   permanecen sin autorización.
+7. **Owner-relative diagnostic correction completed:** durante checkpoint 1 se
+   detecta que un descendiente outer/common no puede aportar el `branchIndex`
+   obligatorio de revision 9. Ricard acepta omitirlo solo para outer/common y
+   conservarlo obligatorio para branch. ADR-005 revision 10, SPEC-019 v0.1.1 y
+   PLAN-035 revision 1 pasan review 319 ciclo 1 sin hallazgos; checkpoint 1 se
+   reanuda sin ampliar alcance.
+8. **Presentation compatibility correction completed:** una prueba
+   descriptor-safe expone que M33 contradice la familia
+   `INVALID_UI_PRESENTATION` ya Accepted por SPEC-005/SPEC-009. Ricard acepta
+   preservarla para todo forest owner inválido y reservar
+   `INCOMPATIBLE_UI_OPTION` para un forest válido. ADR-005 revision 11,
+   SPEC-019 v0.1.2 y PLAN-035 revision 2 pasan review 320 ciclo 2 con cero
+   hallazgos; checkpoint 1 se reanuda sin cambio de graph, release o Git.
+9. **Checkpoint 1 completed:** review 321 ciclo 2 pasa catorce áreas y las
+   filas 1–7 tras corregir cinco defectos de compiler/presentation/evidence;
+   tipos Public y compilador completo quedan congelados.
+10. **Checkpoint 2 completed:** review 322 ciclo 2 pasa catorce áreas y las
+    filas 8–12 tras cinco correcciones; definiciones manuales, selección,
+    estado controlado y defensas inactivas quedan completos.
+11. **Checkpoint 3 completed:** review 323 ciclo 2 pasa catorce áreas y las
+    filas 13–14 tras corregir scopes e issue ownership; validators y helper M29
+    conservan entradas y autoridad.
+12. **Checkpoint 4 completed:** review 324 ciclo 2 pasa catorce áreas y la fila
+    15; escenario compartido e implementaciones Angular/Standard independientes
+    pasan unit y Chromium.
+13. **Checkpoint 5 completed:** review 325 ciclo 2 pasa catorce áreas y la fila
+    16 tras cinco correcciones de evidence/tooling; declarations, packages,
+    consumidores y source reconstruction pasan sin graph/version drift.
+14. **Checkpoint 6 and M33 completed:** review 326 ciclo 3 repite la matriz
+    completa y las 17 filas con cero hallazgos tras alinear los locators
+    numéricos de Chromium. PLAN-035 revision 2 queda Completed; M1–M33 y G0
+    están implementados sin release ni mutación Git.
+
+### M34 — Wizard declarativo lineal controlado — completado
+
+- Ricard acepta el 4 de agosto de 2026 review 327 ciclo 8: un único wizard
+  root-only, al menos dos steps estáticos, scopes derivados, selección
+  confirmada por la aplicación y progreso neutral visited/attempted/passed.
+- En el gate de promoción solo quedó promovida la pregunta arquitectónica y se
+  reservó ADR-037; los gates posteriores aceptaron arquitectura y SPEC y
+  aprobaron el plan sin autorizar dependencias, versión, release, Git ni estado
+  externo.
+- ADR-037 revisión 0 queda Accepted. Ricard selecciona la excepción
+  síncrona/provisional de `next`: datos futuros pueden mantener async global
+  `blocked` sin impedir un step actual síncronamente válido; pending/failed
+  bloquean y complete exige validez total. Review 328 ciclo 5 pasa las quince
+  áreas sin hallazgos tras trece correcciones; solo autoriza preparar/revisar
+  SPEC-020.
+- SPEC-020 v0.1.0 cierra dieciocho exports exactos, protocolo
+  controlado, snapshot/progreso, diagnósticos y 24 filas. Review 329 ciclo 2
+  pasa quince áreas y todas las filas sin hallazgos y queda Accepted.
+- PLAN-036 revision 0 distribuye las 24 filas una vez en seis
+  checkpoints; review 330 ciclo 3 pasa doce áreas sin hallazgos. Checkpoint 1
+  queda completo tras review 331 ciclo 3; checkpoint 2 queda completo tras
+  review 332 ciclo 3; checkpoint 3 queda completo tras review 333 ciclo 1 y
+  checkpoint 4 tras review 334 ciclo 3. Checkpoint 5 queda completo tras review
+  335 ciclo 2. Review 336 ciclo 2 repite la matriz completa y las 24 filas con
+  cero hallazgos; PLAN-036 y M34 quedan Completed sin release ni mutación Git.
+- Wizards nested/item/dinámicos, selección directa, branching, persistencia,
+  workflow, React/Vue y el resto de D-011/D-012 permanecen Deferred.
+
+### M35 — Primer adaptador React y shell de referencia — completado
+
+- Ricard acepta el 4 de agosto de 2026 review 338 ciclo 2 tras una revisión
+  completa de dieciséis áreas con cero hallazgos. Solo queda promovida la
+  pregunta arquitectónica D-026/D-044 para un adaptador React client-only y su
+  shell privado independiente; ADR-038 queda reservado.
+- La frontera seleccionada exige un paquete Public + Experimental, renderers
+  HTML nativos y proyección completa de la superficie neutral implementada
+  hasta M34, sin importar lifecycle, controllers, templates o estilos de
+  Angular/Standard.
+- SSR, hydration, Server Components, portals, Suspense/lazy renderers,
+  capability negotiation, UI libraries, theming compartido, Vue, dependencias,
+  versiones, release, publicación y Git permanecen inactivos.
+- ADR-038 revision 0 queda Accepted tras review 339 ciclo 5 repetir dieciocho
+  áreas con cero hallazgos después de doce correcciones y aceptación de Ricard
+  el 4 de agosto de 2026. Solo autoriza preparar y revisar SPEC-021; PLAN-037 y
+  toda implementación requieren sus gates posteriores.
+- SPEC-021 v0.1.0 queda Accepted tras review 340 ciclo 2 repetir dieciocho áreas
+  y 36 filas con cero hallazgos después de siete correcciones y aceptación de
+  Ricard el 4 de agosto de 2026. Solo autoriza preparar/revisar PLAN-037; toda
+  implementación sigue inactiva.
+- PLAN-037 revision 0 queda Approved por Ricard el 6 de agosto de 2026 tras
+  review 341 ciclo 2 repetir quince áreas y ownership exacto de las 36 filas en
+  diez checkpoints con cero hallazgos después de cinco correcciones. Checkpoint
+  1 local queda autorizado; la resolución de dependencias conserva un gate de
+  ejecución separado.
+- Ricard autoriza el gate de dependencias el 6 de agosto de 2026. Checkpoint 1
+  queda completo tras review 343 ciclo 4 pasar catorce áreas con cero hallazgos:
+  dos proyectos privados, grafo exacto React/DOM `19.2.8`, siete records nuevos,
+  tres importers y fronteras TSX congeladas.
+- Checkpoint 2 queda completo tras review 344 ciclo 3 pasar quince áreas y las
+  filas 5–13 con cero hallazgos: hook controlado, bridge externo, fachada
+  completa, reconciliación y replay Strict Mode. Checkpoint 3 queda activo para
+  registry, caché de proyección y aislamiento de renderer, sin ampliar contrato
+  ni resolver otra dependencia.
+- Checkpoint 3 queda completo tras review 345 ciclo 4 pasar dieciséis áreas y
+  las filas 2/14–18 con cero hallazgos: inventario raíz exacto, registry opaco,
+  resolución, caché post-commit, props y error boundaries. Checkpoint 4 queda
+  activo solo para los seis leaves nativos, textos y semántica primitiva de las
+  filas 19–20.
+- Checkpoint 4 queda completo tras review 346 ciclo 2 pasar dieciséis áreas y
+  las filas 19–20 con cero hallazgos: seis registrations nativas cerradas,
+  buffers primitivos controlados, texto cacheado, IDs UTF-16 y semántica
+  accesible. Checkpoint 5 queda activo solo para objetos, colecciones,
+  alternativas, presentación y condiciones de las filas 21–25.
+- Checkpoint 5 queda completo tras review 347 ciclo 3 pasar dieciséis áreas y
+  las filas 21–25 con cero hallazgos: árboles normalizados recursivos,
+  identidad estable de ítems/buffers, ramas discriminadas, condiciones y hosts
+  Internal de section/tabs/accordion/grid. Checkpoint 6 queda activo solo para
+  validación, scopes/baseline y wizard controlado de las filas 26–28.
+- Checkpoint 6 queda completo tras review 348 ciclo 3 pasar dieciséis áreas y
+  las filas 26–28 con cero hallazgos: validación síncrona/asíncrona neutral,
+  scopes/baseline y wizard controlado con pasos retenidos. Checkpoint 7 queda
+  activo solo para el shell React de referencia independiente de las filas
+  29–30.
+- Checkpoint 7 queda completo tras review 349 ciclo 3 pasar dieciséis áreas y
+  las filas 29–30 con cero hallazgos: shell independiente bajo Strict Mode, 18
+  escenarios, edición, evidencia/snippets, tema/copia y 4/4 jornadas Chromium.
+  Checkpoint 8 queda activo solo para inventarios, artefactos y consumidores
+  React aislados lower/current de las filas 4 y 31, repitiendo la fila 2.
+- Checkpoint 8 queda completo tras review 350 ciclo 3 pasar dieciséis áreas y
+  las filas 4/31 más la fila 2 repetida con cero hallazgos: inventario raíz,
+  tarball privado, reconstrucción de fuentes y consumidores React/DOM
+  `19.2.0`/`19.2.8` pasan online/offline.
+- Checkpoint 9 queda completo tras review 351 ciclo 2 repetir dieciséis áreas y
+  las filas 32–35 con cero hallazgos: workspace, packages, artefactos,
+  consumidores, tres referencias, Chromium secuencial, políticas, seguridad y
+  documentación pasan desde el grafo congelado.
+- Final review 352 ciclo 1 audita ownership exacto y repite las 36 filas y
+  dieciocho áreas con cero hallazgos. Checkpoint 10, PLAN-037 revision 0 y M35
+  quedan Completed sin versión pública React, release, publicación ni mutación
+  Git; el alcance más amplio D-026/D-044 permanece Deferred.

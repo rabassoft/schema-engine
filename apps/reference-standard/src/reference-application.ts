@@ -60,9 +60,17 @@ export type StandardScopeCandidateState =
       readonly diagnostics: readonly Diagnostic[];
     }
   | {
-      readonly status: 'unconfirmable' | 'accepted';
+      readonly status: 'unconfirmable';
       readonly targetId: string;
       readonly label: string;
+      readonly diagnostics: readonly Diagnostic[];
+    }
+  | {
+      readonly status: 'accepted';
+      readonly targetId: string;
+      readonly label: string;
+      readonly value: Readonly<object>;
+      readonly changed: boolean;
       readonly diagnostics: readonly Diagnostic[];
     };
 
@@ -153,6 +161,7 @@ export class StandardReferenceApplication {
   private defaultCandidate: StandardDefaultCandidateState | undefined;
   private unsubscribeSnapshot: Cleanup | undefined;
   private unsubscribeOperations: Cleanup | undefined;
+  private unsubscribeWizardIntentions: Cleanup | undefined;
   private readonly bindingCleanups = new Set<Cleanup>();
   private readonly stateListeners = new Set<StateListener>();
   private suppressSnapshotNotification = false;
@@ -390,6 +399,8 @@ export class StandardReferenceApplication {
         status: 'accepted',
         targetId: candidate.targetId,
         label: candidate.label,
+        value: candidate.value,
+        changed: candidate.changed,
         diagnostics: candidate.diagnostics,
       });
       this.emitState();
@@ -732,6 +743,7 @@ export class StandardReferenceApplication {
       return;
     }
     this.definition = compilation.definition;
+    const rootPresentation = compilation.definition.presentation[0];
 
     // reference-snippet:start standard-create-runtime
     const created = createControlledFormRuntime({
@@ -746,6 +758,13 @@ export class StandardReferenceApplication {
       ...(this.asyncValidator === undefined
         ? {}
         : { asyncValidator: this.asyncValidator.validator }),
+      ...(rootPresentation?.kind === 'wizard'
+        ? {
+            wizardState: {
+              selectedStepId: rootPresentation.steps[0]?.id ?? '',
+            },
+          }
+        : {}),
     });
     // reference-snippet:end standard-create-runtime
     this.runtimeDiagnostics = freezeDiagnostics(created.diagnostics);
@@ -784,6 +803,35 @@ export class StandardReferenceApplication {
       return;
     }
     this.unsubscribeOperations = operationSubscription.unsubscribe;
+    const wizardSubscription = runtime.subscribeWizardIntentions(
+      (intention) => {
+        if (intention.kind === 'complete') return;
+        if (this.decisionMode === 'reject') {
+          const result = runtime.rejectWizardIntention(intention.requestId);
+          if (!result.success)
+            this.runtimeDiagnostics = freezeDiagnostics(result.diagnostics);
+          return;
+        }
+        if (this.decisionMode === 'pending') return;
+        const result = runtime.updateExternalState({
+          wizardSelection: {
+            requestId: intention.requestId,
+            selectedStepId: intention.toStepId,
+          },
+        });
+        if (!result.success)
+          this.runtimeDiagnostics = freezeDiagnostics(result.diagnostics);
+      },
+    );
+    if (!wizardSubscription.success) {
+      this.runtimeDiagnostics = freezeDiagnostics(
+        wizardSubscription.diagnostics,
+      );
+      this.cleanupRuntimeAndBindings();
+      this.emitState();
+      return;
+    }
+    this.unsubscribeWizardIntentions = wizardSubscription.unsubscribe;
     // reference-snippet:end standard-runtime-subscriptions
     this.emitState();
   }
@@ -945,6 +993,8 @@ export class StandardReferenceApplication {
     this.unsubscribeSnapshot = undefined;
     this.unsubscribeOperations?.();
     this.unsubscribeOperations = undefined;
+    this.unsubscribeWizardIntentions?.();
+    this.unsubscribeWizardIntentions = undefined;
     this.runtime?.dispose();
     this.runtime = undefined;
     this.asyncValidator = undefined;

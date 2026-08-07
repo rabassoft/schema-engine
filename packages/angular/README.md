@@ -136,6 +136,34 @@ also supply `missingSelectionLabel` and `emptySelectionLabel`. This Public
 Experimental source migration requires the same separately approved future
 core/Angular MINOR; published `0.4.1` remains unchanged.
 
+Current source also projects the core-owned bounded discriminated nested-object
+definition. Angular consumes only normalized `children` and the active
+`DiscriminatedObjectRuntimeSnapshot`; it neither inspects raw `oneOf` nor
+selects a branch. The existing string-enum renderer presents the discriminator,
+common child hosts are retained where identity permits and inactive branch
+hosts are removed. Consumers with exhaustive core definition or snapshot
+readers must add the new discriminated-object cases documented by core; Angular
+renderer contracts themselves do not widen. Delivery remains part of the same
+separately approved coordinated future MINOR, and published `0.4.1` is
+unchanged.
+
+Current source also projects the core-owned sole-root linear wizard natively.
+Angular consumes only normalized definitions, immutable snapshots and neutral
+wizard actions; it never reads raw UI Schema, derives validation/progress or
+confirms selection itself. The application handles `schemaWizardIntention` and
+may call `confirmWizardSelection()` or `rejectWizardIntention()`; the directive
+also forwards previous, next and complete requests. Every step host is mounted
+once, inactive hosts remain hidden/inert, confirmed navigation focuses the new
+heading and atomic host failures suppress partial projection.
+
+Consumers with exhaustive core root-presentation or text-context readers must
+add the M34 wizard cases. `AngularControlledFormConfig` inherits optional
+`wizardState`, and `SchemaFormDirective` exposes the new controlled action
+surface without exporting wizard host internals or adding an Angular renderer
+SPI. This Public Experimental source change requires a separately approved
+coordinated MINOR; published `0.4.1`, entry points and dependencies are
+unchanged.
+
 The current source projects static sections, tabs, accordions and logical grids
 at the root and on direct nested-object and collection-item template owners
 through the Public Experimental container SPI with mandatory native fallback.

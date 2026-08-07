@@ -14,7 +14,7 @@ Framework-agnostic metadata-driven UI ecosystem. The first increment focuses on 
   [contribution policy](./CONTRIBUTING.md) and
   [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-The repository contains the completed M1-M31 controlled-form ecosystem,
+The repository contains the completed M1-M34 controlled-form ecosystem,
 verified public Experimental packages and the sanitized public history,
 governance and protected controls completed by PLAN-024. Its G0 review passed;
 SPEC-001 v0.1.15, SPEC-002 v0.1.2, SPEC-003 v0.1.2, SPEC-004 v0.1.1, SPEC-005
@@ -60,9 +60,47 @@ after review 310 cycle 1. Checkpoint 4 completes shared Standard/browser rows
 19–20 after review 311 cycle 2. Checkpoint 5 completes declarations,
 package/built/clean/source consumer migration row 21 after review 312 cycle 3;
 review 313 cycle 2 repeats the frozen matrix and all 22 rows with zero findings,
-completing PLAN-034 revision 0 and M32. The next planning gate is bounded
-D-007/M33 discriminated object alternatives; no M33 contract or implementation
-is active.
+completing PLAN-034 revision 0 and M32. Bounded D-007/M33 discriminated nested
+object alternatives are now defined by Accepted ADR-036 revision 1, coordinated
+ADR-005 revision 11 and Accepted SPEC-019 v0.1.2 after reviews 314–320
+converged with zero findings. Completed PLAN-035 revision 2 maps all 17 rows
+exactly once with zero findings. Checkpoints 1–6
+and reviews 321–326 implement all 17 rows; final review 326 cycle 3 repeated the
+frozen matrix with zero findings. M33 is complete without dependency, version,
+release or Git mutation.
+Bounded D-011/D-012/M34 is defined normatively by Accepted ADR-037 revision 0
+and Accepted SPEC-020 v0.1.0 after reviews 327–329 converged with zero findings.
+Completed PLAN-036 revision 0 maps all 24 rows exactly once after review 330
+cycle 3.
+Checkpoint 1 implements definitions, compiler/manual validation and derived
+scopes after review 331 cycle 3. Checkpoint 2 implements the complete controlled
+runtime, intentions, gates, snapshots and progress after review 332 cycle 3;
+checkpoint 3 proves core state invariants after review 333 cycle 1. Checkpoint 4
+implements text, lifecycle, independent Angular/Standard hosts and shared
+browser evidence after review 334 cycle 3. Checkpoint 5 completes declaration,
+package and isolated-consumer conformance after review 335 cycle 2. Final
+review 336 cycle 2 repeats the frozen matrix and all 24 rows with zero findings,
+completing PLAN-036 and M34 without dependency, version, release or Git
+mutation.
+Bounded D-026/D-044/M35 is defined by Accepted ADR-038 revision 0 and Accepted
+SPEC-021 v0.1.0 after reviews 338–340 converged with zero findings. Approved
+PLAN-037 revision 0 maps all 36 rows across ten ordered checkpoints after review
+341 cycle 2 passed with zero findings. Checkpoint 1 completes the exact private
+projects and frozen React dependency graph after review 343 cycle 4; checkpoint
+2 completes the controlled hook, store, action facade and lifecycle rows after
+review 344 cycle 3. Checkpoint 3 completes the exact root registry, projection
+cache and renderer-isolation rows after review 345 cycle 4. Checkpoint 4
+completes the six native leaves, field text and primitive semantics after
+review 346 cycle 2. Checkpoint 5 completes compound projection, presentation
+and conditions after review 347 cycle 3. Checkpoint 6 completes neutral
+validation, scopes/baseline and the controlled wizard after review 348 cycle 3;
+checkpoint 7 completes the independent React reference shell after review 349
+cycle 3. Checkpoint 8 completes exact private artifacts, source reconstruction
+and isolated lower/current React consumers after review 350 cycle 3. Checkpoint
+9 completes regression and repository integration after review 351 cycle 2.
+Final review 352 cycle 1 repeats all 36 rows with zero findings, completing
+checkpoint 10, PLAN-037 revision 0 and M35 without making the adapter
+publishable.
 Package versions and published M23 artifacts remain unchanged.
 The
 source checkout implements the M14
@@ -137,9 +175,26 @@ uses ordinary controlled set/remove operations, and is projected independently
 as a native multiple selection in Angular and Standard. It is not an M10
 collection and exposes no item identity or item operation.
 
+Current unreleased source additionally supports the bounded M33 nested-object
+alternative: one required string-enum discriminator selects common children
+plus one statically normalized `oneOf` branch. The application remains the
+source of truth for selection and dormant branch data. Core owns the normalized
+definition, active snapshot projection and inactive-action diagnostics;
+Angular and Standard independently render only that projection and never
+inspect raw alternatives.
+
+Current unreleased source also supports one bounded sole-root linear wizard.
+Core derives immutable step/completion scopes, validation gates and factual
+progress, while the application confirms adjacent selection and owns completion
+effects. Angular and Standard independently keep every step subtree mounted,
+hide inactive regions accessibly and consume only normalized definitions,
+snapshots, text contexts and neutral intentions. Exhaustive root-presentation,
+runtime and text-context readers must add the SPEC-020 wizard branches.
+
 External/dynamic references, anchors, other arrays of primitives, arrays inside
 collection item templates, tuples, general composition,
-generated identity, async transport/Ajv, persistence, wizards, workflow,
+generated identity, async transport/Ajv, persistence, nested/multiple/branching
+wizards, workflow,
 controlled layout state, custom
 collection renderers and other deferred decisions are not active.
 
@@ -204,7 +259,13 @@ manually authored `AngularFieldTextSnapshot` supplies `setNullLabel` and
 `emptySelectionLabel`; exhaustive `FieldTextMember` handling also includes
 their corresponding members. Manually authored field definitions may now need
 to handle `StringEnumArrayFieldDefinition` in exhaustive `FieldDefinition`
-switches. Schema-compiled consumers do not manually add definition members.
+switches. Exhaustive `FormNodeDefinition`/`ObjectNodeDefinition` readers must
+also handle `kind: 'discriminated-object'`, and exhaustive
+`NodeRuntimeSnapshot` readers must handle
+`nodeKind: 'discriminated-object'` plus its none/active `selection`. Manually
+authored discriminated definitions must provide the complete static child,
+field and alternative ownership projections; schema-compiled consumers do not
+manually add definition members.
 These coordinated source changes require a separately approved future MINOR;
 published packages remain immutable historical releases and must not be
 treated as containing unversioned source changes.

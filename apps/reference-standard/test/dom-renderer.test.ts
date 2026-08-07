@@ -10,6 +10,8 @@ import {
   compileFormDefinition,
   createControlledFormRuntime,
   type FormOperation,
+  type Diagnostic,
+  type WizardTextResolutionContext,
 } from '@rabassoft/schema-engine';
 
 import { StandardDomRenderer } from '../src/dom-renderer.js';
@@ -23,6 +25,167 @@ afterEach(() => {
 });
 
 describe('StandardDomRenderer', () => {
+  it('projects a once-mounted controlled wizard with application-confirmed adjacent navigation', async () => {
+    const harness = mount('linear-wizard');
+    const wizard = harness.host.querySelector<HTMLElement>('.schema-wizard');
+    if (wizard === null) throw new Error('Expected Standard wizard host.');
+    const regions = [
+      ...wizard.querySelectorAll<HTMLElement>('[role="region"]'),
+    ];
+    expect(regions).toHaveLength(3);
+    expect(regions[0]?.hidden).toBe(false);
+    expect(regions[1]?.hidden).toBe(true);
+    expect(regions[1]?.hasAttribute('inert')).toBe(true);
+    expect(regions[1]?.getAttribute('aria-hidden')).toBe('true');
+    expect(wizard.querySelector('[role="tablist"]')).toBeNull();
+
+    harness.application.setDecisionMode('reject');
+    clickButton(wizard, 'Next');
+    expect(regions[0]?.hidden).toBe(false);
+    harness.application.setDecisionMode('confirm');
+
+    harness.application.resolveServiceValidation(true);
+    await Promise.resolve();
+    await Promise.resolve();
+    clickButton(wizard, 'Next');
+    expect(regions[0]?.hidden).toBe(true);
+    expect(regions[1]?.hidden).toBe(false);
+    expect(regions[1]?.hasAttribute('aria-hidden')).toBe(false);
+    expect(document.activeElement).toBe(regions[1]?.querySelector('h3'));
+    const retained = regions[1]?.querySelector<HTMLInputElement>('input');
+    if (retained === null || retained === undefined)
+      throw new Error('Expected a retained nested step input.');
+    retained.value = 'Retained Standard buffer';
+    retained.dispatchEvent(new Event('input', { bubbles: true }));
+    clickButton(wizard, 'Previous');
+    expect(regions[0]?.hidden).toBe(false);
+    expect(wizard.querySelectorAll('[role="region"]')[1]).toBe(regions[1]);
+    clickButton(wizard, 'Next');
+    expect(regions[1]?.querySelector('input')).toBe(retained);
+    expect(retained.value).toBe('Retained Standard buffer');
+  });
+
+  it('resolves exact wizard text identities once and normalizes one failed identity', () => {
+    const application = new StandardReferenceApplication(
+      undefined,
+      'linear-wizard',
+    );
+    const definition = application.getState().definition;
+    const runtime = application.getRuntime();
+    if (definition === undefined || runtime === undefined)
+      throw new Error('Expected a renderable wizard scenario.');
+    const host = document.createElement('main');
+    const contexts: WizardTextResolutionContext[] = [];
+    const diagnostics: Diagnostic[] = [];
+    const renderer = new StandardDomRenderer(host, definition, runtime, {
+      formId: 'standard-wizard-text',
+      resolveText(text, context) {
+        if (!('wizard' in context)) return text;
+        contexts.push(context);
+        if (context.member === 'next') return '';
+        return text;
+      },
+      reportDiagnostics(entries) {
+        diagnostics.push(...entries);
+      },
+    });
+    renderer.reconcile(runtime.getSnapshot());
+    renderer.reconcile(runtime.getSnapshot());
+
+    const identities = contexts.map((context) =>
+      JSON.stringify([
+        context.locale,
+        context.member,
+        context.step?.key,
+        context.position,
+        context.count,
+      ]),
+    );
+    expect(new Set(identities).size).toBe(identities.length);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]?.code).toBe('TEXT_RESOLUTION_FAILED');
+    expect(diagnostics[0]?.parameters?.['member']).toBe('next');
+    expect(diagnostics[0]?.parameters?.['reason']).toBe('blank-string-result');
+    renderer.dispose();
+    application.dispose();
+  });
+
+  it('suppresses and cleans an atomically failed wizard step projection', () => {
+    const application = new StandardReferenceApplication(
+      undefined,
+      'linear-wizard',
+    );
+    const definition = application.getState().definition;
+    const runtime = application.getRuntime();
+    if (definition === undefined || runtime === undefined)
+      throw new Error('Expected a renderable wizard scenario.');
+    const original = document.createElement.bind(document);
+    const createElement = vi
+      .spyOn(document, 'createElement')
+      .mockImplementation((name: string, options?: ElementCreationOptions) => {
+        if (name === 'h3') throw new Error('unsafe');
+        return original(name, options);
+      });
+    const diagnostics: Diagnostic[] = [];
+    const host = original('main');
+    const renderer = new StandardDomRenderer(host, definition, runtime, {
+      formId: 'standard-wizard-failure',
+      reportDiagnostics(entries) {
+        diagnostics.push(...entries);
+      },
+    });
+    createElement.mockRestore();
+
+    expect(host.querySelector('.schema-wizard')).toBeNull();
+    expect(host.querySelector('input, select, button')).toBeNull();
+    expect(diagnostics).toEqual([
+      {
+        code: 'WIZARD_STEP_HOST_INSTANTIATION_FAILED',
+        severity: 'error',
+        source: 'runtime',
+        parameters: { wizardId: 'onboarding', stepId: 'identity' },
+        fallbackMessage: 'Wizard step host could not be instantiated.',
+      },
+    ]);
+    renderer.dispose();
+    application.dispose();
+  });
+
+  it('projects shared discriminated alternatives with active replacement and stale-event isolation', () => {
+    const harness = mount('discriminated-object-alternatives');
+    const kind = field(harness.host, 'kind').querySelector('select');
+    const commonName = field(harness.host, 'name');
+    const lives = field(harness.host, 'lives');
+    const livesInput = lives.querySelector('input');
+    if (kind === null || livesInput === null) {
+      throw new Error('Expected initial Standard M33 controls.');
+    }
+    expect(field(harness.host, 'indoor')).toBeDefined();
+    expect(
+      harness.host.querySelector('[data-field-name="barkVolume"]'),
+    ).toBeNull();
+
+    livesInput.dispatchEvent(new FocusEvent('focus'));
+    kind.value = 'dog';
+    kind.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(harness.host.querySelector('[data-field-name="lives"]')).toBeNull();
+    expect(harness.host.querySelector('[data-field-name="indoor"]')).toBeNull();
+    expect(field(harness.host, 'barkVolume')).toBeDefined();
+    expect(field(harness.host, 'name')).toBe(commonName);
+    expect(lives.isConnected).toBe(false);
+    expect(
+      harness.application
+        .getState()
+        .snapshot?.fields.some(({ focused }) => focused),
+    ).toBe(false);
+
+    const valueBeforeStaleEvent = harness.application.getState().value;
+    livesInput.value = '7';
+    livesInput.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(harness.application.getState().value).toBe(valueBeforeStaleEvent);
+  });
+
   it('projects the shared M31 scenario with independent controlled multiselection', () => {
     const harness = mount('string-enum-array');
     const rolesHost = field(harness.host, 'roles');
@@ -764,11 +927,25 @@ describe('StandardDomRenderer', () => {
     const triggers = Array.from(
       root.querySelectorAll<HTMLButtonElement>('[id$="--trigger"]'),
     );
+    expect(
+      triggers.map(
+        (trigger) =>
+          trigger.querySelector('.presentation-accordion-indicator')
+            ?.textContent,
+      ),
+    ).toEqual(['+', '+']);
     triggers[0]?.click();
     triggers[1]?.click();
     expect(
       triggers.map((trigger) => trigger.getAttribute('aria-expanded')),
     ).toEqual(['true', 'true']);
+    expect(
+      triggers.map(
+        (trigger) =>
+          trigger.querySelector('.presentation-accordion-indicator')
+            ?.textContent,
+      ),
+    ).toEqual(['−', '−']);
     expect(root.querySelectorAll('.presentation-grid-cell')).toHaveLength(2);
 
     harness.application.setLocale('es');
@@ -836,8 +1013,9 @@ describe('StandardDomRenderer', () => {
       host.querySelector('[id$="--accordion"]')?.getAttribute('aria-label'),
     ).toBe('Resolved Account preferences');
     expect(
-      Array.from(host.querySelectorAll('[id$="--trigger"]')).at(-1)
-        ?.textContent,
+      Array.from(host.querySelectorAll('[id$="--trigger"]'))
+        .at(-1)
+        ?.querySelector('span')?.textContent,
     ).toBe('Security');
     renderer.reconcile(runtime.getSnapshot());
     expect(calls).toHaveLength(8);

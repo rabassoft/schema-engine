@@ -39,6 +39,8 @@ import { scopeBaselineConfirmation } from './scenarios/scope-baseline-confirmati
 import { explicitSchemaDefaults } from './scenarios/explicit-schema-defaults.js';
 import { conditionalFieldState } from './scenarios/conditional-field-state.js';
 import { stringEnumArray } from './scenarios/string-enum-array.js';
+import { discriminatedObjectAlternatives } from './scenarios/discriminated-object-alternatives.js';
+import { linearWizard } from './scenarios/linear-wizard.js';
 export { fixedValueControlStates } from './scenarios/fixed-values.js';
 export { stringEnumArrayControlStates } from './scenarios/string-enum-array.js';
 
@@ -59,4 +61,6 @@ export const referenceScenarios = defineReferenceCatalog([
   explicitSchemaDefaults,
   conditionalFieldState,
   stringEnumArray,
+  discriminatedObjectAlternatives,
+  linearWizard,
 ]);

@@ -29,7 +29,9 @@ export type ReferenceFeature =
   | 'scope-confirmation'
   | 'schema-defaults'
   | 'conditional-field-state'
-  | 'string-enum-array';
+  | 'string-enum-array'
+  | 'discriminated-object-alternatives'
+  | 'linear-wizard';
 
 export type ReferenceExpectedOperation<
   TOperation extends FormOperation = FormOperation,

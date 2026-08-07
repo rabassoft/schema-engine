@@ -7,6 +7,7 @@ import type {
   FormNodeDefinition,
   NodeRuntimeSnapshot,
   ObjectFieldDefinition,
+  ObjectNodeDefinition,
   ObjectPresence,
   ObjectTextResolutionContext,
   ObjectUiSchema,
@@ -94,7 +95,7 @@ describe('M9 public contract foundations', () => {
     expect(snapshot.nodeKind).toBe('object');
     expect(context.node).toBe(address);
     expectTypeOf<FormNodeDefinition>().toMatchTypeOf<
-      | ObjectFieldDefinition
+      | ObjectNodeDefinition
       | ArrayNodeDefinition
       | FormDefinition['fields'][number]
     >();

@@ -31,6 +31,8 @@ const EXPECTED_SCENARIOS = [
   'explicit-schema-defaults',
   'conditional-field-state',
   'string-enum-array',
+  'discriminated-object-alternatives',
+  'linear-wizard',
 ] as const;
 
 const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
@@ -55,6 +57,8 @@ const EXPECTED_FEATURES: readonly ReferenceFeature[] = [
   'schema-defaults',
   'conditional-field-state',
   'string-enum-array',
+  'discriminated-object-alternatives',
+  'linear-wizard',
 ];
 
 const EXPECTED_TRANSITIONS = {
@@ -127,6 +131,12 @@ const EXPECTED_TRANSITIONS = {
     'external-non-string',
     'restore-initial-state',
   ],
+  'discriminated-object-alternatives': [
+    'select-dog',
+    'edit-dog-branch',
+    'restore-cat',
+  ],
+  'linear-wizard': ['application-confirmed-navigation'],
 } as const;
 
 function withRuntimeEnvelope(
@@ -195,6 +205,10 @@ describe('reference scenario catalog', () => {
       'explicit-schema-defaults': ['schema-defaults'],
       'conditional-field-state': ['conditional-field-state'],
       'string-enum-array': ['string-enum-array'],
+      'discriminated-object-alternatives': [
+        'discriminated-object-alternatives',
+      ],
+      'linear-wizard': ['linear-wizard'],
     });
     expect(
       Object.fromEntries(
@@ -220,11 +234,11 @@ describe('reference scenario catalog', () => {
       },
       labels: {
         heading: 'Service validation controls',
-        settleValid: 'Resolve as available',
-        settleInvalid: 'Resolve as unavailable',
-        reject: 'Reject current request',
-        throwNext: 'Throw on next request',
-        retry: 'Retry service validation',
+        settleValid: 'Complete request: username available',
+        settleInvalid: 'Complete request: username unavailable',
+        reject: 'Fail current request',
+        throwNext: 'Make next request throw',
+        retry: 'Retry failed validation',
       },
     });
     expect(Object.isFrozen(scenario?.serviceValidation)).toBe(true);
@@ -608,6 +622,7 @@ describe('reference scenario catalog', () => {
         scenario.compileInput.schema,
         scenario.initialState.value,
       );
+      const rootPresentation = compiled.definition.presentation[0];
       const runtime = createControlledFormRuntime({
         formId: `reference-${scenario.id}`,
         definition: compiled.definition,
@@ -616,6 +631,13 @@ describe('reference scenario catalog', () => {
         baselineValue: scenario.initialState.baselineValue,
         locale: scenario.initialState.locale,
         validationVisibility: scenario.initialState.validationVisibility,
+        ...(rootPresentation?.kind === 'wizard'
+          ? {
+              wizardState: {
+                selectedStepId: rootPresentation.steps[0]?.id ?? '',
+              },
+            }
+          : {}),
         validator: {
           validate(schema, value) {
             receivedSchemas.push(schema);
@@ -625,8 +647,15 @@ describe('reference scenario catalog', () => {
       });
 
       expect(validationA).toEqual(validationB);
-      expect(validationA.valid).toBe(true);
-      expect(validationA.issues).toEqual([]);
+      if (scenario.id === 'linear-wizard') {
+        expect(validationA.valid).toBe(false);
+        expect(simplifiedIssues(validationA.issues)).toEqual([
+          { code: 'review-code', path: ['reviewCode'], keyword: 'minLength' },
+        ]);
+      } else {
+        expect(validationA.valid).toBe(true);
+        expect(validationA.issues).toEqual([]);
+      }
       expect(
         JSON.stringify({
           schema: scenario.compileInput.schema,

@@ -17,6 +17,13 @@ export const EXPECTED_STANDARD_REFERENCE_SNIPPETS = Object.freeze([
   'standard-runtime-cleanup',
 ]);
 
+export const EXPECTED_REACT_REFERENCE_SNIPPETS = Object.freeze([
+  'react-controlled-hook',
+  'react-operation-decision',
+  'react-wizard-decision',
+  'react-schema-form',
+]);
+
 const DEFAULT_SOURCE =
   'apps/reference-angular/src/app/reference-form.component.ts';
 const DEFAULT_OUTPUT =
@@ -33,6 +40,12 @@ export const REFERENCE_SNIPPET_TARGETS = Object.freeze([
     sourcePath: 'apps/reference-standard/src/reference-application.ts',
     outputPath: 'apps/reference-standard/src/generated/reference-snippets.ts',
     expectedIds: EXPECTED_STANDARD_REFERENCE_SNIPPETS,
+  }),
+  Object.freeze({
+    id: 'react',
+    sourcePath: 'apps/reference-react/src/reference-application.tsx',
+    outputPath: 'apps/reference-react/src/generated/reference-snippets.ts',
+    expectedIds: EXPECTED_REACT_REFERENCE_SNIPPETS,
   }),
 ]);
 const TYPESCRIPT_MARKER =

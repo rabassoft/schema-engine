@@ -33,7 +33,10 @@ function fixture() {
   write(
     root,
     'package.json',
-    manifest({ private: true, devDependencies: { ajv: '8.20.0' } }),
+    manifest({
+      private: true,
+      devDependencies: { ajv: '8.20.0', 'ajv-formats': '3.0.1' },
+    }),
   );
   write(root, 'packages/core/package.json', manifest(publicManifest));
   write(root, 'packages/core/src/index.ts', 'export const core = true;\n');
@@ -99,7 +102,7 @@ function fixture() {
           default: './dist/index.js',
         },
       },
-      dependencies: { ajv: '8.20.0' },
+      dependencies: { ajv: '8.20.0', 'ajv-formats': '3.0.1' },
       devDependencies: { '@rabassoft/schema-engine': 'workspace:*' },
       peerDependencies: { '@rabassoft/schema-engine': 'workspace:^' },
     }),
@@ -109,6 +112,34 @@ function fixture() {
     'packages/validator-ajv/src/index.ts',
     "import type { SchemaValidator } from '@rabassoft/schema-engine';\nimport { Ajv2020 } from 'ajv/dist/2020.js';\nexport const validator: SchemaValidator | typeof Ajv2020 = Ajv2020;\n",
   );
+  write(
+    root,
+    'packages/react/package.json',
+    manifest({
+      name: '@rabassoft/schema-engine-react',
+      private: true,
+      exports: {
+        '.': {
+          types: './dist/index.d.ts',
+          import: './dist/index.js',
+          default: './dist/index.js',
+        },
+      },
+      devDependencies: {
+        '@rabassoft/schema-engine': 'workspace:*',
+        '@types/react': '19.2.17',
+        '@types/react-dom': '19.2.3',
+        react: '19.2.8',
+        'react-dom': '19.2.8',
+      },
+      peerDependencies: {
+        '@rabassoft/schema-engine': 'workspace:*',
+        react: '>=19.2.0 <20.0.0',
+        'react-dom': '>=19.2.0 <20.0.0',
+      },
+    }),
+  );
+  write(root, 'packages/react/src/index.ts', 'export {};\n');
   write(
     root,
     'apps/reference-scenarios/package.json',
@@ -188,6 +219,36 @@ function fixture() {
     'apps/reference-standard/src/main.ts',
     "import '@codemirror/lang-javascript';\nimport '@codemirror/lang-json';\nimport '@codemirror/language';\nimport '@lezer/highlight';\nimport '@rabassoft/schema-engine';\nimport '@rabassoft/schema-engine-validator-ajv';\nimport '@schema-engine-internal/reference-scenarios';\nimport 'codemirror';\n",
   );
+  write(
+    root,
+    'apps/reference-react/package.json',
+    manifest({
+      name: '@schema-engine-internal/reference-react',
+      private: true,
+      dependencies: {
+        '@codemirror/lang-javascript': '6.2.5',
+        '@codemirror/lang-json': '6.0.2',
+        '@codemirror/language': '6.12.4',
+        '@lezer/highlight': '1.2.3',
+        '@rabassoft/schema-engine': 'workspace:*',
+        '@rabassoft/schema-engine-react': 'workspace:*',
+        '@rabassoft/schema-engine-validator-ajv': 'workspace:*',
+        '@schema-engine-internal/reference-scenarios': 'workspace:*',
+        codemirror: '6.0.2',
+        react: '19.2.8',
+        'react-dom': '19.2.8',
+      },
+      devDependencies: {
+        '@types/react': '19.2.17',
+        '@types/react-dom': '19.2.3',
+      },
+    }),
+  );
+  write(
+    root,
+    'apps/reference-react/src/main.tsx',
+    "import '@rabassoft/schema-engine';\nimport '@rabassoft/schema-engine-react';\nimport '@rabassoft/schema-engine-validator-ajv';\nimport '@schema-engine-internal/reference-scenarios';\nimport 'react';\nimport 'react-dom/client';\n",
+  );
   return root;
 }
 
@@ -195,10 +256,10 @@ test('accepts the exact private reference dependency boundary', () => {
   const root = fixture();
   try {
     assert.deepEqual(verifyReferenceBoundaries(root), {
-      inspectedImports: 24,
-      inspectedManifestTargets: 11,
-      privateProjects: 3,
-      privateProductProjects: 1,
+      inspectedImports: 30,
+      inspectedManifestTargets: 14,
+      privateProjects: 4,
+      privateProductProjects: 2,
       publicProjects: 3,
     });
   } finally {
@@ -217,6 +278,47 @@ test('rejects a framework dependency in the Standard shell', () => {
     assert.throws(
       () => verifyReferenceBoundaries(root),
       /Standard shell imports framework dependency/u,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects an Angular dependency in the React shell', () => {
+  const root = fixture();
+  try {
+    write(
+      root,
+      'apps/reference-react/src/main.tsx',
+      "import '@angular/core';\n",
+    );
+    assert.throws(
+      () => verifyReferenceBoundaries(root),
+      /React shell imports another target/u,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects a private app dependency in the React adapter', () => {
+  const root = fixture();
+  try {
+    const path = 'packages/react/package.json';
+    const value = JSON.parse(readFixture(root, path));
+    write(
+      root,
+      path,
+      manifest({
+        ...value,
+        dependencies: {
+          '@schema-engine-internal/reference-react': 'workspace:*',
+        },
+      }),
+    );
+    assert.throws(
+      () => verifyReferenceBoundaries(root),
+      /product package depends on a private app/u,
     );
   } finally {
     rmSync(root, { recursive: true, force: true });

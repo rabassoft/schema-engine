@@ -96,9 +96,8 @@ export const stringEnumArray = {
         roles: {
           label: 'Assigned roles',
           description:
-            'Retained choices keep their confirmed order; new choices append in schema order.',
+            'Atomic multiple choice without collection item identity. Retained choices keep their confirmed order; new choices append in schema order.',
           hint: 'Clear removes the property; selecting none keeps an empty array.',
-          tooltip: 'Atomic multiple choice without collection item identity.',
           enumLabels: {
             '': '(empty string)',
             ' ': '(single space)',

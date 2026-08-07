@@ -23,7 +23,7 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 2. [ADR 002: Estrategia de Versionado (Lockstep) y Compatibilidad](./002-versionado-lockstep.md) — **Superseded por ADR-010.**
 3. [ADR 003: Arquitectura Headless y Desacoplamiento de Interfaz (UI)](./003-arquitectura-headless-ui.md) — Pre-SPEC; estado formal pendiente de normalización.
 4. [ADR 004: Estrategia de Renderizado Dinámico (Patrón Registry Agnóstico)](./004-renderizado-dinamico-registry.md) — **Superseded por ADR-007.**
-5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 8 for bounded D-006/M31 after review 294 cycle 2; completed PLAN-033 implements the accepted M31 policy and preserves completed M28 behavior.**
+5. [ADR 005: Política de dialecto y compatibilidad de JSON Schema](./005-politica-dialecto-json-schema.md) — **Accepted revision 11 after review 320 cycle 2 preserves SPEC-005/SPEC-009 presentation diagnostics for M33; completed PLAN-035 revision 2 implements that bounded policy.**
 6. [ADR 006: Límite y nombre público del paquete inicial](./006-limite-paquete-inicial.md) — **Accepted.**
 7. [ADR 007: Resolución de renderers mediante testers puntuados](./007-resolucion-renderers-testers.md) — **Accepted.**
 8. [ADR 008: Instanciación inline de renderers Angular con ViewContainerRef](./008-instanciacion-renderers-angular.md) — **Accepted.**
@@ -54,6 +54,9 @@ Estos ADRs son anteriores a `SPEC-001`. Conservan contexto histórico, pero los 
 33. [ADR 033: Controlled conditional primitive-field state](./033-controlled-conditional-primitive-field-state.md) — **Accepted revision 0 after review 280 cycle 2; accepted SPEC-016 v0.1.1 and completed PLAN-032 revision 1 implement its bounded M30 decision after final review 291 cycle 1.**
 34. [ADR 034: Controlled homogeneous string-enum array field](./034-controlled-homogeneous-string-enum-array-field.md) — **Accepted revision 0 after review 293 cycle 3 passed all twelve areas with zero findings; accepted SPEC-017 and completed PLAN-033 implement its bounded M31 decision after final review 303 cycle 2.**
 35. [ADR 035: Flat compound conditions for controlled primitive-field state](./035-flat-compound-field-conditions.md) — **Accepted revision 0 after review 305 cycle 2 passed all twelve areas with zero findings; accepted SPEC-018 and completed PLAN-034 implement its bounded M32 decision after final review 313 cycle 2.**
+36. [ADR 036: Controlled discriminated nested-object alternatives](./036-controlled-discriminated-object-alternatives.md) — **Accepted revision 1; completed PLAN-035 revision 2 implements the bounded M33 architecture after final review 326 cycle 3 passed with zero findings.**
+37. [ADR 037: Controlled linear declarative wizard and neutral step progress](./037-controlled-linear-declarative-wizard.md) — **Accepted revision 0 after review 328 cycle 5 passed all fifteen areas with zero findings; SPEC-020 v0.1.0 and completed PLAN-036 revision 0 implement bounded M34 after final review 336 cycle 2.**
+38. [ADR 038: First client-rendered React adapter and independent reference shell](./038-first-react-adapter-and-reference-shell.md) — **Accepted revision 0 after review 339 cycle 5 passed all eighteen areas with zero findings; it authorizes SPEC-021 preparation and review only.**
 
 ## 4. ADRs específicos de Angular
 

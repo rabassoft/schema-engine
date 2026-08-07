@@ -207,13 +207,19 @@ import {
   applyFormOperation,
   compileFormDefinition,
   createControlledFormRuntime,
+  type DiscriminatedObjectFieldDefinition,
+  type DiscriminatedObjectRuntimeSnapshot,
   type FormNodeDefinition,
   type FormNodeTemplate,
   type FormOperation,
   type FieldConditionDefinition,
   type PresentationEntryDefinition,
   type SchemaValidator,
+  type ObjectAlternativeSelection,
   type UiFieldConditionSchema,
+  type WizardActionResult,
+  type WizardIntention,
+  type WizardRuntimeSnapshot,
 } from '@rabassoft/schema-engine';
 import {
   SchemaFormDirective,
@@ -232,6 +238,17 @@ export const schema = {
       givenName: { type: 'string', title: 'Given name' },
       familyName: { type: 'string', title: 'Family name' },
     } },
+    pet: { type: 'object', title: 'Pet', properties: {
+      kind: { type: 'string', title: 'Kind', enum: ['cat', 'dog'] },
+      name: { type: 'string', title: 'Name' },
+    }, required: ['kind'], oneOf: [
+      { type: 'object', properties: {
+        kind: { type: 'string', const: 'cat' }, lives: { type: 'integer', title: 'Lives' },
+      }, required: ['kind', 'lives'] },
+      { type: 'object', properties: {
+        kind: { type: 'string', const: 'dog' }, barkVolume: { type: 'number', title: 'Bark volume' },
+      }, required: ['kind'] },
+    ] },
     rows: { type: 'array', title: 'Rows', items: { type: 'object', properties: {
       id: { type: 'string' }, name: { type: 'string', title: 'Name' },
       status: { type: 'string', title: 'Status' },
@@ -286,8 +303,17 @@ const normalizedCondition = normalizedField !== undefined && 'visibleWhen' in no
 if (rawConditionSize(authoredCondition) !== 1 || normalizedCondition === undefined || normalizedConditionSize(normalizedCondition) !== 1) {
   throw new Error('M32 exhaustive condition narrowing failed');
 }
+const petDefinition = definition.nodes.find(({ name }) => name === 'pet');
+if (petDefinition?.kind !== 'discriminated-object') {
+  throw new Error('M33 clean-consumer definition narrowing failed');
+}
+const publicPetDefinition: DiscriminatedObjectFieldDefinition = petDefinition;
+if (publicPetDefinition.alternatives.length !== 2) {
+  throw new Error('M33 clean-consumer alternatives are incomplete');
+}
 export const initial = Object.freeze({
   profile: Object.freeze({ givenName: 'Ada', familyName: 'Lovelace' }),
+  pet: Object.freeze({ kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 }),
   rows: Object.freeze([
     Object.freeze({ id: 'alpha', name: 'Alpha', status: 'Ready', details: Object.freeze({ role: 'Owner', active: true }) }),
     Object.freeze({ id: 'beta', name: 'Beta', status: 'Draft', details: Object.freeze({ role: 'Reviewer', active: false }) }),
@@ -301,7 +327,57 @@ const conditionRuntime = createControlledFormRuntime({
 if (!conditionRuntime.success || conditionRuntime.runtime.getFieldSnapshot(['profile', 'givenName'])?.visible !== true) {
   throw new Error('M32 clean-consumer group runtime truth failed');
 }
+const petSnapshot = conditionRuntime.runtime.getNodeSnapshot(['pet']);
+if (petSnapshot?.nodeKind !== 'discriminated-object') {
+  throw new Error('M33 clean-consumer snapshot is unavailable');
+}
+const publicPetSnapshot: DiscriminatedObjectRuntimeSnapshot = petSnapshot;
+const publicSelection: ObjectAlternativeSelection = publicPetSnapshot.selection;
+if (
+  publicSelection.kind !== 'active' ||
+  publicSelection.discriminatorValue !== 'cat' ||
+  conditionRuntime.runtime.getFieldSnapshot(['pet', 'barkVolume']) !== undefined ||
+  conditionRuntime.runtime.requestSetValue(['pet', 'barkVolume'], 8)
+    .diagnostics[0]?.code !== 'INACTIVE_OBJECT_ALTERNATIVE_TARGET'
+) {
+  throw new Error('M33 clean-consumer runtime truth failed');
+}
 conditionRuntime.runtime.dispose();
+const wizardSchema = { type: 'object', properties: {
+  name: { type: 'string' }, review: { type: 'string' },
+} } as const;
+const wizardCompilation = compileFormDefinition({
+  schema: wizardSchema,
+  uiSchema: { presentation: [{
+    kind: 'wizard', id: 'm20-wizard', label: 'M20 wizard', steps: [
+      { kind: 'wizard-step', id: 'identity', label: 'Identity', children: ['name'] },
+      { kind: 'wizard-step', id: 'review', label: 'Review', children: ['review'] },
+    ],
+  }] },
+});
+if (!wizardCompilation.success) throw new Error('M34 clean wizard failed');
+const wizardValue = { name: 'Ada', review: 'ready' };
+const wizardRuntime = createControlledFormRuntime({
+  formId: 'm34-clean-consumer', definition: wizardCompilation.definition,
+  schema: wizardSchema, value: wizardValue, baselineValue: wizardValue,
+  locale: 'en', validator, wizardState: { selectedStepId: 'identity' },
+});
+if (!wizardRuntime.success) throw new Error('M34 clean runtime failed');
+const wizardIntentions: WizardIntention[] = [];
+const wizardSubscription = wizardRuntime.runtime.subscribeWizardIntentions(
+  (intention) => wizardIntentions.push(intention),
+);
+const wizardAction: WizardActionResult = wizardRuntime.runtime.requestWizardNext();
+const wizardSnapshot: WizardRuntimeSnapshot | undefined =
+  wizardRuntime.runtime.getSnapshot().wizard;
+if (
+  !wizardSubscription.success || !wizardAction.success ||
+  wizardIntentions[0]?.kind !== 'next' || wizardSnapshot?.steps.length !== 2
+) {
+  throw new Error('M34 clean-consumer declarations are unavailable');
+}
+if (wizardSubscription.success) wizardSubscription.unsubscribe();
+wizardRuntime.runtime.dispose();
 
 @Component({ standalone: true, template: '' })
 class ExternalContainer implements AngularPresentationContainerRenderer {

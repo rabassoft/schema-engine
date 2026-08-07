@@ -79,6 +79,10 @@ assert.equal('ItemHostFactory' in angularApi, false);
 assert.equal('AngularObjectTextSnapshot' in angularApi, false);
 assert.equal('AngularCollectionTextSnapshot' in angularApi, false);
 assert.equal('FIELD_INSTANCE_CONTEXT' in angularApi, false);
+assert.equal('WizardHostFactory' in angularApi, false);
+assert.equal('WizardStepHostFactory' in angularApi, false);
+assert.equal('SchemaWizardHostComponent' in angularApi, false);
+assert.equal('SchemaWizardStepHostComponent' in angularApi, false);
 
 for (const method of [
   'getItemSnapshot',
@@ -89,6 +93,11 @@ for (const method of [
   'requestRemoveItem',
   'requestMoveItem',
   'retryAsyncValidation',
+  'requestWizardPrevious',
+  'requestWizardNext',
+  'requestWizardComplete',
+  'rejectWizardIntention',
+  'confirmWizardSelection',
 ]) {
   assert.equal(typeof SchemaFormDirective.prototype[method], 'function');
 }
@@ -166,6 +175,70 @@ assert.equal(
   true,
 );
 conditionalRuntime.runtime.dispose();
+
+const discriminatedObjectSchema = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    pet: {
+      type: 'object',
+      properties: {
+        kind: { type: 'string', enum: ['cat', 'dog'] },
+        name: { type: 'string' },
+      },
+      required: ['kind'],
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            kind: { type: 'string', const: 'cat' },
+            lives: { type: 'integer' },
+          },
+          required: ['kind', 'lives'],
+        },
+        {
+          type: 'object',
+          properties: {
+            kind: { type: 'string', const: 'dog' },
+            barkVolume: { type: 'number' },
+          },
+          required: ['kind'],
+        },
+      ],
+    },
+  },
+};
+const discriminatedObjectDefinition = compileFormDefinition({
+  schema: discriminatedObjectSchema,
+});
+assert.equal(discriminatedObjectDefinition.success, true);
+if (!discriminatedObjectDefinition.success)
+  throw new Error('Discriminated object package compilation failed');
+const discriminatedObjectValue = {
+  pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
+};
+const discriminatedObjectRuntime = createControlledFormRuntime({
+  formId: 'angular-discriminated-object-package-smoke',
+  definition: discriminatedObjectDefinition.definition,
+  schema: discriminatedObjectSchema,
+  value: discriminatedObjectValue,
+  baselineValue: discriminatedObjectValue,
+  locale: 'en',
+  validator: { validate: () => ({ valid: true, issues: [] }) },
+});
+assert.equal(discriminatedObjectRuntime.success, true);
+if (!discriminatedObjectRuntime.success)
+  throw new Error('Discriminated object package runtime failed');
+assert.deepEqual(
+  discriminatedObjectRuntime.runtime.getNodeSnapshot(['pet'])?.selection,
+  { kind: 'active', discriminatorValue: 'cat' },
+);
+assert.equal(
+  discriminatedObjectRuntime.runtime.requestSetValue(['pet', 'barkVolume'], 8)
+    .diagnostics[0]?.code,
+  'INACTIVE_OBJECT_ALTERNATIVE_TARGET',
+);
+discriminatedObjectRuntime.runtime.dispose();
 
 const stringEnumArrayDefinition = compileFormDefinition({
   schema: {

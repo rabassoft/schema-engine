@@ -178,12 +178,12 @@ type DiagnosticCase = {
 
 const diagnosticCases: readonly DiagnosticCase[] = [
   {
-    reason: 'unsupported-entry-kind',
+    reason: 'wizard-not-sole-root',
     ui: withRemaining({ kind: 'wizard' }),
-    path: ['presentation', 0, 'kind'],
+    path: ['presentation'],
     parameters: {
-      expected: 'section, tabs, accordion or grid',
-      actualType: 'string',
+      ownerKind: 'wizard',
+      index: 0,
     },
   },
   {

@@ -101,11 +101,34 @@ export const conditionalFieldState = {
         'profile',
       ],
       fields: {
+        showDetails: {
+          description:
+            'Visibility source: turning this off hides Conditional name and Conditional review code.',
+        },
+        enableRole: {
+          description:
+            'Enabled-state source: turning this off disables Conditional role unless Nested condition flag is true.',
+        },
+        nullableGate: {
+          hint: 'Null keeps Conditional name and Nullable match visible.',
+        },
+        zeroGate: {
+          hint: 'Zero keeps Conditional name, Zero match and Nested compound note visible.',
+        },
+        emptyGate: {
+          hint: 'An empty string keeps Conditional name visible and Empty-string match enabled.',
+        },
+        showDriver: {
+          description:
+            'Visibility source: turning this off hides Hidden driver without changing its controlled value.',
+        },
         driver: {
+          hint: 'When false, this keeps Conditional name and Hidden-source match visible.',
           visibleWhen: { path: ['showDriver'], equals: true },
         },
         displayName: {
-          description: 'Focus this field before hiding the detail targets.',
+          description:
+            'Conditionally visible from Show details, Nullable gate, Zero gate, Empty gate and Hidden driver. Focus it before hiding the detail targets.',
           visibleWhen: {
             operator: 'all',
             conditions: [
@@ -119,6 +142,7 @@ export const conditionalFieldState = {
         },
         role: {
           placeholder: 'Select a role',
+          hint: 'Enabled by Enable role or by Nested condition flag; its confirmed value is retained while disabled.',
           enumLabels: {
             admin: 'Administrator',
             editor: 'Editor',
@@ -133,15 +157,19 @@ export const conditionalFieldState = {
           },
         },
         nullableNote: {
+          hint: 'Visible because Nullable gate currently equals null.',
           visibleWhen: { path: ['nullableGate'], equals: null },
         },
         zeroNote: {
+          hint: 'Visible because Zero gate currently equals 0.',
           visibleWhen: { path: ['zeroGate'], equals: 0 },
         },
         emptyNote: {
+          hint: 'Enabled only when Empty gate equals an empty string.',
           enabledWhen: { path: ['emptyGate'], equals: '' },
         },
         drivenNote: {
+          hint: 'Visible because Hidden driver retains the controlled value false.',
           visibleWhen: { path: ['driver'], equals: false },
         },
         reviewCode: {
@@ -158,6 +186,7 @@ export const conditionalFieldState = {
         profile: {
           fields: {
             note: {
+              hint: 'Visible because Nested condition flag is false and Zero gate equals 0.',
               visibleWhen: {
                 operator: 'all',
                 conditions: [

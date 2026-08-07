@@ -303,8 +303,8 @@ h5 {
   border-color: var(--color-border-strong);
 }
 
-.integration-panel article + article {
-  margin-top: 1rem;
+.integration-snippet > h5 {
+  margin: 0 0 0.75rem;
 }
 
 .integration-flow {
@@ -393,6 +393,13 @@ h5 {
 .scope-guidance,
 .validation-caveat {
   margin: 0.65rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.control-legend {
+  margin: 0;
+  padding-left: 1.3rem;
   color: var(--color-text-muted);
   font-size: 0.88rem;
 }
@@ -504,6 +511,133 @@ h5 {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
   background: var(--color-surface-muted);
+}
+
+.form-surface schema-string-renderer,
+.form-surface schema-string-enum-renderer,
+.form-surface schema-string-enum-array-renderer,
+.form-surface schema-number-renderer,
+.form-surface schema-boolean-renderer,
+.form-surface schema-fixed-value-renderer {
+  display: block;
+  min-width: 0;
+  margin-block: 0 1.2rem;
+}
+
+.form-surface schema-string-renderer > div,
+.form-surface schema-string-enum-renderer > div,
+.form-surface schema-string-enum-array-renderer > div,
+.form-surface schema-number-renderer > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+}
+
+.form-surface schema-string-renderer > div > label,
+.form-surface schema-string-renderer > div > p,
+.form-surface schema-string-renderer > div > details,
+.form-surface schema-string-renderer > div > ul,
+.form-surface schema-string-enum-renderer > div > label,
+.form-surface schema-string-enum-renderer > div > p,
+.form-surface schema-string-enum-renderer > div > details,
+.form-surface schema-string-enum-renderer > div > ul,
+.form-surface schema-string-enum-array-renderer > div > label,
+.form-surface schema-string-enum-array-renderer > div > p,
+.form-surface schema-string-enum-array-renderer > div > details,
+.form-surface schema-string-enum-array-renderer > div > ul,
+.form-surface schema-number-renderer > div > label,
+.form-surface schema-number-renderer > div > p,
+.form-surface schema-number-renderer > div > details,
+.form-surface schema-number-renderer > div > ul {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.form-surface schema-string-renderer input,
+.form-surface schema-string-enum-renderer select,
+.form-surface schema-string-enum-array-renderer select,
+.form-surface schema-number-renderer input {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.form-surface schema-string-renderer button,
+.form-surface schema-string-enum-renderer button,
+.form-surface schema-string-enum-array-renderer button,
+.form-surface schema-number-renderer button {
+  margin: 0;
+}
+
+.form-surface schema-boolean-renderer > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 0.25rem 0.55rem;
+  align-items: center;
+}
+
+.form-surface schema-boolean-renderer input[type='checkbox'] {
+  width: 1.1rem;
+  min-height: 1.1rem;
+  margin: 0;
+}
+
+.form-surface schema-boolean-renderer label,
+.form-surface schema-boolean-renderer button {
+  margin: 0;
+}
+
+.form-surface schema-boolean-renderer > div > p,
+.form-surface schema-boolean-renderer > div > details,
+.form-surface schema-boolean-renderer > div > ul,
+.form-surface schema-boolean-renderer > div > span {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.form-surface schema-fixed-value-renderer > div {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.7fr) minmax(0, 1fr);
+  gap: 0.35rem 0.75rem;
+  align-items: center;
+  padding: 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+}
+
+.form-surface schema-fixed-value-renderer [id$='-label'] {
+  font-weight: 700;
+}
+
+.form-surface schema-fixed-value-renderer p,
+.form-surface schema-fixed-value-renderer details,
+.form-surface schema-fixed-value-renderer ul {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.form-surface schema-fixed-value-renderer .schema-fixed-value {
+  min-width: 0;
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--radius-small);
+  background: var(--color-secondary-soft);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+
+.form-surface [aria-invalid='true']:is(input, select) {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 1px var(--color-danger);
+}
+
+.form-surface input[type='checkbox'][aria-invalid='true'] {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 2px;
+}
+
+.form-surface [id$='-errors'] {
+  color: var(--color-danger);
 }
 
 .pending-card {
@@ -680,6 +814,44 @@ button[aria-pressed='true'] {
   background: var(--color-surface-muted);
 }
 
+.form-surface
+  schema-native-presentation-accordion
+  [data-schema-presentation-accordion-trigger] {
+  display: flex;
+  width: 100%;
+  margin: 0.35rem 0 0;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  text-align: left;
+}
+
+.form-surface
+  schema-native-presentation-accordion
+  [data-schema-presentation-accordion-trigger][aria-expanded='true'] {
+  border-color: var(--color-primary);
+  border-radius: var(--radius-small) var(--radius-small) 0 0;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+.schema-presentation-accordion-indicator {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.form-surface
+  schema-native-presentation-accordion
+  [data-schema-presentation-accordion-trigger]
+  + [role='region'] {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-small) var(--radius-small);
+  background: var(--color-surface-muted);
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -741,6 +913,10 @@ pre {
   .field-grid input,
   .scenario-navigation select {
     width: 100%;
+  }
+
+  .form-surface schema-fixed-value-renderer > div {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

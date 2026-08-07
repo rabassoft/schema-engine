@@ -67,20 +67,20 @@ describe('Standard reference skeleton', () => {
     application.getRuntime()?.requestSetValue(['name'], 'Grace');
     application.updateSchemaDraft(`${application.getState().schemaDraft}\n`);
 
-    const apply = requiredButton(root, 'Apply configuration');
+    const apply = requiredButton(root, 'Apply');
     apply.click();
     await Promise.resolve();
-    expect(document.activeElement?.textContent).toBe('Apply and reset form');
+    expect(document.activeElement?.textContent).toBe('Confirm configuration');
     expect(application.getState().pendingConfigurationAction).toBe('apply');
 
-    requiredButton(root, 'Keep current state').click();
+    requiredButton(root, 'Keep current configuration').click();
     await Promise.resolve();
     expect(document.activeElement).toBe(apply);
     expect(application.getState().pendingConfigurationAction).toBeUndefined();
 
     apply.click();
     await Promise.resolve();
-    requiredButton(root, 'Apply and reset form').click();
+    requiredButton(root, 'Confirm configuration').click();
     await Promise.resolve();
     expect(document.activeElement).toBe(
       root.querySelector('[data-testid="configuration-status"]'),
@@ -104,6 +104,7 @@ describe('Standard reference skeleton', () => {
       'preview-panel',
       'configuration-panel',
       'evidence-panel',
+      'integration-panel',
     ]);
     expect(workspace?.children[0]?.getAttribute('data-region')).toBe(
       'preview-panel',
@@ -112,23 +113,40 @@ describe('Standard reference skeleton', () => {
       'configuration-panel',
     );
     expect(workspace?.nextElementSibling).toBe(evidence);
-    expect(tabLists).toHaveLength(2);
+    expect(tabLists).toHaveLength(3);
     expect(tabLists[0]?.textContent).toBe('SchemaUI Schema');
-    expect(tabLists[1]?.textContent).toBe(
-      'StateDefinitionRuntimeDiagnosticsIntegration',
+    expect(tabLists[1]?.textContent).toBe('StateDefinitionRuntimeDiagnostics');
+    expect(tabLists[2]?.textContent).toBe(
+      'Compile DefinitionCreate RuntimeRuntime SubscriptionsControlled OperationRuntime Cleanup',
     );
+    const schemaEditor = root.querySelector('[data-testid="schema-editor"]');
+    const configurationActions = root.querySelector('.configuration-actions');
+    expect(
+      Array.from(
+        configurationActions?.querySelectorAll('button') ?? [],
+        ({ textContent }) => textContent?.trim(),
+      ),
+    ).toEqual(['Validate', 'Apply', 'Cancel edits', 'Restore original']);
+    expect(
+      schemaEditor !== null &&
+        configurationActions !== null &&
+        Boolean(
+          schemaEditor.compareDocumentPosition(configurationActions) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+        ),
+    ).toBe(true);
     expect(
       root.querySelector(
         '[data-region="scenario-panel"] .scenario-explanation',
       ),
     ).not.toBeNull();
-    expect(root.querySelectorAll('.eyebrow')).toHaveLength(4);
+    expect(root.querySelectorAll('.eyebrow')).toHaveLength(5);
     const disclosures = Array.from(
       root.querySelectorAll<HTMLDetailsElement>(
         '.reference-region > details.region-disclosure',
       ),
     );
-    expect(disclosures).toHaveLength(4);
+    expect(disclosures).toHaveLength(5);
     expect(disclosures.every(({ open }) => open)).toBe(true);
     expect(
       disclosures.map((disclosure) =>
@@ -139,6 +157,7 @@ describe('Standard reference skeleton', () => {
       'Interactive consumer',
       'Schemas',
       'Observable evidence',
+      'Integration',
     ]);
     for (const disclosure of disclosures) {
       disclosure.open = false;
@@ -152,7 +171,7 @@ describe('Standard reference skeleton', () => {
     dispose();
   });
 
-  it('switches evidence with keyboard, highlights integration and copies it', async () => {
+  it('switches evidence with keyboard and exposes collapsible integration independently', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -161,17 +180,17 @@ describe('Standard reference skeleton', () => {
     const root = document.createElement('main');
     document.body.replaceChildren(root);
     const dispose = renderReferenceSkeleton(root);
-    const integration = requiredTab(root, 'Integration');
+    const state = requiredTab(root, 'State');
+    const diagnostics = requiredTab(root, 'Diagnostics');
 
-    integration.dispatchEvent(
+    state.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'End', bubbles: true }),
     );
-    expect(integration.getAttribute('aria-selected')).toBe('true');
-    expect(document.activeElement).toBe(integration);
-    const panel = document.getElementById(
-      integration.getAttribute('aria-controls') ?? '',
+    expect(diagnostics.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(diagnostics);
+    const panel = root.querySelector(
+      '[data-region="integration-panel"] .region-body',
     );
-    expect(panel?.hidden).toBe(false);
     expect(panel?.textContent).toContain('not a public DOM adapter');
     expect(panel?.textContent).toContain(
       'Read them in order to follow the controlled integration',
@@ -183,6 +202,28 @@ describe('Standard reference skeleton', () => {
       'The application supplies and continues to own value and baselineValue',
     );
     expect(panel?.querySelector('[class^="tok-"]')).not.toBeNull();
+    const compile = requiredTab(root, 'Compile Definition');
+    const cleanup = requiredTab(root, 'Runtime Cleanup');
+    expect(compile.getAttribute('aria-selected')).toBe('true');
+    expect(panel?.querySelectorAll('[role="tabpanel"]')).toHaveLength(5);
+    expect(
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>('[role="tabpanel"]') ?? [],
+      ).filter(({ hidden }) => !hidden),
+    ).toHaveLength(1);
+    compile.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'End', bubbles: true }),
+    );
+    expect(cleanup.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(cleanup);
+    cleanup.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true }),
+    );
+    expect(compile.getAttribute('aria-selected')).toBe('true');
+    const disclosure = root.querySelector<HTMLDetailsElement>(
+      '[data-region="integration-panel"] > details',
+    );
+    expect(disclosure?.open).toBe(true);
 
     const copy = requiredButton(root, 'Copy Compile Definition');
     copy.click();

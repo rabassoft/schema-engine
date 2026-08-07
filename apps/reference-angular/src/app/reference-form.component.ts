@@ -20,6 +20,7 @@ import {
   type FormOperation,
   type RuntimeActionResult,
   type ValidationVisibility,
+  type WizardIntention,
 } from '@rabassoft/schema-engine';
 import {
   SchemaFormDirective,
@@ -83,6 +84,8 @@ type ScopeCandidateState =
       readonly status: 'accepted';
       readonly targetId: string;
       readonly label: string;
+      readonly value: Readonly<object>;
+      readonly changed: boolean;
       readonly diagnostics: readonly Diagnostic[];
     };
 
@@ -178,8 +181,8 @@ const snippetEntries = Object.freeze([
 ]);
 
 type ConfigurationTabId = 'schema' | 'ui-schema';
-type EvidenceTabId =
-  'state' | 'definition' | 'runtime' | 'diagnostics' | 'integration';
+type EvidenceTabId = 'state' | 'definition' | 'runtime' | 'diagnostics';
+type IntegrationTabId = (typeof snippetEntries)[number]['id'];
 
 const configurationTabs = Object.freeze<readonly ReferenceTab[]>([
   Object.freeze({ id: 'schema', label: 'Schema' }),
@@ -191,8 +194,11 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
   Object.freeze({ id: 'definition', label: 'Definition' }),
   Object.freeze({ id: 'runtime', label: 'Runtime' }),
   Object.freeze({ id: 'diagnostics', label: 'Diagnostics' }),
-  Object.freeze({ id: 'integration', label: 'Integration' }),
 ]);
+
+const integrationTabs = Object.freeze<readonly ReferenceTab[]>(
+  snippetEntries.map(({ id, label }) => Object.freeze({ id, label })),
+);
 
 @Component({
   selector: 'reference-form',
@@ -419,9 +425,22 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                   >
                     <legend>{{ service.labels.heading }}</legend>
                     <p class="scope-guidance">
-                      Resolve deterministic application work to inspect core
-                      settlement, cancellation, failure and retry behavior.
+                      This is a fake application service. The buttons settle
+                      validation work; they never change the form value.
                     </p>
+                    <ul class="control-legend">
+                      <li>
+                        <strong>pending</strong>: waiting for the application
+                      </li>
+                      <li>
+                        <strong>resolved-valid / resolved-invalid</strong>:
+                        completed with or without a validation issue
+                      </li>
+                      <li>
+                        <strong>cancelled</strong>: replaced by a newer value;
+                        <strong>rejected / threw</strong>: service failure
+                      </li>
+                    </ul>
                     <p
                       role="status"
                       aria-live="polite"
@@ -566,6 +585,7 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                       aria-label="Selected schema form"
                       [schemaForm]="mount.config"
                       (schemaOperation)="handleOperation($event)"
+                      (schemaWizardIntention)="handleWizardIntention($event)"
                       (schemaDiagnostics)="recordRuntimeDiagnostics($event)"
                     ></form>
                     <!-- reference-snippet:end controlled-form-template -->
@@ -652,38 +672,94 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                   <span>Matches applied configuration</span>
                 }
               </div>
-              <div class="button-row configuration-actions">
-                <button type="button" (click)="validateConfiguration()">
-                  Validate configuration
-                </button>
-                <button
-                  type="button"
-                  [disabled]="!draftModified()"
-                  (click)="applyConfiguration($event.currentTarget)"
-                >
-                  Apply configuration
-                </button>
-                <button
-                  type="button"
-                  [disabled]="!draftModified()"
-                  (click)="cancelConfigurationChanges()"
-                >
-                  Cancel changes
-                </button>
-                <button
-                  type="button"
-                  [disabled]="!canRestoreOriginalConfiguration()"
-                  (click)="restoreScenarioConfiguration($event.currentTarget)"
-                >
-                  Restore scenario configuration
-                </button>
-              </div>
               <p class="scope-guidance">
                 Cancel restores only the last applied editor text. Restore
                 reinstalls the scenario's original configuration and resets the
                 form and shell state.
               </p>
 
+              <div class="tab-interface tab-interface--configuration">
+                <reference-tabs
+                  tabSetId="configuration"
+                  label="Schema documents"
+                  [tabs]="configurationTabs"
+                  [activeId]="configurationTab()"
+                  (activeIdChange)="setConfigurationTab($event)"
+                />
+
+                @switch (configurationTab()) {
+                  @case ('schema') {
+                    <section
+                      class="tab-panel"
+                      id="configuration-panel-schema"
+                      role="tabpanel"
+                      aria-labelledby="configuration-tab-schema"
+                      tabindex="0"
+                    >
+                      <h4>JSON Schema draft</h4>
+                      <p id="schema-editor-help">
+                        Edit JSON, then validate or apply the complete
+                        configuration.
+                      </p>
+                      <reference-json-editor
+                        #schemaEditor
+                        label="JSON Schema editor"
+                        instructionsId="schema-editor-help"
+                        [value]="schemaDraft()"
+                        (valueChange)="updateSchemaDraft($event)"
+                      />
+                    </section>
+                  }
+                  @case ('ui-schema') {
+                    <section
+                      class="tab-panel"
+                      id="configuration-panel-ui-schema"
+                      role="tabpanel"
+                      aria-labelledby="configuration-tab-ui-schema"
+                      tabindex="0"
+                    >
+                      <h4>UI Schema draft</h4>
+                      <p id="ui-schema-editor-help">
+                        Presentation metadata is compiled together with the
+                        current JSON Schema draft.
+                      </p>
+                      <reference-json-editor
+                        #uiSchemaEditor
+                        label="UI Schema editor"
+                        instructionsId="ui-schema-editor-help"
+                        [value]="uiSchemaDraft()"
+                        (valueChange)="updateUiSchemaDraft($event)"
+                      />
+                    </section>
+                  }
+                }
+              </div>
+              <div class="button-row configuration-actions">
+                <button type="button" (click)="validateConfiguration()">
+                  Validate
+                </button>
+                <button
+                  type="button"
+                  [disabled]="!draftModified()"
+                  (click)="applyConfiguration($event.currentTarget)"
+                >
+                  Apply
+                </button>
+                <button
+                  type="button"
+                  [disabled]="!draftModified()"
+                  (click)="cancelConfigurationChanges()"
+                >
+                  Cancel edits
+                </button>
+                <button
+                  type="button"
+                  [disabled]="!canRestoreOriginalConfiguration()"
+                  (click)="restoreScenarioConfiguration($event.currentTarget)"
+                >
+                  Restore original
+                </button>
+              </div>
               @if (pendingConfigurationAction(); as action) {
                 <section
                   #configurationConfirmation
@@ -711,14 +787,10 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                       type="button"
                       (click)="confirmConfigurationAction()"
                     >
-                      {{
-                        action === 'apply'
-                          ? 'Apply and reset form'
-                          : 'Restore scenario'
-                      }}
+                      Confirm configuration
                     </button>
                     <button type="button" (click)="cancelConfigurationAction()">
-                      Keep current state
+                      Keep current configuration
                     </button>
                   </div>
                 </section>
@@ -797,62 +869,6 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                   </ol>
                 </section>
               }
-              <div class="tab-interface tab-interface--configuration">
-                <reference-tabs
-                  tabSetId="configuration"
-                  label="Schema documents"
-                  [tabs]="configurationTabs"
-                  [activeId]="configurationTab()"
-                  (activeIdChange)="setConfigurationTab($event)"
-                />
-
-                @switch (configurationTab()) {
-                  @case ('schema') {
-                    <section
-                      class="tab-panel"
-                      id="configuration-panel-schema"
-                      role="tabpanel"
-                      aria-labelledby="configuration-tab-schema"
-                      tabindex="0"
-                    >
-                      <h4>JSON Schema draft</h4>
-                      <p id="schema-editor-help">
-                        Edit JSON, then validate or apply the complete
-                        configuration.
-                      </p>
-                      <reference-json-editor
-                        #schemaEditor
-                        label="JSON Schema editor"
-                        instructionsId="schema-editor-help"
-                        [value]="schemaDraft()"
-                        (valueChange)="updateSchemaDraft($event)"
-                      />
-                    </section>
-                  }
-                  @case ('ui-schema') {
-                    <section
-                      class="tab-panel"
-                      id="configuration-panel-ui-schema"
-                      role="tabpanel"
-                      aria-labelledby="configuration-tab-ui-schema"
-                      tabindex="0"
-                    >
-                      <h4>UI Schema draft</h4>
-                      <p id="ui-schema-editor-help">
-                        Presentation metadata is compiled together with the
-                        current JSON Schema draft.
-                      </p>
-                      <reference-json-editor
-                        #uiSchemaEditor
-                        label="UI Schema editor"
-                        instructionsId="ui-schema-editor-help"
-                        [value]="uiSchemaDraft()"
-                        (valueChange)="updateUiSchemaDraft($event)"
-                      />
-                    </section>
-                  }
-                }
-              </div>
             </div>
           </details>
         </section>
@@ -968,65 +984,78 @@ const evidenceTabs = Object.freeze<readonly ReferenceTab[]>([
                     }
                   </section>
                 }
-                @case ('integration') {
-                  <section
-                    class="tab-panel integration-panel"
-                    id="evidence-panel-integration"
-                    role="tabpanel"
-                    aria-labelledby="evidence-tab-integration"
-                    tabindex="0"
-                  >
-                    <h4 id="snippets-heading">
-                      Build-checked integration excerpts
-                    </h4>
-                    <p>
-                      These excerpts are generated from marked regions in the
-                      compiled reference-form source. Read them in order to
-                      follow the controlled integration from application-owned
-                      state, through operation decisions, to the Angular
-                      template boundary.
-                    </p>
-                    <ol
-                      class="integration-flow"
-                      aria-label="Angular integration flow"
-                    >
-                      <li>
-                        <strong>Own state:</strong> keep value and baseline in
-                        the application.
-                      </li>
-                      <li>
-                        <strong>Decide operations:</strong> confirm, reject or
-                        defer every request.
-                      </li>
-                      <li>
-                        <strong>Bind the form:</strong> pass configuration in
-                        and receive events out.
-                      </li>
-                    </ol>
-                    @defer {
-                      @for (snippet of snippets; track snippet.id) {
-                        <article [attr.data-testid]="'snippet-' + snippet.id">
-                          <h5>{{ snippet.label }}</h5>
-                          <dl class="snippet-explanation">
-                            <dt>What it demonstrates</dt>
-                            <dd>{{ snippet.purpose }}</dd>
-                            <dt>Application responsibility</dt>
-                            <dd>{{ snippet.responsibility }}</dd>
-                          </dl>
-                          <reference-code-example
-                            [label]="snippet.label"
-                            [language]="snippet.language"
-                            [source]="snippet.source"
-                          />
-                        </article>
-                      }
-                    } @placeholder {
-                      <p>Loading highlighted integration excerpts…</p>
-                    }
-                  </section>
-                }
               }
             </div>
+          </div>
+        </details>
+      </section>
+
+      <section
+        class="reference-card tool-card tool-card--integration"
+        aria-labelledby="integration-heading"
+        data-testid="integration-panel"
+      >
+        <details class="card-disclosure" open>
+          <summary class="collapsible-card-summary">
+            <h2 class="eyebrow" id="integration-heading">Integration</h2>
+          </summary>
+          <div class="collapsible-card-content integration-panel">
+            <h4 id="snippets-heading">Build-checked integration excerpts</h4>
+            <p>
+              These excerpts are generated from marked regions in the compiled
+              reference-form source. Read them in order to follow the controlled
+              integration from application-owned state, through operation
+              decisions, to the Angular template boundary.
+            </p>
+            <ol class="integration-flow" aria-label="Angular integration flow">
+              <li>
+                <strong>Own state:</strong> keep value and baseline in the
+                application.
+              </li>
+              <li>
+                <strong>Decide operations:</strong> confirm, reject or defer
+                every request.
+              </li>
+              <li>
+                <strong>Bind the form:</strong> pass configuration in and
+                receive events out.
+              </li>
+            </ol>
+            <reference-tabs
+              tabSetId="integration"
+              label="Integration examples"
+              [tabs]="integrationTabs"
+              [activeId]="integrationTab()"
+              (activeIdChange)="setIntegrationTab($event)"
+            />
+            @defer {
+              @for (snippet of snippets; track snippet.id) {
+                <article
+                  class="integration-snippet"
+                  [id]="'integration-panel-' + snippet.id"
+                  role="tabpanel"
+                  [attr.aria-labelledby]="'integration-tab-' + snippet.id"
+                  [hidden]="snippet.id !== integrationTab()"
+                  [attr.data-testid]="'snippet-' + snippet.id"
+                  tabindex="0"
+                >
+                  <h5>{{ snippet.label }}</h5>
+                  <dl class="snippet-explanation">
+                    <dt>What it demonstrates</dt>
+                    <dd>{{ snippet.purpose }}</dd>
+                    <dt>Application responsibility</dt>
+                    <dd>{{ snippet.responsibility }}</dd>
+                  </dl>
+                  <reference-code-example
+                    [label]="snippet.label"
+                    [language]="snippet.language"
+                    [source]="snippet.source"
+                  />
+                </article>
+              }
+            } @placeholder {
+              <p>Loading highlighted integration excerpts…</p>
+            }
           </div>
         </details>
       </section>
@@ -1041,6 +1070,7 @@ export class ReferenceFormComponent {
   readonly snippets = snippetEntries;
   readonly configurationTabs = configurationTabs;
   readonly evidenceTabs = evidenceTabs;
+  readonly integrationTabs = integrationTabs;
   // reference-snippet:start application-signals
   private readonly selectionState = signal<ScenarioSelection>(
     Object.freeze({
@@ -1103,6 +1133,9 @@ export class ReferenceFormComponent {
   private configurationActionTrigger: HTMLElement | undefined;
   private readonly configurationTabState = signal<ConfigurationTabId>('schema');
   private readonly evidenceTabState = signal<EvidenceTabId>('state');
+  private readonly integrationTabState = signal<IntegrationTabId>(
+    'application-signals',
+  );
   private nextHistoryId = 1;
 
   readonly selectedScenario = computed(() => this.selectionState().scenario);
@@ -1136,6 +1169,7 @@ export class ReferenceFormComponent {
     this.pendingConfigurationActionState.asReadonly();
   readonly configurationTab = this.configurationTabState.asReadonly();
   readonly evidenceTab = this.evidenceTabState.asReadonly();
+  readonly integrationTab = this.integrationTabState.asReadonly();
   readonly draftModified = computed(() => {
     const active = this.activeConfigurationState();
     return (
@@ -1193,6 +1227,7 @@ export class ReferenceFormComponent {
     const selection = this.selectionState();
     if (!selection.compilation.success) return undefined;
     const asyncValidator = this.asyncValidatorState()?.validator;
+    const root = selection.compilation.definition.presentation[0];
     return Object.freeze({
       formId: `reference-${selection.scenario.id}`,
       definition: selection.compilation.definition,
@@ -1202,6 +1237,9 @@ export class ReferenceFormComponent {
       locale: this.locale(),
       validator: this.validator,
       ...(asyncValidator === undefined ? {} : { asyncValidator }),
+      ...(root?.kind === 'wizard'
+        ? { wizardState: { selectedStepId: root.steps[0]?.id ?? '' } }
+        : {}),
       validationVisibility: this.validationVisibility(),
     });
   });
@@ -1235,7 +1273,7 @@ export class ReferenceFormComponent {
       return `${candidate.label}: unconfirmable; baseline and dirty state are unchanged.`;
     }
     if (candidate.status === 'accepted') {
-      return `${candidate.label}: simulated persistence accepted; unrelated edits remain dirty.`;
+      return `${candidate.label}: baseline updated; form Value intentionally stayed unchanged and unrelated edits remain dirty.`;
     }
     return `${candidate.label}: candidate prepared; baseline and dirty state are unchanged until acceptance.`;
   });
@@ -1344,6 +1382,8 @@ export class ReferenceFormComponent {
         status: 'accepted',
         targetId: candidate.targetId,
         label: candidate.label,
+        value: candidate.value,
+        changed: candidate.changed,
         diagnostics: candidate.diagnostics,
       }),
     );
@@ -1438,6 +1478,10 @@ export class ReferenceFormComponent {
 
   setEvidenceTab(id: string): void {
     if (isEvidenceTabId(id)) this.evidenceTabState.set(id);
+  }
+
+  setIntegrationTab(id: string): void {
+    if (isIntegrationTabId(id)) this.integrationTabState.set(id);
   }
 
   updateSchemaDraft(value: string): void {
@@ -1568,6 +1612,19 @@ export class ReferenceFormComponent {
       case 'pending':
         this.appendHistory(operation, 'pending', []);
     }
+  }
+
+  handleWizardIntention(intention: WizardIntention): void {
+    if (intention.kind === 'complete') return;
+    if (this.decisionMode() === 'reject') {
+      this.formDirective?.rejectWizardIntention(intention.requestId);
+      return;
+    }
+    if (this.decisionMode() === 'pending') return;
+    this.formDirective?.confirmWizardSelection({
+      requestId: intention.requestId,
+      selectedStepId: intention.toStepId,
+    });
   }
 
   resolvePending(id: number, decision: 'confirm' | 'reject'): void {
@@ -1828,9 +1885,12 @@ function isEvidenceTabId(value: string): value is EvidenceTabId {
     value === 'state' ||
     value === 'definition' ||
     value === 'runtime' ||
-    value === 'diagnostics' ||
-    value === 'integration'
+    value === 'diagnostics'
   );
+}
+
+function isIntegrationTabId(value: string): value is IntegrationTabId {
+  return snippetEntries.some(({ id }) => id === value);
 }
 
 function prepareConfiguration(

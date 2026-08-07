@@ -110,6 +110,29 @@ try {
     'FieldValueConditionGroupDefinition',
     'FieldConditionDefinition',
     'StringEnumArrayFieldDefinition',
+    'DiscriminatedObjectAlternativeDefinition',
+    'DiscriminatedObjectFieldDefinition',
+    'ObjectNodeDefinition',
+    'ObjectAlternativeSelection',
+    'DiscriminatedObjectRuntimeSnapshot',
+    'UiRootPresentationEntry',
+    'UiWizardSchema',
+    'UiWizardStepSchema',
+    'RootPresentationEntryDefinition',
+    'WizardDefinition',
+    'WizardStepDefinition',
+    'ControlledWizardState',
+    'WizardSelectionConfirmation',
+    'WizardIntention',
+    'WizardIntentionListener',
+    'WizardActionResult',
+    'WizardStepValidationState',
+    'WizardStepProgress',
+    'WizardStepValidationSnapshot',
+    'WizardStepSnapshot',
+    'WizardRuntimeSnapshot',
+    'WizardTextMember',
+    'WizardTextResolutionContext',
   ]) {
     assert.equal(
       coreRootDeclaration.match(new RegExp(`\\b${typeName}\\b`, 'gu'))?.length,
@@ -145,6 +168,39 @@ try {
   );
   assert.match(coreContractsDeclaration, /\| 'missing-selection'/u);
   assert.match(coreContractsDeclaration, /\| 'empty-selection';/u);
+  assert.match(
+    coreContractsDeclaration,
+    /readonly kind: 'discriminated-object';/u,
+  );
+  assert.match(coreContractsDeclaration, /readonly discriminator: string;/u);
+  assert.match(
+    coreContractsDeclaration,
+    /readonly alternatives: readonly DiscriminatedObjectAlternativeDefinition\[\];/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /\| DiscriminatedObjectRuntimeSnapshot/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /readonly wizardState\?: ControlledWizardState;/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /readonly wizardSelection\?: WizardSelectionConfirmation;/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /readonly wizard\?: WizardRuntimeSnapshot;/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /subscribeWizardIntentions\(listener: WizardIntentionListener\): SubscribeResult;/u,
+  );
+  assert.match(
+    coreContractsDeclaration,
+    /requestWizardNext\(\): WizardActionResult;/u,
+  );
 
   const shippedCore = await loadIndex(coreRoot, 'dist');
   const rebuiltCore = await loadIndex(coreRoot, 'rebuilt-dist');
@@ -156,6 +212,111 @@ try {
   };
   assert.equal(shippedCore.compileFormDefinition({ schema }).success, true);
   assert.equal(rebuiltCore.compileFormDefinition({ schema }).success, true);
+  const wizardSchema = {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      review: { type: 'string' },
+    },
+  };
+  const wizardInput = {
+    schema: wizardSchema,
+    uiSchema: {
+      presentation: [
+        {
+          kind: 'wizard',
+          id: 'source-wizard',
+          label: 'Source wizard',
+          steps: [
+            {
+              kind: 'wizard-step',
+              id: 'identity',
+              label: 'Identity',
+              children: ['name'],
+            },
+            {
+              kind: 'wizard-step',
+              id: 'review',
+              label: 'Review',
+              children: ['review'],
+            },
+          ],
+        },
+      ],
+    },
+  };
+  const shippedWizard = shippedCore.compileFormDefinition(wizardInput);
+  const rebuiltWizard = rebuiltCore.compileFormDefinition(wizardInput);
+  assert.deepEqual(rebuiltWizard, shippedWizard);
+  assert.equal(shippedWizard.success, true);
+  if (!shippedWizard.success)
+    throw new Error('Shipped wizard compilation failed');
+  const normalizedWizard = shippedWizard.definition.presentation[0];
+  assert.equal(normalizedWizard?.kind, 'wizard');
+  if (normalizedWizard?.kind !== 'wizard')
+    throw new Error('Shipped wizard definition is unavailable');
+  const manualWizard = {
+    ...normalizedWizard,
+    steps: normalizedWizard.steps.map((step) => ({
+      ...step,
+      children: [...step.children],
+      scope: {
+        ...step.scope,
+        paths: [...step.scope.paths],
+      },
+    })),
+    completionScope: {
+      ...normalizedWizard.completionScope,
+      paths: [...normalizedWizard.completionScope.paths],
+    },
+  };
+  const manualWizardDefinition = {
+    nodes: [...shippedWizard.definition.nodes],
+    fields: [...shippedWizard.definition.fields],
+    presentation: [manualWizard],
+  };
+  const wizardValue = { name: 'Ada', review: 'ready' };
+  for (const api of [shippedCore, rebuiltCore]) {
+    for (const definition of [
+      shippedWizard.definition,
+      manualWizardDefinition,
+    ]) {
+      const created = api.createControlledFormRuntime({
+        formId: 'source-wizard',
+        definition,
+        schema: wizardSchema,
+        value: wizardValue,
+        baselineValue: wizardValue,
+        locale: 'en',
+        validator: { validate: () => ({ valid: true, issues: [] }) },
+        wizardState: { selectedStepId: 'identity' },
+      });
+      assert.equal(created.success, true);
+      if (!created.success) throw new Error('Source wizard runtime failed');
+      const intentions = [];
+      const subscription = created.runtime.subscribeWizardIntentions(
+        (intention) => intentions.push(intention),
+      );
+      assert.equal(subscription.success, true);
+      assert.equal(created.runtime.requestWizardNext().success, true);
+      assert.equal(intentions[0]?.kind, 'next');
+      assert.equal(
+        created.runtime.updateExternalState({
+          wizardSelection: {
+            requestId: intentions[0].requestId,
+            selectedStepId: intentions[0].toStepId,
+          },
+        }).success,
+        true,
+      );
+      assert.equal(
+        created.runtime.getSnapshot().wizard?.selectedStepId,
+        'review',
+      );
+      if (subscription.success) subscription.unsubscribe();
+      created.runtime.dispose();
+    }
+  }
   const defaultSchema = {
     ...schema,
     properties: { name: { type: 'string', default: 'Ada' } },
@@ -322,6 +483,148 @@ try {
     assert.deepEqual(operations[0]?.value, ['editor', 'reader']);
     assert.equal(Object.isFrozen(operations[0]?.value), true);
     created.runtime.dispose();
+  }
+
+  const discriminatedObjectSchema = {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    properties: {
+      pet: {
+        type: 'object',
+        properties: {
+          kind: { type: 'string', enum: ['cat', 'dog'] },
+          name: { type: 'string' },
+        },
+        required: ['kind'],
+        oneOf: [
+          {
+            type: 'object',
+            properties: {
+              kind: { type: 'string', const: 'cat' },
+              lives: { type: 'integer' },
+            },
+            required: ['kind', 'lives'],
+          },
+          {
+            type: 'object',
+            properties: {
+              kind: { type: 'string', const: 'dog' },
+              barkVolume: { type: 'number' },
+            },
+            required: ['kind'],
+          },
+        ],
+      },
+    },
+  };
+  const shippedDiscriminated = shippedCore.compileFormDefinition({
+    schema: discriminatedObjectSchema,
+  });
+  const rebuiltDiscriminated = rebuiltCore.compileFormDefinition({
+    schema: discriminatedObjectSchema,
+  });
+  assert.deepEqual(rebuiltDiscriminated, shippedDiscriminated);
+  assert.equal(shippedDiscriminated.success, true);
+  if (!shippedDiscriminated.success)
+    throw new Error('Shipped discriminated object compilation failed');
+  const manualKind = {
+    kind: 'string',
+    nullable: false,
+    key: '["pet","kind"]',
+    name: 'kind',
+    path: ['pet', 'kind'],
+    required: true,
+    label: 'Kind',
+    constraints: {},
+    choices: [
+      { value: 'cat', label: 'Cat' },
+      { value: 'dog', label: 'Dog' },
+    ],
+  };
+  const manualName = {
+    kind: 'string',
+    nullable: false,
+    key: '["pet","name"]',
+    name: 'name',
+    path: ['pet', 'name'],
+    required: false,
+    label: 'Name',
+    constraints: {},
+  };
+  const manualLives = {
+    kind: 'number',
+    nullable: false,
+    key: '["pet","lives"]',
+    name: 'lives',
+    path: ['pet', 'lives'],
+    required: true,
+    label: 'Lives',
+    numericType: 'integer',
+    constraints: {},
+    ui: {},
+  };
+  const manualBarkVolume = {
+    kind: 'number',
+    nullable: false,
+    key: '["pet","barkVolume"]',
+    name: 'barkVolume',
+    path: ['pet', 'barkVolume'],
+    required: false,
+    label: 'Bark volume',
+    numericType: 'number',
+    constraints: {},
+    ui: {},
+  };
+  const manualPet = {
+    kind: 'discriminated-object',
+    key: '["pet"]',
+    name: 'pet',
+    path: ['pet'],
+    required: false,
+    label: 'Pet',
+    discriminator: 'kind',
+    children: [manualKind, manualName, manualLives, manualBarkVolume],
+    alternatives: [
+      { discriminatorValue: 'cat', children: ['lives'] },
+      { discriminatorValue: 'dog', children: ['barkVolume'] },
+    ],
+  };
+  const manualDiscriminated = {
+    nodes: [manualPet],
+    fields: [manualKind, manualName, manualLives, manualBarkVolume],
+    presentation: [{ kind: 'form-node', node: manualPet }],
+  };
+  const discriminatedObjectValue = {
+    pet: { kind: 'cat', name: 'Milo', lives: 9, barkVolume: 4 },
+  };
+  for (const api of [shippedCore, rebuiltCore]) {
+    for (const definition of [
+      shippedDiscriminated.definition,
+      manualDiscriminated,
+    ]) {
+      const created = api.createControlledFormRuntime({
+        formId: 'source-discriminated-object',
+        definition,
+        schema: discriminatedObjectSchema,
+        value: discriminatedObjectValue,
+        baselineValue: discriminatedObjectValue,
+        locale: 'en',
+        validator: { validate: () => ({ valid: true, issues: [] }) },
+      });
+      assert.equal(created.success, true);
+      if (!created.success)
+        throw new Error('Discriminated object source runtime failed');
+      assert.deepEqual(created.runtime.getNodeSnapshot(['pet'])?.selection, {
+        kind: 'active',
+        discriminatorValue: 'cat',
+      });
+      assert.equal(
+        created.runtime.requestSetValue(['pet', 'barkVolume'], 8).diagnostics[0]
+          ?.code,
+        'INACTIVE_OBJECT_ALTERNATIVE_TARGET',
+      );
+      created.runtime.dispose();
+    }
   }
 
   const angularDirectory = join(temporaryRoot, 'angular');

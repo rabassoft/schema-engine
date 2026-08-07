@@ -5,6 +5,9 @@ import type {
   ArrayNodeDefinition,
   ArrayRuntimeSnapshot,
   CollectionNodeAddress,
+  DiscriminatedObjectFieldDefinition,
+  DiscriminatedObjectRuntimeSnapshot,
+  Diagnostic,
   FieldDefinition,
   FieldRuntimeSnapshot,
   FieldTemplate,
@@ -21,12 +24,24 @@ import type {
   PresentationPanelDefinition,
   PresentationSectionDefinition,
   PresentationTabsDefinition,
+  TextResolutionContext,
+  TextResolver,
   AdvancedPresentationLabelDefinition,
+  WizardDefinition,
+  WizardRuntimeSnapshot,
+  WizardStepDefinition,
+  WizardTextMember,
 } from '@rabassoft/schema-engine';
 
 interface FieldBinding {
   readonly element: HTMLElement;
   reconcile(snapshot: FieldRuntimeSnapshot, locale: string): void;
+  dispose(): void;
+}
+
+interface AlternativeBinding {
+  readonly element: HTMLElement;
+  reconcile(snapshot: DiscriminatedObjectRuntimeSnapshot): void;
   dispose(): void;
 }
 
@@ -37,8 +52,25 @@ function collectCollections(
   for (const node of nodes) {
     if (node.nodeKind === 'array') {
       target.set(node.key, node);
-    } else if (node.nodeKind === 'object') {
+    } else if (
+      node.nodeKind === 'object' ||
+      node.nodeKind === 'discriminated-object'
+    ) {
       collectCollections(node.children, target);
+    }
+  }
+}
+
+function collectAlternativeSnapshots(
+  nodes: readonly NodeRuntimeSnapshot[],
+  target: Map<string, DiscriminatedObjectRuntimeSnapshot>,
+): void {
+  for (const node of nodes) {
+    if (node.nodeKind === 'discriminated-object') {
+      target.set(node.key, node);
+      collectAlternativeSnapshots(node.children, target);
+    } else if (node.nodeKind === 'object') {
+      collectAlternativeSnapshots(node.children, target);
     }
   }
 }
@@ -154,22 +186,42 @@ export interface StandardDomRendererOptions {
         | AdvancedPresentationLabelDefinition;
     }>,
   ) => unknown;
+  readonly resolveText?: TextResolver['resolve'];
+  readonly reportDiagnostics?: (diagnostics: readonly Diagnostic[]) => void;
 }
 
 interface PresentationLabelBinding {
   reconcile(locale: string): void;
 }
 
+interface WizardBinding {
+  readonly element: HTMLElement;
+  reconcile(
+    snapshot: WizardRuntimeSnapshot,
+    form: FormRuntimeSnapshot<object>,
+  ): void;
+  dispose(): void;
+}
+
+class WizardStepCreationFailure extends Error {
+  constructor(readonly step: WizardStepDefinition) {
+    super('Wizard step creation failed.');
+    this.name = 'WizardStepCreationFailure';
+  }
+}
+
 export class StandardDomRenderer {
   private readonly form = document.createElement('form');
   private readonly bindings = new Map<string, FieldBinding>();
   private readonly collections = new Map<string, CollectionBinding>();
+  private readonly alternatives = new Map<string, AlternativeBinding>();
   private readonly cleanups: Array<() => void> = [];
   private readonly presentationLabels: PresentationLabelBinding[] = [];
   private readonly presentationLabelCache = new WeakMap<
     object,
     Map<string, string>
   >();
+  private wizardBinding: WizardBinding | undefined;
   private disposed = false;
 
   constructor(
@@ -182,21 +234,62 @@ export class StandardDomRenderer {
     this.form.className = 'standard-form';
     this.form.setAttribute('aria-label', 'Schema Engine form preview');
     this.listen(this.form, 'submit', (event) => event.preventDefault());
-    for (const entry of definition.presentation) {
-      this.form.append(
-        this.renderPresentation(
-          entry,
-          undefined,
-          (node) => this.renderNode(node as FormNodeDefinition),
-          this.cleanups,
-        ),
-      );
-    }
+    const root = definition.presentation[0];
+    if (definition.presentation.length === 1 && root?.kind === 'wizard') {
+      try {
+        this.wizardBinding = this.renderWizard(root);
+        this.form.append(this.wizardBinding.element);
+      } catch (failure) {
+        this.clearProjectionResources();
+        this.options.reportDiagnostics?.([
+          Object.freeze({
+            code:
+              failure instanceof WizardStepCreationFailure
+                ? 'WIZARD_STEP_HOST_INSTANTIATION_FAILED'
+                : 'WIZARD_HOST_INSTANTIATION_FAILED',
+            severity: 'error',
+            source: 'runtime',
+            parameters: Object.freeze({
+              wizardId: root.id,
+              ...(failure instanceof WizardStepCreationFailure
+                ? { stepId: failure.step.id }
+                : {}),
+            }),
+            fallbackMessage:
+              failure instanceof WizardStepCreationFailure
+                ? 'Wizard step host could not be instantiated.'
+                : 'Wizard host could not be instantiated.',
+          }),
+        ]);
+      }
+    } else
+      for (const entry of definition.presentation) {
+        if (entry.kind === 'wizard') continue;
+        this.form.append(
+          this.renderPresentation(
+            entry,
+            undefined,
+            (node) => this.renderNode(node as FormNodeDefinition),
+            this.cleanups,
+          ),
+        );
+      }
     this.host.replaceChildren(this.form);
   }
 
   reconcile(snapshot: FormRuntimeSnapshot<object>): void {
     if (this.disposed) return;
+    if (snapshot.wizard !== undefined)
+      this.wizardBinding?.reconcile(snapshot.wizard, snapshot);
+    const alternativeSnapshots = new Map<
+      string,
+      DiscriminatedObjectRuntimeSnapshot
+    >();
+    collectAlternativeSnapshots(snapshot.nodes, alternativeSnapshots);
+    for (const [key, binding] of this.alternatives) {
+      const alternative = alternativeSnapshots.get(key);
+      if (alternative !== undefined) binding.reconcile(alternative);
+    }
     const fields = new Map(snapshot.fields.map((field) => [field.key, field]));
     for (const [key, binding] of this.bindings) {
       const field = fields.get(key);
@@ -220,13 +313,21 @@ export class StandardDomRenderer {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.clearProjectionResources();
+    this.host.replaceChildren();
+  }
+
+  private clearProjectionResources(): void {
     for (const binding of this.bindings.values()) binding.dispose();
     this.bindings.clear();
     for (const binding of this.collections.values()) binding.dispose();
     this.collections.clear();
+    for (const binding of this.alternatives.values()) binding.dispose();
+    this.alternatives.clear();
     this.presentationLabels.length = 0;
+    this.wizardBinding?.dispose();
+    this.wizardBinding = undefined;
     for (const cleanup of this.cleanups.splice(0)) cleanup();
-    this.host.replaceChildren();
   }
 
   private renderPresentation(
@@ -243,6 +344,286 @@ export class StandardDomRenderer {
     if (entry.kind === 'accordion')
       return this.renderAccordion(entry, ownerInstance, renderNode, cleanups);
     return this.renderGrid(entry, ownerInstance, renderNode, cleanups);
+  }
+
+  private renderWizard(wizard: WizardDefinition): WizardBinding {
+    const base = `se-${encodeURIComponent(
+      JSON.stringify([this.formId, 'presentation', 'wizard', wizard.id]),
+    )}`;
+    const wrapper = document.createElement('section');
+    wrapper.className = 'schema-wizard';
+    wrapper.id = `${base}--wizard`;
+    const title = document.createElement('h2');
+    title.id = `${base}--heading`;
+    title.textContent = wizard.label;
+    wrapper.setAttribute('aria-labelledby', title.id);
+    const indicators = document.createElement('ol');
+    indicators.id = `${base}--steps`;
+    indicators.className = 'schema-wizard-steps';
+    const records = wizard.steps.map((step, index) => {
+      try {
+        const stepBase = `se-${encodeURIComponent(
+          JSON.stringify([
+            this.formId,
+            'presentation',
+            'wizard',
+            wizard.id,
+            'step',
+            step.id,
+          ]),
+        )}`;
+        const indicator = document.createElement('li');
+        indicator.id = `${stepBase}--indicator`;
+        const position = document.createElement('span');
+        position.textContent = `Step ${index + 1} of ${wizard.steps.length}`;
+        const label = document.createElement('span');
+        label.textContent = step.label;
+        const status = document.createElement('span');
+        status.id = `${stepBase}--status`;
+        indicator.append(position, label, status);
+        indicators.append(indicator);
+
+        const region = document.createElement('section');
+        region.className = 'schema-wizard-step';
+        region.id = `${stepBase}--region`;
+        region.setAttribute('role', 'region');
+        region.setAttribute('aria-describedby', status.id);
+        const heading = document.createElement('h3');
+        heading.id = `${stepBase}--heading`;
+        heading.tabIndex = -1;
+        heading.textContent = step.label;
+        region.setAttribute('aria-labelledby', heading.id);
+        region.append(heading);
+        for (const entry of step.children)
+          region.append(
+            this.renderPresentation(
+              entry,
+              undefined,
+              (node) => this.renderNode(node as FormNodeDefinition),
+              this.cleanups,
+            ),
+          );
+        return {
+          definition: step,
+          indicator,
+          position,
+          label,
+          status,
+          region,
+          heading,
+        };
+      } catch {
+        throw new WizardStepCreationFailure(step);
+      }
+    });
+    const globalIssues = document.createElement('div');
+    globalIssues.className = 'schema-wizard-global-issues';
+    globalIssues.setAttribute('role', 'alert');
+    globalIssues.tabIndex = -1;
+    const controls = document.createElement('div');
+    controls.className = 'schema-wizard-controls';
+    const previous = button('Previous');
+    const next = button('Next');
+    const complete = button('Complete');
+    previous.id = `${base}--previous`;
+    next.id = `${base}--next`;
+    complete.id = `${base}--complete`;
+    controls.append(previous, next, complete);
+    wrapper.append(
+      title,
+      indicators,
+      ...records.map(({ region }) => region),
+      globalIssues,
+      controls,
+    );
+
+    const previousHandler = (): void => {
+      this.runtime.requestWizardPrevious();
+    };
+    const nextHandler = (): void => {
+      this.runtime.requestWizardNext();
+    };
+    const completeHandler = (): void => {
+      this.runtime.requestWizardComplete();
+    };
+    previous.addEventListener('click', previousHandler);
+    next.addEventListener('click', nextHandler);
+    complete.addEventListener('click', completeHandler);
+    let selected: string | undefined;
+    const textCache = new Map<string, string>();
+    const resolve = (
+      source: string,
+      locale: string,
+      member: WizardTextMember,
+      step?: WizardStepDefinition,
+      positionValue?: number,
+      count?: number,
+    ): string => {
+      const identity = JSON.stringify([
+        locale,
+        member,
+        step?.key,
+        positionValue,
+        count,
+      ]);
+      const cached = textCache.get(identity);
+      if (cached !== undefined) return cached;
+      const common = { formId: this.formId, locale, wizard } as const;
+      const context: TextResolutionContext =
+        member === 'position' && step !== undefined
+          ? {
+              ...common,
+              step,
+              member,
+              position: positionValue!,
+              count: count!,
+            }
+          : step === undefined
+            ? {
+                ...common,
+                member: member as 'label' | 'previous' | 'next' | 'complete',
+              }
+            : {
+                ...common,
+                step,
+                member: member as Exclude<
+                  WizardTextMember,
+                  'previous' | 'next' | 'complete' | 'position'
+                >,
+              };
+      let value: unknown;
+      let reason:
+        'exception' | 'non-string-result' | 'blank-string-result' | undefined;
+      try {
+        value =
+          this.options.resolveText === undefined
+            ? source
+            : this.options.resolveText(source, context);
+      } catch {
+        reason = 'exception';
+      }
+      if (reason === undefined && typeof value !== 'string')
+        reason = 'non-string-result';
+      if (
+        reason === undefined &&
+        typeof value === 'string' &&
+        value.trim().length === 0
+      )
+        reason = 'blank-string-result';
+      if (reason !== undefined) {
+        this.options.reportDiagnostics?.([
+          Object.freeze({
+            code: 'TEXT_RESOLUTION_FAILED',
+            severity: 'warning',
+            source: 'runtime',
+            parameters: Object.freeze({
+              wizardKey: wizard.key,
+              ...(step === undefined ? {} : { stepKey: step.key }),
+              member,
+              reason,
+            }),
+            fallbackMessage: 'Wizard text resolution failed.',
+          }),
+        ]);
+        value = source;
+      }
+      textCache.set(identity, value as string);
+      return value as string;
+    };
+    return {
+      element: wrapper,
+      reconcile(snapshot, formSnapshot) {
+        const locale = formSnapshot.locale;
+        title.textContent = resolve(wizard.label, locale, 'label');
+        previous.textContent = resolve('Previous', locale, 'previous');
+        next.textContent = resolve('Next', locale, 'next');
+        complete.textContent = resolve('Complete', locale, 'complete');
+        records.forEach((record, index) => {
+          const step = snapshot.steps[index];
+          if (step === undefined) return;
+          record.position.textContent = resolve(
+            `Step ${step.position} of ${wizard.steps.length}`,
+            locale,
+            'position',
+            record.definition,
+            step.position,
+            wizard.steps.length,
+          );
+          record.label.textContent = resolve(
+            record.definition.label,
+            locale,
+            'label',
+            record.definition,
+          );
+          record.heading.textContent = record.label.textContent;
+          record.indicator.toggleAttribute('aria-current', step.current);
+          if (step.current)
+            record.indicator.setAttribute('aria-current', 'step');
+          const progressSources = {
+            unvisited: 'Not visited',
+            visited: 'Visited',
+            error: 'Contains errors',
+            completed: 'Completed',
+          } as const;
+          const progress = resolve(
+            progressSources[step.progress],
+            locale,
+            step.progress,
+            record.definition,
+          );
+          const validation =
+            step.validation.state === 'provisional'
+              ? resolve(
+                  'Additional validation not yet available',
+                  locale,
+                  'provisional-validation',
+                  record.definition,
+                )
+              : step.validation.state === 'pending'
+                ? resolve(
+                    'Additional validation in progress',
+                    locale,
+                    'pending-validation',
+                    record.definition,
+                  )
+                : step.validation.state === 'failed'
+                  ? resolve(
+                      'Additional validation failed',
+                      locale,
+                      'failed-validation',
+                      record.definition,
+                    )
+                  : '';
+          record.status.textContent =
+            validation.length === 0 ? progress : `${progress}. ${validation}`;
+          setMountedHidden(record.region, !step.current);
+          if (step.current) record.region.removeAttribute('aria-hidden');
+          else record.region.setAttribute('aria-hidden', 'true');
+        });
+        previous.disabled = !snapshot.controls.previous;
+        next.disabled = !snapshot.controls.next;
+        complete.disabled = !snapshot.controls.complete;
+        globalIssues.hidden = !snapshot.showGlobalIssues;
+        globalIssues.replaceChildren(
+          ...formSnapshot.globalIssues.map((issue) => {
+            const message = document.createElement('p');
+            message.textContent = issue.code;
+            return message;
+          }),
+        );
+        if (selected !== undefined && selected !== snapshot.selectedStepId) {
+          records
+            .find((_, index) => snapshot.steps[index]?.current)
+            ?.heading.focus();
+        }
+        selected = snapshot.selectedStepId;
+      },
+      dispose() {
+        previous.removeEventListener('click', previousHandler);
+        next.removeEventListener('click', nextHandler);
+        complete.removeEventListener('click', completeHandler);
+      },
+    };
   }
 
   private renderSection(
@@ -376,9 +757,16 @@ export class StandardDomRenderer {
       const trigger = document.createElement('button');
       trigger.type = 'button';
       trigger.id = `${base}--trigger`;
+      trigger.dataset['presentationAccordionTrigger'] = '';
       trigger.setAttribute('aria-expanded', 'false');
       trigger.setAttribute('aria-controls', `${base}--region`);
-      this.bindPresentationLabel(panel, trigger, cleanups);
+      const triggerLabel = document.createElement('span');
+      const triggerIndicator = document.createElement('span');
+      triggerIndicator.className = 'presentation-accordion-indicator';
+      triggerIndicator.setAttribute('aria-hidden', 'true');
+      triggerIndicator.textContent = '+';
+      this.bindPresentationLabel(panel, triggerLabel, cleanups);
+      trigger.append(triggerLabel, triggerIndicator);
       const region = this.renderPanel(
         panel,
         ownerInstance,
@@ -395,6 +783,7 @@ export class StandardDomRenderer {
         () => {
           const expanded = trigger.getAttribute('aria-expanded') !== 'true';
           trigger.setAttribute('aria-expanded', String(expanded));
+          triggerIndicator.textContent = expanded ? '−' : '+';
           setMountedHidden(region, !expanded);
         },
         cleanups,
@@ -511,7 +900,21 @@ export class StandardDomRenderer {
     return this.options.formId ?? 'reference-standard';
   }
 
-  private renderNode(node: FormNodeDefinition): HTMLElement {
+  private renderNode(
+    node: FormNodeDefinition,
+    cleanups = this.cleanups,
+  ): HTMLElement {
+    if (node.kind === 'discriminated-object') {
+      const binding = this.createAlternativeBinding(node);
+      this.alternatives.set(node.key, binding);
+      cleanups.push(() => {
+        if (this.alternatives.get(node.key) === binding) {
+          this.alternatives.delete(node.key);
+        }
+        binding.dispose();
+      });
+      return binding.element;
+    }
     if (node.kind === 'object') {
       const fieldset = document.createElement('fieldset');
       fieldset.className = 'object-group';
@@ -525,8 +928,8 @@ export class StandardDomRenderer {
           this.renderPresentation(
             entry,
             ownerInstance,
-            (child) => this.renderNode(child as FormNodeDefinition),
-            this.cleanups,
+            (child) => this.renderNode(child as FormNodeDefinition, cleanups),
+            cleanups,
           ),
         );
       }
@@ -541,6 +944,12 @@ export class StandardDomRenderer {
           this.renderPresentation(entry, ownerInstance, renderNode, cleanups),
       );
       this.collections.set(node.key, binding);
+      cleanups.push(() => {
+        if (this.collections.get(node.key) === binding) {
+          this.collections.delete(node.key);
+        }
+        binding.dispose();
+      });
       return binding.element;
     }
     const binding = createFieldBinding(node, {
@@ -551,7 +960,63 @@ export class StandardDomRenderer {
       locale: () => this.runtime.getSnapshot().locale,
     });
     this.bindings.set(node.key, binding);
+    cleanups.push(() => {
+      if (this.bindings.get(node.key) === binding)
+        this.bindings.delete(node.key);
+      binding.dispose();
+    });
     return binding.element;
+  }
+
+  private createAlternativeBinding(
+    definition: DiscriminatedObjectFieldDefinition,
+  ): AlternativeBinding {
+    const fieldset = document.createElement('fieldset');
+    fieldset.className = 'object-group';
+    const legend = document.createElement('legend');
+    legend.textContent = definition.label;
+    fieldset.append(legend);
+    appendSupportingText(fieldset, definition.description, definition.hint);
+    const mounted = new Map<
+      string,
+      { readonly element: HTMLElement; readonly cleanups: Array<() => void> }
+    >();
+    const definitions = new Map(
+      definition.children.map((child) => [child.key, child] as const),
+    );
+    const reconcile = (snapshot: DiscriminatedObjectRuntimeSnapshot): void => {
+      const active = new Set(snapshot.children.map(({ key }) => key));
+      for (const [key, record] of [...mounted]) {
+        if (active.has(key)) continue;
+        for (const cleanup of record.cleanups.splice(0)) cleanup();
+        record.element.remove();
+        mounted.delete(key);
+      }
+      for (const childSnapshot of snapshot.children) {
+        if (mounted.has(childSnapshot.key)) continue;
+        const child = definitions.get(childSnapshot.key);
+        if (child === undefined) continue;
+        const childCleanups: Array<() => void> = [];
+        const element = this.renderNode(child, childCleanups);
+        mounted.set(child.key, { element, cleanups: childCleanups });
+      }
+      for (const childSnapshot of snapshot.children) {
+        const element = mounted.get(childSnapshot.key)?.element;
+        if (element !== undefined) fieldset.append(element);
+      }
+    };
+    const initial = this.runtime.getNodeSnapshot(definition.path);
+    if (initial?.nodeKind === 'discriminated-object') reconcile(initial);
+    return {
+      element: fieldset,
+      reconcile,
+      dispose: () => {
+        for (const record of mounted.values()) {
+          for (const cleanup of record.cleanups.splice(0)) cleanup();
+        }
+        mounted.clear();
+      },
+    };
   }
 
   private listen(
@@ -584,6 +1049,7 @@ function createFieldBinding(
   }
   const container = document.createElement('div');
   container.className = 'form-field';
+  if (definition.kind === 'boolean') container.classList.add('boolean-field');
   container.dataset['fieldKey'] = definition.key;
   container.dataset['fieldName'] = definition.name;
   const controlId = domId(`field-${idScope}-${definition.key}`);

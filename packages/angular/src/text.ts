@@ -19,8 +19,9 @@ import type {
   FormNodeTemplate,
   FieldRuntimeSnapshot,
   FieldTextMember,
-  ObjectFieldDefinition,
+  ObjectNodeDefinition,
   ObjectRuntimeSnapshot,
+  DiscriminatedObjectRuntimeSnapshot,
   ObjectTextMember,
   ItemRuntimeSnapshot,
   PresentationEntryDefinition,
@@ -28,6 +29,7 @@ import type {
   StringChoiceDefinition,
   TextResolutionContext,
   TextResolver,
+  WizardTextResolutionContext,
 } from '@rabassoft/schema-engine';
 import { adapterDiagnostic } from './renderer.js';
 
@@ -147,6 +149,11 @@ export interface SectionTextProjectionResult {
   readonly diagnostics: readonly Diagnostic[];
 }
 
+/** @internal */
+export interface WizardTextProjectionResult extends SectionTextProjectionResult {
+  readonly identity: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AngularTextProjector {
   private readonly candidate: unknown = inject(SCHEMA_TEXT_RESOLVER);
@@ -155,6 +162,74 @@ export class AngularTextProjector {
     object,
     Map<string, SectionTextProjectionResult>
   >();
+  private readonly wizardTexts = new WeakMap<
+    object,
+    Map<string, WizardTextProjectionResult>
+  >();
+
+  /** @internal */
+  projectWizard(
+    source: string,
+    context: WizardTextResolutionContext,
+  ): WizardTextProjectionResult {
+    const identity = JSON.stringify([
+      context.formId,
+      context.locale,
+      context.member,
+      context.step?.key,
+      context.position,
+      context.count,
+    ]);
+    const cached = this.wizardTexts.get(context.wizard)?.get(identity);
+    if (cached !== undefined) return cached;
+    const diagnostics: Diagnostic[] = [...this.parsed.diagnostics];
+    let result: unknown;
+    let reason:
+      'exception' | 'non-string-result' | 'blank-string-result' | undefined;
+    try {
+      result = this.parsed.resolver(source, context);
+    } catch {
+      reason = 'exception';
+    }
+    if (reason === undefined && typeof result !== 'string')
+      reason = 'non-string-result';
+    if (
+      reason === undefined &&
+      typeof result === 'string' &&
+      result.trim().length === 0
+    )
+      reason = 'blank-string-result';
+    if (reason !== undefined) {
+      diagnostics.push(
+        adapterDiagnostic(
+          'TEXT_RESOLUTION_FAILED',
+          'warning',
+          {
+            wizardKey: context.wizard.key,
+            ...(context.step === undefined
+              ? {}
+              : { stepKey: context.step.key }),
+            member: context.member,
+            reason,
+          },
+          'Wizard text resolution failed.',
+        ),
+      );
+      result = source;
+    }
+    const projection = Object.freeze({
+      text: result as string,
+      diagnostics: Object.freeze(diagnostics),
+      identity,
+    });
+    let texts = this.wizardTexts.get(context.wizard);
+    if (texts === undefined) {
+      texts = new Map();
+      this.wizardTexts.set(context.wizard, texts);
+    }
+    texts.set(identity, projection);
+    return projection;
+  }
 
   /** @internal */
   projectSection(
@@ -426,8 +501,8 @@ export class AngularTextProjector {
   }
 
   projectObject(
-    node: ObjectFieldDefinition,
-    snapshot: ObjectRuntimeSnapshot,
+    node: ObjectNodeDefinition,
+    snapshot: ObjectRuntimeSnapshot | DiscriminatedObjectRuntimeSnapshot,
     formId: string,
     locale: string,
   ): ObjectTextProjectionResult {

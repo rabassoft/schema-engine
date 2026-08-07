@@ -142,25 +142,25 @@ export const scopeBaselineConfirmation = {
     labels: {
       heading: 'Scoped baseline confirmation',
       guidance:
-        'Prepare a candidate first. Accepting it separately simulates successful persistence and updates only the baseline.',
+        'Prepare a candidate first. Accepting it simulates successful persistence: only Baseline value changes, while Value and the form inputs intentionally stay unchanged.',
       accept: 'Accept prepared candidate',
     },
     targets: [
       {
         id: 'profile-name',
-        label: 'Prepare profile name candidate',
+        label: 'Prepare current profile name as saved',
         scope: { id: 'profile-name', paths: [['profile', 'displayName']] },
         expectation: 'candidate-and-acceptance-leaves-unrelated-dirty',
       },
       {
         id: 'whole-team',
-        label: 'Prepare whole team candidate',
+        label: 'Prepare current team as saved',
         scope: { id: 'whole-team', paths: [['team']] },
         expectation: 'candidate-and-acceptance-leaves-unrelated-dirty',
       },
       {
         id: 'current-only-linus',
-        label: 'Try current-only Linus item',
+        label: 'Try to save Linus only (unsupported)',
         scope: {
           id: 'current-only-linus',
           paths: [{ collectionPath: ['team'], itemId: 'linus' }],

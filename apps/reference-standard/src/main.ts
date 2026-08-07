@@ -233,18 +233,41 @@ export function renderReferenceSkeleton(
   const serviceGuidance = document.createElement('p');
   serviceGuidance.className = 'scope-guidance';
   serviceGuidance.textContent =
-    'Resolve deterministic application work to inspect core settlement, cancellation, failure and retry behavior.';
+    'This is a fake application service. The buttons settle validation work; they never change the form value.';
+  const serviceStateLegend = document.createElement('ul');
+  serviceStateLegend.className = 'control-legend';
+  for (const [status, meaning] of [
+    ['pending', 'waiting for the application'],
+    [
+      'resolved-valid / resolved-invalid',
+      'completed with or without a validation issue',
+    ],
+    [
+      'cancelled / rejected / threw',
+      'replaced by newer data or failed in the fake service',
+    ],
+  ] as const) {
+    const item = document.createElement('li');
+    const strong = document.createElement('strong');
+    strong.textContent = `${status}: `;
+    item.append(strong, meaning);
+    serviceStateLegend.append(item);
+  }
   const serviceStatus = document.createElement('p');
   serviceStatus.dataset['testid'] = 'async-validation-state';
   serviceStatus.setAttribute('role', 'status');
   serviceStatus.setAttribute('aria-live', 'polite');
   const serviceActions = document.createElement('div');
   serviceActions.className = 'button-row';
-  const settleServiceValid = actionButton('Resolve as available');
-  const settleServiceInvalid = actionButton('Resolve as unavailable');
-  const rejectService = actionButton('Reject current request');
-  const throwNextService = actionButton('Throw on next request');
-  const retryService = actionButton('Retry service validation');
+  const settleServiceValid = actionButton(
+    'Complete request: username available',
+  );
+  const settleServiceInvalid = actionButton(
+    'Complete request: username unavailable',
+  );
+  const rejectService = actionButton('Fail current request');
+  const throwNextService = actionButton('Make next request throw');
+  const retryService = actionButton('Retry failed validation');
   serviceActions.append(
     settleServiceValid,
     settleServiceInvalid,
@@ -256,6 +279,7 @@ export function renderReferenceSkeleton(
   serviceControls.append(
     serviceLegend,
     serviceGuidance,
+    serviceStateLegend,
     serviceStatus,
     serviceActions,
     serviceEvidence.details,
@@ -276,6 +300,7 @@ export function renderReferenceSkeleton(
   scopeStatus.setAttribute('role', 'status');
   scopeStatus.setAttribute('aria-live', 'polite');
   const scopeEvidence = evidenceDetails('Prepared baseline candidate', true);
+  scopeEvidence.details.dataset['testid'] = 'inspector-scope-candidate';
   scopeControls.append(
     scopeLegend,
     scopeGuidance,
@@ -345,10 +370,10 @@ export function renderReferenceSkeleton(
   configurationActions.className = 'configuration-actions';
   configurationActions.setAttribute('role', 'group');
   configurationActions.setAttribute('aria-label', 'Configuration actions');
-  const validateButton = actionButton('Validate configuration');
-  const applyButton = actionButton('Apply configuration');
-  const cancelButton = actionButton('Cancel changes');
-  const restoreButton = actionButton('Restore scenario configuration');
+  const validateButton = actionButton('Validate');
+  const applyButton = actionButton('Apply');
+  const cancelButton = actionButton('Cancel edits');
+  const restoreButton = actionButton('Restore original');
   configurationActions.append(
     validateButton,
     applyButton,
@@ -387,13 +412,13 @@ export function renderReferenceSkeleton(
   configurationTabs.appendTo(configurationTabList);
   configuration.body.append(
     editorInstructions,
-    configurationActions,
-    configurationStatus,
-    configurationDiagnostics,
-    confirmation,
     configurationTabList,
     schemaPanel,
     uiSchemaPanel,
+    configurationActions,
+    configurationStatus,
+    confirmation,
+    configurationDiagnostics,
   );
   workspace.append(preview.section, configuration.section);
 
@@ -413,7 +438,6 @@ export function renderReferenceSkeleton(
   const diagnosticsPanel = document.createElement('div');
   const diagnosticsHost = document.createElement('div');
   diagnosticsPanel.append(diagnosticsHost);
-  const integrationPanel = document.createElement('div');
   const evidenceTabList = document.createElement('div');
   const evidenceTabs = new StandardTabs(
     'evidence',
@@ -430,11 +454,6 @@ export function renderReferenceSkeleton(
         label: 'Diagnostics',
         panel: diagnosticsPanel,
       }),
-      Object.freeze({
-        id: 'integration',
-        label: 'Integration',
-        panel: integrationPanel,
-      }),
     ]),
     'state',
   );
@@ -445,14 +464,17 @@ export function renderReferenceSkeleton(
     definitionPanel,
     runtimePanel,
     diagnosticsPanel,
-    integrationPanel,
   );
+
+  const integration = region('Integration', 'integration-panel');
+  const integrationTabs = renderIntegration(integration.body);
 
   root.replaceChildren(
     header,
     scenarioPanel.section,
     workspace,
     evidence.section,
+    integration.section,
   );
 
   const initialState = application.getState();
@@ -470,8 +492,6 @@ export function renderReferenceSkeleton(
     describedBy: editorInstructions.id,
     onChange: (value) => application.updateUiSchemaDraft(value),
   });
-  renderIntegration(integrationPanel);
-
   let activeDefinition: StandardReferenceApplicationState['definition'];
   let activeRuntime = application.getRuntime();
   let renderer: StandardDomRenderer | undefined;
@@ -510,6 +530,35 @@ export function renderReferenceSkeleton(
             embeddedCollectionControls:
               state.scenario.id === 'recursive-local-presentation',
             formId: `reference-standard-${state.scenario.id}`,
+            resolveText(text, context) {
+              if (context.locale !== 'es' || !('wizard' in context))
+                return text;
+              if (context.member === 'position')
+                return `Paso ${context.position} de ${context.count}`;
+              return (
+                (
+                  {
+                    'Team onboarding': 'Incorporación del equipo',
+                    Identity: 'Identidad',
+                    Team: 'Equipo',
+                    Review: 'Revisión',
+                    Previous: 'Anterior',
+                    Next: 'Siguiente',
+                    Complete: 'Completar',
+                    'Not visited': 'No visitado',
+                    Visited: 'Visitado',
+                    'Contains errors': 'Contiene errores',
+                    Completed: 'Completado',
+                    'Additional validation not yet available':
+                      'Validación adicional aún no disponible',
+                    'Additional validation in progress':
+                      'Validación adicional en curso',
+                    'Additional validation failed':
+                      'Falló la validación adicional',
+                  } as Readonly<Record<string, string>>
+                )[text] ?? text
+              );
+            },
           },
         );
         renderer = nextRenderer;
@@ -766,6 +815,7 @@ export function renderReferenceSkeleton(
     unsubscribe();
     configurationTabs.destroy();
     evidenceTabs.destroy();
+    integrationTabs.destroy();
     schemaEditor.destroy();
     uiSchemaEditor.destroy();
     application.dispose();
@@ -891,7 +941,7 @@ function renderCopyable(
   host.replaceChildren(actions, renderHighlightedCode(source, language));
 }
 
-function renderIntegration(host: HTMLElement): void {
+function renderIntegration(host: HTMLElement): StandardTabs {
   const heading = document.createElement('h3');
   heading.textContent = 'Build-checked integration excerpts';
   const notice = document.createElement('p');
@@ -913,10 +963,13 @@ function renderIntegration(host: HTMLElement): void {
     item.append(strong, step[1]);
     flow.append(item);
   }
-  host.append(heading, notice, flow);
-  for (const id of standardSnippetOrder) {
+  const tabList = document.createElement('div');
+  const tabs = standardSnippetOrder.map((id) => {
     const explanation = standardSnippetExplanations[id];
-    const details = evidenceDetails(explanation.label, false);
+    const panel = document.createElement('article');
+    panel.className = 'integration-snippet';
+    const panelHeading = document.createElement('h4');
+    panelHeading.textContent = explanation.label;
     const explanationList = document.createElement('dl');
     explanationList.className = 'snippet-explanation';
     appendExplanation(
@@ -936,9 +989,24 @@ function renderIntegration(host: HTMLElement): void {
       referenceSnippets[id],
       'typescript',
     );
-    details.body.append(explanationList, codeHost);
-    host.append(details.details);
-  }
+    panel.append(panelHeading, explanationList, codeHost);
+    return Object.freeze({ id, label: explanation.label, panel });
+  });
+  const integrationTabs = new StandardTabs(
+    'integration',
+    Object.freeze(tabs),
+    standardSnippetOrder[0],
+  );
+  integrationTabs.appendTo(tabList);
+  tabList.setAttribute('aria-label', 'Integration examples');
+  host.append(
+    heading,
+    notice,
+    flow,
+    tabList,
+    ...tabs.map(({ panel }) => panel),
+  );
+  return integrationTabs;
 }
 
 function appendExplanation(
@@ -1026,7 +1094,7 @@ function scopeCandidateStatus(
     return `${candidate.label}: unconfirmable; baseline and dirty state are unchanged.`;
   }
   if (candidate.status === 'accepted') {
-    return `${candidate.label}: simulated persistence accepted; unrelated edits remain dirty.`;
+    return `${candidate.label}: baseline updated; form Value intentionally stayed unchanged and unrelated edits remain dirty.`;
   }
   return `${candidate.label}: candidate prepared; baseline and dirty state are unchanged until acceptance.`;
 }
@@ -1085,12 +1153,8 @@ function renderConfigurationConfirmation(
     state.pendingConfigurationAction === 'apply'
       ? 'Applying this configuration will reset form state and history.'
       : 'Restoring the scenario configuration will discard local configuration and form state.';
-  const confirm = actionButton(
-    state.pendingConfigurationAction === 'apply'
-      ? 'Apply and reset form'
-      : 'Restore scenario',
-  );
-  const cancel = actionButton('Keep current state');
+  const confirm = actionButton('Confirm configuration');
+  const cancel = actionButton('Keep current configuration');
   confirm.addEventListener('click', () => {
     const completed = application.confirmConfigurationAction();
     clearTrigger();

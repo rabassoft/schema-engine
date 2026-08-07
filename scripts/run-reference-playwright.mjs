@@ -6,6 +6,7 @@ import { argumentValue } from './release-target.mjs';
 const config = argumentValue(process.argv.slice(2), 'config');
 const allowedConfigs = new Set([
   'apps/reference-angular/playwright.config.ts',
+  'apps/reference-react/playwright.config.ts',
   'apps/reference-standard/playwright.config.ts',
 ]);
 assert.ok(
